@@ -1,0 +1,38 @@
+      </div><!-- /#content -->
+    </div><!-- /.row -->
+  <div class="push"><!--//--!></div>
+  </div><!-- /.container -->
+</div><!--/wrap-->
+
+  <footer class="text-center">
+      <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS - &copy; <?php echo date("Y"); ?> F.L. 
+        <a href="about/">[À propos]</a>
+        <a style="float: right;" href="<?php echo $config->urls->admin; ?>">[Admin]</a>
+        <?php
+          if($user->isLoggedin()) {
+            echo "<a style='float: right; margin-right: 5px;' href='./?logout=1'>[Log out]</a>";
+          }
+        ?>
+      </p>
+	</footer>
+
+
+	<?php 
+
+	// If the page is editable, then output a link that takes us straight to the page edit screen:
+	if($page->editable()) {
+		echo "<a class='nav' id='editpage' href='{$config->urls->admin}page/edit/?id={$page->id}'>Edit</a>"; 
+	}
+
+	?>
+  <script src="<?php echo $config->urls->templates?>bower_components/angular/angular.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/angular-route/angular-route.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/checklist-model/checklist-model.js"></script>
+  <script src="<?php echo $config->urls->templates?>js/app.js"></script>
+  <script src="<?php echo $config->urls->templates?>js/services.js"></script>
+  <script src="<?php echo $config->urls->templates?>js/controllers.js"></script>
+  <script src="<?php echo $config->urls->templates?>js/filters.js"></script>
+  <script src="<?php echo $config->urls->templates?>js/directives.js"></script>
+</body>
+</html>
