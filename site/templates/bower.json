@@ -1,0 +1,26 @@
+{
+  "name": "PlanetAlert",
+  "version": "0.0.0",
+  "authors": [
+    "Fred Lieutaud <flieutaud@gmail.com>"
+  ],
+  "description": "Bower dependencies for PlanetAlert",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "homepage": "http://planetalert.tuxfamily.org",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-bootstrap": "~0.11.2",
+    "angular-route": "~1.2.26",
+    "checklist-model": "~0.1.3"
+  }
+}

@@ -1,0 +1,52 @@
+<body>
+<header>
+<h1 class="title">Planet Alert User’s Guide</h1>
+<h2 class="author">Fred Lieutaud</h2>
+<h3 class="date">January 25, 2014</h3>
+</header>
+<nav id="TOC">
+<ul>
+<li><a href="#but-du-jeu">But du jeu</a><ul>
+<li><a href="#comment-progresser-dans-le-jeu">Comment progresser dans le jeu ?</a></li>
+</ul></li>
+<li><a href="#les-différents-indicateurs-du-jeu">Les différents indicateurs du jeu</a><ul>
+<li><a href="#lexpérience-xp">L’expérience (XP) ?</a></li>
+<li><a href="#les-points-de-santé-hp">Les points de santé (HP)</a></li>
+<li><a href="#le-karma">Le karma</a></li>
+<li><a href="#les-pièces-dor-gc">Les pièces d’or (GC)</a></li>
+</ul></li>
+<li><a href="#le-magasin">Le magasin</a></li>
+<li><a href="#la-carte">La carte</a></li>
+</ul>
+</nav>
+<section class="documentation">
+<hr>
+<p><span class="panel panel-default">ATTENTION : LA DOCUMENTATION EST EN COURS DE RÉDACTION ET RESTE DONC ENCORE INCOMPLÈTE À CE JOUR!</span></p>
+<hr>
+<h1 id="but-du-jeu"><a href="#TOC">But du jeu</a></h1>
+<p>Libérer la planète qui est aux mains des envahisseurs venus de Mars.</p>
+<h2 id="comment-progresser-dans-le-jeu"><a href="#TOC">Comment progresser dans le jeu ?</a></h2>
+<p>L’indicateur le plus simple pour voir son niveau de jeu ets le karma. Il indique la puissance d’un joueur. Cet indicateur est utile en cas de litige (par exemple, si 2 joueurs souhaitent libérer un même lieu, celui qui aura le plus fort karma aura la priorité). Il augmente également la probabilité de recevoir des bonus (pièces d’or, pièce d’équipement…).</p>
+<p>D’autres indicateurs permettent au joueur de se repérer : le niveau atteint (level) permet d’accéder à des lieux et équipements particuliers. Pour franchir les niveaux, il faut augmenter son expérience (XP).</p>
+<h1 id="les-différents-indicateurs-du-jeu"><a href="#TOC">Les différents indicateurs du jeu</a></h1>
+<h2 id="lexpérience-xp"><a href="#TOC">L’expérience (XP) ?</a></h2>
+<p>Pour acquérir de l’expérience (XP), il suffit de faire des actions positives. Ces actions sont variées : des activités menées en classe, des réussites aux compétences des devoirs (2 point Verts, 1 point Vert), une participation active en classe, un travail à la maison supplémentaire… Elles sont décrites dans le ‘Magasin’. L’XP acquise est définitive, sauf en cas de non-activité durant un temps plutôt long (ce qui ne peut pas arriver durant la période scolaire).</p>
+<h2 id="les-points-de-santé-hp"><a href="#TOC">Les points de santé (HP)</a></h2>
+<p>Le joueur possède 50 points de santé au début du jeu. S’il réalise des actions négatives, il en perd. Seuls les joueurs de niveau 01 perdants TOUS leurs points de santé meurent définitivement. Les joueurs d’un autre niveau perdent leurs pièces d’or (GC), perdent un niveau (level), et perdent tout leur équipement. À chaque passage au niveau supérieur, le joueur récupére 50 points de santé. Certaines potions permettent de récupérer des points de santé immédiatement.</p>
+<h2 id="le-karma"><a href="#TOC">Le karma</a></h2>
+<p>Le karma est un indicateur plus simple pour connaître son niveau de jeu. Plus il est élevé, plus le joueur a de l’influence sur le jeu. En cas de conflit sur un lieu à libérer, le joueur ayant le plus grand karma sera plus influent et aura donc une priorité.</p>
+<p>Il est calculé de la manière suivante : - Niveau (level) +100 /niveau à partir du niveau 02 (Level 02 = +200pts, Level 03 = +300pts…)<br>- Expérience (XP) : +1 /point d’XP (27XP = +27…) - Équipement : +10 /pièce d’équipement - Lieux libérés : +20 /lieu - Santé : -5 /point de santé perdu</p>
+<p>Pour exemple, 1 joueur au niveau 02 avec une XP de 37, ayant libéré 3 lieux, avec comme équipement 1 épée et 1 simple bouclier, et ayant une santé de 45 aura un karma de : 2x100 + 37 + 3x20 + 1x10 + 1x10 - 5x5 = 317 - 25 = 292</p>
+<h2 id="les-pièces-dor-gc"><a href="#TOC">Les pièces d’or (GC)</a></h2>
+<p>Les pièces d’or représentent la monnaie d’échange de Planet Alert. Elles permettent de libérer les lieux et d’acheter de l’équipement ou des potions. Pour en obtenir, il suffit de réaliser des actions positives. Attention, les pièces d’or peuvent baisser en cas d’actions négatives! Si le joueur perd tous ses points de santé, il perdra également toutes ses pièces d’or. Un don à d’autres joueurs est possible afin de transformer ses pièces d’or en XP et gagner ainsi du karma (tout en aidant un membre de son équipe)</p>
+<h1 id="le-magasin"><a href="#TOC">Le magasin</a></h1>
+<p>Le magasin liste tous les équipements que les joueurs peuvent acheter. Il y a différentes catégories d’équipement :</p>
+<ul>
+<li>Les armes : Elles permettent d’obtenir des points supplémentaires lors de la réalisation d’actions positives.</li>
+<li>Les protections : Elles permettent de minimiser les pertes lors d’actions négatives.</li>
+<li>Les potions : Elles fournissent des pouvoirs suppléémentaires ponctuels.</li>
+</ul>
+<p>Pour acheter un équipement, il faut en faire la demande en classe ou par le formulaire de ‘Contact’. Evidemment, le joueur doit disposer de suffisamment de pièces d’or.</p>
+<h1 id="la-carte"><a href="#TOC">La carte</a></h1>
+<p>La carte offre un aperçu de tous les endroits devant être libérés dans le jeu. Certains lieux ne sont accessibles qu’à partir de certains niveaux.</p>
+</section>
