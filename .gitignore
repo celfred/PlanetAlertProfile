@@ -1,0 +1,12 @@
+/*
+/*/
+!/site/
+!README.md
+!LICENSE
+!.gitignore
+/site/assets/sessions/*
+/site/assets/logs/*
+/site/assets/cache/*
+/site/assets/backups/*
+/site/templates/bower_components/*
+/site/templates/Session.vim
