@@ -33,6 +33,62 @@
     return $output;
   }
 
+  function updateScore($player, $task) {
+    // Task details to calculate new score
+    $tXP = $task->XP;
+    $tHP = $task->HP;
+    $tGC = $task->GC;
+    
+    // Ponderate task's impact according to player's equipment
+    $deltaXP = 0;
+    $deltaHP = 0;
+    if ($player->equipment) {
+      foreach ($player->equipment as $item) {
+        if ($item.category.name == 'weapons') {
+          $deltaXP += $item.XP;
+        }
+        if ($item.category.name == 'protections') {
+          $deltaHP += $item.HP;
+        }
+      }
+      if ($tHP < 0) { // Negative task
+        // Loss of 1 minimum whatever the equipment
+        if ( $tHP+$deltaHP > 0 ) {
+          $deltaHP = $tHP-1;
+        }
+      } else { // Positive task
+        $deltaHP = 0;
+      }
+    }
+
+    // Calculate player's new score
+    $player->HP = $player->HP + $tHP + $deltaHP;
+    $player->XP = $player->XP + $tXP + $deltaXP;
+    $player->GC += $tGC;
+    // Check death
+    if ($player->HP <= 0) {
+      // Loose 1 level
+      if ($player->level > 1) {
+        // TODO : loose equipment?)
+        $player->level -= 1;
+      } else {
+        // TODO : Make an important team loss? (all players get HP loss? Extra free spots on all places?)
+        // For the moment : init player scores for a new start
+        $player->level = 1;
+        $player->HP = 50;
+        $player->GC = 0;
+        $player->XP = 0;
+      }
+    }
+    // Check new level
+    $threshold = ($player->level*10)+90;
+    if ($player->XP >= $threshold) {
+      $player->level += 1;
+      $player->XP -= $threshold;
+      $player->HP = 50;
+    }
+  }
+
   function updateKarma($player) {
     $player->karma=0;
     if ($player->level > 1) {
@@ -48,15 +104,9 @@
 
   if ($user->isSuperuser()) { // Admin front-end
     if($input->post->submitShop) { // shopForm was submitted, process it
-      //foreach($input->post as $key => $value)
-      //  echo htmlentities("$key = $value") . "<br />"; 
-
       $checked_players = $input->post->playerId;
       $checked_equipments = $input->post->equipmentId;
       $checked_GC = $input->post->GC;
-         // print_r($checked_players);
-         // print_r($checked_equipments);
-         // print_r($checked_GC);
       if ($checked_players) {
         $playerIndex = 0;
         foreach($checked_players as $checked_player) {
@@ -64,19 +114,10 @@
           $player = $pages->get($checked_player);
           $player->of(false);
           
-          // Original values for history
-          $old_XP = $player->XP;
-          $old_HP = $player->HP;
-          $old_GC = $player->GC;
-          $old_level = $player->level;
-          $old_karma = $player->karma;
-
           // Get item's data
           $item = $pages->get($checked_equipments[$playerIndex]);
           // Set new values
           $player->GC = (int) $input->post->GC[$playerIndex];
-      //foreach($item as $key => $value)
-        //echo htmlentities("$key = $value") . "<br />"; 
           switch($item->parent->name) {
             case 'potions' : // instant use potions?
               $player->HP += $item->HP;
@@ -88,7 +129,7 @@
               $player->equipment->add($item);
               break;
           }
-          $task = $item->title;
+          $taskTitle = $item->title;
 
           // Update karma
           updateKarma($player);
@@ -96,7 +137,7 @@
           // Save player's new scores
           $player->save();
 
-          // Save event in history for each player
+          // Record history
           $p = new Page();
           $p->template = 'event';
           $history = $player->child("name=history");
@@ -109,28 +150,12 @@
             $history->save();
           }
           $p->parent = $history;
-          // Save trend to see evolution caused by task
-          $XPTrend = $player->XP-$old_XP;
-          $HPTrend = $player->HP-$old_HP;
-          $GCTrend = $player->GC-$old_GC;
-          $levelTrend = $player->level-$old_level;
-          if ($XPTrend > 0) $XPTrend = '+'.$XPTrend;
-          if ($HPTrend > 0) $HPTrend = '+'.$HPTrend;
-          if ($GCTrend > 0) $GCTrend = '+'.$GCTrend;
-          if ($levelTrend > 0) $levelTrend = '+'.$levelTrend;
-          if ($XPTrend != 0) { $XPTrend = ' ['.$XPTrend.'XP]'; } else { $XPTrend = ''; }
-          if ($HPTrend != 0) { $HPTrend = ' ['.$HPTrend.'HP]'; } else { $HPTrend = ''; }
-          if ($GCTrend != 0) { $GCTrend = ' ['.$GCTrend.'GC]'; } else { $GCTrend = ''; }
-          if ($levelTrend != 0) { $levelTrend = ' ['.$levelTrend.'lvl]'; } else { $levelTrend = ''; };
-          $p->title = $task.$XPTrend.$HPTrend.$GCTrend.$levelTrend;
-          // Set taskType from id
-          $p->category = $pages->get("/categories/shop");
-          // Save new stats (for undo?)
-          $p->XP = $player->XP;
-          $p->HP = $player->HP;
-          $p->GC = $player->GC;
-          $p->level = $player->level;
-          $p->karma = $player->karma;
+          $p->title = $taskTitle;
+          // Save task
+          $task = $pages->get("name='buy'");
+          $p->task = $task;
+          // Save comment
+          $p->summary = $taskComment;
           $p->save(); 
 
           $playerIndex++;
@@ -139,15 +164,12 @@
     }
 
     if($input->post->submitMap) { // mapForm was submitted, process it
-      //foreach($input->post as $key => $value)
-      //  echo htmlentities("$key = $value") . "<br />"; 
-
       $checked_players = $input->post->playerId;
       $checked_places = $input->post->placeId;
       $checked_GC = $input->post->GC;
-          // print_r($checked_players);
-          // print_r($checked_places);
-          // print_r($checked_GC);
+      // print_r($checked_players);
+      // print_r($checked_places);
+      // print_r($checked_GC);
       if ($checked_players) {
         $playerIndex = 0;
         foreach($checked_players as $checked_player) {
@@ -155,13 +177,6 @@
           $player = $pages->get($checked_player);
           $player->of(false);
           
-          // Original values for history
-          $old_XP = $player->XP;
-          $old_HP = $player->HP;
-          $old_GC = $player->GC;
-          $old_level = $player->level;
-          $old_karma = $player->karma;
-
           // Get item's data
           $item = $pages->get($checked_places[$playerIndex]);
           // Set new values
@@ -169,30 +184,11 @@
           // Set new XP : Freeing a place triggers an XP increase proportionnal to place level
           $deltaXP = (int) $input->post->placeLevel[$playerIndex];
           $deltaXP = $deltaXP+5;
-          $player->XP = $old_XP+$deltaXP;
+          $player->XP = $player->XP+$deltaXP;
 
-      //foreach($item as $key => $value)
-      //  echo htmlentities("$key = $value") . "<br />"; 
-          $player->places = $item;
-          // TODO : in places subtree???
-          /*
-          $placePage->parent = $player->child("name=places");
-          if (!$placePage->id) { // Creation of Places page if doesn't exist
-            $placePage = new Page();
-            $placePage->parent = $player;
-            $placePage->template = 'basic-page';
-            $placePage->name = 'places';
-            $placePage->title = 'Places';
-            $placePage->save();
-          }
-          $p-> = new Page();
-          $p->parent = $placePage;
-          $p->template = 'place';
-          $p->title = $item->title;
-          $p->add($item->id);
-           */
+          $player->places->add($item);
 
-          $task = $item->title;
+          $taskTitle = $item->title;
 
           updateKarma($player);
           // Save player's new scores
@@ -211,28 +207,12 @@
             $history->save();
           }
           $p->parent = $history;
-          // Save trend to see evolution caused by task
-          $XPTrend = $player->XP-$old_XP;
-          $HPTrend = $player->HP-$old_HP;
-          $GCTrend = $player->GC-$old_GC;
-          $levelTrend = $player->level-$old_level;
-          if ($XPTrend > 0) $XPTrend = '+'.$XPTrend;
-          if ($HPTrend > 0) $HPTrend = '+'.$HPTrend;
-          if ($GCTrend > 0) $GCTrend = '+'.$GCTrend;
-          if ($levelTrend > 0) $levelTrend = '+'.$levelTrend;
-          if ($XPTrend != 0) { $XPTrend = ' ['.$XPTrend.'XP]'; } else { $XPTrend = ''; }
-          if ($HPTrend != 0) { $HPTrend = ' ['.$HPTrend.'HP]'; } else { $HPTrend = ''; }
-          if ($GCTrend != 0) { $GCTrend = ' ['.$GCTrend.'GC]'; } else { $GCTrend = ''; }
-          if ($levelTrend != 0) { $levelTrend = ' ['.$levelTrend.'lvl]'; } else { $levelTrend = ''; };
-          $p->title = $task.$XPTrend.$HPTrend.$GCTrend.$levelTrend;
-          // Set taskType
-          $p->category = $pages->get("/categories/place");
-          // Save new stats (for undo?)
-          $p->XP = $player->XP;
-          $p->HP = $player->HP;
-          $p->GC = $player->GC;
-          $p->level = $player->level;
-          $p->karma = $player->karma;
+          $p->title = $taskTitle;
+          // Save task
+          $task = $pages->get("name='free'");
+          $p->task = $task;
+          // Save comment
+          $p->summary = $taskComment;
           $p->save(); 
 
           $playerIndex++;
@@ -242,45 +222,33 @@
 
     // TODO : Import csv file from SACoche
     if($input->post->submitTasks) { // taskForm was submitted, process it
-      //foreach($input->post as $key => $value)
-      //  echo htmlentities("$key = $value") . "<br />"; 
-
       // Consider checked players only
       $checked_players = $input->post->player;
-
       if ($checked_players) {
         foreach($checked_players as $checked_player) {
           $player = $pages->get($checked_player);
           $player->of(false);
-
-          // Original values for history
-          $old_XP = $player->XP;
-          $old_HP = $player->HP;
-          $old_GC = $player->GC;
-          $old_level = $player->level;
-          $old_karma = $player->karma;
 
           // Set new values
           $player->HP = (int) $input->post->HP[$checked_player];
           $player->GC = (int) $input->post->GC[$checked_player];
           $player->XP = (int) $input->post->XP[$checked_player];
           $player->level = (int) $input->post->level[$checked_player];
-          //$taskId = (int) $input->post->task[$checked_player];
           $htask = (string) $input->post->htask[$checked_player];
           $customTask = (string) $input->post->customTask[$checked_player];
           $comment = (string) $input->post->customTask[$checked_player];
           $taskType = (int) $input->post->taskType[$checked_player];
-      //echo '<pre>', print_r($GLOBALS), '</pre>'; 
           if ($htask) { // A task is selected
-            //$taskPage = $pages->get($taskId);
-            //$task = $taskPage->title;
-            $task = $htask;
+            // TODO : replace htask by taskId;
+            $task = $pages->get($taskId);
+            $taskTitle = $htask;
           } else { // No task selected
             if (trim($customTask) == '') {  // No comment set : use default comment
-              $task = 'Manual edit (bug correction?)';
+              $taskTitle = 'Manual edit (bug correction?)';
             } else { // A comment is set : use it
-              $task = $customTask;
+              $taskTitle = $customTask;
             }
+            $task = $pages->get("name='manual'");
           }
 
           // New karma
@@ -302,34 +270,11 @@
             $history->save();
           }
           $p->parent = $history;
-          // Save trend to see evolution caused by task
-          $XPTrend = $player->XP-$old_XP;
-          $HPTrend = $player->HP-$old_HP;
-          $GCTrend = $player->GC-$old_GC;
-          $levelTrend = $player->level-$old_level;
-          if ($XPTrend > 0) $XPTrend = '+'.$XPTrend;
-          if ($HPTrend > 0) $HPTrend = '+'.$HPTrend;
-          if ($GCTrend > 0) $GCTrend = '+'.$GCTrend;
-          if ($levelTrend > 0) $levelTrend = '+'.$levelTrend;
-          if ($XPTrend != 0) { $XPTrend = ' ['.$XPTrend.'XP]'; } else { $XPTrend = ''; }
-          if ($HPTrend != 0) { $HPTrend = ' ['.$HPTrend.'HP]'; } else { $HPTrend = ''; }
-          if ($GCTrend != 0) { $GCTrend = ' ['.$GCTrend.'GC]'; } else { $GCTrend = ''; }
-          if ($levelTrend != 0) { $levelTrend = ' ['.$levelTrend.'lvl]'; } else { $levelTrend = ''; };
-          $p->title = $task.$XPTrend.$HPTrend.$GCTrend.$levelTrend;
-          // Get taskType from id
-          if ($taskType) {
-            $category = $pages->get($taskType);
-          } else { // Manual edit
-            $category = $pages->get("/categories/manual");
-          }
-          $p->category = $category;
+          $p->title = $taskTitle;
+          // Save task
+          $p->task = $task;
+          // Save comment
           $p->summary = $comment;
-          // Save new stats (for undo?)
-          $p->XP = $player->XP;
-          $p->HP = $player->HP;
-          $p->GC = $player->GC;
-          $p->level = $player->level;
-          $p->karma = $player->karma;
           $p->save(); 
         }
       }
@@ -349,34 +294,20 @@
 
             $player = $pages->get($playerId);
             $player->of(false);
-            
-            // Original values for history
-            $old_XP = $player->XP;
-            $old_HP = $player->HP;
-            $old_GC = $player->GC;
-            $old_level = $player->level;
-            $old_karma = $player->karma;
 
             // Set the new scores
-            $tDetails = $pages->get($taskId); 
-            // Task details to calculate new score
-            $tXP = $tDetails->XP;
-            $tHP = $tDetails->HP;
-            $tGC = $tDetails->GC;
+            $task = $pages->get($taskId); 
 
-            // Calculate player's new score
-            $player->XP = $old_XP+$tXP;
-            $player->GC = $old_GC+$tGC;
-            $player->HP = $old_HP+$tHP;
+            // Update player's scores
+            updateScore($player, $task);
 
             // Update karma
             updateKarma($player);
 
-            //echo $task.$XPTrend.$HPTrend.$GCTrend.$levelTrend.$karmaTrend.'<br />';
             // Save player's new scores
             $player->save();
 
-            // Record history (for undo?)
+            // Record history
             $p = new Page();
             $p->template = 'event';
             $history = $player->child("name=history");
@@ -389,33 +320,11 @@
               $history->save();
             }
             $p->parent = $history;
-            // Save trend to see evolution caused by task
-            $XPTrend = $player->XP-$old_XP;
-            $HPTrend = $player->HP-$old_HP;
-            $GCTrend = $player->GC-$old_GC;
-            $levelTrend = $player->level-$old_level;
-            $karmaTrend = $player->karma-$old_karma;
-            if ($XPTrend > 0) $XPTrend = '+'.$XPTrend;
-            if ($HPTrend > 0) $HPTrend = '+'.$HPTrend;
-            if ($GCTrend > 0) $GCTrend = '+'.$GCTrend;
-            if ($levelTrend > 0) $levelTrend = '+'.$levelTrend;
-            if ($karmaTrend > 0) $karmaTrend = '+'.$karmaTrend;
-            if ($XPTrend != 0) { $XPTrend = ' ['.$XPTrend.'XP]'; } else { $XPTrend = ''; }
-            if ($HPTrend != 0) { $HPTrend = ' ['.$HPTrend.'HP]'; } else { $HPTrend = ''; }
-            if ($GCTrend != 0) { $GCTrend = ' ['.$GCTrend.'GC]'; } else { $GCTrend = ''; }
-            if ($levelTrend != 0) { $levelTrend = ' ['.$levelTrend.'lvl]'; } else { $levelTrend = ''; };
-            if ($karmaTrend != 0) { $karmaTrend = ' ['.$karmaTrend.'karma]'; } else { $karmaTrend = ''; };
-            $p->title = $task.$XPTrend.$HPTrend.$GCTrend.$levelTrend.$karmaTrend;
-            // Set taskType from id
-            $p->category = $tDetails->category;
+            $p->title = $task->title;
+            // Save task
+            $p->task = $task;
             // Save comment
             $p->summary = $taskComment;
-            // Save previous stats (for undo?)
-            $p->XP = $old_XP;
-            $p->HP = $old_HP;
-            $p->GC = $old_GC;
-            $p->level = $old_level;
-            $p->karma = $old_karma;
             $p->save(); 
           }
         }
@@ -432,6 +341,7 @@
     <li ng-class="{active: selected == 4}" ng-click="selected = 4">S'équiper</li>
     <li ng-class="{active: selected == 5}" ng-click="selected = 5">Libérer un lieu</li>
     <li ng-class="{active: selected == 6}" ng-click="selected = 6">Admin Table</li>
+    <!-- <li ng-class="{active: selected == 7}" ng-click="selected = 7">Reports</li> -->
     <?php } //Guest contact form ?>
   </ul>
 
@@ -664,6 +574,13 @@
     <input type="submit" name="adminTableSubmit" value="Enregistrer" class="btn btn-block btn-primary" ng-disabled="" />
     </form>
   </div>
+
+  <div ng-show="selected == 7" class="row" ng-init="">
+    <ul>
+      <li><a target="_blank" href="<?php echo $pages->get('/team-report')->url.$input->urlSegment1; ?>">Team report</a></li>
+      <li ng-repeat="cat in allCategories"><a target="_blank" href="<?php echo $pages->get('/team-report')->url.$input->urlSegment1; ?>/{{cat.id}}">Team report : {{cat.title}}</a></li>
+  </div>
+
   <?php } // Close admin front-end ?>
 
 </div> <!-- /teamCtrl -->

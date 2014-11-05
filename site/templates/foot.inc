@@ -34,5 +34,7 @@
   <script src="<?php echo $config->urls->templates?>js/controllers.js"></script>
   <script src="<?php echo $config->urls->templates?>js/filters.js"></script>
   <script src="<?php echo $config->urls->templates?>js/directives.js"></script>
+  <script src="<?php echo $config->urls->templates?>scripts/jquery-1.4.2.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>scripts/main.js"></script>
 </body>
 </html>

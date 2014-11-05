@@ -2,7 +2,6 @@
 
 
 // Declare app level module which depends on filters, and services
-// TODO : Add ngRoute module when using unstable angularJs
 angular.module('myApp', ['ngRoute', 'checklist-model', 'ui.bootstrap', 'myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers']).
   config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     //$routeProvider.when('/', {templateUrl: '../private/ProcessWire/site/templates/partials/partial1.php', controller: 'MyCtrl1'});

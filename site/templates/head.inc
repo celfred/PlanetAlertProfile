@@ -46,7 +46,7 @@
     $homepage = $pages->get("/"); 
     $children = $homepage->children;
     $children->prepend($homepage); 
-    $players = $pages->find("template=player");
+    $players = $pages->find("template=player, sort=title");
     $uniqueResults = array(); 
     foreach($players as $resultPage) {
       $uniqueResults[$resultPage->team] = $resultPage; 
@@ -66,7 +66,13 @@
             }
 
           } else {
-            echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
+            if ($child->name != 'reports') {
+              echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
+            } else {
+              if ($user->isSuperuser()) {
+                echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
+              }
+            }
           }
         }
       ?>
