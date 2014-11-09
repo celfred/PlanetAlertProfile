@@ -386,6 +386,14 @@ img.align_right {
   border: 2px solid #000;
   background-color: #FFF;
 }
+#reportDiv .absent {
+  margin: 0 10px;
+}
+#reportDiv .label.participation {
+  display: inline-block;
+  width: 25px;
+  padding: 5px;
+}
 header {
   display: none;
 }
