@@ -10,17 +10,19 @@ function calculate_average($arr) {
   return $average;
 }
 
-
 if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $team = $input->urlSegment1;
   $allPlayers = $pages->find("team=$team, template=player, sort=title");
   $selectedPlayer = false;
   $teamParticipation = false;
+
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 != 'participation') { // 1 player report
   $playerId = $input->urlSegment2;
   $selectedPlayer = $pages->get($playerId);
   $teamParticipation = false;
-  echo '<h1>Report : '.$selectedPlayer->title .' ('. $selectedPlayer->team.')</h1>';
+
+  echo  '<h2>Report : '.$selectedPlayer->title .' ('. $selectedPlayer->team.')</h2>';
+
   // List all recorded events for selected player
   $events = $selectedPlayer->find("template=event, sort=category");
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 == 'participation') { // Team participation
@@ -28,6 +30,7 @@ if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $allPlayers = $pages->find("team=$team, template=player, sort=title");
   $teamParticipation = true;
   $selectedPlayer = false;
+
   if ($input->urlSegment3) {
     $limit = true;
   } else {
@@ -37,23 +40,23 @@ if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
 
 $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|attitude");
 
-echo '<a class="pdfLink btn btn-info" href="' . $page->url.$input->urlSegment1.'/'.$input->urlSegment2.'/'.$input->urlSegment3. '?pages2pdf=1">Générer PDF</a>';
-
-echo '<table class="table table-condensed table-hover">';
+echo  '<table class="table table-condensed table-hover">';
 if (!$selectedPlayer) { // Class report
   if (!$teamParticipation) { // Class report
-    echo '<tr>';
-    echo '<td></td>';
-    echo '<td colspan="'. $categories->count.'"><h3>Suivi du travail : '.$team.'</td>';
-    echo '<td colspan="4"><h3>Planet Alert</h3></td>';
-    echo '</tr>';
-    echo '<tr>';
-    echo '<td></td>';
+    echo  '<tr>';
+    echo  '<td></td>';
+    echo  '<td colspan="'. $categories->count.'"><h2>Suivi du travail : '. $team .'</h2></td>';
+    echo  '<td colspan="4"><h3>Planet Alert</h3></td>';
+    echo  '</tr>';
+    echo  '<tr>';
+    echo  '<td></td>';
     // Build all categories columns
     foreach ($categories as $category) {
       echo '<th>';
+      echo '<span class="" title="">'. $category->title.'</span>';
+      /*
       switch ($category->name) {
-        case 'participation' : echo '<i class="glyphicon glyphicon-comment" title="'. $category->title.'"></i> '; break;
+        case 'participation' : echo '<span class="" title="'. $category->title.'">Participation</span> '; break;
         case 'homework' : echo '<i class="glyphicon glyphicon-pencil" title="'. $category->title.'"></i>'; break;
         case 'groupwork' : echo '<i class="glyphicon glyphicon-user" title="'. $category->title.'"></i><i class="glyphicon glyphicon-user" title="'. $category->title.'"></i>'; break;
         case 'travail-individuel' : echo '<i class="glyphicon glyphicon-user" title="'. $category->title.'"></i>'; break;
@@ -62,12 +65,13 @@ if (!$selectedPlayer) { // Class report
         case 'oublis' : echo '<i class="glyphicon glyphicon-cloud" title="'. $category->title.'"></i>'; break;
         default : echo $category->title;
       }
+      */
       echo '</th>';
     }
-    echo '<td><i class="glyphicon glyphicon-picture" title="Lieux"></i></td>';
-    echo '<td><i class="glyphicon glyphicon-shopping-cart" title="Équipement"></i></td>';
-    echo '<td><i class="glyphicon glyphicon-usd" title="Gold coins"></i></td>';
-    echo '<td><i class="glyphicon glyphicon-heart" title="Health points"></i></td>';
+    echo '<td><span>Lieux</span></td>';
+    echo '<td><span>Équipement</span></td>';
+    echo '<td><span>Or</span></td>';
+    echo '<td><span>Santé</span></td>';
     echo '</tr>';
 
     $teamPlaces = 0;
@@ -147,7 +151,6 @@ if (!$selectedPlayer) { // Class report
                 case 'no-homework' :
                   $nbNoHk += 1;
                   $listNoHk .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
-                  $teamNoHk += 1;
                   //echo  '<p title="'. $event->summary.'"><span style="font-size: 18px;">⊝</span>&nbsp;<span style="font-size: 11px;" class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></p>';
                   break;
                 case 'homework' : // Don't display regular homework
@@ -168,6 +171,7 @@ if (!$selectedPlayer) { // Class report
                 case 'awarded-homework' :
                   $nbExtraHk += 1;
                   $listExtraHk .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
+                  $teamExtraHk += 1;
                   //echo  '<p title="'. $event->summary.'"><span style="font-size: 18px;">⊕</span>&nbsp;<span style="font-size: 11px;" class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></p>';
                   break;
                 default : break;
@@ -314,11 +318,11 @@ if (!$selectedPlayer) { // Class report
     echo '</tr>';
   } else { // Team Participation report
     echo '<tr>';
-    echo '<td colspan="7"><h3>Team participation : '. $team .'</h3>';
+    echo '<td colspan="7"><h2>Participation : '. $team;
     if ($limit) {
-      echo '<h4>'.$input->urlSegment3.' last lessons.</h4>';
-    }
-    echo '</td>';
+      echo '<h3>('.$input->urlSegment3.' derniers cours)</h3>';
+    } 
+    echo '</h2></td>';
     echo '</tr>';
     foreach($allPlayers as $player) {
       $vv = 0;
@@ -344,22 +348,32 @@ if (!$selectedPlayer) { // Class report
           switch ($task->name) {
             case 'communication-rr' :
               $out .= '<span class="participation label label-danger" title="['.strftime("%d/%m", $event->created).']">RR</span>';
+              //$out .= '['.strftime("%d/%m", $event->created).']';
+              $out .= ' | ';
               $rr += 1;
               break;
             case 'communication-r' :
               $out .= '<span class="participation label label-danger" title="['.strftime("%d/%m", $event->created).']">R</span>';
+              //$out .= '['.strftime("%d/%m", $event->created).']';
+              $out .= ' | ';
               $r +=1;
               break;
             case 'communication-v' : 
               $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">V</span>';
+              //$out .= '['.strftime("%d/%m", $event->created).']';
+              $out .= ' | ';
               $v +=1;
               break;
             case 'communication-vv' :
               $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">VV</span>';
+              //$out .= '['.strftime("%d/%m", $event->created).']';
+              $out .= ' | ';
               $vv +=1;
               break;
             case 'absent' : 
               $out .= '<span class="participation label label-info" title="['.strftime("%d/%m", $event->created).']">-</span>';
+              $out .= '['.strftime("%d/%m", $event->created).']';
+              $out .= ' | ';
               $abs += 1;
               $nbPart -= 1;
               break;
@@ -385,7 +399,7 @@ if (!$selectedPlayer) { // Class report
         echo '<td class="text-left">';
         echo $ratio.'%';
         //echo $ratio.'%&nbsp;&nbsp;&nbsp;&nbsp;'.($v+$vv).'<i class="glyphicon glyphicon-thumbs-up"></i> '.($nbPart-($v+$vv)).'<i class="glyphicon glyphicon-thumbs-down"></i>&nbsp;&nbsp;&nbsp;&nbsp;('.$nbPart.' cours)';
-        //echo 'RR:'.$rr.' / R:'.$r.' / V:'.$v.' / VV:'.$vv.'&nbsp;&nbsp;&nbsp;';
+        //$out .='RR:'.$rr.' / R:'.$r.' / V:'.$v.' / VV:'.$vv.'&nbsp;&nbsp;&nbsp;';
         echo '</td>';
         echo '<td class="text-left">';
         echo ($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i> '.($nbPart-($v+$vv)).' <i class="glyphicon glyphicon-thumbs-down"></i>';
@@ -399,7 +413,7 @@ if (!$selectedPlayer) { // Class report
         }
         echo '</td>';
         echo '<td class="text-left">';
-        echo $out;
+        echo  $out;
         echo '</td>';
       } else {
         echo '<td>-</td>';
@@ -431,27 +445,7 @@ if (!$selectedPlayer) { // Class report
   }
 }
 
-// Legend
-if (!$teamParticipation) {
-  echo '<tr>';
-  echo '<td class="legend" colspan="'.($categories->count()+1).'">';
-  foreach ($categories as $category) {
-    echo '<small>';
-    switch ($category->name) {
-      case 'participation' : echo '<i class="glyphicon glyphicon-comment"></i> '. $category->title .'&nbsp;&nbsp;&nbsp;'; break;
-      case 'homework' : echo '<i class="glyphicon glyphicon-pencil"></i> '. $category->title .'&nbsp;[<i class="glyphicon glyphicon-remove-circle"></i> : Travail non fait / <i class="glyphicon glyphicon-ban-circle"></i>Travail ½ fait / <i class="glyphicon glyphicon-ok-circle"></i>Travail supplémentaire]&nbsp;&nbsp;&nbsp;'; break;
-      case 'groupwork' : echo '<i class="glyphicon glyphicon-user"></i><i class="glyphicon glyphicon-user"></i> '. $category->title .'&nbsp;&nbsp;&nbsp;'; break;
-      case 'travail-individuel' : echo '<i class="glyphicon glyphicon-user"></i>'. $category->title .'&nbsp;&nbsp;&nbsp;'; break;
-      case 'manual-cat' : echo '<i class="glyphicon glyphicon-cog"></i>'. $category->title .'&nbsp;&nbsp;&nbsp;'; break;
-      case 'test' : echo '<i class="glyphicon glyphicon-ok"></i>'. $category->title .'&nbsp;&nbsp;&nbsp;'; break;
-      case 'oublis' : echo '<i class="glyphicon glyphicon-cloud"></i>'. $category->title .'&nbsp;&nbsp;&nbsp;'; break;
-      default : break;
-    }
-    echo '</small>';
-  }
-  echo '</td>';
-  echo '</tr>';
-}
 echo '</table>';
 
 ?>
+

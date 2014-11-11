@@ -7,10 +7,11 @@
   <footer class="text-center">
       <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS - &copy; <?php echo date("Y"); ?> F.L. 
         <a href="about/">[À propos]</a>
-        <a style="float: right;" href="<?php echo $config->urls->admin; ?>">[Admin]</a>
         <?php
           if($user->isLoggedin()) {
             echo "<a style='float: right; margin-right: 5px;' href='./?logout=1'>[Log out]</a>";
+          } else {
+            echo "<a style='float: right;' href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>[Admin]</a>";
           }
         ?>
       </p>
@@ -19,10 +20,18 @@
 
 	<?php 
 
+  if ($user->isSuperuser()) {
+    echo '<span class="backendLink">';
+    echo '<a href="'.$config->urls->admin.'">[Backend]</a>';
+    echo '<a href="./?logout=1">[Log out]</a>';
+    echo '</span>';
+  }
 	// If the page is editable, then output a link that takes us straight to the page edit screen:
+  /*
 	if($page->editable()) {
-		echo "<a class='nav' id='editpage' href='{$config->urls->admin}page/edit/?id={$page->id}'>Edit</a>"; 
+		echo "<a class='nav backendLink' id='editpage' href='{$config->urls->admin}page/edit/?id={$page->id}'>Edit</a>"; 
 	}
+  */
 
 	?>
   <script src="<?php echo $config->urls->templates?>bower_components/angular/angular.js"></script>

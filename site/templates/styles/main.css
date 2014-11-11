@@ -137,7 +137,7 @@ footer a:hover {
   text-decoration: underline; 
 }
 
-#editpage {
+.backendLink {
 	position: absolute;
 	top: 0;
 	left: 0; 
@@ -146,6 +146,7 @@ footer a:hover {
 	color: #FFF; 
 	display: block;
 	font-weight: bold; 
+  z-index: 100;
 }
 #editpage:hover {
   background: #FFC;
@@ -393,6 +394,9 @@ img.align_right {
   display: inline-block;
   width: 25px;
   padding: 5px;
+}
+.pdfLink {
+  float: left;
 }
 header {
   display: none;
