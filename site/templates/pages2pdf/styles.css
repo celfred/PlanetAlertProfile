@@ -6,7 +6,7 @@
 table {
   width: 100%;
   border: 2px solid #000;
-  font-size: 10px;
+  font-size: 12px;
   border-collapse: collapse;
 }
 table th {
@@ -18,7 +18,23 @@ table tr {
 table td {
   border: 1px solid #000;
   text-align: center;
+  padding: 5px;
 }
-table .label {
+span.text-left {
+  text-align: left;
+}
+span {
+  margin: 0px 5px;
+}
+span.label {
   border: 1px solid #000;
+}
+span.label-success {
+  background-color: #5CB85C;
+}
+span.label-danger {
+  background-color: #FF000; /*#D9534F;*/
+}
+span.label-info {
+  background-color: #5BC0DE;
 }

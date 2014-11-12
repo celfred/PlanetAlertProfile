@@ -6,6 +6,7 @@
 !.gitignore
 /site/assets/sessions/*
 /site/assets/logs/*
+/site/assets/files/*/*.pdf
 /site/assets/cache/*
 /site/assets/backups/*
 /site/templates/bower_components/*

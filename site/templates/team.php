@@ -4,6 +4,7 @@
 
   $allPlaces = $pages->find("template=place, name!=places");
   $allTeam = $pages->find("template=player, team=");
+  $reportLink = $pages->get("/report_generator")->url;
 
   // Returns a multidimensional array from $values based on the
   // $prefix of the keys
@@ -333,6 +334,7 @@
   } // End if superUser
   ?>
 
+
   <ul class="tabList list-inline">
     <li ng-class="{active: selected == 1}" ng-click="selected = 1">État de l'équipe</li>
     <li ng-class="{active: selected == 2}" ng-click="selected = 2">État du monde</li>
@@ -341,6 +343,7 @@
     <li ng-class="{active: selected == 4}" ng-click="selected = 4">S'équiper</li>
     <li ng-class="{active: selected == 5}" ng-click="selected = 5">Libérer un lieu</li>
     <li ng-class="{active: selected == 6}" ng-click="selected = 6">Admin Table</li>
+    <li><a href='<?php echo $reportLink.$input->urlSegment1; ?>/participation/10' target="_blank">Participation des 10 derniers cours</a></li>
     <!-- <li ng-class="{active: selected == 7}" ng-click="selected = 7">Reports</li> -->
     <?php } //Guest contact form ?>
   </ul>

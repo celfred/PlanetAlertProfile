@@ -10,18 +10,21 @@ function calculate_average($arr) {
   return $average;
 }
 
+$reportTitle = '';
 if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $team = $input->urlSegment1;
   $allPlayers = $pages->find("team=$team, template=player, sort=title");
   $selectedPlayer = false;
   $teamParticipation = false;
-
+  $reportTitle = 'Suivi du travail ('.$team.')<br />';
+  $reportTitle .= '[généré le '.strftime("%d/%m/%Y à %T", $page->created).']';
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 != 'participation') { // 1 player report
   $playerId = $input->urlSegment2;
   $selectedPlayer = $pages->get($playerId);
   $teamParticipation = false;
 
-  echo  '<h2>Report : '.$selectedPlayer->title .' ('. $selectedPlayer->team.')</h2>';
+  $reportTitle = 'Bilan de '.$selectedPlayer->title.' ('. $selectedPlayer->team.')';;
+  $reportTitle .= '[généré le '.strftime("%d/%m/%Y à %T", $page->created).']';
 
   // List all recorded events for selected player
   $events = $selectedPlayer->find("template=event, sort=category");
@@ -30,12 +33,14 @@ if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $allPlayers = $pages->find("team=$team, template=player, sort=title");
   $teamParticipation = true;
   $selectedPlayer = false;
-
+  $reportTitle = 'Participation ('.$team.')';
   if ($input->urlSegment3) {
     $limit = true;
+    $reportTitle .= ' (10 derniers cours)';
   } else {
     $limit = false;
   }
+  $reportTitle .= '[généré le '.strftime("%d/%m/%Y à %T", $page->created).']';
 }
 
 $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|attitude");
@@ -45,7 +50,7 @@ if (!$selectedPlayer) { // Class report
   if (!$teamParticipation) { // Class report
     echo  '<tr>';
     echo  '<td></td>';
-    echo  '<td colspan="'. $categories->count.'"><h2>Suivi du travail : '. $team .'</h2></td>';
+    echo  '<th colspan="'. $categories->count.'"><h2>'. $reportTitle .'</h2></th>';
     echo  '<td colspan="4"><h3>Planet Alert</h3></td>';
     echo  '</tr>';
     echo  '<tr>';
@@ -93,12 +98,9 @@ if (!$selectedPlayer) { // Class report
       foreach ($categories as $category) {
         echo '<td>';
         $events = $player->find("template=event, task.category=$category");
-        //echo $events->count();
-        //if ($category->name == 'participation' || $category->name == 'homework' ) {
-          $posPart = $events->count(); // Get positive participation
-          $nbPart = $events->count(); // Max participation
-          $nbAbsent = 0;
-        //}
+        $posPart = $events->count(); // Get positive participation
+        $nbPart = $events->count(); // Max participation
+        $nbAbsent = 0;
         $list = '';
         $listForgotStuff = '';
         $listForgotSigned = '';
@@ -207,16 +209,26 @@ if (!$selectedPlayer) { // Class report
             array_push($teamPart, $ratio);
           }
           if ($category->name == 'oublis') {
-            echo  '<span title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="'. $className .'">'.$nbForgotStuff.'</span></span>';
-            echo '&nbsp;&nbsp;&nbsp;';
-            echo  '<span title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="'. $className .'">'.$nbForgotSigned.'</span></span> ';
+            if ($nbForgotStuff > 0) {
+              echo  '<span title="'. $listForgotStuff .'">M:<span class="'. $className .'">'.$nbForgotStuff.'</span></span>';
+            echo '&nbsp;';
+            }
+            if ($nbForgotSigned > 0) {
+              echo  '<span title="'. $listForgotSigned .'">S:<span class="'. $className .'">'.$nbForgotSigned.'</span></span> ';
+            }
           }
           if ($category->name == 'homework') {
-            echo  '<span title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
-            echo '&nbsp;&nbsp;&nbsp;';
-            echo  '<span title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
-            echo '&nbsp;&nbsp;&nbsp;';
-            echo  '<span title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
+            if ($nbNoHk > 0) {
+              echo  '<span title="'. $listNoHk .'">&nbsp;<span>'.$nbNoHk.'</span>-</span>';
+              echo '&nbsp;';
+            }
+            if ($nbHalfHk > 0) {
+              echo  '<span title="'. $listHalfHk .'">&nbsp;<span>'.$nbHalfHk.'</span>½</span>';
+              echo '&nbsp;';
+            }
+            if ($nbExtraHk > 0) {
+              echo  '<span title="'. $listExtraHk .'">&nbsp;<span>'.$nbExtraHk.'</span>+</span>';
+            }
           }
           if ($category->name != 'participation' && $category->name != 'homework' && $category->name != 'oublis') {
             $ratio = round(($posItems*100)/$nbItems);
@@ -287,20 +299,20 @@ if (!$selectedPlayer) { // Class report
       echo '<th>';
       if ($category->name == 'participation') {
         echo calculate_average($teamPart).'%';
-        echo '&nbsp;&nbsp;&nbsp;';
+        echo '&nbsp;';
         echo '['.$teamAbsent.' abs.]';
       }
       if ($category->name == 'homework') {
-        echo  '<span title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$teamNoHk.'</span></span>';
-        echo '&nbsp;&nbsp;&nbsp;';
-        echo  '<span title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$teamHalfHk.'</span></span>';
-        echo '&nbsp;&nbsp;&nbsp;';
-            echo  '<span title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$teamExtraHk.'</span></span>';
+        echo  '<span>'.$teamNoHk.'-</span>';
+        echo '&nbsp;';
+        echo  '<span>'.$teamHalfHk.'½</span>';
+        echo '&nbsp;';
+        echo  '<span>'.$teamExtraHk.'+</span>';
       }
       if ($category->name == 'oublis') {
-        echo  '<span title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span>'.$teamForgotStuff.'</span></span>';
-        echo '&nbsp;&nbsp;&nbsp;';
-        echo  '<span title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span>'.$teamForgotSigned.'</span></span> ';
+        echo  '<span>M:'.$teamForgotStuff.'</span>';
+        echo '&nbsp;';
+        echo  '<span>S:'.$teamForgotSigned.'</span> ';
       }
       echo '</th>';
     }
@@ -318,11 +330,8 @@ if (!$selectedPlayer) { // Class report
     echo '</tr>';
   } else { // Team Participation report
     echo '<tr>';
-    echo '<td colspan="7"><h2>Participation : '. $team;
-    if ($limit) {
-      echo '<h3>('.$input->urlSegment3.' derniers cours)</h3>';
-    } 
-    echo '</h2></td>';
+    echo '<th colspan="7"><h2>'. $reportTitle;
+    echo '</h2></th>';
     echo '</tr>';
     foreach($allPlayers as $player) {
       $vv = 0;
@@ -347,33 +356,27 @@ if (!$selectedPlayer) { // Class report
           $task = $pages->get("$event->task");
           switch ($task->name) {
             case 'communication-rr' :
-              $out .= '<span class="participation label label-danger" title="['.strftime("%d/%m", $event->created).']">RR</span>';
+              $out .= '<span class="participation label label-danger" title="['.strftime("%d/%m", $event->created).']">&nbsp;RR&nbsp;</span>';
               //$out .= '['.strftime("%d/%m", $event->created).']';
-              $out .= ' | ';
               $rr += 1;
               break;
             case 'communication-r' :
-              $out .= '<span class="participation label label-danger" title="['.strftime("%d/%m", $event->created).']">R</span>';
+              $out .= '<span class="participation label label-danger">&nbsp;R&nbsp;</span>';
               //$out .= '['.strftime("%d/%m", $event->created).']';
-              $out .= ' | ';
               $r +=1;
               break;
             case 'communication-v' : 
-              $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">V</span>';
+              $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">&nbsp;V&nbsp;</span>';
               //$out .= '['.strftime("%d/%m", $event->created).']';
-              $out .= ' | ';
               $v +=1;
               break;
             case 'communication-vv' :
-              $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">VV</span>';
+              $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">&nbsp;VV&nbsp;</span>';
               //$out .= '['.strftime("%d/%m", $event->created).']';
-              $out .= ' | ';
               $vv +=1;
               break;
             case 'absent' : 
-              $out .= '<span class="participation label label-info" title="['.strftime("%d/%m", $event->created).']">-</span>';
-              $out .= '['.strftime("%d/%m", $event->created).']';
-              $out .= ' | ';
+              $out .= '<span class="participation label label-info">- ['.strftime("%d/%m", $event->created).']</span>';
               $abs += 1;
               $nbPart -= 1;
               break;
@@ -384,16 +387,16 @@ if (!$selectedPlayer) { // Class report
         $ratio = round((($vv+$v)*100)/$nbPart);
         echo '<td class="text-left">';
           if ($ratio >= 80) {
-            echo '<span class="label label-success">VV</span>';
+            echo '<span class="label label-success">&nbsp;VV&nbsp;</span>';
           }
           if ($ratio < 80 && $ratio >= 55) {
-            echo '<span class="label label-success">V</span>';
+            echo '<span class="label label-success">&nbsp;V&nbsp;</span>';
           }
           if ($ratio < 55 && $ratio >= 35) {
-            echo '<span class="label label-danger">R</span>';
+            echo '<span class="label label-danger">&nbsp;R&nbsp;</span>';
           }
           if ($ratio < 35 && $ratio >= 0) {
-            echo '<span class="label label-danger">RR</span>';
+            echo '<span class="label label-danger">&nbsp;RR&nbsp;</span>';
           }
         echo '</td>';
         echo '<td class="text-left">';
@@ -401,18 +404,18 @@ if (!$selectedPlayer) { // Class report
         //echo $ratio.'%&nbsp;&nbsp;&nbsp;&nbsp;'.($v+$vv).'<i class="glyphicon glyphicon-thumbs-up"></i> '.($nbPart-($v+$vv)).'<i class="glyphicon glyphicon-thumbs-down"></i>&nbsp;&nbsp;&nbsp;&nbsp;('.$nbPart.' cours)';
         //$out .='RR:'.$rr.' / R:'.$r.' / V:'.$v.' / VV:'.$vv.'&nbsp;&nbsp;&nbsp;';
         echo '</td>';
-        echo '<td class="text-left">';
-        echo ($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i> '.($nbPart-($v+$vv)).' <i class="glyphicon glyphicon-thumbs-down"></i>';
+        echo '<td>';
+        echo '<span class="">'.($v+$vv).'+</span>&nbsp;&nbsp;<span class="">'.($nbPart-($v+$vv)).'-</span>';
         echo '</td>';
-        echo '<td class="text-left">';
+        echo '<td>';
         echo $nbPart.' cours';
         echo '</td>';
-        echo '<td class="text-left">';
+        echo '<td>';
         if ($abs > 0) {
           echo '['.$abs.' abs.]';
         }
         echo '</td>';
-        echo '<td class="text-left">';
+        echo '<td>';
         echo  $out;
         echo '</td>';
       } else {

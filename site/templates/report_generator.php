@@ -10,17 +10,23 @@ function calculate_average($arr) {
   return $average;
 }
 
+if (!$config->ajax) {
+  include("./head_report.inc"); 
+}
 
+
+$reportTitle = '';
 if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $team = $input->urlSegment1;
   $allPlayers = $pages->find("team=$team, template=player, sort=title");
   $selectedPlayer = false;
   $teamParticipation = false;
+  $reportTitle = 'Suivi du travail ('.$team.')';
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 != 'participation') { // 1 player report
   $playerId = $input->urlSegment2;
   $selectedPlayer = $pages->get($playerId);
   $teamParticipation = false;
-  echo '<h1>Report : '.$selectedPlayer->title .' ('. $selectedPlayer->team.')</h1>';
+  $reportTitle = '<h3>Bilan de '.$selectedPlayer->title.' ('. $selectedPlayer->team.')</h3>';;
   // List all recorded events for selected player
   $events = $selectedPlayer->find("template=event, sort=category");
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 == 'participation') { // Team participation
@@ -28,8 +34,10 @@ if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $allPlayers = $pages->find("team=$team, template=player, sort=title");
   $teamParticipation = true;
   $selectedPlayer = false;
+  $reportTitle = 'Participation ('.$team.')';
   if ($input->urlSegment3) {
     $limit = true;
+    $reportTitle .= ' (10 derniers cours)';
   } else {
     $limit = false;
   }
@@ -44,7 +52,7 @@ if (!$selectedPlayer) { // Class report
   if (!$teamParticipation) { // Class report
     echo '<tr>';
     echo '<td></td>';
-    echo '<td colspan="'. $categories->count.'"><h3>Suivi du travail : '.$team.'</td>';
+    echo '<td colspan="'. $categories->count.'"><h3>'.$reportTitle.'</td>';
     echo '<td colspan="4"><h3>Planet Alert</h3></td>';
     echo '</tr>';
     echo '<tr>';
@@ -203,16 +211,26 @@ if (!$selectedPlayer) { // Class report
             array_push($teamPart, $ratio);
           }
           if ($category->name == 'oublis') {
-            echo  '<span title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="'. $className .'">'.$nbForgotStuff.'</span></span>';
-            echo '&nbsp;&nbsp;&nbsp;';
-            echo  '<span title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="'. $className .'">'.$nbForgotSigned.'</span></span> ';
+            if ($nbForgotStuff > 0) {
+              echo  '<span title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="'. $className .'">'.$nbForgotStuff.'</span></span>';
+              echo '&nbsp;&nbsp;&nbsp;';
+            }
+            if ($nbForgotSigned > 0) {
+              echo  '<span title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="'. $className .'">'.$nbForgotSigned.'</span></span> ';
+            }
           }
           if ($category->name == 'homework') {
-            echo  '<span title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
-            echo '&nbsp;&nbsp;&nbsp;';
-            echo  '<span title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
-            echo '&nbsp;&nbsp;&nbsp;';
-            echo  '<span title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
+            if ($nbNoHk > 0) {
+              echo  '<span title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
+              echo '&nbsp;&nbsp;&nbsp;';
+            }
+            if ($nbHalfHk > 0) {
+              echo  '<span title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
+              echo '&nbsp;&nbsp;&nbsp;';
+            }
+            if ($nbExtraHk > 0) {
+              echo  '<span title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
+            }
           }
           if ($category->name != 'participation' && $category->name != 'homework' && $category->name != 'oublis') {
             $ratio = round(($posItems*100)/$nbItems);
@@ -314,10 +332,7 @@ if (!$selectedPlayer) { // Class report
     echo '</tr>';
   } else { // Team Participation report
     echo '<tr>';
-    echo '<td colspan="7"><h3>Team participation : '. $team .'</h3>';
-    if ($limit) {
-      echo '<h4>'.$input->urlSegment3.' last lessons.</h4>';
-    }
+    echo '<td colspan="7"><h3>'. $reportTitle .'</h3>';
     echo '</td>';
     echo '</tr>';
     foreach($allPlayers as $player) {
@@ -454,4 +469,7 @@ if (!$teamParticipation) {
 }
 echo '</table>';
 
+if (!$config->ajax) {
+  include("./foot_report.inc"); 
+}
 ?>
