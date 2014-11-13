@@ -332,7 +332,7 @@ if (!$selectedPlayer) { // Class report
     echo '</tr>';
   } else { // Team Participation report
     echo '<tr>';
-    echo '<td colspan="7"><h3>'. $reportTitle .'</h3>';
+    echo '<td colspan="8"><h3>'. $reportTitle .'</h3>';
     echo '</td>';
     echo '</tr>';
     foreach($allPlayers as $player) {
@@ -404,6 +404,10 @@ if (!$selectedPlayer) { // Class report
         echo '</td>';
         echo '<td class="text-left">';
         echo ($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i> '.($nbPart-($v+$vv)).' <i class="glyphicon glyphicon-thumbs-down"></i>';
+        echo '</td>';
+        echo '<td class="text-left">';
+        echo 'Du <span>'.strftime("%d/%m", $events[0]->created).'</span>';
+        echo ' au <span>'.strftime("%d/%m", $events[$events->count-1]->created).'</span>';
         echo '</td>';
         echo '<td class="text-left">';
         echo $nbPart.' cours';
