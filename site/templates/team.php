@@ -531,7 +531,7 @@
     </form>
   </div> <!-- /mapCtrl -->
 
-  <div ng-show="selected == 6" class="row" ng-init="">
+  <div ng-show="selected == 6" class="row" ng-init="predicate=title;">
     <form id="adminTableForm" name="adminTableForm" action="players/<?php echo $input->urlSegment1; ?>" method="post" class="" role="form">
 
     <ul class="list-inline text-center">
