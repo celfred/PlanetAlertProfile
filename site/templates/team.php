@@ -531,7 +531,7 @@
     </form>
   </div> <!-- /mapCtrl -->
 
-  <div ng-show="selected == 6" class="row" ng-init="">
+  <div ng-show="selected == 6" class="row" ng-init="predicate=title;">
     <form id="adminTableForm" name="adminTableForm" action="players/<?php echo $input->urlSegment1; ?>" method="post" class="" role="form">
 
     <ul class="list-inline text-center">
@@ -543,7 +543,8 @@
 
     <table class="adminTable">
       <tr>
-        <td></td>
+        <th ng-click="predicate = 'group.title'; reverse=!reverse">Groups</th>
+        <th ng-click="predicate = 'title'; reverse=!reverse">Players</th>
         <th ng-repeat="task in tasks | orderBy: ['GC', 'HP', 'title'] | filter:search" title="{{task.summary}}">
           <div class="vertical-text">
             <div class="vertical-text__inner">
@@ -553,22 +554,23 @@
         </th>
       </tr>
       <tr>
-        <td>Commentaires</td>
+        <td colspan="2">Commentaires</td>
         <td ng-repeat="task in tasks | orderBy: ['GC', 'HP', 'title'] | filter:search" title="Commentaire">
           <input type="checkbox" ng-model="task.showComment" ng-change="setCommonComment(task)" />
           <input ng-if="adminTableAnyChecked && task.showComment" type="text" name="commonComment[{{task.id}}]" value="" placeholder="Commentaire commun" ng-model="task.commonComment" ng-change="setCommonComment(task)" />
         </td>
       </tr>
       <tr>
-        <td>Tout cocher</td>
+        <td colspan="2">Tout cocher</td>
         <td ng-repeat="task in tasks | orderBy: ['GC', 'HP', 'title'] | filter:search" title="Tout cocher"><input type="checkbox" ng-model="task.checkedAll" ng-click="selectAll(task)" /></td>
       </tr>
-      <tr ng-repeat="player in players">
+      <tr ng-repeat="player in players | orderBy:predicate:reverse">
+        <td>{{player.group.title}}</td>
         <th>{{player.title}}</th>
         <!-- Hack because checklist-value doesn't work as expected... -->
         <input type="hidden" name="player[{{player.id}}]" value="{{player.checkedTasks}}">
         <input type="hidden" name="plyr[{{player.id}}]" value="{{player.checkedComments}}">
-        <td ng-repeat="task in tasks | orderBy: ['GC', 'HP', 'title'] | filter:search" title="{{player.name}} - {{task.title}}">
+        <td ng-repeat="task in tasks | orderBy: ['GC', 'HP', 'title'] | filter:search" title="{{player.title}} ({{player.group.title}}) - {{task.title | filterHtmlChars}}">
           <input type="checkbox" name="pl_{{player.id}}[]" checklist-model="player.checkedTasks" checklist-value="task.id" ng-change="onCheck(player, task)" />
           <input ng-if="task.showComment && (player.checkedTasks.indexOf(task.id) != -1)" type="text" name="comment_{{player.id}}[{{task.id}}]" value="" ng-model="player.checkedComments[task.id]" placeholder="Commentaire" />
         </td>
