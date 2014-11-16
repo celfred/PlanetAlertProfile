@@ -10,6 +10,8 @@ angular.module('myApp.controllers', []) .
     $scope.adminTableAnyChecked = false;
     $scope.predicate = 'karma';
     $scope.reverse = true;
+    $scope.adminPredicate = 'title';
+    $scope.adminReverse = false;
     $scope.startEdit = false; // No player checked
     $scope.allCategories = [];
     $scope.alreadyCat = [];
