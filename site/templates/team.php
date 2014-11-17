@@ -66,6 +66,8 @@
     $player->HP = $player->HP + $tHP + $deltaHP;
     $player->XP = $player->XP + $tXP + $deltaXP;
     $player->GC += $tGC;
+    // Check GC
+    if ($player->GC < 0) { $player->GC = 0; }
     // Check death
     if ($player->HP <= 0) {
       // Loose 1 level
