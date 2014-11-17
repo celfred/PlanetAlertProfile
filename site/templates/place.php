@@ -162,7 +162,7 @@ if ($page->name != 'places') { // Single place view
       </tr>
       <tr ng-repeat="place in places | orderBy:predicate:reverse | filter:search">
         <td>
-          {{place.title}}
+          {{place.title | filterHtmlChars}}
           <img ng-repeat="photo in place.photo | limitTo:1" ng-src="site/assets/files/{{place.id}}/mini_{{photo.basename}}" />
         </td>
         <td>{{place.country.title}}</td>

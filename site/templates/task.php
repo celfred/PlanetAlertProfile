@@ -25,7 +25,7 @@ include("./head.inc");
       <th ng-click="predicate = 'type'; reverse=!reverse"><span class="glyphicon glyphicon-plus"></span> / <span class="glyphicon glyphicon-minus"></span></th>
     </tr>
     <tr ng-repeat="task in tasks | orderBy:predicate:reverse | filter:search" ng-class="{'negative' : task.type == 'negative', 'positive' : task.type == 'positive' }">
-      <td><span>{{task.title}}</span> <span tooltip-html-unsafe="{{task.summary}}" tooltip-placement="right" class="glyphicon glyphicon-info-sign"></span></td>
+      <td><span>{{task.title | filterHtmlChars}}</span> <span tooltip-html-unsafe="{{task.summary}}" tooltip-placement="right" class="glyphicon glyphicon-info-sign"></span></td>
       <td>{{task.HP}}</td>
       <td>{{task.XP}}</td>
       <td>{{task.GC}}</td>
