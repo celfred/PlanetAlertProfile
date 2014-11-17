@@ -1,0 +1,150 @@
+<?php
+
+class ProcessLogs extends Process implements Module {
+
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Logs', 
+			'version' => '120', 
+			'summary' => __('Let you see your logs.'),
+			'singular' => true, 
+			'autoload' => false, 
+			);
+	}
+
+	public function init() {
+		parent::init();
+		ini_set('auto_detect_line_endings', true);
+		
+	}
+	public function ___execute() {
+        $form = $this->modules->get("InputfieldForm");
+        $form->method = 'post';
+        $form->action = './log/';
+
+
+		$logs = glob($this->config->paths->logs.'*');
+
+        $field = $this->modules->get("InputfieldSelect");
+        $field->label = $this->_('Select log');
+        $field->description = $this->_('Select the log you want to use.');
+        $field->name = 'file';
+        $field->required = true;
+        $i = 0;
+        foreach($logs as $log) {
+        		$field->addOption(basename($log), ucfirst(basename($log, '.txt')));
+        		$i++;
+		}
+        $form->add($field);
+
+
+        $field = $this->modules->get("InputfieldButton");
+        $field->type = 'submit';
+        $field->value = $this->_('Display the selected log');
+        $field->name = '';
+        $form->add($field);
+
+        return $form->render();
+	}
+	
+	public function ___executeLog() {
+		if($this->input->post['file']) {
+			$_SESSION['ProcessLog']['selectedLog'] = $this->input->post->file;
+		}
+		
+		$errors = array();
+		$button = '';
+		
+		$this->setFuel('processHeadline', ucfirst(basename($_SESSION['ProcessLog']['selectedLog'], '.txt')).' Log');
+		$this->fuel->breadcrumbs->add(new Breadcrumb('../', 'Logs'));
+	
+		$table = $this->modules->get('MarkupAdminDataTable');
+		$table->setSortable(true); 
+		$table->setEncodeEntities(false);
+		$header = array(
+			$this->_('Date'),
+			$this->_('User'),
+			$this->_('Page'),
+			$this->_('Description')
+		);
+		$table->headerRow($header);
+
+		$lines = array_reverse(file($this->config->paths->logs .$_SESSION['ProcessLog']['selectedLog'], FILE_IGNORE_NEW_LINES));
+
+		foreach($lines as $line) {
+			if(!preg_match('%^(.*) (.*)	(.*)	(.*)	(.*)$%AUis', $line, $matches)) {
+				preg_match('%^(.*) (.*): (.*):(.*):(.*)$%AUis', $line, $matches);
+			}
+			$matches = array_combine(array('full', 'date', 'time', 'user', 'page', 'description'), $matches);
+			$matches['timestamp'] = strtotime($matches['date'].' '.$matches['time']);
+			unset($matches['date'], $matches['time']);
+			
+			$errors[] = $matches;
+		}
+	
+		if(count($errors)) {
+			
+			foreach($errors as $error) {
+				$table->row(array(
+					'<span style="width:140px;margin-right:20px;float:left;">'.date($this->config->dateFormat, $error['timestamp']).'</span>',
+					$error['user'].'&emsp;',
+					'<span style="word-break: break-word;float: left;margin-right: 20px;">'.(($error['page'] != '/?/') ? '<a href="'.$error['page'].'">'.$error['page'].'</a>&emsp;' : '/?/').'</span>',
+					'<span style="float:left;word-break:break-word; ">'.$error['description'].'</span>'
+				));	
+			}
+
+		
+		
+			$button = $this->modules->get("InputfieldButton");
+			$button->type = 'submit';
+			$button->id = 'clear_log';
+			$button->value = $this->_('Clear Log');
+		
+		}
+
+		return '<form id="form" action="../clear/" method="post">' .$table->render() . (($button) ? $button->render() : $this->_('The log file is empty.')) . '</form>';
+	}
+	
+	public function ___executeClear() {
+		$handle = fopen($this->config->paths->logs .$_SESSION['ProcessLog']['selectedLog'], 'w');
+		fclose($handle);
+		$this->session->redirect("../log/");
+	}
+
+	public function ___install() {
+
+		if(ProcessWire::versionMajor == 2 && ProcessWire::versionMinor < 1) {
+			throw new WireException($this->_("This module requires ProcessWire 2.2 or newer")); 
+		}
+
+		$page = $this->getInstalledPage();
+		$this->message(sprintf($this->_("Installed to %s."), $page->path)); 
+		if($page->parent->name == 'setup') $this->message($this->_("Click to your 'Setup' page to manage your files.")); 
+	}
+
+	protected function getInstalledPage() {
+		$parent = $this->pages->get("name=setup"); 
+		$page = $parent->child("name=process-logs"); 
+
+		if(!$page->id) { 	
+			$page = new Page();
+			$page->parent = $parent; 
+			$page->template = $this->templates->get('admin');
+			$page->name = 'process-logs'; 
+			$page->title = "Logs";
+			$page->process = $this; 
+			$page->sort = $parent->numChildren;
+			$page->save();
+		}
+		return $page; 	
+	}
+
+	public function ___uninstall() {
+		$page = $this->getInstalledPage();	
+		if($page->id) { 
+			$this->message(sprintf($this->_("Removed %s."), $page->path));
+			$this->pages->delete($page); 
+		}
+	}
+	
+}
