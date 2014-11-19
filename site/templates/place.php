@@ -5,7 +5,10 @@ if ( $page->template != 'list-all' ) { // Single place detailed view
   include("./head.inc"); 
 }
 
+
 if ($page->name != 'places') { // Single place view
+  echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
+
   //$thumbImage = $page->photo->eq(0)->getThumb('thumbnail');
   $imageHeight = $page->photo->eq(0)->height;
   $imageWidth = $page->photo->eq(0)->width;
@@ -63,6 +66,9 @@ if ($page->name != 'places') { // Single place view
   </table>
 <?php
 } else { // All places view, Country view, City view
+
+  echo '<a class="pdfLink btn btn-info" href="'. $page->url.'all?pages2pdf=1">Get PDF [The Map]</a>';
+
   // Get any limiting elements in URL
   $type = $input->get->type;
   $name = $input->get->name;
