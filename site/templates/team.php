@@ -105,6 +105,33 @@
     if ($player->karma < 0) $player->karma = 0;
   }
 
+  function saveHistory($player, $task) {
+    $p = new Page();
+    $p->template = 'event';
+    $history = $player->child("name=history");
+    if (!$history->id) { // Creation of history page if doesn't exist
+      $history = new Page();
+      $history->parent = $player;
+      $history->template = 'basic-page';
+      $history->name = 'history';
+      $history->title = 'History';
+      $history->save();
+    }
+    $p->parent = $history;
+    // Save title
+    // Get today's date
+    date_default_timezone_set('Paris/France');
+    $today = date('d/m', time());
+    // Get new values
+    $newValues = ' ['.$player->level.'lvl, '.$player->karma.'k, '.$player->HP.'HP, '.$player->XP.'XP, '.$player->GC.'GC, '.$player->places->count.'P, '.$player->equipment->count.'E]';
+    $p->title = $today.' - '.str_replace('&#039;', '\'', $task->title).$newValues;
+    // Save task
+    $p->task = $task;
+    // Save comment
+    $p->summary = $taskComment;
+    $p->save(); 
+  }
+
   if ($user->isSuperuser()) { // Admin front-end
     if($input->post->submitShop) { // shopForm was submitted, process it
       $checked_players = $input->post->playerId;
@@ -141,25 +168,8 @@
           $player->save();
 
           // Record history
-          $p = new Page();
-          $p->template = 'event';
-          $history = $player->child("name=history");
-          if (!$history->id) { // Creation of history page if doesn't exist
-            $history = new Page();
-            $history->parent = $player;
-            $history->template = 'basic-page';
-            $history->name = 'history';
-            $history->title = 'History';
-            $history->save();
-          }
-          $p->parent = $history;
-          $p->title = $taskTitle;
-          // Save task
           $task = $pages->get("name='buy'");
-          $p->task = $task;
-          // Save comment
-          $p->summary = $taskComment;
-          $p->save(); 
+          saveHistory($player, $task);
 
           $playerIndex++;
         }
@@ -197,26 +207,9 @@
           // Save player's new scores
           $player->save();
 
-          // Save event in history for each player
-          $p = new Page();
-          $p->template = 'event';
-          $history = $player->child("name=history");
-          if (!$history->id) { // Creation of history parent page if doesn't exist
-            $history = new Page();
-            $history->parent = $player;
-            $history->template = 'basic-page';
-            $history->name = 'history';
-            $history->title = 'History';
-            $history->save();
-          }
-          $p->parent = $history;
-          $p->title = $taskTitle;
-          // Save task
+          // Record history
           $task = $pages->get("name='free'");
-          $p->task = $task;
-          // Save comment
-          $p->summary = $taskComment;
-          $p->save(); 
+          saveHistory($player, $task);
 
           $playerIndex++;
         }
@@ -260,25 +253,8 @@
           // Save player's new scores
           $player->save();
 
-          // Save event in history for each player
-          $p = new Page();
-          $p->template = 'event';
-          $history = $player->child("name=history");
-          if (!$history->id) { // Creation of history page if doesn't exist
-            $history = new Page();
-            $history->parent = $player;
-            $history->template = 'basic-page';
-            $history->name = 'history';
-            $history->title = 'History';
-            $history->save();
-          }
-          $p->parent = $history;
-          $p->title = $taskTitle;
-          // Save task
-          $p->task = $task;
-          // Save comment
-          $p->summary = $comment;
-          $p->save(); 
+          // Record history
+          saveHistory($player, $task);
         }
       }
     }
@@ -311,24 +287,7 @@
             $player->save();
 
             // Record history
-            $p = new Page();
-            $p->template = 'event';
-            $history = $player->child("name=history");
-            if (!$history->id) { // Creation of history page if doesn't exist
-              $history = new Page();
-              $history->parent = $player;
-              $history->template = 'basic-page';
-              $history->name = 'history';
-              $history->title = 'History';
-              $history->save();
-            }
-            $p->parent = $history;
-            $p->title = $task->title;
-            // Save task
-            $p->task = $task;
-            // Save comment
-            $p->summary = $taskComment;
-            $p->save(); 
+            saveHistory($player, $task);
           }
         }
       }
