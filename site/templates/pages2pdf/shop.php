@@ -77,8 +77,16 @@ foreach($items as $item) {
   $out .= '<tr>';
   $out .= '<td>'.$item->level.'</td>';
   $out .= '<td>'.$item->GC.'</td>';
-  $out .= '<td>'.$item->HP.'</td>';
-  $out .= '<td>'.$item->XP.'</td>';
+  if ($item->HP != 0) {
+    $out .= '<td>+'.$item->HP.'</td>';
+  } else {
+    $out .= '<td>-</td>';
+  }
+  if ($item->XP != 0) {
+    $out .= '<td>+'.$item->XP.'</td>';
+  } else {
+    $out .= '<td>-</td>';
+  }
   $out .= '<td>'.$item->title.'</td>';
   $out .= '<td><img src="'.$thumbImage.'" /></td>';
   $out .= '<td>'.$item->summary.'</td>';
