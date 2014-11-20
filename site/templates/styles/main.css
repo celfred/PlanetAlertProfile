@@ -152,7 +152,6 @@ footer a:hover {
   background: #FFC;
   color: #000; 
 }
-
 /**
  * WireFatalError is a class that ProcessWire will use to output
  * fatal errors in the design, but only if debug mode is on, or if
@@ -357,6 +356,21 @@ img.align_right {
 	line-height: 1.5;
 	transform: translate(0,100%) rotate(-90deg);
 	transform-origin: 0 0;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+
+  /* also accepts left, right, top, bottom coordinates; not required, but a good idea for styling */
+  -webkit-transform-origin: 50% 50%;
+  -moz-transform-origin: 50% 50%;
+  -ms-transform-origin: 50% 50%;
+  -o-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+
+  /* Should be unset in IE9+ I think. */
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
 /* This element stretches the parent to be square
    by using the mechanics of vertical margins  */
@@ -364,6 +378,21 @@ img.align_right {
 	content: "";
 	display: block;
 	margin: -1.5em 0 100%;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+
+  /* also accepts left, right, top, bottom coordinates; not required, but a good idea for styling */
+  -webkit-transform-origin: 50% 50%;
+  -moz-transform-origin: 50% 50%;
+  -ms-transform-origin: 50% 50%;
+  -o-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+
+  /* Should be unset in IE9+ I think. */
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
 .adminTable tr {
   padding: 0;
