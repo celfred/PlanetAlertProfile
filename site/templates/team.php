@@ -83,6 +83,21 @@
         $player->XP = 0;
       }
     }
+
+    checkLevel($player);
+
+    // Check new level
+    /*
+    $threshold = ($player->level*10)+90;
+    if ($player->XP >= $threshold) {
+      $player->level += 1;
+      $player->XP -= $threshold;
+      $player->HP = 50;
+    }
+     */
+  }
+
+  function checkLevel($player) {
     // Check new level
     $threshold = ($player->level*10)+90;
     if ($player->XP >= $threshold) {
@@ -92,6 +107,7 @@
     }
   }
 
+/*
   function updateKarma($player) {
     $player->karma=0;
     if ($player->level > 1) {
@@ -104,6 +120,7 @@
     if (50-$player->HP > 0) $player->karma -= 50-$player->HP; // HP loss = -1
     if ($player->karma < 0) $player->karma = 0;
   }
+*/
 
   function saveHistory($player, $task) {
     $p = new Page();
@@ -123,7 +140,7 @@
     date_default_timezone_set('Paris/France');
     $today = date('d/m', time());
     // Get new values
-    $newValues = ' ['.$player->level.'lvl, '.$player->karma.'k, '.$player->HP.'HP, '.$player->XP.'XP, '.$player->GC.'GC, '.$player->places->count.'P, '.$player->equipment->count.'E]';
+    $newValues = ' ['.$player->level.'lvl, '.$player->HP.'HP, '.$player->XP.'XP, '.$player->GC.'GC, '.$player->places->count.'P, '.$player->equipment->count.'E]';
     $p->title = $today.' - '.str_replace('&#039;', '\'', $task->title).$newValues;
     // Save task
     $p->task = $task;
@@ -159,10 +176,6 @@
               $player->equipment->add($item);
               break;
           }
-          $taskTitle = $item->title;
-
-          // Update karma
-          updateKarma($player);
 
           // Save player's new scores
           $player->save();
@@ -201,9 +214,9 @@
 
           $player->places->add($item);
 
-          $taskTitle = $item->title;
+          // Check new level
+          checkLevel($player);
 
-          updateKarma($player);
           // Save player's new scores
           $player->save();
 
@@ -247,9 +260,6 @@
             $task = $pages->get("name='manual'");
           }
 
-          // New karma
-          updateKarma($player);
-
           // Save player's new scores
           $player->save();
 
@@ -274,14 +284,9 @@
             $player = $pages->get($playerId);
             $player->of(false);
 
-            // Set the new scores
-            $task = $pages->get($taskId); 
-
             // Update player's scores
+            $task = $pages->get($taskId); 
             updateScore($player, $task);
-
-            // Update karma
-            updateKarma($player);
 
             // Save player's new scores
             $player->save();

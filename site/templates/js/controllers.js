@@ -137,6 +137,13 @@ angular.module('myApp.controllers', []) .
             player.deltaXP = 0;
             player.xpWidth = 150*player.XP/(player.level*10+90);
             player.hpWidth = 150*player.HP/50;
+            // Karma calculated from all values (except GC)
+            if (player.level > 1) {
+              player.karma = player.level*100 + player.XP + player.places.length*20 + player.equipment.length*10 - ((50-player.HP)*5);
+            } else {
+              player.karma = player.XP + player.places.length*20 + player.equipment.length*10 - ((50-player.HP)*5);
+            }
+            if (player.karma < 0) { player.karma == 0; }
                         
             // Get delta from all equipment list
             angular.forEach(player.equipment, function(item, index) {
