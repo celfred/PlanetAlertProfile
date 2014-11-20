@@ -22,7 +22,7 @@ if($input->post->submit) {
 
   // if no errors, email the form results
   if(!$error) {
-      $msg = "Full name: $form[fullname] ($form[playerClass]\n" . 
+      $msg = "Full name: $form[fullname] ($form[playerClass])\n" . 
              "Email: $form[email]\n" . 
              "Comments: $form[comments]"; 
 
