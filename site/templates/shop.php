@@ -6,6 +6,9 @@ include("./head.inc");
 
 <div ng-controller="shopCtrl" ng-init="loadItems()">
 <?php
+
+  echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF</a>';
+
   $categories = $pages->get("/shop")->children;
   echo '<ul class="list-inline text-center">';
   echo "<li><a class='btn btn-info' href='' ng-click='setFilter(\"\")'>Tout lister</a></li>";

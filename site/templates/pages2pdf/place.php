@@ -7,7 +7,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
 
   echo '<img style="float: left;" src="'.$logo.'" />';
   echo '<img style="float: right;" src="'.$logo.'" />';
-  echo '<h1 style="text-align: center; text-decoration : underline;">The Map : '.$places->count .' Places</h1>';
+  echo '<h1 style="text-align: center; text-decoration : underline;">The Map : '.$places->count .' Places.</h1>';
   echo  '<table class="table table-condensed table-hover">';
     echo '<tr>';
     echo '<th>';
