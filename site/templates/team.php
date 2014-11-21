@@ -45,16 +45,16 @@
     $deltaHP = 0;
     if ($player->equipment) {
       foreach ($player->equipment as $item) {
-        if ($item.category.name == 'weapons') {
-          $deltaXP += $item.XP;
+        if ($item->category->name == 'weapons') {
+          $deltaXP += $item->XP;
         }
-        if ($item.category.name == 'protections') {
-          $deltaHP += $item.HP;
+        if ($item->category->name == 'protections') {
+          $deltaHP += $item->HP;
         }
       }
       if ($tHP < 0) { // Negative task
         // Loss of 1 minimum whatever the equipment
-        if ( $tHP+$deltaHP > 0 ) {
+        if ( $tHP + $deltaHP > 0 ) {
           $deltaHP = $tHP-1;
         }
       } else { // Positive task
