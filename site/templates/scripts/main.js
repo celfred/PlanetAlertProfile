@@ -26,19 +26,20 @@ $(document).ready(function() {
       limitCheckbox.removeAttr('disabled'); // Enable limit
       $('a.reportButton').each( function() {
         var href = $(this).attr('href');
-        $(this).attr('href', href+'/participation');
+        if ($('#lastName').is(':checked')) { // Remove from the URL
+          href = href.replace(/\?sort=lastName/g, "");
+        }
+        href = href+'/participation'; // Add urlSegment
+        if ($('#lastName').is(':checked')) { // Append to the URL
+          href = href+'?sort=lastName';
+        }
+        $(this).attr('href', href);
       });
     } else {
       $('a.reportButton').each( function() {
         var href = $(this).attr('href');
-        if (href.indexOf('/participation') != -1) {
-          var mySplitResult = href.split("\/");
-          if (limitCheckbox.is(':checked')) { // Uncheck limit
-            href = href.substring(0, href.length-3);
-          }
-          href = href.substring(0, href.length-14); // remove '/participation' from url
-          $(this).attr('href', href); // remove '/participation' from url
-        }
+        href = href.replace(/\/participation(\/10)?/g, "");
+        $(this).attr('href', href);
       });
       limitCheckbox.attr('checked', false);
       limitCheckbox.attr('disabled', true); // Disabled limit
@@ -49,13 +50,37 @@ $(document).ready(function() {
     if ($(this).is(':checked')) {
       $('a.reportButton').each( function() {
         var href = $(this).attr('href');
-        $(this).attr('href', href+'/10');
+        if ($('#lastName').is(':checked')) {
+          href = href.replace(/\?sort=lastName/g, "");
+        }
+        href = href+'/10';
+        if ($('#lastName').is(':checked')) {
+          href = href+'?sort=lastName';
+        }
+        $(this).attr('href', href);
       });
     } else {
       $('a.reportButton').each( function() {
         var href = $(this).attr('href');
-        $(this).attr('href', href.substring(0, href.length-3));
+        href = href.replace(/\/10/g, "");
+        $(this).attr('href', href);
       });
     }
+  });
+
+  $('#lastName').click( function() {
+    $('a.reportButton').each( function() {
+      var href = $(this).attr('href');
+      href = href+'?sort=lastName';
+      $(this).attr('href', href);
+    });
+  });
+  $('#firstName').click( function() {
+    $('a.reportButton').each( function() {
+      var href = $(this).attr('href');
+      // Remove sort GET variable from URL
+      href = href.replace(/\?sort=lastName/g, "");
+      $(this).attr('href', href);
+    });
   });
 }); 

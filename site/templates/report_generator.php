@@ -16,9 +16,18 @@ if (!$config->ajax) {
 
 
 $reportTitle = '';
+if ($input->get['sort']) {
+  $sort = $input->get['sort'];
+} else {
+  $sort = 'title';
+}
+
 if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $team = $input->urlSegment1;
-  $allPlayers = $pages->find("team=$team, template=player, sort=title");
+  if ($input->urlSegment4 !== '') {
+    $sort = $input->urlSegment4;
+  }
+  $allPlayers = $pages->find("team=$team, template=player, sort='".$sort."'");
   $selectedPlayer = false;
   $teamParticipation = false;
   $reportTitle = 'Suivi du travail ('.$team.')';
@@ -31,7 +40,7 @@ if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $events = $selectedPlayer->find("template=event, sort=category");
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 == 'participation') { // Team participation
   $team = $input->urlSegment1;
-  $allPlayers = $pages->find("team=$team, template=player, sort=title");
+  $allPlayers = $pages->find("team=$team, template=player, sort='".$sort."'");
   $teamParticipation = true;
   $selectedPlayer = false;
   $reportTitle = 'Participation ('.$team.')';
@@ -45,7 +54,7 @@ if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
 
 $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|attitude");
 
-echo '<a class="pdfLink btn btn-info" href="' . $page->url.$input->urlSegment1.'/'.$input->urlSegment2.'/'.$input->urlSegment3. '?pages2pdf=1">Générer PDF</a>';
+echo '<a class="pdfLink btn btn-info" href="' . $page->url.$input->urlSegment1.'/'.$input->urlSegment2.'/'.$input->urlSegment3. '?sort='.$sort.'&pages2pdf=1">Get PDF</a>';
 
 echo '<table class="table table-condensed table-hover">';
 if (!$selectedPlayer) { // Class report

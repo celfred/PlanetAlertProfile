@@ -11,26 +11,31 @@ function calculate_average($arr) {
 }
 
 $reportTitle = '';
+if ($input->get['sort']) {
+  $sort = $input->get['sort'];
+} else {
+  $sort = 'title';
+}
 if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   $team = $input->urlSegment1;
-  $allPlayers = $pages->find("team=$team, template=player, sort=title");
+  $allPlayers = $pages->find("team=$team, template=player, sort='". $sort ."'");
   $selectedPlayer = false;
   $teamParticipation = false;
   $reportTitle = 'Suivi du travail ('.$team.')<br />';
-  $reportTitle .= '[généré le '.strftime("%d/%m/%Y à %T", $page->created).']';
+  $reportTitle .= ' [généré le '. date('d/m/Y \à H:i:s').']';
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 != 'participation') { // 1 player report
   $playerId = $input->urlSegment2;
   $selectedPlayer = $pages->get($playerId);
   $teamParticipation = false;
 
   $reportTitle = 'Bilan de '.$selectedPlayer->title.' ('. $selectedPlayer->team.')';;
-  $reportTitle .= '[généré le '.strftime("%d/%m/%Y à %T", $page->created).']';
+  $reportTitle .= ' [généré le '. date('d/m/Y \à H:i:s').']';
 
   // List all recorded events for selected player
   $events = $selectedPlayer->find("template=event, sort=category");
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 == 'participation') { // Team participation
   $team = $input->urlSegment1;
-  $allPlayers = $pages->find("team=$team, template=player, sort=title");
+  $allPlayers = $pages->find("team=$team, template=player, sort='".$sort."'");
   $teamParticipation = true;
   $selectedPlayer = false;
   $reportTitle = 'Participation ('.$team.')';
@@ -40,7 +45,7 @@ if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   } else {
     $limit = false;
   }
-  $reportTitle .= '[généré le '.strftime("%d/%m/%Y à %T", $page->created).']';
+  $reportTitle .= ' [généré le '. date('d/m/Y \à H:i:s').']';
 }
 
 $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|attitude");
@@ -93,7 +98,7 @@ if (!$selectedPlayer) { // Class report
     foreach($allPlayers as $player) {
       echo '<tr>';
       echo '<th>';
-      echo $player->title;
+      echo $player->title.' '.$player->lastName;
       echo '</th>';
       foreach ($categories as $category) {
         echo '<td>';
@@ -342,7 +347,7 @@ if (!$selectedPlayer) { // Class report
       $out = '';
       echo '<tr>';
       echo '<th>';
-      echo $player->title;
+      echo $player->title.' '.$player->lastName;
       echo '</th>';
       if ($limit) { // Limit to last lessons
         $events = $player->find("template=event, task.category='participation', limit=10, sort=-created")->reverse();

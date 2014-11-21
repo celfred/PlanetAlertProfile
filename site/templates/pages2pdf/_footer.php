@@ -24,6 +24,6 @@ if ($page->name === 'report_generator') {
 //if ($reportTitle !== '') {
 //  echo ' : '.$reportTitle.', ';
 //}
-echo 'Page générée le '.strftime("%d/%m/%Y à %T", $page->created);
+echo 'Page générée le '.date("d/m/Y \à H:i:s");
 
 ?>
