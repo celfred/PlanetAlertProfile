@@ -426,6 +426,7 @@ img.align_right {
 }
 .pdfLink {
   float: left;
+  margin: 5px;
 }
 header {
   display: none;

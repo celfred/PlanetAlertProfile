@@ -7,7 +7,13 @@ include("./head.inc");
 <div ng-controller="shopCtrl" ng-init="loadItems()">
 <?php
 
-  echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF</a>';
+  echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF [Catalogue]</a>';
+  if ($user->isSuperuser() ) {
+    echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/weapons?pages2pdf=1">Get PDF [Weapons]</a>';
+    echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/protections?pages2pdf=1">Get PDF [Protections]</a>';
+    echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/items?pages2pdf=1">Get PDF [Potions]</a>';
+    echo '<br /><br /><br />';
+  }
 
   $categories = $pages->get("/shop")->children;
   echo '<ul class="list-inline text-center">';
