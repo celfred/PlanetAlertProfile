@@ -112,6 +112,10 @@ if (!$selectedPlayer) { // Class report
           $nbPart = $events->count(); // Max participation
           $nbAbsent = 0;
         //}
+        $vv = 0;
+        $v = 0;
+        $r = 0;
+        $rr = 0;
         $list = '';
         $listForgotStuff = '';
         $listForgotSigned = '';
@@ -207,12 +211,35 @@ if (!$selectedPlayer) { // Class report
                 default : break;
               }
             }
+            if ($category->name == 'participation') {
+                switch ($task->name) {
+                  case 'communication-rr' :
+                    $rr += 1;
+                    break;
+                  case 'communication-r' :
+                    $r += 1;
+                    break;
+                  case 'communication-v' : 
+                    $v += 1;
+                    break;
+                  case 'communication-vv' :
+                    $vv += 1;
+                    break;
+                  case 'absent' : 
+                    $abs += 1;
+                    $nbPart -= 1;
+                    break;
+                  default: break;
+                }
+            }
           }
           if ($category->name == 'participation') {
-            $ratio = round(($posPart*100)/$nbPart);
+            $ratio = round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
+            if ( $ratio < 0) { $ratio = 0; }
+
             if ($nbPart != 0) {
               echo $ratio.'%';
-              echo ' ('.$posPart.'/'.$nbPart.')';
+              //echo ' ('.$posPart.'/'.$nbPart.')';
             }
             if ($nbAbsent != 0) {
               echo '<span title="'.$listAbsent.'" class="absent">['.$nbAbsent.' abs.]</span>';
@@ -372,15 +399,15 @@ if (!$selectedPlayer) { // Class report
               break;
             case 'communication-r' :
               $out .= '<span class="participation label label-danger" title="['.strftime("%d/%m", $event->created).']">R</span>';
-              $r +=1;
+              $r += 1;
               break;
             case 'communication-v' : 
               $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">V</span>';
-              $v +=1;
+              $v += 1;
               break;
             case 'communication-vv' :
               $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">VV</span>';
-              $vv +=1;
+              $vv += 1;
               break;
             case 'absent' : 
               $out .= '<span class="participation label label-info" title="['.strftime("%d/%m", $event->created).']">-</span>';
@@ -391,7 +418,9 @@ if (!$selectedPlayer) { // Class report
           }
         }
         // Player's average and stats
-        $ratio = round((($vv+$v)*100)/$nbPart);
+        $ratio = round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
+        if ( $ratio < 0) { $ratio = 0; }
+
         echo '<td class="text-left">';
           if ($ratio >= 80) {
             echo '<span class="label label-success">VV</span>';
@@ -412,7 +441,7 @@ if (!$selectedPlayer) { // Class report
         //echo 'RR:'.$rr.' / R:'.$r.' / V:'.$v.' / VV:'.$vv.'&nbsp;&nbsp;&nbsp;';
         echo '</td>';
         echo '<td class="text-left">';
-        echo ($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i> '.($nbPart-($v+$vv)).' <i class="glyphicon glyphicon-thumbs-down"></i>';
+        echo ($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i> '.($r+$rr).' <i class="glyphicon glyphicon-thumbs-down"></i>';
         echo '</td>';
         echo '<td class="text-left">';
         echo 'Du <span>'.strftime("%d/%m", $events[0]->created).'</span>';

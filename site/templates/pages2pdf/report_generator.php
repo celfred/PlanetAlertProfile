@@ -105,6 +105,10 @@ if (!$selectedPlayer) { // Class report
         $events = $player->find("template=event, task.category=$category");
         $posPart = $events->count(); // Get positive participation
         $nbPart = $events->count(); // Max participation
+        $vv = 0;
+        $v = 0;
+        $r = 0;
+        $rr = 0;
         $nbAbsent = 0;
         $list = '';
         $listForgotStuff = '';
@@ -201,12 +205,35 @@ if (!$selectedPlayer) { // Class report
                 default : break;
               }
             }
+            if ($category->name == 'participation') {
+                switch ($task->name) {
+                  case 'communication-rr' :
+                    $rr += 1;
+                    break;
+                  case 'communication-r' :
+                    $r += 1;
+                    break;
+                  case 'communication-v' : 
+                    $v += 1;
+                    break;
+                  case 'communication-vv' :
+                    $vv += 1;
+                    break;
+                  case 'absent' : 
+                    $abs += 1;
+                    $nbPart -= 1;
+                    break;
+                  default: break;
+                }
+            }
           }
           if ($category->name == 'participation') {
-            $ratio = round(($posPart*100)/$nbPart);
+            $ratio = round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
+            if ( $ratio < 0) { $ratio = 0; }
+
             if ($nbPart != 0) {
               echo $ratio.'%';
-              echo ' ('.$posPart.'/'.$nbPart.')';
+              //echo ' ('.$posPart.'/'.$nbPart.')';
             }
             if ($nbAbsent != 0) {
               echo '<span title="'.$listAbsent.'" class="absent">['.$nbAbsent.' abs.]</span>';
@@ -389,7 +416,9 @@ if (!$selectedPlayer) { // Class report
           }
         }
         // Player's average and stats
-        $ratio = round((($vv+$v)*100)/$nbPart);
+        $ratio = round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
+        if ( $ratio < 0) { $ratio = 0; }
+
         echo '<td class="text-left">';
           if ($ratio >= 80) {
             echo '<span class="label label-success">&nbsp;VV&nbsp;</span>';
