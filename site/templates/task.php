@@ -6,6 +6,8 @@ include("./head.inc");
 
 <div ng-controller="taskCtrl" ng-init="loadTasks()">
   
+  <a class="pdfLink btn btn-info" href="<?php echo $page->url; ?>?pages2pdf=1">Get PDF</a>
+
   <ul class="list-inline text-center">
     <li><a class="btn btn-info" href="" ng-click="setSearch('', search.type)">Toutes les actions</a></li>
     <li ng-repeat="cat in allCategories"><a class="btn btn-info" href="" ng-click="setSearch(cat.name, search.type)">{{cat.title}}</a></li>

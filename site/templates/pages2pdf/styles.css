@@ -52,4 +52,7 @@ table.miniTable td {
 table.miniTable td.empty {
   border: 0;
 }
+tr.negative {
+  background-color: #C8C8C8;
+}
 
