@@ -366,6 +366,7 @@
   </div>
 
   <div ng-show="selected == 2" ng-controller="mapCtrl" ng-init="">
+  <a class="pdfLink btn btn-info" href="<?php echo $page->url.$input->urlSegment1; ?>/places?pages2pdf=1">Get PDF</a>
     <h2 class="text-center"><span class="label label-default">Taux de libération de l'équipe : {{completedRate}}% du monde</span> [{{completed}}/{{allPlaces}}]</h2>
     <table class="table table-condensed table-hover">
       <tr>
