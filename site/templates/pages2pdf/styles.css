@@ -52,8 +52,20 @@ table.miniTable td {
 table.miniTable td.empty {
   border: 0;
 }
+table.big td {
+  font-size: 16px;
+}
+td.important {
+  font-weight: bold;
+}
 tr.negative {
   background-color: #C8C8C8;
+}
+tr.complete {
+  background-color: #000;
+}
+tr.complete td {
+  color: #FFF;
 }
 p, h1 {
   text-align: center;

@@ -370,6 +370,7 @@
     <h2 class="text-center"><span class="label label-default">Taux de libération de l'équipe : {{completedRate}}% du monde</span> [{{completed}}/{{allPlaces}}]</h2>
     <table class="table table-condensed table-hover">
       <tr>
+        <th ng-click="predicate = 'level'; reverse=!reverse">Level</th>
         <th ng-click="predicate = 'name'; reverse=!reverse">Lieux</th>
         <th ng-click="predicate = 'city.name'; reverse=!reverse">Villes</th>
         <th ng-click="predicate = 'country.name'; reverse=!reverse">Pays</th>
@@ -377,6 +378,7 @@
         <th ng-click="predicate = 'freedomRate'; reverse=!reverse">Taux de libération</th>
       </tr>
       <tr ng-repeat="place in places | orderBy:predicate:reverse" ng-class="{completed: place.freedomRate == 100, almost: place.freedomRate > 60 && place.freedomRate < 100}">
+        <td>{{place.level}}</td>
         <td>{{place.title | filterHtmlChars}}</td>
         <td>{{place.city.title | filterHtmlChars}}</td>
         <td>{{place.country.title | filterHtmlChars}}</td>
