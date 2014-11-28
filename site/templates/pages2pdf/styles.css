@@ -55,4 +55,11 @@ table.miniTable td.empty {
 tr.negative {
   background-color: #C8C8C8;
 }
-
+p, h1 {
+  text-align: center;
+  font-variant: small-caps;
+}
+span.negative {
+  background-color: #000;
+  color: #FFF;
+}

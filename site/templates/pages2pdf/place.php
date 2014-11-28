@@ -1,77 +1,92 @@
 <?php 
 
 $logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
+$largeLogo = $pages->get('/')->photo->eq(0)->url;
+
+$out = '';
 
 if ($input->urlSegment1  == 'all') { // All places catalog
   $places = $pages->find("template='place',sort='level'")->not("name=places");
 
-  echo '<img style="float: left;" src="'.$logo.'" />';
-  echo '<img style="float: right;" src="'.$logo.'" />';
-  echo '<h1 style="text-align: center; text-decoration : underline;">The Map : '.$places->count .' Places.</h1>';
-  echo  '<table class="table table-condensed table-hover">';
-    echo '<tr>';
-    echo '<th>';
-    echo 'Level';
-    echo '</th>';
-    echo '<th>';
-    echo 'Gold coins (GC)';
-    echo '</th>';
-    echo '<th>';
-    echo 'Place';
-    echo '</th>';
-    echo '<th>';
-    echo 'Country';
-    echo '</th>';
-    echo '<th>';
-    echo 'City';
-    echo '</th>';
-    echo '<th>';
-    echo 'Summary';
-    echo '</th>';
-    echo '<th>';
-    echo '# of owners';
-    echo '</th>';
-    echo '<th>';
-    echo 'Photo';
-    echo '</th>';
-    echo '<tr>';
+  $currentLevel = 0;
   foreach ($places as $place) {
-    echo '<tr>';
-    echo '<td>';
-    echo $place->level;
-    echo '</td>';
-    echo '<td>';
-    echo $place->GC;
-    echo '</td>';
-    echo '<td>';
-    echo $place->title;
-    echo '</td>';
-    echo '<td>';
-    echo $place->country->title;
-    echo '</td>';
-    echo '<td>';
-    echo $place->city->title;
-    echo '</td>';
-    echo '<td>';
-    echo $place->summary;
-    echo '</td>';
-    echo '<td>';
-    echo $place->maxOwners;
-    echo '</td>';
-    echo '<td>';
+    if ($place->level !== $currentLevel) {
+      if ($currentLevel > 0) {
+        $out .= '</table>';
+        $out .= '<pagebreak />';
+      } 
+      $out .= '<div style="text-align: center; border: 3px solid #000; border-radius: 50px;">';
+      $out .= '<img style="margin: 30px;" src="'.$largeLogo.'" />';
+      $nbPlaces = $pages->find("template='place',level=$place->level")->count();
+      $out .= '<h1>The Map</h1>';
+      $out .= '<p style="font-size: 50px; text-decoration: underline;">Level '.$place->level.'<p>';
+      $out .= '<p style="font-size: 40px;">'.$nbPlaces.' places</p>';
+      $out .= '<img style="margin: 50px;" src="'.$logo.'" />';
+      $out .= '</div>';
+      $out .= '<pagebreak />';
+      $out .=  '<table class="table table-condensed table-hover">';
+      $out .= '<tr>';
+      $out .= '<th>';
+      $out .= 'Level';
+      $out .= '</th>';
+      $out .= '<th>';
+      $out .= 'Gold coins (GC)';
+      $out .= '</th>';
+      $out .= '<th>';
+      $out .= 'Place';
+      $out .= '</th>';
+      $out .= '<th>';
+      $out .= 'Country';
+      $out .= '</th>';
+      $out .= '<th>';
+      $out .= 'City';
+      $out .= '</th>';
+      $out .= '<th>';
+      $out .= 'Summary';
+      $out .= '</th>';
+      $out .= '<th>';
+      $out .= '# of owners';
+      $out .= '</th>';
+      $out .= '<th>';
+      $out .= 'Photo';
+      $out .= '</th>';
+      $out .= '<tr>';
+    }
+    $currentLevel = $place->level;
+    $out .= '<tr>';
+    $out .= '<td>';
+    $out .= $place->level;
+    $out .= '</td>';
+    $out .= '<td>';
+    $out .= $place->GC;
+    $out .= '</td>';
+    $out .= '<td>';
+    $out .= $place->title;
+    $out .= '</td>';
+    $out .= '<td>';
+    $out .= $place->country->title;
+    $out .= '</td>';
+    $out .= '<td>';
+    $out .= $place->city->title;
+    $out .= '</td>';
+    $out .= '<td>';
+    $out .= $place->summary;
+    $out .= '</td>';
+    $out .= '<td>';
+    $out .= $place->maxOwners;
+    $out .= '</td>';
+    $out .= '<td>';
     $thumbImage = $place->photo->eq(0)->getThumb('thumbnail');
-    echo '<img style="border: 2px solid #000;" src="'.$thumbImage.'" />';
-    //echo $thumbImage;
-    echo '</td>';
-    echo '</tr>';
+    $out .= '<img style="border: 2px solid #000;" src="'.$thumbImage.'" />';
+    //$out .= $thumbImage;
+    $out .= '</td>';
+    $out .= '</tr>';
   }
 
-  echo '</table>';
+  $out .= '</table>';
 } else { // 1 place PDF
   $place = $pages->get("template='place', name='$page->name'");
   $thumbImage = $place->photo->eq(0)->getThumb('thumbnail');
-
-  $out = '';
 
   for ($i=0; $i<5; $i++) {
     $out .= '<table class="miniTable">';
@@ -130,9 +145,9 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '</table>';
   }
 
-  echo $out;
 }
 
+echo $out;
 
 ?>
 
