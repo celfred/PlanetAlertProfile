@@ -143,7 +143,7 @@ angular.module('myApp.controllers', []) .
             } else {
               player.karma = player.XP + player.places.length*20 + player.equipment.length*10 - ((50-player.HP)*5);
             }
-            if (player.karma < 0) { player.karma == 0; }
+            if (player.karma < 0) { player.karma = 0; }
                         
             // Get delta from all equipment list
             angular.forEach(player.equipment, function(item, index) {

@@ -3,8 +3,108 @@
   /* list-all template */
 
   $allPlaces = $pages->find("template=place, name!=places");
-  $allTeam = $pages->find("template=player, team=");
+  //$allTeam = $pages->find("template=player, team=");
   $reportLink = $pages->get("/report_generator")->url;
+  $allPlayers = $pages->find("template='player', team=$input->urlSegment1, sort='group'");
+  $allGroups = $pages->get("/groups")->children('sort=title');
+  $outGroups = '';
+
+  // Calculate groups Karma
+  $index = 0;
+  foreach( $allGroups as $group) {
+    $group->karma = 0;
+    $group->nbBonus = 0;
+    
+    // Find selected players
+    $players = $allPlayers->find("group=$group");
+    
+    // Get rid of unused groups
+    if ($players->count == 0) {
+      unset($allGroups[$index]);
+    }
+    $group->nbBonus = groupBonus($players);
+    $group->karma = $group->nbBonus*30;
+
+    // Add individual karmas
+    foreach( $players as $player) {
+      $karma = getKarma($player);
+      (int) $group->karma = $group->karma + $karma;
+      $group->details .= $player->title." (".$karma.' - '.$player->places->count.') ';
+    }
+    $index++;
+    // Check for group bonus
+  }
+
+  // Prepare group display
+  $allGroups->sort('-karma');
+  $outGroups .= '<ul class="list-inline lead">';
+  foreach( $allGroups as $group) {
+    $outGroups .= '<li>';
+    $outGroups .= '<p class="label label-default" title="'.$group->details.'">';
+    $outGroups .= $group->title.' <span class="bg-primary">'.$group->karma.'</span>';
+    // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
+    $starsGroups = floor($group->nbBonus/5);
+    if ( $starsGroups < 1) {
+      for ($i=0; $i<$group->nbBonus; $i++) {
+        $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
+      }
+    } else {
+      for ($i=0; $i<$starsGroups; $i++) {
+        $outGroups .= ' <span class="glyphicon glyphicon-star"></span>';
+      }
+      $group->nbBonus = $group->nbBonus - $starsGroups*5;
+      for ($i=0; $i<$group->nbBonus; $i++) {
+        $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
+      }
+    }
+    $outGroups .= '</p>';
+    $outGroups .= '</li>';
+  }
+  $outGroups .= '</ul>';
+
+
+  function groupBonus($players) {
+    $nbBonus = 0;
+    // Sort players by nb of pkaces
+    $players->sort('places.count');
+    // Get min/max nb of places in the group
+    $min = $players->first()->places->count;
+    $max = $players->last()->places->count;
+    if ($min == 0) { // 1 player has 0 places, so NO bonus possible
+      return 0; 
+    } else { // No player has 0 places, let's check if they all have 1,2,3... places
+      for ($i=1; $i<=$min; $i++) {
+        $nbPlaces = $players->find("places.count>=$i")->count;
+        if ($nbPlaces == $players->count) {
+          $nbBonus++;
+        }
+      }
+    }
+    return $nbBonus;
+    /*
+    foreach( $players as $player) {
+      array_push($nbPlaces, $player->places->count); 
+    }
+    // All players have the same number of places, then +30 bonus
+    $same = array_count_values($nbPlaces);
+    print_r($same);
+    if ( count(array_unique($nbPlaces)) == 1) {
+      return 30;
+    }
+    */
+  }
+
+  function getKarma($player) {
+    // Karma calculated from all values (except GC)
+    if ($player->level > 1) {
+      $karma = $player->level*100 + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
+    } else {
+      $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
+    }
+    if ($karma < 0) { $karma = 0; }
+    //echo $player->title.':'.$karma.'-';
+    return $karma;
+  }
 
   // Returns a multidimensional array from $values based on the
   // $prefix of the keys
@@ -106,21 +206,6 @@
       $player->HP = 50;
     }
   }
-
-/*
-  function updateKarma($player) {
-    $player->karma=0;
-    if ($player->level > 1) {
-      $player->karma = $player->XP;$player->karma = 100*$player->level; // level = +100
-    }
-    //$player->karma += $player->GC; // GC : +1
-    $player->karma += $player->XP; // XP : +1
-    $player->karma += $player->equipment->count()*10; // Equipment : +10 for each
-    $player->karma += $player->places->count()*20; // Freed places : +20 for each
-    if (50-$player->HP > 0) $player->karma -= 50-$player->HP; // HP loss = -1
-    if ($player->karma < 0) $player->karma = 0;
-  }
-*/
 
   function saveHistory($player, $task) {
     $p = new Page();
@@ -300,6 +385,7 @@
   } // End if superUser
   ?>
 
+  <?php echo $outGroups; ?>
 
   <ul class="tabList list-inline">
     <li ng-class="{active: selected == 1}" ng-click="selected = 1">État de l'équipe</li>
@@ -317,6 +403,7 @@
   <div ng-show="selected == 1">
     <table class="table table-hover table-condensed teamView">
       <tr>
+        <th ng-click="predicate = 'group.title'; reverse=!reverse">Groupes</th>
         <th ng-click="predicate = 'name'; reverse=!reverse">Nom</th>
         <th ng-click="predicate = 'karma'; reverse=!reverse">Karma</th>
         <th ng-click="predicate = 'level'; reverse=!reverse"><span class="glyphicon glyphicon-signal"></span> Niveau</th>
@@ -327,6 +414,7 @@
         <th ng-click="predicate = 'equipment.length'; reverse=!reverse"><span class="glyphicon glyphicon-user"></span> Équipement</th>
       </tr>
       <tr ng-repeat="player in players | orderBy:predicate:reverse">
+        <td>{{player.group.title}}</td>
         <td>
           <img ng-mouseover="getPos($event); showImg = !showImg" ng-mouseOut="showImg = !showImg" ng-src="site/assets/files/{{player.id}}/mini_{{player.avatar.basename}}" alt="" />
           <a href="players/{{sanitizedTeam}}/{{player.name}}">{{player.title}}</a>
