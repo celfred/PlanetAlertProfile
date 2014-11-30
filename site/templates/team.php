@@ -10,13 +10,18 @@
   $outGroups = '';
 
   // Calculate groups Karma
+  $index = 0;
   foreach( $allGroups as $group) {
     $group->karma = 0;
     $group->nbBonus = 0;
+    
     // Find selected players
     $players = $allPlayers->find("group=$group");
     
-    // Check for group bonus
+    // Get rid of unused groups
+    if ($players->count == 0) {
+      unset($allGroups[$index]);
+    }
     $group->nbBonus = groupBonus($players);
     $group->karma = $group->nbBonus*30;
 
@@ -26,7 +31,8 @@
       (int) $group->karma = $group->karma + $karma;
       $group->details .= $player->title." (".$karma.' - '.$player->places->count.') ';
     }
-
+    $index++;
+    // Check for group bonus
   }
   // Prepare group display
   $allGroups->sort('-karma');
@@ -35,7 +41,7 @@
     $outGroups .= '<li>';
     $outGroups .= '<p class="label label-default" title="'.$group->details.'">';
     $outGroups .= $group->title.' <span class="bg-primary">'.$group->karma.'</span>';
-    // Display sars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
+    // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
     $starsGroups = floor($group->nbBonus/5);
     if ( $starsGroups < 1) {
       for ($i=0; $i<$group->nbBonus; $i++) {
