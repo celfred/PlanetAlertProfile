@@ -144,11 +144,13 @@
     $deltaHP = 0;
     if ($player->equipment) {
       foreach ($player->equipment as $item) {
+        // TODO : Limit to 2 best weapons
         if ($item->category->name == 'weapons') {
-          $deltaXP += $item->XP;
+          $deltaXP = $deltaXP + $item->XP;
         }
+        // TODO : Limit to 1 best protection
         if ($item->category->name == 'protections') {
-          $deltaHP += $item->HP;
+          $deltaHP = $deltaHP + $item->HP;
         }
       }
       if ($tHP < 0) { // Negative task
@@ -156,6 +158,8 @@
         if ( $tHP + $deltaHP > 0 ) {
           $deltaHP = $tHP-1;
         }
+        // Get rid of weapons' bonus
+        $deltaXP = 0;
       } else { // Positive task
         $deltaHP = 0;
       }
@@ -164,7 +168,7 @@
     // Calculate player's new score
     $player->HP = $player->HP + $tHP + $deltaHP;
     $player->XP = $player->XP + $tXP + $deltaXP;
-    $player->GC += $tGC;
+    $player->GC = $player->GC + $tGC;
     // Check GC
     if ($player->GC < 0) { $player->GC = 0; }
     // Check death
@@ -172,7 +176,7 @@
       // Loose 1 level
       if ($player->level > 1) {
         // TODO : loose equipment?)
-        $player->level -= 1;
+        $player->level = $player->level - 1;
       } else {
         // TODO : Make an important team loss? (all players get HP loss? Extra free spots on all places?)
         // For the moment : init player scores for a new start
@@ -184,24 +188,14 @@
     }
 
     checkLevel($player);
-
-    // Check new level
-    /*
-    $threshold = ($player->level*10)+90;
-    if ($player->XP >= $threshold) {
-      $player->level += 1;
-      $player->XP -= $threshold;
-      $player->HP = 50;
-    }
-     */
   }
 
   function checkLevel($player) {
     // Check new level
     $threshold = ($player->level*10)+90;
     if ($player->XP >= $threshold) {
-      $player->level += 1;
-      $player->XP -= $threshold;
+      $player->level = $player->level + 1;
+      $player->XP = $player->XP - $threshold;
       $player->HP = 50;
     }
   }
@@ -251,7 +245,7 @@
           $player->GC = (int) $input->post->GC[$playerIndex];
           switch($item->parent->name) {
             case 'potions' : // instant use potions?
-              $player->HP += $item->HP;
+              $player->HP = $player->HP + $item->HP;
               if ($player->HP > 50) {
                 $player->HP = 50;
               }
