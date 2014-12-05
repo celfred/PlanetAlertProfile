@@ -670,7 +670,7 @@ angular.module('myApp.controllers', []) .
         var root = "service-pages/?";
       }
       $http({ // Get all places
-          url: root+"template=place"+param+"&name!=places&sort=name&limit=30",
+          url: root+"template=place"+param+"&name!=places&sort=name",
           method: "GET",
       }).success(function(data, status, headers, config) {
           $scope.places = data.matches;

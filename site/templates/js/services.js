@@ -11,7 +11,7 @@ angular.module('myApp.services', []).
     return {
       load: function(team) {
         if (team) {
-          var url = "service-pages/?template=player&sort=title"+team;
+          var url = "service-pages/?template=player&limit=35&sort=title"+team;
           var promise = $http.get(url).then(function (response) {
             return response.data.matches;
           });
@@ -23,7 +23,7 @@ angular.module('myApp.services', []).
   factory('Places', function($http, $filter) {
     return {
       load: function(team) {
-        var url = "service-pages/?template=place&name!=places&sort=country.name&limit=50";
+        var url = "service-pages/?template=place&name!=places&sort=country.name";
         var promise = $http.get(url).then(function (response) {
           return response.data.matches;
         });
@@ -52,7 +52,7 @@ angular.module('myApp.services', []).
   factory('Equipment', function($http) {
     return {
       load: function(team) {
-        var url = "service-pages/?template=equipment|item&sort=level&limit=50";
+        var url = "service-pages/?template=equipment|item&sort=level";
         var promise = $http.get(url).then(function (response) {
           return response.data.matches;
         });
@@ -63,7 +63,7 @@ angular.module('myApp.services', []).
   factory('Task', function($http) {
     return {
       load: function(team) {
-        var url = "service-pages/?template=task&name!=tasks&sort=category.name&limit=50";
+        var url = "service-pages/?template=task&name!=tasks&sort=category.name";
         var promise = $http.get(url).then(function (response) {
           return response.data.matches;
         });
