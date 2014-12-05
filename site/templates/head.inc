@@ -51,7 +51,7 @@
     $players = $pages->find("template=player, sort=title");
     $uniqueResults = array(); 
     foreach($players as $resultPage) {
-      $uniqueResults[$resultPage->team] = $resultPage; 
+      $uniqueResults[$resultPage->team->name] = $resultPage; 
     }
   ?>
           
@@ -63,8 +63,8 @@
           $class = $child === $page->rootParent ? " class='on'" : '';
           if ($child->name == 'players') {
             foreach($uniqueResults as $player) {
-              $class = $sanitizer->pageName($player->team) == $input->urlSegment1 ? " class='on'" : "";
-              echo "<li><a$class href='{$child->url}{$sanitizer->pageName($player->team)}'>{$player->team}</a></li>";
+              $class = $sanitizer->pageName($player->team->name) == $input->urlSegment1 ? " class='on'" : "";
+              echo "<li><a$class href='{$child->url}{$sanitizer->pageName($player->team)}'>{$player->team->name}</a></li>";
             }
 
           } else {
