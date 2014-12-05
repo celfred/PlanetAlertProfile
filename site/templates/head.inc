@@ -48,11 +48,7 @@
     $homepage = $pages->get("/"); 
     $children = $homepage->children;
     $children->prepend($homepage); 
-    $players = $pages->find("template=player, sort=title");
-    $uniqueResults = array(); 
-    foreach($players as $resultPage) {
-      $uniqueResults[$resultPage->team] = $resultPage; 
-    }
+    $allTeams = $pages->get("/teams")->children->not("name=orphans");
   ?>
           
   <div id="wrap">
@@ -62,9 +58,9 @@
         foreach($children as $child) {
           $class = $child === $page->rootParent ? " class='on'" : '';
           if ($child->name == 'players') {
-            foreach($uniqueResults as $player) {
-              $class = $sanitizer->pageName($player->team) == $input->urlSegment1 ? " class='on'" : "";
-              echo "<li><a$class href='{$child->url}{$sanitizer->pageName($player->team)}'>{$player->team}</a></li>";
+            foreach($allTeams as $team) {
+              $class = $sanitizer->pageName($team->name) == $input->urlSegment1 ? " class='on'" : "";
+              echo "<li><a$class href='{$child->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></li>";
             }
 
           } else {
