@@ -22,18 +22,21 @@
     if ($players->count == 0) {
       unset($allGroups[$index]);
     }
+    // Check for group bonus
     $group->nbBonus = groupBonus($players);
     $group->karma = $group->nbBonus*30;
 
     // Add individual karmas
     foreach( $players as $player) {
       $karma = getKarma($player);
-      (int) $group->karma = $group->karma + $karma;
-      $group->details .= $player->title." (".$karma.' - '.$player->places->count.') ';
+      // Karma is divided by number of players in the group to be fair with smaller groups
+      $groupKarma = round($karma/$players->count);
+      (int) $group->karma = $group->karma + $groupKarma;
+      $group->details .= $player->title." (".$karma.' ('.$groupKarma.') - '.$player->places->count.') ';
     }
     $index++;
-    // Check for group bonus
   }
+
   // Prepare group display
   $allGroups->sort('-karma');
   $outGroups .= '<ul class="list-inline lead">';
