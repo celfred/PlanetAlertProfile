@@ -19,7 +19,6 @@ $(document).ready(function() {
     return false; 
   });
 
-
   $('#participation').click( function() {
     var limitCheckbox = $('#limit10');
     if ($(this).is(':checked')) {
@@ -83,4 +82,18 @@ $(document).ready(function() {
       $(this).attr('href', href);
     });
   });
+
+  $('#quizForm').submit( function(event) {
+    //event.preventDefault();
+  });
+  $('#showAnswer').click( function() {
+    $('#answer').toggle();
+    return false;
+  });
+
+  $('#playerQuizButton').click( function() {
+    var url = $('#players_list').val();
+    window.location.href = url;
+  });
+
 }); 

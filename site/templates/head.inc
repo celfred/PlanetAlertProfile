@@ -2,6 +2,7 @@
 <html lang="en" ng-app="myApp">
 <head>
   <?php
+    include('./my-functions.inc'); // Planet Alert PHP functions
     $whitelist = array('127.0.0.1');
     if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
       // Remote server
@@ -65,7 +66,13 @@
 
           } else {
             if ($child->name != 'reports') {
-              echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
+              if ($child->name == 'quiz') {
+                if ($user->isSuperuser()) {
+                  echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
+                }
+              } else {
+                echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
+              }
             } else {
               if ($user->isSuperuser()) {
                 echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";

@@ -26,12 +26,6 @@
     echo '<a href="./?logout=1">[Log out]</a>';
     echo '</span>';
   }
-	// If the page is editable, then output a link that takes us straight to the page edit screen:
-  /*
-	if($page->editable()) {
-		echo "<a class='nav backendLink' id='editpage' href='{$config->urls->admin}page/edit/?id={$page->id}'>Edit</a>"; 
-	}
-  */
 
 	?>
   <script src="<?php echo $config->urls->templates?>bower_components/angular/angular.js"></script>

@@ -411,6 +411,44 @@ img.align_right {
 .adminTable td p {
   display: inline;
 }
+#answer {
+  display: none;
+}
+#showAnswer {
+  float: left;
+  margin: 15px;
+}
+.quiz img.monster {
+  transform: rotate(-8deg);
+  margin-right: 30px;
+  float: left;
+  z-index: 10;
+}
+@keyframes miniZoom {
+  0% : {
+    transform: scale(0.9);
+    transform: rotate(-8deg);
+  }
+  100% : {
+    transform: scale(1);
+    transform: rotate(8deg);
+  }
+}
+.quiz img.avatar {
+  transform: rotate(8deg);
+  float: right;
+  z-index: 10;
+}
+.quiz .playerName {
+  float: right;
+  animation: miniZoom 1s infinite;
+  background: #FFF;
+  color: #000;
+  border: 3px solid #000;
+  padding: 10px;
+  border-radius: 10px;
+  z-index: 11;
+}
 #reportDiv {
   margin: 5px;
   border: 2px solid #000;
