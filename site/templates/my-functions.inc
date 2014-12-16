@@ -68,8 +68,14 @@ function updateScore($player, $task) {
   if ($player->HP <= 0) {
     // Loose 1 level
     if ($player->level > 1) {
-      // TODO : loose equipment?)
       $player->level = $player->level - 1;
+      $player->HP = 50;
+      // Loose all Gold Coins
+      $player->GC = 0;
+      // Loose all equipment
+      foreach ($player->equipment as $equipment) {
+        $equipment->delete();
+      }
     } else {
       // TODO : Make an important team loss? (all players get HP loss? Extra free spots on all places?)
       // For the moment : init player scores for a new start
