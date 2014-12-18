@@ -2,6 +2,8 @@
 
 include("./head.inc"); 
 
+$allPlayers = $pages->get("/players")->children("team.count>0");
+
 if ($user->isSuperuser()) {
   // List of teams (taken from fead.inc)
   echo '<span style="margin: 5px 20px;">';
@@ -16,15 +18,15 @@ if ($user->isSuperuser()) {
     echo '&nbsp;&nbsp;';
     echo '<label for="lastName"><input type="radio" id="lastName" name="order"> Last name</input></label>';
     echo '</span>';
-    foreach($uniqueResults as $player) {
-      echo "<span class='btn btn-primary'><a class='ajax reportButton' href='{$pages->get('/report_generator')->url}{$sanitizer->pageName($player->team)}'>{$player->team}</a></span> ";
+    foreach($allTeams as $team) {
+      echo "<span class='btn btn-primary'><a class='ajax reportButton' href='{$pages->get('/report_generator')->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></span> ";
     }
     echo '<span style="float: right;">';
     // List of players
     echo '<span>Player reports : </span>';
     echo '<select id="players_list">';
-    foreach($players as $player) {
-      echo "<option value='{$pages->get('/report_generator')->url}{$sanitizer->pageName($player->team)}/{$sanitizer->pageName($player->id)}'>{$player->title} ({$player->team})</a></option>";
+    foreach($allPlayers as $player) {
+      echo "<option value='{$pages->get('/report_generator')->url}{$sanitizer->pageName($player->team->name)}/{$sanitizer->pageName($player->id)}'>{$player->title} ({$player->team->title})</a></option>";
     }
     echo '</select>';
     echo '<button id="report_button">Generate</button>';
