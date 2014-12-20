@@ -130,6 +130,7 @@
               if ($player->HP > 50) {
                 $player->HP = 50;
               }
+              $player->equipment->add($item);
               break;
             default:
               $player->equipment->add($item);
@@ -267,7 +268,7 @@
     <li ng-class="{active: selected == 1}" ng-click="selected = 1">État de l'équipe</li>
     <li ng-class="{active: selected == 2}" ng-click="selected = 2">État du monde</li>
     <?php if ( $user->isSuperuser()) { // Admin front-end ?>
-    <li ng-class="{active: selected == 3}" ng-click="selected = 3">Les actions</li>
+    <!-- <li ng-class="{active: selected == 3}" ng-click="selected = 3">Les actions</li> -->
     <li ng-class="{active: selected == 4}" ng-click="selected = 4">S'équiper</li>
     <li ng-class="{active: selected == 5}" ng-click="selected = 5">Libérer un lieu</li>
     <li ng-class="{active: selected == 6}" ng-click="selected = 6">Admin Table</li>
@@ -330,7 +331,7 @@
   </div>
 
   <div ng-show="selected == 2" ng-controller="mapCtrl" ng-init="">
-  <a class="pdfLink btn btn-info" href="<?php echo $page->url.$input->urlSegment1; ?>/places?pages2pdf=1">Get PDF</a>
+    <a class="pdfLink btn btn-info" href="<?php echo $page->url.$input->urlSegment1; ?>/places?pages2pdf=1">Get PDF</a>
     <h2 class="text-center"><span class="label label-default">Taux de libération de l'équipe : {{completedRate}}% du monde</span> [{{completed}}/{{allPlaces}}]</h2>
     <table class="table table-condensed table-hover">
       <tr>
@@ -367,6 +368,7 @@
   </div>
 
   <?php if ( $user->isSuperuser()) { // Admin front-end ?>
+  <!--
   <div ng-show="selected == 3" ng-init="">
     <form id="taskForm" name="taskForm" action="players/<?php echo $input->urlSegment1; ?>" method="post" class="form-horizontal" role="form">
 
@@ -414,6 +416,7 @@
     <input type="submit" name="submitTasks" value="Enregistrer" class="btn btn-block btn-primary" ng-disabled="!anyChecked" />
     </form>
   </div>
+  -->
 
   <div ng-show="selected == 4" class="row" ng-controller="shopCtrl" ng-init="">
     <form id="shopForm" class="form-inline" role="form" name="shopForm" action="players/<?php echo $input->urlSegment1; ?>" method="post">
