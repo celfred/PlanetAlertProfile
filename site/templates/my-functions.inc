@@ -36,15 +36,15 @@ function updateScore($player, $task) {
   $deltaXP = 0;
   $deltaHP = 0;
   if ($player->equipment) {
-    foreach ($player->equipment as $item) {
-      // TODO : Limit to 2 best weapons
-      if ($item->category->name == 'weapons') {
-        $deltaXP = $deltaXP + $item->XP;
-      }
-      // TODO : Limit to 1 best protection
-      if ($item->category->name == 'protections') {
-        $deltaHP = $deltaHP + $item->HP;
-      }
+    // Limit to the 2 best weapons
+    $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
+    foreach ($concerned_weapons as $item) {
+      $deltaXP = $deltaXP + $item->XP;
+    }
+    // Limit to 1 best protection
+    $concerned_protection = $player->equipment->find("category.name=protections, sort=-HP, limit=1");
+    foreach ($concerned_protection as $item) {
+      $deltaHP = $deltaHP + $item->HP;
     }
     if ($tHP < 0) { // Negative task
       // Loss of 1 minimum whatever the equipment
