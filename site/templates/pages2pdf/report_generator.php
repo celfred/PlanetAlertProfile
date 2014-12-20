@@ -416,21 +416,31 @@ if (!$selectedPlayer) { // Class report
           }
         }
         // Player's average and stats
-        $ratio = round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
-        if ( $ratio < 0) { $ratio = 0; }
+        // Player's average and stats
+        if ($nbPart > 7) { // No more than 3 absences
+          $ratio = (int) round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
+          if ( $ratio < 0) { $ratio = 0; }
+        } else {
+          $ratio = 'absent';
+        }
 
         echo '<td class="text-left">';
-          if ($ratio >= 80) {
-            echo '<span class="label label-success">&nbsp;VV&nbsp;</span>';
-          }
-          if ($ratio < 80 && $ratio >= 55) {
-            echo '<span class="label label-success">&nbsp;V&nbsp;</span>';
-          }
-          if ($ratio < 55 && $ratio >= 35) {
-            echo '<span class="label label-danger">&nbsp;R&nbsp;</span>';
-          }
-          if ($ratio < 35 && $ratio >= 0) {
-            echo '<span class="label label-danger">&nbsp;RR&nbsp;</span>';
+          if (is_int($ratio)) {
+            if ($ratio >= 80) {
+              echo '<span class="label label-success">&nbsp;VV&nbsp;</span>';
+            }
+            if ($ratio < 80 && $ratio >= 55) {
+              echo '<span class="label label-success">&nbsp;V&nbsp;</span>';
+            }
+            if ($ratio < 55 && $ratio >= 35) {
+              echo '<span class="label label-danger">&nbsp;R&nbsp;</span>';
+            }
+            if ($ratio < 35 && $ratio >= 0) {
+              echo '<span class="label label-danger">&nbsp;RR&nbsp;</span>';
+          } else {
+            if ($ratio === 'absent') {
+              echo '<span class="label label-default">NN</span>';
+            }
           }
         echo '</td>';
         echo '<td class="text-left">';
