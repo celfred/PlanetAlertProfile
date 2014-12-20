@@ -103,6 +103,49 @@ function checkLevel($player) {
   }
 }
 
+function getKarma($player) {
+  // Karma calculated from all values (except GC)
+  if ($player->level > 1) {
+    $karma = $player->level*100 + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
+  } else {
+    $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
+  }
+  if ($karma < 0) { $karma = 0; }
+  //echo $player->title.':'.$karma.'-';
+  return $karma;
+}
+
+function groupBonus($players) {
+  $nbBonus = 0;
+  // Sort players by nb of pkaces
+  $players->sort('places.count');
+  // Get min/max nb of places in the group
+  $min = $players->first()->places->count;
+  $max = $players->last()->places->count;
+  if ($min == 0) { // 1 player has 0 places, so NO bonus possible
+    return 0; 
+  } else { // No player has 0 places, let's check if they all have 1,2,3... places
+    for ($i=1; $i<=$min; $i++) {
+      $nbPlaces = $players->find("places.count>=$i")->count;
+      if ($nbPlaces == $players->count) {
+        $nbBonus++;
+      }
+    }
+  }
+  return $nbBonus;
+  /*
+  foreach( $players as $player) {
+    array_push($nbPlaces, $player->places->count); 
+  }
+  // All players have the same number of places, then +30 bonus
+  $same = array_count_values($nbPlaces);
+  print_r($same);
+  if ( count(array_unique($nbPlaces)) == 1) {
+    return 30;
+  }
+  */
+}
+
 function saveHistory($player, $task, $taskComment) {
   $p = new Page();
   $p->template = 'event';
