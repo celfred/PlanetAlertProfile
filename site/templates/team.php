@@ -336,6 +336,7 @@
         <th ng-click="predicate = 'name'; reverse=!reverse">Lieux</th>
         <th ng-click="predicate = 'city.name'; reverse=!reverse">Villes</th>
         <th ng-click="predicate = 'country.name'; reverse=!reverse">Pays</th>
+        <th ng-click="predicate = 'GC'; reverse=!reverse">Or</th>
         <th ng-click="predicate = 'owners.length'; reverse=!reverse"># de 'libérateurs'</th>
         <th ng-click="predicate = 'freedomRate'; reverse=!reverse">Taux de libération</th>
       </tr>
@@ -344,6 +345,7 @@
         <td>{{place.title | filterHtmlChars}}</td>
         <td>{{place.city.title | filterHtmlChars}}</td>
         <td>{{place.country.title | filterHtmlChars}}</td>
+        <td>{{place.GC}}</td>
         <td>{{place.owners.length}}/{{place.maxOwners}}
           <span ng-mouseover="showOwnersList = !showOwnersList" ng-mouseout="showOwnersList = !showOwnersList" class="glyphicon glyphicon-info-sign"></span>
           <ul ng-show="showOwnersList"  ng-style="{left: posLeft+'px'}" class="list-unstyled tipList">

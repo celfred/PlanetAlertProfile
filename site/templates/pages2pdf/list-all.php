@@ -40,7 +40,7 @@ $out .= '<tr>';
 $out .= '<td>';
 $out .= '<img style="" src="'.$logo.'" />';
 $out .= '</td>';
-$out .= '<td colspan="2">';
+$out .= '<td colspan="3">';
 $out .= '<h1 style="text-align: center; text-decoration : underline;">Free Places (Team:'.strtoupper($input->urlSegment1).')</h1>';
 //$out .= '<h1 style="text-align: center;">'.$freedomRate.'% of the world is free!</h1>';
 $out .= '</td>';
@@ -49,6 +49,7 @@ $out .= '</tr>';
 $out .= '<tr>';
 $out .= '<td># of owners</td>';
 $out .= '<td>Level</td>';
+$out .= '<td>GC</td>';
 $out .= '<td>Place</td>';
 $out .= '</tr>';
 
@@ -59,12 +60,13 @@ for ($i=1; $i<11; $i++) {
       $out .= '<tr class="negative">';
       $out .= '<td>FREE!</td>';
       $out .= '<td>'.$place->level.'</td>';
+      $out .= '<td>'.$place->GC.'</td>';
       $out .= '<td><h2>'.$place->title.' ('.$place->city->title.', '.$place->country->title.')</h2></td>';
       $out .= '</tr>';
     } 
   } else { // Level completed
     $out .= '<tr class="complete">';
-    $out .= '<td colspan="3"><h1 style="font-variant: small-caps;">Level '.$i.' complete!</h1></td>';
+    $out .= '<td colspan="4"><h1 style="font-variant: small-caps;">Level '.$i.' complete!</h1></td>';
     $out .= '</tr>';
   }
 }
@@ -76,6 +78,7 @@ foreach($oneLeft as $place) {
   //$out .= '<td>1 needed!</td>';
   $out .= '<td>'.$nbOwners.'/'.$place->maxOwners.'</td>';
   $out .= '<td>'.$place->level.'</td>';
+  $out .= '<td>'.$place->GC.'</td>';
   $out .= '<td class="important">'.$place->title.' ('.$place->city->title.', '.$place->country->title.')</td>';
   $out .= '</tr>';
 }
@@ -85,6 +88,7 @@ foreach($twoLeft as $place) {
   //$out .= '<td>2 needed!</td>';
   $out .= '<td>'.$nbOwners.'/'.$place->maxOwners.'</td>';
   $out .= '<td>'.$place->level.'</td>';
+  $out .= '<td>'.$place->GC.'</td>';
   $out .= '<td class="important">'.$place->title.' ('.$place->city->title.', '.$place->country->title.')</td>';
   $out .= '</tr>';
 }
@@ -94,6 +98,7 @@ foreach($placesLeft as $place) {
   $out .= '<tr class="">';
   $out .= '<td>'.$nbOwners.'/'.$place->maxOwners.'</td>';
   $out .= '<td>'.$place->level.'</td>';
+  $out .= '<td>'.$place->GC.'</td>';
   $out .= '<td class="important">'.$place->title.' ('.$place->city->title.', '.$place->country->title.')</td>';
   $out .= '</tr>';
   }
