@@ -141,6 +141,7 @@
 
           // Record history
           $task = $pages->get("name='buy'");
+          $taskComment = $item->title;
           saveHistory($player, $task, $taskComment);
 
           $playerIndex++;
@@ -181,6 +182,7 @@
 
           // Record history
           $task = $pages->get("name='free'");
+          $taskComment = $item->title;
           saveHistory($player, $task, $taskComment);
 
           $playerIndex++;
