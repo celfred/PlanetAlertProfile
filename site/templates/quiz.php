@@ -57,8 +57,7 @@ if ($user->isSuperuser()) {
 
     // Get minimum number of invasions in the team (to find who is the next invaded player)
     foreach($allConcerned as $player) {
-      //$nbInvasions[$player->id] = $player->count("parent=history, task.name='right-invasion|wrong-invasion'");
-      $nbInvasions[$player->id] = $player->count("parent=history, task.name='right-invasion|wrong-invasion'");
+      $nbInvasions[$player->id] = $player->find("template=event, task.name=right-invasion|wrong-invasion")->count();
       $player->nbInvasions = $nbInvasions[$player->id];
     }
     // Find minimum nb of invasions
