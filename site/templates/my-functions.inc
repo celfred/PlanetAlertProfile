@@ -117,7 +117,7 @@ function getKarma($player) {
 
 function groupBonus($players) {
   $nbBonus = 0;
-  // Sort players by nb of pkaces
+  // Sort players by nb of places
   $players->sort('places.count');
   // Get min/max nb of places in the group
   $min = $players->first()->places->count;
@@ -201,5 +201,19 @@ function pick_question($player) {
     }
 
   return $quiz;
+}
+
+function globalScore($players, $totalPlaces) {
+  $totalOwners = 0;
+  foreach($totalPlaces as $place) {
+    $totalOwners = $totalOwners + $place->maxOwners;
+  }
+  $teamOwners = 0;
+  foreach( $players as $player) {
+    $teamOwners = $teamOwners + $player->places->count();
+  }
+  $globalScore = round((100*$teamOwners)/$totalOwners);
+
+  return $globalScore;
 }
 ?>
