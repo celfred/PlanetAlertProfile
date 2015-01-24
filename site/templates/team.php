@@ -8,7 +8,10 @@
   $outGroups = '';
   $team = $allPlayers->first->team->title;
   $totalPlaces = $pages->find("template='place'");
-  $teamScore = globalScore($allPlayers, $totalPlaces);
+  $globalScore = globalScore($allPlayers, $totalPlaces);
+  $teamScore = $globalScore[0];
+  $teamOwners = $globalScore[1];
+  $totalOwners = $globalScore[2];
 
   // Calculate groups Karma
   $index = 0;
@@ -220,7 +223,7 @@
   ?>
 
   <?php
-    echo '<h3 class="text-center well"><strong>'.$team.' - Free world : '.$teamScore.'%</strong></h3>';
+    echo '<h3 class="text-center well"><strong title="'.$teamOwners.'/'.$totalOwners.'">'.$team.' - Free world : '.$teamScore.'%</strong></h3>';
     echo $outGroups;
   ?>
 

@@ -214,6 +214,6 @@ function globalScore($players, $totalPlaces) {
   }
   $globalScore = round((100*$teamOwners)/$totalOwners);
 
-  return $globalScore;
+  return array($globalScore, $teamOwners, $totalOwners);
 }
 ?>
