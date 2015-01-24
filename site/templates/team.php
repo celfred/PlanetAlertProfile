@@ -6,6 +6,9 @@
   $allPlayers = $pages->find("template='player', team=$input->urlSegment1, sort='group'");
   $allGroups = $pages->get("/groups")->children('sort=title');
   $outGroups = '';
+  $team = $allPlayers->first->team->title;
+  $totalPlaces = $pages->find("template='place'");
+  $teamScore = globalScore($allPlayers, $totalPlaces);
 
   // Calculate groups Karma
   $index = 0;
@@ -216,6 +219,9 @@
   } // End if superUser
   ?>
 
+  <?php
+    echo '<h3 class="text-center well"><strong>'.$team.' - Free world : '.$teamScore.'%</strong></h3>';
+  ?>
   <?php echo $outGroups; ?>
 
   <ul class="tabList list-inline">
@@ -286,7 +292,8 @@
 
   <div ng-show="selected == 2" ng-controller="mapCtrl" ng-init="">
     <a class="pdfLink btn btn-info" href="<?php echo $page->url.$input->urlSegment1; ?>/places?pages2pdf=1">Get PDF</a>
-    <h2 class="text-center"><span class="label label-default">Taux de libération de l'équipe : {{completedRate}}% du monde</span> [{{completed}}/{{allPlaces}}]</h2>
+    <!-- <h2 class="text-center"><span class="label label-default">Taux de libération de l'équipe : {{completedRate}}% du monde</span> [{{completed}}/{{allPlaces}}]</h2> -->
+    <h3 class="text-center"><span class="label label-default">{{completed}} completed out of {{allPlaces}} places [ {{allPlaces-completed}} left]]</span></h3>
     <table class="table table-condensed table-hover">
       <tr>
         <th ng-click="predicate = 'level'; reverse=!reverse">Level</th>
