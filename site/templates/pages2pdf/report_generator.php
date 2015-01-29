@@ -437,6 +437,7 @@ if (!$selectedPlayer) { // Class report
             }
             if ($ratio < 35 && $ratio >= 0) {
               echo '<span class="label label-danger">&nbsp;RR&nbsp;</span>';
+            }
           } else {
             if ($ratio === 'absent') {
               echo '<span class="label label-default">NN</span>';
