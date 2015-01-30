@@ -90,8 +90,14 @@ if ($user->isSuperuser()) {
         */
         $out .= '<h2 class="alert alert-danger text-center">';
         $out .= $quiz['question'].'&nbsp;&nbsp;';
-        $out .= '<a id="showAnswer" class="label label-info">[Check answer]</a>';
         $out .= '</h2>';
+        // Display map if necessary
+        if ( $quiz['type'] === 'map' ) {
+          $out .= '<section class="">';
+          $out .= '<object id="worldMap" type="image/svg+xml" data="'.$config->urls->templates.'img/worldMap.svg" style="width: 100%; height: 400px; border:1px solid black; ">Your browser does not support SVG</object>';
+          $out .= '</section>';
+        }
+        $out .= '<a id="showAnswer" class="label label-info lead">[Check answer]</a>';
         $out .= '<h2 id="answer" class="lead text-center">';
         $out .= $quiz['answer'];
         $out .= '</h2>';
@@ -107,6 +113,7 @@ if ($user->isSuperuser()) {
         $out .= '&nbsp;&nbsp;';
         $out .= '<a class="btn btn-info" href="'.$page->url.$input->urlSegment1.'">Pass player</a>';
       $out .= '</form>';
+
     $out .= '</div>';
   } else {
     $out .= '<p class="text-center lead well">Select a team and prepare for a... Monster invasion!</p>';

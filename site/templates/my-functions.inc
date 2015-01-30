@@ -182,6 +182,7 @@ function pick_question($player) {
         $type = ['country', 'city'];
       }
       $rand = array_rand($type, 1);
+      $quiz['type'] = $type[$rand];
       switch($type[$rand]) {
         case 'country' :
           $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randomPlace->title.'</strong>?';
@@ -195,10 +196,14 @@ function pick_question($player) {
           $randQuiz = $randomPlace->quiz->getRandom();
           $quiz['question'] = $randQuiz->question;
           $quiz['answer'] = $randQuiz->answer;
+          if (  strpos($quiz['question'], 'on the map') == true) {
+            $quiz['type'] = 'map';
+          }
           break;    
         default : $quiz['answer'] = 'Question type error!'; break;
       }
     }
+
 
   return $quiz;
 }

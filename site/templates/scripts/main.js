@@ -1,4 +1,5 @@
 $(document).ready(function() {
+
   $(".ajax").click(function() {
     $("#report").html("<p>Loading...</p>"); 
     
@@ -95,5 +96,14 @@ $(document).ready(function() {
     var url = $('#players_list').val();
     window.location.href = url;
   });
+
+  if ($('#worldMap')) {
+    setTimeout( function() { test(); }, 300);
+  }
+  function test() {
+    svgPanZoom('#worldMap', {
+      controlIconsEnabled: true
+    });
+  }
 
 }); 
