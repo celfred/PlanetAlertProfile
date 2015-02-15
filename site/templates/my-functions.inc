@@ -91,6 +91,9 @@ function updateScore($player, $task) {
   }
 
   checkLevel($player);
+
+  // Set karma
+  $player->karma = getKarma($player);
 }
 
 function checkLevel($player) {
@@ -221,4 +224,14 @@ function globalScore($players, $totalPlaces) {
 
   return array($globalScore, $teamOwners, $totalOwners);
 }
+
+function placeFreedomRate($place, $allPlayers) {
+  $maxOwners = $place->maxOwners;
+  $placeId = $place->id;
+  $teamOwners = $allPlayers->find("places=$placeId")->count();
+  $rate = (100*$teamOwners)/$maxOwners;
+
+  return $rate;
+}
+
 ?>

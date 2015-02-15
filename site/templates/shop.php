@@ -2,11 +2,21 @@
 /* Shop template */
 
 include("./head.inc"); 
+
+$allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");
+$allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
+$allCategories = new PageArray();
+foreach ($allEquipments as $equipment) {
+  $allCategories->add($equipment->category);
+  $allCategories->sort("title");
+}
+
 ?>
 
-<div ng-controller="shopCtrl" ng-init="loadItems()">
+<div>
 <?php
 
+if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
   echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF [Catalogue]</a>';
   if ($user->isSuperuser() ) {
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/weapons?pages2pdf=1">Get PDF [Weapons]</a>';
@@ -14,39 +24,73 @@ include("./head.inc");
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/items?pages2pdf=1">Get PDF [Potions]</a>';
     echo '<br /><br /><br />';
   }
-
-  $categories = $pages->get("/shop")->children;
-  echo '<ul class="list-inline text-center">';
-  echo "<li><a class='btn btn-info' href='' ng-click='setFilter(\"\")'>Tout lister</a></li>";
-  foreach($categories as $category) {
-    echo "<li><a class='btn btn-info' href='' ng-click='setFilter(\"{$category->name}\")' tooltip-html-unsafe='{$category->summary}' tooltip-placement='bottom'>{$category->title}</a></li>";
-  }
   ?>
-  </ul>
-
-  <table class="table table-hover table-condensed">
-    <tr>
-      <th ng-click="predicate = 'name'; reverse=!reverse">Nom</th>
-      <th ng-click="predicate = 'level'; reverse=!reverse"><span class="glyphicon glyphicon-signal"></span> Niveau minimum</th>
-      <th ng-click="predicate = 'HP'; reverse=!reverse"><img ng-src="<?php  echo $config->urls->templates?>img/heart.png" alt="" /> Santé</th>
-      <th ng-click="predicate = 'XP'; reverse=!reverse"><img ng-src="<?php  echo $config->urls->templates?>img/star.png" alt="" /> Expérience</th>
-      <th ng-click="predicate = 'GC'; reverse=!reverse"><img ng-src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="" /> Or</th>
-      <th ng-click="predicate = 'category.title'; reverse=!reverse;">Catégorie</th>
-    </tr>
-    <tr ng-repeat="item in items | orderBy:predicate:reverse | filter:search">
-      <td>
-        <img ng-mouseover="getPos($event); showImg = !showImg" ng-mouseOut="showImg = !showImg" ng-src="site/assets/files/{{item.id}}/mini_{{item.image.basename}}" alt="" />
-        <span>{{item.title | filterHtmlChars}}</span>
-        <span tooltip-html-unsafe="{{item.summary}}" tooltip-placement="right" class="glyphicon glyphicon-question-sign"></span>
-        <ul class="list-unstyled tipList-light" ng-style="{left: posLeft+'px'}" ng-show="showImg"><li><img ng-src='site/assets/files/{{item.id}}/{{item.image.basename}}' /></li></ul>
-      </td>
-      <td>{{item.level}}</td>
-      <td>{{item.HP}}</td>
-      <td>{{item.XP}}</td>
-      <td>{{item.GC}}</td>
-      <td>{{item.category.title}}</td>
-    </tr>
+ 
+  <div id="Filters" class="text-center" data-fcolindex="6">
+    <ul class="list-inline well">
+      <?php foreach ($allCategories as $category) { ?>
+        <li><label for="<?php echo $category->name; ?>" class="btn btn-primary btn-xs"><?php echo $category->title; ?> <input type="checkbox" value="<?php echo $category->title; ?>" class="categoryFilter" name="categoryFilter" id="<?php echo $category->name; ?>"></label></li>
+      <?php } ?> 
+    </ul>
+  </div>
+  <table id="mainShop" class="table table-hover table-condensed">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th></th>
+        <th><span class="glyphicon glyphicon-signal"></span> Minimum level</th>
+        <th><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="" /> HP</th>
+        <th><img src="<?php  echo $config->urls->templates?>img/star.png" alt="" /> XP</th>
+        <th><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="" /> GC</th>
+        <th>Category</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($allEquipments as $item) {
+        if ($item->image) {
+          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$item->image->url."\" alt=\"avatar\" />' src='".$item->image->getThumb('mini')."' alt='avatar' />";
+        } else {
+          $mini = '';
+        }
+      ?>
+      <tr>
+        <td data-order="<?php echo $item->title; ?>" data-toggle="tooltip" title="<?php echo $item->summary; ?>">
+          <?php echo $item->title; ?>
+        </td>
+        <td>
+          <?php echo $mini; ?>
+        </td>
+        <td><?php echo $item->level; ?></td>
+        <td><?php echo $item->HP; ?></td>
+        <td><?php echo $item->XP; ?></td>
+        <td><?php echo $item->GC; ?></td>
+        <td><?php echo $item->category->title; ?></td>
+      </tr>
+      <?php } ?>
+    </tbody>
   </table>
+<?php } else { // A class is selected, display possible items
+  // Nav tabs
+  include("./tabList.inc"); 
+
+  $out = '';
+  $team = $input->urlSegment1;
+  $allPlayers = $pages->find("template='player', team=$team, sort='title'");
+  // Select form
+  $out .= '<select class="" id="shopSelect" name="shopSelect">';
+    $out .= '<option value="">Select a player</option>';
+    foreach ($allPlayers as $player) {
+      // Build selectEquipment
+      $out .= '<option value="'.$pages->get('/shop_generator')->url.$player->id.'">'.$player->title.' ['.$player->GC.'GC]</option>';
+    }
+  $out .= '</select>';
+
+  // Display possible equipment/places for selected player
+  $out .= '<section id="possibleItems">';
+  $out .= '</section>';
+
+  echo $out;
+} ?>
 </div>
 
 <?php

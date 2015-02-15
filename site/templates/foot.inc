@@ -28,16 +28,10 @@
   }
 
 	?>
-  <script src="<?php echo $config->urls->templates?>bower_components/angular/angular.js"></script>
-  <script src="<?php echo $config->urls->templates?>bower_components/angular-route/angular-route.min.js"></script>
-  <script src="<?php echo $config->urls->templates?>bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-  <script src="<?php echo $config->urls->templates?>bower_components/checklist-model/checklist-model.js"></script>
-  <script src="<?php echo $config->urls->templates?>js/app.js"></script>
-  <script src="<?php echo $config->urls->templates?>js/services.js"></script>
-  <script src="<?php echo $config->urls->templates?>js/controllers.js"></script>
-  <script src="<?php echo $config->urls->templates?>js/filters.js"></script>
-  <script src="<?php echo $config->urls->templates?>js/directives.js"></script>
-  <script src="<?php echo $config->urls->templates?>scripts/jquery-1.4.2.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/DataTables/media/js/jquery.dataTables.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/datatables-plugins-bootstrap3/dist/js/datatables-plugins-bootstrap3.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="<?php echo $config->urls->templates?>scripts/svg-pan-zoom.min.js"></script>
   <script src="<?php echo $config->urls->templates?>scripts/main.js"></script>
 </body>

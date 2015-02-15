@@ -10,6 +10,21 @@ $(document).ready(function() {
     return false; 
   }); 
 
+  $('#shopSelect').change( function() {
+    var url = $('#shopSelect').val();
+
+    $.get(url, function(data) { 
+        $("#possibleItems").html(data); 
+    }); 
+
+    return false; 
+  });
+
+  $('#switchGallery').click( function() {
+    $('#galleryPlacesList').toggle();
+    $('#detailedPlacesList').toggle();
+  });
+
   $('#report_button').click( function() {
     var url = $('#players_list').val();
 
@@ -97,7 +112,7 @@ $(document).ready(function() {
     window.location.href = url;
   });
 
-  if ($('#worldMap')) {
+  if ($('#worldMap').length > 0) {
     setTimeout( function() { test(); }, 300);
   }
   function test() {
@@ -106,4 +121,203 @@ $(document).ready(function() {
     });
   }
 
+  $('[data-toggle="tooltip"]').tooltip({ container: 'body'});
+
+  $('#historyTable').DataTable({
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+    order: [[ 0, "desc"]]
+  });
+  $('#mapTable').DataTable({
+    dom: 'ft',
+    paging: false,
+    order: [[ 0, "asc"]]
+  });
+  var taskTable = $('#taskTable').DataTable({
+    dom: 'ft',
+    paging: false,
+    order: [[ 0, "asc"]]
+  });
+  var mainShop = $('#mainShop').DataTable({
+    dom: 'ft',
+    paging: false,
+    order: [[ 0, "asc"]]
+  });
+  var shopAdminTable = $('#shopAdminTable').DataTable({
+    paging: false,
+    order: [[ 0, "asc"]]
+  });
+  $('#freeWorld').DataTable({
+    dom: 'ft',
+    paging: false,
+    order: [[ 6, "desc" ]]
+  });
+  $('#teamTable').DataTable({
+    paging: false,
+    columnDefs: [{ "orderable": false, "targets": 1 },
+      { "orderable": false, "targets": 4}],
+    order: [[ 3, "desc" ]]
+  });
+  var adminTable = $('#adminTable').DataTable({
+    dom: 't',
+    paging: false,
+    order: [[ 1, "asc" ]],
+    orderCellsTop: true,
+    searching: false,
+    "columnDefs": [ {
+      "targets": "task",
+      "orderable": false
+    } ]
+  });
+
+  $('.categoryFilter').click(function(){
+    mainShop.draw();
+    taskTable.draw();
+  });		    
+    
+  $('a.toggle-vis').on( 'click', function (e) {
+    e.preventDefault();
+    // Show all columns
+    adminTable.columns( ).visible( true, false );
+    // Get the column API object
+    var category = $(this).attr('data-category');
+    if (category !== '') {
+      // Get columns index of the category
+      var allColumns = $("#adminTable th[data-category='"+ category +"']");
+      var indexHidden = new Array();
+      $('#adminTable th.task').each( function(index) {
+        if ( $(this).attr('data-category') !== category) {
+          indexHidden.push(index+2);
+        }
+      });
+      adminTable.columns( indexHidden ).visible( false, false );
+      //adminTable.columns.adjust().draw( false ); // adjust column sizing and redraw
+    }
+  });
+
 }); 
+
+// Hide rows functions
+$.fn.dataTable.ext.search.push(
+  function( settings, data, dataIndex ) {
+    var categoryFilter,categoryCol,categoryArray,found;
+    var fColIndex;
+    //creates selected checkbox array
+    categoryFilter = $('.categoryFilter:checked').map(function () {
+      return this.value;
+    }).get();
+    if(categoryFilter.length){
+      fColIndex = $('#Filters').attr('data-fcolindex');
+      if (fColIndex) {
+        categoryCol = data[fColIndex]; //filter column
+      } else {
+        categoryCol = data[0]; //filter column
+      }
+      categoryArray =  $.map( categoryCol.split(','), $.trim); // splits comma separated string into array
+      // finding array intersection
+      found = $(categoryArray).not($(categoryArray).not(categoryFilter)).length;
+      if(found == 0){
+        return false;
+      } else {
+        return true;
+      }      
+    }
+    // default no filter
+    return true;
+});
+
+// adminTable functions
+var setCommonComment = function(taskId, obj) {
+  var commonComment = obj.val();
+  $('.cc_'+taskId).each( function() {
+    if ($(this).prev(':checkbox').prop('checked')) {
+      $(this).val(commonComment);
+    }
+  });
+}
+var showComment = function(taskId) {
+  $('#commonComment_'+taskId).toggle();
+  $('.cc_'+taskId).toggle();
+}
+var isAnyChecked = function() {
+  var anyChecked = false;
+  $('#adminTable .ctPlayer').each(function() {
+    if ( $(this).prop('checked') === true) {
+      anyChecked = true;
+      return false;
+    }
+  });
+  if (anyChecked === true) {
+    $("#adminTableForm :submit").prop('disabled', false);
+  } else {
+    $("#adminTableForm :submit").prop('disabled', true);
+  }
+}
+var selectAll = function(taskId) {
+  //console.log('selectAll: taskId:'+taskId);
+  $('.ct_'+taskId).prop('checked', $('#csat_'+taskId).prop('checked'));
+  isAnyChecked();
+}
+var onCheck = function(playerId, taskId) {
+  //console.log('onCheck: playerId:'+playerId+ '-taskId:'+taskId);
+  $('#csat_'+taskId).prop('checked', false)
+  isAnyChecked();
+
+  var tasksLists = $('#player['+playerId+']').value;
+  if ( $('.ct_'+taskId).prop('checked') === true ) {
+    //$('#player['+playerId+']').value += taskId+',';
+  } else {
+    
+  }
+}
+
+// shopAdminTable functions
+var shopCheck = function(obj, remainingGC, itemGC) {
+  //alert(remainingGC+'-'+itemGC);
+  if ( $(obj).prop('checked') === true) {
+    var newGC = remainingGC - itemGC;
+    $('#remainingGC').text(newGC);
+    // Disable impossible items left
+    $('ul.itemList li input[type=checkbox]').not($(obj)).each(function() {
+      if ($(this).attr('data-gc') > newGC) {
+        $(this).prop('disabled', true);
+      }
+    });
+    // Enable save buttons
+    $("#marketPlaceForm :submit").prop('disabled', false);
+  } else {
+    var newGC = parseInt(remainingGC) + parseInt(itemGC);
+    $('#remainingGC').text(newGC);
+    $('ul.itemList li input[type=checkbox]').each(function() {
+      if ($(this).attr('data-gc') > newGC) {
+        $(this).prop('disabled', true);
+      } else {
+        $(this).prop('disabled', false);
+      }
+    });
+    var anyChecked = false;
+    $('ul.itemList li input[type=checkbox]').each(function() {
+      if ( $(this).prop('checked') === true) {
+        anyChecked = true;
+        return false;
+      }
+    });
+    if (anyChecked === true) {
+      $("#marketPlaceForm :submit").prop('disabled', false);
+    } else {
+      $("#marketPlaceForm :submit").prop('disabled', true);
+    }
+  }
+}
+
+var marketPlaceSelect = function(obj, playerId) {
+  var type = obj.className;
+  //alert(type+'-'+ playerId);
+  //alert($(obj).val());
+  var objId = $(obj).val();
+  if (objId != 0 & $('#'+playerId+objId).length == 0 ) {
+    var newObj = '<p id="'+playerId+objId+'">'+$(obj).find('option:selected').text()+' <button type="button" class="close" aria-label="Close" onclick="alert(\'TODO\')"><span aria-hidden="true">&times;</span></button></p>';
+    var newInput = '<input type="hidden" name="inputToSave_'+playerId+'_'+objId+'" />';
+    $('#toSave_'+playerId).append(newObj);
+    $('#toSave_'+playerId).append(newInput);
+  }
+}

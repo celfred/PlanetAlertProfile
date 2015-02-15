@@ -102,25 +102,42 @@ body {
 }
 
 #content a {
+  /*
  color: #313131;
+ */
 }
 #content a:hover {
+  /*
   background-color: #f00076; 
   color: #FFF; 
   text-decoration: none; 
+  */
 }
 
 .tabList li {
   z-index:10;
-  padding: 10px;
-  border: 1px solid #5A4E4E;
   cursor: pointer;
+  padding: 5px;
+  /*
+  border: 1px solid #5A4E4E;
   border-radius: 10px 0px 10px 0px;
   background: #FFF;
+  */
 }
 .tabList li.active {
+  border: 1px solid #5A4E4E;
+  border-radius: 10px 0px 10px 0px;
   background: #5A4E4E;
   color: #FFF;
+}
+.tabList li.active a {
+  color: #FFF;
+}
+.tabList li a {
+  color: #313131;
+}
+table a {
+  color: #000;
 }
 .push, footer {
   height: 30px;
@@ -147,6 +164,9 @@ footer a:hover {
 	display: block;
 	font-weight: bold; 
   z-index: 100;
+}
+.backendLink a {
+  color: #FFF;
 }
 #editpage:hover {
   background: #FFC;
@@ -252,6 +272,37 @@ span.glyphicon {
   color: #FFF;
   z-index: 10;
 }
+.tooltip {
+  position: absolute;
+}
+.tooltip ul li {
+  list-style-type: square;
+  text-align: left;
+}
+.tooltip img {
+  position: relative;
+  border: 5px solid #000;
+}
+.trend {
+  position: relative;
+  padding-left: 10px;
+}
+.negativeTrend, .positiveTrend {
+  vertical-align: middle;
+  cursor: pointer;
+  border-radius: 10px;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #000;
+}
+.negativeTrend {
+  vertical-align: bottom;
+  background-color: #F00;
+}
+.positiveTrend {
+  background-color: #74C374;
+}
 .tipList-light {
   color: #000;
   background: #FFCCE5;
@@ -337,8 +388,8 @@ img.align_right {
 .positive {
   background: lightgreen;
 }
-.adminTable {
-  margin: 10px;
+table.adminTable > thead > tr > th {
+  padding: 0;
 }
 .adminTable th {
   border: 1px solid #000;
@@ -396,7 +447,6 @@ img.align_right {
 }
 .adminTable tr {
   padding: 0;
-  margin: 5px;
 }
 .adminTable label {
   padding: 0;

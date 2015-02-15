@@ -33,7 +33,7 @@ if ($user->isSuperuser()) {
   echo '<span style="margin: 5px 20px;">';
     echo '<span>Teams : </span>';
     foreach($allTeams as $team) {
-      echo "<span class='btn btn-primary'><a class='' href='{$pages->get('/quiz')->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></span> ";
+      echo "<a class='btn btn-primary'' href='{$pages->get('/quiz')->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a> ";
     }
     echo '<span style="float: right;">';
     // List of players

@@ -17,7 +17,7 @@ if($input->post->submit) {
 	
   // determine if any fields were ommitted or didn't validate
   foreach($form as $key => $value) {
-      if(empty($value)) $error = "<p class='error'>Une erreur est survenue. <br />Merci de vérifier que tous les champs ont été complétés.</p>";
+      if(empty($value)) $error = "<p class='error'>An error occurred.<br />Please check that all fields have been completed.</p>";
   }
 
   // if no errors, email the form results
@@ -29,7 +29,7 @@ if($input->post->submit) {
       mail($emailTo, "Contact Form", $msg, "From: $form[email]");
 
       // populate body with success message, or pull it from another PW field
-      $page->body = "<h2>Merci ! Votre message a bien été envoyé.</h2>"; 
+      $page->body = "<h2>Thank you! Your message has been sent.</h2>"; 
       $sent = true;	
   }
 }
@@ -47,32 +47,32 @@ if(!$sent) {
     $error
     <form role="form" class="form-horizontal" action="contact/" method="post">
       <div class="form-group">
-        <label for="fullname" class="col-sm-2 control-label">Prénom et Nom</label>
+        <label for="fullname" class="col-sm-2 control-label">First AND last name</label>
         <div class="col-sm-8">
-          <input type="text" class="form-control" id="fullname" name="fullname" value="$form[fullname]" placeholder="Prénom et Nom" />
+          <input type="text" class="form-control" id="fullname" name="fullname" value="$form[fullname]" placeholder="First AND last name" />
         </div>
       </div>
       <div class="form-group">
-        <label for="playerClass" class="col-sm-2 control-label">Classe</label>
+        <label for="playerClass" class="col-sm-2 control-label">Class</label>
         <div class="col-sm-8">
-          <input type="text" class="form-control" id="playerClass" name="playerClass" value="$form[playerClass]" placeholder="Classe" />
+          <input type="text" class="form-control" id="playerClass" name="playerClass" value="$form[playerClass]" placeholder="Class" />
         </div>
       </div>
       <div class="form-group">
-        <label for="email" class="col-sm-2 control-label">Votre adresse email</label>
+        <label for="email" class="col-sm-2 control-label">Your email adress</label>
         <div class="col-sm-8">
-          <input type="email" class="form-control" name="email" id="email" value="$form[email]" placeholder="Adresse email" />
+          <input type="email" class="form-control" name="email" id="email" value="$form[email]" placeholder="Your email adress" />
         </div>
       </div>
       <div class="form-group">
-        <label for="comments" class="col-sm-2 control-label">Votre Message</label>
+        <label for="comments" class="col-sm-2 control-label">Your message</label>
         <div class="col-sm-8">
           <textarea id="comments" class="form-control" name="comments" rows="6">$form[comments]</textarea>
-          <span class="help-box"><em>Merci de faire attention à l'orthographe et de ne pas utiliser de langage SMS ;-)</em><br />Tout message rédigé <strong>sans aucune erreur</strong> (majuscule, ponctuation...) rapportera <strong>+1XP à son auteur</strong></span>
+          <span class="help-box"><em>Please watch out your spelling and DO NOT use SMS syntax ;)</em><br />An <strong>error-free</strong> message (punctuation, spelling, instructions...) will give <strong>+1XP to the player</strong>!</span>
         </div>
       </div>
       <div class="col-sm-offset-2 col-sm-8">
-        <input type="submit" name="submit" class="btn btn-block btn-primary" value="Envoyer" />
+        <input type="submit" name="submit" class="btn btn-block btn-primary" value="Send message" />
       </div>
     </form>
 

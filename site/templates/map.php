@@ -1,7 +1,7 @@
 <?php
   include("./head.inc");
 
-  $places = $pages->find("template=place, mapMarker!='', sort=title");
+  $places = $pages->find("template=place, mapMarker!='', name!='places', sort=title");
   $map = $modules->get('MarkupGoogleMap');
   $totalPlacesCount = count($places);
 ?>

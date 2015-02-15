@@ -2,38 +2,57 @@
 /** Task template */
 
 include("./head.inc"); 
+
+$allTasks = $pages->get("/tasks/")->find("template=task, name!=manual|free|buy, sort='title'");
+$allCategories = new PageArray();
+foreach ($allTasks as $task) {
+  $allCategories->add($task->category);
+  $allCategories->sort("title");
+}
 ?>
 
-<div ng-controller="taskCtrl" ng-init="loadTasks()">
+<div>
   
   <a class="pdfLink btn btn-info" href="<?php echo $page->url; ?>?pages2pdf=1">Get PDF</a>
+  <br /><br /><br />
 
-  <ul class="list-inline text-center">
-    <li><a class="btn btn-info" href="" ng-click="setSearch('', search.type)">Toutes les actions</a></li>
-    <li ng-repeat="cat in allCategories"><a class="btn btn-info" href="" ng-click="setSearch(cat.name, search.type)">{{cat.title}}</a></li>
-  </ul>
-  <div class="col-sm-12 text-center">
-    <label><input ng-model="search.type" value='' type="radio">Toutes les actions</input></label>
-    <label><input ng-model="search.type" value='positive' type="radio">Actions positives seulement</input></label>
-    <label><input ng-model="search.type" value='négative' type="radio">Actions négatives seulement</input></label></li>
+  <div id="Filters" data-fcolindex="5" class="text-center">
+    <ul class="list-inline well">
+      <?php foreach ($allCategories as $category) { ?>
+      <li><label for="<?php echo $category->name; ?>" class="btn btn-primary btn-xs"><?php echo $category->title; ?> <input type="checkbox" value="<?php echo $category->title; ?>" class="categoryFilter" name="categoryFilter" id="<?php echo $category->name; ?>"></label></li>
+      <?php } ?> 
+    </ul>
   </div>
-  <table class="table table-hover table-condensed">
+
+  <table id="taskTable" class="table table-hover table-condensed">
+    <thead>
     <tr>
-      <th ng-click="predicate = 'name'; reverse=!reverse">Nom</th>
-      <th ng-click="predicate = 'HP'; reverse=!reverse"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="" /> Santé</th>
-      <th ng-click="predicate = 'XP'; reverse=!reverse"><img src="<?php  echo $config->urls->templates?>img/star.png" alt="" /> Expérience</th>
-      <th ng-click="predicate = 'GC'; reverse=!reverse"><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="Gold Coins (GC)" width="20" height="20" /> Or</th>
-      <th ng-click="predicate = 'category.title'; reverse=!reverse">Catégorie</th>
-      <th ng-click="predicate = 'type'; reverse=!reverse"><span class="glyphicon glyphicon-plus"></span> / <span class="glyphicon glyphicon-minus"></span></th>
+      <th>Name</th>
+      <th><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="" /> HP</th>
+      <th><img src="<?php  echo $config->urls->templates?>img/star.png" alt="" /> XP</th>
+      <th><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="Gold Coins (GC)" width="20" height="20" /> GC</th>
+      <th><span class="glyphicon glyphicon-plus"></span> / <span class="glyphicon glyphicon-minus"></span></th>
+      <th>Category</th>
     </tr>
-    <tr ng-repeat="task in tasks | orderBy:predicate:reverse | filter:search" ng-class="{'negative' : task.type == 'negative', 'positive' : task.type == 'positive' }">
-      <td><span>{{task.title | filterHtmlChars}}</span> <span tooltip-html-unsafe="{{task.summary}}" tooltip-placement="right" class="glyphicon glyphicon-info-sign"></span></td>
-      <td>{{task.HP}}</td>
-      <td>{{task.XP}}</td>
-      <td>{{task.GC}}</td>
-      <td>{{task.category.title}}</td>
-      <td>{{task.type}}</td>
-    </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($allTasks as $task) {
+        if ($task->HP < 0) {
+          $task->type = 'negative';
+        } else { 
+          $task->type = 'positive';
+        }
+      ?>
+        <tr class="<?php echo $task->type; ?>">
+          <td><span><?php echo $task->title; ?></span></td>
+          <td><?php echo $task->HP; ?></td>
+          <td><?php echo $task->XP; ?></td>
+          <td><?php echo $task->GC; ?></td>
+          <td><?php echo $task->type; ?></td>
+          <td><?php echo $task->category->title; ?></td>
+        </tr>
+      <?php } ?>
+    </tbody>
   </table>
 
 </div>

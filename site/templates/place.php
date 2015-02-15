@@ -1,10 +1,7 @@
 <?php 
 /* Place template */
 
-if ( $page->template != 'list-all' ) { // Single place detailed view
-  include("./head.inc"); 
-}
-
+include("./head.inc"); 
 
 if ($page->name != 'places') { // Single place view
   if ($user->isSuperuser()) {
@@ -16,7 +13,7 @@ if ($page->name != 'places') { // Single place view
   $imageWidth = $page->photo->eq(0)->width;
   if ($imageWidth > $imageHeight) { // Landscape
     $thumbImage = $page->photo->eq(0)->size(0,200)->url;
-  } else { // Protrait
+  } else { // Portrait
     $thumbImage = $page->photo->eq(0)->size(200,0)->url;
   }
   $city = $page->parent;
@@ -26,18 +23,26 @@ if ($page->name != 'places') { // Single place view
   <table class="table">
     <tr>
       <td rowspan="2" class="col-sm-2">
-        <img class="img-thumbnail" ng-src="<?php echo $thumbImage; ?>" alt="Photo" />
+        <img class="img-thumbnail" src="<?php echo $thumbImage; ?>" alt="Photo" />
       </td>
       <td class="col-sm-8">
-        <h1><?php echo $page->title; ?></h1><?php echo "<h2><a href='places/?type=city&name={$city->name}'>{$city->title}</a>, <a href='places/?type=country&name={$country->name}'>{$country->title}</a></h2>"; ?>
+        <h1><?php echo $page->title; ?></h1>
+        <?php echo "<h2><a href='places/?type=city&name={$city->name}' data-toggle='tooltip' title='See all places in {$city->title}' data-placement='bottom'>{$city->title}</a>, <a href='places/?type=country&name={$country->name}' data-toggle='tooltip' title='See all places in {$city->country}' data-placement='bottom'>{$country->title}</a></h2>"; ?>
       </td>
       <td class="col-sm-2">
-        <h1><img style="float: left;" ng-src="<?php  echo $config->urls->templates?>img/gold.png" alt="Value" width="50" height="50" /> <span class="gcbtn btn-default btn-lg"><?php echo $page->GC; ?></span></h1>
+        <div class="panel panel-success">
+        <div class="panel-heading">
+          <h1 class="panel-title">Level : <?php echo $page->level; ?></h1>
+        </div>
+        <div class="panel-body text-center">
+          <h1><img style="float: left;" src="<?php  echo $config->urls->templates?>img/gold.png" alt="Value" width="50" height="50" /><span class="lead btn btn-default btn-lg"><?php echo $page->GC; ?></span></h1>
+        </div>
+        </div>
       </td>
     </tr>
     <tr>
       <td colspan="2" class="col-sm-10">
-        <p class="lead"><?php echo $page->summary; ?> <span class="btn btn-info"><a href="<?php echo $page->link; ?>">[En savoir plus sur ce lieu]</a></span></p>
+        <p class="lead"><?php echo $page->summary; ?> <span class="btn btn-info"><a href="<?php echo $page->link; ?>">[Read more about this place]</a></span></p>
       </td>
     <tr>
       <td colspan="3" class="col-sm-12">
@@ -52,13 +57,12 @@ if ($page->name != 'places') { // Single place view
           <?php 
             $totalOwners = count($owners);
             $i=0;
-            echo "<small><span class='glyphicon glyphicon-user'></span> Ce lieu est libéré par {$totalOwners} joueur(s) : ";
+            echo "<small><span class='glyphicon glyphicon-user'></span> This place has been freed by {$totalOwners} player(s) : ";
             foreach ($owners as $owner) {
-              if ($i++ === $totalOwners) {
-                echo "{$owner->title} [{$owner->team}]";
+              if ($owner == $owners->last()) {
+                echo "{$owner->title} [{$owner->team->title}]";
               } else {
-                echo "{$owner->title} [{$owner->team}], ";
-                $i++;
+                echo "{$owner->title} [{$owner->team->title}], ";
               }
             }
           echo "</small>";
@@ -96,7 +100,7 @@ if ($page->name != 'places') { // Single place view
   $pageNum = $input->pageNum;
   
   // Count ALL places in the game (for information)
-  $totalCount = $pages->find("template=place, name!=places")->count();
+  $totalCount = $pages->find("template=place, name!='places'")->count();
   // Get all cities having places
   $cities = $pages->find("template=city, children.count>0, sort=title");
   // Get all countries having places
@@ -104,22 +108,22 @@ if ($page->name != 'places') { // Single place view
 
   if (!$type) {
     $type = 'All places';
-    $name = $totalCount.' lieux dans '.$cities->count().' villes, dans '.$countries->count().' pays différents.';
+    $name = $totalCount.' places in '.$cities->count().' cities, in '.$countries->count().' different countries.';
   }
   ?>
-  <div class="row" ng-controller="placesCtrl" ng-init="loadPlaces('<?php echo $pageNum.'\',\''.$angularParam; ?>')">
+  <div class="row">
     <div class="text-center">
-      <h2><a href="map/">Voir la carte du monde Planet Alert</a></h2>
+      <h2><a href="map/">See complete Planet Alert World map</a></h2>
       <?php
         if ($formattedName) {
-          echo "<h2>Lieux dans : {$formattedName} ({$selectedPlaces->count()})</h2>";
+          echo "<h2>Places in : {$formattedName} ({$selectedPlaces->count()})</h2>";
         } else {
-          echo "<h2>Tous les lieux ({$totalCount})</h2>";
+          echo "<h2>All places ({$totalCount})</h2>";
         }
       ?>
-      <a class="btn btn-info" href="<?php echo $page->url; ?>">Voir TOUS les lieux</a>
+      <a class="btn btn-info" href="<?php echo $page->url; ?>">See ALL places</a>
       <div class="dropdown btn-group">
-        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">Choisir un pays <span class="caret"></span></button>
+        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">Select a country <span class="caret"></span></button>
         <ul class="dropdown-menu" role="menu">
           <?php
             foreach($countries as $country) {
@@ -129,7 +133,7 @@ if ($page->name != 'places') { // Single place view
         </ul>
       </div>
       <div class=" dropdown btn-group">
-        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">Choisir une ville <span class="caret"></span></button>
+        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">Select a city <span class="caret"></span></button>
         <ul class="dropdown-menu" role="menu">
           <?php
             foreach($cities as $city) {
@@ -138,11 +142,10 @@ if ($page->name != 'places') { // Single place view
           ?>
         </ul>
       </div>
-      <span class="btn btn-primary" ng-click="thumbView = !thumbView" ng-show="thumbView">Voir la liste détaillée</span>
-      <span class="btn btn-primary" ng-click="thumbView = !thumbView" ng-hide="thumbView">Retour aux photos</span>
+      <span id="switchGallery" class="btn btn-primary" onclick="">Change view</span>
     </div>
 
-  <div ng-show="thumbView" class="text-center">
+  <div id="galleryPlacesList" class="text-center">
     <div class="text-center"><?php echo $pagination; ?></div>
     <ul class="list-inline placesList">
       <?php
@@ -150,43 +153,48 @@ if ($page->name != 'places') { // Single place view
           $thumbImage = $place->photo->eq(0)->getThumb('thumbnail');
           $city = $place->parent->title;
           $country = $place->parent->parent->title;
-          echo "<li><a href='{$place->url}' title=''><img class='img-thumbnail' ng-src='{$thumbImage}' alt='' tooltip-html-unsafe='<h4>$place->title</h4> <h5>{$city},{$country}</h5> <strong>Coût: {$place->GC} or, Niveau {$place->level}</strong>' tooltip-placement='bottom' /></a></li>";
+          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='<h4>$place->title</h4> <h5>{$city},{$country}</h5> <strong>Coût: {$place->GC} or, Niveau {$place->level}</strong>' dta-placement='bottom' /></a></li>";
         }
       ?>
     </ul>
     <div class="text-center"><?php echo $pagination; ?></div>
   </div>
 
-  <div id="" ng-hide="thumbView" class="row">
+  <div id="detailedPlacesList" style="display: none;" class="row">
     <div class="text-center"><?php echo $pagination; ?></div>
-    <table class="table table-condensed table-hover">
+    <table id="mapTable" class="table table-condensed table-hover">
+      <thead>
       <tr>
-        <th ng-click="predicate = 'name'; reverse=!reverse">Nom</th>
-        <th ng-click="predicate = 'country.name'; reverse=!reverse">Pays</th>
-        <th ng-click="predicate = 'city.name'; reverse=!reverse">Ville</th>
-        <th ng-click="predicate = 'GC'; reverse=!reverse">Or</th>
-        <th ng-click="predicate = 'level'; reverse=!reverse">Niveau</th>
-        <th ng-click="predicate = 'maxOwners'; reverse=!reverse"># de 'libérateurs'</th>
+        <th>Name</th>
+        <th>Country</th>
+        <th>City</th>
+        <th>GC</th>
+        <th>Level</th>
+        <th># of 'owners'</th>
       </tr>
-      <tr ng-repeat="place in places | orderBy:predicate:reverse | filter:search">
+      </thead>
+      <tbody>
+      <?php foreach ($selectedPlaces as $place) { ?>
+      <tr>
         <td>
-          {{place.title | filterHtmlChars}}
-          <img ng-repeat="photo in place.photo | limitTo:1" ng-src="site/assets/files/{{place.id}}/mini_{{photo.basename}}" />
+          <?php echo $place->title; ?>
+          <img src="<?php echo $place->photo->eq(0)->getThumb('mini'); ?>" />
         </td>
-        <td>{{place.country.title}}</td>
-        <td>{{place.city.title}}</td>
-        <td>{{place.GC}}</td>
-        <td>{{place.level}}</td>
-        <td>{{place.maxOwners}}</td>
+        <td><?php echo $place->country->title; ?></td>
+        <td><?php echo $place->city->title; ?></td>
+        <td><?php echo $place->GC; ?></td>
+        <td><?php echo $place->level; ?></td>
+        <td><?php echo $place->maxOwners; ?></td>
       </tr>
+      <?php } ?>
+      </tbody>
     </table>
     <div class="text-center"><?php echo $pagination; ?></div>
   </div>
+
 </div>
 <?php
 }
 
-if ( $page->template != 'list-all' ) { // Single place detailed view
   include("./foot.inc"); 
-}
 

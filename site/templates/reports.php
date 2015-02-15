@@ -19,7 +19,7 @@ if ($user->isSuperuser()) {
     echo '<label for="lastName"><input type="radio" id="lastName" name="order"> Last name</input></label>';
     echo '</span>';
     foreach($allTeams as $team) {
-      echo "<span class='btn btn-primary'><a class='ajax reportButton' href='{$pages->get('/report_generator')->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></span> ";
+      echo "<a class='ajax reportButton btn btn-primary' href='{$pages->get('/report_generator')->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a> ";
     }
     echo '<span style="float: right;">';
     // List of players
