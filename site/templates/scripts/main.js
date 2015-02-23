@@ -280,6 +280,7 @@ var shopCheck = function(obj, remainingGC, itemGC) {
     $('ul.itemList li input[type=checkbox]').not($(obj)).each(function() {
       if ($(this).attr('data-gc') > newGC) {
         $(this).prop('disabled', true);
+        $(this).parent('label').css('text-decoration', 'line-through');
       }
     });
     // Enable save buttons
@@ -290,8 +291,10 @@ var shopCheck = function(obj, remainingGC, itemGC) {
     $('ul.itemList li input[type=checkbox]').each(function() {
       if ($(this).attr('data-gc') > newGC) {
         $(this).prop('disabled', true);
+        $(this).parent('label').css('text-decoration', 'line-through');
       } else {
         $(this).prop('disabled', false);
+        $(this).parent('label').css('text-decoration', '');
       }
     });
     var anyChecked = false;

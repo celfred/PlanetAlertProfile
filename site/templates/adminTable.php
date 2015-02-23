@@ -26,6 +26,7 @@ $allPlayers = $pages->find("template='player', team=$team, sort='title'");
 </ul>
 
 <input type="submit" name="adminTableSubmit" value="Save" class="btn btn-block btn-primary" disabled="disabled" />
+<input type="hidden" name="team" value="<?php echo $input->urlSegment1; ?>">
 
 <table id="adminTable" class="adminTable">
   <thead>
@@ -66,7 +67,6 @@ $allPlayers = $pages->find("template='player', team=$team, sort='title'");
   <tr>
   <td><?php echo $player->group->title; ?></td>
   <th><?php echo $player->title; ?></th>
-    <input type="hidden" name="team" value="<?php echo $input->urlSegment1; ?>">
     <?php
       foreach ($allTasks as $task) {
       $taskId = $task->id;

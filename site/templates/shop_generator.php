@@ -1,10 +1,12 @@
 <?php
+include("./my-functions.inc"); 
 
 $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");
 $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
 
 $playerId = $input->urlSegment1;
 $player = $pages->get($playerId);
+$allPlayers = $pages->find("template='player', team=$player->team");
 
 // TODO : Redirect on marketPlace
 
@@ -20,6 +22,12 @@ $out .= '<input type="hidden" name="team" value="'.$player->team.'" />';
 $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment");
 
 $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places");
+// Delete completed places
+foreach($possiblePlaces as $place) {
+  if (placeFreedomRate($place, $allPlayers) === 100) {
+    $possiblePlaces->remove($place);
+  }
+}
 
 if ( $possibleEquipment.count() > 0 || $possiblePlaces.count() >0) {
   $out .= '<input type="submit" name="marketPlaceSubmit" value="Save" class="btn btn-block btn-primary" disabled="disabled" />';
