@@ -42,17 +42,22 @@
        
         // Set new values
         $player->GC = (int) $player->GC - $newItem->GC;
-        switch($newItem->parent->name) {
-          case 'potions' : // instant use potions?
-            $player->HP = $player->HP + $newItem->HP;
-            if ($player->HP > 50) {
-              $player->HP = 50;
-            }
-            $player->equipment->add($newItem);
-            break;
-          default:
-            $player->equipment->add($newItem);
-            break;
+        if ($newItem->template == 'equipment') {
+          switch($newItem->parent->name) {
+            case 'potions' : // instant use potions?
+              $player->HP = $player->HP + $newItem->HP;
+              if ($player->HP > 50) {
+                $player->HP = 50;
+              }
+              $player->equipment->add($newItem);
+              break;
+            default:
+              $player->equipment->add($newItem);
+              break;
+          }
+        }
+        if ($newItem->template == 'place') {
+          $player->places->add($newItem);
         }
 
         // Save player's new scores
