@@ -530,6 +530,16 @@ header {
   background: #FFF;
 }
 
+.list-group {
+  -moz-column-count: 3;
+  column-count: 3;
+}
+.list-group-item label {
+  cursor: pointer;
+}
+.list-group-item label.disabled {
+  text-decoration : line-through;
+}
 /* Large desktop */
 @media (min-width: 1200px) { 
 }

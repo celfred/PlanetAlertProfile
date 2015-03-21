@@ -194,6 +194,40 @@ $(document).ready(function() {
     }
   });
 
+  $('#tickAll').on('click', function() {
+    $('.list-group-item input[type=checkbox]').each( function() {
+      if (!$(this).prop('disabled')) {
+        $(this).prop('checked', true);
+      }
+    });
+  });
+  $('#untickAll').on('click', function() {
+    $('.list-group-item input[type=checkbox]').each( function() {
+      $(this).prop('checked', false);
+    });
+  });
+  $('#generateQuiz').on('click', function() {
+    var noChecked = true;
+    var urls = [];
+    $('.list-group-item input[type=checkbox]').each( function() {
+      if ( $(this).prop('checked') === true) {
+        noChecked = false;
+        urls.push($(this).val());
+      }
+    });
+    if (noChecked == true) {
+      // No checked
+      alert('Please, select at least 1 player!');
+      return false;
+    } else {
+      // Pick a random player and go to quiz
+      //console.log(urls);
+      //alert('TODO: Quiz');
+      var randomUrl = urls[Math.floor(Math.random() * urls.length)];
+      window.location.href = randomUrl;
+    }
+  });
+
 }); 
 
 // Hide rows functions
