@@ -194,37 +194,64 @@ $(document).ready(function() {
     }
   });
 
+  $('#lastQuestion').on('click', function() {
+    $('#toggle').click();
+  });
+  $('#toggle').on('click', function() {
+    $('.list-group').toggleClass('shown');
+    $('.list-group').toggleClass('hidden');
+
+    return false;
+  });
   $('#tickAll').on('click', function() {
     $('.list-group-item input[type=checkbox]').each( function() {
       if (!$(this).prop('disabled')) {
         $(this).prop('checked', true);
       }
     });
+    return false;
   });
   $('#untickAll').on('click', function() {
     $('.list-group-item input[type=checkbox]').each( function() {
       $(this).prop('checked', false);
     });
+    return false;
   });
-  $('#generateQuiz').on('click', function() {
+  $('button.generateQuiz').on('click', function() {
     var noChecked = true;
     var urls = [];
-    $('.list-group-item input[type=checkbox]').each( function() {
+    var ids = [];
+    var playersIndex = [];
+    $('.list-group-item input[type=checkbox]').each( function(index) {
       if ( $(this).prop('checked') === true) {
         noChecked = false;
         urls.push($(this).val());
+        ids.push($(this).val());
+        playersIndex.push(index);
       }
     });
     if (noChecked == true) {
       // No checked
-      alert('Please, select at least 1 player!');
-      return false;
+      // Check if last question is checked
+      if ($('#lastQuestion').prop('checked') === true) {
+        return true;
+      } else {
+        alert('Please, select at least 1 player!');
+        return false;
+      }
     } else {
       // Pick a random player and go to quiz
-      //console.log(urls);
-      //alert('TODO: Quiz');
-      var randomUrl = urls[Math.floor(Math.random() * urls.length)];
-      window.location.href = randomUrl;
+      if (ids.length > 0) {
+        var randomIndex = Math.floor(Math.random() * ids.length);
+        var randomId = ids[randomIndex];
+        // Get rid of selected player
+        ids.splice(randomIndex, 1);
+      } else {
+        var randomId = '-1';
+      }
+      // Modify form parameters accordingly & send form
+      $('#selectedIds').val(ids);
+      $('#selectedPlayer').val(randomId);
     }
   });
 
