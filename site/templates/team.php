@@ -95,6 +95,11 @@
   $out .= '</thead>';
   $out .= '<tbody>';
   foreach( $allPlayers as $player) {
+    if ($player->login == $user->name) {
+      $class = ' class="selected"';
+    } else {
+      $class = '';
+    }
     // Get karma evolution
     $prevEvents = $player->child("name='history'")->children("limit=5");
     $prevEvents->sort('created');
@@ -147,7 +152,7 @@
     } else {
       $mini = '';
     }
-    $out .= '<tr>';
+    $out .= '<tr '. $class.'>';
     $out .= '<td>'. $player->group->title .'</td>';
     $out .= '<td>'. $mini .'</td>';
     $out .= '<td><a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a></td>';

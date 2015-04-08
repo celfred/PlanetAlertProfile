@@ -123,14 +123,14 @@ $(document).ready(function() {
 
   $('[data-toggle="tooltip"]').tooltip({ container: 'body'});
 
-  $('#historyTable').DataTable({
-    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
-    order: [[ 0, "desc"]]
-  });
   $('#mapTable').DataTable({
     dom: 'ft',
     paging: false,
     order: [[ 0, "asc"]]
+  });
+  var historyTable = $('#historyTable').DataTable({
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+    order: [[ 0, "desc"]]
   });
   var taskTable = $('#taskTable').DataTable({
     dom: 'ft',
@@ -172,6 +172,7 @@ $(document).ready(function() {
   $('.categoryFilter').click(function(){
     mainShop.draw();
     taskTable.draw();
+    historyTable.draw();
   });		    
     
   $('a.toggle-vis').on( 'click', function (e) {

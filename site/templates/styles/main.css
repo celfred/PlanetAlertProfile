@@ -313,6 +313,9 @@ span.glyphicon {
 .selected {
   border-bottom: 1px solid #000;
 }
+tr.selected {
+  background-color: #FFF;
+}
 #taskForm td:nth-of-type(1), #taskForm th:nth-of-type(1) {
   text-align: left;
 }
@@ -383,7 +386,7 @@ img.align_right {
 #goldPlayer, #equipPlayer {
 }
 .negative {
-  background: lightred;
+  background: red;
 }
 .positive {
   background: lightgreen;

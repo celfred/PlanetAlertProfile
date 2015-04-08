@@ -1,5 +1,9 @@
 <?php
-include("./my-functions.inc"); 
+if (!$config->ajax) {
+  include("./head.inc"); 
+} else {
+  include("./my-functions.inc"); 
+}
 
 $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");
 $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
@@ -7,8 +11,6 @@ $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
 $playerId = $input->urlSegment1;
 $player = $pages->get($playerId);
 $allPlayers = $pages->find("template='player', team=$player->team");
-
-// TODO : Redirect on marketPlace
 
 $out = '';
 
@@ -29,9 +31,11 @@ foreach($possiblePlaces as $place) {
   }
 }
 
+/*
 if ( $possibleEquipment.count() > 0 || $possiblePlaces.count() >0) {
-  $out .= '<input type="submit" name="marketPlaceSubmit" value="Save" class="btn btn-block btn-primary" disabled="disabled" />';
+  $out .= '<input type="submit" name="marketPlaceSubmit" value="Yes, buy the selected items!" class="btn btn-block btn-primary" disabled="disabled" />';
 }
+ */
 
 $out .= '<section class="row">';
 if ( $possibleEquipment.count() > 0) {
@@ -63,10 +67,15 @@ if ( $possiblePlaces.count() > 0) {
 $out .= '</section>';
 
 if ( $possibleEquipment.count() > 0 || $possiblePlaces.count() >0) {
-  $out .= '<input type="submit" name="marketPlaceSubmit" value="Save" class="btn btn-block btn-primary" disabled="disabled" />';
+  $out .= '<input type="submit" name="marketPlaceSubmit" value="Yes, buy the selected items!" class="btn btn-block btn-primary" disabled="disabled" />';
+  $out .= '<a href="'.$homepage->url.'players/'.$player->team->name.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
 }
 
 $out .= '</form>';
 
 echo $out;
+
+if (!$config->ajax) {
+  include("./foot.inc"); 
+}
 ?>

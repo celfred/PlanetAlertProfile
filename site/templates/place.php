@@ -3,6 +3,29 @@
 
 include("./head.inc"); 
 
+  // Test if a player is connected
+  if ($user->isLoggedin()) {
+    if ($user->isSuperuser() == false ) { // Not admin
+      echo '<div class="row well">';
+      echo '<h4>';
+      echo '<span class="lead label label-default"><span class="glyphicon glyphicon-signal"></span>'.$player->level.'&nbsp;&nbsp;<img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" />'.$player->GC.'</span>';
+      echo '</h4>';
+      echo '<img src="'.$player->avatar->url.'" alt="No avatar" />';
+      if ($player->places->count > 0) {
+        $playerPlaces = [];
+        foreach ($player->places as $place) {
+          array_push($playerPlaces, $place->id);
+          $mini = "<img class='img-thumbnail' data-toggle='tooltip' data-html='true' data-original-title='".$place->title."' src='".$place->photo->eq(0)->getThumb('thumbnail')."' alt='Photo' />";
+          echo $mini;
+        }
+      } else {
+        echo '<span class="label label-info">No places.</span>';
+      }
+      echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
+      echo '</div>';
+    }
+  }
+
 if ($page->name != 'places') { // Single place view
   if ($user->isSuperuser()) {
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
@@ -70,10 +93,13 @@ if ($page->name != 'places') { // Single place view
       </td>
     </tr>
   </table>
+  <?php echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>'; ?>
 <?php
 } else { // All places view, Country view, City view
 
-  echo '<a class="pdfLink btn btn-info" href="'. $page->url.'all?pages2pdf=1">Get PDF [The Map]</a>';
+  if ($user->isSuperuser()) {
+    echo '<a class="pdfLink btn btn-info" href="'. $page->url.'all?pages2pdf=1">Get PDF [The Map]</a>';
+  }
 
   // Get any limiting elements in URL
   $type = $input->get->type;
@@ -192,6 +218,7 @@ if ($page->name != 'places') { // Single place view
     <div class="text-center"><?php echo $pagination; ?></div>
   </div>
 
+  <?php echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>'; ?>
 </div>
 <?php
 }

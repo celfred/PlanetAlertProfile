@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- <html lang="en" ng-app="myApp"> -->
 <html lang="en">
 <head>
   <?php
@@ -16,6 +15,10 @@
     if ($input->get->logout == 1) {
       $session->logout();
       $session->redirect('./');
+    }
+
+    if ($user->isLoggedin()) {
+      $player = $pages->get("template='player', login=$user->name");
     }
   ?>
 	<title><?php echo $page->get("headline|title"); ?></title>
@@ -57,7 +60,13 @@
           if ($child->name == 'players') {
             foreach($allTeams as $team) {
               $class = $sanitizer->pageName($team->name) == $input->urlSegment1 ? " class='on'" : "";
-              echo "<li><a$class href='{$child->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></li>";
+              if ($user->isLoggedin() == false || ($user->isSuperuser())) { // No user logged : display all teams (public view)
+                echo "<li><a$class href='{$child->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></li>";
+              } else { // A user is logged : display his team only
+                if ($team->title == $player->team->title) {
+                  echo "<li><a$class href='{$child->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></li>";
+                }
+              }
             }
 
           } else {
@@ -75,6 +84,13 @@
               }
             }
           }
+        }
+        if ( $user->isLoggedin()) {
+          echo '<li><a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'"><span class="username">My profile ('.$user->name.')</span></a></li>';
+          echo '<li><a href="./?logout=1">Log out</a></li>';
+        } else {
+          if ($page->name=='login') { $class=" class='on'"; }
+          echo "<li><a$class href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>Login</a></li>";
         }
       ?>
       </ul>

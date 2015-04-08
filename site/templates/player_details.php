@@ -4,6 +4,13 @@
   $playersTotalNb = $pages->count("template=player,team=$playerPage->team");
   $playerPlacesNb = $playerPage->places->count();
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-created");
+  $allCategories = new PageArray();
+  foreach ($allEvents as $task) {
+    if ($task->category != '') {
+      $allCategories->add($task->category);
+      $allCategories->sort("title");
+    }
+  }
 
   $karma = $playerPage->karma;
   if (!$karma) $karma = 0;
@@ -30,7 +37,7 @@
 ?>
 
         <!-- <a href="players/<?php echo $input->urlSegment1; ?>">Back to team view</a> -->
-<div ng-controller="playerCtrl" ng-init="init(<?php echo $rate; ?>)">
+<div>
   <div class="row">
     <div class="col-sm-12">
       <div id="" class="col-sm-6 panel panel-success panel-player">
@@ -130,19 +137,27 @@
   </div>
 
   <?php
-    if ($user->isSuperuser()) { // Admin front-end
+    if ($user->name === $playerPage->login || ($user->isSuperuser())) { // Logged-in user or Admin front-end
   ?>
   <div class="row">
     <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
-          <h4>Historique</h4>
+          <h4>History</h4>
         </div>
         <div class="panel-body">
+          <div id="Filters" data-fcolindex="2" class="text-center">
+            <ul class="list-inline well">
+              <?php foreach ($allCategories as $category) { ?>
+              <li><label for="<?php echo $category->name; ?>" class="btn btn-primary btn-xs"><?php echo $category->title; ?> <input type="checkbox" value="<?php echo $category->title; ?>" class="categoryFilter" name="categoryFilter" id="<?php echo $category->name; ?>"></label></li>
+              <?php } ?> 
+            </ul>
+          </div>
             <table id="historyTable" class="table table-condensed table-hover">
               <thead>
-              <tr>
+                <tr>
                 <th>Date</th>
+                <th>+/-</th>
                 <th>Category</th>
                 <th>Title</th>
                 <th>Comment</th>
@@ -151,8 +166,17 @@
               <tbody>
               <?php
                 foreach($allEvents as $event) {
-                  echo "<tr><td data-order='{$event->created}'>";
+                  if ($event->task->XP > 0 || ($event->task->category->name === 'place' || $event->task->category->name === 'shop') ) {
+                    $class = '+';
+                  } else {
+                    $class = '-';
+                  }
+                  echo "<tr>";
+                  echo "<td data-order='{$event->created}'>";
                     echo date("d/m/Y D", $event->created);
+                  echo "</td>";
+                  echo "<td>";
+                  echo $class;
                   echo "</td>";
                   echo "<td>";
                   echo "{$event->task->category->title}";
