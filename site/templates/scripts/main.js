@@ -10,6 +10,13 @@ $(document).ready(function() {
     return false; 
   }); 
 
+  $(".ajaxUnpublish").click(function() {
+    //$("#feedback").html("<p>Loading...</p>"); 
+    $.get($(this).val(), function(data) { 
+        //$("#feedback").html(''); 
+    }); 
+  }); 
+
   $('#shopSelect').change( function() {
     var url = $('#shopSelect').val();
 
@@ -340,7 +347,7 @@ var shopCheck = function(obj, remainingGC, itemGC) {
     $('#remainingGC').text(newGC);
     // Disable impossible items left
     $('ul.itemList li input[type=checkbox]').not($(obj)).each(function() {
-      if ($(this).attr('data-gc') > newGC) {
+      if ($(this).attr('data-gc') > newGC && $(this).prop('checked') === false) {
         $(this).prop('disabled', true);
         $(this).parent('label').css('text-decoration', 'line-through');
       }

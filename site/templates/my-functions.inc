@@ -149,7 +149,7 @@ function groupBonus($players) {
   */
 }
 
-function saveHistory($player, $task, $taskComment) {
+function saveHistory($player, $task, $taskComment, $newsBoard = 0) {
   $p = new Page();
   $p->template = 'event';
   $history = $player->child("name=history");
@@ -173,6 +173,8 @@ function saveHistory($player, $task, $taskComment) {
   $p->task = $task;
   // Save comment
   $p->summary = $taskComment;
+  // Save publish state
+  $p->publish = $newsBoard;
   $p->save(); 
 }
 
@@ -234,4 +236,19 @@ function placeFreedomRate($place, $allPlayers) {
   return $rate;
 }
 
+function display_scores($allPlayers, $allTeams, $totalPlaces) {
+  // Calculate each team scores and display it
+  echo '<h3 class="text-center ">';
+  echo '<ul class="scores list-inline">Free world : ';
+  foreach($allTeams as $team) {
+    $teamPlayers = $allPlayers->find("team=$team");
+    $globalScore = globalScore($teamPlayers, $totalPlaces); $teamScore = $globalScore[0];
+    $teamOwners = $globalScore[1];
+    $totalOwners = $globalScore[2];
+
+    echo '<li class="label label-default"><strong title="'.$teamOwners.'/'.$totalOwners.'">'.$team->title.' : '.$teamScore.'%</strong></li>';
+  }
+  echo '</ul>';
+  echo '</h3>';
+}
 ?>

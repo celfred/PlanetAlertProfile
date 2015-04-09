@@ -48,7 +48,7 @@
     $homepage = $pages->get("/"); 
     $children = $homepage->children;
     $children->prepend($homepage); 
-    $allTeams = $pages->get("/teams")->children->not("name=orphans");
+    $allTeams = $pages->get("/teams")->children->not("name=orphans")->sort('-name');
   ?>
           
   <div id="wrap">
@@ -86,7 +86,9 @@
           }
         }
         if ( $user->isLoggedin()) {
-          echo '<li><a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'"><span class="username">My profile ('.$user->name.')</span></a></li>';
+          if ($user->isSuperuser() === false) {
+            echo '<li><a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'"><span class="username">My profile ('.$user->name.')</span></a></li>';
+          }
           echo '<li><a href="./?logout=1">Log out</a></li>';
         } else {
           if ($page->name=='login') { $class=" class='on'"; }

@@ -316,7 +316,25 @@ span.glyphicon {
 tr.selected {
   background-color: #FFF;
 }
-#taskForm td:nth-of-type(1), #taskForm th:nth-of-type(1) {
+.focus {
+  background-color: #3175AF;
+  color: #FFF;
+  padding: 2px;
+}
+.news {
+  margin: 20px 0px;
+  border-radius: 10px;
+}
+.panel-heading {
+  border-radius: 10px 10px 0px 0px;
+}
+.panel-footer {
+  border-radius: 0px 0px 10px 10px;
+}
+.scores li {
+  margin : 0px 5px;
+}
+#taskForm td:nth-of-type(0), #taskForm th:nth-of-type(1) {
   text-align: left;
 }
 #shopForm select, #mapForm select {
