@@ -7,6 +7,8 @@
 /site/assets/sessions/*
 /site/assets/logs/*
 /site/assets/files/*/*.pdf
+/site/assets/files/*/*.png
+/site/assets/files/*/*.jpg
 /site/assets/cache/*
 /site/assets/backups/*
 /site/templates/bower_components/*
