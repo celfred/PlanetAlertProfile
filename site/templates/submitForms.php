@@ -44,21 +44,20 @@
               $player->equipment->add($newItem);
               break;
           }
-          $task = $pages->get("name='buy'");
-          $newsBoard = 1;
-        }
-        if ($newItem->template == 'place') {
-          $player->places->add($newItem);
-          $task = $pages->get("name='free'");
-          $newsBoard = 1;
-        }
 
-        // Save player's new scores
-        $player->save();
+          // Save player's new scores
+          $player->save();
 
-        // Record history
-        $taskComment = $newItem->title;
-        saveHistory($player, $task, $taskComment, $newsBoard);
+          // Record history
+          $taskComment = $newItem->title;
+          saveHistory($player, $task, $taskComment, $newsBoard);
+          
+          // Notify admin
+          $msg = "Player : ". $player->title."\r\n";
+          $msg .= "Team :". $player->team->title."\r\n";
+          $msg .= "Item :". $newItem->title;
+          mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+        }
       }
 
       if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
@@ -103,16 +102,16 @@
           // Record history
           $taskComment = $newItem->title;
           saveHistory($player, $task, $taskComment, $newsBoard);
+          
+          // Notify admin
+          $msg = "Player : ". $player->title."\r\n";
+          $msg .= "Team :". $player->team->title."\r\n";
+          $msg .= "Item :". $newItem->title;
+          mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
     }
     
-    // Notify admin
-    $msg = "Player : ". $player->title."<br />";
-    $msg .= "Team :". $player->team->title."<br />";
-    $msg .= "Item :". $newItem->title;
-    mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
-
     // Redirect to player's profile
     $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name);
   }
@@ -204,6 +203,5 @@
       $session->redirect($pages->get('/shop')->url.$input->post->team);
     }
   } // End if superUser
-
 
 ?>
