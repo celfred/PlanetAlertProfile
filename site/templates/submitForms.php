@@ -44,21 +44,14 @@
               $player->equipment->add($newItem);
               break;
           }
-          $task = $pages->get("name='buy'");
-          $newsBoard = 1;
-        }
-        if ($newItem->template == 'place') {
-          $player->places->add($newItem);
-          $task = $pages->get("name='free'");
-          $newsBoard = 1;
-        }
 
-        // Save player's new scores
-        $player->save();
+          // Save player's new scores
+          $player->save();
 
-        // Record history
-        $taskComment = $newItem->title;
-        saveHistory($player, $task, $taskComment, $newsBoard);
+          // Record history
+          $taskComment = $newItem->title;
+          saveHistory($player, $task, $taskComment, $newsBoard);
+        }
       }
 
       if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
@@ -204,6 +197,5 @@
       $session->redirect($pages->get('/shop')->url.$input->post->team);
     }
   } // End if superUser
-
 
 ?>
