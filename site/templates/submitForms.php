@@ -111,7 +111,7 @@
         }
       }
     }
-    
+
     // Redirect to player's profile
     $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name);
   }
