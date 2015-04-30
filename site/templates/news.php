@@ -118,7 +118,7 @@
   <div class="col-sm-8">
     <?php
       // Admin news
-      $newsAdmin = $pages->get('/newsboard')->children('publish=1');
+      $newsAdmin = $pages->get('/newsboard')->children('publish=1')->sort('-created');
       if ($newsAdmin->count() > 0) {
         foreach($newsAdmin as $n) {
         ?>
@@ -182,9 +182,9 @@
            <?php
              echo '<p>';
              switch ($n->task->category->name) {
-             case 'place' : echo '<span class="lead">New free place : '.$n->summary.'</span>';
+             case 'place' : echo '<span class="lead">New place : '.$n->summary.'</span>';
                break;
-             case 'shop' : echo '<span class="lead">New item from The Shop : '.$n->summary.'</span>';
+             case 'shop' : echo '<span class="lead">New equipment : '.html_entity_decode($n->summary).'</span>';
                break;
              default : echo 'todo : ';
                break;
