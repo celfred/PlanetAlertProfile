@@ -108,9 +108,9 @@
       $HP = $event->task->HP;
       $title = $event->task->title;
       if ($event->summary) {
-        $comment = '<br />['.date("d/m", $event->created).' - '.$event->summary.']';
+        $comment = '<br />'.$event->date.'<br />'.$event->summary;
       } else {
-        $comment = '<br />['.date("d/m", $event->created).']';
+        $comment = '<br />'.$event->date;
       }
       if ($HP < 0) {
         $trend .= '<span class="negativeTrend" data-toggle="tooltip" data-html="true" title="'.$title.$comment.'">&nbsp;</span>';

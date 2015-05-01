@@ -173,7 +173,7 @@
                   }
                   echo "<tr>";
                   echo "<td data-order='{$event->created}'>";
-                    echo date("d/m/Y D", $event->created);
+                  echo "{$event->date}";
                   echo "</td>";
                   echo "<td>";
                   echo $class;
