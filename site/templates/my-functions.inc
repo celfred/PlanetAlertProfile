@@ -163,12 +163,13 @@ function saveHistory($player, $task, $taskComment, $newsBoard = 0) {
   }
   $p->parent = $history;
   // Save title
-  // Get today's date
+  // Get today's date by default, changeable in backend if needed)
   date_default_timezone_set('Paris/France');
-  $today = date('d/m', time());
+  $today = date('m/d/Y', time());
+  $p->date = $today;
   // Get new values
   $newValues = ' ['.$player->level.'lvl, '.$player->HP.'HP, '.$player->XP.'XP, '.$player->GC.'GC, '.$player->places->count.'P, '.$player->equipment->count.'E]';
-  $p->title = $today.' - '.str_replace('&#039;', '\'', $task->title).$newValues;
+  $p->title = str_replace('&#039;', '\'', $task->title).$newValues;
   // Save task
   $p->task = $task;
   // Save comment
