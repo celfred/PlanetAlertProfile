@@ -7,11 +7,7 @@
   $totalPlaces = $pages->find("template='place', name!='places'");
 
   echo '<div class="row">';
-  echo '<h3 class="well text-center col-sm-4"><span class="glyphicon glyphicon-list"></span> Planet Alert Newsboard</h3>';
-
-  echo '<div class="col-sm-8">';
-  display_scores($allPlayers, $allTeams, $totalPlaces);
-  echo '</div>';
+    display_scores($allPlayers, $allTeams, $totalPlaces);
   echo '</div>';
 
 ?>
@@ -72,7 +68,7 @@
 
     <div class="panel panel-info">
       <div class="panel-heading">
-        <h4 class="panel-title"><span class="glyphicon glyphicon-wrench"</span> Most equipped</h4>
+        <h4 class="panel-title"><span class="glyphicon glyphicon-wrench"></span> Most equipped</h4>
       </div>
       <div class="panel-body">
         <ol>
