@@ -6,16 +6,9 @@
 
   <footer class="text-center">
       <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS - &copy; <?php echo date("Y"); ?> F.L. 
-        <a href="about/">[À propos]</a>
-        <?php
-        /*
-          if($user->isLoggedin()) {
-            echo "<a style='float: right; margin-right: 5px;' href='./?logout=1'>[Log out]</a>";
-          } else {
-            echo "<a style='float: right;' href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>[Admin]</a>";
-          }
-        */
-        ?>
+        <a href="about/">[About]</a>
+        &nbsp;
+        <a href="https://github.com/celfred/PlanetAlertProfile">[Github repository]</a>
       </p>
 	</footer>
 
@@ -27,19 +20,6 @@
     echo '<a href="'.$config->urls->admin.'">[Backend]</a>';
     echo '</span>';
   }
-  /*
-  if ($user->isLoggedin()) {
-    $name = $user->name;
-    $player = $pages->get("template='player', login=$name");
-    echo '<span class="backendLink">';
-    if ($user->isSuperuser()) {
-      echo '<a href="'.$config->urls->admin.'">[Backend]</a>';
-    }
-    echo '<a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'">[My profile]</a>';
-    echo '<a href="./?logout=1">[Log out]</a>';
-    echo '</span>';
-  }
-  */
 
 	?>
   <script src="<?php echo $config->urls->templates?>bower_components/jquery/dist/jquery.min.js"></script>
