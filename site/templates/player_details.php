@@ -4,6 +4,8 @@
   $playersTotalNb = $pages->count("template=player,team=$playerPage->team");
   $playerPlacesNb = $playerPage->places->count();
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-created");
+  $rightInvasions = $allEvents->find("task.name=right-invasion")->count();
+  $wrongInvasions = $allEvents->find("task.name=wrong-invasion")->count();
   $allCategories = new PageArray();
   foreach ($allEvents as $task) {
     if ($task->category != '') {
@@ -131,6 +133,15 @@
               }
             ?>
             </ul>
+        </div>
+        <div class="panel-footer">
+            <?php
+            if ($rightInvasions > 0 || $wrongInvasions > 0) {
+              echo 'Defensive power : <span>'.(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)';
+            } else {
+              echo 'You have not faced any monster invasion yet.';
+            }
+            ?>
         </div>
       </div>
     </div>
