@@ -180,7 +180,7 @@
            <?php
              echo '<p>';
              switch ($n->task->category->name) {
-             case 'place' : echo '<span class="lead">New place : '.$n->summary.'</span>';
+             case 'place' : echo '<span class="lead">New place : '.html_entity_decode($n->summary).'</span>';
                break;
              case 'shop' : echo '<span class="lead">New equipment : '.html_entity_decode($n->summary).'</span>';
                break;
