@@ -405,6 +405,10 @@ img.align_right {
 }
 .negative {
   background: red;
+  color: #FFF;
+}
+.negative:hover {
+  color: #000;
 }
 .positive {
   background: lightgreen;

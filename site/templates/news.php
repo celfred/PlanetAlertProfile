@@ -127,7 +127,7 @@
               echo date("F d, Y", $n->created);
               echo $n->date;
               echo ' - ';
-              echo 'Planet Alert Official Announcement : '.$n->title;
+              echo 'Official Announcement : '.$n->title;
              ?>
            </h4>
          </div>
