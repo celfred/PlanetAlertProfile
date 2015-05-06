@@ -1,5 +1,4 @@
 <?php
-
 include("./head.inc"); 
 
 // For redirection to previous page

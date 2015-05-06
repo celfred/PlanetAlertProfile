@@ -2,7 +2,8 @@
   <?php 
   /* list-all template */
 
-  $reportLink = $pages->get("/report_generator")->url;
+  $reportLink = $pages->get("/reports")->url;
+  $reportGeneratorLink = $pages->get("/report_generator")->url;
   $allPlayers = $pages->find("template='player', team=$input->urlSegment1, sort='group'");
   $allGroups = $pages->get("/groups")->children('sort=title');
   $outGroups = '';

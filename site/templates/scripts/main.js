@@ -42,6 +42,26 @@ $(document).ready(function() {
     return false; 
   });
 
+  $('#reportUrl_button').click( function() {
+    var reportUrl = $(this).attr('data-reportUrl');
+    // Add report category
+    reportUrl += $('.reportCat:checked').val()+'/';
+    // Add report team or player
+    if ($('#reportPlayer').val() == '') { // No single player selected
+      reportUrl += $('.reportTeam:checked').val()+'/';
+    } else {
+      reportUrl += $('#reportPlayer').val()+'/';
+    }
+    // Add period Id
+    reportUrl += $('#periodId').val()+'/';
+    // Add sorting GET parameter
+    reportUrl += '?sort='+$('.reportSort:checked').val();
+    // Go to report_generator
+    $.get(reportUrl, function(data) { 
+        $("#reportDiv").html(data); 
+    }); 
+  });
+
   $('#participation').click( function() {
     var limitCheckbox = $('#limit10');
     if ($(this).is(':checked')) {
@@ -88,6 +108,12 @@ $(document).ready(function() {
         $(this).attr('href', href);
       });
     }
+  });
+
+  $('#period_list').change( function() {
+    $('a.reportButton').each( function() {
+      var href = $(this).attr('href');
+    });
   });
 
   $('#lastName').click( function() {

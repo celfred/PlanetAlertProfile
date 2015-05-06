@@ -34,6 +34,8 @@ if ($input->urlSegment1 && $input->urlSegment2 == '') { // Class report
   // List all recorded events for selected player
   $events = $selectedPlayer->find("template=event, sort=category");
 } else if ($input->urlSegment2 != '' && $input->urlSegment2 == 'participation') { // Team participation
+  // TODO : Save generation date if needed (confirm dialog?)
+  // TODO : Alert message for admin if participation->count() == 10 in a team since saved date?
   $team = $input->urlSegment1;
   $allPlayers = $pages->find("team=$team, template=player, sort='".$sort."'");
   $teamParticipation = true;

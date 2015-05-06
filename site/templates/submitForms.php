@@ -151,6 +151,13 @@
 
         // Record history
         saveHistory($player, $task, $taskComment);
+
+        // TODO : Check participation here?
+        /*
+        if ($task->category == 'participation') {
+          // Count previous participation?
+        }
+        */
       }
       // Redirect to team page
       $session->redirect($pages->get('/players')->url.$input->post->team);
