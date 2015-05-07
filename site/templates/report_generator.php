@@ -20,7 +20,7 @@ $selected = $pages->get("name=$input->urlSegment2");
 $period = $pages->get("$input->urlSegment3");
 $sort = $input->get['sort'];
 
-$categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|attitude");
+$categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat");
 
 if ($selected->template == 'player') { // Player's report
   echo 'Player TODO';
@@ -46,14 +46,16 @@ if ($selected->template == 'player') { // Player's report
 // PDF Download link TODO Check the link
 echo '<a class="pdfLink btn btn-info" href="' . $page->url.$input->urlSegment1.'/'.$input->urlSegment2.'/'.$input->urlSegment3. '?sort='.$sort.'&pages2pdf=1">Get PDF</a>';
 
-if ($global) {
+if (!$global) { // Single Player report
+  echo 'Single player';
+} else { // Team report
   if (!$participation) {
 ?>
 <table class="table table-condensed table-hover">
   <tr>
     <td></td>
     <td colspan="<?php echo $categories->count; ?>"><h3><?php echo $reportTitle; ?></td>
-    <td colspan="4"><h3>Planet Alert</h3></td>
+  <!--  <td colspan="4"><h3>Planet Alert</h3></td> -->
   </tr>
   <tr>
   <td></td>
@@ -61,22 +63,24 @@ if ($global) {
   foreach ($categories as $category) {
     echo '<th>';
     switch ($category->name) {
-      case 'participation' : echo '<i class="glyphicon glyphicon-comment" title="'. $category->title.'"></i> '; break;
-      case 'homework' : echo '<i class="glyphicon glyphicon-pencil" title="'. $category->title.'"></i>'; break;
-      case 'groupwork' : echo '<i class="glyphicon glyphicon-user" title="'. $category->title.'"></i><i class="glyphicon glyphicon-user" title="'. $category->title.'"></i>'; break;
-      case 'travail-individuel' : echo '<i class="glyphicon glyphicon-user" title="'. $category->title.'"></i>'; break;
-      case 'manual-cat' : echo '<i class="glyphicon glyphicon-cog" title="'. $category->title.'"></i>'; break;
-      case 'test' : echo '<i class="glyphicon glyphicon-ok" title="'. $category->title.'"></i>'; break;
-      case 'oublis' : echo '<i class="glyphicon glyphicon-cloud" title="'. $category->title.'"></i>'; break;
+      case 'participation' : echo '<i class="glyphicon glyphicon-comment" data-toggle="tooltip" title="'. $category->title.'"></i> '; break;
+      case 'homework' : echo '<i class="glyphicon glyphicon-pencil" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
+      case 'groupwork' : echo '<i class="glyphicon glyphicon-user" data-toggle="tooltip" title="'. $category->title.'"></i><i class="glyphicon glyphicon-user" title="'. $category->title.'"></i>'; break;
+      case 'travail-individuel' : echo '<i class="glyphicon glyphicon-user" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
+      case 'manual-cat' : echo '<i class="glyphicon glyphicon-cog" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
+      case 'test' : echo '<i class="glyphicon glyphicon-ok" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
+      case 'oublis' : echo '<i class="glyphicon glyphicon-cloud" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
       default : echo $category->title;
     }
     echo '</th>';
   }
   ?>
+<!--
   <td><i class="glyphicon glyphicon-picture" title="Lieux"></i></td>
   <td><i class="glyphicon glyphicon-shopping-cart" title="Équipement"></i></td>
   <td><i class="glyphicon glyphicon-usd" title="Gold coins"></i></td>
   <td><i class="glyphicon glyphicon-heart" title="Health points"></i></td>
+-->
   </tr>
   <?php
     $teamPlaces = 0;
@@ -145,41 +149,38 @@ if ($global) {
               $sign = '+';
             }
             if (strlen(trim($event->summary)) > 0) {
-              $list .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->summary."\r\n";
+              $list .= $sign.' '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
             } else {
-              $list .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
+              $list .= $sign.' '.strftime("%d/%m", $event->date).' '.$event->title."<br />";
             }
             if ($event->task->name == 'absent') {
-              $listAbsent .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
+              $listAbsent .= '- '.strftime("%d/%m", $event->date).'<br />';
               $teamAbsent += 1;
             }
             if ($category->name == 'homework') {
               switch ($task->name) {
                 case 'no-homework' :
                   $nbNoHk += 1;
-                  $listNoHk .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
+                  $listNoHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
                   $teamNoHk += 1;
-                  //echo  '<p title="'. $event->summary.'"><span style="font-size: 18px;">⊝</span>&nbsp;<span style="font-size: 11px;" class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></p>';
                   break;
                 case 'homework' : // Don't display regular homework
                   $nbHk += 1;
-                  $listHk .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
-                  //echo  '<p title="'. $event->summary.'"><span style="font-size: 18px;">⊙</span>&nbsp;<span style="font-size: 11px;" class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></p>';
+                  $listHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
                   break;
                 case 'homework-half-done' :
                   $nbHalfHk += 1;
-                  $listHalfHk .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
-                  //echo  '<p title="'. $event->summary.'"><span style="font-size: 18px;">⊘</span>&nbsp;<span style="font-size: 11px;" class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></p>';
+                  $teamHalfHk += 1;
+                  $listHalfHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
                   break;
                 case 'entrainement-supplementaire-simple' :
                   $nbExtraHk += 1;
-                  $listExtraHk .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
-                  //echo  '<p title="'. $event->summary.'"><span style="font-size: 18px;">⊕</span>&nbsp;<span style="font-size: 11px;" class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></p>';
+                  $teamExtraHk += 1;
+                  $listExtraHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
                   break;
                 case 'awarded-homework' :
                   $nbExtraHk += 1;
-                  $listExtraHk .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
-                  //echo  '<p title="'. $event->summary.'"><span style="font-size: 18px;">⊕</span>&nbsp;<span style="font-size: 11px;" class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></p>';
+                  $listExtraHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
                   break;
                 default : break;
               }
@@ -188,13 +189,12 @@ if ($global) {
               switch ($task->name) {
                 case 'forgotten-weapons' :
                   $nbForgotStuff += 1;
-                  $listForgotStuff .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
+                  $listForgotStuff .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
                   $teamForgotStuff += 1;
-                  //echo  '<span title="'. $list .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></span> ';
                   break;
                 case 'test-not-signed' :
                   $nbForgotSigned += 1;
-                  $listForgotSigned .= $sign.' ['.strftime("%d/%m", $event->created).'] '.$event->title."\r\n";
+                  $listForgotSigned .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
                   $teamForgotSigned += 1;
                   //echo  '<span title="'. $list .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="'. $className .'">['. strftime("%d/%m", $event->created).']</span></span> ';
                   break;
@@ -228,41 +228,41 @@ if ($global) {
             if ( $ratio < 0) { $ratio = 0; }
 
             if ($nbPart != 0) {
-              echo $ratio.'%';
+              echo '<span data-toggle="tooltip" title="% Participation positive">'.$ratio.'%</span>';
               //echo ' ('.$posPart.'/'.$nbPart.')';
             }
             if ($nbAbsent != 0) {
-              echo '<span title="'.$listAbsent.'" class="absent">['.$nbAbsent.' abs.]</span>';
+              echo ' <span data-toggle="tooltip" data-html="true" title="'.$listAbsent.'" class="absent">['.$nbAbsent.' abs.]</span>';
             }
             array_push($teamPart, $ratio);
           }
           if ($category->name == 'oublis') {
             if ($nbForgotStuff > 0) {
-              echo  '<span title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="'. $className .'">'.$nbForgotStuff.'</span></span>';
+              echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="">'.$nbForgotStuff.'</span></span>';
               echo '&nbsp;&nbsp;&nbsp;';
             }
             if ($nbForgotSigned > 0) {
-              echo  '<span title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="'. $className .'">'.$nbForgotSigned.'</span></span> ';
+              echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="">'.$nbForgotSigned.'</span></span> ';
             }
           }
           if ($category->name == 'homework') {
             if ($nbNoHk > 0) {
-              echo  '<span title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
+              echo  '<span data-toggle="tooltip" data-html="true" title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
               echo '&nbsp;&nbsp;&nbsp;';
             }
             if ($nbHalfHk > 0) {
-              echo  '<span title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
+              echo  '<span data-toggle="tooltip" data-html="true" title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
               echo '&nbsp;&nbsp;&nbsp;';
             }
             if ($nbExtraHk > 0) {
-              echo  '<span title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
+              echo  '<span data-toggle="tooltip" data-html="true" title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
             }
           }
           if ($category->name != 'participation' && $category->name != 'homework' && $category->name != 'oublis') {
             $ratio = round(($posItems*100)/$nbItems);
-            echo '<p title="'.$list.'">';
-            echo $ratio.'%';
-            echo ' ('.$posItems.'/'.$nbItems.')';
+            echo '<p>';
+            echo '<span data-toggle="tooltip" title="% positif">'.$ratio.'%</span>';
+            echo '&nbsp;<span data-toggle="tooltip" data-html="true" title="'.$list.'">('.$posItems.'/'.$nbItems.')</span>';
             echo '</p>';
           }
         } else {
@@ -285,6 +285,7 @@ if ($global) {
       }
       */
 
+      /*
       echo '<td>';
       if ($player->places->count > 0) {
         $list = '';
@@ -316,6 +317,7 @@ if ($global) {
       echo $player->HP.'/50';
       array_push($teamHealth, $player->HP);
       echo '</td>';
+       */
       echo '</tr>';
     }
     
@@ -327,24 +329,25 @@ if ($global) {
     foreach ($categories as $category) {
       echo '<th>';
       if ($category->name == 'participation') {
-        echo calculate_average($teamPart).'%';
+        echo '<span data-toggle="tooltip" title="Participation moyenne">'.calculate_average($teamPart).'%';
         echo '&nbsp;&nbsp;&nbsp;';
-        echo '['.$teamAbsent.' abs.]';
+        echo '['.$teamAbsent.' abs.]</span>';
       }
       if ($category->name == 'homework') {
-        echo  '<span title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$teamNoHk.'</span></span>';
+        echo  '<span data-toggle="tooltip" title="No hk"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$teamNoHk.'</span></span>';
         echo '&nbsp;&nbsp;&nbsp;';
-        echo  '<span title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$teamHalfHk.'</span></span>';
+        echo  '<span data-toggle="tooltip" title="Half-hk"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$teamHalfHk.'</span></span>';
         echo '&nbsp;&nbsp;&nbsp;';
-            echo  '<span title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$teamExtraHk.'</span></span>';
+            echo  '<span data-toggle="tooltip" title="Extra-hk"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$teamExtraHk.'</span></span>';
       }
       if ($category->name == 'oublis') {
-        echo  '<span title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span>'.$teamForgotStuff.'</span></span>';
+        echo  '<span data-toggle="tooltip" title="Oubli matériel"><i class="glyphicon glyphicon-file"></i>&nbsp;<span>'.$teamForgotStuff.'</span></span>';
         echo '&nbsp;&nbsp;&nbsp;';
-        echo  '<span title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span>'.$teamForgotSigned.'</span></span> ';
+        echo  '<span data-toggle="tooltip" title="Oubli signature"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span>'.$teamForgotSigned.'</span></span> ';
       }
       echo '</th>';
     }
+      /*
     echo '<th>';
     echo $teamPlaces;
     echo '</th>';
@@ -356,16 +359,19 @@ if ($global) {
     echo '<th>';
     echo calculate_average($teamHealth);
     echo '</th>';
+       */
     echo '</tr>';
 ?>
 </table>
 <?php
   } else { // Global participation
-    echo '<table class="table table-condensed table-hover">';
-    echo '<tr>';
-    echo '<td colspan="8"><h3>'. $reportTitle .'</h3>';
-    echo '</td>';
-    echo '</tr>';
+?>
+<div class="row">
+    <table class="table table-condensed table-hover">
+      <tr>
+        <td colspan="8"><h3><?php echo $reportTitle; ?></h3></td>
+      </tr>
+<?php
     foreach($allPlayers as $player) {
       $vv = 0;
       $v = 0;
@@ -377,35 +383,30 @@ if ($global) {
       echo '<th>';
       echo $player->title;
       echo '</th>';
-      if ($limit) { // Limit to last lessons
-        $events = $player->find("template=event, task.category='participation', limit=10, sort=-created")->reverse();
-        $nbPart = $events->count();
-      } else {
-        $events = $player->find("template=event, task.category='participation'");
-        $nbPart = $events->count();
-      }
+      $events = $player->find("template=event, task.category='participation', date>=$period->dateStart, date<=$period->dateEnd, sort=-date")->reverse();
+      $nbPart = $events->count();
       if ($events->count() > 0) {
         foreach ($events as $event) {
           $task = $pages->get("$event->task");
           switch ($task->name) {
             case 'communication-rr' :
-              $out .= '<span class="participation label label-danger" title="['.strftime("%d/%m", $event->created).']">RR</span>';
+              $out .= '<span class="participation label label-danger" data-toggle="tooltip" title="'.strftime("%d/%m", $event->date).'">RR</span>';
               $rr += 1;
               break;
             case 'communication-r' :
-              $out .= '<span class="participation label label-danger" title="['.strftime("%d/%m", $event->created).']">R</span>';
+              $out .= '<span class="participation label label-danger" data-toggle="tooltip" title="'.strftime("%d/%m", $event->date).'">R</span>';
               $r += 1;
               break;
             case 'communication-v' : 
-              $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">V</span>';
+              $out .= '<span class="participation label label-success" data-toggle="tooltip" title="'.strftime("%d/%m", $event->date).'">V</span>';
               $v += 1;
               break;
             case 'communication-vv' :
-              $out .= '<span class="participation label label-success" title="['.strftime("%d/%m", $event->created).']">VV</span>';
+              $out .= '<span class="participation label label-success" data-toggle="tooltip" title="'.strftime("%d/%m", $event->date).'">VV</span>';
               $vv += 1;
               break;
             case 'absent' : 
-              $out .= '<span class="participation label label-info" title="['.strftime("%d/%m", $event->created).']">-</span>';
+              $out .= '<span class="participation label label-info" data-toggle="tooltip" title="'.strftime("%d/%m", $event->date).'">-</span>';
               $abs += 1;
               $nbPart -= 1;
               break;
@@ -423,36 +424,34 @@ if ($global) {
         echo '<td class="text-left">';
           if (is_int($ratio)) {
             if ($ratio >= 80) {
-              echo '<span class="label label-success">VV</span>';
+              echo '<span data-toggle="tooltip" title="Moyenne sur la période" class="label label-success">VV</span>';
             }
             if ($ratio < 80 && $ratio >= 55) {
-              echo '<span class="label label-success">V</span>';
+              echo '<span data-toggle="tooltip" title="Moyenne sur la période" class="label label-success">V</span>';
             }
             if ($ratio < 55 && $ratio >= 35) {
-              echo '<span class="label label-danger">R</span>';
+              echo '<span data-toggle="tooltip" title="Moyenne sur la période" class="label label-danger">R</span>';
             }
             if ($ratio < 35 && $ratio >= 0) {
-              echo '<span class="label label-danger">RR</span>';
+              echo '<span data-toggle="tooltip" title="Moyenne sur la période" class="label label-danger">RR</span>';
             }
           } else {
             if ($ratio === 'absent') {
-              echo '<span class="label label-default">NN</span>';
+              echo '<span data-toggle="tooltip" title="Moyenne sur la période" class="label label-default">NN</span>';
             }
           }
         echo '</td>';
         echo '<td class="text-left">';
         if (is_int($ratio)) {
-          echo $ratio.'%';
+          echo '<span data-toggle="tooltip" title="% participation positive">'.$ratio.'%</span>';
         }
-        //echo $ratio.'%&nbsp;&nbsp;&nbsp;&nbsp;'.($v+$vv).'<i class="glyphicon glyphicon-thumbs-up"></i> '.($nbPart-($v+$vv)).'<i class="glyphicon glyphicon-thumbs-down"></i>&nbsp;&nbsp;&nbsp;&nbsp;('.$nbPart.' cours)';
-        //echo 'RR:'.$rr.' / R:'.$r.' / V:'.$v.' / VV:'.$vv.'&nbsp;&nbsp;&nbsp;';
         echo '</td>';
         echo '<td class="text-left">';
-        echo ($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i> '.($r+$rr).' <i class="glyphicon glyphicon-thumbs-down"></i>';
+        echo '<span data-toggle="tooltip" title="Participation positive">'.($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.($r+$rr).' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
         echo '</td>';
         echo '<td class="text-left">';
-        echo 'Du <span>'.strftime("%d/%m", $events[0]->created).'</span>';
-        echo ' au <span>'.strftime("%d/%m", $events[$events->count-1]->created).'</span>';
+        echo 'Du <span>'.strftime("%d/%m", $events[0]->date).'</span>';
+        echo ' au <span>'.strftime("%d/%m", $events[$events->count-1]->date).'</span>';
         echo '</td>';
         echo '<td class="text-left">';
         echo $nbPart.' cours';
@@ -470,9 +469,8 @@ if ($global) {
       }
     }
     echo '</table>';
+    echo '</div>';
   }
-} else { // Single Player report
-  echo 'Single player';
 }
 /*
  * -----------------------------------------------
@@ -980,6 +978,6 @@ echo '</table>';
 
  */
 if (!$config->ajax) {
-  include("./foot_report.inc"); 
+  include("./foot.inc"); 
 }
 ?>

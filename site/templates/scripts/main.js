@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
   $(".ajax").click(function() {
-    $("#report").html("<p>Loading...</p>"); 
+    $("#reportDiv").html("<p>Loading...</p>"); 
     
     $.get($(this).attr('href'), function(data) { 
         $("#reportDiv").html(data); 
@@ -56,10 +56,16 @@ $(document).ready(function() {
     reportUrl += $('#periodId').val()+'/';
     // Add sorting GET parameter
     reportUrl += '?sort='+$('.reportSort:checked').val();
+
+    $(this).attr('href', reportUrl);
+    return true;
     // Go to report_generator
+    /*
+    $("#reportDiv").html("<p>Loading...</p>"); 
     $.get(reportUrl, function(data) { 
         $("#reportDiv").html(data); 
     }); 
+    */
   });
 
   $('#participation').click( function() {

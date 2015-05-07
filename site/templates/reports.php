@@ -2,6 +2,9 @@
 
 include("./head.inc"); 
 
+// Nav tabs
+include("./tabList.inc"); 
+
 $selectedTeam = $input->urlSegment1;
 $allPlayers = $pages->find("template=player, team=$selectedTeam");
 $allPeriods = $pages->find("template=period");
@@ -27,6 +30,8 @@ if ($user->isSuperuser()) {
           }
         ?>
       </select>
+  </div>
+  <div>
   <span>Select a player : </span>
   <select id="reportPlayer">
   <?php
@@ -36,7 +41,7 @@ if ($user->isSuperuser()) {
     }
   echo '</select>';
   // reportUrl is based on url segments : all|category/team|player/periodId?sort=title|lastName
-  echo '<p class="text-center"><button id="reportUrl_button" class="btn btn-primary" data-reportUrl="'. $pages->get('/report_generator')->url .'">Generate report</button></p>';
+  echo '<p class="text-center"><a id="reportUrl_button" class="btn btn-primary" href="'. $pages->get('/report_generator')->url .'" data-reportUrl="'. $pages->get('/report_generator')->url .'" target="_blank">Generate report</a></p>';
   ?>
   </div>
   </section>
@@ -45,8 +50,6 @@ if ($user->isSuperuser()) {
 } else {
   echo '<p>Admin only ;)</p>';
 }
-
-echo '<div id="reportDiv">Select a report.</div>';
 
 include("./foot.inc"); 
 ?>
