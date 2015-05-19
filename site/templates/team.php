@@ -118,7 +118,12 @@
       } else {
         $trendClass = 'positiveTrend';
       }
-      $trend .= '<span class="'.$trendClass.'" data-toggle="tooltip" data-html="true" title="'.strftime("%d/%m", $event->date).': '.$title.' ('.$event->summary.')">&nbsp;</span>';
+      if ($event->summary !== '') {
+        $summary = ' ('.$event->summary.')';
+      } else {
+        $summary = '';
+      } 
+      $trend .= '<span class="'.$trendClass.'" data-toggle="tooltip" data-html="true" title="'.strftime("%d/%m", $event->date).': '.$title.$summary.'">&nbsp;</span>';
     }
     // Set HP progressbar
     $HPwidth = 150*$player->HP/50;
