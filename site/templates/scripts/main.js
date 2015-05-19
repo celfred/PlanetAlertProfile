@@ -42,6 +42,16 @@ $(document).ready(function() {
     return false; 
   });
 
+  $('#reportPlayer').change( function() {
+    if ($(this)[0].selectedIndex > 0) {
+      $('#allCat').prop('checked', true);
+      $('#participation').attr('disabled', true);
+      $('#planetAlert').attr('disabled', true);
+    } else {
+      $('#participation').attr('disabled', false);
+      $('#planetAlert').attr('disabled', false);
+    }
+  });
   $('#reportUrl_button').click( function() {
     var reportUrl = $(this).attr('data-reportUrl');
     // Add report category

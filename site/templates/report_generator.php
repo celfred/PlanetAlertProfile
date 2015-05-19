@@ -23,7 +23,22 @@ $sort = $input->get['sort'];
 $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat");
 
 if ($selected->template == 'player') { // Player's report
-  echo 'Player TODO';
+  $player = $selected;
+  $global = false;
+  $reportTitle = 'Bilan ';
+  if ($category == 'all') { // Global report
+    $reportTitle .= ' global ';
+  } else { // Category report
+    $reportTitle .= " '".$category."' ";
+    switch ($category) {
+      case 'participation' : $reportType = 'participation'; break;
+      case 'planetAlert' : $reportType = 'planetAlert'; break;
+      default: break;
+    }
+  }
+  $reportTitle .= ' de '.$selected->title.' '.$selected->lastName.' ('.$selected->team->title.')'; 
+  $reportTitle .= '<br />';
+  $reportTitle .= 'Période couverte : '.$period->title;
 } else { // Team's report
   $global = true;
   $allPlayers = $pages->find("team=$selected, template=player, sort=$sort");
@@ -49,7 +64,10 @@ if (!$input->get['pages2pdf']) {
 }
 
 if (!$global) { // Single Player report
-  echo 'Single player';
+  $player = $selected;
+  switch($reportType) {
+  default: include('./singlePlayerReport_default.inc');
+  }
 } else { // Team report
   switch($reportType) {
   case 'participation': include('./globalReport_participation.inc'); break;
