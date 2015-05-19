@@ -184,7 +184,7 @@
                   }
                   echo "<tr>";
                   echo "<td data-order='{$event->created}'>";
-                  echo "{$event->date}";
+                  echo strftime("%d/%m", $event->date);
                   echo "</td>";
                   echo "<td>";
                   echo $class;

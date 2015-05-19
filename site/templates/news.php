@@ -125,7 +125,6 @@
               $logo = $homepage->photo->eq(0)->size(40,40); 
               echo '<img src="'.$logo->url.'" alt="" /> ';
               echo date("F d, Y", $n->created);
-              echo $n->date;
               echo ' - ';
               echo 'Official Announcement : '.$n->title;
              ?>
@@ -167,8 +166,7 @@
           <div class="panel-heading">
             <h4 class="panel-title">
              <?php
-              //echo date("l, F d", $n->created);
-              echo $n->date;
+              echo date("F j (l)", $n->date);
               echo ' - ';
               echo 'Congratulations to ';
               echo $currentPlayer->title.' ['.$currentPlayer->team->title.']  ';

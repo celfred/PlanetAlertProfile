@@ -4,11 +4,10 @@
   </div><!-- /.container -->
 </div><!--/wrap-->
 
-  <footer class="text-center">
-      <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS - &copy; <?php echo date("Y"); ?> F.L. 
-        <a href="about/">[À propos]</a>
-      </p>
-	</footer>
-
+  <script src="<?php echo $config->urls->templates?>bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/DataTables/media/js/jquery.dataTables.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/datatables-plugins-bootstrap3/dist/js/datatables-plugins-bootstrap3.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="<?php echo $config->urls->templates?>scripts/main.js"></script>
 </body>
 </html>

@@ -2,7 +2,8 @@
   <?php 
   /* list-all template */
 
-  $reportLink = $pages->get("/report_generator")->url;
+  $reportLink = $pages->get("/reports")->url;
+  $reportGeneratorLink = $pages->get("/report_generator")->url;
   $allPlayers = $pages->find("template='player', team=$input->urlSegment1, sort='group'");
   $allGroups = $pages->get("/groups")->children('sort=title');
   $outGroups = '';
@@ -108,15 +109,16 @@
       $HP = $event->task->HP;
       $title = $event->task->title;
       if ($event->summary) {
-        $comment = '<br />'.$event->date.'<br />'.$event->summary;
+        $comment = '<br />'.strftime("%d/%m", $event->date).'<br />'.$event->summary;
       } else {
-        $comment = '<br />'.$event->date;
+        $comment = '<br />'.strftime("%d/%m", $event->date);
       }
       if ($HP < 0) {
-        $trend .= '<span class="negativeTrend" data-toggle="tooltip" data-html="true" title="'.$title.$comment.'">&nbsp;</span>';
+        $trendClass = 'negativeTrend';
       } else {
-        $trend .= '<span class="positiveTrend" data-toggle="tooltip" data-html="true" title="'.$title.$comment.'">&nbsp;</span>';
+        $trendClass = 'positiveTrend';
       }
+      $trend .= '<span class="'.$trendClass.'" data-toggle="tooltip" data-html="true" title="'.strftime("%d/%m", $event->date).': '.$title.' ('.$event->summary.')">&nbsp;</span>';
     }
     // Set HP progressbar
     $HPwidth = 150*$player->HP/50;

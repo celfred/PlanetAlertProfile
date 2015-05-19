@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
   $(".ajax").click(function() {
-    $("#report").html("<p>Loading...</p>"); 
+    $("#reportDiv").html("<p>Loading...</p>"); 
     
     $.get($(this).attr('href'), function(data) { 
         $("#reportDiv").html(data); 
@@ -40,6 +40,42 @@ $(document).ready(function() {
     }); 
 
     return false; 
+  });
+
+  $('#reportPlayer').change( function() {
+    if ($(this)[0].selectedIndex > 0) {
+      $('#allCat').prop('checked', true);
+      $('#participation').attr('disabled', true);
+      $('#planetAlert').attr('disabled', true);
+    } else {
+      $('#participation').attr('disabled', false);
+      $('#planetAlert').attr('disabled', false);
+    }
+  });
+  $('#reportUrl_button').click( function() {
+    var reportUrl = $(this).attr('data-reportUrl');
+    // Add report category
+    reportUrl += $('.reportCat:checked').val()+'/';
+    // Add report team or player
+    if ($('#reportPlayer').val() == '') { // No single player selected
+      reportUrl += $('.reportTeam:checked').val()+'/';
+    } else {
+      reportUrl += $('#reportPlayer').val()+'/';
+    }
+    // Add period Id
+    reportUrl += $('#periodId').val()+'/';
+    // Add sorting GET parameter
+    reportUrl += '?sort='+$('.reportSort:checked').val();
+
+    $(this).attr('href', reportUrl);
+    return true;
+    // Go to report_generator
+    /*
+    $("#reportDiv").html("<p>Loading...</p>"); 
+    $.get(reportUrl, function(data) { 
+        $("#reportDiv").html(data); 
+    }); 
+    */
   });
 
   $('#participation').click( function() {
@@ -88,6 +124,12 @@ $(document).ready(function() {
         $(this).attr('href', href);
       });
     }
+  });
+
+  $('#period_list').change( function() {
+    $('a.reportButton').each( function() {
+      var href = $(this).attr('href');
+    });
   });
 
   $('#lastName').click( function() {
