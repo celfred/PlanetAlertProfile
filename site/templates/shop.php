@@ -98,7 +98,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       ?>
       <tr>
         <td data-order="<?php echo $item->title; ?>" data-toggle="tooltip" title="<?php echo $item->summary; ?>">
-          <?php echo $item->title; ?>
+          <span data-toggle="tooltip" data-html="true" title="<?php echo $item->summary; ?>"><?php echo $item->title; ?></span>
         </td>
         <td>
           <?php echo $mini; ?>
