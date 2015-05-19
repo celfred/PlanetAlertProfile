@@ -44,7 +44,7 @@ foreach ($allTasks as $task) {
         }
       ?>
         <tr class="<?php echo $task->type; ?>">
-          <td><span><?php echo $task->title; ?></span></td>
+          <td><span data-toggle="tooltip" data-html="true" title="<?php echo $task->summary; ?>"><?php echo $task->title; ?></span></td>
           <td><?php echo $task->HP; ?></td>
           <td><?php echo $task->XP; ?></td>
           <td><?php echo $task->GC; ?></td>
