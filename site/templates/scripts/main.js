@@ -312,7 +312,7 @@ $(document).ready(function() {
     var urls = [];
     var ids = [];
     var playersIndex = [];
-    $('.list-group-item input[type=checkbox]').each( function(index) {
+    $('.list-group-item input[type=checkbox]').not('.tickRatio, .tickNbInvasions, .tickNbPlaces').each( function(index) {
       if ( $(this).prop('checked') === true) {
         noChecked = false;
         urls.push($(this).val());
