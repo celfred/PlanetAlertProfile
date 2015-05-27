@@ -162,7 +162,7 @@ $(document).ready(function() {
   });
 
   if ($('#worldMap').length > 0) {
-    setTimeout( function() { del(); }, 300);
+    setTimeout( function() { del(); }, 1000);
   }
   function del() {
     svgPanZoom('#worldMap', {
