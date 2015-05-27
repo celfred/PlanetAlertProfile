@@ -183,13 +183,13 @@ function pick_question($player) {
   $randomPlace = $player->places->getRandom();
     if ($randomPlace) {
       if ($randomPlace->quiz->count > 0) {
-        $type = ['country', 'city', 'quiz'];
+        $type = ['country', 'city', 'photo', 'quiz'];
       } else {
-        $type = ['country', 'city'];
+        $type = ['country', 'city', 'photo'];
       }
       $rand = array_rand($type, 1);
       $quiz['type'] = $type[$rand];
-      switch($type[$rand]) {
+      switch($quiz['type']) {
         case 'country' :
           $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randomPlace->title.'</strong>?';
           $quiz['answer'] = $randomPlace->country->title;
@@ -197,6 +197,10 @@ function pick_question($player) {
         case 'city' :
           $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randomPlace->title.'</strong>?';
           $quiz['answer'] = $randomPlace->city->title;
+          break;    
+        case 'photo' :
+          $quiz['question'] = 'What <strong>monument</strong> is it?';
+          $quiz['answer'] = $randomPlace->title. ' in '. $randomPlace->city->title.', '.$randomPlace->country->title;
           break;    
         case 'quiz' :
           $randQuiz = $randomPlace->quiz->getRandom();
@@ -210,7 +214,7 @@ function pick_question($player) {
       }
     }
 
-
+  $quiz['id'] = $randomPlace->id;
   return $quiz;
 }
 
