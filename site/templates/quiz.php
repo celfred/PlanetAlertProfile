@@ -33,7 +33,6 @@ if ($user->isSuperuser()) {
   }
 
   $selectedTeam = $input->urlSegment1;
-  //$selectedPlayer = $input->urlSegment2;
   $selectedPlayer = $input->post->selectedPlayer;
   $allPlayers = $pages->find("template='player', team=$selectedTeam, sort='name'");
 
@@ -70,7 +69,8 @@ if ($user->isSuperuser()) {
   $allMinConcerned = $allConcerned->find("nbInvasions=$min");
   if (!$formerSelected) { // First load
     foreach($allMinConcerned as $player) {
-      $player->checked = "checked='checked'";
+      // Disabled since quick selection tools have been added
+      //$player->checked = "checked='checked'"; 
     }
   } else { // Some players have already been checked
     foreach($allPlayers as $player) {
@@ -127,11 +127,17 @@ if ($user->isSuperuser()) {
     }
 
     // Players list display
+    $nbPlaces = [];
+    $ratio = [];
     $out .= '<div class="well">';
     $out .= '<button id="toggle" class="btn btn-default">See list</button>';
     $out .= '<ul class="list-group '.$display.'">';
       foreach($allPlayers as $player) {
-        if ($player->places->count === 0) {
+        $nbPlayerPlaces = $player->places->count();
+        if (!in_array($nbPlayerPlaces, $nbPlaces, true)) {
+          array_push($nbPlaces, $nbPlayerPlaces);
+        }
+        if ($nbPlayerPlaces === 0) {
           $disabled = "disabled='disabled'";
           $details = "";
           $class = "disabled";
@@ -139,27 +145,55 @@ if ($user->isSuperuser()) {
           $disabled = "";
           $class = "";
           if ($player->places->count == 1) {
-            $details = "({$player->places->count} place, ";
+            $details = "({$nbPlayerPlaces} place, ";
             if ($player->nbInvasions == 1) {
               $details .= "{$player->nbInvasions} invasion)";
             } else {
               $details .= "{$player->nbInvasions} invasions)";
             }
           } else {
-            $details = "({$player->places->count} places, ";
+            $details = "({$nbPlayerPlaces} places, ";
             if ($player->nbInvasions == 1) {
               $details .= "{$player->nbInvasions} invasion)";
             } else {
               $details .= "{$player->nbInvasions} invasions)";
             }
           }
+          $playerRatio = $player->nbInvasions-$nbPlayerPlaces;
+          $details .= ' ['.$playerRatio.']';
+          array_push($ratio, $playerRatio);
         }
-        $out .= "<li class='list-group-item'><label class='{$class}' for='ch[{$player->id}]'><input type='checkbox' id='ch[{$player->id}]' value='{$player->id}' {$player->checked} {$disabled}> {$player->title} {$details}</label></li>";
+        $out .= "<li class='list-group-item'><label class='{$class}' for='ch[{$player->id}]'><input type='checkbox' id='ch[{$player->id}]' value='{$player->id}' {$player->checked} {$disabled} data-nbPlaces='{$nbPlayerPlaces}' data-nbInvasions='{$player->nbInvasions}' data-ratio='{$playerRatio}'> {$player->title} {$details}</label></li>";
       }
-    $out .= '<li class="list-group-item"><button id="tickAll" class="btn btn-success">Tick all</button>';
-    $out .= '<button id="untickAll" class="btn btn-danger">Untick all</button></li>';
+    $out .= '<li class="list-group-item"># of Places selection :<br />';
+    sort($nbPlaces);
+    foreach($nbPlaces as $nb) {
+      $out .= '<label class="btn btn-info btn-xs"><input type="checkbox" class="tickNbPlaces" value="'.$nb.'"><span class="">'.$nb.'</span></label>';
+    }
+    $out .= '</li>';
+    $out .= '<li class="list-group-item"># of Invasions selection :<br />';
+    $nbInvasions = array_unique($nbInvasions);
+    sort($nbInvasions);
+    foreach($nbInvasions as $nb) {
+      $out .= '<label class="btn btn-info btn-xs"><input type="checkbox" class="tickNbInvasions" value="'.$nb.'"><span class="">'.$nb.'</span></label>';
+    }
+    $out .= '</li>';
+    $out .= '<li class="list-group-item">Ratio selection :<br />';
+    $ratio = array_unique($ratio);
+    sort($ratio);
+    foreach($ratio as $nb) {
+      if ($nb !== 0) {
+        $out .= '<label class="btn btn-info btn-xs"><input type="checkbox" class="tickRatio" value="'.$nb.'">'.$nb.'</label>';
+      } else {
+        $out .= '<label class="btn btn-primary btn-xs"><input type="checkbox" class="tickRatio" value="'.$nb.'">'.$nb.'</label>';
+      }
+    }
+    $out .= '</li>';
+    $out .= '<li class="list-group-item">';
+    $out .= '<button id="tickAll" class="btn btn-success btn-sm">Tick all</button>';
+    $out .= '<button id="untickAll" class="btn btn-danger btn-sm">Untick all</button>';
+    $out .= '</li>';
     $out .= '</ul>';
-
     $out .= '<button type="submit" class="btn btn-info btn-block generateQuiz">Generate</button>';
     $out .= '<input type="hidden" id="selectedIds" name="selectedIds" value="'.$input->post->selectedIds.'">';
     $out .= '<input type="hidden" id="selectedPlayer" name="selectedPlayer" value="">';

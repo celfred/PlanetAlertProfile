@@ -162,9 +162,9 @@ $(document).ready(function() {
   });
 
   if ($('#worldMap').length > 0) {
-    setTimeout( function() { test(); }, 300);
+    setTimeout( function() { del(); }, 300);
   }
-  function test() {
+  function del() {
     svgPanZoom('#worldMap', {
       controlIconsEnabled: true
     });
@@ -252,6 +252,46 @@ $(document).ready(function() {
     $('.list-group').toggleClass('hidden');
 
     return false;
+  });
+
+  $('.tickNbPlaces').on('click', function() {
+    var nbPlaces = $(this).val();
+    var sender = $(this);
+    $('.list-group-item input[type=checkbox]').each( function() {
+      if ($(this).attr('data-nbPlaces') === nbPlaces) {
+        if (sender.prop('checked')) {
+          $(this).prop('checked', true);
+        } else {
+          $(this).prop('checked', false);
+        }
+      }
+    });
+  });
+  $('.tickNbInvasions').on('click', function() {
+    var nbInvasions = $(this).val();
+    var sender = $(this);
+    $('.list-group-item input[type=checkbox]').each( function() {
+      if ($(this).attr('data-nbInvasions') === nbInvasions) {
+        if (sender.prop('checked')) {
+          $(this).prop('checked', true);
+        } else {
+          $(this).prop('checked', false);
+        }
+      }
+    });
+  });
+  $('.tickRatio').on('click', function() {
+    var ratio = $(this).val();
+    var sender = $(this);
+    $('.list-group-item input[type=checkbox]').each( function() {
+      if ($(this).attr('data-ratio') === ratio) {
+        if (sender.prop('checked')) {
+          $(this).prop('checked', true);
+        } else {
+          $(this).prop('checked', false);
+        }
+      }
+    });
   });
   $('#tickAll').on('click', function() {
     $('.list-group-item input[type=checkbox]').each( function() {
