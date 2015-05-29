@@ -34,6 +34,7 @@
     // Add individual karmas
     foreach( $players as $player) {
       $karma = getKarma($player);
+      $player->karma = $karma;
       // Karma is divided by number of players in the group to be fair with smaller groups
       $groupKarma = round($karma/$players->count);
       (int) $group->karma = $group->karma + $groupKarma;
@@ -92,6 +93,7 @@
   $out .= '<th><img src="'.$config->urls->templates.'img/star.png" alt="" /> XP</th>';
   $out .= '<th data-toggle="tooltip" title="Places"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
   $out .= '<th data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span></th>';
+  $out .= '<td data-toggle="tooltip" title="Donation"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></td>';
   $out .= '</tr>';
   $out .= '</thead>';
   $out .= '<tbody>';
@@ -103,7 +105,7 @@
     }
     // Get karma evolution
     $prevEvents = $player->child("name='history'")->children("limit=5");
-    $prevEvents->sort('created');
+    $prevEvents->sort('date');
     $trend = '';
     foreach ($prevEvents as $event) {
       $HP = $event->task->HP;
@@ -179,6 +181,7 @@
     $out .= '</td>';
     $out .= '<td '.$tooltipPlaces.'>'. $player->places->count() .'</td>';
     $out .= '<td '.$tooltipEquipment.'>'. $player->equipment->count() .'</td>';
+    $out .= '<td>'. $player->donation .'</td>';
     $out .= '</tr>';
   }
   $out .= '</tbody>';

@@ -538,6 +538,14 @@ table.adminTable > thead > tr > th {
   width: 25px;
   padding: 5px;
 }
+#donation {
+  transform: rotate(8deg);
+  cursor: pointer;
+}
+#marketPlaceForm ul li {
+  list-style: none;
+}
+#donationDiv { display: none; }
 .pdfLink {
   float: left;
   margin: 5px;

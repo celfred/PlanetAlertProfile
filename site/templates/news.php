@@ -21,7 +21,7 @@
       <div class="panel-body">
         <ol>
           <?php
-            $players = $pages->find('template=player, sort=-karma, limit=10');
+            $players = $pages->find('template=player, sort=-karma, karma>0, limit=10');
             foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
@@ -47,7 +47,7 @@
       <div class="panel-body">
         <ol>
           <?php
-            $players = $pages->find('template=player, sort=-places.count, limit=10');
+            $players = $pages->find('template=player, sort=-places.count, places.count>0, limit=10');
             foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
@@ -73,7 +73,7 @@
       <div class="panel-body">
         <ol>
           <?php
-            $players = $pages->find('template=player, sort=-equipment.count, limit=10');
+            $players = $pages->find('template=player, sort=-equipment.count, equipment.count>0, limit=10');
             foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
@@ -99,12 +99,20 @@
       <div class="panel-body">
         <ol>
           <?php
+            $players = $pages->find('template=player, sort=-donation, donation>0, limit=10');
+            foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
               } else {
                 $mini = '';
               }
-            echo '<li>Coming soon...</li>';
+              if ($player->login == $user->name) {
+                $focus = "class='focus'";
+              } else {
+                $focus = "";
+              }
+              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.' ['. $player->team->title.']</span> <span class="badge">'.$player->donation.' GC</span></li>';
+            }
           ?>
         </ol>
       </div>
@@ -151,7 +159,7 @@
       }
 
       // Automatic players' news (free place, shop)
-      $news = $pages->find('template=event, publish=1, sort=-created');
+      $news = $pages->find("template=event, publish=1, sort=-created, task.name!='donated'");
       if ($news->count() > 0) {
         foreach($news as $n) {
           $currentPlayer = $n->parent('template=player');
@@ -181,6 +189,8 @@
              case 'place' : echo '<span class="lead">New place : '.html_entity_decode($n->summary).'</span>';
                break;
              case 'shop' : echo '<span class="lead">New equipment : '.html_entity_decode($n->summary).'</span>';
+               break;
+             case 'attitude' : echo '<span class="lead">Generous attitude : '.html_entity_decode($n->summary).'</span>';
                break;
              default : echo 'todo : ';
                break;

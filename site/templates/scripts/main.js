@@ -170,6 +170,38 @@ $(document).ready(function() {
     });
   }
 
+  $('#donation').click( function() {
+    $('#donationDiv').toggle();
+    $('#marketPlaceForm').toggle();
+    if ($(this).html() === 'Make a donation') {
+      $(this).html('Go back to the Marketplace');
+    } else {
+      $(this).html('Make a donation');
+    }
+  });
+  $('#donateFormSubmit').click( function() {
+    if ($('#receiver').val() == 0 ) {
+      alert('You must select a player!');
+      return false;
+    }
+    if ($('#amount').val() == 0 || $('#amount').val() == '') {
+      alert('Invalid amount !');
+      return false;
+    } 
+    return true; // Submit form
+  });
+  $('#amount').on('keyup', function() {
+    if (!$.isNumeric($(this).val())) {
+      alert('You must enter a number!');
+      $(this).val('');
+    } else {
+      if ($(this).val() > parseInt($(this).attr('data-max'))) {
+        alert('Invalid amount!');
+        $(this).val('');
+      }
+    }
+  });
+
   $('[data-toggle="tooltip"]').tooltip({ container: 'body'});
 
   $('#mapTable').DataTable({

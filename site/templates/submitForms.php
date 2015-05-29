@@ -9,7 +9,7 @@
       $newItem = $pages->get($itemId);
     }
 
-    // Check is equipment or place not already there
+    // Check if equipment or place not already there
     $already = false;
     $player = $pages->get($playerId);
     foreach ($player->equipment as $eq) {
@@ -110,6 +110,43 @@
           mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
+
+      if($input->post->donateFormSubmit) { // donateForm submitted
+        $playerId = $input->post->player;
+        $player = $pages->get($playerId);
+        $player->of(false);
+        $amount = $input->post->amount;
+        $receiverId = $input->post->receiver;
+        $receiver = $pages->get($receiverId);
+        $receiver->of(false);
+        
+        // Save donation
+        
+        // Modify player's page
+        $player->GC = $player->GC - $amount;
+        $task = $pages->get("template='task', name='donation'");
+        $player->HP = $player->HP + $task->GC;
+        $player->donation = $player->donation + $amount;
+        $player->save();
+        // Record history
+        $taskComment = 'Donation of '.$amount. ' GC to '.$receiver->title.' ['.$receiver->team->title.']';
+        $newsBoard = 1;
+        saveHistory($player, $task, $taskComment, $newsBoard);
+
+        // Modify receiver's page
+        $receiver->GC = $player->GC + $amount;
+        $receiver->save();
+        // Record history
+        $task = $pages->get("template='task', name='donated'");
+        $taskComment = 'Donation of '.$amount. ' GC by '.$player->title.' ['.$player->team->title.']';
+        saveHistory($receiver, $task, $taskComment, $newsBoard);
+        
+        // Notify admin
+        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
+        $msg .= "Donation amount :". $amount;
+        $msg .= "Donated to :". $receiver->title." [".$receiver->team->title."]";
+        mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
+      }
     }
 
     // Redirect to player's profile
@@ -117,6 +154,7 @@
   }
 
   if ($user->isSuperuser()) { // Admin front-end
+    // TODO : Give superUser possibility to record a donation
     if ($input->get->form && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
       $n->of(false);
@@ -151,13 +189,6 @@
 
         // Record history
         saveHistory($player, $task, $taskComment);
-
-        // TODO : Check participation here?
-        /*
-        if ($task->category == 'participation') {
-          // Count previous participation?
-        }
-        */
       }
       // Redirect to team page
       $session->redirect($pages->get('/players')->url.$input->post->team);
