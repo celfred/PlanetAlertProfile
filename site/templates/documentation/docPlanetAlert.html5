@@ -1,52 +1,85 @@
 <body>
 <header>
-<h1 class="title">Planet Alert User’s Guide</h1>
+<h1 class="title">Planet Alert Documentation</h1>
 <h2 class="author">Fred Lieutaud</h2>
-<h3 class="date">January 25, 2014</h3>
+<h3 class="date">May 31, 2015</h3>
 </header>
 <nav id="TOC">
 <ul>
-<li><a href="#but-du-jeu">But du jeu</a><ul>
-<li><a href="#comment-progresser-dans-le-jeu">Comment progresser dans le jeu ?</a></li>
+<li><a href="#but-du-jeu">But du ‘jeu’</a><ul>
+<li><a href="#comment-progresser-dans-le-jeu">Comment progresser dans le ‘jeu’ ?</a></li>
 </ul></li>
-<li><a href="#les-différents-indicateurs-du-jeu">Les différents indicateurs du jeu</a><ul>
+<li><a href="#les-différents-indicateurs-du-jeu">Les différents indicateurs du ‘jeu’</a><ul>
 <li><a href="#lexpérience-xp">L’expérience (XP) ?</a></li>
 <li><a href="#les-points-de-santé-hp">Les points de santé (HP)</a></li>
 <li><a href="#le-karma">Le karma</a></li>
 <li><a href="#les-pièces-dor-gc">Les pièces d’or (GC)</a></li>
 </ul></li>
-<li><a href="#le-magasin">Le magasin</a></li>
-<li><a href="#la-carte">La carte</a></li>
+<li><a href="#le-magasin-the-shop">Le magasin (The Shop)</a></li>
+<li><a href="#la-carte-the-map">La carte (The Map)</a></li>
+<li><a href="#la-place-du-marché-the-marketplace">La place du marché (The Marketplace)</a></li>
+<li><a href="#les-invasions-de-monstres">Les invasions de monstres</a></li>
+<li><a href="#faq">FAQ</a><ul>
+<li><a href="#pourquoi-se-connecter-avec-ses-identifiants">Pourquoi se connecter avec ses identifiants?</a></li>
+<li><a href="#que-faire-des-lieux-et-équipements-obtenus">Que faire des lieux et équipements obtenus?</a></li>
+<li><a href="#quelles-sont-les-actions-utilisées-dans-le-jeu">Quelles sont les actions utilisées dans le ‘jeu’?</a></li>
+</ul></li>
+<li><a href="#pourquoi-planet-alert">Pourquoi Planet Alert?</a></li>
 </ul>
 </nav>
 <section class="documentation">
-<hr>
+<hr />
 <p><span class="panel panel-default">ATTENTION : LA DOCUMENTATION EST EN COURS DE RÉDACTION ET RESTE DONC ENCORE INCOMPLÈTE À CE JOUR!</span></p>
-<hr>
-<h1 id="but-du-jeu"><a href="#TOC">But du jeu</a></h1>
+<hr />
+<h1 id="but-du-jeu"><a href="#but-du-jeu">But du ‘jeu’</a></h1>
 <p>Libérer la planète qui est aux mains des envahisseurs venus de Mars.</p>
-<h2 id="comment-progresser-dans-le-jeu"><a href="#TOC">Comment progresser dans le jeu ?</a></h2>
-<p>L’indicateur le plus simple pour voir son niveau de jeu ets le karma. Il indique la puissance d’un joueur. Cet indicateur est utile en cas de litige (par exemple, si 2 joueurs souhaitent libérer un même lieu, celui qui aura le plus fort karma aura la priorité). Il augmente également la probabilité de recevoir des bonus (pièces d’or, pièce d’équipement…).</p>
-<p>D’autres indicateurs permettent au joueur de se repérer : le niveau atteint (level) permet d’accéder à des lieux et équipements particuliers. Pour franchir les niveaux, il faut augmenter son expérience (XP).</p>
-<h1 id="les-différents-indicateurs-du-jeu"><a href="#TOC">Les différents indicateurs du jeu</a></h1>
-<h2 id="lexpérience-xp"><a href="#TOC">L’expérience (XP) ?</a></h2>
-<p>Pour acquérir de l’expérience (XP), il suffit de faire des actions positives. Ces actions sont variées : des activités menées en classe, des réussites aux compétences des devoirs (2 point Verts, 1 point Vert), une participation active en classe, un travail à la maison supplémentaire… Elles sont décrites dans le ‘Magasin’. L’XP acquise est définitive, sauf en cas de non-activité durant un temps plutôt long (ce qui ne peut pas arriver durant la période scolaire).</p>
-<h2 id="les-points-de-santé-hp"><a href="#TOC">Les points de santé (HP)</a></h2>
-<p>Le joueur possède 50 points de santé au début du jeu. S’il réalise des actions négatives, il en perd. Seuls les joueurs de niveau 01 perdants TOUS leurs points de santé meurent définitivement. Les joueurs d’un autre niveau perdent leurs pièces d’or (GC), perdent un niveau (level), et perdent tout leur équipement. À chaque passage au niveau supérieur, le joueur récupére 50 points de santé. Certaines potions permettent de récupérer des points de santé immédiatement.</p>
-<h2 id="le-karma"><a href="#TOC">Le karma</a></h2>
-<p>Le karma est un indicateur plus simple pour connaître son niveau de jeu. Plus il est élevé, plus le joueur a de l’influence sur le jeu. En cas de conflit sur un lieu à libérer, le joueur ayant le plus grand karma sera plus influent et aura donc une priorité.</p>
-<p>Il est calculé de la manière suivante : - Niveau (level) +100 /niveau à partir du niveau 02 (Level 02 = +200pts, Level 03 = +300pts…)<br>- Expérience (XP) : +1 /point d’XP (27XP = +27…) - Équipement : +10 /pièce d’équipement - Lieux libérés : +20 /lieu - Santé : -5 /point de santé perdu</p>
-<p>Pour exemple, 1 joueur au niveau 02 avec une XP de 37, ayant libéré 3 lieux, avec comme équipement 1 épée et 1 simple bouclier, et ayant une santé de 45 aura un karma de : 2x100 + 37 + 3x20 + 1x10 + 1x10 - 5x5 = 317 - 25 = 292</p>
-<h2 id="les-pièces-dor-gc"><a href="#TOC">Les pièces d’or (GC)</a></h2>
-<p>Les pièces d’or représentent la monnaie d’échange de Planet Alert. Elles permettent de libérer les lieux et d’acheter de l’équipement ou des potions. Pour en obtenir, il suffit de réaliser des actions positives. Attention, les pièces d’or peuvent baisser en cas d’actions négatives! Si le joueur perd tous ses points de santé, il perdra également toutes ses pièces d’or. Un don à d’autres joueurs est possible afin de transformer ses pièces d’or en XP et gagner ainsi du karma (tout en aidant un membre de son équipe)</p>
-<h1 id="le-magasin"><a href="#TOC">Le magasin</a></h1>
+<h2 id="comment-progresser-dans-le-jeu"><a href="#comment-progresser-dans-le-jeu">Comment progresser dans le ‘jeu’ ?</a></h2>
+<p>L’indicateur le plus simple pour voir son niveau de ‘jeu’ est le karma. Il indique la puissance, l’influence d’un joueur. Cet indicateur est utile en cas de litige (par exemple, si 2 joueurs souhaitent libérer un même lieu et qu’il ne reste qu’une place, celui qui aura le plus fort karma aura la priorité). Il augmente également la probabilité de recevoir des bonus (pièces d’or, pièce d’équipement…).</p>
+<p>D’autres indicateurs permettent au joueur de se repérer : le niveau atteint (level) permet d’accéder à des lieux et équipements supplémentaires. Pour franchir les niveaux, il faut augmenter son expérience (XP).</p>
+<h1 id="les-différents-indicateurs-du-jeu"><a href="#les-différents-indicateurs-du-jeu">Les différents indicateurs du ‘jeu’</a></h1>
+<h2 id="lexpérience-xp"><a href="#lexpérience-xp">L’expérience (XP) ?</a></h2>
+<p>Pour acquérir de l’expérience (XP), il suffit de faire des actions positives. Ces actions sont variées : des activités menées en classe, des réussites aux compétences des devoirs (2 point Verts, 1 point Vert), une participation active en classe, un travail à la maison supplémentaire… Elles sont décrites dans le ‘Magasin’ (<strong>‘The Shop’</strong>). L’XP acquise est définitive, sauf en cas de non-activité durant un temps plutôt long (ce qui ne peut pas arriver durant la période scolaire).</p>
+<h2 id="les-points-de-santé-hp"><a href="#les-points-de-santé-hp">Les points de santé (HP)</a></h2>
+<p>Le joueur possède 50 HP au début du ‘jeu’. S’il réalise des actions négatives, il en perd. Seuls les joueurs de niveau 01 perdants TOUS leurs points de santé meurent définitivement. Les joueurs d’un autre niveau arrivant à 0HP baissent d’1 niveau (level), perdent leurs pièces d’or (GC) et perdent tout leur équipement.</p>
+<p>À chaque passage au niveau supérieur, le joueur récupère 50 points de santé. Certaines potions permettent de récupérer des points de santé immédiatement. On peut également décider de faire un don (‘Make a donation’) à un autre joueur pour récupérer quelques points de santé.</p>
+<h2 id="le-karma"><a href="#le-karma">Le karma</a></h2>
+<p>Le karma est un indicateur plus simple pour connaître son niveau de ‘jeu’. Plus il est élevé, plus le joueur a de l’influence sur le ‘jeu’. En cas de conflit sur un lieu à libérer, le joueur ayant le plus grand karma sera plus influent et aura donc une priorité.</p>
+<p>Il est calculé de la manière suivante : - Niveau (level) +100 /niveau à partir du niveau 02 (Level 02 = +200pts, Level 03 = +300pts…)<br />- Expérience (XP) : +1 /point d’XP (27XP = +27…) - Équipement : +10 /pièce d’équipement - Lieux libérés : +20 /lieu - Santé : -5 /point de santé perdu - Don : +1 par pièce d’or donnée à 1 uatre joueur</p>
+<p>Pour exemple, 1 joueur au niveau 02 avec une XP de 37, ayant libéré 3 lieux, avec comme équipement 1 épée et 1 simple bouclier, ayant une santé de 45 et ayant déjà donné 12 pièces aura un karma de : 2x100 + 37 + 3x20 + 1x10 + 1x10 - 5x5 = 317 - 25 + 12 = 304</p>
+<h2 id="les-pièces-dor-gc"><a href="#les-pièces-dor-gc">Les pièces d’or (GC)</a></h2>
+<p>Les pièces d’or représentent la monnaie d’échange de Planet Alert. Elles permettent de libérer les lieux et d’acheter de l’équipement ou des potions. Pour en obtenir, il suffit de réaliser des actions positives. Attention, les pièces d’or peuvent baisser en cas d’actions négatives! Si le joueur perd tous ses points de santé, il perdra également toutes ses pièces d’or. Un don à d’autres joueurs est possible afin de gagner quelques points de santé et augmenter son karma (tout en aidant un membre de son équipe, ou un membre d’une autre équipe).</p>
+<h1 id="le-magasin-the-shop"><a href="#le-magasin-the-shop">Le magasin (The Shop)</a></h1>
 <p>Le magasin liste tous les équipements que les joueurs peuvent acheter. Il y a différentes catégories d’équipement :</p>
 <ul>
 <li>Les armes : Elles permettent d’obtenir des points supplémentaires lors de la réalisation d’actions positives.</li>
 <li>Les protections : Elles permettent de minimiser les pertes lors d’actions négatives.</li>
-<li>Les potions : Elles fournissent des pouvoirs suppléémentaires ponctuels.</li>
+<li>Les potions : Elles fournissent des pouvoirs supplémentaires ponctuels.</li>
 </ul>
-<p>Pour acheter un équipement, il faut en faire la demande en classe ou par le formulaire de ‘Contact’. Evidemment, le joueur doit disposer de suffisamment de pièces d’or.</p>
-<h1 id="la-carte"><a href="#TOC">La carte</a></h1>
-<p>La carte offre un aperçu de tous les endroits devant être libérés dans le jeu. Certains lieux ne sont accessibles qu’à partir de certains niveaux.</p>
+<p>Pour acheter un équipement, le joueur peut : - en faire la demande en classe en complétant la fiche à disposition. - en complétant le formulaire de ‘Contact’ directement sur le site. - en accédant à la place du marché (‘The Marketplace’) afin d’effectuer directement l’achat.</p>
+<p>Évidemment, le joueur doit disposer de suffisamment de pièces d’or et être au niveau requis.</p>
+<h1 id="la-carte-the-map"><a href="#la-carte-the-map">La carte (The Map)</a></h1>
+<p>La carte offre un aperçu de tous les endroits devant être libérés dans le ‘jeu’. Attention, tous les lieux ne sont pas accessibles dès le départ ! Certains lieux ne sont accessibles qu’à partir de certains niveaux.</p>
+<p>Pour libérer un lieu, le joueur peut : - en faire la demande en classe en complétant la fiche à disposition. - en complétant le formulaire de ‘Contact’ directement sur le site. - en accédant à la place du marché (‘The Marketplace’) afin d’effectuer directement la libération.</p>
+<p>Évidemment, le joueur doit disposer de suffisamment de pièces d’or et être au niveau requis.</p>
+<h1 id="la-place-du-marché-the-marketplace"><a href="#la-place-du-marché-the-marketplace">La place du marché (The Marketplace)</a></h1>
+<p>La place du marché permet au joueur qui est connecté sur son compte d’effectuer directement ses achats, ses libérations ou des dons envers un autre joueur.</p>
+<p>Cette option permet d’agir le plus vite possible et d’être certain d’obtenir l’item souhaité !</p>
+<h1 id="les-invasions-de-monstres"><a href="#les-invasions-de-monstres">Les invasions de monstres</a></h1>
+<p>En classe, les joueurs seront questionnés régulièrement sur les lieux qu’ils ont libérés. La question pourra porter sur : - la ville - le pays - la photo - un fait important - la situation sur la carte</p>
+<p>Chaque invasion repoussée, c’est à dire une bonne réponse à la question posée, permettra de gagner de l’XP et des GC supplémentaires. À l’inverse, chaque invasion subie, c’est à dire une mauvaise réponse à la question posée, causera une perte d’HP au joueur.</p>
+<h1 id="faq"><a href="#faq">FAQ</a></h1>
+<h2 id="pourquoi-se-connecter-avec-ses-identifiants"><a href="#pourquoi-se-connecter-avec-ses-identifiants">Pourquoi se connecter avec ses identifiants?</a></h2>
+<p>L’accès à Planet Alert à l’aide de ses identifiants permet d’avoir accès à la place du marché (<em>The Marketplace</em>) pour effectuer directement ses achats ou ses libérations. Ainsi, s’il ne reste plus qu’une seule place disponible sur un lieu souhaité, la validation est immédiate et garantit donc d’obtenir ce lieu.</p>
+<p>La connexion à son espace personnel permet également de consulter tout l’historique de ses actions. Ainsi, un élève peut suivre l’évolution de sa participation, ses oublis, sa capacité à travailler en groupe… sur l’ensemble de l’année. Libre à lieu de consulter cet historique avec ses parents s’il le souhaite.</p>
+<h2 id="que-faire-des-lieux-et-équipements-obtenus"><a href="#que-faire-des-lieux-et-équipements-obtenus">Que faire des lieux et équipements obtenus?</a></h2>
+<p>Tous les lieux et équipements obtenus par un joueur sont distribués en classe et doivent être collés sur les fiches ‘Planet Alert’ prévues dans le cahier.</p>
+<p>Les textes accompagant les lieux doivent être lus de temps en temps et il faut regarder parfois la carte mondiale affichée en classe afin de savoir les placer sans hésiter. Il est également utile pour un joueur de connaître le pays et la ville de ses lieux afin de repousser les invsaions pouvant arriver en classe (<em>Monster Invasions</em>).</p>
+<h2 id="quelles-sont-les-actions-utilisées-dans-le-jeu"><a href="#quelles-sont-les-actions-utilisées-dans-le-jeu">Quelles sont les actions utilisées dans le ‘jeu’?</a></h2>
+<p>Les actions figurent sous l’onglet <em>‘The Actions’</em> et sont nombreuses. Elles appartiennent à certaines catégories telles que : Attitude, Participation, Travail à la maison, Test, Travail de groupe… Elles sont partagées en actions positives et négatives. Le joueur peut ainsi comprendre comment faire progresser son personnage dans le ‘jeu’.</p>
+<p>Prenez le temps de consulter le catalogue complet des actions dans l’onglet ‘<em>The Actions</em>’!</p>
+<h1 id="pourquoi-planet-alert"><a href="#pourquoi-planet-alert">Pourquoi Planet Alert?</a></h1>
+<p>Planet Alert part d’une simple idée : essayer d’intégrer une dimension ludique à l’enseignement afin de motiver les élèves. L’intérêt du ‘jeu’ repose sur son lien étroit avec la vie de la classe. Chaque cours offre la possibilité aux élèves de faire évoluer leur personnage. Le mot ‘jeu’ est volontairement mis entre guillemets dans cette documentation car la dimension ludique ne doit pas cacher la réalité qui est derrière : le travail effectif des élèves. Il ne s’agit pas de cacher toute tâche derrière le côté ludique, mais bien d’essayer de motiver pour progresser dans l’acquisition de compétences.</p>
+<p>Du côté ‘Prof’, un espace ‘<em>Reports</em>’ est accessible permettant d’avoir un suivi de l’ensemble de la classe concernant de nombreux aspects : travail à la maison non fait, matériel oublié, participation, résultats aux évaluations, travail supplémentaire fournit, … Le suivi peut également être généré pour 1 élève en particulier.</p>
+<p>Planet Alert reste donc pour l’instant une simple expérience pédagogique. Il ne résout bien sûr pas tous les soucis de motivation des élèves, mais l’expérience apporte de nombreux retours positifs, ce qui est encourageant.</p>
+<p>Les idées pour faire évoluer le ‘jeu’ sont encore nombreuses. En vrac : - des exercices en ligne accessibles depuis l’espace personnel d’un élève. - mêler davantage le suivi d’acquisition des compétences géré via le logiciel <a href="https://sacoche.sesamath.net/">SACoche</a> - différencier les mondes selon le niveau des classes - ajouter d’autres éléments pouvant motiver les élèves (personnages célèbres…) - trouver un scénario différent plus intéressant (j’avoue avoir fait dans le minimaliste ;) ) - améliorer la stratégie du ‘jeu’ afin de trouver toujours plus de leviers pour motiver certains élèves - …</p>
 </section>
