@@ -28,6 +28,8 @@
 	<meta name="description" content="<?php echo $page->summary; ?>" />
 	<meta name="generator" content="ProcessWire <?php echo $config->version; ?>" />
 
+  <link rel="icon" type="image/png" href="<?php echo $config->urls->templates?>img/favicon.png">
+
 	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/css/bootstrap-theme.min.css" />
 	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/datatables-plugins-bootstrap3/dist/css/datatables-plugins-bootstrap3.css" />
