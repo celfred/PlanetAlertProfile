@@ -159,7 +159,7 @@
       }
 
       // Automatic players' news (free place, shop)
-      $news = $pages->find("template=event, publish=1, sort=-created, task.name!='donated'");
+      $news = $pages->find("template=event, publish=1, sort=-created");
       if ($news->count() > 0) {
         foreach($news as $n) {
           $currentPlayer = $n->parent('template=player');

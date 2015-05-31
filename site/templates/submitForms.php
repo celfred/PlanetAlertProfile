@@ -134,11 +134,12 @@
         saveHistory($player, $task, $taskComment, $newsBoard);
 
         // Modify receiver's page
-        $receiver->GC = $player->GC + $amount;
+        $receiver->GC = $receiver->GC + $amount;
         $receiver->save();
         // Record history
         $task = $pages->get("template='task', name='donated'");
         $taskComment = 'Donation of '.$amount. ' GC by '.$player->title.' ['.$player->team->title.']';
+        $newsBoard = 0;
         saveHistory($receiver, $task, $taskComment, $newsBoard);
         
         // Notify admin
