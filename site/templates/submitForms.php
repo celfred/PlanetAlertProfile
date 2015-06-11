@@ -10,11 +10,14 @@
     }
 
     // Check if equipment or place not already there
+    // Except 'Potions'
     $already = false;
     $player = $pages->get($playerId);
     foreach ($player->equipment as $eq) {
       if ($eq->id == $itemId) {
-        $already = true;
+        if($newItem->parent->name !== 'potions') {
+          $already = true;
+        }
       }
     }
     foreach ($player->places as $pl) {
@@ -49,6 +52,8 @@
           $player->save();
 
           // Record history
+          $task = $pages->get("name='buy'");
+          $newsBoard = 1;
           $taskComment = $newItem->title;
           saveHistory($player, $task, $taskComment, $newsBoard);
           
