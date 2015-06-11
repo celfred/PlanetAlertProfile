@@ -31,7 +31,9 @@ $out .= '     <span>Donate to : </span>';
 $out .= '<select class="form-control" id="receiver" name="receiver">';
   $out .= '<option value="0">Select a player</option>';
   foreach ($globalPlayers as $plyr) {
-    $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' ['.$plyr->team->title.'] '.$plyr->GC.' GC</option>';
+    if ($plyr->id != $player->id) {
+      $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' ['.$plyr->team->title.'] '.$plyr->GC.' GC</option>';
+    }
   }
 $out .= '</select>';
 $out .= "<input id='donateFormSubmit' name='donateFormSubmit' type='submit' class='form-control btn btn-danger btn-sm' value='Donate !'>";
