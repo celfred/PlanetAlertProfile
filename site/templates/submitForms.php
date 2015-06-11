@@ -156,7 +156,7 @@
     }
 
     // Redirect to player's profile
-    $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name);
+    //$session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name);
   }
 
   if ($user->isSuperuser()) { // Admin front-end
