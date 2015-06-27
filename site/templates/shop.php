@@ -36,7 +36,6 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       } else {
         echo '<span class="label label-info">No equipment.</span>';
       }
-      echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
       echo '</div>';
     }
   }
