@@ -45,17 +45,17 @@ body {
   background-size: contain;
 }
 
-#masthead ul {
+#masthead > ul, #masthead button, #masthead .myButton {
   position: relative;
   z-index: 1;
 }
-#masthead ul li {
+#masthead > ul > li, #masthead .myButton, #masthead button {
   position: relative;
   display: inline;
   z-index: 5;
 }
 
-#masthead a {
+#masthead a.btn, #masthead div.btn-group button {
   font-family: "Helvetica Neue", Arial, sans-serif; 
   font-weight: bold; 
   text-transform: uppercase; 
@@ -65,6 +65,15 @@ body {
   margin: 0 0 0 1px;
   padding: 48px 10px 15px 10px;
   border-radius: 10px 0px 10px 0px;
+}
+#masthead div.btn-group button {
+  background: transparent;
+  border: none;
+  padding-top: 44px;
+}
+#masthead div.btn-group ul li a {
+  font-family: "Helvetica Neue", Arial, sans-serif; 
+  font-weight: bold; 
 }
 @keyframes myfade
 {
@@ -83,19 +92,28 @@ body {
     padding-bottom: 25px;
   }
 }
+#masthead div.btn-group button.on {
+  color: #313131; 
+  background: #FFC;
+} 
 
-#masthead a:hover:not(.on) {
+#masthead a.btn:hover:not(.on), #masthead > ul > li > a:hover:not(.on), #masthead .myButton:hover, #masthead button a:hover:not(.on), #masthead div.btn-group button:hover {
   animation: myfade 0.5s;
   animation-fill-mode: forwards;
 }
-#masthead a:hover, #masthead a.on {
+#masthead a.btn:hover, #masthead a.btn.on, #masthead > ul > li > a:hover, #masthead a.on, #masthead button a:hover, #masthead button a.on, #masthead div.btn-group button:hover  {
   color: #313131; 
   background: #FFC;
 }
-#masthead a.on {
+~masthead a.btn.on, #masthead > ul > li > a.on, #masthead button a.on {
   padding-top: 38px;
   padding-bottom: 25px;
 }
+
+.selected-left {
+  border-left: 3px solid #000;
+}
+
 #content {
 	color: #333; 
   padding: 5px 30px 0px 30px;

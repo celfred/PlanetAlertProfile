@@ -57,9 +57,11 @@
 
     <div id="masthead" class="masthead">
       <?php 
+        $newsboardPage = $pages->get("/newsboard");
         if ($user->isLoggedin() == false || ($user->isSuperuser())) { // No user logged : display all teams (public view)
       ?>
         <ul><?php
+          /*
           foreach($children as $child) {
             $class = $child === $page->rootParent ? " class='on'" : '';
             if ($child->name == 'players') {
@@ -99,7 +101,59 @@
             if ($page->name=='login') { $class=" class='on'"; }
             echo "<li><a$class href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>Login</a></li>";
           }
+          $class = $page->name == 'home' ? " class='on'" : "";
+          echo "<li><a$class href='{$homepage->url}'>{$homepage->title}</a></li>";
+          $class = $page->name == 'newsboard' ? " class='on'" : "";
+          echo "<li><a$class href='{$newsboardPage->url}'>{$newsboardPage->title}</a></li>";
+          */
         ?>
+        <div class="btn-group" role="group" aria-label="...">
+          <?php
+            $class = $page->name == 'home' ? "on" : "";
+            echo "<a class='btn $class' href='{$homepage->url}'>{$homepage->title}</a>";
+            $class = $page->name == 'newsboard' ? "on" : "";
+            echo "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
+          ?>
+
+          <div class="btn-group" role="group">
+            <?php $class = $page->name == 'players' ? "on" : ""; ?>
+            <button type="button" class="<?php echo $class;?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The Teams <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <?php
+                foreach($allTeams as $team) {
+                  $class = $sanitizer->pageName($team->name) == $input->urlSegment1 ? " class='selected-left'" : "";
+                  echo "<li><a$class href='{$homepage->url}players/{$team->name}/'>{$team->title}</a></li>";
+                }
+              ?>
+            </ul>
+          </div>
+          <div class="btn-group">
+            <?php $class = ($page->name == 'shop' || $page->name == 'places' || $page->name == 'tasks') ? "on" : ""; ?>
+            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The World <span class="caret"> </span></button>
+            <ul class="dropdown-menu">
+              <?php
+              $class = $page->name == 'shop' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
+              $class = $page->name == 'places' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
+              $class = $page->name == 'tasks' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
+              ?>
+            </ul>
+          </div>
+          <?php
+            $class = $page->name == 'documentation' ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Documentation</a>";
+            $class = $page->name == 'contact' ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/contact')->url}'>Contact</a>";
+            if ( $user->isLoggedin()) {
+              echo '<a class="btn" href="./?logout=1">Log out</a>';
+            } else {
+              $class = $page->name == 'login' ? "on" : "";
+              echo "<a class='btn $class' href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>Login</a>";
+            }
+          ?>
+        </div>
         </ul>
       <?php } else { // Logged user's Menu ?>
         <div style="float:left; color: #FFF;">
@@ -109,25 +163,75 @@
         ?>
         </div>
         <ul>
+        <div class="btn-group" role="group" aria-label="...">
           <?php
-            $newsboardPage = $pages->get("/newsboard");
-            $class = $page->name == 'newsboard' ? " class='on'" : "";
-            echo "<li><a$class href='{$newsboardPage->url}'>{$newsboardPage->title}</a></li>";
-            $class = ($player->team->name == $input->urlSegment1 && $player->name == $input->urlSegment2) ? " class='on'" : "";
-            echo "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}{$player->name}'>My Profile</a></li>";
-            $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == '') ? " class='on'" : "";
-            echo "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}'>My Team</a></li>";
-            $class = $page->name == 'shop_generator' ? " class='on'" : "";
-            echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>The Marketplace</a></li>";
-            $class = $page->name == 'shop' ? " class='on'" : "";
-            echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
-            $class = $page->name == 'places' ? " class='on'" : "";
-            echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
-            $class = $page->name == 'documentation' ? " class='on'" : "";
-            echo "<li><a$class href='{$pages->get('/documentation')->url}'>Documentation</a></li>";
-            $class = $page->name == 'contact' ? " class='on'" : "";
-            echo "<li><a$class href='{$pages->get('/contact')->url}'>Contact</a></li>";
-            echo '<li><a href="./?logout=1">Log out ('.$player->login.')</a></li>';
+            $class = $page->name == 'newsboard' ? "on" : "";
+            echo "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
+            $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}'>My Team</a>";
+            /* $class = $page->name == 'shop_generator' ? "on" : ""; */
+            /* echo "<a class='btn $class' href='{$pages->get('/shop_generator')->url}{$player->id}'>The Marketplace</a>"; */
+          ?>
+
+          <div class="btn-group">
+            <?php $class = ($page->name == 'shop_generator') ? "on" : ""; ?>
+            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Actions <span class="caret"> </span></button>
+            <ul class="dropdown-menu">
+              <?php
+              $class = $page->name == 'shop_generator' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Go to the Marketplace</a></li>";
+              echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Make a donation</a></li>";
+              /* $class = $page->name == 'places' ? " class='selected-left'" : ""; */
+              /* echo "<li><a$class href='{$pages->get('/places')->url}'>Fight a monster</a></li>"; */
+              ?>
+            </ul>
+          </div>
+
+          <div class="btn-group">
+            <?php $class = ($page->name == 'shop' || $page->name == 'places' || $page->name == 'tasks') ? "on" : ""; ?>
+            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The World <span class="caret"> </span></button>
+            <ul class="dropdown-menu">
+              <?php
+              $class = $page->name == 'shop' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
+              $class = $page->name == 'places' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
+              $class = $page->name == 'tasks' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
+              ?>
+            </ul>
+          </div>
+          <?php
+            $class = $page->name == 'documentation' ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Documentation</a>";
+            $class = $page->name == 'contact' ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/contact')->url}'>Contact</a>";
+            if ( $user->isLoggedin()) {
+              echo '<a class="btn" href="./?logout=1">Log out</a>';
+            } else {
+              $class = $page->name == 'login' ? "on" : "";
+              echo "<a class='btn $class' href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>Login</a>";
+            }
+          ?>
+        </div>
+          <?php
+            /* $class = $page->name == 'newsboard' ? " class='on'" : ""; */
+            /* echo "<li><a$class href='{$newsboardPage->url}'>{$newsboardPage->title}</a></li>"; */
+            /* $class = ($player->team->name == $input->urlSegment1 && $player->name == $input->urlSegment2) ? " class='on'" : ""; */
+            /* echo "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}{$player->name}'>My Profile</a></li>"; */
+            /* $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == '') ? " class='on'" : ""; */
+            /* echo "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}'>My Team</a></li>"; */
+            /* $class = $page->name == 'shop_generator' ? " class='on'" : ""; */
+            /* echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>The Marketplace</a></li>"; */
+            /* $class = $page->name == 'shop' ? " class='on'" : ""; */
+            /* echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>"; */
+            /* $class = $page->name == 'places' ? " class='on'" : ""; */
+            /* echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>"; */
+            /* $class = $page->name == 'documentation' ? " class='on'" : ""; */
+            /* echo "<li><a$class href='{$pages->get('/documentation')->url}'>Documentation</a></li>"; */
+            /* $class = $page->name == 'contact' ? " class='on'" : ""; */
+            /* echo "<li><a$class href='{$pages->get('/contact')->url}'>Contact</a></li>"; */
+            /* echo '<li><a href="./?logout=1">Log out ('.$player->login.')</a></li>'; */
           ?>
         </ul>
       <?php } ?>
