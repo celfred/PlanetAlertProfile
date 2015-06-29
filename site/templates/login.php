@@ -8,20 +8,22 @@ if ( $input->get('sender') != 1) {
   $url = $sender->url.$team;
   $homepage = false;
 } else {
-  $homepage = $pages->get('/');
+  $homepage = $pages->get('/newsboard');
 }
 
 // check for login before outputting markup
 if($input->post->user && $input->post->pass) {
-    $user = $sanitizer->username($input->post->user);
-    $pass = $input->post->pass; 
-    if($session->login($user, $pass)) {
-      if (!$homepage) {
-        $session->redirect($url); 
-      } else {
-        $session->redirect($homepage->url); 
-      }
+  $user = $sanitizer->username($input->post->user);
+  $pass = $input->post->pass; 
+  if($session->login($user, $pass)) {
+    if (!$homepage) {
+      //$session->redirect($url); 
+      // Redirect user to Newsboard
+      $session->redirect($pages->get('/newsboard')->url);
+    } else {
+      $session->redirect($homepage->url); 
     }
+  }
 }
 ?>
 
