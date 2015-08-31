@@ -116,7 +116,7 @@
           ?>
 
           <div class="btn-group" role="group">
-            <?php $class = $page->name == 'players' ? "on" : ""; ?>
+            <?php $class = $page->name == 'players' || $page->name == "world" ? "on" : ""; ?>
             <button type="button" class="<?php echo $class;?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The Teams <span class="caret"></span></button>
             <ul class="dropdown-menu">
               <?php
