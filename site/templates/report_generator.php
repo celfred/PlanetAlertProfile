@@ -41,7 +41,8 @@ if ($selected->template == 'player') { // Player's report
   $reportTitle .= 'Période couverte : '.$period->title;
 } else { // Team's report
   $global = true;
-  $allPlayers = $pages->find("team=$selected, template=player, sort=$sort");
+  $selected = strtoupper($input->urlSegment2);
+  $allPlayers = $pages->find("playerTeam=$selected, template=player, sort=$sort");
   $reportTitle = 'Bilan ';
   if ($category == 'all') { // Global report
     $reportTitle .= ' global';
@@ -53,7 +54,7 @@ if ($selected->template == 'player') { // Player's report
       default: break;
     }
   }
-  $reportTitle .= ' (classe de '.$selected->title.')'; 
+  $reportTitle .= ' (classe de '.$selected.')'; 
   $reportTitle .= '<br />';
   $reportTitle .= 'Période couverte : '.$period->title;
 }
