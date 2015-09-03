@@ -195,9 +195,11 @@
 
         // Record history
         saveHistory($player, $task, $taskComment);
+
+        $team = $player->playerTeam;
       }
       // Redirect to team page
-      $session->redirect($pages->get('/players')->url.$input->post->team);
+      $session->redirect($pages->get('/players')->url.$team);
     }
 
     if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
@@ -214,7 +216,7 @@
        
         // Set new values
         $player->GC = (int) $player->GC - $newItem->GC;
-        if ($newItem->template == 'equipment') {
+        if ($newItem->template == 'equipment' || $newItem->template == 'item') {
           switch($newItem->parent->name) {
             case 'potions' : // instant use potions?
               $player->HP = $player->HP + $newItem->HP;
@@ -244,7 +246,8 @@
         saveHistory($player, $task, $taskComment, $newsBoard);
       }
       // Redirect to marketPlace
-      $session->redirect($pages->get('/shop')->url.$input->post->team);
+      $team = $player->playerTeam;
+      $session->redirect($pages->get('/shop')->url.$team);
     }
   } // End if superUser
 

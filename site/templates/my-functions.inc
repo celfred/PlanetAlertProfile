@@ -246,12 +246,14 @@ function display_scores($allPlayers, $allTeams, $totalPlaces) {
   echo '<h3 class="text-center ">';
   echo '<ul class="scores list-inline">Free world : ';
   foreach($allTeams as $team) {
-    $teamPlayers = $allPlayers->find("team=$team");
-    $globalScore = globalScore($teamPlayers, $totalPlaces); $teamScore = $globalScore[0];
-    $teamOwners = $globalScore[1];
-    $totalOwners = $globalScore[2];
+    if ($team != 'No team') {
+      $teamPlayers = $allPlayers->find("playerTeam=$team");
+      $globalScore = globalScore($teamPlayers, $totalPlaces); $teamScore = $globalScore[0];
+      $teamOwners = $globalScore[1];
+      $totalOwners = $globalScore[2];
 
-    echo '<li class="label label-default"><strong title="'.$teamOwners.'/'.$totalOwners.'">'.$team->title.' : '.$teamScore.'%</strong></li>';
+      echo '<li class="label label-default"><strong title="'.$teamOwners.'/'.$totalOwners.'">'.$team.' : '.$teamScore.'%</strong></li>';
+    }
   }
   echo '</ul>';
   echo '</h3>';

@@ -110,7 +110,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
         <td><?php
         switch ($item->stat) {
         case 0 : echo '<span>Out of reach</span>'; break;
-        case 1 : echo '<a class="buyButton label label-primary" href="'.$page->url.$player->team->name.'/'.$item->id.'">Buy</a>'; break;
+        case 1 : echo '<a class="buyButton label label-primary" href="'.$page->url.$player->playerTeam.'/'.$item->id.'">Buy</a>'; break;
         case 2 : echo '<span class="label label-success">Owned</span>'; break;
         default : echo 'Out of reach';
         } 
@@ -128,7 +128,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
 
       $out = '';
       $team = $input->urlSegment1;
-      $allPlayers = $pages->find("template='player', team=$team, sort='title'");
+      $allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
       // Select form
       $out .= '<select class="" id="shopSelect" name="shopSelect">';
         $out .= '<option value="">Select a player</option>';
@@ -154,7 +154,6 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
 
       echo '<form id="buyForm" name="buyForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="" role="form">';
       echo '<input type="hidden" name="player" value="'.$player->id.'" />';
-      echo '<input type="hidden" name="team" value="'.$player->team.'" />';
       echo '<input type="hidden" name="item" value="'.$item->id.'" />';
       echo '<div class="row well text-center">';
       echo '<a href="'.$page->url.'" class="btn btn-danger">No, I cancel the deal.</a>&nbsp;&nbsp;&nbsp;';

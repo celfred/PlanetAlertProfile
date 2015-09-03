@@ -36,7 +36,7 @@ if ($selected->template == 'player') { // Player's report
       default: break;
     }
   }
-  $reportTitle .= ' de '.$selected->title.' '.$selected->lastName.' ('.$selected->team->title.')'; 
+  $reportTitle .= ' de '.$selected->title.' '.$selected->lastName.' ('.$selected->playerTeam.')'; 
   $reportTitle .= '<br />';
   $reportTitle .= 'Période couverte : '.$period->title;
 } else { // Team's report

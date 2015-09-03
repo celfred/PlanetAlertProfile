@@ -4,10 +4,15 @@
 
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
-  $allPlayers = $pages->find("template='player', team=$input->urlSegment1, sort='group'");
+  if ($input->urlSegment1 != 'no-team') {
+    $allPlayers = $pages->find("template='player', playerTeam=$input->urlSegment1, sort='group'");
+    $team = $allPlayers->first->playerTeam;
+  } else {
+    $allPlayers = $pages->find("template='player', playerTeam='', sort='group'");
+    $team = 'No team';
+  }
   $allGroups = $pages->get("/groups")->children('sort=title');
   $outGroups = '';
-  $team = $allPlayers->first->team->title;
   $totalPlaces = $pages->find("template='place', name!='places'");
   $globalScore = globalScore($allPlayers, $totalPlaces);
   $teamScore = $globalScore[0];
@@ -104,8 +109,7 @@
       $class = '';
     }
     // Get karma evolution
-    $prevEvents = $player->child("name='history'")->children("limit=5");
-    $prevEvents->sort('date');
+    $prevEvents = $player->child("name='history'")->children("limit=5,sort=-date");
     $trend = '';
     foreach ($prevEvents as $event) {
       $HP = $event->task->HP;

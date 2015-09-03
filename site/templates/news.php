@@ -2,8 +2,6 @@
 
   include("./head.inc"); 
 
-  $allPlayers = $pages->find('template=player');
-  $allTeams = $pages->get("/teams")->children->not("name=orphans")->sort('-name');
   $totalPlaces = $pages->find("template='place', name!='places'");
 
   echo '<div class="row">';
@@ -33,7 +31,8 @@
               } else {
                 $focus = "";
               }
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.' ['. $player->team->title.']</span> <span class="badge">'.$player->karma.' karma</span></li>';
+              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
+              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->karma.' karma</span></li>';
             }
           ?>
         </ol>
@@ -59,7 +58,8 @@
               } else {
                 $focus = "";
               }
-              echo '<li><span '.$focus.'>'.$mini.' '.$player->title.' ['. $player->team->title.']</span> <span class="badge">'.$player->places->count.' places</span></li>';
+              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
+              echo '<li><span '.$focus.'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->places->count.' places</span></li>';
           }
         ?>
         </ol>
@@ -85,7 +85,8 @@
               } else {
                 $focus = "";
               }
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.' ['. $player->team->title.']</span> <span class="badge">'.$player->equipment->count.' equipment</span></li>';
+              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
+              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->equipment->count.' equipment</span></li>';
             }
           ?>
         </ol>
@@ -111,7 +112,8 @@
               } else {
                 $focus = "";
               }
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.' ['. $player->team->title.']</span> <span class="badge">'.$player->donation.' GC</span></li>';
+              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
+              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->donation.' GC</span></li>';
             }
           ?>
         </ol>
@@ -177,7 +179,7 @@
               echo date("F j (l)", $n->date);
               echo ' - ';
               echo 'Congratulations to ';
-              echo $currentPlayer->title.' ['.$currentPlayer->team->title.']  ';
+              echo $currentPlayer->title.' ['.$currentPlayer->playerTeam.']  ';
               echo $mini.'  ';
              ?>
            </h4>

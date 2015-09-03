@@ -6,7 +6,7 @@ include("./head.inc");
 include("./tabList.inc"); 
 
 $selectedTeam = $input->urlSegment1;
-$allPlayers = $pages->find("template=player, team=$selectedTeam, sort=name");
+$allPlayers = $pages->find("template=player, playerTeam=$selectedTeam, sort=name");
 $allPeriods = $pages->find("template=period");
 
 if ($user->isSuperuser()) {

@@ -34,7 +34,7 @@ if ($user->isSuperuser()) {
 
   $selectedTeam = $input->urlSegment1;
   $selectedPlayer = $input->post->selectedPlayer;
-  $allPlayers = $pages->find("template='player', team=$selectedTeam, sort='name'");
+  $allPlayers = $pages->find("template='player', playerTeam=$selectedTeam, sort='name'");
 
   
   $reportTitle = '';
@@ -91,7 +91,7 @@ if ($user->isSuperuser()) {
         $out .= '<img class="monster" src="'.$logo.'" />';
         $out .= '<img class="avatar" src="'.$player->avatar->url.'" />';
         $out .= '<h1 class="playerName">'.$player->title.'</h1>';
-        $out .= '<h3>Monster invasion ! Team '.$player->team->title.' has to react!</h3>';
+        $out .= '<h3>Monster invasion ! Team '.$player->playerTeam.' has to react!</h3>';
         $out .= '<h2 class="alert alert-danger text-center">';
         $out .= $quiz['question'].'&nbsp;&nbsp;';
         $out .= '</h2>';

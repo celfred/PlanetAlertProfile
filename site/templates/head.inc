@@ -48,9 +48,20 @@
 <body>
   <?php
     $homepage = $pages->get("/"); 
-    $children = $homepage->children;
-    $children->prepend($homepage); 
-    $allTeams = $pages->get("/teams")->children->not("name=orphans")->sort('-name');
+    $allPlayers = $pages->find("template=player");
+    $allTeams = [];
+    foreach ($allPlayers as $player) {
+      if (!in_array($player->playerTeam, $allTeams)) {
+        if ($player->playerTeam == '' && !in_array('No team', $allTeams)) {
+          array_push($allTeams, 'No team'); 
+        } else {
+          if ($player->playerTeam != '') {
+            array_push($allTeams, $player->playerTeam); 
+          }
+        }
+      }
+    }
+
   ?>
           
   <div id="wrap">
@@ -60,53 +71,7 @@
         $newsboardPage = $pages->get("/newsboard");
         if ($user->isLoggedin() == false || ($user->isSuperuser())) { // No user logged : display all teams (public view)
       ?>
-        <ul><?php
-          /*
-          foreach($children as $child) {
-            $class = $child === $page->rootParent ? " class='on'" : '';
-            if ($child->name == 'players') {
-              foreach($allTeams as $team) {
-                $class = $sanitizer->pageName($team->name) == $input->urlSegment1 ? " class='on'" : "";
-                if ($user->isLoggedin() == false || ($user->isSuperuser())) { // No user logged : display all teams (public view)
-                  echo "<li><a$class href='{$child->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></li>";
-                } else { // A user is logged : display his team only
-                  if ($team->title == $player->team->title) {
-                    echo "<li><a$class href='{$child->url}{$sanitizer->pageName($team->name)}'>{$team->title}</a></li>";
-                  }
-                }
-              }
-
-            } else {
-              if ($child->name != 'reports') {
-                if ($child->name == 'quiz') {
-                  if ($user->isSuperuser()) {
-                    echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
-                  }
-                } else {
-                  echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
-                }
-              } else {
-                if ($user->isSuperuser()) {
-                  echo "<li><a$class href='{$child->url}'>{$child->title}</a></li>";
-                }
-              }
-            }
-          }
-          if ( $user->isLoggedin()) {
-            if ($user->isSuperuser() === false) {
-              echo '<li><a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'"><span class="username">My profile ('.$user->name.')</span></a></li>';
-            }
-            echo '<li><a href="./?logout=1">Log out</a></li>';
-          } else {
-            if ($page->name=='login') { $class=" class='on'"; }
-            echo "<li><a$class href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>Login</a></li>";
-          }
-          $class = $page->name == 'home' ? " class='on'" : "";
-          echo "<li><a$class href='{$homepage->url}'>{$homepage->title}</a></li>";
-          $class = $page->name == 'newsboard' ? " class='on'" : "";
-          echo "<li><a$class href='{$newsboardPage->url}'>{$newsboardPage->title}</a></li>";
-          */
-        ?>
+        <ul>
         <div class="btn-group" role="group" aria-label="...">
           <?php
             $class = $page->name == 'home' ? "on" : "";
@@ -121,8 +86,10 @@
             <ul class="dropdown-menu">
               <?php
                 foreach($allTeams as $team) {
-                  $class = $sanitizer->pageName($team->name) == $input->urlSegment1 ? " class='selected-left'" : "";
-                  echo "<li><a$class href='{$homepage->url}players/{$team->name}/'>{$team->title}</a></li>";
+                  //$class = $sanitizer->pageName($team->name) == $input->urlSegment1 ? " class='selected-left'" : "";
+                  $class = $team == $input->urlSegment1 ? " class='selected-left'" : "";
+                  //echo "<li><a$class href='{$homepage->url}players/{$team->name}/'>{$team->title}</a></li>";
+                  echo "<li><a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a></li>";
                 }
               ?>
             </ul>

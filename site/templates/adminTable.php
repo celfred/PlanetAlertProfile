@@ -9,11 +9,10 @@ include("./tabList.inc");
 $team = $input->urlSegment1;
 $allCategories = $pages->get('/categories/')->children("name!=potions|place|shop|protections|weapons|manual-cat");
 $allTasks = $pages->get('/tasks/')->children()->sort('category, HP, GC, name');
-$allPlayers = $pages->find("template='player', team=$team, sort='title'");
+$allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
 
 ?>
 
-<!-- <form id="adminTableForm" name="adminTableForm" action="players/<?php echo $input->urlSegment1; ?>" method="post" class="" role="form"> -->
 <form id="adminTableForm" name="adminTableForm" action="<?php echo $pages->get('name=submitforms')->url; ?>" method="post" class="" role="form">
 
 <ul class="list-inline text-center">
@@ -26,7 +25,6 @@ $allPlayers = $pages->find("template='player', team=$team, sort='title'");
 </ul>
 
 <input type="submit" name="adminTableSubmit" value="Save" class="btn btn-block btn-primary" disabled="disabled" />
-<input type="hidden" name="team" value="<?php echo $input->urlSegment1; ?>">
 
 <table id="adminTable" class="adminTable">
   <thead>

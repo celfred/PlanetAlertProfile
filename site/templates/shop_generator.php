@@ -10,12 +10,12 @@ $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
 
 $playerId = $input->urlSegment1;
 $player = $pages->get($playerId);
-$allPlayers = $pages->find("template='player', team=$player->team");
+$allPlayers = $pages->find("template='player', playerTeam=$player->playerTeam");
 $globalPlayers = $pages->find("template='player', sort=title");
 
 $out = '';
 
-$out .= "<h2 class='text-center'>Marketplace for {$player->title} ({$player->team->title})</h2>";
+$out .= "<h2 class='text-center'>Marketplace for {$player->title} ({$player->playerTeam})</h2>";
 $out .= "<h3 class='text-center well'>";
 $out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='' />&nbsp;<span id='remainingGC'>{$player->GC}</span> GC available.";
 if ($player->GC >=5) {
@@ -32,7 +32,7 @@ $out .= '<select class="form-control" id="receiver" name="receiver">';
   $out .= '<option value="0">Select a player</option>';
   foreach ($globalPlayers as $plyr) {
     if ($plyr->id != $player->id) {
-      $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' ['.$plyr->team->title.'] '.$plyr->GC.' GC</option>';
+      $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' ['.$plyr->playerTeam.'] '.$plyr->GC.' GC</option>';
     }
   }
 $out .= '</select>';
@@ -43,7 +43,6 @@ $out .= "</section>";
 
 $out .= '<form id="marketPlaceForm" name="marketPlaceForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="" role="form">';
 $out .= '<input type="hidden" name="player" value="'.$player->id.'" />';
-$out .= '<input type="hidden" name="team" value="'.$player->team.'" />';
 // Possible equipment
 $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment");
 
@@ -86,7 +85,7 @@ $out .= '</section>';
 
 if ( $possibleEquipment.count() > 0 || $possiblePlaces.count() >0) {
   $out .= '<input type="submit" name="marketPlaceSubmit" value="Yes, buy the selected items!" class="btn btn-block btn-primary" disabled="disabled" />';
-  $out .= '<a href="'.$homepage->url.'players/'.$player->team->name.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
+  $out .= '<a href="'.$homepage->url.'players/'.$player->playerTeam.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
 }
 
 $out .= '</form>';
