@@ -61,6 +61,7 @@
         }
       }
     }
+    arsort($allTeams);
 
   ?>
           
