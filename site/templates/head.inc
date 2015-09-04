@@ -126,8 +126,9 @@
       <?php } else { // Logged user's Menu ?>
         <div style="float:left; color: #FFF;">
         <?php
+          $player = $pages->get("template=player, login=$user->name");
           echo '<img class="" src="'.$player->avatar->url.'" width="95" alt="No avatar" />';
-          //echo '<span class="logged">'.$player->title.' ('.$player->team->title.')</span>';
+          //echo '<span class="logged">'.$player->title.' ('.$player->playerTeam.')</span>';
         ?>
         </div>
         <ul>
@@ -135,10 +136,10 @@
           <?php
             $class = $page->name == 'newsboard' ? "on" : "";
             echo "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
-            $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}'>My Team</a>";
-            /* $class = $page->name == 'shop_generator' ? "on" : ""; */
-            /* echo "<a class='btn $class' href='{$pages->get('/shop_generator')->url}{$player->id}'>The Marketplace</a>"; */
+            $class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}/{$player->name}'>My Profile</a>";
+            $class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}'>My Team</a>";
           ?>
 
           <div class="btn-group">
@@ -182,25 +183,6 @@
             }
           ?>
         </div>
-          <?php
-            /* $class = $page->name == 'newsboard' ? " class='on'" : ""; */
-            /* echo "<li><a$class href='{$newsboardPage->url}'>{$newsboardPage->title}</a></li>"; */
-            /* $class = ($player->team->name == $input->urlSegment1 && $player->name == $input->urlSegment2) ? " class='on'" : ""; */
-            /* echo "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}{$player->name}'>My Profile</a></li>"; */
-            /* $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == '') ? " class='on'" : ""; */
-            /* echo "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}'>My Team</a></li>"; */
-            /* $class = $page->name == 'shop_generator' ? " class='on'" : ""; */
-            /* echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>The Marketplace</a></li>"; */
-            /* $class = $page->name == 'shop' ? " class='on'" : ""; */
-            /* echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>"; */
-            /* $class = $page->name == 'places' ? " class='on'" : ""; */
-            /* echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>"; */
-            /* $class = $page->name == 'documentation' ? " class='on'" : ""; */
-            /* echo "<li><a$class href='{$pages->get('/documentation')->url}'>Documentation</a></li>"; */
-            /* $class = $page->name == 'contact' ? " class='on'" : ""; */
-            /* echo "<li><a$class href='{$pages->get('/contact')->url}'>Contact</a></li>"; */
-            /* echo '<li><a href="./?logout=1">Log out ('.$player->login.')</a></li>'; */
-          ?>
         </ul>
       <?php } ?>
       <span id="bgtitle">Planet Alert</span>
