@@ -109,7 +109,7 @@
       $class = '';
     }
     // Get karma evolution
-    $prevEvents = $player->child("name='history'")->children("limit=5,sort=-date");
+    $prevEvents = $player->child("name='history'")->children("limit=5,sort=-date")->reverse();
     $trend = '';
     foreach ($prevEvents as $event) {
       $HP = $event->task->HP;
