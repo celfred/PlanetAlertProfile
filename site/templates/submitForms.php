@@ -237,6 +237,8 @@
           $task = $pages->get("name='free'");
           $newsBoard = 1;
         }
+        // Update player's scores
+        updateScore($player, $task);
 
         // Save player's new scores
         $player->save();
