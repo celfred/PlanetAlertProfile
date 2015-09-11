@@ -59,7 +59,11 @@
                 $focus = "";
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '.$focus.'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->places->count.' places</span></li>';
+              if ($player->places->count > 1) {
+                echo '<li><span '.$focus.'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->places->count.' places</span></li>';
+              } else {
+                echo '<li><span '.$focus.'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->places->count.' place</span></li>';
+              }
           }
         ?>
         </ol>
