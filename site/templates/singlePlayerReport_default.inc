@@ -29,7 +29,7 @@
       case 'homework' :
         $noHk = $events->find("task.name=no-homework, sort=-date");
         $xtHk = $events->find("task.name=extra-homework, sort=-date");
-        $out .= '<span class="label label-default pull-left">Travail à la maison</span>';
+        $out .= '<h3><label class="label label-default pull-left">Travail à la maison</span></h3>';
         if ($noHk->count() == 0) {
           $out .= '<i class="glyphicon glyphicon-thumbs-up"></i> <span class="">Toujours fait! C\'est bien!</span>';
         } else {
@@ -45,7 +45,7 @@
       case 'oublis' :
         $noSigned = $events->find("task.name=test-not-signed, sort=-date");
         $noMaterial = $events->find("task.name=forgotten-weapons, sort=-date");
-        $out .= '<span class="label label-default pull-left">Signatures</span>';
+        $out .= '<h3><label class="label label-default pull-left">Signatures</span></h3>';
         if ($noSigned->count() > 0 || $noMaterial->count() > 0) {
           if ($noSigned->count() > 0) {
             $out .= '<i class="glyphicon glyphicon-thumbs-down"></i> Oubli(s) de signatures : '.$noSigned->count();
@@ -62,7 +62,7 @@
         break;
       default :
         $cat = wire('pages')->get("name=$category")->title;
-        $out .= '<span class="label label-default pull-left">'.$cat.'</span>';
+        $out .= '<h3><label class="label label-default pull-left">'.$cat.'</span></h3>';
         // Calculate positive ratio to set an average RR/R/V/VV
         $vv = 0;
         $v = 0;
