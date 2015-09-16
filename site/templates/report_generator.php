@@ -1,15 +1,5 @@
 <?php 
 
-function calculate_average($arr) {
-  $total = 0;
-  $count = count($arr); //total numbers in array
-  foreach ($arr as $value) {
-      $total = $total + $value; // total value of array numbers
-  }
-  $average = round($total/$count); // get average value
-  return $average;
-}
-
 if ($user->isSuperuser() || $user->isLoggedin() ) {
 
   if (!$config->ajax) {
