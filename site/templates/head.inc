@@ -170,9 +170,24 @@
               ?>
             </ul>
           </div>
+
+          <div class="btn-group">
+            <?php $class = ($page->name == 'report_generator') ? "on" : ""; ?>
+            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Reports <span class="caret"> </span></button>
+            <ul class="dropdown-menu">
+              <?php
+              $class = $page->name == 'report_generator' ? " class='selected-left'" : "";
+              $allPeriods = $pages->find("template=period, adminOnly=0");
+              foreach($allPeriods as $period) {
+                echo "<li><a$class target='_blank' href='{$pages->get('/report_generator')->url}all/{$player->name}/{$period->id}/'>{$period->title}</a></li>";
+              }
+              ?>
+            </ul>
+          </div>
+
           <?php
             $class = $page->name == 'documentation' ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Documentation</a>";
+            echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Doc.</a>";
             $class = $page->name == 'contact' ? "on" : "";
             echo "<a class='btn $class' href='{$pages->get('/contact')->url}'>Contact</a>";
             if ( $user->isLoggedin()) {

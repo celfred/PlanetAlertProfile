@@ -220,7 +220,7 @@ td, th {
 th {
  cursor: pointer;
 }
-td ul {
+td:not('.report') ul {
   position: absolute;
 }
 td img {
