@@ -127,6 +127,72 @@
 
   <div class="col-sm-8">
     <?php
+      // Admin is logged in
+      if ($user->isSuperuser()) {
+        // Get current school year dates
+        $period = $pages->get("template='period', name='school-year'");
+        // Get today's unique logged players' names
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND date(login_timestamp) = current_date()");   
+        $query->execute();
+        $todaysPlayers = $query->fetchAll();
+        // Get yesterday's unique logged players' names
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND date(login_timestamp) = current_date()-1");   
+        $query->execute();
+        $yesterdaysPlayers = $query->fetchAll();
+        // Get total # of unique logged players during the last 7 days
+        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND login_timestamp BETWEEN date(now())-7 AND now()");   
+        $query->execute();
+        $totalNbUniqueVisitors7Days = $query->fetchColumn();
+        // Get total # of logged players during the last 7 days
+        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND login_timestamp BETWEEN date(now())-7 AND now()");   
+        $query->execute();
+        $totalNbVisitors7Days = $query->fetchColumn();
+        // Get total # of unique logged players during the current school year
+        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
+        $query->execute();
+        $totalNbUniqueVisitors = $query->fetchColumn();
+        // Get total # of logged players during the current school year
+        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
+        $query->execute();
+        $totalNbVisitors = $query->fetchColumn();
+
+        $stats = '<div id="" class="news panel panel-primary">';
+        $stats .= '<div class="panel-heading">';
+        $stats .= '<h4 class="panel-title">Planet Alert Statistics (started 17/09/2015)</h4>';
+        $stats .= '</div>';
+        $stats .= '<div class="panel-body">';
+        $stats .= '<p class="lead">';
+        $stats .= '&nbsp;&nbsp;&nbsp';
+        $stats .= '<span class="label label-success">Today : '.count($todaysPlayers).'</span>';
+        $stats .= '&nbsp;&nbsp;&nbsp';
+        $stats .= '<span class="label label-success">Yesterday : '.count($yesterdaysPlayers).'</span>';
+        $stats .= '&nbsp;&nbsp;&nbsp';
+        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">Last 7 days : '.$totalNbUniqueVisitors7Days.'/'.$totalNbVisitors7Days.'</span>';
+        $stats .= '&nbsp;&nbsp;&nbsp';
+        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors7Days.'</span>';
+        $stats .= '&nbsp;&nbsp;&nbsp';
+        $stats .= '</p>';
+        if ( count($todaysPlayers) > 0 ) {
+          $stats .= '<p>Today\'s players : </p>';
+          $stats .= '<ul>';
+          foreach($todaysPlayers as $r) {
+            $stats .= '<li>'.$r['username'].'</li>';
+          }
+          $stats .= '</ul>';
+        }
+        if ( count($yesterdaysPlayers) > 0 ) {
+          $stats .= '<p>Yesterday\s players : ';
+          $stats .= '<ul>';
+          foreach($yesterdaysPlayers as $r) {
+            $stats .= '<li>'.$r['username'].'</li>';
+          }
+          $stats .= '</ul>';
+        }
+        $stats .= '</div>';
+        $stats .= '</div>';
+        echo $stats;
+      }
+
       // Admin news
       $newsAdmin = $pages->get('/newsboard')->children('publish=1')->sort('-created');
       if ($newsAdmin->count() > 0) {
