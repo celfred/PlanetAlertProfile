@@ -226,6 +226,12 @@ td:not('.report') ul {
 td img {
   float: right;
 }
+table.report td {
+  font-size: 1.4em;
+}
+table.report td h3 {
+  margin: 0px;
+}
 .progress {
   height: 15px;
   border: 1px solid #000;
