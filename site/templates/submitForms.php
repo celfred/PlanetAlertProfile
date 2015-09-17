@@ -141,7 +141,7 @@
 
         $player->save();
         // Record history
-        $taskComment = 'Donation of '.$amount. ' GC to '.$receiver->title.' ['.$receiver->team->title.']';
+        $taskComment = 'Donation of '.$amount. ' GC to '.$receiver->title.' ['.$receiver->playerTeam.']';
         $newsBoard = 1;
         saveHistory($player, $task, $taskComment, $newsBoard);
 
