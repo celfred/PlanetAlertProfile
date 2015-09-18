@@ -91,7 +91,7 @@
   $out .= '<td></td>';
   $out .= '<th data-toggle="tooltip" title="Player"><span class="glyphicon glyphicon-user"></span></th>';
   $out .= '<td>Karma</td>';
-  $out .= '<td data-toggle="tooltip" title="Last 5 actions"><span class="glyphicon glyphicon-th-list"></span></td>';
+  $out .= '<td data-toggle="tooltip" title="What happened on the last date?"><span class="glyphicon glyphicon-th-list"></span></td>';
   $out .= '<th data-toggle="tooltip" title="Gold coins"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></th>';
   $out .= '<th data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span></th>';
   $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="" /> HP</th>';
@@ -108,8 +108,12 @@
     } else {
       $class = '';
     }
-    // Get karma evolution
-    $prevEvents = $player->child("name='history'")->children("limit=5,sort=-date")->reverse();
+    // Get last recorded events
+    // Get last event date
+    $lastEvent = $player->child("name='history'")->children("sort=-date")->first();
+    $prevDate = $lastEvent->date;
+    // Get all events on same date
+    $prevEvents = $player->child("name='history'")->children("date=$prevDate");
     $trend = '';
     foreach ($prevEvents as $event) {
       $HP = $event->task->HP;
