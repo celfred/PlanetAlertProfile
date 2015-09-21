@@ -377,6 +377,11 @@ $(document).ready(function() {
     }
   });
 
+  $('#startFight').on('click', function() {
+    $(this).parents('.alert').hide();
+    $('#fightForm').show();
+  });
+
 }); 
 
 // Hide rows functions
@@ -507,3 +512,5 @@ var marketPlaceSelect = function(obj, playerId) {
     $('#toSave_'+playerId).append(newInput);
   }
 }
+
+
