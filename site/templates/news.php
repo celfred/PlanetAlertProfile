@@ -127,7 +127,7 @@
 
   <div class="col-sm-8">
     <?php
-      // Admin is logged in
+      // Admin is logged in, show stats
       if ($user->isSuperuser()) {
         // Get current school year dates
         $period = $pages->get("template='period', name='school-year'");
@@ -225,8 +225,8 @@
             if ($user->isSuperuser()) {
          ?>
          <div class="panel-footer text-right">
-<form>
-<label for="unpublish_<?php echo $n->id; ?>"><input type="checkbox" id="unpublish_<?php echo $n->id; ?>" class="ajaxUnpublish" value="<?php echo $pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id; ?>" /> Unpublish from Newsboard<span id="feedback"></span></label>
+          <form>
+          <label for="unpublish_<?php echo $n->id; ?>"><input type="checkbox" id="unpublish_<?php echo $n->id; ?>" class="ajaxUnpublish" value="<?php echo $pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id; ?>" /> Unpublish from Newsboard<span id="feedback"></span></label>
          </div>
          <?php
            }
@@ -235,6 +235,121 @@
       <?php
         }
       }
+
+      // User is logged in, show personal news
+      if ($user->isLoggedin() && $user->isSuperuser() == false) {
+        // Get player's indicators
+        $player = $pages->get("template=player, login=$user->name");
+        //echo '<h2><img src="'.$player->avatar->getThumb('thumbnail').'" alt="avatar" /> '.$player->title.' ['.$player->playerTeam.']</h2>';
+        echo '<div class="">';
+        echo '<h3 class="text-center">'.$player->title.' ['.$player->playerTeam.']</h3>';
+        echo '<h3 class="">';
+        echo '<span class="label label-success">Your Karma : '.$player->karma.'</span>';
+        echo '&nbsp;&nbsp;';
+        echo '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
+        echo '&nbsp;&nbsp;';
+        echo '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
+        echo '&nbsp;&nbsp;';
+        echo '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->XP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+        echo '&nbsp;&nbsp;';
+        echo '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->XP.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
+        echo '&nbsp;&nbsp;';
+        echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->places->count().'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
+        echo '&nbsp;&nbsp;';
+        echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>';
+        echo '&nbsp;&nbsp;';
+        if ($player->donation == false) {$player->donation = 0; }
+        echo '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+        echo ' </h3>';
+        echo '</div>';
+
+        // Get last 10 players's events
+        $allEvents = $player->child("name=history")->find("template=event,sort=-created,limit=10");
+        ?>
+        <div id="" class="news panel panel-primary">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getThumb('mini').'" alt="avatar" />'; } ?>
+              Last 10 events in your personal history
+            </h4>
+          </div>
+          <div class="panel-body">
+            <ul class="list-unstyled">
+            <?php
+              foreach ($allEvents as $event) {
+                if ($event->task->HP < 0) {
+                  $className = 'negative';
+                  $sign = '';
+                } else {
+                  $className = 'positive';
+                  $sign = '+';
+                }
+                echo '<li class="'.$className.'">';
+                echo date("F j (l)", $event->date).' : ';
+                echo '<span data-toggle="tooltip" title="XP" class="badge badge-success">'.$sign.$event->task->XP.'</span><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> ';
+                echo '<span data-toggle="tooltip" title="GC" class="badge badge-default">'.$sign.$event->task->GC.'</span><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> ';
+                if ($className == 'negative') {
+                  echo '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'</span><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> ';
+                }
+                echo $event->task->title.' ['.$event->summary.']';
+                echo '</li>';
+              };
+            ?>
+            </ul>
+          </div>
+          <div class="panel-footer text-right">
+            <p>To see your complete history, go the the 'My Profile' page.</p>
+          </div>
+        </div>
+      <?php 
+      }
+
+      // Public news
+      $news = $pages->find("template=event, sort=-created, limit=10, task=free|buy");
+      if ($news->count() > 0) {
+      ?>
+        <div id="" class="news panel panel-primary">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              Last 10 public events in Planet Alert
+            </h4>
+          </div>
+          <div class="panel-body">
+            <ul class="list-unstyled">
+            <?php
+            foreach($news as $n) {
+              $currentPlayer = $n->parent('template=player');
+              if ($currentPlayer->avatar) {
+                $thumb = $currentPlayer->avatar->size(40,40);
+                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
+              } else {
+                $mini = '';
+              }
+              echo '<li>';
+              echo $mini;
+              echo date("F j (l)", $n->date).' : ';
+              echo '<span>';
+              switch ($n->task->category->name) {
+              case 'place' : echo '<span class="">New place for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                break;
+              case 'shop' : echo '<span class="">New equipment for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                break;
+              case 'attitude' : echo '<span class="">Generous attitude from '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                break;
+              default : echo 'todo : ';
+                break;
+              }
+              //echo $n->task->title. ' : ' . $n->summary;
+              echo '</span>';
+              echo '</li>';
+            }
+            ?>
+          </ul>
+        </div>
+      </div>
+      <?php
+      }
+      
 
       // Automatic players' news (free place, shop)
       $news = $pages->find("template=event, publish=1, sort=-created");
