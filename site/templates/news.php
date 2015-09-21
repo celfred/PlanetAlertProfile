@@ -176,7 +176,10 @@
           $stats .= '<p>Today\'s players : </p>';
           $stats .= '<ul>';
           foreach($todaysPlayers as $r) {
-            $stats .= '<li>'.$r['username'].'</li>';
+            // Get player's name
+            $login = $r['username'];
+            $player = $pages->get("template='player', login=$login");
+            $stats .= '<li>'.$player->title.' ['.$player->playerTeam.']</li>';
           }
           $stats .= '</ul>';
         }
@@ -184,7 +187,10 @@
           $stats .= '<p>Yesterday\s players : ';
           $stats .= '<ul>';
           foreach($yesterdaysPlayers as $r) {
-            $stats .= '<li>'.$r['username'].'</li>';
+            // Get player's name
+            $login = $r['username'];
+            $player = $pages->get("template='player', login=$login");
+            $stats .= '<li>'.$player->title.' ['.$player->playerTeam.']</li>';
           }
           $stats .= '</ul>';
         }
