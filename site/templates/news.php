@@ -184,7 +184,7 @@
           $stats .= '</ul>';
         }
         if ( count($yesterdaysPlayers) > 0 ) {
-          $stats .= '<p>Yesterday\s players : ';
+          $stats .= '<p>Yesterday\'s players : ';
           $stats .= '<ul>';
           foreach($yesterdaysPlayers as $r) {
             // Get player's name
@@ -274,24 +274,29 @@
             </h4>
           </div>
           <div class="panel-body">
-            <ul class="list-unstyled">
+            <ul class="double list-unstyled">
             <?php
               foreach ($allEvents as $event) {
                 if ($event->task->HP < 0) {
                   $className = 'negative';
                   $sign = '';
+                  $signicon = '<span class="glyphicon glyphicon-minus-sign"></span> ';
                 } else {
                   $className = 'positive';
+                  //$className = '';
                   $sign = '+';
+                  $signicon = '<span class="glyphicon glyphicon-plus-sign"></span> ';
                 }
                 echo '<li class="'.$className.'">';
+                echo $signicon;
                 echo date("F j (l)", $event->date).' : ';
                 echo '<span data-toggle="tooltip" title="XP" class="badge badge-success">'.$sign.$event->task->XP.'</span><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> ';
                 echo '<span data-toggle="tooltip" title="GC" class="badge badge-default">'.$sign.$event->task->GC.'</span><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> ';
                 if ($className == 'negative') {
                   echo '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'</span><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> ';
                 }
-                echo $event->task->title.' ['.$event->summary.']';
+                echo $event->task->title;
+                echo ' ['.$event->summary.']';
                 echo '</li>';
               };
             ?>

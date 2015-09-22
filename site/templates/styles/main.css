@@ -434,6 +434,9 @@ img.align_right {
 .negative:hover {
   color: #000;
 }
+.double {
+  line-height: 2em;
+}
 .positive {
   background: lightgreen;
 }
