@@ -303,7 +303,7 @@
             </ul>
           </div>
           <div class="panel-footer text-right">
-            <p>To see your complete history, go the the 'My Profile' page.</p>
+          <p>To see your complete history, go the the <a href="<?php echo $pages->get('/players')->url.$player->playerTeam.'/'.$player->name; ?>">'My Profile'</a> page.</p>
           </div>
         </div>
       <?php 
