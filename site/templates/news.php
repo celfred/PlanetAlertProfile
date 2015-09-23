@@ -132,27 +132,27 @@
         // Get current school year dates
         $period = $pages->get("template='period', name='school-year'");
         // Get today's unique logged players' names
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND date(login_timestamp) = current_date()");   
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND date(login_timestamp) = current_date()");   
         $query->execute();
         $todaysPlayers = $query->fetchAll();
         // Get yesterday's unique logged players' names
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND date(login_timestamp) = current_date()-1");   
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND date(login_timestamp) = current_date()-1");   
         $query->execute();
         $yesterdaysPlayers = $query->fetchAll();
         // Get total # of unique logged players during the last 7 days
-        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND login_timestamp BETWEEN date(now())-7 AND now()");   
+        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN date(now())-7 AND now()");   
         $query->execute();
         $totalNbUniqueVisitors7Days = $query->fetchColumn();
         // Get total # of logged players during the last 7 days
-        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND login_timestamp BETWEEN date(now())-7 AND now()");   
+        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN date(now())-7 AND now()");   
         $query->execute();
         $totalNbVisitors7Days = $query->fetchColumn();
         // Get total # of unique logged players during the current school year
-        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
+        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
         $query->execute();
         $totalNbUniqueVisitors = $query->fetchColumn();
         // Get total # of logged players during the current school year
-        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
+        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
         $query->execute();
         $totalNbVisitors = $query->fetchColumn();
 
