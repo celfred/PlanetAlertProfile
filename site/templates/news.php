@@ -174,7 +174,7 @@
         $stats .= '</p>';
         if ( count($todaysPlayers) > 0 ) {
           $stats .= '<p>Today\'s players : </p>';
-          $stats .= '<ul>';
+          $stats .= '<ul class=="list-inline list-unstyled">';
           foreach($todaysPlayers as $r) {
             // Get player's name
             $login = $r['username'];
@@ -185,7 +185,7 @@
         }
         if ( count($yesterdaysPlayers) > 0 ) {
           $stats .= '<p>Yesterday\'s players : ';
-          $stats .= '<ul>';
+          $stats .= '<ul class="list-inline list-unstyled">';
           foreach($yesterdaysPlayers as $r) {
             // Get player's name
             $login = $r['username'];
@@ -204,7 +204,7 @@
       if ($newsAdmin->count() > 0) {
         foreach($newsAdmin as $n) {
         ?>
-        <div id="" class="news panel panel-success">
+          <div id="<?php echo $n->id; ?>" class="news panel panel-success">
           <div class="panel-heading">
             <h4 class="panel-title">
              <?php
@@ -214,6 +214,7 @@
               echo ' - ';
               echo 'Official Announcement : '.$n->title;
              ?>
+               <button type="button" class="close" data-id="<?php echo '#'.$n->id; ?>" aria-label="Close"><span aria-hidden="true">&times;</span></button>
            </h4>
          </div>
          <div class="panel-body">
@@ -225,7 +226,6 @@
             if ($user->isSuperuser()) {
          ?>
          <div class="panel-footer text-right">
-          <form>
           <label for="unpublish_<?php echo $n->id; ?>"><input type="checkbox" id="unpublish_<?php echo $n->id; ?>" class="ajaxUnpublish" value="<?php echo $pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id; ?>" /> Unpublish from Newsboard<span id="feedback"></span></label>
          </div>
          <?php
@@ -233,6 +233,48 @@
          ?>
       </div>
       <?php
+        }
+      }
+
+      // Admin NewsBoard (to prepare in-class papers to be given to the students)
+      if ($user->isSuperuser()) {
+        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy");
+        if ($news->count() > 0) {
+        ?>
+          <div id="" class="news panel panel-primary">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                Admin's work (papers to be given to players)
+              </h4>
+            </div>
+            <div class="panel-body">
+              <ul class="list-unstyled">
+              <?php
+              foreach($news as $n) {
+                echo '<li class="">';
+                echo date("F j (l)", $n->date).' : ';
+                echo '<span>';
+                switch ($n->task->category->name) {
+                case 'place' : echo '<span class="">New place for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  break;
+                case 'shop' : echo '<span class="">New equipment for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  break;
+                case 'attitude' : echo '<span class="">Generous attitude from '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  break;
+                default : echo 'todo : ';
+                  break;
+                }
+                echo '</span>';
+                echo ' <label for="unpublish_'.$n->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> Unpublish<span id="feedback"></span></label>';
+                echo '</li>';
+              }
+              ?>
+            </ul>
+          </div>
+        </div>
+        <?php
+        } else {
+          echo '<span>Nothing to prepare.</span>';
         }
       }
 
@@ -309,14 +351,14 @@
       <?php 
       }
 
-      // Public news
-      $news = $pages->find("template=event, sort=-created, limit=10, task=free|buy");
+      // Last 15 public news
+      $news = $pages->find("template=event, sort=-created, limit=15, task=free|buy");
       if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">
           <div class="panel-heading">
             <h4 class="panel-title">
-              Last 10 public events in Planet Alert
+              Last 15 public events in Planet Alert
             </h4>
           </div>
           <div class="panel-body">
@@ -353,64 +395,7 @@
         </div>
       </div>
       <?php
-      }
-      
-
-      // Automatic players' news (free place, shop)
-      $news = $pages->find("template=event, publish=1, sort=-created");
-      if ($news->count() > 0) {
-        foreach($news as $n) {
-          $currentPlayer = $n->parent('template=player');
-          if ($currentPlayer->avatar) {
-            $thumb = $currentPlayer->avatar->size(40,40);
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
-          } else {
-            $mini = '';
-          }
-        ?>
-        <div id="" class="news panel panel-primary">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-             <?php
-              echo date("F j (l)", $n->date);
-              echo ' - ';
-              echo 'Congratulations to ';
-              echo $currentPlayer->title.' ['.$currentPlayer->playerTeam.']  ';
-              echo $mini.'  ';
-             ?>
-           </h4>
-         </div>
-         <div class="panel-body text-center">
-           <?php
-             echo '<p>';
-             switch ($n->task->category->name) {
-             case 'place' : echo '<span class="lead">New place : '.html_entity_decode($n->summary).'</span>';
-               break;
-             case 'shop' : echo '<span class="lead">New equipment : '.html_entity_decode($n->summary).'</span>';
-               break;
-             case 'attitude' : echo '<span class="lead">Generous attitude : '.html_entity_decode($n->summary).'</span>';
-               break;
-             default : echo 'todo : ';
-               break;
-             }
-             //echo $n->task->title. ' : ' . $n->summary;
-             echo '</p>';
-           ?>
-         </div>
-         <?php
-            if ($user->isSuperuser()) {
-         ?>
-         <div class="panel-footer text-right">
-<form>
-<label for="unpublish_<?php echo $n->id; ?>"><input type="checkbox" id="unpublish_<?php echo $n->id; ?>" class="ajaxUnpublish" value="<?php echo $pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id; ?>" /> Unpublish from Newsboard<span id="feedback"></span></label>
-         </div>
-         <?php
-           }
-         ?>
-      </div>
-    <?php
-      }
-      } else { // No news
+      } else {
         echo '<h4 class="well">No player\'s news... :(</h4>';
       }
     ?>

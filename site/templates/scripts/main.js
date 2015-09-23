@@ -1,5 +1,10 @@
 $(document).ready(function() {
 
+  $('.close').on('click', function () {
+    var id = $(this).attr('data-id');
+    $(id).hide();
+  });
+
   $(".ajax").click(function() {
     $("#reportDiv").html("<p>Loading...</p>"); 
     
@@ -12,6 +17,8 @@ $(document).ready(function() {
 
   $(".ajaxUnpublish").click(function() {
     //$("#feedback").html("<p>Loading...</p>"); 
+    $(this).parents('li').toggleClass('strikeText');
+    var $this = $(this);
     $.get($(this).val(), function(data) { 
         //$("#feedback").html(''); 
     }); 
