@@ -440,6 +440,9 @@ img.align_right {
 .positive {
   background: lightgreen;
 }
+.strikeText {
+  text-decoration: line-through;
+}
 table.adminTable > thead > tr > th {
   padding: 0;
 }
