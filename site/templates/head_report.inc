@@ -31,6 +31,7 @@
 	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/ie.css" />
 	<![endif]-->	
 
+  <?php include('./my-functions.inc'); // Planet Alert PHP functions ?>
 </head>
 
 <body>
