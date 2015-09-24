@@ -83,9 +83,9 @@ if ($page->name != 'places') { // Single place view
             echo "<small><span class='glyphicon glyphicon-user'></span> This place has been freed by {$totalOwners} player(s) : ";
             foreach ($owners as $owner) {
               if ($owner == $owners->last()) {
-                echo "{$owner->title} [{$owner->team->title}]";
+                echo "{$owner->title} [{$owner->playerTeam->title}]";
               } else {
-                echo "{$owner->title} [{$owner->team->title}], ";
+                echo "{$owner->title} [{$owner->playerTeam->title}], ";
               }
             }
           echo "</small>";
