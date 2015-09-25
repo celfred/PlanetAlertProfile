@@ -238,7 +238,7 @@
 
       // Admin NewsBoard (to prepare in-class papers to be given to the students)
       if ($user->isSuperuser()) {
-        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy");
+        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy|penalty");
         if ($news->count() > 0) {
         ?>
           <div id="" class="news panel panel-primary">
@@ -261,6 +261,8 @@
                 case 'shop' : echo '<span class="">New equipment for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
                 case 'attitude' : echo '<span class="">Generous attitude from '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  break;
+                case 'homework' : echo '<span class="">Penalty for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
                 default : echo 'todo : ';
                   break;

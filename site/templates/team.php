@@ -111,18 +111,14 @@
     // Get last recorded events
     // Get last event date
     $lastEvent = $player->child("name='history'")->children("sort=-date")->first();
-    $prevDate = $lastEvent->date;
-    // Get all events on same date
-    $prevEvents = $player->child("name='history'")->children("date=$prevDate");
+    // Get all events on same day
+    $prevDay = date("m/d/Y", $lastEvent->date);
+    $prevDate = $prevDay.' 0:0:0'; // Select events for the whole day
+    $prevEvents = $player->child("name='history'")->children("date>=$prevDate");
     $trend = '';
     foreach ($prevEvents as $event) {
       $HP = $event->task->HP;
       $title = $event->task->title;
-      if ($event->summary) {
-        $comment = '<br />'.strftime("%d/%m", $event->date).'<br />'.$event->summary;
-      } else {
-        $comment = '<br />'.strftime("%d/%m", $event->date);
-      }
       if ($HP < 0) {
         $trendClass = 'negativeTrend';
       } else {

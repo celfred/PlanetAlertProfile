@@ -165,7 +165,7 @@ function saveHistory($player, $task, $taskComment, $newsBoard = 0) {
   // Save title
   // Get today's date by default, changeable in backend if needed)
   date_default_timezone_set('Paris/France');
-  $today = date('m/d/Y', time());
+  $today = date('m/d/Y H:i:s', time());
   $p->date = $today;
   // Get new values
   $newValues = ' ['.$player->level.'lvl, '.$player->HP.'HP, '.$player->XP.'XP, '.$player->GC.'GC, '.$player->places->count.'P, '.$player->equipment->count.'E]';
@@ -267,6 +267,55 @@ function calculate_average($arr) {
   }
   $average = round($total/$count); // get average value
   return $average;
+}
+
+function recordPenalty($player) {
+  // Detected : 3 forgotten homework (or adding up half-done homework or signature
+  // Record a penalty for the player
+  $task = wire('pages')->get("template=task, name=penalty");
+  $comment = 'Automatic hk penalty';
+  saveHistory($player, $task, $comment, 1);
+}
+
+function checkHk($player) {
+  $count = 0;
+  // Check last penalty's date
+  $penalty = $player->find("template=event, task.name=penalty");
+  if ($penalty->count() != 0) {
+    // Count all negative homework tasks since then
+    $lastDate = $penalty->last()->date;
+    $allHk = $player->find("template=event, task.category=homework, task.HP<0, task.name!=penalty, date>$lastDate");
+    if ($allHk->count() > 0) {
+      foreach ($allHk as $event) {
+        if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
+          $count = $count + 0.5;
+        } else {
+          $count++;
+        }
+      }
+      if ($count >= 3) { // 3 forgotten hk (or half-done hk or signature
+        // Register a new penalty
+        return true;
+      }
+    }
+  } else { // No previous penalty
+    // Count all negative homework tasks
+    $allHk = $player->find("template=event, task.category=homework, task.name!=penalty, task.HP<0");
+    if ($allHk->count() > 0) {
+      foreach ($allHk as $event) {
+        if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
+          $count = $count + 0.5;
+        } else {
+          $count++;
+        }
+      }
+    }
+    if ($count >= 3) { // 3 forgotten hk (or half-done hk or signature
+      // Register a new penalty
+      return true;
+    }
+  }
+  return false;
 }
 
 ?>
