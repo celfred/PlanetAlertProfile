@@ -204,6 +204,18 @@
         saveHistory($player, $task, $taskComment);
 
         $team = $player->playerTeam;
+
+        // Check if extra-action needs to be taken
+        // For example : 3 forgotten homework...
+        if (checkHk($player)) {
+          // Update player's scores
+          $task = $pages->get("template=event, name=penalty"); 
+          updateScore($player, $task);
+          // Save player's page
+          $player->save();
+          // Register a new penalty
+          recordPenalty($player);
+        }
       }
       // Redirect to team page
       $session->redirect($pages->get('/players')->url.$team);
