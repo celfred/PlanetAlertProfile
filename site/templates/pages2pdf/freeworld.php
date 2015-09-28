@@ -3,7 +3,7 @@
 $logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
 
 $places = $pages->find("template='place',sort='level'")->not("name=places");
-$players = $pages->find("template='player', team=$input->urlSegment1");
+$players = $pages->find("template='player', playerTeam=$input->urlSegment1");
 $currentLevel = 0;
 $totalOwned = 0;
 $out = '';
