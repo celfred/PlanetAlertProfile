@@ -269,14 +269,6 @@ function calculate_average($arr) {
   return $average;
 }
 
-function recordPenalty($player) {
-  // Detected : 3 forgotten homework (or adding up half-done homework or signature
-  // Record a penalty for the player
-  $task = wire('pages')->get("template=task, name=penalty");
-  $comment = 'Automatic hk penalty';
-  saveHistory($player, $task, $comment, 1);
-}
-
 function checkHk($player) {
   $count = 0;
   // Check last penalty's date
