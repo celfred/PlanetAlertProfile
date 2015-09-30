@@ -84,7 +84,7 @@
 
   // New PHP table
   $out = '<table id="teamTable" class="table table-hover table-condensed teamView">';
-  $allPlayers->sort('-karma');
+  $allPlayers->sort('-karma, -XP');
   $out .= '<thead>';
   $out .= '<tr>';
   $out .= '<th data-toggle="tooltip" title="Group"><span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></th>';
