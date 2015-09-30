@@ -2,7 +2,7 @@
   include("./head.inc"); 
 
   $allPlayers = $pages->find("template='player', playerTeam=$input->urlSegment1, sort='group'");
-  $team = $allPlayers->first->team->title;
+  $team = $allPlayers->first->playerTeam;
   $totalPlaces = $pages->find("template='place', name!='places', sort=level");
   $globalScore = globalScore($allPlayers, $totalPlaces);
   $teamScore = $globalScore[0];

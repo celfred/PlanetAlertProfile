@@ -36,12 +36,12 @@ if ($selected->template == 'player') { // Player's report
       default: break;
     }
   }
-  $reportTitle .= ' de '.$selected->title.' '.$selected->lastName.' ('.$selected->team->title.')'; 
+  $reportTitle .= ' de '.$selected->title.' '.$selected->lastName.' ('.$selected->playerTeam.')'; 
   $reportTitle .= '<br />';
   $reportTitle .= 'Période couverte : '.$period->title;
 } else { // Team's report
   $global = true;
-  $allPlayers = $pages->find("team=$selected, template=player, sort=$sort");
+  $allPlayers = $pages->find("playerTeam=$selected, template=player, sort=$sort");
   $reportTitle = 'Bilan ';
   if ($category == 'all') { // Global report
     $reportTitle .= ' global';
