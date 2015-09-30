@@ -209,12 +209,14 @@
         // For example : 3 forgotten homework...
         if (checkHk($player)) {
           // Update player's scores
-          $task = $pages->get("template=event, name=penalty"); 
-          updateScore($player, $task);
+          $task = $pages->get("template=task, name=penalty"); 
+          //updateScore($player, $task);
+          $player->GC = round($player->GC/2); // Penalty = Half GC taken away
           // Save player's page
           $player->save();
           // Register a new penalty
-          recordPenalty($player);
+          $comment = 'Automatic homework penalty';
+          saveHistory($player, $task, $comment, 1);
         }
       }
       // Redirect to team page
