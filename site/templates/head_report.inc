@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <?php
-    include("./my-functions.inc"); // Planet Alert PHP functions
+    //include("./my-functions.inc"); // Planet Alert PHP functions
     $whitelist = array('127.0.0.1');
     if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
       // Remote server
