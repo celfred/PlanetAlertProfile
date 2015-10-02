@@ -132,27 +132,27 @@
         // Get current school year dates
         $period = $pages->get("template='period', name='school-year'");
         // Get today's unique logged players' names
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND date(login_timestamp) >= current_date()");   
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp >= CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
         $query->execute();
         $todaysPlayers = $query->fetchAll();
         // Get yesterday's unique logged players' names
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp >= date_sub(current_date(), interval 1 day)");   
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -1 DAY) AND CURDATE()");   
         $query->execute();
         $yesterdaysPlayers = $query->fetchAll();
         // Get total # of unique logged players during the last 7 days
-        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN date_sub(current_date(), interval 7 day) AND now()");   
+        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND CURDATE()");   
         $query->execute();
         $totalNbUniqueVisitors7Days = $query->fetchColumn();
         // Get total # of logged players during the last 7 days
-        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN date_sub(current_date(), interval 7 day) AND now()");   
+        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND CURDATE()");   
         $query->execute();
         $totalNbVisitors7Days = $query->fetchColumn();
         // Get total # of unique logged players during the current school year
-        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
+        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND CURDATE()");   
         $query->execute();
         $totalNbUniqueVisitors = $query->fetchColumn();
         // Get total # of logged players during the current school year
-        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
+        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND CURDATE()");   
         $query->execute();
         $totalNbVisitors = $query->fetchColumn();
 
@@ -163,13 +163,13 @@
         $stats .= '<div class="panel-body">';
         $stats .= '<p class="lead">';
         $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span class="label label-success">Today : '.count($todaysPlayers).'</span>';
+        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Today : '.count($todaysPlayers).'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span class="label label-success">Yesterday : '.count($yesterdaysPlayers).'</span>';
+        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Yesterday : '.count($yesterdaysPlayers).'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
         $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">Last 7 days : '.$totalNbUniqueVisitors7Days.'/'.$totalNbVisitors7Days.'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors7Days.'</span>';
+        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors.'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
         $stats .= '</p>';
         if ( count($todaysPlayers) > 0 ) {
