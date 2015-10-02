@@ -107,11 +107,11 @@ function checkLevel($player) {
 }
 
 function getKarma($player) {
-  // Karma calculated from all values (except GC)
+  // Karma calculated from all values (except GC and Donations)
   if ($player->level > 1) {
-    $karma = $player->level*100 + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5) + $player->donation;
+    $karma = $player->level*100 + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
   } else {
-    $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5) + $player->donation;
+    $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
   }
   if ($karma < 0) { $karma = 0; }
   //echo $player->title.':'.$karma.'-';
