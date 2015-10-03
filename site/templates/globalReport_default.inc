@@ -52,9 +52,14 @@
         echo '<td>';
         // Find events within the selected period
         $events = $player->find("template=event, task.category=$category, date>=$period->dateStart, date<=$period->dateEnd");
-        $posPart = $events->count();
-        $nbPart = $events->count();
-        $nbAbsent = 0;
+        if ( $category->name == 'participation') {
+          $posPart = $events->count();
+          $nbPart = $events->count();
+          $nbAbsent = 0;
+        } else {
+          $posItems = $events->count();
+          $nbItems = $events->count();
+        }
         $vv = 0;
         $v = 0;
         $r = 0;
@@ -73,13 +78,10 @@
         $nbHalfHk = 0;
         $nbHk = 0;
         $nbExtraHk = 0;
-        $posItems = $events->count();
-        $nbItems = $events->count();
         // Is $player concerned with this category?
         if ($events->count() > 0) {
           foreach ($events as $event) {
-            $task = $pages->get("$event->task");
-            if ($task->HP < 0) {
+            if ($event->task->HP < 0) {
               $className = 'negative';
               // Participation stat
               if ($category->name == 'participation') {
@@ -88,12 +90,12 @@
               $posItems = $posItems-1;
               $sign = '-';
             } else {
-              if ($task->name != 'absent') {
-                $className = 'positive';
-              } else {
+              if ($event->task->name == 'abs' || $event->task->name == 'absent') {
                 $nbPart = $nbPart-1;
                 $nbAbsent = $nbAbsent+1;
                 $posPart = $posPart-1;
+              } else {
+                $className = 'positive';
               }
               $sign = '+';
             }
@@ -102,12 +104,12 @@
             } else {
               $list .= $sign.' '.strftime("%d/%m", $event->date).' '.$event->title."<br />";
             }
-            if ($event->task->name == 'absent') {
-              $listAbsent .= '- '.strftime("%d/%m", $event->date).'<br />';
+            if ($event->task->name == 'abs' || $event->task->name == 'absent') {
+              $listAbsent .= strftime("%d/%m", $event->date).'<br />';
               $teamAbsent += 1;
             }
             if ($category->name == 'homework') {
-              switch ($task->name) {
+              switch ($event->task->name) {
                 case 'no-homework' :
                   $nbNoHk += 1;
                   $listNoHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
@@ -145,7 +147,7 @@
               }
             }
             if ($category->name == 'participation') {
-                switch ($task->name) {
+                switch ($event->task->name) {
                   case 'communication-rr' :
                     $rr += 1;
                     break;
@@ -171,7 +173,19 @@
             if ( $ratio < 0) { $ratio = 0; }
 
             if ($nbPart != 0) {
-              echo '<span data-toggle="tooltip" title="% Participation positive">'.$ratio.'%</span>';
+              echo '<span data-toggle="tooltip" title="% Participation positive sur '.$nbPart.' cours">'.$ratio.'%</span>&nbsp;';
+              if ($ratio >= 80) {
+                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-success">VV</span>';
+              }
+              if ($ratio < 80 && $ratio >= 55) {
+                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-success">V</span>';
+              }
+              if ($ratio < 55 && $ratio >= 35) {
+                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-danger">R</span>';
+              }
+              if ($ratio < 35 && $ratio >= 0) {
+                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-danger">RR</span>';
+              }
             }
             if ($nbAbsent != 0) {
               echo ' <span data-toggle="tooltip" data-html="true" title="'.$listAbsent.'" class="absent">['.$nbAbsent.' abs.]</span>';
