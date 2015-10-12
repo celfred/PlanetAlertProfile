@@ -431,9 +431,13 @@ img.align_right {
   background: red;
   color: #FFF;
 }
-.negative:hover {
+.negative a {
+  color: #FFF;
+}
+.negative:hover, .negative a:hover {
   color: #000;
 }
+.inline { display: inline; }
 .double {
   line-height: 2em;
 }
@@ -592,7 +596,6 @@ header {
   padding: 5px;
   background: #FFF;
 }
-
 .hidden {
   display: none;
 }
