@@ -32,7 +32,7 @@
                 $focus = "";
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->karma.' karma</span></li>';
+              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->karma.' karma</span></li>';
             }
           ?>
         </ol>
@@ -60,9 +60,9 @@
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
               if ($player->places->count > 1) {
-                echo '<li><span '.$focus.'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->places->count.' places</span></li>';
+                echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->places->count.' places</span></li>';
               } else {
-                echo '<li><span '.$focus.'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->places->count.' place</span></li>';
+                echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->places->count.' place</span></li>';
               }
           }
         ?>
@@ -90,7 +90,7 @@
                 $focus = "";
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->equipment->count.' equipment</span></li>';
+              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->equipment->count.' equipment</span></li>';
             }
           ?>
         </ol>
@@ -117,7 +117,7 @@
                 $focus = "";
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->donation.' GC</span></li>';
+              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->donation.' GC</span></li>';
             }
           ?>
         </ol>
@@ -179,7 +179,7 @@
             // Get player's name
             $login = $r['username'];
             $player = $pages->get("template='player', login=$login");
-            $stats .= '<li>'.$player->title.' ['.$player->playerTeam.']</li>';
+            $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
           }
           $stats .= '</ul>';
         }
@@ -190,7 +190,7 @@
             // Get player's name
             $login = $r['username'];
             $player = $pages->get("template='player', login=$login");
-            $stats .= '<li>'.$player->title.' ['.$player->playerTeam.']</li>';
+            $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
           }
           $stats .= '</ul>';
         }
@@ -256,13 +256,13 @@
                 echo date("F j (l)", $n->date).' : ';
                 echo '<span>';
                 switch ($n->task->category->name) {
-                case 'place' : echo '<span class="">New place for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'place' : echo '<span class="">New place for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'shop' : echo '<span class="">New equipment for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'shop' : echo '<span class="">New equipment for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'attitude' : echo '<span class="">Generous attitude from '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'homework' : echo '<span class="">Penalty for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'homework' : echo '<span class="">Penalty for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
                 default : echo 'todo : ';
                   break;
@@ -384,11 +384,11 @@
               echo date("F j (l)", $n->date).' : ';
               echo '<span>';
               switch ($n->task->category->name) {
-              case 'place' : echo '<span class="">New place for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'place' : echo '<span class="">New place for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'shop' : echo '<span class="">New equipment for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'shop' : echo '<span class="">New equipment for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'attitude' : echo '<span class="">Generous attitude from '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : echo 'todo : ';
                 break;
