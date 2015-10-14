@@ -110,8 +110,10 @@
             </ul>
           </div>
           <?php
-            $class = $page->name == 'documentation' ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Documentation</a>";
+            $class = $page->is("name=blog|documentation") ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/blog')->url}'>Infos</a>";
+            //$class = $page->name == 'documentation' ? "on" : "";
+            //echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Documentation</a>";
             $class = $page->name == 'contact' ? "on" : "";
             echo "<a class='btn $class' href='{$pages->get('/contact')->url}'>Contact</a>";
             if ( $user->isLoggedin()) {
