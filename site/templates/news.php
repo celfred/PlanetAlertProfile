@@ -220,6 +220,16 @@
          <div class="panel-body">
            <?php
              echo $n->body;
+             echo '<br />';
+             echo '<a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$n->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
+             echo '<div class="collapse" id="collapseDiv'.$n->id.'"><div class="well">';
+             if ($n->frenchSummary != '') {
+               echo $n->frenchSummary;
+             } else {
+               echo 'French version in preparation, sorry ;)';
+             }
+             echo '</div>';
+             echo '</div>';
            ?>
          </div>
          <?php
