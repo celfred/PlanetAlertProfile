@@ -17,7 +17,7 @@
         case 'travail-individuel' : echo '<i class="glyphicon glyphicon-user" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
         case 'manual-cat' : echo '<i class="glyphicon glyphicon-cog" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
         case 'test' : echo '<i class="glyphicon glyphicon-ok" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
-        /* case 'oublis' : echo '<i class="glyphicon glyphicon-cloud" data-toggle="tooltip" title="'. $category->title.'"></i>'; break; */
+        case 'oublis' : echo '<i class="glyphicon glyphicon-cloud" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
         default : echo $category->title;
       }
     } else {
@@ -52,14 +52,9 @@
         echo '<td>';
         // Find events within the selected period
         $events = $player->find("template=event, task.category=$category, date>=$period->dateStart, date<=$period->dateEnd");
-        if ( $category->name == 'participation') {
-          $posPart = $events->count();
-          $nbPart = $events->count();
-          $nbAbsent = 0;
-        } else {
-          $posItems = $events->count();
-          $nbItems = $events->count();
-        }
+        $posPart = $events->count();
+        $nbPart = $events->count();
+        $nbAbsent = 0;
         $vv = 0;
         $v = 0;
         $r = 0;
@@ -78,10 +73,13 @@
         $nbHalfHk = 0;
         $nbHk = 0;
         $nbExtraHk = 0;
+        $posItems = $events->count();
+        $nbItems = $events->count();
         // Is $player concerned with this category?
         if ($events->count() > 0) {
           foreach ($events as $event) {
-            if ($event->task->HP < 0) {
+            $task = $pages->get("$event->task");
+            if ($task->HP < 0) {
               $className = 'negative';
               // Participation stat
               if ($category->name == 'participation') {
@@ -90,12 +88,12 @@
               $posItems = $posItems-1;
               $sign = '-';
             } else {
-              if ($event->task->name == 'abs' || $event->task->name == 'absent') {
+              if ($task->name != 'absent') {
+                $className = 'positive';
+              } else {
                 $nbPart = $nbPart-1;
                 $nbAbsent = $nbAbsent+1;
                 $posPart = $posPart-1;
-              } else {
-                $className = 'positive';
               }
               $sign = '+';
             }
@@ -104,12 +102,12 @@
             } else {
               $list .= $sign.' '.strftime("%d/%m", $event->date).' '.$event->title."<br />";
             }
-            if ($event->task->name == 'abs' || $event->task->name == 'absent') {
-              $listAbsent .= strftime("%d/%m", $event->date).'<br />';
+            if ($event->task->name == 'absent') {
+              $listAbsent .= '- '.strftime("%d/%m", $event->date).'<br />';
               $teamAbsent += 1;
             }
             if ($category->name == 'homework') {
-              switch ($event->task->name) {
+              switch ($task->name) {
                 case 'no-homework' :
                   $nbNoHk += 1;
                   $listNoHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
@@ -124,21 +122,26 @@
                   $teamHalfHk += 1;
                   $listHalfHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
                   break;
-                case 'extra-homework' :
+                case 'entrainement-supplementaire-simple' :
                   $nbExtraHk += 1;
                   $teamExtraHk += 1;
                   $listExtraHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
                   break;
-                case 'very-extra-homework' :
+                case 'awarded-homework' :
                   $nbExtraHk += 1;
                   $listExtraHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
                   break;
-                case 'material' :
+                default : break;
+              }
+            }
+            if ($category->name == 'oublis') {
+              switch ($task->name) {
+                case 'forgotten-weapons' :
                   $nbForgotStuff += 1;
                   $listForgotStuff .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
                   $teamForgotStuff += 1;
                   break;
-                case 'signature' :
+                case 'test-not-signed' :
                   $nbForgotSigned += 1;
                   $listForgotSigned .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
                   $teamForgotSigned += 1;
@@ -147,7 +150,7 @@
               }
             }
             if ($category->name == 'participation') {
-                switch ($event->task->name) {
+                switch ($task->name) {
                   case 'communication-rr' :
                     $rr += 1;
                     break;
@@ -173,24 +176,27 @@
             if ( $ratio < 0) { $ratio = 0; }
 
             if ($nbPart != 0) {
-              echo '<span data-toggle="tooltip" title="% Participation positive sur '.$nbPart.' cours">'.$ratio.'%</span>&nbsp;';
-              if ($ratio >= 80) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-success">VV</span>';
-              }
-              if ($ratio < 80 && $ratio >= 55) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-success">V</span>';
-              }
-              if ($ratio < 55 && $ratio >= 35) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-danger">R</span>';
-              }
-              if ($ratio < 35 && $ratio >= 0) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-danger">RR</span>';
-              }
+              echo '<span data-toggle="tooltip" title="% Participation positive">'.$ratio.'%</span>';
             }
             if ($nbAbsent != 0) {
               echo ' <span data-toggle="tooltip" data-html="true" title="'.$listAbsent.'" class="absent">['.$nbAbsent.' abs.]</span>';
             }
             array_push($teamPart, $ratio);
+          }
+          if ($category->name == 'oublis') {
+            if (!$input->get['pages2pdf']) {
+              if ($nbForgotStuff > 0) {
+                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="">'.$nbForgotStuff.'</span></span>';
+                echo '&nbsp;&nbsp;&nbsp;';
+              }
+              if ($nbForgotSigned > 0) {
+                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="">'.$nbForgotSigned.'</span></span> ';
+              }
+            } else {
+              echo  '<span>'.$nbForgotStuff.' Mat.</span>';
+              echo '&nbsp;&nbsp;&nbsp;';
+              echo  '<span>'.$nbForgotSigned.' Sign.</span>';
+            }
           }
           if ($category->name == 'homework') {
             if (!$input->get['pages2pdf']) {
@@ -217,21 +223,6 @@
               if ($nbExtraHk > 0) {
                 echo  '<span>'.$nbExtraHk.' XtHk</span>';
               }
-            }
-          }
-          if ($category->name == 'homework' && ($nbForgotSigned != 0 || $nbForgotStuff != 00)) {
-            if (!$input->get['pages2pdf']) {
-              if ($nbForgotStuff > 0) {
-                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="">'.$nbForgotStuff.'</span></span>';
-                echo '&nbsp;&nbsp;&nbsp;';
-              }
-              if ($nbForgotSigned > 0) {
-                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="">'.$nbForgotSigned.'</span></span> ';
-              }
-            } else {
-              echo  '<span>'.$nbForgotStuff.' Mat.</span>';
-              echo '&nbsp;&nbsp;&nbsp;';
-              echo  '<span>'.$nbForgotSigned.' Sign.</span>';
             }
           }
           if ($category->name != 'participation' && $category->name != 'homework' && $category->name != 'oublis') {
@@ -274,10 +265,10 @@
           echo  '<span>'.$teamHalfHk.' HfHk</span>';
           echo '&nbsp;&nbsp;&nbsp;';
           echo  '<span>'.$teamExtraHk.' XtHk</span>';
-          echo '&nbsp;&nbsp;&nbsp;';
         }
+      }
+      if ($category->name == 'oublis') {
         if (!$input->get['pages2pdf']) {
-          echo '&nbsp;&nbsp;&nbsp;';
           echo  '<span data-toggle="tooltip" title="Oubli matériel"><i class="glyphicon glyphicon-file"></i>&nbsp;<span>'.$teamForgotStuff.'</span></span>';
           echo '&nbsp;&nbsp;&nbsp;';
           echo  '<span data-toggle="tooltip" title="Oubli signature"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span>'.$teamForgotSigned.'</span></span> ';

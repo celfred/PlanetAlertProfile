@@ -96,7 +96,7 @@
             </ul>
           </div>
           <div class="btn-group">
-            <?php $class = ($page->name == 'shop' || $page->name == 'places' || $page->name == 'tasks') ? "on" : ""; ?>
+            <?php $class = ($page->name == 'shop' || $page->name == 'places' || $page->name == 'tasks' || $page->template == 'task') ? "on" : ""; ?>
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The World <span class="caret"> </span></button>
             <ul class="dropdown-menu">
               <?php
@@ -104,14 +104,16 @@
               echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
               $class = $page->name == 'places' ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
-              $class = $page->name == 'tasks' ? " class='selected-left'" : "";
+              $class = ($page->name == 'tasks' || $page->template == 'task') ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
               ?>
             </ul>
           </div>
           <?php
-            $class = $page->name == 'documentation' ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Documentation</a>";
+            $class = $page->is("name=blog|documentation") ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/blog')->url}'>Infos</a>";
+            //$class = $page->name == 'documentation' ? "on" : "";
+            //echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Documentation</a>";
             $class = $page->name == 'contact' ? "on" : "";
             echo "<a class='btn $class' href='{$pages->get('/contact')->url}'>Contact</a>";
             if ( $user->isLoggedin()) {

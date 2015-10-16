@@ -107,11 +107,11 @@ function checkLevel($player) {
 }
 
 function getKarma($player) {
-  // Karma calculated from all values (except GC)
+  // Karma calculated from all values (except GC and Donations)
   if ($player->level > 1) {
-    $karma = $player->level*100 + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5) + $player->donation;
+    $karma = $player->level*100 + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
   } else {
-    $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5) + $player->donation;
+    $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
   }
   if ($karma < 0) { $karma = 0; }
   //echo $player->title.':'.$karma.'-';
@@ -165,7 +165,7 @@ function saveHistory($player, $task, $taskComment, $newsBoard = 0) {
   // Save title
   // Get today's date by default, changeable in backend if needed)
   date_default_timezone_set('Paris/France');
-  $today = date('m/d/Y', time());
+  $today = date('m/d/Y H:i:s', time());
   $p->date = $today;
   // Get new values
   $newValues = ' ['.$player->level.'lvl, '.$player->HP.'HP, '.$player->XP.'XP, '.$player->GC.'GC, '.$player->places->count.'P, '.$player->equipment->count.'E]';
@@ -267,6 +267,47 @@ function calculate_average($arr) {
   }
   $average = round($total/$count); // get average value
   return $average;
+}
+
+function checkHk($player) {
+  $count = 0;
+  // Check last penalty's date
+  $penalty = $player->find("template=event, task.name=penalty");
+  if ($penalty->count() != 0) {
+    // Count all negative homework tasks since then
+    $lastDate = $penalty->last()->date;
+    $allHk = $player->find("template=event, task.category=homework, task.HP<0, task.name!=penalty, date>$lastDate");
+    if ($allHk->count() > 0) {
+      foreach ($allHk as $event) {
+        if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
+          $count = $count + 0.5;
+        } else {
+          $count++;
+        }
+      }
+      if ($count >= 3) { // 3 forgotten hk (or half-done hk or signature
+        // Register a new penalty
+        return true;
+      }
+    }
+  } else { // No previous penalty
+    // Count all negative homework tasks
+    $allHk = $player->find("template=event, task.category=homework, task.name!=penalty, task.HP<0");
+    if ($allHk->count() > 0) {
+      foreach ($allHk as $event) {
+        if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
+          $count = $count + 0.5;
+        } else {
+          $count++;
+        }
+      }
+    }
+    if ($count >= 3) { // 3 forgotten hk (or half-done hk or signature
+      // Register a new penalty
+      return true;
+    }
+  }
+  return false;
 }
 
 ?>

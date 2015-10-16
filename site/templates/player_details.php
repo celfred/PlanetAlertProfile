@@ -192,7 +192,11 @@
                   echo "<td>";
                   echo "{$event->task->category->title}";
                   echo "</td>";
-                  echo "<td>".$event->title."</td>";
+                  if ($user->isSuperuser()) {
+                    echo "<td>".$event->title."</td>";
+                  } else {
+                    echo "<td>".$event->task->title."</td>";
+                  }
                   echo "<td>".$event->summary."</td>";
                   echo"</tr>";
                 }

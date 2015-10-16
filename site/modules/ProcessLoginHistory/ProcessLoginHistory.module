@@ -1,0 +1,799 @@
+<?php
+
+/**
+ * Process Login History
+ *
+ * This module keeps track of login attempts to your site, both successful and
+ * unsuccessful (tracking unsuccesful logins is off by default) in order to offer
+ * better understanding about users' activity and environments they use / favor;
+ * browsers, browser features such as Flash / JavaScript, devices, screen and
+ * window sizes.
+ *
+ * For detailed information, installation instructions etc. see README.md.
+ *
+ * @copyright Copyright (c) 2012-2014, Teppo Koivula
+ * @license http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License, version 2
+ *
+ * ProcessWire 2.x 
+ * Copyright (C) 2012 by Ryan Cramer 
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ * 
+ * http://processwire.com
+ *
+ */
+class ProcessLoginHistory extends Process implements ConfigurableModule {
+    
+    /**
+     * Return information about this module (required)
+     *
+     * @return array
+     */
+    public static function getModuleInfo() {
+        return array(
+            'title' => __('Login History'),
+            'summary' => __('Keep track of site login history'),
+            'href' => 'http://modules.processwire.com/modules/process-login-history/',
+            'author' => 'Teppo Koivula',
+            'version' => 128,
+            'singular' => true,
+            'autoload' => false,
+            'icon' => 'terminal',
+            'permission' => 'login-history',
+            'installs' => 'ProcessLoginHistoryHooks',
+        ); 
+    }
+    
+    /**
+     * Default configuration for this module
+     *
+     * The point of putting this in it's own function is so that you don't have to specify
+     * these defaults more than once.
+     *
+     * @return array
+     */
+    static public function getDefaultData() {
+        return array(
+            'row_limit' => 25,
+            'date_format' => 'Y-m-d H:i:s'
+        );
+    }
+    
+    /**
+     * Names of admin page and database table used by this module
+     */
+    const PAGE_NAME = 'login-history';
+
+    /**
+     * Name of database table used by this module
+     */
+    protected $table_name;
+
+    /**
+     * Populate the default config data
+     *
+     * ProcessWire will automatically overwrite it with anything the user has specifically configured.
+     * This is done in construct() rather than init() because ProcessWire populates config data after
+     * construct(), but before init().
+     */
+    public function __construct() {
+        // Get name of database table and any available module config settings
+        // from ProcessLoginHistoryHooks module
+        if ($this->modules->isInstalled("ProcessLoginHistoryHooks")) {
+            $this->table_name = ProcessLoginHistoryHooks::TABLE_NAME;
+            $data = $this->modules->getModuleConfigData("ProcessLoginHistoryHooks");
+            $defaults = $this->modules->get("ProcessLoginHistoryHooks")->getDefaultData();
+            $data = array_merge($defaults, $data);
+            foreach ($data as $key => $value) {
+                $this->$key = $value;
+            }
+        }
+        foreach(self::getDefaultData() as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
+    /**
+     * Module configuration
+     *
+     * @param array $data
+     * @return InputfieldWrapper
+     */
+    static public function getModuleConfigInputfields(array $data) {
+
+        // this is a container for fields, basically like a fieldset
+        $fields = new InputfieldWrapper();
+
+        // since this is a static function, we can't use $this->modules, so get them from the global wire() function
+        $modules = wire('modules');
+
+        // merge default config settings (custom values overwrite defaults)
+        $defaults = self::getDefaultData();
+        $data = array_merge($defaults, $data);
+
+        // date format used
+        $field = $modules->get("InputfieldText");
+        $field->name = "date_format";
+        $field->label = "Date Format";
+        $field->notes = "See the [PHP date](http://www.php.net/manual/en/function.date.php) function reference for more information on how to customize this format.";
+        $field->value = ($data['date_format']) ? $data['date_format'] : $defaults['date_format'];
+        $field->size = 70;
+        $fields->add($field);
+
+        // number of results visible at once
+        $field = $modules->get("InputfieldSelect");
+        $field->name = "row_limit";
+        $field->label = "Row Limit";
+        $field->description = "Number of history rows visible at once";
+        $field->required = true;
+        $field->addOptions(array(
+            25 => '25', 
+            50 => '50', 
+            75 => '75', 
+            100 => '100',
+        ));
+        $field->value = $data['row_limit'];
+        $fields->add($field);
+
+        return $fields;
+    }
+
+    /**
+     * Initialization function called before any execute functions
+     *
+     */
+    public function init() {
+        parent::init();
+        // should date formatting occur?
+        $defaults = self::getDefaultData();
+        if ($this->date_format == $defaults['date_format']) unset($this->date_format);
+    }
+
+    /**
+     * Executed when a page with this Process assigned is accessed
+     *
+     * @return string
+     */
+    public function ___execute() {
+
+        // render filters
+        $filters = $this->renderFilters();
+        
+        // setup admin data table for history
+        $table = $this->modules->get("MarkupAdminDataTable");
+        $table->setEncodeEntities(false);
+        $table->setClass('history');
+        $headerRow = array(
+            __('User'),
+            __('When'),
+            __('Successful attempt?'),
+            '', // placeholder
+            __('More'),
+        );
+        if ($this->log_ip_addresses) array_splice($headerRow, 1, 0, __("IP"));
+        $table->headerRow($headerRow);
+
+        // fetch rows from database and add them to our data table
+        $query = $this->buildQuery();
+        $result = $this->db->query($query['query']);
+        while ($row = $result->fetch_assoc()) {
+            $table->row($this->parseTableRow($row));
+        }
+
+        // if less than two matches were found, disable table sorting
+        if ($query['total'] < 2) $table->setSortable(false);
+
+        // pager markup
+        $pager = "";
+        if ($query['limit'] && $query['total'] > $query['limit']) {
+            $pager_links = 20;
+            $pager_page = (int) $query['start']/$query['limit']+1;
+            $pager_pages = ceil($query['total']/$query['limit']);
+            $pager = $this->renderPager($pager_links, $pager_page, $pager_pages);
+        }
+
+        // UI translations
+        $this->config->js($this->className(), array(
+            'i18n' => array(
+                'more' => __("more"),
+                'less' => __("less"),
+                'areYouSure' => __("Are you sure?"),
+                'removeFailed' => __("Sorry, remove failed"),
+            ),
+        ));
+
+        // Basic information about found rows
+        $info = "<div id='info'><p>";
+        $info .= sprintf(_n("One matching row found.", "%d matching rows found.", $query['total']), $query['total']);
+        $info .= "</p></div>";
+
+        // return admin data table markup and pager
+        return $filters . $info . $table->render() . $pager;
+
+    }    
+
+    /**
+     * Executed when a page with this Process assigned is accessed with /JSON/
+     *
+     */
+    public function ___executeJSON() {
+
+        // fetch rows from database
+        $data = array();
+        $query = $this->buildQuery();
+        $result = $this->db->query($query['query']);
+        while ($row = $result->fetch_assoc()) $data[] = $row;
+
+        // send header and output JSON
+        header('Content-type: application/json');
+        exit(json_encode($data));
+
+    }
+
+    /**
+     * Build SQL query for fetching history data from custom database table
+     *
+     * @param array $group_by Fields to group results by, such as "id"
+     * @return array Array with SQL query ('query'), total row count ('total'),
+     *         start ('start') and limit ('limit')
+     */
+    private function buildQuery(array $group_by = array()) {
+
+        // $joins and $where arrays are used to construct where clause and joins
+        // later. $where contains rules like "key = '$value'" and $joins actual
+        // joins, such as "LEFT JOIN table ON table.id = $id".
+        $joins = array();
+        $where = array();
+
+        // Allowed keys (GET params used to build queries) are defined here to
+        // make sure we're not letting any weird queries get past us.
+        $allowed_keys = array(
+            "id",
+            "user_id",
+            "username",
+            "user_agent",
+            "user_agent_features",
+            "login_was_successful",
+            "when",
+            "date_from",
+            "date_until",
+        );
+
+        // Possible values for 'when' filter
+        $allowed_intervals = array(
+            __("within a day") => '1 DAY',
+            __("within a week") => '1 WEEK',
+            __("within a month") => '1 MONTH',
+            __("within a year") => '1 YEAR',
+        );
+
+        foreach ($this->input->get as $key => $value) {
+            if (in_array($key, $allowed_keys) && $value != "") {
+                $operator = "=";
+                $value = $this->db->real_escape_string($value);
+                if (strpos($value, "!") === 0) {
+                    $operator = "!=";
+                    $value = substr($value, 1);
+                }
+                switch ($key) {
+                    case "user_agent":
+                        $where[] = "$key LIKE '%$value%'";
+                        break;
+                    case "when":
+                        if (!isset($where['date_from']) && !isset($where['date_until']) && in_array($value, $allowed_intervals)) {
+                            $where[$key] = "DATE_SUB(CURDATE(), INTERVAL $value) <= login_timestamp";
+                        }
+                        break;
+                    case "date_from":
+                    case "date_until":
+                        if (!isset($where['when'])) {
+                            $value = date("Y-m-d", strtotime($value));
+                            $operator = "<=";
+                            $time = "23:59";
+                            if ($key == "date_from") {
+                                $operator = ">=";
+                                $time = "00:00";
+                            }
+                            $where[$key] = "login_timestamp $operator '$value $time'";
+                        }
+                        break;
+                    default:
+                        $where[] = "$key $operator '$value'";
+                }
+            }
+        }
+
+        // put together WHERE clause, required JOINs and GROUP BY
+        $where = $where ? "WHERE " . implode(" AND ", $where) : "";
+        $joins = $joins ? " " . implode(" ", $joins) : "";
+        $group_by = $group_by ? "GROUP BY " . implode(", ", $group_by) : "";
+
+        // total count of rows in database table
+        $count = $group_by ? "DISTINCT " . substr($group_by, 9) : "*";
+        $sql = "SELECT COUNT($count) FROM {$this->table_name} $joins $where";
+        $row = $this->db->query($sql)->fetch_row();
+        $total = reset($row);
+
+        // put together LIMIT
+        $start = 0;
+        $limit = isset($this->input->get->limit) ? (int) $this->input->get->limit : $this->row_limit;
+        if ($limit && $total > $limit) {
+            if ($this->input->get->page) $start = ($this->input->get->page-1)*$limit;
+            if ($start > $total) $start = $total-$limit;
+        }
+        
+        // put together ORDER BY
+        $sort = $this->input->get->sort ? $this->db->real_escape_string($this->input->get->sort) : "-login_timestamp";
+        $sort_order = (strpos($sort, "-") === 0) ? "DESC" : "ASC";
+        if ($sort_order == "DESC") $sort = substr($sort, 1);
+        $order_by = "ORDER BY $sort $sort_order, id DESC";
+
+        // stick pieces together to construct final SQL query
+        $query = "SELECT {$this->table_name}.* FROM {$this->table_name} $joins $where $group_by $order_by";
+        if ($limit) $query .= " LIMIT $start, $limit";
+
+        // return SQL query along with some additional data
+        return array(
+            'query' => $query,
+            'total' => $total,
+            'start' => $start,
+            'limit' => $limit,
+        );
+
+    }
+
+    /**
+     * Executed when requesting removal of an individual row
+     *
+     * @return boolean
+     */
+    public function ___executeDelete() {
+
+        if ((int) $this->input->get->id != $this->input->get->id) return false;
+
+        $id = (int) $this->input->get->id;
+        $sql = "DELETE FROM {$this->table_name} WHERE id = $id LIMIT 1";
+        $this->db->query($sql);
+
+        return true;
+
+    }
+
+    /**
+     * Parse MarkupAdminDataTable row from a row fetched from database
+     *
+     * @param array $row
+     */
+    private function parseTableRow(array $row) {
+
+        // container
+        $data = array();
+            
+        // escape values (just a precaution really)
+        foreach ($row as $key => $value) {
+            if ($key != "user_agent_features") $row[$key] = htmlentities($value);
+        }
+        
+        // basic user information; if user_id is set user exists or at least existed at
+        // the time of login attempt (still need to check if that's currently true though)
+        if ($row['user_id']) {
+            $user = $this->users->get($row['user_id']);
+            if ($user->id) $data[] = "<a href='{$this->config->urls->admin}access/users/edit/?id={$user->id}'>{$user->name}</a>";
+            else $data[] = $row['username'] . " <em>(" . __("removed") . ")</em>";
+        } else {
+            $data[] = $row['username'] . " <em>(" . __("nonexistent") . ")</em>";
+        }
+        
+        // IP address
+        if ($this->log_ip_addresses) $data[] = $row['ip_address'];
+        
+        // timestamp (raw timestamp is hidden and only included to allow proper ordering with JavaScript)
+        $date = ($this->date_format) ? date($this->date_format, strtotime($row['login_timestamp'])) : $row['login_timestamp'];
+        $data[] = "<span>{$row['login_timestamp']}</span>$date";
+        
+        // status of login attempt
+        if ($row['login_was_successful']) $data[] = __("Yes");
+        else $data[] = "<em>" . __("No") . "</em>";
+        
+        // link for removing individual history row
+        $data[] = "<a href='./delete/?id={$row['id']}' class='remove'>" . __("remove?") . "</a>";
+        
+        // environment and user agent
+        if ($row['user_agent']) $data[] = $this->renderBrowserInfo($row['user_agent'], $row['user_agent_features']);
+        else $data[] = __("No data available.");
+
+        return $data;
+        
+    }
+
+    /**
+     * Render markup for pager
+     *
+     * @param int $links Number of pager links visible at once
+     * @param int $page Identifies currently active pager item
+     * @param int $pages Number of total pager items available
+     * @return string
+     */
+    private function renderPager($links, $page, $pages) {
+
+        if ($pages < 2) return;
+
+        // convert GET params to string
+        $get = "";
+        foreach ($this->input->get as $key => $value) {
+            if ($key != "page" && $value != "") {
+                $get .= "&".urlencode($key)."=".urlencode($value);
+            }
+        }
+
+        // calculate start and end points
+        $start = 1;
+        $end = $pages;
+        if ($end > $links) {
+            $start = (int) $page-$links/2;
+            if ($start < 1) $start=1;
+            $end = $start+($links-1);
+            if ($end > $pages) $end = $pages;
+            if ($end-$page < (int) $links/2-1) { 
+                $start -= ((int) $links/2)-($end-$page);
+                if ($start < 1) $start=1;
+            }
+        }
+
+        // generate markup
+        $out = "<ul class='MarkupPagerNav MarkupPagerNavCustom'>";
+        if ($start > 1) {
+            $out .= "<li><a href='./?page=1$get'><span>1</span></a></li>";
+            if ($start > 2) {
+                $out .= "<li class='MarkupPagerNavSeparator'>&hellip;</li>";
+            }
+        }
+        for ($i = $start; $i<=$pages; ++$i) {
+            $here = ($page == $i) ? " class='MarkupPagerNavOn'" : "";
+            $out .= "<li$here><a href='./?page=$i$get'><span>$i</span></a></li>";
+            if ($pages > $links && $i == $end && $i < $pages) {
+                if ($pages-$i > 1) {
+                    $out .= "<li class='MarkupPagerNavSeparator'>&hellip;</li>";
+                }
+                $i = $pages-1;
+                if ($i < $end) $i = $end+1;
+            }
+        }
+        $out .= "</ul>";
+        
+        return $out;
+
+    }
+
+    /**
+     * Render markup for result filter UI
+     *
+     * @return string 
+     */
+    private function renderFilters() {
+
+        $markup = "";
+
+        // Was login attempt successful?
+        $options = array(
+            __("All login attempts"),
+            __("Successful login attempts") => "1",
+            __("Unsuccessful login attempts") => "0",
+        );
+        $markup .= $this->renderSelect('login_was_successful', $options);
+
+        // Username
+        $options = array();
+        $login = $this->input->get->login_was_successful;
+        $where = ($login == "1" || $login == "0") ? " WHERE login_was_successful = $login" : "";
+        $sql = "SELECT DISTINCT username 
+                FROM {$this->table_name}
+                $where 
+                ORDER BY username DESC";
+        $result = $this->db->query($sql);
+        if (!$result->num_rows || $result->num_rows > 1) {
+            $options[] = __("by any user");
+        }
+        while ($row = $result->fetch_assoc()) {
+            $key = sprintf(__("by %s"), $row['username']); // by %s // %s will be replaced run-time by username
+            $options[$key] = $row['username'];
+        }
+        $markup .= $this->renderSelect('username', $options);
+
+        // Real/removed/nonexistent users
+        $options = array(
+            __("whether or not user really exists"),
+            __("limited to existing users") => "!0",
+            __("limited to nonexisting users") => "0",
+        );
+        $attrs = array('data-disabled-title' => __("Not relevant in this context"));
+        $markup .= $this->renderSelect('user_id', $options, array('attrs' => $attrs));
+        
+        // When
+        $options = array(
+            __("whenever"),
+            __("within a day") => '1 DAY',
+            __("within a week") => '1 WEEK',
+            __("within a month") => '1 MONTH',
+            __("within a year") => '1 YEAR',
+            __("between") => "between",
+        );
+        $markup .= $this->renderSelect('when', $options);
+            
+        // Date range
+        $disabled_title = __("Not relevant in this context");
+        $date_from = ($this->input->get->date_from) ? date('d.m.Y', strtotime($this->input->get->date_from)) : '';
+        $date_until = ($this->input->get->date_until) ? date('d.m.Y', strtotime($this->input->get->date_until)) : '';
+        $input = $this->modules->get("InputfieldText");
+        $markup .= "<input type='text'"
+                 . " value='$date_from'"
+                 . " size='10'"
+                 . " data-maxdate='+0D'"
+                 . " data-dateformat='dd.mm.yy'"
+                 . " name='date_from'"
+                 . " data-disabled-title='$disabled_title'"
+                 . " class='loginhistory-datepicker'"
+                 . " />"
+                 . " .. "
+                 . "<input type='text'"
+                 . " value='$date_until'"
+                 . " size='10'"
+                 . " data-maxdate='+0D'"
+                 . " data-dateformat='dd.mm.yy'"
+                 . " name='date_until'"
+                 . " class='loginhistory-datepicker'"
+                 . " />";
+
+        if ($markup) {
+            $form = $this->modules->get('InputfieldForm');
+            $form->attr('id', 'filters');
+            $form->attr('method', 'get');
+            $fieldset = $this->modules->get('InputfieldFieldset');
+            $fieldset->label = __('Filters');
+            $fieldset->icon = 'filter';
+            $field = $this->modules->get('InputfieldMarkup');
+            $field->markupText = $markup;
+            $fieldset->append($field);
+            $form->append($fieldset);
+            return $form->render();
+        }
+        
+    }
+
+    /**
+     * Render markup for select element
+     *
+     * @param string $name
+     * @param array $options
+     * @param array $settings
+     * @return string
+     */
+    private function renderSelect($name, array $options, array $settings = array()) {
+
+        if (!$name) return;
+
+        $disabled = "";
+        if (count($options) < 2) {
+            $disabled = " disabled='disabled' class='disabled'";
+        }
+
+        $attrs = "";
+        if (isset($settings['attrs'])) {
+            foreach ($settings['attrs'] as $k => $v) $attrs .= " $k='$v'";
+        }
+
+        $markup = "";
+        foreach ($options as $key => $option) {
+            $value = $key ? $option : '';
+            $text = !is_numeric($key) ? $key : $option;
+            if (isset($settings['translate'])) $text = __($text);
+            $selected = ($this->input->get->$name == $value) ? ' selected="selected"' : '';
+            $markup .= "<option$selected value='$value'>$text</option>";
+        }
+
+        return "<select name='$name'$disabled$attrs>$markup</select>";
+
+    }
+
+    /**
+     * Render human readable view of browser / platform information
+     *
+     * @param string $user_agent
+     * @param string $user_agent_features
+     * @return string
+     */
+    private function renderBrowserInfo($user_agent = null, $user_agent_features = null) {
+
+        // user agent string is required
+        if (!$user_agent) return false;
+
+        // init vars
+        $markup = "";
+        $browser = $this->get_browser_alt($user_agent);
+        $features = ($user_agent_features) ? json_decode($user_agent_features) : null;
+
+        // basic information from user agent string
+        $markup .= "<tr><th>" . __("Browser") . "</th><td>{$browser->browser} {$browser->version}</td></tr>";
+        $markup .= "<tr><th>" . __("Platform") . "</th><td>{$browser->platform}</td></tr>";
+        $markup .= "<tr id='device-type'><th>" . __("Device Type") . "</th><td>{$browser->device}</td></tr>";
+
+        if ($features) {
+
+            // note: since feature detection is implemented with javascript, these will not be available
+            // without proper js support!
+
+            // escape values (just a precaution)
+            foreach ($features as &$feature) $feature = htmlentities($feature);
+
+            // javascript support
+            $markup .= "<tr><th>JavaScript</th><td>";
+            if (isset($features->javascript) && $features->javascript) $markup .= __("Enabled");
+            else $markup .= __("Disabled");
+            $markup .= "</td></tr>";
+
+            // flash support
+            $markup .= "<tr><th>Flash</th><td>";
+            if (isset($features->flash) && $features->flash) $markup .= __("Enabled");
+            else $markup .= __("Disabled");
+            $markup .= "</td></tr>";
+
+            // screen size
+            $markup .= "<tr><th>" . __("Screen") . "</th><td>";
+            if (isset($features->screen) && $features->screen) $markup .= $features->screen;
+            else $markup .= __("unidentified");
+            $markup .= "</td></tr>";
+
+            // window size
+            $markup .= "<tr><th>" . __("Window") . "</th><td>";
+            if (isset($features->window) && $features->window) $markup .= $features->window;
+            else $markup .= __("unidentified");
+            $markup .= "</td></tr>";
+
+        } else {
+
+            // javascript-dependent feature checking has failed
+            $markup .= "<tr><th>JavaScript</th><td>" . __("Disabled") . "</td></tr>";
+
+        }
+        
+        return "<table class='user-agent'>$markup</table>";
+
+    }
+
+    /**
+     * Simplified replacement for PHP's native get_browser()
+     *
+     * PHP get_browser() depends on external browscap file and an ini directive
+     * that cannot be set run-time. This is why we're introducing an alternative
+     * method that provides the most rudimentary features without any extra fuss.
+     *
+     * @param string $user_agent
+     * @return stdClass|null
+     */
+    private function get_browser_alt($user_agent = null) {
+
+        if (!$user_agent) return null;
+
+        // empty container object for browser info
+        $b = new stdClass();
+        $b->browser = __("unknown");
+        $b->version = null;
+        $b->majorver = 0;
+        $b->minorver = 0;
+        $b->revision = 0;
+        $b->platform = __("unknown");
+        $b->device = __("desktop");
+        
+        // very rough device type detection
+        if (preg_match("/iPad|Tablet|; GT-/i", $user_agent)) $b->device = __("tablet");
+        else if (preg_match("/Android|webOS|iPhone|iPod|BlackBerry/i", $user_agent)) $b->device = __("mobile");
+
+        // identify platform
+        if (preg_match("/\(([a-zA-Z0-9\.;:\/\-_ ]+)\)/", $user_agent, $match)) {
+            if (strstr($match[1], "Windows")) {
+                $b->platform = "Windows";
+            } else {
+                $b->platform = strtok($match[1], ";");
+                if (strstr($match[1], "Android")) {
+                    $b->platform = (preg_match("/Android[ 0-9\.]*/", $match[1], $match)) ? $match[0] : "Android";
+                }
+            }
+        }
+
+        // identify version number (mostly for Safari and Opera)
+        if (preg_match("/version\/([0-9.]*)/i", $user_agent, $match)) {
+            $b->version = $match[1];
+        }
+
+        // identifiable browser strings
+        $browsers = array(
+            'firefox', 'msie', 'opera', 'chrome', 'safari', 'mozilla', 'seamonkey', 'konqueror', 'netscape',
+            'gecko', 'navigator', 'mosaic', 'lynx', 'amaya', 'omniweb', 'avant', 'camino', 'flock', 'aol'
+        );
+
+        // identify current browser
+        foreach($browsers as $browser) {
+            if (preg_match("/([a-z]*?[ ]?$browser)[\/ ]?([0-9.]*)/i", $user_agent, $match)) {
+                $b->browser = $match[1];
+                if (!$b->version) $b->version = $match[2];
+                @list($b->majorver, $b->minorver, $b->revision) = explode('.', $b->version);
+                break;
+            }
+        }
+
+        // special case: android browser reports itself as mobile safari
+        if (strpos($b->platform, "Android") !== false && $match[1] == "Mobile Safari") {
+            $b->browser = "Android Browser";
+        }
+
+        return $b;
+
+    }
+
+    /**
+     * Called only when this module is installed
+     *
+     * Creates new page with this Process module assigned.
+     *
+     */
+    public function ___install() {
+
+        // create a page for this module
+        $page = new Page();
+        $page->template = 'admin';
+        $page->name = self::PAGE_NAME; 
+        $page->process = $this; 
+
+        // insert page under setup at admin
+        $page->parent = $this->pages->get($this->config->adminRootPageID)->child('name=setup');
+
+        // make page title match module title
+        $info = self::getModuleInfo();
+        $page->title = $info['title'];
+
+        // save the page
+        $page->save();
+
+        // tell user that we've created a new page
+        $this->message("Created Page: {$page->path}"); 
+
+        // create login-history permission
+        $permission = $this->permissions->get("login-history");
+        if (!$permission->id) {
+            $permission = new Permission();
+            $permission->name = "login-history";
+            $permission->title = $this->_("Access login history");
+            $permission->save();
+            $this->message("Created Permission: {$permission->name}");
+        }
+
+    }
+
+    /**
+     * Called only when this module is uninstalled
+     *
+     * Removes page associated with this Process module.
+     *
+     */
+    public function ___uninstall() {
+
+        // find the page we installed, locating it by the process field (which has the module ID)
+        // it would probably be sufficient just to locate by name, but this is just to be extra sure.
+        $moduleID = $this->modules->getModuleID($this); 
+        $page = $this->pages->get("template=admin, process=$moduleID, name=" . self::PAGE_NAME); 
+
+        if($page->id) {
+            // if we found the page, let the user know and delete it
+            $this->message("Deleting Page: {$page->path}"); 
+            $page->delete();
+        }
+
+        // delete login-history permission
+        $permission = $this->permissions->get("login-history");
+        if ($permission->id) {
+            $this->message("Deleting Permission: {$permission->name}");
+            $permission->delete();
+        }
+
+    }
+    
+}

@@ -37,6 +37,12 @@
               $out .= '<span class="participation label label-success" data-toggle="tooltip" title="'.strftime("%d/%m", $event->date).'">VV</span>';
               $vv += 1;
               break;
+            case 'abs' : 
+              $out .= '<span class="participation label label-info" data-toggle="tooltip" title="'.strftime("%d/%m", $event->date).'">-</span>';
+              $abs += 1;
+              $nbPart -= 1;
+              $listAbsent .= '- '.strftime("%d/%m", $event->date).'<br />';
+              break;
             case 'absent' : 
               $out .= '<span class="participation label label-info" data-toggle="tooltip" title="'.strftime("%d/%m", $event->date).'">-</span>';
               $abs += 1;

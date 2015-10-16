@@ -11,5 +11,6 @@
 /site/assets/files/*/*.jpg
 /site/assets/cache/*
 /site/assets/backups/*
+/site/assets/*
 /site/templates/bower_components/*
 /site/templates/Session.vim

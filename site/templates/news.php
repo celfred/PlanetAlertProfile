@@ -32,7 +32,7 @@
                 $focus = "";
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->karma.' karma</span></li>';
+              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->karma.' karma</span></li>';
             }
           ?>
         </ol>
@@ -60,9 +60,9 @@
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
               if ($player->places->count > 1) {
-                echo '<li><span '.$focus.'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->places->count.' places</span></li>';
+                echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->places->count.' places</span></li>';
               } else {
-                echo '<li><span '.$focus.'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->places->count.' place</span></li>';
+                echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->places->count.' place</span></li>';
               }
           }
         ?>
@@ -90,7 +90,7 @@
                 $focus = "";
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->equipment->count.' equipment</span></li>';
+              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->equipment->count.' equipment</span></li>';
             }
           ?>
         </ol>
@@ -117,7 +117,7 @@
                 $focus = "";
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' '.$player->title.$team.'</span> <span class="badge">'.$player->donation.' GC</span></li>';
+              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->donation.' GC</span></li>';
             }
           ?>
         </ol>
@@ -132,27 +132,27 @@
         // Get current school year dates
         $period = $pages->get("template='period', name='school-year'");
         // Get today's unique logged players' names
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND date(login_timestamp) = current_date()");   
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp >= CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
         $query->execute();
         $todaysPlayers = $query->fetchAll();
         // Get yesterday's unique logged players' names
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND date(login_timestamp) = current_date()-1");   
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -1 DAY) AND CURDATE()");   
         $query->execute();
         $yesterdaysPlayers = $query->fetchAll();
         // Get total # of unique logged players during the last 7 days
-        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN date(now())-7 AND now()");   
+        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
         $query->execute();
         $totalNbUniqueVisitors7Days = $query->fetchColumn();
         // Get total # of logged players during the last 7 days
-        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN date(now())-7 AND now()");   
+        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
         $query->execute();
         $totalNbVisitors7Days = $query->fetchColumn();
         // Get total # of unique logged players during the current school year
-        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
+        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
         $query->execute();
         $totalNbUniqueVisitors = $query->fetchColumn();
         // Get total # of logged players during the current school year
-        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND now()");   
+        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
         $query->execute();
         $totalNbVisitors = $query->fetchColumn();
 
@@ -163,13 +163,13 @@
         $stats .= '<div class="panel-body">';
         $stats .= '<p class="lead">';
         $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span class="label label-success">Today : '.count($todaysPlayers).'</span>';
+        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Today : '.count($todaysPlayers).'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span class="label label-success">Yesterday : '.count($yesterdaysPlayers).'</span>';
+        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Yesterday : '.count($yesterdaysPlayers).'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
         $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">Last 7 days : '.$totalNbUniqueVisitors7Days.'/'.$totalNbVisitors7Days.'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors7Days.'</span>';
+        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors.'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
         $stats .= '</p>';
         if ( count($todaysPlayers) > 0 ) {
@@ -179,7 +179,7 @@
             // Get player's name
             $login = $r['username'];
             $player = $pages->get("template='player', login=$login");
-            $stats .= '<li>'.$player->title.' ['.$player->playerTeam.']</li>';
+            $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
           }
           $stats .= '</ul>';
         }
@@ -190,7 +190,7 @@
             // Get player's name
             $login = $r['username'];
             $player = $pages->get("template='player', login=$login");
-            $stats .= '<li>'.$player->title.' ['.$player->playerTeam.']</li>';
+            $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
           }
           $stats .= '</ul>';
         }
@@ -220,6 +220,16 @@
          <div class="panel-body">
            <?php
              echo $n->body;
+             echo '<br />';
+             echo '<a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$n->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
+             echo '<div class="collapse" id="collapseDiv'.$n->id.'"><div class="well">';
+             if ($n->frenchSummary != '') {
+               echo $n->frenchSummary;
+             } else {
+               echo 'French version in preparation, sorry ;)';
+             }
+             echo '</div>';
+             echo '</div>';
            ?>
          </div>
          <?php
@@ -238,7 +248,7 @@
 
       // Admin NewsBoard (to prepare in-class papers to be given to the students)
       if ($user->isSuperuser()) {
-        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy");
+        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy|penalty");
         if ($news->count() > 0) {
         ?>
           <div id="" class="news panel panel-primary">
@@ -256,11 +266,13 @@
                 echo date("F j (l)", $n->date).' : ';
                 echo '<span>';
                 switch ($n->task->category->name) {
-                case 'place' : echo '<span class="">New place for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'place' : echo '<span class="">New place for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'shop' : echo '<span class="">New equipment for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'shop' : echo '<span class="">New equipment for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'attitude' : echo '<span class="">Generous attitude from '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  break;
+                case 'homework' : echo '<span class="">Penalty for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
                 default : echo 'todo : ';
                   break;
@@ -382,11 +394,11 @@
               echo date("F j (l)", $n->date).' : ';
               echo '<span>';
               switch ($n->task->category->name) {
-              case 'place' : echo '<span class="">New place for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'place' : echo '<span class="">New place for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'shop' : echo '<span class="">New equipment for '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'shop' : echo '<span class="">New equipment for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'attitude' : echo '<span class="">Generous attitude from '.$currentPlayer->title.' ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : echo 'todo : ';
                 break;

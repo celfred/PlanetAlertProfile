@@ -9,6 +9,10 @@ foreach ($allTasks as $task) {
   $allCategories->add($task->category);
   $allCategories->sort("title");
 }
+
+// All tasks catalogue
+$out = '';
+if ($page->name == 'tasks') {
 ?>
 
 <div>
@@ -44,7 +48,7 @@ foreach ($allTasks as $task) {
         }
       ?>
         <tr class="<?php echo $task->type; ?>">
-          <td><span data-toggle="tooltip" data-html="true" title="<?php echo $task->summary; ?>"><?php echo $task->title; ?></span></td>
+          <td><a data-toggle="tooltip" data-html="true" title="<?php echo $task->summary; ?>" href="<?php echo $task->url; ?>"><?php echo $task->title; ?></a></td>
           <td><?php echo $task->HP; ?></td>
           <td><?php echo $task->XP; ?></td>
           <td><?php echo $task->GC; ?></td>
@@ -56,6 +60,50 @@ foreach ($allTasks as $task) {
   </table>
 
 </div>
+<?php
+} else { // Task details
+  $sign = '';
+  $out .= '<div class="well">';
+  $out .= '<span class="badge badge-default">'.$page->category->title.'</span>&nbsp;';
+  $out .= '<br />';
+  $out .= '<br />';
+  $out .= '<h2 class="inline"><strong>'.$page->title.'</strong>&nbsp;&nbsp;';
+  if ( $page->XP != 0) {
+    if ($page->XP > 0) { $sign = '+'; }
+    $page->GC > 0 ? $type = 'success' : $type = 'danger';
+    $out .= '<span class="label label-'.$type.'">XP : '.$sign.$page->XP.'</span>&nbsp;';
+  }
+  if ( $page->HP != 0) {
+    if ($page->HP > 0) { $sign = '+'; }
+    $page->GC > 0 ? $type = 'success' : $type = 'danger';
+    $out .= '<span class="label label-'.$type.'">HP : '.$sign.$page->HP.'</span>&nbsp;';
+  }
+  if ( $page->GC != 0) {
+    if ($page->GC > 0) { $sign = '+'; }
+    $page->GC > 0 ? $type = 'success' : $type = 'danger';
+    $out .= '<span class="label label-'.$type.'">GC : '.$sign.$page->GC.'</span>&nbsp;';
+  }
+  $out .= '</h2>';
+  if ( $page->GC != 0 || $page->HP != 0 || $page->XP != 0) {
+    $out .= '<span>(Depending on your equipment!)</span>';
+  }
+  $out .= '<h2 class="">'.$page->summary;
+  $out .= '</h2>';
+  $out .= '<br />';
+  $out .= '<a role="button" class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
+  $out .= '<div class="collapse" id="collapseDiv"><div class="well">';
+  if ($page->frenchSummary != '') {
+    $out .= $page->frenchSummary;
+  } else {
+    $out .= 'French version in preparation, sorry ;)';
+  }
+  $out .= '</div></div>';
+  $out .= '</div>';
+
+  $out .= '<a class="btn btn-block btn-primary" href="'.$pages->get('name=tasks')->url.'">Back to the Actions list.</a>';
+  echo $out;
+}
+?>
 
 <?php
   include("./foot.inc"); 

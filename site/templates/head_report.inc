@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="myApp">
+<html lang="en">
 <head>
   <?php
+    //include("./my-functions.inc"); // Planet Alert PHP functions
     $whitelist = array('127.0.0.1');
     if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
       // Remote server
@@ -31,6 +32,7 @@
 	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/ie.css" />
 	<![endif]-->	
 
+  <?php include('./my-functions.inc'); // Planet Alert PHP functions ?>
 </head>
 
 <body>
