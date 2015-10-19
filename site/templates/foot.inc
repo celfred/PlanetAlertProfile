@@ -28,5 +28,11 @@
   <script src="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="<?php echo $config->urls->templates?>scripts/svg-pan-zoom.min.js"></script>
   <script src="<?php echo $config->urls->templates?>scripts/main.js"></script>
+  <?php if ($page->template == 'exercise') { ?>
+    <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular/angular.min.js'></script>
+    <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular-animate/angular-animate.min.js'></script>
+    <!-- Set the game logic !-->
+    <script type='text/javascript' src='<?php echo $config->urls->templates?>scripts/exercise.js'></script>
+  <?php } ?>
 </body>
 </html>

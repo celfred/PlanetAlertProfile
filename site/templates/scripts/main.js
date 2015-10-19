@@ -389,6 +389,10 @@ $(document).ready(function() {
   $('#startFight').on('click', function() {
     $(this).parents('.alert').hide();
     $('#fightForm').show();
+    $('#exTitle').hide();
+    $('#energyDiv').show();
+    // Start exercise
+    // TODO : Record session start...
   });
 
 }); 
@@ -554,3 +558,4 @@ function debounce(func, wait, immediate, context) {
         if (callNow) result = func.apply(ctx, args);
         return result;
     };
+}
