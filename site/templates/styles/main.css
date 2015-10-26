@@ -232,6 +232,20 @@ table.report td {
 table.report td h3 {
   margin: 0px;
 }
+.avatarContainer {
+  position: relative;
+}
+img.superpose {
+  position: absolute;
+}
+.weapon.superpose {
+  top: 65px;
+  left: 0px;
+}
+.protection.superpose {
+  top: 65px;
+  left: 70px;
+}
 .bubble-left, .bubble-right {
   display: inline-block;
   border: 3px solid #000;
@@ -240,12 +254,42 @@ table.report td h3 {
   margin: 10px;
 }
 .bubble-left {
+  position : relative;
   border-radius: 30px 30px 30px 0px;
   margin-left: 50px;
 }
-.rotate180 {
-  transform : roate(180deg);
-  background: #000;
+@keyframes explode {
+  from { transform: rotate(0deg) scale(1); opacity: 1; left: 0%;}
+  to {transform: rotate(-90deg) scale(2); opacity: 0; left: -50%;}
+}
+.explode {
+  animation-duration: 0.5s;
+  animation-name: explode;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+}
+.blink {
+  animation-duration: 0.3s;
+  animation-name: blink;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+@keyframes blink {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.squeeze {
+  margin: 0px 20px;
+  animation-duration: 0.3s;
+  animation-name: squeeze;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+@keyframes squeeze {
+  from { transform: scale(0.9); }
+  to { transform: scale(1.1); }
 }
 .bubble-right {
   bottom: 0px;

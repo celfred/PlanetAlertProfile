@@ -387,6 +387,7 @@ $(document).ready(function() {
   });
 
   $('#startFight').on('click', function() {
+    // TODO : Move function into exercise.js?
     $(this).parents('.alert').hide();
     $('#fightForm').show();
     $('#exTitle').hide();
