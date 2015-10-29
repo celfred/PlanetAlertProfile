@@ -1,31 +1,25 @@
 var exerciseApp = angular.module('exerciseApp', ['ngAnimate', 'ngSanitize']);
 
 exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $interval, $window) {
-  $scope.history = new Array();
   $scope.waitForStart = true;
+  $scope.history = new Array();
   $scope.monsterHP = 100;
-  $scope.wonFight = false;
   $scope.playerHP = 100;
-  $scope.hit = 10; // 10 correct answers to win, variable according to player's equipment
-  $scope.monsterPower = 10;
-  $scope.playerPower = 10;
+  $scope.monsterPower = 10; // 10 wrong answers = to lose, depending on player's equipment
+  $scope.playerPower = 10; // 10 correct answers to win, depending on player's equipment
+  $scope.nbAttacks = 0; // # of words
   $scope.counter = 0; // # of tries to copy correction
   $scope.exType = '';
   $scope.exData = '';
   $scope.correct = false;
-  $scope.nbAttacks = 0;
-  $scope.showInput = false; // Hide input field at first
-  $scope.isFocused = false;
+  $scope.wrong = false;
+  $scope.wonFight = false;
+  $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
-  $scope.questionClass = "bubble-left";
   
   $scope.init = function(exerciseId, redirectUrl, playerId, weaponRatio, protectionRatio, submitUrl) {
-    console.log('weaponRatio:'+weaponRatio);
-    console.log('protectionRatio:'+protectionRatio);
     $scope.playerPower += parseInt(weaponRatio);
     $scope.monsterPower -= parseInt(protectionRatio);
-    console.log('playerPower:'+$scope.playerPower);
-    console.log('monsterPower:'+$scope.monsterPower);
     $http.get('service-pages/?template=exercise&id='+exerciseId).then(function(response){
       var newLines = new Array();
       $scope.exType = response.data.matches[0].type.name;
@@ -69,7 +63,7 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
 
   $scope.pickQuestion = function(exType) {
     $scope.correct = false;
-    $scope.questionClass = "bubble-left";
+    $scope.wrong = false;
     $scope.showCorrection = '';
     switch(exType) {
       case 'translate' :
@@ -83,13 +77,16 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
         $scope.allWords = randWords[randIndex].trim().split("|");
         $scope.allCorrections = randWords[randOpp].trim().split("|");
         // Pick 1 random word (different from previous word)
-        while ( $scope.word == $scope.history[$scope.history.length-1]) {
-          $scope.word = chance.pick($scope.allWords);
+        if ( $scope.nbAttacks > 1) { // More than 1 word in history
+          while ( $scope.word == $scope.history[$scope.history.length-1]) {
+            $scope.word = chance.pick($scope.allWords);
+          }
+        } else {
+            $scope.word = chance.pick($scope.allWords);
         }
         // Add word to history
         $scope.history.push($scope.word);
         // console.log($scope.history);
-        // $scope.correction = chance.pick($scope.allCorrections);
         $scope.nbAttacks += 1;
         // console.log('Word:'+$scope.word+'-Correction:'+$scope.correction);
         $scope.throwQuestion();
@@ -132,7 +129,6 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
     if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
       // Trigger explode animation
       $scope.correct = true;
-      $scope.questionClass = 'bubble-left explode';
       // Stop HP loss
       $interval.cancel($scope.promise);
       $scope.runningInterval = false;
@@ -161,6 +157,7 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
         //$scope.pickQuestion($scope.exType);
       }
     } else { // Wrong answer
+      $scope.wrong = true;
       // Full HP loss
       $scope.playerHP = $scope.playerHP - $scope.monsterPower;
       if ($scope.playerHP <= 0) { // Monster wins, player loses
@@ -200,7 +197,6 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
 
   $scope.loseFight = function () {
     // Stop animation
-    // $scope.questionClass = 'bubble-left';
     $interval.cancel($scope.promise);
     $scope.runningInterval = false;
     // $scope.saveData();

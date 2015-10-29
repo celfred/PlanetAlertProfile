@@ -28,15 +28,14 @@
     // TODO : limit equipment and weapons
     foreach ($player->equipment as $equipment) {
       if ($equipment->parent()->name === 'weapons') {
-        // TODO : ng-class to put some animation (weapon when correct, protection when wrong)
-        $out .= '<img ng-class="{\'weapon\', \'superpose\'}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
+        $out .= '<img ng-class="{weapon:true, superpose:true, explode:correct}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
       }
     }
   }
   if ($protectionRatio > 0) { // Player has protections
     foreach ($player->equipment as $equipment) {
       if ($equipment->parent()->name === 'protections') {
-        $out .= '<img class="protection superpose" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
+        $out .= '<img ng-class="{protection:true, superpose:true, squeeze:wrong}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
       }
     }
   }
@@ -107,7 +106,7 @@
     $out .= '<img class="pull-left" src="'.$page->image->url.'" alt="Avatar" />';
   }
   $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getThumb('thumbnail').'" alt="Antenna" />';
-  $out .= '<div ng-class="questionClass">';
+  $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
   $out .= '<h3 class="inline" ng-bind-html="word"></h3>&nbsp;';
   $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span></h2>  ';
   $out .= '</div>';
@@ -124,7 +123,30 @@
   $out .='</div>';
   $out .='</h3>';
   if ($player->avatar) {
-    $out .= '<img class="pull-right" src="'.$player->avatar->url.'" alt="Avatar" />';
+  $out .= '<span class="pull-right">';
+  $out .= '<span class="avatarContainer">';
+  if ($player->avatar) {
+    $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+  } else {
+    $out .= '<Avatar>';
+  }
+  if ($weaponRatio > 0) { // Player has weapons
+    // TODO : limit equipment and weapons
+    foreach ($player->equipment as $equipment) {
+      if ($equipment->parent()->name === 'weapons') {
+        $out .= '<img ng-class="{weapon:true, superpose:true, explode:correct}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
+      }
+    }
+  }
+  if ($protectionRatio > 0) { // Player has protections
+    foreach ($player->equipment as $equipment) {
+      if ($equipment->parent()->name === 'protections') {
+        $out .= '<img ng-class="{protection:true, superpose:true, squeeze:wrong}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
+      }
+    }
+  }
+  $out .= '</span>';
+  $out .= '</span>';
   }
   $out .='</div>';
   $out .= '</div>';
