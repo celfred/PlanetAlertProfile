@@ -87,9 +87,7 @@
             <ul class="dropdown-menu">
               <?php
                 foreach($allTeams as $team) {
-                  //$class = $sanitizer->pageName($team->name) == $input->urlSegment1 ? " class='selected-left'" : "";
                   $class = $team == $input->urlSegment1 ? " class='selected-left'" : "";
-                  //echo "<li><a$class href='{$homepage->url}players/{$team->name}/'>{$team->title}</a></li>";
                   echo "<li><a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a></li>";
                 }
               ?>
@@ -112,8 +110,6 @@
           <?php
             $class = $page->is("name=blog|documentation") ? "on" : "";
             echo "<a class='btn $class' href='{$pages->get('/blog')->url}'>Infos</a>";
-            //$class = $page->name == 'documentation' ? "on" : "";
-            //echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Documentation</a>";
             $class = $page->name == 'contact' ? "on" : "";
             echo "<a class='btn $class' href='{$pages->get('/contact')->url}'>Contact</a>";
             if ( $user->isLoggedin()) {
@@ -130,7 +126,6 @@
         <?php
           $player = $pages->get("template=player, login=$user->name");
           echo '<img class="" src="'.$player->avatar->url.'" width="95" alt="No avatar" />';
-          //echo '<span class="logged">'.$player->title.' ('.$player->playerTeam.')</span>';
         ?>
         </div>
         <ul>
@@ -152,6 +147,8 @@
               $class = $page->name == 'shop_generator' ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Go to the Marketplace</a></li>";
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Make a donation</a></li>";
+              $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=underground-training')->url}'>Use the re-activator helmet</a></li>";
               /* $class = $page->name == 'places' ? " class='selected-left'" : ""; */
               /* echo "<li><a$class href='{$pages->get('/places')->url}'>Fight a monster</a></li>"; */
               ?>

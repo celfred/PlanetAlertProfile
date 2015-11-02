@@ -254,7 +254,158 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
   $scope.focusInput = function() {
     $scope.isFocused = !$scope.isFocused;
   }
+});
 
+exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $interval, $window) {
+  $scope.waitForStart = true;
+  $scope.history = new Array();
+  $scope.counter = 0; // #
+  $scope.exType = '';
+  $scope.exData = '';
+  $scope.isFocused = false; // Automatic focus on input field
+  $scope.runningInterval = false;
+
+  $scope.init = function(exerciseId) {
+    $http.get('service-pages/?template=exercise&id='+exerciseId).then(function(response){
+      var newLines = new Array();
+      $scope.exType = response.data.matches[0].type.name;
+      $scope.exData = response.data.matches[0].exData;
+      // Replace some escaped characters
+      var tmp = $scope.exData;
+      $scope.exData = tmp.replace(/&#039;/g, "'");
+      // Build data array
+      $scope.allLines = $scope.exData.split("\n");
+      // Manage priorities
+      var pattern = /^{(\d+)}/i; // {n} at the beginning of a line
+      for (var i=0; i<$scope.allLines.length; i++) {
+        var str = $scope.allLines[i];
+        if (str.search(pattern) != -1 ) {
+          // Get n and copy the line accordingly
+          var n = str.match(pattern);
+          // Clean original line
+          $scope.allLines[i] = str.replace(pattern, '');
+          for (var j=0; j<n[1]; j++) {
+            newLines.push($scope.allLines[i]);
+          }
+        }
+      }
+      // Add new lines
+      for (var i=0; i<newLines.length; i++) {
+        $scope.allLines.push(newLines[i]);
+      }
+      // Enable start Fight button
+      $scope.waitForStart = false;
+      // Pick first question
+      $scope.pickQuestion($scope.exType);
+    })
+    $scope.exerciseId = exerciseId;
+  }
+
+  $scope.pickQuestion = function(exType) {
+    $scope.correct = false;
+    $scope.wrong = false;
+    $scope.showCorrection = '';
+    switch(exType) {
+      case 'translate' :
+        // Pick a random line and build words array
+        var randLine = $scope.allLines[Math.floor(Math.random()*$scope.allLines.length)];
+        var randWords = randLine.split(",");
+        // Pick a random word
+        var randIndex = Math.round(Math.random());
+        if (randIndex == 0) { randOpp = 1; } else { randOpp = 0; }
+        // Test for multiple possible words and answers
+        $scope.allWords = randWords[randIndex].trim().split("|");
+        $scope.allCorrections = randWords[randOpp].trim().split("|");
+        // Pick 1 random word (different from previous word)
+        if ( $scope.nbAttacks > 1) { // More than 1 word in history
+          while ( $scope.word == $scope.history[$scope.history.length-1]) {
+            $scope.word = chance.pick($scope.allWords);
+          }
+        } else {
+            $scope.word = chance.pick($scope.allWords);
+        }
+        // Add word to history
+        $scope.history.push($scope.word);
+        // console.log($scope.history);
+        $scope.nbAttacks += 1;
+        console.log('Word:'+$scope.word+'-Correction:'+$scope.correction);
+        $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
+        // Set focus on input field
+        $timeout($scope.focusInput, 300);
+        break;
+      default:
+        console.log('Unknown exType');
+        break;
+    }
+  }
+
+  $scope.shuffle = function (str) {
+      var a = str.split(""),
+          n = a.length;
+
+      for(var i = n - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = a[i];
+          a[i] = a[j];
+          a[j] = tmp;
+      }
+      return a.join("");
+  }
+
+  $scope.attack = function() {
+    if ($scope.playerAnswer) {
+      $scope.checkAnswer($scope.playerAnswer);
+    }
+  }
+
+  $scope.checkAnswer = function(submitted) {
+    if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
+      // Trigger explode animation
+      $scope.correct = true;
+        $scope.playerAnswer = '';
+        $scope.isFocused = false;
+        $scope.counter++;
+        // Pick another question (timeout workaround so animation starts from 0)
+        // $timeout(function() { $scope.pickQuestion($scope.exType); }, 550);
+        $scope.pickQuestion($scope.exType);
+    } else { // Wrong answer
+      $scope.wrong = true;
+    }
+  }
+
+  $scope.stopSession = function() {
+    if ($scope.counter > 5) {
+      swal({
+        title: "Stop training?",
+        text: "Good job! You've set a number od "+$scope.counter+" words in your brain. Please come back and use the re-activator helmet soon!",
+        type: "success",
+        showCancelButton : true,
+        cancelButtonText: "Keep the helmet on",
+        confirmButtonText: "Take the helmet off"
+      }, function() {
+        // $window.location.href = $scope.redirectUrl;
+        // TODO
+        // Save and redirect
+      });;
+    } else {
+      swal({
+        title: "Stop training?",
+        text: "You didn't use the re-activator enough to record words in your brain. Are you sure you want to stop?",
+        // TODO : Add cancel action
+        type: "warning",
+        showCancelButton : true,
+        cancelButtonText: "Keep the helmet on",
+        confirmButtonText: "Take the helmet off"
+      }, function() {
+        // $window.location.href = $scope.redirectUrl;
+        // TODO DO not save, but redirect
+      });;
+    }
+  }
+
+  $scope.focusInput = function() {
+    $scope.isFocused = !$scope.isFocused;
+  }
 });
 
 exerciseApp.directive('syncFocusWith', function($timeout, $rootScope) {

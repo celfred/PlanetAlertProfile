@@ -246,6 +246,10 @@ img.superpose {
   top: 65px;
   left: 70px;
 }
+.helmet.superpose {
+  top: -50px;
+  left: 0px;
+}
 .bubble-left, .bubble-right {
   display: inline-block;
   border: 3px solid #000;

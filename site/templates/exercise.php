@@ -1,6 +1,8 @@
 <?php
   include("./head.inc"); 
 
+  // TODO : Test player login
+
   echo '<div ng-app="exerciseApp">';
   
   // Get player's equipment to set scores alternatives
