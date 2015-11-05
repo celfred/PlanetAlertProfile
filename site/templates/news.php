@@ -266,13 +266,13 @@
                 echo date("F j (l)", $n->date).' : ';
                 echo '<span>';
                 switch ($n->task->category->name) {
-                case 'place' : echo '<span class="">New place for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'place' : echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'shop' : echo '<span class="">New equipment for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'homework' : echo '<span class="">Penalty for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'homework' : echo '<span class="">Penalty for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
                 default : echo 'todo : ';
                   break;
@@ -394,11 +394,11 @@
               echo date("F j (l)", $n->date).' : ';
               echo '<span>';
               switch ($n->task->category->name) {
-              case 'place' : echo '<span class="">New place for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'place' : echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'shop' : echo '<span class="">New equipment for <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$player->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : echo 'todo : ';
                 break;
