@@ -90,7 +90,7 @@
   $out .= '<th data-toggle="tooltip" title="Group"><span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></th>';
   $out .= '<td></td>';
   $out .= '<th data-toggle="tooltip" title="Player"><span class="glyphicon glyphicon-user"></span></th>';
-  $out .= '<td>Karma</td>';
+  $out .= '<td data-toggle="tooltip" title="Karma">K&nbsp;&nbsp;</td>';
   $out .= '<td data-toggle="tooltip" title="What happened on the last date?"><span class="glyphicon glyphicon-th-list"></span></td>';
   $out .= '<th data-toggle="tooltip" title="Gold coins"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></th>';
   $out .= '<th data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span></th>';
@@ -99,6 +99,7 @@
   $out .= '<th data-toggle="tooltip" title="Places"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
   $out .= '<th data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Donation"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></td>';
+  $out .= '<th data-toggle="tooltip" title="Underground training"><span class="glyphicon glyphicon-headphones"></span> U.T.</th>';
   $out .= '</tr>';
   $out .= '</thead>';
   $out .= '<tbody>';
@@ -186,6 +187,8 @@
     $out .= '<td '.$tooltipPlaces.'>'. $player->places->count() .'</td>';
     $out .= '<td '.$tooltipEquipment.'>'. $player->equipment->count() .'</td>';
     $out .= '<td>'. $player->donation .'</td>';
+    /* $out .= '<td>'. $player->underground-training .'</td>'; */
+    $out .= '<td>'. $player->donation.'</td>';
     $out .= '</tr>';
   }
   $out .= '</tbody>';

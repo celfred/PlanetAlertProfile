@@ -148,7 +148,8 @@
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Go to the Marketplace</a></li>";
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Make a donation</a></li>";
               $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('name=underground-training')->url}'>Use the re-activator helmet</a></li>";
+              /* TODO : Enable/Disable according to availability for the player */
+              echo "<li><a$class href='{$pages->get('name=underground-training')->url}'>Use the memory helmet</a></li>";
               /* $class = $page->name == 'places' ? " class='selected-left'" : ""; */
               /* echo "<li><a$class href='{$pages->get('/places')->url}'>Fight a monster</a></li>"; */
               ?>

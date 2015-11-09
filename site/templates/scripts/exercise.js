@@ -258,6 +258,7 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
 
 exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $interval, $window) {
   $scope.waitForStart = true;
+  $scope.result = 0;
   $scope.history = new Array();
   $scope.counter = 0; // #
   $scope.exType = '';
@@ -328,7 +329,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         $scope.history.push($scope.word);
         // console.log($scope.history);
         $scope.nbAttacks += 1;
-        console.log('Word:'+$scope.word+'-Correction:'+$scope.correction);
+        //console.log('Word:'+$scope.word+'-Correction:'+$scope.correction);
         $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
         // Set focus on input field
         $timeout($scope.focusInput, 300);
@@ -365,6 +366,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         $scope.playerAnswer = '';
         $scope.isFocused = false;
         $scope.counter++;
+        // Get number of words and calculate result
+        if ($scope.counter >= 5) {
+          if (Math.floor($scope.counter/5) > $scope.result) {
+            $scope.result++;
+          }
+        }
         // Pick another question (timeout workaround so animation starts from 0)
         // $timeout(function() { $scope.pickQuestion($scope.exType); }, 550);
         $scope.pickQuestion($scope.exType);
@@ -374,10 +381,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   }
 
   $scope.stopSession = function() {
-    if ($scope.counter > 5) {
+    if ($scope.counter >= 5) {
+      $scope.saveData();
       swal({
+        html: true,
         title: "Stop training?",
-        text: "Good job! You've set a number od "+$scope.counter+" words in your brain. Please come back and use the re-activator helmet soon!",
+        text: "Good job! You've set a number of <span class='label label-success'>"+$scope.counter+" words</span> in your brain. This will credit you of <span class='label label-success'>+"+$scope.result+" U.T.</span><br />Are you sure you want to stop the training session?",
         type: "success",
         showCancelButton : true,
         cancelButtonText: "Keep the helmet on",
@@ -390,8 +399,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     } else {
       swal({
         title: "Stop training?",
-        text: "You didn't use the re-activator enough to record words in your brain. Are you sure you want to stop?",
-        // TODO : Add cancel action
+        text: "You didn't use the memory helmet enough to record words in your brain. Are you sure you want to stop?",
         type: "warning",
         showCancelButton : true,
         cancelButtonText: "Keep the helmet on",
@@ -401,6 +409,30 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         // TODO DO not save, but redirect
       });;
     }
+  }
+
+  $scope.saveData = function () {
+    // Get number of words
+    if ($scope.counter >= 5) {
+      $scope.result = Math.floor($scope.counter/5);
+    }
+    console.log('result:'+$scope.result);
+    // Save result
+    // $http({
+    //   url: $scope.submitUrl,
+    //   method: 'POST',
+    //   headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    //   data: $.param({
+    //     exerciseId : $scope.exerciseId,
+    //     playerId : $scope.playerId,
+    //     training: true,
+    //     result : $scope.result
+    //   })
+    //   }).then(function(data, status, headers, config){ //make a get request to mock json file.
+    //   $scope.saved = 'Result saved!';
+    // }, function(data, status, headers, config) {
+    //   $scope.saved = 'Error! Please contact the administrator.';
+    // })
   }
 
   $scope.focusInput = function() {

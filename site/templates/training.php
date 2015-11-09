@@ -17,7 +17,7 @@
       $out .= '<li>';
       $out .= $result->summary;
       $out .= ' <a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$result->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
-      $out .= ' <a class="btn btn-primary" href="'.$page->url.'?id='.$result->id.'">Practise!</a>';
+      $out .= ' <a class="btn btn-primary" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
       $out .= '<div class="collapse" id="collapseDiv'.$result->id.'"><div class="well">';
       if ($result->frenchSummary != '') {
         $out .= $result->frenchSummary;
@@ -31,31 +31,29 @@
     $out .= '<div ng-app="exerciseApp">';
 
     $monster = $pages->get($input->get->id);
-    $out .= '<div ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\')">';
+    $out .= '<div class="text-center" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\')">';
     if ($monster->id) { // Training session starts
-      $out .= '<h1>Re-activator helmet programmed : '. $monster->summary.'</h1>';
+      $out .= '<h1>Memory helmet programmed : '. $monster->summary.'</h1> ';
 
-      $out .= '<div class="col-sm-2 text-center">';
-      $out .= '<span class="label label-primary">Training session word count</span>';
+      $out .= '<div class="col-sm-3 text-center">';
+      $out .= '<h4><span class="label label-primary">Training session word count</span></h4>';
       $out .= '<h1><span class="label label-primary">{{counter}}</span></h1>';
+      $out .= '<h1><span class="label label-primary">+{{result}} U.T.</span></h1>';
       $out .= '</div>';
 
-      $out .= '<div class="col-sm-10 text-center">';
+      $out .= '<div class="col-sm-9 text-center">';
       $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
+      $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
       $out .= '<div class="bubble-right">';
       $out .= '<div class="text-center">';
       $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
-      /* $out .= ' [<span ng-bind-html="mixedWord"></span>] '; */
-      $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Mixed letters : {{mixedWord}}"></span> ';
-      /* $out .= ' <span class="glyphicon glyphicon-question-sign" ng-show="wrong" data-toggle="tooltip" data-html="true" title="{{allCorrections[0]}}"></span> '; */
-      $out .= ' <span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{allCorrections[0]}}</span> ';
+      $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
+      $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{allCorrections[0]}}</span></h3> ';
       $out .= '</div>';
+      $out .= '<br />';
       $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
       $out .= '<br />';
       $out .= '<button ng-click="attack()" class="btn btn-success">Stimulate!</button>';
-      $out .= '&nbsp;';
-      $out .= '&nbsp;';
-      // TODO : Put player's avatar
       $out .= '<span class="pull-right">';
       $out .= '<span class="avatarContainer">';
       if ($player->avatar) {
@@ -67,7 +65,7 @@
       $out .= '</span>';
       $out .= '</span>';
       $out .= '</div>';
-      $out .= '<button ng-click="stopSession()" class="btn btn-danger">Take the helmet off (and stop training session)</button>';
+      $out .= '<button ng-click="stopSession()" class="btn btn-danger">Take the helmet off (Stop training session)</button>';
       $out .= '</div>';
       $out .= '</div>';
 
