@@ -187,8 +187,7 @@
     $out .= '<td '.$tooltipPlaces.'>'. $player->places->count() .'</td>';
     $out .= '<td '.$tooltipEquipment.'>'. $player->equipment->count() .'</td>';
     $out .= '<td>'. $player->donation .'</td>';
-    /* $out .= '<td>'. $player->underground-training .'</td>'; */
-    $out .= '<td>'. $player->donation.'</td>';
+    $out .= '<td>'. $player->underground_training .'</td>';
     $out .= '</tr>';
   }
   $out .= '</tbody>';

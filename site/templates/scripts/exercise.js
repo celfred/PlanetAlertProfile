@@ -266,7 +266,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
 
-  $scope.init = function(exerciseId) {
+  $scope.init = function(exerciseId, redirectUrl, playerId, submitUrl) {
     $http.get('service-pages/?template=exercise&id='+exerciseId).then(function(response){
       var newLines = new Array();
       $scope.exType = response.data.matches[0].type.name;
@@ -300,6 +300,9 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       $scope.pickQuestion($scope.exType);
     })
     $scope.exerciseId = exerciseId;
+    $scope.redirectUrl = redirectUrl;
+    $scope.playerId = playerId;
+    $scope.submitUrl = submitUrl;
   }
 
   $scope.pickQuestion = function(exType) {
@@ -382,19 +385,17 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 
   $scope.stopSession = function() {
     if ($scope.counter >= 5) {
-      $scope.saveData();
       swal({
         html: true,
         title: "Stop training?",
-        text: "Good job! You've set a number of <span class='label label-success'>"+$scope.counter+" words</span> in your brain. This will credit you of <span class='label label-success'>+"+$scope.result+" U.T.</span><br />Are you sure you want to stop the training session?",
+        text: "Good job! You've set a number of <span class='label label-success'>"+$scope.counter+" words</span> in your brain. This will credit you of <span class='label label-success'>+"+$scope.result+" U.T.</span>",
         type: "success",
         showCancelButton : true,
-        cancelButtonText: "Keep the helmet on",
-        confirmButtonText: "Take the helmet off"
+        cancelButtonText: "Keep the helmet on (Continue training)",
+        confirmButtonText: "Take the helmet off (Stop training & Save results)"
       }, function() {
-        // $window.location.href = $scope.redirectUrl;
-        // TODO
         // Save and redirect
+        $scope.saveData();
       });;
     } else {
       swal({
@@ -402,37 +403,33 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         text: "You didn't use the memory helmet enough to record words in your brain. Are you sure you want to stop?",
         type: "warning",
         showCancelButton : true,
-        cancelButtonText: "Keep the helmet on",
-        confirmButtonText: "Take the helmet off"
+        cancelButtonText: "Keep the helmet on (Continue training)",
+        confirmButtonText: "Take the helmet off (Stop training)"
       }, function() {
-        // $window.location.href = $scope.redirectUrl;
-        // TODO DO not save, but redirect
+        // DO not save, but redirect
+        $window.location.href = $scope.redirectUrl;
       });;
     }
   }
 
   $scope.saveData = function () {
-    // Get number of words
-    if ($scope.counter >= 5) {
-      $scope.result = Math.floor($scope.counter/5);
-    }
-    console.log('result:'+$scope.result);
     // Save result
-    // $http({
-    //   url: $scope.submitUrl,
-    //   method: 'POST',
-    //   headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    //   data: $.param({
-    //     exerciseId : $scope.exerciseId,
-    //     playerId : $scope.playerId,
-    //     training: true,
-    //     result : $scope.result
-    //   })
-    //   }).then(function(data, status, headers, config){ //make a get request to mock json file.
-    //   $scope.saved = 'Result saved!';
-    // }, function(data, status, headers, config) {
-    //   $scope.saved = 'Error! Please contact the administrator.';
-    // })
+    $http({
+      url: $scope.submitUrl,
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      data: $.param({
+        exerciseId : $scope.exerciseId,
+        playerId : $scope.playerId,
+        training: true,
+        result : $scope.result
+      })
+      }).then(function(data, status, headers, config){ //make a get request to mock json file.
+      $scope.saved = 'Result saved!';
+      $window.location.href = $scope.redirectUrl;
+    }, function(data, status, headers, config) {
+      $scope.saved = 'Error! Please contact the administrator.';
+    })
   }
 
   $scope.focusInput = function() {

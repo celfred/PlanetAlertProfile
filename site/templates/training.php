@@ -31,13 +31,14 @@
     $out .= '<div ng-app="exerciseApp">';
 
     $monster = $pages->get($input->get->id);
-    $out .= '<div class="text-center" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\')">';
+    $redirectUrl = $player->url;
+    $out .= '<div class="text-center" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
     if ($monster->id) { // Training session starts
       $out .= '<h1>Memory helmet programmed : '. $monster->summary.'</h1> ';
 
       $out .= '<div class="col-sm-3 text-center">';
-      $out .= '<h4><span class="label label-primary">Training session word count</span></h4>';
-      $out .= '<h1><span class="label label-primary">{{counter}}</span></h1>';
+      $out .= '<h4><span class="label label-primary">Training session word count: {{counter}}</span></h4>';
+      /* $out .= '<h1><span class="label label-primary">{{counter}}</span></h1>'; */
       $out .= '<h1><span class="label label-primary">+{{result}} U.T.</span></h1>';
       $out .= '</div>';
 
