@@ -263,6 +263,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.counter = 0; // #
   $scope.exType = '';
   $scope.exData = '';
+  $scope.correct = false;
+  $scope.utPoint = false;
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
 
@@ -306,7 +308,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   }
 
   $scope.pickQuestion = function(exType) {
-    $scope.correct = false;
+    // End animation
+    $timeout(function() { $scope.correct = false; }, 1000);
     $scope.wrong = false;
     $scope.showCorrection = '';
     switch(exType) {
@@ -321,7 +324,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         $scope.allWords = randWords[randIndex].trim().split("|");
         $scope.allCorrections = randWords[randOpp].trim().split("|");
         // Pick 1 random word (different from previous word)
-        if ( $scope.nbAttacks > 1) { // More than 1 word in history
+        if ( $scope.history.length > 0) { // More than 1 word in history
           while ( $scope.word == $scope.history[$scope.history.length-1]) {
             $scope.word = chance.pick($scope.allWords);
           }
@@ -331,7 +334,6 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         // Add word to history
         $scope.history.push($scope.word);
         // console.log($scope.history);
-        $scope.nbAttacks += 1;
         //console.log('Word:'+$scope.word+'-Correction:'+$scope.correction);
         $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
         // Set focus on input field
@@ -364,27 +366,28 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 
   $scope.checkAnswer = function(submitted) {
     if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
-      // Trigger explode animation
+      // Trigger animation
       $scope.correct = true;
-        $scope.playerAnswer = '';
-        $scope.isFocused = false;
-        $scope.counter++;
-        // Get number of words and calculate result
-        if ($scope.counter >= 5) {
-          if (Math.floor($scope.counter/5) > $scope.result) {
-            $scope.result++;
-          }
+      $scope.playerAnswer = '';
+      $scope.isFocused = false;
+      $scope.counter++;
+      // Get number of words and calculate result
+      if ($scope.counter >= 10) {
+        if (Math.floor($scope.counter/10) > $scope.result) {
+          $scope.result++;
+          $scope.utPoint = true;
+          $timeout(function() { $scope.utPoint = false; }, 1000);
         }
-        // Pick another question (timeout workaround so animation starts from 0)
-        // $timeout(function() { $scope.pickQuestion($scope.exType); }, 550);
-        $scope.pickQuestion($scope.exType);
+      }
+      // Pick another question (timeout workaround so animation starts from 0)
+      $scope.pickQuestion($scope.exType);
     } else { // Wrong answer
       $scope.wrong = true;
     }
   }
 
   $scope.stopSession = function() {
-    if ($scope.counter >= 5) {
+    if ($scope.result >= 1) {
       swal({
         html: true,
         title: "Stop training?",

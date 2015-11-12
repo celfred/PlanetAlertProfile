@@ -36,6 +36,8 @@
         $player->GC = (int) $player->GC - $newItem->GC;
         if ($newItem->template == 'equipment' || $newItem->template == 'item') {
           switch($newItem->parent->name) {
+            // TODO : Test if group-item and make it available to all group members
+            // TODO : Same in other submitforms...
             case 'potions' : // instant use potions?
               $player->HP = $player->HP + $newItem->HP;
               if ($player->HP > 50) {

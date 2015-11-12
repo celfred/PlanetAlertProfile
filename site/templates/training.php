@@ -37,12 +37,14 @@
       $out .= '<h1>Memory helmet programmed : '. $monster->summary.'</h1> ';
 
       $out .= '<div class="col-sm-3 text-center">';
-      $out .= '<h4><span class="label label-primary">Training session word count: {{counter}}</span></h4>';
+      $out .= '<h4><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Training session word count: {{counter}}</span></h4>';
       /* $out .= '<h1><span class="label label-primary">{{counter}}</span></h1>'; */
-      $out .= '<h1><span class="label label-primary">+{{result}} U.T.</span></h1>';
+      $out .= '<h1 ng-class="{zoom:utPoint}"><span class="label label-primary">+{{result}} U.T.</span></h1>';
       $out .= '</div>';
 
       $out .= '<div class="col-sm-9 text-center">';
+      $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
+      $out .= '</div>';
       $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
       $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
       $out .= '<div class="bubble-right">';
