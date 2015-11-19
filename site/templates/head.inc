@@ -153,7 +153,7 @@
               if ($player->equipment->get("name=memory-helmet")) {
                 echo "<li><a$class href='{$pages->get('name=underground-training')->url}'>Use the memory helmet</a></li>";
               } else {
-                echo "<li> <span class='badge badge-danger'>Locked</span> Memory helmet</li>";
+                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Memory helmet</li>";
               }
               /* $class = $page->name == 'places' ? " class='selected-left'" : ""; */
               /* echo "<li><a$class href='{$pages->get('/places')->url}'>Fight a monster</a></li>"; */

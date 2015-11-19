@@ -36,14 +36,20 @@
         $player->GC = (int) $player->GC - $newItem->GC;
         if ($newItem->template == 'equipment' || $newItem->template == 'item') {
           switch($newItem->parent->name) {
-            // TODO : Test if group-item and make it available to all group members
-            // TODO : Same in other submitforms...
-            case 'potions' : // instant use potions?
+            case 'potions' : // instant use potions
               $player->HP = $player->HP + $newItem->HP;
               if ($player->HP > 50) {
                 $player->HP = 50;
               }
               $player->equipment->add($newItem);
+              break;
+            case 'group-items' : // Make item available to each group member
+              $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
+              foreach ($members as $p) {
+                $p->of(false);
+                $p->equipment->add($newItem);
+                $p->save();
+              }
               break;
             default:
               $player->equipment->add($newItem);
@@ -57,10 +63,17 @@
           // Save player's new scores
           $player->save();
 
-          // Record history
+          // Record history (for each group member if necessary)
           $newsBoard = 1;
           $taskComment = $newItem->title;
-          saveHistory($player, $task, $taskComment, $newsBoard);
+          if ($members) {
+            foreach ($members as $p) {
+              $p->of(false);
+              saveHistory($p, $task, $taskComment, $newsBoard);
+            }
+          } else {
+            saveHistory($player, $task, $taskComment, $newsBoard);
+          }
           
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
@@ -93,6 +106,14 @@
                 }
                 $player->equipment->add($newItem);
                 break;
+              case 'group-items' : // Make item available to each group member
+                $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
+                foreach ($members as $p) {
+                  $p->of(false);
+                  $p->equipment->add($newItem);
+                  $p->save();
+                }
+                break;
               default:
                 $player->equipment->add($newItem);
                 break;
@@ -114,7 +135,14 @@
 
           // Record history
           $taskComment = $newItem->title;
-          saveHistory($player, $task, $taskComment, $newsBoard);
+          if ($members) {
+            foreach ($members as $p) {
+              $p->of(false);
+              saveHistory($p, $task, $taskComment, $newsBoard);
+            }
+          } else {
+            saveHistory($player, $task, $taskComment, $newsBoard);
+          }
           
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
@@ -128,39 +156,40 @@
         $playerId = $input->post->player;
         $player = $pages->get($playerId);
         $player->of(false);
-        $amount = $input->post->amount;
+        $amount = (integer) $input->post->amount;
         $receiverId = $input->post->receiver;
         $receiver = $pages->get($receiverId);
         $receiver->of(false);
         
         // Save donation
-        
-        // Modify player's page
-        $player->GC = $player->GC - $amount;
-        $task = $pages->get("template='task', name='donation'");
-        $player->HP = $player->HP + $task->GC;
-        $player->donation = $player->donation + $amount;
+        if ($amount && $amount > 0 && $amount<$player->GC) {
+          // Modify player's page
+          $player->GC = $player->GC - $amount;
+          $task = $pages->get("template='task', name='donation'");
+          $player->HP = $player->HP + $task->GC;
+          $player->donation = $player->donation + $amount;
 
-        $player->save();
-        // Record history
-        $taskComment = 'Donation of '.$amount. ' GC to '.$receiver->title.' ['.$receiver->playerTeam.']';
-        $newsBoard = 1;
-        saveHistory($player, $task, $taskComment, $newsBoard);
+          $player->save();
+          // Record history
+          $taskComment = 'Donation of '.$amount. ' GC to '.$receiver->title.' ['.$receiver->playerTeam.']';
+          $newsBoard = 1;
+          saveHistory($player, $task, $taskComment, $newsBoard);
 
-        // Modify receiver's page
-        $receiver->GC = $receiver->GC + $amount;
-        $receiver->save();
-        // Record history
-        $task = $pages->get("template='task', name='donated'");
-        $taskComment = 'Donation of '.$amount. ' GC by '.$player->title.' ['.$player->playerTeam.']';
-        $newsBoard = 0;
-        saveHistory($receiver, $task, $taskComment, $newsBoard);
-        
-        // Notify admin
-        $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
-        $msg .= "Donation amount :". $amount;
-        $msg .= "Donated to :". $receiver->title." [".$receiver->playerTeam."]";
-        mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
+          // Modify receiver's page
+          $receiver->GC = $receiver->GC + $amount;
+          $receiver->save();
+          // Record history
+          $task = $pages->get("template='task', name='donated'");
+          $taskComment = 'Donation of '.$amount. ' GC by '.$player->title.' ['.$player->playerTeam.']';
+          $newsBoard = 0;
+          saveHistory($receiver, $task, $taskComment, $newsBoard);
+          
+          // Notify admin
+          $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
+          $msg .= "Donation amount :". $amount;
+          $msg .= "Donated to :". $receiver->title." [".$receiver->playerTeam."]";
+          mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
+        }
       }
     }
 
@@ -169,7 +198,7 @@
   }
 
   if ($user->isSuperuser()) { // Admin front-end
-    // TODO : Give superUser possibility to record a donation
+    // TODO : Give superUser possibility to record a donation?
     if ($input->get->form && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
       $n->of(false);

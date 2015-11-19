@@ -322,6 +322,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         if (randIndex == 0) { randOpp = 1; } else { randOpp = 0; }
         // Test for multiple possible words and answers
         $scope.allWords = randWords[randIndex].trim().split("|");
+        // TODO : Test if it works all the time ?
         $scope.allCorrections = randWords[randOpp].trim().split("|");
         // Pick 1 random word (different from previous word)
         if ( $scope.history.length > 0) { // More than 1 word in history
@@ -377,6 +378,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
           $scope.result++;
           $scope.utPoint = true;
           $timeout(function() { $scope.utPoint = false; }, 1000);
+          $scope.stopSession(); // Record +1 U.T. : Stop or continue?
         }
       }
       // Pick another question (timeout workaround so animation starts from 0)
@@ -396,10 +398,14 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         showCancelButton : true,
         cancelButtonText: "Keep the helmet on (Continue training)",
         confirmButtonText: "Take the helmet off (Stop training & Save results)"
-      }, function() {
-        // Save and redirect
-        $scope.saveData();
-      });;
+      }, function(isConfirm) {
+        if (isConfirm) { // Save and redirect
+          // TODO : Result cumulating for the moment!
+          $scope.saveData(true);
+        } else { // Save and continue
+          $scope.saveData(false);
+        }
+      });
     } else {
       swal({
         title: "Stop training?",
@@ -415,7 +421,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     }
   }
 
-  $scope.saveData = function () {
+  $scope.saveData = function (redirect) {
     // Save result
     $http({
       url: $scope.submitUrl,
@@ -427,9 +433,11 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         training: true,
         result : $scope.result
       })
-      }).then(function(data, status, headers, config){ //make a get request to mock json file.
+    }).then(function(data, status, headers, config){ //make a get request to mock json file.
       $scope.saved = 'Result saved!';
-      $window.location.href = $scope.redirectUrl;
+      if (redirect === true) {
+        $window.location.href = $scope.redirectUrl;
+      }
     }, function(data, status, headers, config) {
       $scope.saved = 'Error! Please contact the administrator.';
     })

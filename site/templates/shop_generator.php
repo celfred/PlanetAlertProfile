@@ -44,9 +44,10 @@ $out .= "</section>";
 $out .= '<form id="marketPlaceForm" name="marketPlaceForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="" role="form">';
 $out .= '<input type="hidden" name="player" value="'.$player->id.'" />';
 // Possible equipment
-$possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment");
+$possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, sort=-parent.name, sort=name");
 
-$possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places");
+// Possible places
+$possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
 // Delete completed places
 foreach($possiblePlaces as $place) {
   if (placeFreedomRate($place, $allPlayers) === 100) {
@@ -58,8 +59,20 @@ $out .= '<section class="row">';
 if ( $possibleEquipment.count() > 0) {
   $out .= "<ul class='itemList col-md-6'><h3>Possible equipment</h3>";
   foreach($possibleEquipment as $item) {
+    // List items by category
+    if ($item->parent->name !== $lastCat) {
+      $out .= '<li class="label label-primary">'.$item->parent->title.'</li>';
+    }
     $out .= '<li>';
-    $out .= '<label title="'.$item->summary.'" for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->GC.'GC]</label></li>';
+    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+    if ($item->image) {
+      $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+    }
+    $out .= $item->title.' ['.$item->GC.'GC]';
+    $out .= '</label>';
+    $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+    $out .= '</li>';
+    $lastCat = $item->parent->name;
   }
   $out .= "</ul>";
 } else {

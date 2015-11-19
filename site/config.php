@@ -98,6 +98,6 @@ $config->timezone = 'Europe/Paris';
  */
 $config->httpHosts = array(
   '127.0.0.1',
-  'localhost',
+  /* 'localhost', */
   'planetalert.tuxfamily.org'
 );

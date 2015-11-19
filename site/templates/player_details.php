@@ -122,6 +122,16 @@
     <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
+          <h4 class="panel-title"><span class="">Underground Training (U.T.) : <?php echo $player->underground_training; ?></span></h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="panel panel-success">
+        <div class="panel-heading">
           <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free places: <?php echo $playerPlacesNb; ?></span></h4>
         </div>
         <div class="panel-body">

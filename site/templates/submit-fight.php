@@ -9,6 +9,7 @@
     $training = $input->post->training;
     $exerciseId = $input->post->exerciseId;
     $monster = $pages->get($exerciseId)->title;
+    $summary = $pages->get($exerciseId)->summary;
     $result = $input->post->result;
 
     if ($training == true) { // Training session
@@ -30,7 +31,8 @@
         $player->save();
         
         // Record history
-        $taskComment = 'Training vs. '.$monster.' [+'.$result.'U.T.]';
+        /* $taskComment = 'Training vs. '.$monster.' [+'.$result.'U.T.]'; */
+        $taskComment = 'Training "'.$summary.'" [+'.$result.'U.T.]';
         saveHistory($player, $task, $taskComment, $newsBoard);
         
         // Record to log file
