@@ -14,6 +14,7 @@
   <div class="col-sm-4">
     <div id="" class="panel panel-success">
       <div class="panel-heading">
+      <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
       <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
       </div>
       <div class="panel-body">
@@ -41,6 +42,7 @@
 
     <div class="panel panel-success">
       <div class="panel-heading">
+        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Free Places</h4>
       </div>
       <div class="panel-body">
@@ -72,6 +74,7 @@
 
     <div class="panel panel-info">
       <div class="panel-heading">
+        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=equipment"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><span class="glyphicon glyphicon-wrench"></span> Most equipped</h4>
       </div>
       <div class="panel-body">
@@ -99,6 +102,7 @@
 
     <div id="" class="panel panel-info">
       <div class="panel-heading">
+        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> Best donators</h4>
       </div>
       <div class="panel-body">
