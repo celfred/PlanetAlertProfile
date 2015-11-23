@@ -31,9 +31,20 @@
     default : 
       $title = 'Error';
   }
+
+  if ($user->isLoggedin()) {
+    // Get player's position
+    $playerPos = getPosition($player, $players);
+    if ($playerPos) {
+      $pos = '<h3 class="text-center"><span class="label label-success">You are '.$playerPos.'/'.$players->count.' in the \''.$title.'\' score board.</span></h3>';
+    } else {
+      $pos = '<h3 class="text-center"><span class="label label-success">You are not on this score board. Sorry :(</span></h3>';
+    }
+  }
 ?>
 
 <div class="row">
+  <?php echo $pos; ?>
   <div class="panel panel-success">
     <div class="panel-heading">
     <h4 class="panel-title"><?php echo $img .' '. $title; ?></h4>
@@ -82,8 +93,7 @@
         ?>
       </ol>
       <div class="panel-footer">
-        <p class="text-center"><span class="label label-success">Total # of players : <?php echo $pages->find("template=player, name!=test")->count; ?></span></p>
-        <p class="text-center">If you have a 0 indicator in the selected scoreboard, then you are absent of the list :(</p>
+        <p class="text-center"><span class="label label-success">Total # of players : <?php echo $pages->find("template=player, name!=test")->count; ?></span> If you have a 0 indicator in the selected scoreboard, then you are absent of this list :(</p>
       </div>
     </div>
   </div>
