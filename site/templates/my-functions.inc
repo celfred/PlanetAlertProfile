@@ -310,4 +310,19 @@ function checkHk($player) {
   return false;
 }
 
+function getPosition($player, $allPlayers) {
+  $pos = 1;
+  foreach($allPlayers as $p) {
+    if ($p->id === $player->id) {
+      $playerPos = $pos;
+    }
+    $pos++;
+  }
+  if ($playerPos) {
+    return $playerPos;
+  } else {
+    return false;
+  }
+}
+
 ?>

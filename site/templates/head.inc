@@ -88,7 +88,21 @@
               <?php
                 foreach($allTeams as $team) {
                   $class = $team == $input->urlSegment1 ? " class='selected-left'" : "";
-                  echo "<li><a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a></li>";
+                  if ($user->isSuperuser()) { // Display direct access via submenu only for admin
+                    echo "<li class='dropdown-submenu'>";
+                    echo "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a>";
+                    echo "<ul class='dropdown-menu'>";
+                    echo "<li><a href='{$homepage->url}players/{$sanitizer->pageName($team)}'>{$team} team</a></li>";
+                    echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team)}'>{$team} world</a></li>";
+                    echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team)}'>{$team} marketplace</a></li>";
+                    echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team)}'>{$team} adminTable</a></li>";
+                    echo "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team)}'>{$team} monster invasions</a></li>";
+                    echo "<li><a href='{$homepage->url}reports/{$sanitizer->pageName($team)}'>{$team} reports</a></li>";
+                    echo "</ul>";
+                    echo "</li>";
+                  } else {
+                      echo "<li><a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a></li>";
+                  }
                 }
               ?>
             </ul>
