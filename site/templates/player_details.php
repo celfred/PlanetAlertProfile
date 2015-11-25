@@ -1,7 +1,6 @@
 <?php
   $playerPage = $pages->get("template=player,name=".$input->urlSegment2);
-  //$categories = $pages->find("parent=/categories");
-  $playersTotalNb = $pages->count("template=player,team=$playerPage->team");
+  $playersTotalNb = $pages->count("template=player,playerTeam=$playerPage->playerTeam");
   $playerPlacesNb = $playerPage->places->count();
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-created");
   $rightInvasions = $allEvents->find("task.name=right-invasion")->count();
@@ -18,27 +17,12 @@
   if (!$karma) $karma = 0;
   if ($karma > 0) { // Team Position
     // Number of players having a better karma than current player
-    $playerPos = $pages->count("template=player,team=$playerPage->team,karma>$karma") + 1;
-    if ($playerPos > 0 && $playerPos <= 3) {
-      $rate = 5;
-    } else if ($playerPos > 3 && $playerPos <= 7) {
-      $rate = 4;
-    } else if ($playerPos > 7 && $playerPos <= 12) {
-      $rate = 3;
-    } else if ($playerPos > 12 && $playerPos <= 17) {
-      $rate = 2;
-    } else if ($playerPos > 17 && $playerPos <= 21) {
-      $rate = 1;
-    } else {
-      $rate = 0;
-    }
+    $playerPos = $pages->count("template=player,playerTeam=$playerPage->playerTeam,karma>$karma") + 1;
   } else {
-    $playerPos = 0;
-    $rate = 0;
+    $playerPos = $playersTotalNb;
   }
 ?>
 
-        <!-- <a href="players/<?php echo $input->urlSegment1; ?>">Back to team view</a> -->
 <div>
   <div class="row">
     <div class="col-sm-12">
@@ -104,21 +88,80 @@
         </div>
       </div>
 
-      <div id="" class="col-sm-3 panel panel-success">
+      <div class="col-sm-3 panel panel-success">
         <div class="panel-heading">
           <h4 class="panel-title">Karma</h4>
         </div>
         <div class="panel-body text-center">
-          <h4><span class="label label-default"><?php echo $karma; ?></span></h4>
-        </div>
-        <div class="panel-body text-center">
-          <h4><span class="position">Team position : <?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?></h4>
+          <h4><span class="label label-default"><?php echo $karma; ?></span> <span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span></h4>
         </div>
       </div>
     </div>
   </div>
 
   <div class="row">
+    <div class="col-sm-12">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Global Hall of Fames (Your positions)</span></h4>
+        </div>
+        <div class="panel-body">
+          <ul>
+          <?php 
+            // Most influential (karma)
+            $players = $pages->find("template=player, sort=-karma, karma>0");
+            $playerPos = getPosition($playerPage, $players);
+            if ($playerPos) {
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
+              echo '<li><p>Most influential : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+            } else {
+              echo '<li><p>Most influential : No ranking.</p></li>';
+            }
+            // Greatest # of places (places)
+            $players = $pages->find("template=player, sort=-places.count, places.count>0");
+            $playerPos = getPosition($playerPage, $players);
+            if ($playerPos) {
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
+              echo '<li><p>Greates # of places : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+            } else {
+              echo '<li><p>Greatest # of places : No ranking.</p></li>';
+            }
+            // Most equipped (equipment)
+            $players = $pages->find('template=player, sort=-equipment.count, equipment.count>0');
+            $playerPos = getPosition($playerPage, $players);
+            if ($playerPos) {
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
+              echo '<li><p>Most equipped : '.$playerPos.'/'.$players->count.' '. $star.'</p></li>';
+            } else {
+              echo '<li><p>Most equipped : No ranking.</p></li>';
+            }
+            // Best donators (donation)
+            $players = $pages->find('template=player, sort=-donation, donation>0');
+            $playerPos = getPosition($playerPage, $players);
+            if ($playerPos) {
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
+              echo '<li><p>Best donators : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+            } else {
+              echo '<li><p>Best donators : No ranking.</p></li>';
+            }
+            // Most trained (underground_training)
+            if ($player->underground_training) {
+              $players = $pages->find('template=player, sort=-underground_training, underground_training>0');
+              $playerPos = getPosition($playerPage, $players);
+              if ($playerPos) {
+                if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
+                echo '<li><p>Most trained : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+              } else {
+                echo '<li><p>Most trained : No ranking.</p></li>';
+              }
+            }
+          ?>
+          </ul>
+        </div>
+        <div class="panel-footer">
+        </div>
+      </div>
+    </div>
     <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
