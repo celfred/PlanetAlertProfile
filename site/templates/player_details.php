@@ -103,7 +103,7 @@
     <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
-          <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Global Hall of Fames (Your positions)</span></h4>
+          <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-list"></span> Global Hall of Fames (Your positions)</span></h4>
         </div>
         <div class="panel-body">
           <ul>
@@ -112,46 +112,78 @@
             $players = $pages->find("template=player, sort=-karma, karma>0");
             $playerPos = getPosition($player, $players);
             if ($playerPos) {
-              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
-              echo '<li><p>Most influential : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Most influential : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
             } else {
-              echo '<li><p>Most influential : No ranking.</p></li>';
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Most influential : No ranking.</p></li>';
             }
             // Greatest # of places (places)
             $players = $pages->find("template=player, sort=-places.count, places.count>0");
             $playerPos = getPosition($player, $players);
             if ($playerPos) {
-              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
-              echo '<li><p>Greates # of places : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Greatest # of places : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
             } else {
-              echo '<li><p>Greatest # of places : No ranking.</p></li>';
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Greatest # of places : No ranking.</p></li>';
             }
             // Most equipped (equipment)
             $players = $pages->find('template=player, sort=-equipment.count, equipment.count>0');
             $playerPos = getPosition($player, $players);
             if ($playerPos) {
-              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
-              echo '<li><p>Most equipped : '.$playerPos.'/'.$players->count.' '. $star.'</p></li>';
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=equipment"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Most equipped : '.$playerPos.'/'.$players->count.' '. $star.'</p></li>';
             } else {
-              echo '<li><p>Most equipped : No ranking.</p></li>';
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=equipment"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Most equipped : No ranking.</p></li>';
             }
             // Best donators (donation)
             $players = $pages->find('template=player, sort=-donation, donation>0');
             $playerPos = getPosition($player, $players);
             if ($playerPos) {
-              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
-              echo '<li><p>Best donators : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Best donators : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
             } else {
-              echo '<li><p>Best donators : No ranking.</p></li>';
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Best donators : No ranking.</p></li>';
             }
             // Most trained (underground_training)
             $players = $pages->find('template=player, sort=-underground_training, underground_training>0');
             $playerPos = getPosition($player, $players);
             if ($playerPos) {
-              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $start=''; }
-              echo '<li><p>Most trained : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Most trained : '.$playerPos.'/'.$players->count.' '.$star;
+              echo '</p></li>';
             } else {
-              echo '<li><p>Most trained : No ranking.</p></li>';
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Most trained : No ranking.';
+              echo '</p></li>';
             }
           ?>
           </ul>
