@@ -322,20 +322,25 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         if (randIndex == 0) { randOpp = 1; } else { randOpp = 0; }
         // Test for multiple possible words and answers
         $scope.allWords = randWords[randIndex].trim().split("|");
-        // TODO : Test if it works all the time ?
         $scope.allCorrections = randWords[randOpp].trim().split("|");
         // Pick 1 random word (different from previous word)
         if ( $scope.history.length > 0) { // More than 1 word in history
           while ( $scope.word == $scope.history[$scope.history.length-1]) {
-            $scope.word = chance.pick($scope.allWords);
+            if ($scope.allWords.length > 1) {
+              $scope.word = chance.pick($scope.allWords);
+            } else {
+              $scope.word = $scope.allWords[0];
+            }
           }
         } else {
-            $scope.word = chance.pick($scope.allWords);
+            if ($scope.allWords.length > 1) {
+              $scope.word = chance.pick($scope.allWords);
+            } else {
+              $scope.word = $scope.allWords[0];
+            }
         }
         // Add word to history
         $scope.history.push($scope.word);
-        // console.log($scope.history);
-        //console.log('Word:'+$scope.word+'-Correction:'+$scope.correction);
         $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
         // Set focus on input field
         $timeout($scope.focusInput, 300);

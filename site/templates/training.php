@@ -31,8 +31,9 @@
         foreach($allTranslate as $result) {
           $out .= '<li>';
           $out .= $result->summary;
+          // TODO : Get player's history
           $out .= ' <a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$result->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
-          $out .= ' <a class="btn btn-primary" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
+          $out .= ' <a class="btn btn-sm btn-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
           $out .= '<div class="collapse" id="collapseDiv'.$result->id.'"><div class="well">';
           if ($result->frenchSummary != '') {
             $out .= $result->frenchSummary;
