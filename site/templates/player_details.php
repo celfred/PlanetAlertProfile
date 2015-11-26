@@ -116,7 +116,7 @@
               echo '<li>';
               echo '<p>';
               echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
-              echo 'Most influential : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+              echo 'Most influential : '.$playerPos.'/'.$allPlayers->count.' '.$star.'</p></li>';
             } else {
               echo '<li>';
               echo '<p>';
@@ -131,7 +131,7 @@
               echo '<li>';
               echo '<p>';
               echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
-              echo 'Greatest # of places : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+              echo 'Greatest # of places : '.$playerPos.'/'.$allPlayers->count.' '.$star.'</p></li>';
             } else {
               echo '<li>';
               echo '<p>';
@@ -146,7 +146,7 @@
               echo '<li>';
               echo '<p>';
               echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=equipment"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
-              echo 'Most equipped : '.$playerPos.'/'.$players->count.' '. $star.'</p></li>';
+              echo 'Most equipped : '.$playerPos.'/'.$allPlayers->count.' '. $star.'</p></li>';
             } else {
               echo '<li>';
               echo '<p>';
@@ -161,7 +161,7 @@
               echo '<li>';
               echo '<p>';
               echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
-              echo 'Best donators : '.$playerPos.'/'.$players->count.' '.$star.'</p></li>';
+              echo 'Best donators : '.$playerPos.'/'.$allPlayers->count.' '.$star.'</p></li>';
             } else {
               echo '<li>';
               echo '<p>';
@@ -177,7 +177,7 @@
                 echo '<li>';
                 echo '<p>';
                 echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
-                echo 'Most trained : '.$playerPos.'/'.$players->count.' '.$star;
+                echo 'Most trained : '.$playerPos.'/'.$allPlayers->count.' '.$star;
                 echo '</p></li>';
               } else {
                 echo '<li>';
