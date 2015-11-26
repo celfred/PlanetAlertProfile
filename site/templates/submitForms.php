@@ -132,33 +132,34 @@
         $receiver->of(false);
         
         // Save donation
-        
-        // Modify player's page
-        $player->GC = $player->GC - $amount;
-        $task = $pages->get("template='task', name='donation'");
-        $player->HP = $player->HP + $task->GC;
-        $player->donation = $player->donation + $amount;
+        if ($player && $receiverId && $amount != 0) {
+          // Modify player's page
+          $player->GC = $player->GC - $amount;
+          $task = $pages->get("template='task', name='donation'");
+          $player->HP = $player->HP + $task->GC;
+          $player->donation = $player->donation + $amount;
 
-        $player->save();
-        // Record history
-        $taskComment = 'Donation of '.$amount. ' GC to '.$receiver->title.' ['.$receiver->playerTeam.']';
-        $newsBoard = 1;
-        saveHistory($player, $task, $taskComment, $newsBoard);
+          $player->save();
+          // Record history
+          $taskComment = 'Donation of '.$amount. ' GC to '.$receiver->title.' ['.$receiver->playerTeam.']';
+          $newsBoard = 1;
+          saveHistory($player, $task, $taskComment, $newsBoard);
 
-        // Modify receiver's page
-        $receiver->GC = $receiver->GC + $amount;
-        $receiver->save();
-        // Record history
-        $task = $pages->get("template='task', name='donated'");
-        $taskComment = 'Donation of '.$amount. ' GC by '.$player->title.' ['.$player->playerTeam.']';
-        $newsBoard = 0;
-        saveHistory($receiver, $task, $taskComment, $newsBoard);
-        
-        // Notify admin
-        $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
-        $msg .= "Donation amount :". $amount;
-        $msg .= "Donated to :". $receiver->title." [".$receiver->playerTeam."]";
-        mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
+          // Modify receiver's page
+          $receiver->GC = $receiver->GC + $amount;
+          $receiver->save();
+          // Record history
+          $task = $pages->get("template='task', name='donated'");
+          $taskComment = 'Donation of '.$amount. ' GC by '.$player->title.' ['.$player->playerTeam.']';
+          $newsBoard = 0;
+          saveHistory($receiver, $task, $taskComment, $newsBoard);
+          
+          // Notify admin
+          $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
+          $msg .= "Donation amount :". $amount;
+          $msg .= "Donated to :". $receiver->title." [".$receiver->playerTeam."]";
+          mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
+        }
       }
     }
 

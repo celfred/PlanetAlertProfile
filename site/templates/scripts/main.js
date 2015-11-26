@@ -186,7 +186,6 @@ $(document).ready(function() {
       $(this).html('Make a donation');
     }
   });
-  var submitDonationDebounce = debounce(submitDonation, 5000);
   var submitDonation = function() {
     if ($('#receiver').val() == 0 ) {
       alert('You must select a player!');
@@ -196,9 +195,10 @@ $(document).ready(function() {
       alert('Invalid amount !');
       return false;
     } 
+    $('#donateFormSubmit').attr('disabled', 'disabled');
     return true; // Submit form
   };
-  $('#donateFormSubmit').on( "click", submitDonationDebounce);
+  $('#donateFormSubmit').on( "click", submitDonation);
   $('#amount').on('keyup', function() {
     if (!$.isNumeric($(this).val())) {
       alert('You must enter a number!');
