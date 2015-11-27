@@ -198,6 +198,12 @@
         $task = $pages->get($taskId); 
         updateScore($player, $task);
 
+        // Check if manual action needs to be taken
+        if ($task->name == 'fake-donator') {
+          $player->donation = 0; // Reset donation indicator
+          // Save player's page
+          $player->save();
+        }
         // Save player's new scores
         $player->save();
 
