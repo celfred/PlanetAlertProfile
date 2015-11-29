@@ -127,6 +127,21 @@
         </ol>
       </div>
     </div>
+
+    <div id="" class="panel panel-success">
+      <div class="panel-heading">
+      <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=group"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+      <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most active groups</h4>
+      </div>
+      <div class="panel-body">
+        <ol>
+          <?php
+            $groupScoreBoard = groupScoreBoard(10);
+            echo $groupScoreBoard;
+          ?>
+        </ol>
+      </div>
+    </div>
   </div>
 
   <div class="col-sm-8">
