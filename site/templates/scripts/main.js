@@ -195,7 +195,6 @@ $(document).ready(function() {
       alert('Invalid amount !');
       return false;
     } 
-    $('#donateFormSubmit').attr('disabled', 'disabled');
     return true; // Submit form
   };
   $('#donateFormSubmit').on( "click", submitDonation);
