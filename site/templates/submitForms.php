@@ -162,7 +162,7 @@
         $receiver->of(false);
         
         // Save donation
-        if ($amount && $amount > 0 && $amount<$player->GC) {
+        if ($player && $receiverId && $amount != 0) {
           // Modify player's page
           $player->GC = $player->GC - $amount;
           $task = $pages->get("template='task', name='donation'");
@@ -228,6 +228,12 @@
         $task = $pages->get($taskId); 
         updateScore($player, $task);
 
+        // Check if manual action needs to be taken
+        if ($task->name == 'fake-donator') {
+          $player->donation = 0; // Reset donation indicator
+          // Save player's page
+          $player->save();
+        }
         // Save player's new scores
         $player->save();
 

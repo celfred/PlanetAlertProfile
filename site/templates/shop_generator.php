@@ -36,10 +36,10 @@ $out .= '<select class="form-control" id="receiver" name="receiver">';
     }
   }
 $out .= '</select>';
-$out .= "<input id='donateFormSubmit' name='donateFormSubmit' type='submit' class='form-control btn btn-danger btn-sm' value='Donate !'>";
+$out .= '<input id="donateFormSubmit" name="donateFormSubmit" type="submit" class="form-control btn btn-danger btn-sm" value="Donate !" />';
 $out .= '<input type="hidden" name="player" value="'.$player->id.'" />';
-$out .= "</form>";
-$out .= "</section>";
+$out .= '</form>';
+$out .= '</section>';
 
 $out .= '<form id="marketPlaceForm" name="marketPlaceForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="" role="form">';
 $out .= '<input type="hidden" name="player" value="'.$player->id.'" />';

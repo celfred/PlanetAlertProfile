@@ -128,6 +128,7 @@
       </div>
     </div>
 
+<<<<<<< HEAD
     <div id="" class="panel panel-info">
       <div class="panel-heading">
         <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
@@ -150,6 +151,21 @@
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
               echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->underground_training.' U.T.</span></li>';
             }
+          ?>
+        </ol>
+      </div>
+    </div>
+
+    <div id="" class="panel panel-success">
+      <div class="panel-heading">
+      <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=group"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+      <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most active groups</h4>
+      </div>
+      <div class="panel-body">
+        <ol>
+        <?php
+            $groupScoreBoard = groupScoreBoard(10);
+            echo $groupScoreBoard;
           ?>
         </ol>
       </div>

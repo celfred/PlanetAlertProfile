@@ -310,19 +310,143 @@ function checkHk($player) {
   return false;
 }
 
-function getPosition($player, $allPlayers) {
+function getPosition($player, $field) {
+  $pages = wire('pages');
   $pos = 1;
+  switch ($field) {
+    case 'karma' :
+      $allPlayers = $pages->find("template=player, sort=-karma, karma>0");
+      break;
+    case 'places' :
+      $allPlayers = $pages->find("template=player, sort=-places.count, places.count>0");
+      break;
+    case 'equipment' :
+      $allPlayers = $pages->find('template=player, sort=-equipment.count, equipment.count>0');
+      break;
+    case 'donation' :
+      $allPlayers = $pages->find('template=player, sort=-donation, donation>0');
+      break;
+    case 'underground_training' :
+      $allPlayers = $pages->find('template=player, sort=-underground_training, underground_training>0');
+      break;
+    case 'group' :
+      $allPlayers = $pages->find('template=player');
+      $allGroups = $pages->get('/groups')->children;
+      $index = 0;
+      foreach( $allGroups as $group) {
+        // Find selected players
+        $players = $allPlayers->find("group=$group");
+        // Get rid of unused groups
+        if ($players->count == 0) {
+          unset($allGroups[$index]);
+        }
+        $index++;
+      }
+      $allPlayers = $allGroups;
+      break;
+    default : 
+      $allPlayers = '';
+  }
   foreach($allPlayers as $p) {
-    if ($p->id === $player->id) {
-      $playerPos = $pos;
+    if ($field != 'group') {
+      if ($p->id === $player->id) {
+        $playerPos = $pos;
+      }
+    } else {
+      if ($p->id === $player->group->id) {
+        $playerPos = $pos;
+      }
     }
     $pos++;
   }
   if ($playerPos) {
-    return $playerPos;
+    return array($playerPos, $allPlayers->count);
   } else {
     return false;
   }
+}
+
+function groupScoreBoard($limit) {
+  $pages = wire('pages');
+  $allPlayers = $pages->find("template=player");
+  $allGroups = $pages->get("/groups")->children('sort=title');
+  $outGroups = '';
+  if (wire('user')->isLoggedin()) {
+    $login = wire('user')->name;
+    $loggedGroup = $pages->get("template=player, login=$login")->group->name;
+  } else {
+    $loggedGroup = "";
+  }
+  // Calculate groups Karma
+  $index = 0;
+  foreach( $allGroups as $group) {
+    $group->karma = 0;
+    $group->nbBonus = 0;
+    
+    // Find selected players
+    $players = $allPlayers->find("group=$group");
+    
+    // Get rid of unused groups
+    if ($players->count == 0) {
+      unset($allGroups[$index]);
+    }
+    // Check for group bonus
+    $group->nbBonus = groupBonus($players);
+    $group->karma = $group->nbBonus*30;
+
+    // Add individual karmas
+    foreach( $players as $player) {
+      $karma = getKarma($player);
+      $player->karma = $karma;
+      // Karma is divided by number of players in the group to be fair with smaller groups
+      $groupKarma = round($karma/$players->count);
+      (int) $group->karma = $group->karma + $groupKarma;
+      $group->details .= $player->title.'<br />';
+      $group->team = $player->playerTeam;
+    }
+    $index++;
+  }
+
+  // Prepare group display
+  $allGroups->sort('-karma');
+  if (!isset($limit) || $limit === 0) {
+    $limit = $allGroups->count();
+  }
+  $index = 0;
+  foreach( $allGroups as $group) {
+    if ($index < $limit) {
+      if ($loggedGroup == $group->name) {
+        $focus = "class='focus'";
+      } else {
+        $focus = "";
+      }
+      $outGroups .= '<li>';
+      $outGroups .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+      $outGroups .= $group->title.' ['.$group->team.']</span> <span class="badge">'.$group->karma.'</span>';
+      // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
+      $starsGroups = floor($group->nbBonus/5);
+      if ( $starsGroups < 1) {
+        for ($i=0; $i<$group->nbBonus; $i++) {
+          $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
+        }
+      } else {
+        for ($i=0; $i<$starsGroups; $i++) {
+          $outGroups .= ' <span class="glyphicon glyphicon-star"></span>';
+        }
+        $group->nbBonus = $group->nbBonus - $starsGroups*5;
+        for ($i=0; $i<$group->nbBonus; $i++) {
+          $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
+        }
+      }
+      $outGroups .= '</p>';
+      $outGroups .= '</li>';
+      $index++;
+    } else {
+      return $outGroups;
+    }
+  }
+
+  return $outGroups;
 }
 
 ?>
