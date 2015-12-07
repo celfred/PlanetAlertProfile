@@ -162,7 +162,6 @@
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Go to the Marketplace</a></li>";
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Make a donation</a></li>";
               $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
-              /* TODO : Enable/Disable according to availability for the player */
               // Check if memory helmet accessible in player's group
               if ($player->equipment->get("name=memory-helmet")) {
                 echo "<li><a$class href='{$pages->get('name=underground-training')->url}'>Use the memory helmet</a></li>";
