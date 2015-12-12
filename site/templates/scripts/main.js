@@ -275,7 +275,7 @@ $(document).ready(function() {
       var allColumns = $("#adminTable th[data-category='"+ category +"']");
       var indexHidden = new Array();
       $('#adminTable th.task').each( function(index) {
-        if ( $(this).attr('data-category') !== category) {
+        if ( $(this).attr('data-category') !== category && $(this).attr('data-keepVisible') != 'true' ) { // Nothing is checked in this column : hide it
           indexHidden.push(index+2);
         }
       });
@@ -416,49 +416,65 @@ $.fn.dataTable.ext.search.push(
     return true;
 });
 
+
 // adminTable functions
 var setCommonComment = function(taskId, obj) {
-  var commonComment = obj.val();
-  $('.cc_'+taskId).each( function() {
-    if ($(this).prev(':checkbox').prop('checked')) {
-      $(this).val(commonComment);
-    }
-  });
+	var commonComment = obj.val();
+	$('.cc_'+taskId).each( function() {
+		if ($(this).prev(':checkbox').prop('checked')) {
+			$(this).val(commonComment);
+		}
+	});
 }
 var showComment = function(taskId) {
-  $('#commonComment_'+taskId).toggle();
-  $('.cc_'+taskId).toggle();
+	$('#commonComment_'+taskId).toggle();
+	$('.cc_'+taskId).toggle();
 }
 var isAnyChecked = function() {
-  var anyChecked = false;
-  $('#adminTable .ctPlayer').each(function() {
-    if ( $(this).prop('checked') === true) {
-      anyChecked = true;
-      return false;
-    }
-  });
-  if (anyChecked === true) {
-    $("#adminTableForm :submit").prop('disabled', false);
-  } else {
-    $("#adminTableForm :submit").prop('disabled', true);
-  }
+	var anyChecked = false;
+	$('#adminTable .ctPlayer').each(function() {
+		if ( $(this).prop('checked') === true) {
+			anyChecked = true;
+			return false;
+		}
+	});
+	if (anyChecked === true) {
+		$("#adminTableForm :submit").prop('disabled', false);
+	} else {
+		$("#adminTableForm :submit").prop('disabled', true);
+	}
+}
+var isAnyCheckedCol = function(colIndex) {
+	var anyChecked = false;
+	$('#adminTable td:nth-child('+colIndex+') .ctPlayer').each(function() {
+		if ( $(this).prop('checked') === true) {
+			anyChecked = true;
+			return false;
+		}
+	});
+	if (anyChecked === true) {
+		$('#th').eq(colIndex).attr('data-keepVisible', 'true');
+	} else {
+		$('#th').eq(colIndex).attr('data-keepVisible', '');
+	}
 }
 var selectAll = function(taskId) {
-  //console.log('selectAll: taskId:'+taskId);
-  $('.ct_'+taskId).prop('checked', $('#csat_'+taskId).prop('checked'));
-  isAnyChecked();
+	//console.log('selectAll: taskId:'+taskId);
+	$('.ct_'+taskId).prop('checked', $('#csat_'+taskId).prop('checked'));
+	isAnyChecked();
 }
-var onCheck = function(playerId, taskId) {
-  //console.log('onCheck: playerId:'+playerId+ '-taskId:'+taskId);
-  $('#csat_'+taskId).prop('checked', false)
-  isAnyChecked();
-
-  var tasksLists = $('#player['+playerId+']').value;
-  if ( $('.ct_'+taskId).prop('checked') === true ) {
-    //$('#player['+playerId+']').value += taskId+',';
-  } else {
-    
-  }
+var onCheck = function(chbx, colIndex, taskId) {
+	// Disable 'Select all' checkbox
+	$('#csat_'+taskId).prop('checked', false)
+	// Enable submit buttons if needed
+	isAnyChecked();
+	// Set column visible state
+	if ( chbx.prop('checked') === true ) {
+		$('#th_'+taskId).attr('data-keepVisible', 'true');
+	} else {
+		// Check if checked in same column and force visible state if needed
+		isAnyCheckedCol(colIndex);
+	}
 }
 
 // shopAdminTable functions
