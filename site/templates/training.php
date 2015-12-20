@@ -40,15 +40,13 @@
             $out .= '<span class="badge"><span class="glyphicon glyphicon-thumbs-up"></span>'.$prevUt.'</span> ';
           }
           $out .= $result->summary;
-          $out .= ' <a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$result->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
-          $out .= ' <a class="btn btn-sm btn-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
-          $out .= '<div class="collapse" id="collapseDiv'.$result->id.'"><div class="well">';
           if ($result->frenchSummary != '') {
-            $out .= $result->frenchSummary;
+            $fr = $result->frenchSummary;
           } else {
-            $out .= 'French version in preparation, sorry ;)';
+            $fr = 'French version in preparation, sorry ;)';
           }
-          $out .= '</div>';
+          $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$fr.'"></span>';
+          $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
           $out .= '</li>';
         }
         $out .= '</ul>';
