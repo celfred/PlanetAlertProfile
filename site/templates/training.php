@@ -28,28 +28,65 @@
         $out .= '<div class="well">';
         $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
         $out .= '<h3>Vocabulary revisions</h3>';
-        $out .= '<ul>';
+        $out .= '<table class="table table-condensed table-hover">';
+          $out .= '<tr>';
+          $out .= '<th>Topic</th>';
+          $out .= '<th>Already trained?</th>';
+          $out .= '<th colspan="2">Last training session</th>';
+          $out .= '<th>Action</th>';
+          $out .= '</tr>';
         foreach($allTranslate as $result) {
           // Get previous player's statistics
           // TODO : Lock page if UT > 5???
           // TODO : Avoid a player to work only on 4 seasons to get more UT
           // TODO : Depends on # of words in the exercise?
-          $prevUt = $player->find('template=event,refPage='.$result->id)->count();
-          $out .= '<li>';
-          if ($prevUt) {
-            $out .= '<span class="badge"><span class="glyphicon glyphicon-thumbs-up"></span>'.$prevUt.'</span> ';
-          }
+          $prevUt = $player->find('template=event,refPage='.$result->id.', sort=-date');
+          $out .= '<tr>';
+          $out .= '<td>';
           $out .= $result->summary;
           if ($result->frenchSummary != '') {
             $fr = $result->frenchSummary;
           } else {
             $fr = 'French version in preparation, sorry ;)';
           }
-          $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$fr.'"></span>';
-          $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
-          $out .= '</li>';
+          $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$fr.'"></span>';
+          $out .= '</td>';
+          $out .= '<td>';
+          if ($prevUt->count > 0) {
+            $out .= '<span class="badge"><span class="glyphicon glyphicon-thumbs-up"></span> '.$prevUt->count.'</span> ';
+          }
+          $out .= '</td>';
+          // Last training session date
+          $out .= '<td>';
+          // Find # of days compared to today
+          $date1 = new DateTime("today");
+          $date2 = new DateTime(date("Y-m-d", $prevUt->first->date));
+          $interval = $date1->diff($date2);
+          if ($interval->days === 0) {
+            $out .= "Today !";
+          } else {
+            $out .= $interval->days . " days ago ";
+            /* $out .= date("[F j Y", $prevUt->first->date).']'; */
+          }
+          $out .= '</td>';
+          $out .= '<td>';
+          if ($interval->days >= 0 && $interval->days < 30) {
+            $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span></span>';
+          } else {
+            $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>';
+          }
+          $out .= '</td>';
+          $out .= '<td>';
+          // Limit to 1 training session a day 
+          if ($interval->days <= 1) {
+            $out .= 'Come back tomorrow ;)';
+          } else {
+            $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
+          }
+          $out .= '</td>';
+          $out .= '</tr>';
         }
-        $out .= '</ul>';
+        $out .= '</table>';
       } else { // Training session
         $out .= '<div ng-app="exerciseApp">';
 
