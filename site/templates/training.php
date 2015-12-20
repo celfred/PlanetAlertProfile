@@ -12,11 +12,8 @@
         $allTranslate = $pages->find('template=exercise, type.name=translate');
 
         $out .= '<div class="row">';
-          $out .= '<div class="col-sm-4">';
-          $out .= '<h2><span class="label label-primary">Your current U.T. is : '.$player->underground_training.'</span></h2>';
-          $out .= '</div>';
-          $out .= '<div class="col-sm-8 text-center">';
-          $out .= '<h2>Underground Training Zone</h2>';
+          $out .= '<div class="col-sm-12 text-center">';
+          $out .= '<h2><span class="label label-primary">Underground Training Zone</span></h2>';
           $out .= '</div>';
         $out .= '</div>';
 
