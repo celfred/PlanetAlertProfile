@@ -128,7 +128,6 @@
       </div>
     </div>
 
-<<<<<<< HEAD
     <div id="" class="panel panel-info">
       <div class="panel-heading">
         <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
@@ -418,7 +417,7 @@
       }
 
       // Last 15 public news
-      $news = $pages->find("template=event, sort=-created, limit=15, task=free|buy");
+      $news = $pages->find("template=event, sort=-created, limit=15, task=free|buy|ut-action-v|ut-action-vv");
       if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">
@@ -448,6 +447,7 @@
               case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
               case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'individual-work' : echo '<span class="">Underground Training for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : echo 'todo : ';
                 break;

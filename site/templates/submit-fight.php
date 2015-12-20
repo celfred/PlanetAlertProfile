@@ -31,9 +31,10 @@
         $player->save();
         
         // Record history
-        /* $taskComment = 'Training vs. '.$monster.' [+'.$result.'U.T.]'; */
-        $taskComment = 'Training "'.$summary.'" [+'.$result.'U.T.]';
-        saveHistory($player, $task, $taskComment, $newsBoard);
+        //$taskComment = 'Training "'.$summary.'" [+'.$result.'U.T.]';
+        $taskComment = $summary;
+        $refPage = $exerciseId;
+        saveHistory($player, $task, $taskComment, $newsBoard, $refPage);
         
         // Record to log file
         $this->log($taskComment.','.$result);
@@ -45,7 +46,6 @@
         $msg .= "Result : ". $result;
         mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
       }
-
     } else { // Monster fight
       $playerHP = $input->post->playerHP;
       $monsterHP = $input->post->monsterHP;
@@ -92,5 +92,6 @@
         mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
       }
     }
+    
   }
 ?>

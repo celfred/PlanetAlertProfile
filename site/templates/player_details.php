@@ -105,6 +105,45 @@
         <div class="panel-heading">
           <h4 class="panel-title"><span class="">Underground Training (U.T.) : <?php echo $player->underground_training; ?></span></h4>
         </div>
+        <div class="panel-body">
+          <ul>
+          <?php 
+  // Find # of untrained pages
+  $allPossible = $pages->find("template=exercise, type.name=translate");
+  $allUt = $player->find("template=event, task.name=ut-action-v|ut-action-vv");
+  $refPages = [];
+  $untrained = [];
+  foreach ($allUt as $p) { // Build array of trained ids
+    array_push($refPages, $p->refPage);
+  }
+  foreach ($allPossible as $p) { // Compare to all possible pages
+    if (!in_array($p, $refPages)) {
+      array_push($untrained, $p->id);
+    }
+  }
+  if (count($untrained) > 0) {
+    if (count($untrained) == 1) {
+      echo 'You have NEVER trained on '.count($untrained).' possible revision.';
+    } else {
+      echo 'You have NEVER trained on '.count($untrained).' possible revisions.';
+    }
+  }
+            /* $allUt = $player->find("template=event, task.name=ut-action-v|ut-action-vv"); */
+            /* foreach ($allUt as $p) { */
+            /*   echo '<li>'.$p->summary.'</li>'; */
+            /* } */
+          ?>
+          </ul>
+        </div>
+        <div class="panel-footer">
+        <?php
+          if ($player->equipment->get("name=memory-helmet")) {
+            echo 'You can use your <a href="'.$pages->get('name=underground-training')->url.'">Memory Helmet</a> to practise and improve your Underground Training rate :)';
+          } else {
+            echo 'Sorry, but at least one member in your group needs to buy the <a href="'.$pages->get('name=memory-helmet')->url.'">Memory Helmet</a> to be able to access the Underground Training zone.';
+          }
+        ?>
+        </div>
       </div>
     </div>
 
@@ -190,6 +229,7 @@
                 echo '</p></li>';
               }
             }
+
             // Most active groups
             list($playerPos, $totalPlayers) = getPosition($player, 'group');
             if ($playerPos) {
@@ -208,8 +248,6 @@
             }
           ?>
           </ul>
-        </div>
-        <div class="panel-footer">
         </div>
       </div>
     </div>

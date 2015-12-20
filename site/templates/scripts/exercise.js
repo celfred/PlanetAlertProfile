@@ -68,6 +68,7 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
     switch(exType) {
       case 'translate' :
         // Pick a random line and build words array
+				// TODO : Copy from training for a random line different from previous
         var randLine = $scope.allLines[Math.floor(Math.random()*$scope.allLines.length)];
         var randWords = randLine.split(",");
         // Pick a random word
@@ -77,7 +78,9 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
         $scope.allWords = randWords[randIndex].trim().split("|");
         $scope.allCorrections = randWords[randOpp].trim().split("|");
         // Pick 1 random word (different from previous word)
-        if ( $scope.nbAttacks > 1) { // More than 1 word in history
+				var prevWord = $scope.history[$scope.history.length-1];
+        //if ( $scope.nbAttacks > 1) { // More than 1 word in history
+        if ( prevWord ) { // More than 1 word in history
           while ( $scope.word == $scope.history[$scope.history.length-1]) {
             $scope.word = chance.pick($scope.allWords);
           }
@@ -260,6 +263,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.waitForStart = true;
   $scope.result = 0;
   $scope.history = new Array();
+  $scope.lineHistory = new Array();
   $scope.counter = 0; // #
   $scope.exType = '';
   $scope.exData = '';
@@ -315,7 +319,15 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     switch(exType) {
       case 'translate' :
         // Pick a random line and build words array
-        var randLine = $scope.allLines[Math.floor(Math.random()*$scope.allLines.length)];
+        // Different from previous line
+				var randNum = Math.floor(Math.random()*$scope.allLines.length);
+				if ( $scope.lineHistory.length > 1) {
+					while ( randNum == $scope.lineHistory[$scope.lineHistory.length-1] ) {
+						var randNum = Math.floor(Math.random()*$scope.allLines.length);
+					}
+				}
+        $scope.lineHistory.push(randNum);
+        var randLine = $scope.allLines[randNum];
         var randWords = randLine.split(",");
         // Pick a random word
         var randIndex = Math.round(Math.random());
@@ -323,22 +335,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         // Test for multiple possible words and answers
         $scope.allWords = randWords[randIndex].trim().split("|");
         $scope.allCorrections = randWords[randOpp].trim().split("|");
-        // Pick 1 random word (different from previous word)
-        if ( $scope.history.length > 0) { // More than 1 word in history
-          while ( $scope.word == $scope.history[$scope.history.length-1]) {
-            if ($scope.allWords.length > 1) {
-              $scope.word = chance.pick($scope.allWords);
-            } else {
-              $scope.word = $scope.allWords[0];
-            }
-          }
-        } else {
-            if ($scope.allWords.length > 1) {
-              $scope.word = chance.pick($scope.allWords);
-            } else {
-              $scope.word = $scope.allWords[0];
-            }
-        }
+        // Pick 1 random word from possible words
+				if ($scope.allWords.length > 1) {
+					$scope.word = chance.pick($scope.allWords);
+				} else {
+					$scope.word = $scope.allWords[0];
+				}
         // Add word to history
         $scope.history.push($scope.word);
         $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);

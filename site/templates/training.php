@@ -16,7 +16,7 @@
           $out .= '<h2><span class="label label-primary">Your current U.T. is : '.$player->underground_training.'</span></h2>';
           $out .= '</div>';
           $out .= '<div class="col-sm-8 text-center">';
-          $out .= '<h2>Underground Training</h2>';
+          $out .= '<h2>Underground Training Zone</h2>';
           $out .= '</div>';
         $out .= '</div>';
 
@@ -27,11 +27,19 @@
 
         $out .= '<div class="well">';
         $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
+        $out .= '<h3>Vocabulary revisions</h3>';
         $out .= '<ul>';
         foreach($allTranslate as $result) {
+          // Get previous player's statistics
+          // TODO : Lock page if UT > 5???
+          // TODO : Avoid a player to work only on 4 seasons to get more UT
+          // TODO : Depends on # of words in the exercise?
+          $prevUt = $player->find('template=event,refPage='.$result->id)->count();
           $out .= '<li>';
+          if ($prevUt) {
+            $out .= '<span class="badge"><span class="glyphicon glyphicon-thumbs-up"></span>'.$prevUt.'</span> ';
+          }
           $out .= $result->summary;
-          // TODO : Get player's history
           $out .= ' <a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$result->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
           $out .= ' <a class="btn btn-sm btn-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
           $out .= '<div class="collapse" id="collapseDiv'.$result->id.'"><div class="well">';
@@ -48,7 +56,7 @@
         $out .= '<div ng-app="exerciseApp">';
 
         $monster = $pages->get($input->get->id);
-        $redirectUrl = $player->url;
+        $redirectUrl = $pages->get('name=underground-training')->url;
         $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
         if ($monster->id) { // Training session starts
           $out .= '<h1>Memory helmet programmed : '. $monster->summary.'</h1> ';
@@ -87,6 +95,7 @@
           $out .= '</span>';
           $out .= '</div>';
           $out .= '<button ng-click="stopSession()" class="btn btn-danger">Take the helmet off (Stop training session)</button>';
+          $out .= '</div>';
           $out .= '</div>';
           $out .= '</div>';
 
