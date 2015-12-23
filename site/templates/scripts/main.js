@@ -217,6 +217,10 @@ $(document).ready(function() {
     paging: false,
     order: [[ 0, "asc"]]
   });
+  var trainingTable = $('#trainingTable').DataTable({
+    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+    order: [[ 0, "asc"]]
+  });
   var historyTable = $('#historyTable').DataTable({
     lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
     order: [[ 0, "desc"]]

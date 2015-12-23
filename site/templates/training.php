@@ -25,17 +25,24 @@
         $out .= '<div class="well">';
         $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
         $out .= '<h3>Vocabulary revisions</h3>';
-        $out .= '<table class="table table-condensed table-hover">';
+        $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
+          $out .= '<thead>';
           $out .= '<tr>';
+          $out .= '<th>Level</th>';
           $out .= '<th>Topic</th>';
           $out .= '<th>Already trained?</th>';
-          $out .= '<th colspan="2">Last training session</th>';
+          $out .= '<th>Last training session</th>';
           $out .= '<th>Action</th>';
           $out .= '</tr>';
+          $out .= '</thead>';
+          $out .= '<tbody>';
         foreach($allTranslate as $result) {
           // Get previous player's statistics
           $prevUt = $player->find('template=event,refPage='.$result->id.', sort=-date');
           $out .= '<tr>';
+          $out .= '<td>';
+          $out .= $result->level;
+          $out .= '</td>';
           $out .= '<td>';
           $out .= $result->summary;
           if ($result->frenchSummary != '') {
@@ -66,17 +73,17 @@
           } else {
           }
           $out .= '</td>';
-          $out .= '<td>';
-          if ($prevUt->count > 0) {
-            if ($interval->days >= 0 && $interval->days < 30) {
-              $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span></span>';
-            } else {
-              $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>';
-            }
-          } else {
-            $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>';
-          }
-          $out .= '</td>';
+          /* $out .= '<td>'; */
+          /* if ($prevUt->count > 0) { */
+          /*   if ($interval->days >= 0 && $interval->days < 30) { */
+          /*     $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span></span>'; */
+          /*   } else { */
+          /*     $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>'; */
+          /*   } */
+          /* } else { */
+          /*   $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>'; */
+          /* } */
+          /* $out .= '</td>'; */
           $out .= '<td>';
           // Limit to 1 training session a day 
           if ($interval->days <= 1 && $prevUt->count > 0) {
@@ -91,6 +98,7 @@
           $out .= '</td>';
           $out .= '</tr>';
         }
+        $out .= '</tbody>';
         $out .= '</table>';
       } else { // Training session
         $out .= '<div ng-app="exerciseApp">';
@@ -186,6 +194,7 @@
 
       echo $out;
 
+      echo '</div>';
       echo '</div>';
     }
   } else {

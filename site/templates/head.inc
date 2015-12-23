@@ -3,7 +3,7 @@
 <head>
   <?php
     include('./my-functions.inc'); // Planet Alert PHP functions
-    $whitelist = array('127.0.0.1');
+    $whitelist = array('127.0.0.1', 'localhost');
     if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
       // Remote server
       echo "<base href='/index.html'>";
