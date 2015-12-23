@@ -23,8 +23,10 @@
         $out .= '</div>';
 
         $out .= '<div class="well">';
-        $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
-        $out .= '<h3>Vocabulary revisions</h3>';
+        $out .= '<h3 class="text-center">';
+        $out .= '<img width="50" src="'.$helmet->image->url.'" alt="Helmet" />';
+        $out .= ' Memory Helmet <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Vocabulary Revisions"></span>';
+        $out .= '</h3>';
         $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
           $out .= '<thead>';
           $out .= '<tr>';
