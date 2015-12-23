@@ -13,7 +13,7 @@
 
         $out .= '<div class="row">';
           $out .= '<div class="col-sm-12 text-center">';
-          $out .= '<h2><span class="label label-primary">Underground Training Zone</span></h2>';
+          $out .= '<h2><span class="label label-default">Underground Training Zone</span></h2>';
           $out .= '</div>';
         $out .= '</div>';
 
@@ -56,7 +56,9 @@
           $out .= '</td>';
           $out .= '<td>';
           if ($prevUt->count > 0) {
-            $out .= '<span class="badge"><span class="glyphicon glyphicon-thumbs-up"></span> '.$prevUt->count.'</span> ';
+            $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.$prevUt->count.'</span> ';
+          } else {
+            $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span> ';
           }
           $out .= '</td>';
           // Last training session date
@@ -91,7 +93,7 @@
           if ($interval->days <= 1 && $prevUt->count > 0) {
             $out .= 'Come back tomorrow ;)';
           } else {
-            $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
+            $out .= ' <a class="label label-sm label-primary" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
           }
           // Admin access
           if ($user->isSuperuser()) {
