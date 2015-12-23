@@ -9,7 +9,7 @@
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
         // Translate type only (for the moment)
-        $allTranslate = $pages->find('template=exercise, type.name=translate');
+        $allTranslate = $pages->find('template=exercise, type.name=translate, sort=name');
 
         $out .= '<div class="row">';
           $out .= '<div class="col-sm-12 text-center">';
@@ -34,9 +34,6 @@
           $out .= '</tr>';
         foreach($allTranslate as $result) {
           // Get previous player's statistics
-          // TODO : Lock page if UT > 5???
-          // TODO : Avoid a player to work only on 4 seasons to get more UT
-          // TODO : Depends on # of words in the exercise?
           $prevUt = $player->find('template=event,refPage='.$result->id.', sort=-date');
           $out .= '<tr>';
           $out .= '<td>';
@@ -55,29 +52,40 @@
           $out .= '</td>';
           // Last training session date
           $out .= '<td>';
-          // Find # of days compared to today
-          $date1 = new DateTime("today");
-          $date2 = new DateTime(date("Y-m-d", $prevUt->first->date));
-          $interval = $date1->diff($date2);
-          if ($interval->days === 0) {
-            $out .= "Today !";
+          if ($prevUt->count > 0) {
+            // Find # of days compared to today
+            $date1 = new DateTime("today");
+            $date2 = new DateTime(date("Y-m-d", $prevUt->first->date));
+            $interval = $date1->diff($date2);
+            if ($interval->days === 0) {
+              $out .= "Today !";
+            } else {
+              $out .= $interval->days . " days ago ";
+              /* $out .= date("[F j Y", $prevUt->first->date).']'; */
+            }
           } else {
-            $out .= $interval->days . " days ago ";
-            /* $out .= date("[F j Y", $prevUt->first->date).']'; */
           }
           $out .= '</td>';
           $out .= '<td>';
-          if ($interval->days >= 0 && $interval->days < 30) {
-            $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span></span>';
+          if ($prevUt->count > 0) {
+            if ($interval->days >= 0 && $interval->days < 30) {
+              $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span></span>';
+            } else {
+              $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>';
+            }
           } else {
             $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>';
           }
           $out .= '</td>';
           $out .= '<td>';
           // Limit to 1 training session a day 
-          if ($interval->days <= 1) {
+          if ($interval->days <= 1 && $prevUt->count > 0) {
             $out .= 'Come back tomorrow ;)';
           } else {
+            $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
+          }
+          // Admin access
+          if ($user->isSuperuser()) {
             $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
           }
           $out .= '</td>';

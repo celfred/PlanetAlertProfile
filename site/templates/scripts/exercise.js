@@ -89,9 +89,7 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
         }
         // Add word to history
         $scope.history.push($scope.word);
-        // console.log($scope.history);
         $scope.nbAttacks += 1;
-        // console.log('Word:'+$scope.word+'-Correction:'+$scope.correction);
         $scope.throwQuestion();
         break;
       default:
@@ -176,7 +174,6 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
     $scope.playerHP = $scope.playerHP - 1;
     $scope.counter += 1;
     if ($scope.playerHP <= 0) { // Monster wins, player loses
-        //console.log('MONSTER WINS THE FIGHT! PLAYER LOSES!');
         $scope.loseFight();
     }
   }
@@ -333,8 +330,14 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         var randIndex = Math.round(Math.random());
         if (randIndex == 0) { randOpp = 1; } else { randOpp = 0; }
         // Test for multiple possible words and answers
-        $scope.allWords = randWords[randIndex].trim().split("|");
-        $scope.allCorrections = randWords[randOpp].trim().split("|");
+        $scope.allWords = randWords[randIndex].split("|");
+				for (i=0; i<$scope.allWords.length; i++) {
+					$scope.allWords[i] = $scope.allWords[i].trim();
+				}
+        $scope.allCorrections = randWords[randOpp].split("|");
+				for (i=0; i<$scope.allCorrections.length; i++) {
+					$scope.allCorrections[i] = $scope.allCorrections[i].trim();
+				}
         // Pick 1 random word from possible words
 				if ($scope.allWords.length > 1) {
 					$scope.word = chance.pick($scope.allWords);
