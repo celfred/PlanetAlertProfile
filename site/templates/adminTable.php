@@ -72,7 +72,9 @@ $allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
     <input type="checkbox" class="ctPlayer ct_<?php echo $taskId; ?>" id="" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $taskId; ?>)" />
     <input style="display: none;" type="text" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="Comment" />
     </td>
-    <?php } ?>
+    <?php
+      $colIndex = $colIndex+1;
+     } ?>
   </tr>
   <?php } ?>
   </tbody>

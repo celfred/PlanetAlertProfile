@@ -478,6 +478,18 @@ var selectAll = function(taskId) {
 	isAnyCheckedCol(taskId);
 }
 var onCheck = function(taskId) {
+		$('#th').eq(colIndex).attr('data-keepVisible', 'true');
+	} else {
+		$('#th').eq(colIndex).attr('data-keepVisible', '');
+	}
+}
+var selectAll = function(taskId) {
+	//console.log('selectAll: taskId:'+taskId);
+	$('.ct_'+taskId).prop('checked', $('#csat_'+taskId).prop('checked'));
+	isAnyChecked();
+}
+var onCheck = function(chbx, colIndex, taskId) {
+>>>>>>> c85760c5f1add1798153fdda8234d943c1baaf0f
 	// Disable 'Select all' checkbox
 	$('#csat_'+taskId).prop('checked', false)
 	// Enable submit buttons if needed
