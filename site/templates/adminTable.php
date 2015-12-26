@@ -32,7 +32,7 @@ $allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
     <th>Groups</th>
     <th>Players</th>
     <?php foreach ($allTasks as $task) { ?>
-    <th class="task" data-category="<?php echo $task->category->name; ?>" data-order="<?php echo $task->name; ?>" data-toggle="tooltip" data-placement="bottom" title="<?php echo $task->summary; ?>">
+    <th class="task" id="th_<?php echo $task->id; ?>" data-category="<?php echo $task->category->name; ?>" data-order="<?php echo $task->name; ?>" data-toggle="tooltip" data-placement="bottom" title="<?php echo $task->summary; ?>" data-keepVisible="">
       <div class="vertical-text">
         <div class="vertical-text__inner">
           <?php echo $task->title; ?>
@@ -65,12 +65,11 @@ $allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
   <tr>
   <td><?php echo $player->group->title; ?></td>
   <th><?php echo $player->title; ?></th>
-    <?php
-      foreach ($allTasks as $task) {
+    <?php foreach ($allTasks as $task) {
       $taskId = $task->id;
     ?>
     <td data-toggle="tooltip" title="<?php echo $player->title.' - '.$task->title; ?>">
-    <input type="checkbox" class="ctPlayer ct_<?php echo $taskId; ?>" id="" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $id.', '.$taskId; ?>)" />
+    <input type="checkbox" class="ctPlayer ct_<?php echo $taskId; ?>" id="" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $taskId; ?>)" />
     <input style="display: none;" type="text" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="Comment" />
     </td>
     <?php } ?>
