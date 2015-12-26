@@ -36,12 +36,20 @@
         $player->GC = (int) $player->GC - $newItem->GC;
         if ($newItem->template == 'equipment' || $newItem->template == 'item') {
           switch($newItem->parent->name) {
-            case 'potions' : // instant use potions?
+            case 'potions' : // instant use potions
               $player->HP = $player->HP + $newItem->HP;
               if ($player->HP > 50) {
                 $player->HP = 50;
               }
               $player->equipment->add($newItem);
+              break;
+            case 'group-items' : // Make item available to each group member
+              $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
+              foreach ($members as $p) {
+                $p->of(false);
+                $p->equipment->add($newItem);
+                $p->save();
+              }
               break;
             default:
               $player->equipment->add($newItem);
@@ -55,10 +63,17 @@
           // Save player's new scores
           $player->save();
 
-          // Record history
+          // Record history (for each group member if necessary)
           $newsBoard = 1;
           $taskComment = $newItem->title;
-          saveHistory($player, $task, $taskComment, $newsBoard);
+          if ($members) {
+            foreach ($members as $p) {
+              $p->of(false);
+              saveHistory($p, $task, $taskComment, $newsBoard);
+            }
+          } else {
+            saveHistory($player, $task, $taskComment, $newsBoard);
+          }
           
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
@@ -91,6 +106,14 @@
                 }
                 $player->equipment->add($newItem);
                 break;
+              case 'group-items' : // Make item available to each group member
+                $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
+                foreach ($members as $p) {
+                  $p->of(false);
+                  $p->equipment->add($newItem);
+                  $p->save();
+                }
+                break;
               default:
                 $player->equipment->add($newItem);
                 break;
@@ -112,7 +135,14 @@
 
           // Record history
           $taskComment = $newItem->title;
-          saveHistory($player, $task, $taskComment, $newsBoard);
+          if ($members) {
+            foreach ($members as $p) {
+              $p->of(false);
+              saveHistory($p, $task, $taskComment, $newsBoard);
+            }
+          } else {
+            saveHistory($player, $task, $taskComment, $newsBoard);
+          }
           
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
@@ -126,7 +156,7 @@
         $playerId = $input->post->player;
         $player = $pages->get($playerId);
         $player->of(false);
-        $amount = $input->post->amount;
+        $amount = (integer) $input->post->amount;
         $receiverId = $input->post->receiver;
         $receiver = $pages->get($receiverId);
         $receiver->of(false);
@@ -168,7 +198,7 @@
   }
 
   if ($user->isSuperuser()) { // Admin front-end
-    // TODO : Give superUser possibility to record a donation
+    // TODO : Give superUser possibility to record a donation?
     if ($input->get->form && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
       $n->of(false);

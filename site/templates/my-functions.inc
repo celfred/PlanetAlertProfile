@@ -149,7 +149,7 @@ function groupBonus($players) {
   */
 }
 
-function saveHistory($player, $task, $taskComment, $newsBoard = 0) {
+function saveHistory($player, $task, $taskComment, $newsBoard = 0, $refPage = '') {
   $p = new Page();
   $p->template = 'event';
   $history = $player->child("name=history");
@@ -172,6 +172,10 @@ function saveHistory($player, $task, $taskComment, $newsBoard = 0) {
   $p->title = str_replace('&#039;', '\'', $task->title).$newValues;
   // Save task
   $p->task = $task;
+  // Save refPage
+  if ($refPage) {
+    $p->refPage = $refPage;
+  }
   // Save comment
   $p->summary = $taskComment;
   // Save publish state

@@ -217,6 +217,10 @@ $(document).ready(function() {
     paging: false,
     order: [[ 0, "asc"]]
   });
+  var trainingTable = $('#trainingTable').DataTable({
+    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+    order: [[ 0, "asc"]]
+  });
   var historyTable = $('#historyTable').DataTable({
     lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
     order: [[ 0, "desc"]]
@@ -383,6 +387,16 @@ $(document).ready(function() {
       $('#selectedIds').val(ids);
       $('#selectedPlayer').val(randomId);
     }
+  });
+
+  $('#startFight').on('click', function() {
+    // TODO : Move function into exercise.js?
+    $(this).parents('.alert').hide();
+    $('#fightForm').show();
+    $('#exTitle').hide();
+    $('#energyDiv').show();
+    // Start exercise
+    // TODO : Record session start...
   });
 
 }); 

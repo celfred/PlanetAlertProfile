@@ -64,7 +64,7 @@ $config->appendTemplateFile = '_main.php';
  * Installer: Database Configuration
  * 
  */
-$config->dbHost = 'localhost';
+$config->dbHost = '127.0.0.1';
 $config->dbName = 'planetalert';
 $config->dbUser = 'root';
 $config->dbPass = 'onzOct75';
@@ -96,5 +96,8 @@ $config->timezone = 'Europe/Paris';
  * Installer: HTTP Hosts Whitelist
  * 
  */
-$config->httpHosts = array('localhost');
-
+$config->httpHosts = array(
+  '127.0.0.1',
+  'localhost',
+  'planetalert.tuxfamily.org'
+);

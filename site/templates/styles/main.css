@@ -63,7 +63,7 @@ body {
   display: block;
   float: left;
   margin: 0 0 0 1px;
-  padding: 48px 10px 15px 10px;
+  padding: 48px 6px 15px 6px;
   border-radius: 10px 0px 10px 0px;
 }
 #masthead div.btn-group button {
@@ -231,6 +231,98 @@ table.report td {
 }
 table.report td h3 {
   margin: 0px;
+}
+.avatarContainer {
+  position: relative;
+}
+img.superpose {
+  position: absolute;
+}
+.weapon.superpose {
+  top: 65px;
+  left: 0px;
+}
+.protection.superpose {
+  top: 65px;
+  left: 70px;
+}
+.helmet.superpose {
+  top: -50px;
+  left: 0px;
+}
+.bubble-left, .bubble-right {
+  display: inline-block;
+  border: 3px solid #000;
+  background: #FFF;
+  padding: 10px;
+  margin: 10px;
+}
+.bubble-left {
+  position : relative;
+  border-radius: 30px 30px 30px 0px;
+  margin-left: 50px;
+}
+.zoom {
+  animation-duration: 0.5s;
+  animation-name: zoom;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-direction: alternate;
+}
+@keyframes zoom {
+  from { transform: scale(1);}
+  to {transform: scale(2);}
+}
+@keyframes explode {
+  from { transform: rotate(0deg) scale(1); opacity: 1; left: 0%;}
+  to {transform: rotate(-90deg) scale(2); opacity: 0; left: -50%;}
+}
+.explode {
+  animation-duration: 0.5s;
+  animation-name: explode;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+}
+.blink {
+  animation-duration: 0.3s;
+  animation-name: blink;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+@keyframes blink {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.squeeze {
+  animation-duration: 0.4s;
+  animation-name: squeeze;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+@keyframes squeeze {
+  from { transform: scale(0.9); }
+  to { transform: scale(1); }
+}
+.bubble-right {
+  bottom: 0px;
+  border-radius: 30px 30px 0px 30px;
+  margin-right: 100px;
+}
+#fightForm {
+  display: none;
+  border : 2px solid #000;
+  border-radius: 30px;
+  background: #FFF;
+  padding: 20px;
+  padding-bottom: 50px;
+}
+#actionBoard {
+  width: 80%;
+  border : 2px solid #000;
+  border-radius: 30px;
+  background: #FFF;
 }
 .progress {
   height: 15px;
@@ -424,6 +516,9 @@ img.align_right {
   padding-right: 3px;
 }
 #idPlayer {
+}
+#energyDiv {
+  display: none;
 }
 #goldPlayer, #equipPlayer {
 }

@@ -128,6 +128,33 @@
       </div>
     </div>
 
+    <div id="" class="panel panel-info">
+      <div class="panel-heading">
+        <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
+      </div>
+      <div class="panel-body">
+        <ol>
+          <?php
+            $players = $pages->find('template=player, sort=-underground_training, underground_training>0, limit=10');
+            foreach($players as $player) {
+              if ($player->avatar) {
+                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
+              } else {
+                $mini = '';
+              }
+              if ($player->login == $user->name) {
+                $focus = "class='focus'";
+              } else {
+                $focus = "";
+              }
+              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
+              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->underground_training.' U.T.</span></li>';
+            }
+          ?>
+        </ol>
+      </div>
+    </div>
+
     <div id="" class="panel panel-success">
       <div class="panel-heading">
       <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=group"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
@@ -135,7 +162,7 @@
       </div>
       <div class="panel-body">
         <ol>
-          <?php
+        <?php
             $groupScoreBoard = groupScoreBoard(10);
             echo $groupScoreBoard;
           ?>
@@ -334,6 +361,8 @@
         echo '&nbsp;&nbsp;';
         if ($player->donation == false) {$player->donation = 0; }
         echo '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+        echo '&nbsp;&nbsp;';
+        echo '<span class="label label-primary" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' U.T.</span>';
         echo ' </h3>';
         echo '</div>';
 
@@ -388,7 +417,7 @@
       }
 
       // Last 15 public news
-      $news = $pages->find("template=event, sort=-created, limit=15, task=free|buy");
+      $news = $pages->find("template=event, sort=-created, limit=15, task=free|buy|ut-action-v|ut-action-vv");
       if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">
@@ -418,6 +447,7 @@
               case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
               case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'individual-work' : echo '<span class="">Underground Training for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : echo 'todo : ';
                 break;
