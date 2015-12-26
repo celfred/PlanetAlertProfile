@@ -32,6 +32,7 @@
           $out .= '<tr>';
           $out .= '<th>Level</th>';
           $out .= '<th>Topic</th>';
+          $out .= '<th># of words</th>';
           $out .= '<th>Already trained?</th>';
           $out .= '<th>Last training session</th>';
           $out .= '<th>Action</th>';
@@ -53,6 +54,29 @@
             $fr = 'French version in preparation, sorry ;)';
           }
           $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$fr.'"></span>';
+          $out .= '</td>';
+          // Count # of words
+          $exData = $result->exData;
+          $allLines = preg_split('/$\r|\n/', $exData);
+          /* $out .= '<td data-sort="'.count($allLines).'">'; */
+          $out .= '<td>';
+          $out .= count($allLines).' words';
+          // Prepare list of French words
+          if (count($allLines)>15) {
+            $listWords = '<strong>15 first words :</strong><br />';
+            for($i=0; $i<15; $i++) {
+              list($left, $right) = preg_split('/,/', $allLines[$i]);
+              $listWords .= $right.'<br />';
+            }
+            $listWords .= '[...]';
+          } else {
+            $listWords = '';
+            foreach($allLines as $line) {
+              list($left, $right) = preg_split('/,/', $line);
+              $listWords .= $right.'<br />';
+            }
+          }
+          $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
           $out .= '<td>';
           if ($prevUt->count > 0) {
@@ -77,17 +101,6 @@
           } else {
           }
           $out .= '</td>';
-          /* $out .= '<td>'; */
-          /* if ($prevUt->count > 0) { */
-          /*   if ($interval->days >= 0 && $interval->days < 30) { */
-          /*     $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span></span>'; */
-          /*   } else { */
-          /*     $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>'; */
-          /*   } */
-          /* } else { */
-          /*   $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span>'; */
-          /* } */
-          /* $out .= '</td>'; */
           $out .= '<td>';
           // Limit to 1 training session a day 
           if ($interval->days <= 1 && $prevUt->count > 0) {
@@ -151,46 +164,6 @@
           $out .= '</div>';
           $out .= '</div>';
 
-          /* $exData = $monster->exData; */ 
-          /* $allLines = preg_split('/$\R?^/m', $exData); */
-          /* $pair = []; */
-          /* foreach($allLines as $line) { */
-          /*   list($left, $right) = preg_split('/,/', $line); */
-          /*   // TODO : Doesn't work */ 
-          /*   //$answer = preg_split('||', $answer); */
-          /*   $pair[$left] = $right; */
-          /*   $data[] = ['left'=>$left, 'right'=>$right]; */
-          /* } */
-          /* // TODO : */
-          /* // trainingBoard dimensions */
-          /* // shuffle tags inside trainingBoard */
-          /* // draggable tags */
-          /* // disappears when on top */
-          /* // => TODO : Pb : difficult / Find an easier solution (and fun?) */
-          /* $out .= '<div class="well trainingBoard">'; */
-          /* /1* foreach($pair as $word=>$answer) { *1/ */
-          /* /1*   $out .= '<span class="btn btn-success">'.$word.'</span>'; *1/ */
-          /* /1*   $out .= '<span class="btn btn-danger">'.$answer.'</span>'; *1/ */
-          /* /1* } *1/ */
-    /* function str_shuffle_unicode($str) { */
-        /* $tmp = preg_split("//u", $str, -1, PREG_SPLIT_NO_EMPTY); */
-        /* shuffle($tmp); */
-        /* return join("", $tmp); */
-    /* } */
-          /* shuffle($data); */
-          /* $out .= '<div class="bubble-right">'; */
-          /* $out .= '<h3 class="">Set the pairs in your mind.</h3>'; */
-          /* $i = 0; */
-          /* foreach($data as $d) { */
-          /*   $shuffled = str_shuffle($data[$i]['left']); */
-          /*   $out .= '<h4 class="">'; */
-          /*   $out .= $data[$i]['right'].' ['.$shuffled.'] : '; */ 
-          /*   $out .= '<input type="text" size="50" />'; */
-          /*   $out .= '</h4>'; */
-          /*   $i++; */
-          /* } */
-          /* $out .= '</div>'; */
-          /* $out .= '</div>'; */
         } else {
           $out .= 'Sorry, but a problem occured. Please try again. If the problem still exists, contact the administrator.';
         }
