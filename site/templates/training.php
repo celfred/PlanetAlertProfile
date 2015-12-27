@@ -4,8 +4,12 @@
   // Test player login
   if ($player && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
-    $helmet = $player->equipment->get('memory-helmet');
-    if ($helmet || $user->isSuperuser()) {
+    if ($user->isSuperuser()) {
+      $helmet = $pages->get("name=memory-helmet");
+    } else {
+      $helmet = $player->equipment->get('memory-helmet');
+    }
+    if ($helmet) {
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
         // Translate type only (for the moment)
