@@ -140,7 +140,7 @@
           if ($player->equipment->get("name=memory-helmet")) {
             echo 'You can use your <a href="'.$pages->get('name=underground-training')->url.'">Memory Helmet</a> to practise and improve your Underground Training rate :)';
           } else {
-            echo 'Sorry, but at least one member in your group needs to buy the <a href="'.$pages->get('name=memory-helmet')->url.'">Memory Helmet</a> to be able to access the Underground Training zone.';
+            echo 'Sorry, but at least one member in your group needs to buy the <a href="'.$pages->get('name=shop')->url.'details/memory-helmet">Memory Helmet</a> to be able to access the Underground Training zone.';
           }
         ?>
         </div>
