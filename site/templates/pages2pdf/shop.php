@@ -5,6 +5,7 @@ $logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
 $weapons = $pages->find("template='equipment', category='weapons', sort='level'");
 $protections = $pages->find("template='equipment',category='protections', sort='level'");
 $items = $pages->find("template='item', sort='level'");
+$groupItems = $pages->find("template='item', parent.name='group-items', sort='level'");
 
 $out = '';
 
@@ -13,6 +14,7 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
     case 'weapons' : $items = $weapons; break;
     case 'protections' : $items = $protections; break;
     case 'items' : $items = $items; break;
+    case 'group-items' : $items = $groupItems; break;
     default : $items = $weapons; break;
   }
   $maxIndex = count($items);

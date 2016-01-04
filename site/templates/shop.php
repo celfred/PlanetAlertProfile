@@ -48,6 +48,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/weapons?pages2pdf=1">Get PDF [Weapons]</a>';
       echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/protections?pages2pdf=1">Get PDF [Protections]</a>';
       echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/items?pages2pdf=1">Get PDF [Potions]</a>';
+      echo '<a class="pdfLink btn btn-info" href="'. $page->url.'pictures/group-items?pages2pdf=1">Get PDF [Group items]</a>';
       echo '<br /><br /><br />';
     }
     ?>
