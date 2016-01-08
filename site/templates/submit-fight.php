@@ -13,8 +13,8 @@
     $result = $input->post->result;
 
     if ($training == true) { // Training session
-      // Increase UT value with result
-      $player->underground_training = $player->underground_training + $result;
+      // Increase UT value
+      $player->underground_training = $player->underground_training + 1;
 
       if ($result>=1 && $result <=5) {
         $task = $pages->get("name=ut-action-v");
