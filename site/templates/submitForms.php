@@ -283,6 +283,13 @@
               }
               $player->equipment->add($newItem);
               break;
+            case 'group-items' : // Make item available to each group member
+              $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
+              foreach ($members as $p) {
+                $p->of(false);
+                $p->equipment->add($newItem);
+              }
+              break;
             default:
               $player->equipment->add($newItem);
               break;
