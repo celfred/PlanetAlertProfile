@@ -118,6 +118,8 @@
               echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
               $class = ($page->name == 'tasks' || $page->template == 'task') ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
+              $class = $page->name == 'monsters' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
               ?>
             </ul>
           </div>
@@ -185,6 +187,8 @@
               echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
               $class = $page->name == 'tasks' ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
+              $class = $page->name == 'monsters' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
               ?>
             </ul>
           </div>
