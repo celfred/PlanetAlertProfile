@@ -261,11 +261,17 @@ $(document).ready(function() {
       "orderable": false
     } ]
   });
+  var monstersTable = $('#monstersTable').DataTable({
+    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+    order: [[ 2, "asc"], [0, "asc"]],
+    orderCellsTop: true
+  });
 
   $('.categoryFilter').click(function(){
     mainShop.draw();
     taskTable.draw();
     historyTable.draw();
+    monstersTable.draw();
   });		    
     
   $('a.toggle-vis').on( 'click', function (e) {
