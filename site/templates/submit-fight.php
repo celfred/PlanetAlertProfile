@@ -32,7 +32,7 @@
         
         // Record history
         //$taskComment = 'Training "'.$summary.'" [+'.$result.'U.T.]';
-        $taskComment = $summary;
+        $taskComment = $summary.'" [+'.$result.'U.T.]';
         $refPage = $exerciseId;
         saveHistory($player, $task, $taskComment, $newsBoard, $refPage);
         

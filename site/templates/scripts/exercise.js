@@ -388,7 +388,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
           $scope.result++;
           $scope.utPoint = true;
           $timeout(function() { $scope.utPoint = false; }, 1000);
-          $scope.stopSession(); // Record +1 U.T. : Stop or continue?
+          $scope.stopSession(); // Alert +1 U.T. : Stop or continue?
         }
       }
       // Pick another question (timeout workaround so animation starts from 0)
@@ -410,10 +410,10 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         confirmButtonText: "Take the helmet off (Stop training & Save results)"
       }, function(isConfirm) {
         if (isConfirm) { // Save and redirect
-          // TODO : Result cumulating for the moment!
           $scope.saveData(true);
         } else { // Save and continue
-          $scope.saveData(false);
+					// Do not save (prevent a bug?), just continue
+          //$scope.saveData(false);
         }
       });
     } else {
