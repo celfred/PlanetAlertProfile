@@ -288,6 +288,7 @@
               foreach ($members as $p) {
                 $p->of(false);
                 $p->equipment->add($newItem);
+                $p->save();
               }
               break;
             default:
