@@ -130,6 +130,7 @@
 
     <div id="" class="panel panel-info">
       <div class="panel-heading">
+        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
       </div>
       <div class="panel-body">
