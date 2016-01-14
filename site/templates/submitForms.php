@@ -66,9 +66,9 @@
           // Record history (for each group member if necessary)
           $newsBoard = 1;
           $taskComment = $newItem->title;
-          if ($members) {
+          if ($members->count > 0) {
+            $taskComment .= ' [unlocked]';
             foreach ($members as $p) {
-              $p->of(false);
               saveHistory($p, $task, $taskComment, $newsBoard);
             }
           } else {
@@ -133,11 +133,12 @@
           // Save player's new scores
           $player->save();
 
-          // Record history
+          // Record history (for each group member if necessary)
+          $newsBoard = 1;
           $taskComment = $newItem->title;
-          if ($members) {
+          if ($members->count > 0) {
+            $taskComment .= ' [unlocked]';
             foreach ($members as $p) {
-              $p->of(false);
               saveHistory($p, $task, $taskComment, $newsBoard);
             }
           } else {
