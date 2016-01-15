@@ -411,6 +411,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       }, function(isConfirm) {
         if (isConfirm) { // Save and redirect
           $scope.saveData(true);
+					$scope.waitForStart = true;
         } else { // Save and continue
 					// Do not save (prevent a bug?), just continue
           //$scope.saveData(false);

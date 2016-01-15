@@ -169,7 +169,7 @@
           $out .= '</span>';
           $out .= '</span>';
           $out .= '</div>';
-          $out .= '<button ng-click="stopSession()" class="btn btn-danger">Take the helmet off (Stop training session)</button>';
+          $out .= '<button ng-click="stopSession()" class="btn btn-danger" ng-disabled="">Take the helmet off (Stop training session)</button>';
           $out .= '</div>';
           $out .= '</div>';
           $out .= '</div>';
