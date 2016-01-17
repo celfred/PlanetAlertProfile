@@ -266,6 +266,11 @@ $(document).ready(function() {
     order: [[ 2, "asc"], [0, "asc"]],
     orderCellsTop: true
   });
+  var loggedTable = $('#loggedTable').DataTable({
+    lengthMenu: [ [25, 50, -1], [25, 50, 75, 100, "All"] ],
+    order: [[ 1, "desc"]],
+    orderCellsTop: true
+  });
 
   $('.categoryFilter').click(function(){
     mainShop.draw();

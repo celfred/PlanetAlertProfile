@@ -29,18 +29,6 @@ $totalNbUniqueVisitors = $query->fetchColumn();
 $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
 $query->execute();
 $totalNbVisitors = $query->fetchColumn();
-// Find NEVER logged players during the current school year
-// Get logged names in current school year
-$query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
-$query->execute();
-$totalVisitors = $query->fetchAll();
-$neverLogged = [];
-// Compare to all players
-foreach($allPlayers as $p) {
-  if (in_array($p->id, $totalVisitors)) {
-    array_push($neverLogged,$p);
-  }
-}
 
 $stats = '<div id="" class="news panel panel-primary">';
 $stats .= '<div class="panel-heading">';
@@ -82,17 +70,50 @@ if ($user->isSuperuser()) {
     }
     $stats .= '</ul>';
   }
-  if ($neverLogged->count > 0) {
-    $stats .= '<ul class="list-inline list-unstyled">';
-    $stats .= '<span>Never logged : </span>';
-    foreach ($neverLogged as $nl) {
-        $stats .= '<li><a href="'.$nl->url.'">'.$nl->title.'</a> ['.$nl->playerTeam.']</li>';
-    };
-    $stats .= '</ul>';
-  };
 }
+
+// Training sessions stats
+$today = mktime(date("m/d/Y").' 0:0:0');
+$totalTrainingSessions = $pages->find('template=event, task=ut-action-v|ut-action-vv');
+$todayTrainingSessions = $totalTrainingSessions->find("date>=$today");
+$todayTrainedPlayers = [];
+/* $todayTrainedPlayers = $todayTrainingSessions->unique()->parent("template=player"); */
+foreach( $todayTrainingSessions as $t) {
+  $pl = $t->parent("template=player");
+  if (!in_array($pl->id, $todayTrainedPlayers)) {
+    array_push($todayTrainedPlayers, $pl->id);
+  }
+}
+$trainedPlayers = $pages->find('template=player, underground_training>0');
+$stats .= '<h3><span class="label label-default" data-toggle="tooltip" title="Today/Total">Today Training sessions : ';
+$stats .= $todayTrainingSessions->count.' with '.count($todayTrainedPlayers).' different player(s).';
+$stats .= '</span></h3>';
+$stats .= '<h3><span class="label label-default" data-toggle="tooltip" title="Today/Total">Total Training sessions : ';
+$stats .= $totalTrainingSessions->count.' with '.$trainedPlayers->count.' player(s).';
+$stats .= '</span></h3>';
+
+// Last connected users (and dates)
+$stats .= '<h3 class="text-center">Last logged dates</h3>';
+$stats .= '<table id="loggedTable" class="table table-condensed table-hover">';
+$stats .= '<thead>';
+$stats .= '<tr>';
+$stats .= '<th>Username</th>';
+$stats .= '<th>Last logged date</th>';
+$stats .= '</tr>';
+$stats .= '</thead>';
+$stats .= '<tbody>';
+foreach ($allPlayers as $p) {
+  $query = $database->prepare("SELECT login_timestamp FROM process_login_history WHERE username = :username AND login_was_successful=1 ORDER BY login_timestamp DESC LIMIT 1");   
+  $query->execute(array(':username' => $p->name));
+  $lastvisit = $query->fetchColumn();
+  $stats .= '<tr><td>'.$p->title.' ['.$p->playerTeam.']</td><td>'. $lastvisit .'</td></tr>';
+}
+$stats .= '</tbody>';
+$stats .= '</table>';
+
 $stats .= '</div>';
 $stats .= '</div>';
+
 echo $stats;
 
 include("./foot.inc"); 
