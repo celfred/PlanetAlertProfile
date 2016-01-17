@@ -244,7 +244,7 @@
           $stats .= '</ul>';
         }
         // Link to Statistics page
-        $stats .= '<a href='.$pages->get('name=statistics')->url.'>See the complete Planet Alert statistics.</a>';
+        $stats .= '<p class="text-center"><a href='.$pages->get('name=statistics')->url.'>[See the complete Planet Alert statistics]</a></p>';
         $stats .= '</div>';
         $stats .= '</div>';
         echo $stats;
