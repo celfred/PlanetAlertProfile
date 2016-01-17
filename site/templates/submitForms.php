@@ -67,8 +67,12 @@
           $newsBoard = 1;
           $taskComment = $newItem->title;
           if ($members->count > 0) {
-            $taskComment .= ' [unlocked]';
             foreach ($members as $p) {
+              if ($p->name == $player->name) {
+                $taskComment .= ' [purchase]';
+              } else {
+                $taskComment .= ' [unlocked by '.$player->title.']';
+              }
               saveHistory($p, $task, $taskComment, $newsBoard);
             }
           } else {
