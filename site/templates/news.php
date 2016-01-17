@@ -202,22 +202,12 @@
         $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
         $query->execute();
         $totalNbVisitors = $query->fetchColumn();
-        // Find NEVER logged players during the current school year
-        // Get logged names in current school year
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
-        $query->execute();
-        $totalVisitors = $query->fetchAll();
-        $neverLogged = [];
-        // Compare to all players
-        foreach($allPlayers as $p) {
-          if (in_array($p->id, $totalVisitors)) {
-            array_push($neverLogged,$p);
-          }
-        }
 
-        $stats = '<div id="" class="news panel panel-primary">';
+        $stats = '<div id="stats" class="news panel panel-primary">';
         $stats .= '<div class="panel-heading">';
-        $stats .= '<h4 class="panel-title">Planet Alert Statistics (started 17/09/2015)</h4>';
+        $stats .= '<h4 class="panel-title">Planet Alert Statistics (started 17/09/2015)';
+        $stats .= '<button type="button" class="close" data-id="#stats" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+        $stats .= '</h4>';
         $stats .= '</div>';
         $stats .= '<div class="panel-body">';
         $stats .= '<p class="lead">';
@@ -253,14 +243,7 @@
           }
           $stats .= '</ul>';
         }
-        if ($neverLogged->count > 0) {
-          $stats .= '<ul class="list-inline list-unstyled">';
-          $stats .= '<span>Never logged : </span>';
-          foreach ($neverLogged as $nl) {
-              $stats .= '<li><a href="'.$nl->url.'">'.$nl->title.'</a> ['.$nl->playerTeam.']</li>';
-          };
-          $stats .= '</ul>';
-        };
+        // Link to Statistics page
         $stats .= '<a href='.$pages->get('name=statistics')->url.'>See the complete Planet Alert statistics.</a>';
         $stats .= '</div>';
         $stats .= '</div>';
