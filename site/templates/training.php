@@ -113,7 +113,7 @@
           $out .= '</td>';
           $out .= '<td>';
           // Limit to 1 training session a day 
-          if ($interval->days <= 1 && $prevUt->count > 0) {
+          if ($interval->days < 1 && $prevUt->count > 0) {
             $out .= 'Come back tomorrow ;)';
           } else {
             $out .= ' <a class="label label-sm label-primary" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
