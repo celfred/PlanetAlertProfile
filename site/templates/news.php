@@ -202,6 +202,18 @@
         $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
         $query->execute();
         $totalNbVisitors = $query->fetchColumn();
+        // Find NEVER logged players during the current school year
+        // Get logged names in current school year
+        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+        $query->execute();
+        $totalVisitors = $query->fetchAll();
+        $neverLogged = [];
+        // Compare to all players
+        foreach($allPlayers as $p) {
+          if (in_array($p->id, $totalVisitors)) {
+            array_push($neverLogged,$p);
+          }
+        }
 
         $stats = '<div id="" class="news panel panel-primary">';
         $stats .= '<div class="panel-heading">';
@@ -220,8 +232,8 @@
         $stats .= '&nbsp;&nbsp;&nbsp';
         $stats .= '</p>';
         if ( count($todaysPlayers) > 0 ) {
-          $stats .= '<p>Today\'s players : </p>';
           $stats .= '<ul class="list-inline list-unstyled">';
+          $stats .= '<span>Today\'s players : </span>';
           foreach($todaysPlayers as $r) {
             // Get player's name
             $login = $r['username'];
@@ -231,7 +243,7 @@
           $stats .= '</ul>';
         }
         if ( count($yesterdaysPlayers) > 0 ) {
-          $stats .= '<p>Yesterday\'s players : ';
+          $stats .= '<span>Yesterday\'s players : </span>';
           $stats .= '<ul class="list-inline list-unstyled">';
           foreach($yesterdaysPlayers as $r) {
             // Get player's name
@@ -241,6 +253,15 @@
           }
           $stats .= '</ul>';
         }
+        if ($neverLogged->count > 0) {
+          $stats .= '<ul class="list-inline list-unstyled">';
+          $stats .= '<span>Never logged : </span>';
+          foreach ($neverLogged as $nl) {
+              $stats .= '<li><a href="'.$nl->url.'">'.$nl->title.'</a> ['.$nl->playerTeam.']</li>';
+          };
+          $stats .= '</ul>';
+        };
+        $stats .= '<a href='.$pages->get('name=statistics')->url.'>See the complete Planet Alert statistics.</a>';
         $stats .= '</div>';
         $stats .= '</div>';
         echo $stats;
