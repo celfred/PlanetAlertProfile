@@ -350,6 +350,30 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         // Set focus on input field
         $timeout($scope.focusInput, 300);
         break;
+      case 'quiz' :
+        // Pick a random line and build quiz array
+        // Different from previous line
+				var randNum = Math.floor(Math.random()*$scope.allLines.length);
+				if ( $scope.lineHistory.length > 1) {
+					while ( randNum == $scope.lineHistory[$scope.lineHistory.length-1] ) {
+						var randNum = Math.floor(Math.random()*$scope.allLines.length);
+					}
+				}
+        $scope.lineHistory.push(randNum);
+        var randLine = $scope.allLines[randNum];
+        var quiz = randLine.split("?");
+        // Test for multiple possible words and answers
+        $scope.allCorrections = quiz[1].split("|");
+				for (i=0; i<$scope.allCorrections.length; i++) {
+					$scope.allCorrections[i] = $scope.allCorrections[i].trim();
+				}
+				$scope.word = quiz[0];
+        // Add word to history
+        $scope.history.push($scope.word);
+        $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
+        // Set focus on input field
+        $timeout($scope.focusInput, 300);
+        break;
       default:
         console.log('Unknown exType');
         break;
