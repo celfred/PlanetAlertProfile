@@ -322,16 +322,16 @@ function getPosition($player, $field) {
       $allPlayers = $pages->find("template=player, sort=karma, karma>0");
       break;
     case 'places' :
-      $allPlayers = $pages->find("template=player, sort=-places.count, sort=karma, places.count>0");
+      $allPlayers = $pages->find("template=player, sort=-places.count, sort=-karma, places.count>0");
       break;
     case 'equipment' :
-      $allPlayers = $pages->find('template=player, sort=-equipment.count, sort=karma, equipment.count>0');
+      $allPlayers = $pages->find('template=player, sort=-equipment.count, sort=-karma, equipment.count>0');
       break;
     case 'donation' :
-      $allPlayers = $pages->find('template=player, sort=-donation, sort=karma, donation>0');
+      $allPlayers = $pages->find('template=player, sort=-donation, sort=-karma, donation>0');
       break;
     case 'underground_training' :
-      $allPlayers = $pages->find('template=player, sort=-underground_training, sort=karma, underground_training>0');
+      $allPlayers = $pages->find('template=player, sort=-underground_training, sort=-karma, underground_training>0');
       break;
     case 'group' :
       $allPlayers = $pages->find('template=player');
