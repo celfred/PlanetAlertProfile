@@ -78,10 +78,10 @@
           $allLines = preg_split('/$\r|\n/', $exData);
           /* $out .= '<td data-sort="'.count($allLines).'">'; */
           $out .= '<td>';
-          $out .= count($allLines).' words';
           // Prepare list of French words
           switch ($result->type->name) {
             case 'translate' :
+              $out .= count($allLines).' words';
               if (count($allLines)>15) {
                 $listWords = '<strong>15 first words :</strong><br />';
                 for($i=0; $i<15; $i++) {
@@ -98,6 +98,7 @@
               }
               break;
             case 'quiz' :
+              $out .= count($allLines).' questions';
               if (count($allLines)>15) {
                 $listWords = '<strong>15 first questions :</strong><br />';
                 for($i=0; $i<15; $i++) {
