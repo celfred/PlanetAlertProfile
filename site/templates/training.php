@@ -12,8 +12,12 @@
     if ($helmet) {
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
-        // Translate type only (for the moment)
-        $allTranslate = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
+        // Translate / Quiz types only (for the moment)
+        if ($user->isSuperuser()) {
+          $allTranslate = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=hidden');
+        } else {
+          $allTranslate = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
+        }
 
         $out .= '<div class="row">';
           $out .= '<div class="col-sm-12 text-center">';
