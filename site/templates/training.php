@@ -116,9 +116,27 @@
           }
           $out .= '</td>';
           $out .= '<td>';
-          // Limit to 1 training session a day 
-          if ($interval->days < 1 && $prevUt->count > 0) {
-            $out .= 'Come back tomorrow ;)';
+          // Limit to 1 training session a day if prevUt<10
+          // Limit to 1 training session a week if prevUt<30
+          // Limit to 1 training session a month if prevUt>30
+          if ($prevUt->count > 0 && $prevUt->count < 10) {
+            $spaced = 1;
+          }
+          if ($prevUt->count > 10 && $prevUt->count < 30) {
+            $spaced = 7;
+          }
+          if ($prevUt->count > 30) {
+            $spaced = 30;
+          }
+          if ($interval->days < $spaced && $prevUt->count > 0) {
+            $nbDays = $spaced - $interval->days;
+            if ($nbDays == $spaced) {
+              $out .= 'Come back tomorrow ;)';
+            } else {
+              if ($nbDays > 1) {
+                $out .= 'Come back in '.$nbDays.' days ;)';
+              }
+            }
           } else {
             $out .= ' <a class="label label-sm label-primary" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
           }
