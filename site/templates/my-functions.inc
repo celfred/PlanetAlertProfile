@@ -289,10 +289,6 @@ function checkHk($player) {
           $count++;
         }
       }
-      if ($count >= 3) { // 3 forgotten hk (or half-done hk or signature
-        // Register a new penalty
-        return true;
-      }
     }
   } else { // No previous penalty
     // Count all negative homework tasks
@@ -306,12 +302,8 @@ function checkHk($player) {
         }
       }
     }
-    if ($count >= 3) { // 3 forgotten hk (or half-done hk or signature
-      // Register a new penalty
-      return true;
-    }
   }
-  return false;
+  return $count;
 }
 
 function getPosition($player, $field) {

@@ -21,6 +21,12 @@
   } else {
     $playerPos = $playersTotalNb;
   }
+  // Set no hk counter
+  if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
+    $hkCount = '<span class="label label-danger" data-toggle="tooltip" title="No hk counter">'.checkHk($playerPage).'</span>';
+  } else {
+    $hkCount = '<span class="label label-danger">Private!</span>';
+  }
 ?>
 
 <div>
@@ -32,8 +38,17 @@
               <span class=""><?php echo $playerPage->title; ?></span>
             </h1>
           </div>
-          <div class="panel-body text-center">
+          <div class="panel-body row">
+          <div class="text-center col-sm-6">
             <img src="<?php if ($playerPage->avatar) echo $playerPage->avatar->url; ?>" alt="No avatar" />
+          </div>
+          <div class="col-sm-6">
+            <h3>Karma : <span class="label label-default"><?php echo $karma; ?></span> <span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span></h3>
+            <br />
+            <h4><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></h4>
+            <br />
+            <h4><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></h4>
+          </div>
           </div>
           <div class="col-sm-2 text-right">
             <span class="badge" tooltip="Points de santé"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="Santé" /> <?php echo $playerPage->HP; ?>/50</span>
@@ -79,23 +94,6 @@
         </div>
       </div>
 
-      <div id="" class="col-sm-2 panel panel-success">
-        <div class="panel-heading">
-          <h4 class="panel-title">Gold coins</h4>
-        </div>
-        <div class="panel-body text-center">
-          <h4><img src="<?php  echo $config->urls->templates?>img/gold.png" alt="Or" width="100" /><span class="gc label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?></span></h4>
-        </div>
-      </div>
-
-      <div class="col-sm-3 panel panel-success">
-        <div class="panel-heading">
-          <h4 class="panel-title">Karma</h4>
-        </div>
-        <div class="panel-body text-center">
-          <h4><span class="label label-default"><?php echo $karma; ?></span> <span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span></h4>
-        </div>
-      </div>
     </div>
   </div>
 
