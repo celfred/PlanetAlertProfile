@@ -34,6 +34,7 @@
         $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
           $out .= '<thead>';
           $out .= '<tr>';
+          $out .= '<th>Name</th>';
           $out .= '<th>Topic</th>';
           $out .= '<th>Level</th>';
           $out .= '<th>Summary</th>';
@@ -48,6 +49,9 @@
           // Get previous player's statistics
           $prevUt = $player->find('template=event,refPage='.$result->id.', sort=-date');
           $out .= '<tr>';
+          $out .= '<td>';
+          $out .= $result->title;
+          $out .= '</td>';
           $out .= '<td>';
           foreach ($result->topic as $t) {
             $out .= '<span class="label label-default">'.$t->title.'</span>';

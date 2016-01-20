@@ -14,7 +14,7 @@
 
     if ($training == true) { // Training session
       // Increase UT value
-      $player->underground_training = $player->underground_training + 1;
+      $player->underground_training = $player->underground_training + $result;
 
       if ($result>=1 && $result <=5) {
         $task = $pages->get("name=ut-action-v");

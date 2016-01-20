@@ -249,7 +249,7 @@
 
         // Check if extra-action needs to be taken
         // For example : 3 forgotten homework...
-        if (checkHk($player)) {
+        if (checkHk($player) >= 3) { // Record a penalty
           // Update player's scores
           $task = $pages->get("template=task, name=penalty"); 
           //updateScore($player, $task);

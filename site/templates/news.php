@@ -48,7 +48,7 @@
       <div class="panel-body">
         <ol>
           <?php
-            $players = $pages->find('template=player, sort=-places.count, places.count>0, limit=10');
+            $players = $pages->find('template=player, sort=-places.count, sort=-karma, places.count>0, limit=10');
             foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
@@ -80,7 +80,7 @@
       <div class="panel-body">
         <ol>
           <?php
-            $players = $pages->find('template=player, sort=-equipment.count, equipment.count>0, limit=10');
+            $players = $pages->find('template=player, sort=-equipment.count, sort=-karma, equipment.count>0, limit=10');
             foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
@@ -108,7 +108,7 @@
       <div class="panel-body">
         <ol>
           <?php
-            $players = $pages->find('template=player, sort=-donation, donation>0, limit=10');
+            $players = $pages->find('template=player, sort=-donation, sort=-karma, donation>0, limit=10');
             foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
@@ -136,7 +136,7 @@
       <div class="panel-body">
         <ol>
           <?php
-            $players = $pages->find('template=player, sort=-underground_training, underground_training>0, limit=10');
+            $players = $pages->find('template=player, sort=-underground_training, sort=-karma, underground_training>0, limit=10');
             foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";

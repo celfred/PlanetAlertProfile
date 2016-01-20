@@ -11,22 +11,22 @@
     case 'places' :
       $title = 'Greatest # of places';
       $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
-      $players = $pages->find("template=player, sort=-places.count, places.count>0");
+      $players = $pages->find("template=player, sort=-places.count, sort=-karma, places.count>0");
       break;
     case 'equipment' :
       $title = 'Most equipped';
       $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
-      $players = $pages->find('template=player, sort=-equipment.count, equipment.count>0');
+      $players = $pages->find('template=player, sort=-equipment.count, sort=-karma, equipment.count>0');
       break;
     case 'donation' :
       $title = 'Best donators';
       $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
-      $players = $pages->find('template=player, sort=-donation, donation>0');
+      $players = $pages->find('template=player, sort=-donation, sort=-karma, donation>0');
       break;
     case 'underground_training' :
       $title = 'Most trained';
       $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
-      $players = $pages->find('template=player, sort=-underground_training, underground_training>0');
+      $players = $pages->find('template=player, sort=-underground_training, sort=-karma, underground_training>0');
       break;
     case 'group' :
       $title = 'Most active groups';

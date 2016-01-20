@@ -92,7 +92,7 @@
   $out .= '<th data-toggle="tooltip" title="Player"><span class="glyphicon glyphicon-user"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Karma">K&nbsp;&nbsp;</td>';
   $out .= '<td data-toggle="tooltip" title="What happened on the last date?"><span class="glyphicon glyphicon-th-list"></span></td>';
-  $out .= '<th data-toggle="tooltip" title="Gold coins"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></th>';
+  $out .= '<th data-toggle="tooltip" title="Gold coins"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></th>';
   $out .= '<th data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span></th>';
   $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="" /> HP</th>';
   $out .= '<th><img src="'.$config->urls->templates.'img/star.png" alt="" /> XP</th>';
@@ -132,6 +132,17 @@
       } 
       $trend .= '<span class="'.$trendClass.'" data-toggle="tooltip" data-html="true" title="'.strftime("%d/%m", $event->date).': '.$title.$summary.'">&nbsp;</span>';
     }
+    // Set hk counter
+    if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $player->login)) { // Admin is logged or user
+      $count = checkHk($player);
+      if ($count > 0) {
+        $hkCount = '&nbsp;<span class="label label-danger">'.checkHk($player).'</span>';
+      } else {
+        $hkCount = '';
+      }
+    } else {
+      $hkCount = '';
+    }
     // Set HP progressbar
     $HPwidth = 150*$player->HP/50;
     // Set XP progressbar
@@ -169,7 +180,7 @@
     $out .= '<tr '. $class.'>';
     $out .= '<td>'. $player->group->title .'</td>';
     $out .= '<td>'. $mini .'</td>';
-    $out .= '<td><a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a></td>';
+    $out .= '<td><a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount.'</td>';
     $out .= '<td>'. $player->karma .'</td>';
     $out .= '<td><span class="trend">'.$trend.'</span></td>';
     $out .= '<td>'. $player->GC .'</td>';

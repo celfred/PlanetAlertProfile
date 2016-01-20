@@ -289,10 +289,6 @@ function checkHk($player) {
           $count++;
         }
       }
-      if ($count >= 3) { // 3 forgotten hk (or half-done hk or signature
-        // Register a new penalty
-        return true;
-      }
     }
   } else { // No previous penalty
     // Count all negative homework tasks
@@ -306,12 +302,8 @@ function checkHk($player) {
         }
       }
     }
-    if ($count >= 3) { // 3 forgotten hk (or half-done hk or signature
-      // Register a new penalty
-      return true;
-    }
   }
-  return false;
+  return $count;
 }
 
 function getPosition($player, $field) {
@@ -319,19 +311,19 @@ function getPosition($player, $field) {
   $pos = 1;
   switch ($field) {
     case 'karma' :
-      $allPlayers = $pages->find("template=player, sort=-karma, karma>0");
+      $allPlayers = $pages->find("template=player, sort=karma, karma>0");
       break;
     case 'places' :
-      $allPlayers = $pages->find("template=player, sort=-places.count, places.count>0");
+      $allPlayers = $pages->find("template=player, sort=-places.count, sort=-karma, places.count>0");
       break;
     case 'equipment' :
-      $allPlayers = $pages->find('template=player, sort=-equipment.count, equipment.count>0');
+      $allPlayers = $pages->find('template=player, sort=-equipment.count, sort=-karma, equipment.count>0');
       break;
     case 'donation' :
-      $allPlayers = $pages->find('template=player, sort=-donation, donation>0');
+      $allPlayers = $pages->find('template=player, sort=-donation, sort=-karma, donation>0');
       break;
     case 'underground_training' :
-      $allPlayers = $pages->find('template=player, sort=-underground_training, underground_training>0');
+      $allPlayers = $pages->find('template=player, sort=-underground_training, sort=-karma, underground_training>0');
       break;
     case 'group' :
       $allPlayers = $pages->find('template=player');
