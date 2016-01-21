@@ -12,8 +12,12 @@
     if ($helmet) {
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
-        // Translate type only (for the moment)
-        $allTranslate = $pages->find('template=exercise, type.name=translate, sort=name');
+        // Translate / Quiz types only (for the moment)
+        if ($user->isSuperuser()) {
+          $allTranslate = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=hidden');
+        } else {
+          $allTranslate = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
+        }
 
         $out .= '<div class="row">';
           $out .= '<div class="col-sm-12 text-center">';
@@ -74,21 +78,45 @@
           $allLines = preg_split('/$\r|\n/', $exData);
           /* $out .= '<td data-sort="'.count($allLines).'">'; */
           $out .= '<td>';
-          $out .= count($allLines).' words';
           // Prepare list of French words
-          if (count($allLines)>15) {
-            $listWords = '<strong>15 first words :</strong><br />';
-            for($i=0; $i<15; $i++) {
-              list($left, $right) = preg_split('/,/', $allLines[$i]);
-              $listWords .= $right.'<br />';
-            }
-            $listWords .= '[...]';
-          } else {
-            $listWords = '';
-            foreach($allLines as $line) {
-              list($left, $right) = preg_split('/,/', $line);
-              $listWords .= $right.'<br />';
-            }
+          switch ($result->type->name) {
+            case 'translate' :
+              $out .= count($allLines).' words';
+              if (count($allLines)>15) {
+                $listWords = '<strong>15 first words :</strong><br />';
+                for($i=0; $i<15; $i++) {
+                  list($left, $right) = preg_split('/,/', $allLines[$i]);
+                  $listWords .= $right.'<br />';
+                }
+                $listWords .= '[...]';
+              } else {
+                $listWords = '';
+                foreach($allLines as $line) {
+                  list($left, $right) = preg_split('/,/', $line);
+                  $listWords .= $right.'<br />';
+                }
+              }
+              break;
+            case 'quiz' :
+              $out .= count($allLines).' questions';
+              if (count($allLines)>15) {
+                $listWords = '<strong>15 first questions :</strong><br />';
+                for($i=0; $i<15; $i++) {
+                  list($left, $right) = preg_split('/\?/', $allLines[$i]);
+                  $listWords .= '- '.$left.'<br />';
+                }
+                $listWords .= '[...]';
+              } else {
+                $listWords = '';
+                foreach($allLines as $line) {
+                  list($left, $right) = preg_split('/\?/', $line);
+                  $listWords .= '- '.$left.'<br />';
+                }
+              }
+              break;
+            default :
+              $listWords = '';
+              break;
           }
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
