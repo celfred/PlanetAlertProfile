@@ -134,39 +134,31 @@
             $date1 = new DateTime("today");
             $date2 = new DateTime(date("Y-m-d", $prevUt->first->date));
             $interval = $date1->diff($date2);
-            if ($interval->days === 0) {
+          }
+          switch ($interval->days) {
+            case 1 : 
+              $out .= "1 day ago.";
+              break;
+            case 0 :
               $out .= "Today !";
-            } else {
-              $out .= $interval->days . " days ago ";
-              /* $out .= date("[F j Y", $prevUt->first->date).']'; */
-            }
-          } else {
+              break;
+            default:
+              $out .= $interval->days . " days ago.";
+              break;
           }
           $out .= '</td>';
           $out .= '<td>';
-          // Limit to 1 training session a day if prevUt<10
-          // Limit to 1 training session a week if prevUt<30
-          // Limit to 1 training session a month if prevUt>30
-          if ($prevUt->count > 0 && $prevUt->count < 10) {
-            $spaced = 1;
-          }
-          if ($prevUt->count > 10 && $prevUt->count < 30) {
-            $spaced = 7;
-          }
-          if ($prevUt->count > 30) {
-            $spaced = 30;
-          }
-          if ($interval->days < $spaced && $prevUt->count > 0) {
-            $nbDays = $spaced - $interval->days;
-            if ($nbDays == $spaced) {
+          $spaced = isTrainingAllowed($player, $result);
+          switch ($spaced) {
+            case 1 : 
               $out .= 'Come back tomorrow ;)';
-            } else {
-              if ($nbDays > 1) {
-                $out .= 'Come back in '.$nbDays.' days ;)';
-              }
-            }
-          } else {
-            $out .= ' <a class="label label-sm label-primary" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
+              break;
+            case 0 :
+              $out .= ' <a class="label label-sm label-primary" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
+              break;
+            default:
+              $out .= 'Come back in '.$spaced.' days ;)';
+              break;
           }
           // Admin access
           if ($user->isSuperuser()) {
@@ -178,54 +170,61 @@
         $out .= '</tbody>';
         $out .= '</table>';
       } else { // Training session
-        $out .= '<div ng-app="exerciseApp">';
-
+        // Test if player is allowed to do the training session today
         $monster = $pages->get($input->get->id);
         $redirectUrl = $pages->get('name=underground-training')->url;
-        $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
-        if ($monster->id) { // Training session starts
-          $out .= '<h1>Memory helmet programmed : '. $monster->summary.'</h1> ';
 
-          $out .= '<div class="col-sm-3">';
-          $out .= '<h3><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Training session <span class="blink">started</span></span></h3>';
-          $out .= '<h1><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Word count: {{counter}}</span></h1>';
-          /* $out .= '<h1 ng-class="{zoom:utPoint}"><span class="label label-primary">+{{result}} U.T.</span></h1>'; */
-          /* $out .= '<h1><span class="glyphicon glyphicon-warning-sign"></span> Don\'t forget to save your result!</h1>'; */
-          $out .= '</div>';
+        $isAllowed = isTrainingAllowed($player, $monster);
+        if ($isAllowed !== 0) { // Not allowed because of spaced repetition.
+          // Redirect to training page
+          $session->redirect($redirectUrl);
+        } else { // Ok, let's start the training session !
+          $out .= '<div ng-app="exerciseApp">';
+          $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
+          if ($monster->id) { // Training session starts
+            $out .= '<h1>Memory helmet programmed : '. $monster->summary.'</h1> ';
 
-          $out .= '<div class="col-sm-9 text-center">';
-          $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
-          $out .= '</div>';
-          $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
-          $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
-          $out .= '<div class="bubble-right">';
-          $out .= '<div class="text-center">';
-          $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
-          $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
-          $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{allCorrections[0]}}</span></h3> ';
-          $out .= '</div>';
-          $out .= '<br />';
-          $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
-          $out .= '<br />';
-          $out .= '<button ng-click="attack()" class="btn btn-success">Stimulate!</button>';
-          $out .= '<span class="pull-right">';
-          $out .= '<span class="avatarContainer">';
-          if ($player->avatar) {
-            $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+            $out .= '<div class="col-sm-3">';
+            $out .= '<h3><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Training session <span class="blink">started</span></span></h3>';
+            $out .= '<h1><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Word count: {{counter}}</span></h1>';
+            /* $out .= '<h1 ng-class="{zoom:utPoint}"><span class="label label-primary">+{{result}} U.T.</span></h1>'; */
+            /* $out .= '<h1><span class="glyphicon glyphicon-warning-sign"></span> Don\'t forget to save your result!</h1>'; */
+            $out .= '</div>';
+
+            $out .= '<div class="col-sm-9 text-center">';
+            $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
+            $out .= '</div>';
+            $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
+            $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+            $out .= '<div class="bubble-right">';
+            $out .= '<div class="text-center">';
+            $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
+            $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
+            $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{allCorrections[0]}}</span></h3> ';
+            $out .= '</div>';
+            $out .= '<br />';
+            $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
+            $out .= '<br />';
+            $out .= '<button ng-click="attack()" class="btn btn-success">Stimulate!</button>';
+            $out .= '<span class="pull-right">';
+            $out .= '<span class="avatarContainer">';
+            if ($player->avatar) {
+              $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+            } else {
+              $out .= '<img src="'.$page->image->url.'" alt="Avatar" />';
+            }
+            $out .= '<img class="helmet superpose squeeze" src="'.$helmet->image->url.'" alt="image" />';
+            $out .= '</span>';
+            $out .= '</span>';
+            $out .= '</div>';
+            $out .= '<button ng-click="stopSession()" class="btn btn-danger" ng-disabled="">Take the helmet off (Stop training session)</button>';
+            $out .= '</div>';
+            $out .= '</div>';
+            $out .= '</div>';
+
           } else {
-            $out .= '<img src="'.$page->image->url.'" alt="Avatar" />';
+            $out .= 'Sorry, but a problem occured. Please try again. If the problem still exists, contact the administrator.';
           }
-          $out .= '<img class="helmet superpose squeeze" src="'.$helmet->image->url.'" alt="image" />';
-          $out .= '</span>';
-          $out .= '</span>';
-          $out .= '</div>';
-          $out .= '<button ng-click="stopSession()" class="btn btn-danger" ng-disabled="">Take the helmet off (Stop training session)</button>';
-          $out .= '</div>';
-          $out .= '</div>';
-          $out .= '</div>';
-
-        } else {
-          $out .= 'Sorry, but a problem occured. Please try again. If the problem still exists, contact the administrator.';
         }
       }
 

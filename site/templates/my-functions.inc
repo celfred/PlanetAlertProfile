@@ -445,4 +445,61 @@ function groupScoreBoard($limit) {
   return $outGroups;
 }
 
+function isTrainingAllowed($player, $monster) {
+  $prevUt = $player->find("template=event,refPage=$monster->id, sort=-date");
+
+  if ($prevUt->count > 0) {
+    // Find # of days compared to today
+    $date1 = new DateTime("today");
+    $date2 = new DateTime(date("Y-m-d", $prevUt->first->date));
+    $interval = $date1->diff($date2);
+  }
+
+  // Set spaced repetition according to monster's level?
+  if ($monster->level >= 1 ) {
+    // Limit to 1 training session a day if prevUt<5
+    // Limit to 1 training session a week if prevUt<10
+    // Limit to 1 training session a month if prevUt>15
+    if ($prevUt->count > 0 && $prevUt->count < 5) {
+      $spaced = 1;
+    }
+    if ($prevUt->count > 5 && $prevUt->count < 10) {
+      $spaced = 7;
+    }
+    if ($prevUt->count > 10) {
+      $spaced = 30;
+    }
+  }
+  if ($monster->level === 1) {
+    // Limit to 1 training session a day if prevUt<5
+    // Limit to 1 training session a week if prevUt<10
+    // Limit to 1 training session a month if prevUt>15
+    if ($prevUt->count > 0 && $prevUt->count <= 5) {
+      $spaced = 1;
+    }
+    if ($prevUt->count > 5 && $prevUt->count <= 10) {
+      $spaced = 7;
+    }
+    if ($prevUt->count > 10) {
+      $spaced = 30;
+    }
+  }
+
+  if ($interval->days < $spaced && $prevUt->count > 0) {
+    $nbDays = $spaced - $interval->days;
+    if ($nbDays == $spaced) {
+      return $spaced;
+    } else {
+      if ($nbDays > 1) {
+        return $nbDays;
+      }
+    }
+  } else {
+    return 0;
+  }
+
+  return 0;
+
+}
+
 ?>
