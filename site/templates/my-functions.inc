@@ -497,9 +497,6 @@ function isTrainingAllowed($player, $monster) {
   } else {
     return 0;
   }
-
-  return 0;
-
 }
 
 ?>

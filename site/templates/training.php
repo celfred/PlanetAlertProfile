@@ -134,17 +134,17 @@
             $date1 = new DateTime("today");
             $date2 = new DateTime(date("Y-m-d", $prevUt->first->date));
             $interval = $date1->diff($date2);
-          }
-          switch ($interval->days) {
-            case 1 : 
-              $out .= "1 day ago.";
-              break;
-            case 0 :
-              $out .= "Today !";
-              break;
-            default:
-              $out .= $interval->days . " days ago.";
-              break;
+            switch ($interval->days) {
+              case 1 : 
+                $out .= "1 day ago.";
+                break;
+              case 0 :
+                $out .= "Today !";
+                break;
+              default:
+                $out .= $interval->days . " days ago.";
+                break;
+            }
           }
           $out .= '</td>';
           $out .= '<td>';
