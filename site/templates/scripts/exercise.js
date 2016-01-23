@@ -17,6 +17,17 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
   
+	$window.addEventListener("beforeunload", function (e) {
+		if (!$scope.waitForStart) {
+			var confirmationMessage = "Do you really want to quit the page?";
+
+			(e || window.event).returnValue = confirmationMessage; //Gecko + IE
+			return confirmationMessage;                            //Webkit, Safari, Chrome
+		} else {
+			return false;
+		}
+	});
+
   $scope.init = function(exerciseId, redirectUrl, playerId, weaponRatio, protectionRatio, submitUrl) {
     $scope.playerPower += parseInt(weaponRatio);
     $scope.monsterPower -= parseInt(protectionRatio);
@@ -268,6 +279,17 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.utPoint = false;
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
+
+	$window.addEventListener("beforeunload", function (e) {
+		if (!$scope.waitForStart) {
+			var confirmationMessage = "Do you really want to quit the page?";
+
+			(e || window.event).returnValue = confirmationMessage; //Gecko + IE
+			return confirmationMessage;                            //Webkit, Safari, Chrome
+		} else {
+			return false;
+		}
+	});
 
 	$scope.nationality = ['French', 'English', 'Scottish', 'Welsh', 'American', 'Australian', 'Canadian', 'Irish', 'German', 'Spanish', 'Italian', 'Swedish', 'Brazilian', 'Greek', 'Turkish', 'Russian', 'Chinese', 'Belgian'];
 
