@@ -55,10 +55,17 @@
           $out .= '<tr>';
           $out .= '<td>';
           $out .= $result->title;
+          // Find # of days compared to today to set 'New' indicator
+          $date1 = new DateTime("today");
+          $date2 = new DateTime(date("Y-m-d", $result->modified));
+          $interval = $date1->diff($date2);
+          if ($interval->days < 7) {
+            $out .= ' <span class="badge">New</span>';
+          }
           $out .= '</td>';
           $out .= '<td>';
           foreach ($result->topic as $t) {
-            $out .= '<span class="label label-default">'.$t->title.'</span>';
+            $out .= '<span class="label label-primary">'.$t->title.'</span> ';
           }
           $out .= '</td>';
           $out .= '<td>';
