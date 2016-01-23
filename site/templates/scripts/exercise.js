@@ -269,6 +269,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
 
+	$scope.nationality = ['French', 'English', 'Scottish', 'Welsh', 'American', 'Australian', 'Canadian', 'Irish', 'German', 'Spanish', 'Italian', 'Swedish', 'Brazilian', 'Greek', 'Turkish', 'Russian', 'Chinese', 'Belgian'];
+
   $scope.init = function(exerciseId, redirectUrl, playerId, submitUrl) {
     $http.get('service-pages/?template=exercise&id='+exerciseId).then(function(response){
       var newLines = new Array();
@@ -297,6 +299,52 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       for (var i=0; i<newLines.length; i++) {
         $scope.allLines.push(newLines[i]);
       }
+      // Manage special variables
+			// %fname% : First name (female or male)
+			// %fnamef% : First name female
+			// %fnamem% : First name male
+			// %name% : Full name (female or male)
+			// %age% : Age
+			// %nationality% : Nationality
+      for (var i=0; i<$scope.allLines.length; i++) {
+        var str = $scope.allLines[i];
+				var pattern = /%name%/i;
+        if (str.search(pattern) != -1 ) {
+					var sub = chance.name();
+          $scope.allLines[i] = str.replace(pattern, sub);
+					str = $scope.allLines[i];
+				}
+				var pattern = /%fname%/i;
+        if (str.search(pattern) != -1 ) {
+					var sub = chance.first();
+          $scope.allLines[i] = str.replace(pattern, sub);
+					str = $scope.allLines[i];
+				}
+				var pattern = /%fnamef%/i;
+        if (str.search(pattern) != -1 ) {
+					var sub = chance.first({gender:"female"});
+          $scope.allLines[i] = str.replace(pattern, sub);
+					str = $scope.allLines[i];
+				}
+				var pattern = /%fnamem%/i;
+        if (str.search(pattern) != -1 ) {
+					var sub = chance.first({gender:"male"});
+          $scope.allLines[i] = str.replace(pattern, sub);
+					str = $scope.allLines[i];
+				}
+				var pattern = /%age%/i;
+        if (str.search(pattern) != -1 ) {
+					var sub = chance.age();
+          $scope.allLines[i] = str.replace(pattern, sub);
+					str = $scope.allLines[i];
+				}
+				var pattern = /%nationality%/i;
+        if (str.search(pattern) != -1 ) {
+					var sub = chance.pick($scope.nationality);
+          $scope.allLines[i] = str.replace(pattern, sub);
+					str = $scope.allLines[i];
+				}
+			}
       // Enable start Fight button
       $scope.waitForStart = false;
       // Pick first question
