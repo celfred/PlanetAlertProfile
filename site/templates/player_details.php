@@ -125,7 +125,7 @@
             /*   echo '<li>'.$p->summary.'</li>'; */
             /* } */
           } else {
-            echo 'You have NEVER used the Memoru Helmet.';
+            echo 'You have NEVER used the Memory Helmet.';
           }
           ?>
           </ul>
