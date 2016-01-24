@@ -272,6 +272,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.result = 0;
   $scope.history = new Array();
   $scope.lineHistory = new Array();
+	$scope.newCorrections = new Array();
   $scope.counter = 0; // #
   $scope.exType = '';
   $scope.exData = '';
@@ -328,6 +329,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			// %name% : Full name (female or male)
 			// %age% : Age
 			// %nationality% : Nationality
+			// (...) : Displayed text but optional in answers
       for (var i=0; i<$scope.allLines.length; i++) {
         var str = $scope.allLines[i];
 				var pattern = /%name%/i;
@@ -404,9 +406,20 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 				for (i=0; i<$scope.allWords.length; i++) {
 					$scope.allWords[i] = $scope.allWords[i].trim();
 				}
-        $scope.allCorrections = randWords[randOpp].split("|");
 				for (i=0; i<$scope.allCorrections.length; i++) {
 					$scope.allCorrections[i] = $scope.allCorrections[i].trim();
+					// Add optional text functionality : (...)
+					var pattern = /\((.*?)\)/i;
+					var str = $scope.allCorrections[i];
+					if (str.search(pattern) != -1 ) {
+						$scope.newCorrections.push(str.replace(pattern, ""));
+						$scope.newCorrections.push(str.replace(pattern, "$1"));
+					}
+					// Add to allCorrections
+					for (var i=0; i<$scope.newCorrections.length; i++) {
+						$scope.allCorrections.push($scope.newCorrections[i].trim());
+					}
+					$scope.newCorrections = [];
 				}
         // Pick 1 random word from possible words
 				if ($scope.allWords.length > 1) {
@@ -436,6 +449,18 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         $scope.allCorrections = quiz[1].split("|");
 				for (i=0; i<$scope.allCorrections.length; i++) {
 					$scope.allCorrections[i] = $scope.allCorrections[i].trim();
+					// Add optional text functionality : (...)
+					var pattern = /\((.*?)\)/i;
+					var str = $scope.allCorrections[i];
+					if (str.search(pattern) != -1 ) {
+						$scope.newCorrections.push(str.replace(pattern, ""));
+						$scope.newCorrections.push(str.replace(pattern, "$1"));
+					}
+					// Add to allCorrections
+					for (var i=0; i<$scope.newCorrections.length; i++) {
+						$scope.allCorrections.push($scope.newCorrections[i].trim());
+					}
+					$scope.newCorrections = [];
 				}
 				$scope.word = quiz[0];
         // Add word to history
