@@ -109,7 +109,10 @@ function checkLevel($player) {
 function getKarma($player) {
   // Karma calculated from all values (except GC and Donations)
   if ($player->level > 1) {
-    $karma = $player->level*100 + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
+    for ($i=1; $i<=$player->level; $i++) {
+      $levelKarma = $levelKarma + (($i*10)+90);
+    }
+    $karma = $levelKarma + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
   } else {
     $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
   }
