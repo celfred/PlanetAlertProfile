@@ -403,6 +403,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         if (randIndex == 0) { randOpp = 1; } else { randOpp = 0; }
         // Test for multiple possible words and answers
         $scope.allWords = randWords[randIndex].split("|");
+				$scope.allCorrections = randWords[randOpp].trim().split("|");
 				for (i=0; i<$scope.allWords.length; i++) {
 					$scope.allWords[i] = $scope.allWords[i].trim();
 				}
