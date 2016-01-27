@@ -33,28 +33,31 @@ function updateScore($player, $task) {
   $tGC = $task->GC;
   
   // Ponderate task's impact according to player's equipment
+  // Except for training (core values are used)
   $deltaXP = 0;
   $deltaHP = 0;
-  if ($player->equipment) {
-    // Limit to the 2 best weapons
-    $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
-    foreach ($concerned_weapons as $item) {
-      $deltaXP = $deltaXP + $item->XP;
-    }
-    // Limit to 1 best protection
-    $concerned_protection = $player->equipment->find("category.name=protections, sort=-HP, limit=1");
-    foreach ($concerned_protection as $item) {
-      $deltaHP = $deltaHP + $item->HP;
-    }
-    if ($tHP < 0) { // Negative task
-      // Loss of 1 minimum whatever the equipment
-      if ( $tHP + $deltaHP > 0 ) {
-        $deltaHP = $tHP-1;
+  if ($task->is('name!=ut-action-v|ut-action-vv')) {
+    if ($player->equipment) {
+      // Limit to the 2 best weapons
+      $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
+      foreach ($concerned_weapons as $item) {
+        $deltaXP = $deltaXP + $item->XP;
       }
-      // Get rid of weapons' bonus
-      $deltaXP = 0;
-    } else { // Positive task
-      $deltaHP = 0;
+      // Limit to 1 best protection
+      $concerned_protection = $player->equipment->find("category.name=protections, sort=-HP, limit=1");
+      foreach ($concerned_protection as $item) {
+        $deltaHP = $deltaHP + $item->HP;
+      }
+      if ($tHP < 0) { // Negative task
+        // Loss of 1 minimum whatever the equipment
+        if ( $tHP + $deltaHP > 0 ) {
+          $deltaHP = $tHP-1;
+        }
+        // Get rid of weapons' bonus
+        $deltaXP = 0;
+      } else { // Positive task
+        $deltaHP = 0;
+      }
     }
   }
 
