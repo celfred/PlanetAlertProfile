@@ -383,8 +383,10 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.pickQuestion = function(exType) {
     // End animation
     $timeout(function() { $scope.correct = false; }, 1000);
+		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
+		$scope.newCorrections = [];
     switch(exType) {
       case 'translate' :
         // Pick a random line and build words array
