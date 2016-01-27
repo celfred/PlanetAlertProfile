@@ -383,8 +383,10 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.pickQuestion = function(exType) {
     // End animation
     $timeout(function() { $scope.correct = false; }, 1000);
+		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
+		$scope.newCorrections = [];
     switch(exType) {
       case 'translate' :
         // Pick a random line and build words array
@@ -417,8 +419,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 						$scope.newCorrections.push(str.replace(pattern, "$1"));
 					}
 					// Add to allCorrections
-					for (var i=0; i<$scope.newCorrections.length; i++) {
-						$scope.allCorrections.push($scope.newCorrections[i].trim());
+					for (var j=0; j<$scope.newCorrections.length; j++) {
+						$scope.allCorrections.push($scope.newCorrections[j].trim());
 					}
 					$scope.newCorrections = [];
 				}
@@ -458,8 +460,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 						$scope.newCorrections.push(str.replace(pattern, "$1"));
 					}
 					// Add to allCorrections
-					for (var i=0; i<$scope.newCorrections.length; i++) {
-						$scope.allCorrections.push($scope.newCorrections[i].trim());
+					for (var j=0; j<$scope.newCorrections.length; j++) {
+						$scope.allCorrections.push($scope.newCorrections[j].trim());
 					}
 					$scope.newCorrections = [];
 				}
