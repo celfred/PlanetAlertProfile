@@ -233,8 +233,7 @@
               ?>
             </ul>
           </div>
-					echo '<a class="btn" href="./?logout=1">Log out</a>';
-          ?>
+					<?php echo '<a class="btn" href="./?logout=1">Log out</a>'; ?>
         </div>
         </ul>
       <?php } ?>
