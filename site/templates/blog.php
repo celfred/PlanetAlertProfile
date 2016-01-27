@@ -1,15 +1,9 @@
 <?php
   // TODO : Add comments for each news?
   include("./head.inc"); 
-?>
 
-<p class="well">This is the archives of Official Announcements on the Newsboard.
- You can also read the  <a class='btn btn-primary' href='<?php echo $pages->get('/documentation')->url; ?>'>complete Documentation (work in progress)</a> for more information.
-</p>
-
-<?php
   // Admin news
-  $newsAdmin = $pages->get('/newsboard')->children("limit=10")->sort('-created');
+  $newsAdmin = $pages->get('/newsboard')->children("limit=5")->sort('-created');
   if ($newsAdmin->count() > 0) {
 
     // Pagination

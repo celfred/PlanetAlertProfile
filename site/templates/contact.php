@@ -68,7 +68,7 @@ if(!$sent) {
         <label for="comments" class="col-sm-2 control-label">Your message</label>
         <div class="col-sm-8">
           <textarea id="comments" class="form-control" name="comments" rows="6">$form[comments]</textarea>
-          <span class="help-box"><em>Please watch out your spelling and DO NOT use SMS syntax ;)</em><br />An <strong>error-free</strong> message (punctuation, spelling, instructions...) will give <strong>+1XP to the player</strong>!</span>
+          <span class="help-box"><em>Please watch out your spelling and DO NOT use SMS syntax ;)</em></span>
         </div>
       </div>
       <div class="col-sm-offset-2 col-sm-8">

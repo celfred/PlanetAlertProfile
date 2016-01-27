@@ -108,7 +108,7 @@
             </ul>
           </div>
           <div class="btn-group">
-            <?php $class = ($page->name == 'shop' || $page->name == 'places' || $page->name == 'tasks' || $page->template == 'task') ? "on" : ""; ?>
+            <?php $class = $page->is("name=shop|places|tasks|task") ? "on" : ""; ?>
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The World <span class="caret"> </span></button>
             <ul class="dropdown-menu">
               <?php
@@ -123,11 +123,22 @@
               ?>
             </ul>
           </div>
+          <div class="btn-group">
           <?php
-            $class = $page->is("name=blog|documentation") ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/blog')->url}'>Infos</a>";
-            $class = $page->name == 'contact' ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/contact')->url}'>Contact</a>";
+            $class = $page->is("name=blog|documentation|contact") ? "on" : ""; ?>
+            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>
+            <ul class="dropdown-menu">
+							<?php
+							$class = $page->name == 'contact' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=contact')->url}'>Contact</a></li>";
+							$class = $page->name == 'blog' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=blog')->url}'>Newsboard Archives</a></li>";
+							$class = $page->name == 'documentation' ? " class='selected-left'" : "";
+              echo "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'>Documentation</a></li>";
+              ?>
+            </ul>
+          </div>
+					<?php
             if ( $user->isLoggedin()) {
               echo '<a class="btn" href="./?logout=1">Log out</a>';
             } else {
@@ -177,7 +188,7 @@
           </div>
 
           <div class="btn-group">
-            <?php $class = ($page->name == 'shop' || $page->name == 'places' || $page->name == 'tasks') ? "on" : ""; ?>
+            <?php $class = $page->is("name=shop|places|tasks|task") ? "on" : ""; ?>
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The World <span class="caret"> </span></button>
             <ul class="dropdown-menu">
               <?php
@@ -207,17 +218,22 @@
             </ul>
           </div>
 
+          <div class="btn-group">
           <?php
-            $class = $page->name == 'documentation' ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/documentation')->url}'>Doc.</a>";
-            $class = $page->name == 'contact' ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/contact')->url}'>Contact</a>";
-            if ( $user->isLoggedin()) {
-              echo '<a class="btn" href="./?logout=1">Log out</a>';
-            } else {
-              $class = $page->name == 'login' ? "on" : "";
-              echo "<a class='btn $class' href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>Login</a>";
-            }
+            $class = $page->is("name=blog|documentation|contact") ? "on" : ""; ?>
+            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>
+            <ul class="dropdown-menu">
+							<?php
+							$class = $page->name == 'contact' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=contact')->url}'>Contact</a></li>";
+							$class = $page->name == 'blog' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=blog')->url}'>Newsboard Archives</a></li>";
+							$class = $page->name == 'documentation' ? " class='selected-left'" : "";
+              echo "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'>Documentation</a></li>";
+              ?>
+            </ul>
+          </div>
+					echo '<a class="btn" href="./?logout=1">Log out</a>';
           ?>
         </div>
         </ul>
