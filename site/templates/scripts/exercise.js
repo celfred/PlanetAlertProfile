@@ -386,10 +386,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
-		$scope.newCorrections = [];
-    switch(exType) {
-      case 'translate' :
-        // Pick a random line and build words array
+        // Pick a random line
         // Different from previous line
 				var randNum = Math.floor(Math.random()*$scope.allLines.length);
 				if ( $scope.lineHistory.length > 1) {
@@ -399,31 +396,33 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 				}
         $scope.lineHistory.push(randNum);
         var randLine = $scope.allLines[randNum];
+    switch(exType) {
+      case 'translate' :
         var randWords = randLine.split(",");
-        // Pick a random word
+        // Pick a random word : either left or right
         var randIndex = Math.round(Math.random());
         if (randIndex == 0) { randOpp = 1; } else { randOpp = 0; }
         // Test for multiple possible words and answers
         $scope.allWords = randWords[randIndex].split("|");
-				$scope.allCorrections = randWords[randOpp].trim().split("|");
+				// Trim eventual extra spaces
 				for (i=0; i<$scope.allWords.length; i++) {
 					$scope.allWords[i] = $scope.allWords[i].trim();
 				}
-				for (i=0; i<$scope.allCorrections.length; i++) {
-					$scope.allCorrections[i] = $scope.allCorrections[i].trim();
-					// Add optional text functionality : (...)
-					var pattern = /\((.*?)\)/i;
-					var str = $scope.allCorrections[i];
-					if (str.search(pattern) != -1 ) {
-						$scope.newCorrections.push(str.replace(pattern, ""));
-						$scope.newCorrections.push(str.replace(pattern, "$1"));
-					}
-					// Add to allCorrections
-					for (var j=0; j<$scope.newCorrections.length; j++) {
-						$scope.allCorrections.push($scope.newCorrections[j].trim());
-					}
-					$scope.newCorrections = [];
-				}
+				var allCorrections = randWords[randOpp].split("|");
+				$scope.allCorrections = $scope.parseCorrections(allCorrections);
+        break;
+      case 'quiz' :
+				// Question will be $scope.allWords[0]
+        var quiz = randLine.split("?");
+				$scope.allWords = quiz[0].sptlit("|");
+        // Test for multiple possible answers
+        var allCorrections = quiz[1].split("|");
+				$scope.allCorrections = $scope.parseCorrections(allCorrections);
+        break;
+      default:
+        console.log('Unknown exType');
+        break;
+    }
         // Pick 1 random word from possible words
 				if ($scope.allWords.length > 1) {
 					$scope.word = chance.pick($scope.allWords);
@@ -432,51 +431,39 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 				}
         // Add word to history
         $scope.history.push($scope.word);
+				// Help with 1st mixed answers
         $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
         // Set focus on input field
         $timeout($scope.focusInput, 300);
-        break;
-      case 'quiz' :
-        // Pick a random line and build quiz array
-        // Different from previous line
-				var randNum = Math.floor(Math.random()*$scope.allLines.length);
-				if ( $scope.lineHistory.length > 1) {
-					while ( randNum == $scope.lineHistory[$scope.lineHistory.length-1] ) {
-						var randNum = Math.floor(Math.random()*$scope.allLines.length);
-					}
-				}
-        $scope.lineHistory.push(randNum);
-        var randLine = $scope.allLines[randNum];
-        var quiz = randLine.split("?");
-        // Test for multiple possible words and answers
-        $scope.allCorrections = quiz[1].split("|");
-				for (i=0; i<$scope.allCorrections.length; i++) {
-					$scope.allCorrections[i] = $scope.allCorrections[i].trim();
-					// Add optional text functionality : (...)
-					var pattern = /\((.*?)\)/i;
-					var str = $scope.allCorrections[i];
-					if (str.search(pattern) != -1 ) {
-						$scope.newCorrections.push(str.replace(pattern, ""));
-						$scope.newCorrections.push(str.replace(pattern, "$1"));
-					}
-					// Add to allCorrections
-					for (var j=0; j<$scope.newCorrections.length; j++) {
-						$scope.allCorrections.push($scope.newCorrections[j].trim());
-					}
-					$scope.newCorrections = [];
-				}
-				$scope.word = quiz[0];
-        // Add word to history
-        $scope.history.push($scope.word);
-        $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
-        // Set focus on input field
-        $timeout($scope.focusInput, 300);
-        break;
-      default:
-        console.log('Unknown exType');
-        break;
-    }
+		// 
   }
+
+	$scope.parseCorrections = function(allCorrections) {
+		var newCorrections = [];
+		var tempCorrections = [];
+		for (i=0; i<allCorrections.length; i++) {
+			// Trim extra spaces
+			allCorrections[i] = allCorrections[i].trim();
+			// Add optional text functionality : (...)
+			var pattern = /\((.*?)\)/i;
+			var str = allCorrections[i];
+			if (str.search(pattern) != -1 ) {
+				tempCorrections.push(str.replace(pattern, ""));
+				tempCorrections.push(str.replace(pattern, "$1"));
+			}
+			// Add to newCorrections
+			for (var j=0; j<tempCorrections.length; j++) {
+				newCorrections.push(tempCorrections[j].trim());
+			}
+			tempCorrections = [];
+		}
+		// Add to allCorrections
+		for (var j=0; j<newCorrections.length; j++) {
+			allCorrections.push(newCorrections[j]);
+		}
+		newCorrections = [];
+		return allCorrections;
+	}
 
   $scope.shuffle = function (str) {
       var a = str.split(""),
