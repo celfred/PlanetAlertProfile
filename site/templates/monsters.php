@@ -25,6 +25,7 @@ $allMonsters = $page->children->sort('name');
   <th>Level</th>
   <th>Type</th>
   <th>Summary</th>
+  <th>Best trained</th>
 </tr>
 </thead>
 <tbody>
@@ -44,6 +45,17 @@ $allMonsters = $page->children->sort('name');
     $out .= '<td>'.$m->level.'</td>';
     $out .= '<td>'.$m->type->title.'</td>';
     $out .= '<td>'.$m->summary.' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$m->frenchSummary.'"></span></td>';
+    // Find best trained player on this monster
+    $out .= '<td>';
+    if ($m->mostTrained) {
+      $bestUt = utGain($m->id, $m->mostTrained);
+      if ($m->mostTrained == $player) {
+        $out .= '<span class="label label-success">'.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span>';
+      } else {
+        $out .= '<span>'.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span> : '.$bestUt.'UT';
+      }
+    }
+    $out .= '</td>';
     $out .= '</tr>';
   }
   echo $out;

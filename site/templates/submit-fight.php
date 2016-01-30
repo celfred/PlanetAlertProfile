@@ -8,7 +8,7 @@
 
     $training = $input->post->training;
     $exerciseId = $input->post->exerciseId;
-    $monster = $pages->get($exerciseId)->title;
+    $monster = $pages->get($exerciseId);
     $summary = $pages->get($exerciseId)->summary;
     $result = $input->post->result;
 
@@ -36,15 +36,16 @@
         saveHistory($player, $task, $taskComment, $newsBoard, $refPage);
         
         // TODO Test if new best player on this monster
-        setBestPlayer($exerciseId, $player);
+        setBestPlayer($monster, $player);
 
         // Record to log file
-        $this->log($taskComment.','.$result);
+        $logText = $player->id.' ('.$player->name.'),'.$exerciseId.' ('.$refPage->name.'),'.$result;
+        $log->save('underground-training.txt', $logText);
 
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->playerTeam."\r\n";
-        $msg .= "Training : ". $monster."\r\n";
+        $msg .= "Training : ". $monster->title."\r\n";
         $msg .= "Result : ". $result;
         mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
       }
@@ -80,7 +81,7 @@
         $player->save();
 
         // Record history
-        $taskComment = 'Fight vs. '.$monster.' ['.$result.']';
+        $taskComment = 'Fight vs. '.$monster->title.' ['.$result.']';
         saveHistory($player, $task, $taskComment, $newsBoard);
         
         // Record to log file
@@ -89,7 +90,7 @@
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->playerTeam."\r\n";
-        $msg .= "Fight : ". $monster."\r\n";
+        $msg .= "Fight : ". $monster->title."\r\n";
         $msg .= "Result : ". $result;
         mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
       }
