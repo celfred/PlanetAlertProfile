@@ -31,11 +31,13 @@
         $player->save();
         
         // Record history
-        //$taskComment = 'Training "'.$summary.'" [+'.$result.'U.T.]';
         $taskComment = $summary.'" [+'.$result.'U.T.]';
         $refPage = $exerciseId;
         saveHistory($player, $task, $taskComment, $newsBoard, $refPage);
         
+        // TODO Test if new best player on this monster
+        setBestPlayer($exerciseId, $player);
+
         // Record to log file
         $this->log($taskComment.','.$result);
 

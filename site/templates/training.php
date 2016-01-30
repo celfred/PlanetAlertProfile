@@ -14,9 +14,9 @@
       if (!$input->get->id) { // Display training catalogue
         // Translate / Quiz types only (for the moment)
         if ($user->isSuperuser()) {
-          $allTranslate = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=hidden');
+          $allUt = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=hidden');
         } else {
-          $allTranslate = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
+          $allUt = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
         }
 
         $out .= '<div class="row">';
@@ -44,12 +44,14 @@
           $out .= '<th>Summary</th>';
           $out .= '<th># of words</th>';
           $out .= '<th>Already trained?</th>';
+          $out .= '<th>Ut gained</th>';
           $out .= '<th>Last training session</th>';
           $out .= '<th>Action</th>';
+          $out .= '<th>Best trained</th>';
           $out .= '</tr>';
           $out .= '</thead>';
           $out .= '<tbody>';
-        foreach($allTranslate as $result) {
+        foreach($allUt as $result) {
           // Get previous player's statistics
           $prevUt = $player->find('template=event,refPage='.$result->id.', sort=-date');
           $out .= '<tr>';
@@ -134,6 +136,11 @@
             $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span> ';
           }
           $out .= '</td>';
+          //Get total UT gained on this monster
+          $utGain = utGain($result->id, $player);
+          $out .= '<td>';
+          $out .= '+'.$utGain;
+          $out .= '</td>';
           // Last training session date
           $out .= '<td>';
           if ($prevUt->count > 0) {
@@ -170,6 +177,12 @@
           // Admin access
           if ($user->isSuperuser()) {
             $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
+          }
+          $out .= '</td>';
+          // Find best trained player on this monster
+          $out .= '<td>';
+          if ($result->bestTrainedPlayer->id) {
+            $out .= $result->bestTrainedPlayer->title.' ('.$result->bestTrainedUt.')';
           }
           $out .= '</td>';
           $out .= '</tr>';

@@ -505,4 +505,23 @@ function isTrainingAllowed($player, $monster) {
   }
 }
 
+function utGain($monsterId, $player) {
+  $prevUt = $player->find('template=event,refPage='.$monsterId.', sort=-date');
+  foreach($prevUt as $p) {
+    preg_match_all("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches, PREG_SET_ORDER);
+
+    if (count($matches) == 0) {
+      $utGain = $utGain+1;
+    } else {
+      foreach ($matches as $val) {
+        $utGain = $utGain+$val[1];
+      }
+    }
+  }
+  return $utGain;
+}
+
+function setBestPlayer($monsterId, $player) {
+
+}
 ?>
