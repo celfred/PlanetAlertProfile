@@ -118,9 +118,9 @@ $allMonsters = $page->children->sort('name');
     if ($m->mostTrained) {
       $bestUt = utGain($m->id, $m->mostTrained);
       if ($m->mostTrained == $player) {
-        $out .= '<span class="label label-success">'.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span>';
+        $out .= '<span class="label label-success">'.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.'] : '.$bestUt.'</span>';
       } else {
-        $out .= '<span>'.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span> : '.$bestUt.'UT';
+        $out .= '<span class="label label-primary">'.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.'] : '.$bestUt.' UT </span>';
       }
     }
     $out .= '</td>';

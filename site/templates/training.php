@@ -139,7 +139,9 @@
           //Get total UT gained on this monster
           $utGain = utGain($result->id, $player);
           $out .= '<td>';
-          $out .= '+'.$utGain;
+          if ($utGain > 0) {
+            $out .= '+'.$utGain;
+          }
           $out .= '</td>';
           // Last training session date
           $out .= '<td>';
