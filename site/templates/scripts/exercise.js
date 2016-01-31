@@ -386,16 +386,16 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
-        // Pick a random line
-        // Different from previous line
+		// Pick a random line
+		// Different from previous line
+		var randNum = Math.floor(Math.random()*$scope.allLines.length);
+		if ( $scope.lineHistory.length > 1) {
+			while ( randNum == $scope.lineHistory[$scope.lineHistory.length-1] ) {
 				var randNum = Math.floor(Math.random()*$scope.allLines.length);
-				if ( $scope.lineHistory.length > 1) {
-					while ( randNum == $scope.lineHistory[$scope.lineHistory.length-1] ) {
-						var randNum = Math.floor(Math.random()*$scope.allLines.length);
-					}
-				}
-        $scope.lineHistory.push(randNum);
-        var randLine = $scope.allLines[randNum];
+			}
+		}
+		$scope.lineHistory.push(randNum);
+		var randLine = $scope.allLines[randNum];
     switch(exType) {
       case 'translate' :
         var randWords = randLine.split(",");
@@ -423,19 +423,18 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         console.log('Unknown exType');
         break;
     }
-        // Pick 1 random word from possible words
-				if ($scope.allWords.length > 1) {
-					$scope.word = chance.pick($scope.allWords);
-				} else {
-					$scope.word = $scope.allWords[0];
-				}
-        // Add word to history
-        $scope.history.push($scope.word);
-				// Help with 1st mixed answers
-        $scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
-        // Set focus on input field
-        $timeout($scope.focusInput, 300);
-		// 
+		// Pick 1 random word from possible words
+		if ($scope.allWords.length > 1) {
+			$scope.word = chance.pick($scope.allWords);
+		} else {
+			$scope.word = $scope.allWords[0];
+		}
+		// Add word to history
+		$scope.history.push($scope.word);
+		// Help with 1st mixed answers
+		$scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
+		// Set focus on input field
+		$timeout($scope.focusInput, 300);
   }
 
 	$scope.parseCorrections = function(allCorrections) {

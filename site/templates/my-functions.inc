@@ -522,7 +522,7 @@ function utGain($monsterId, $player) {
 }
 
 function setBestPlayer($monster, $player) {
-  $playerUt = utGain($monsterId, $player);
+  $playerUt = utGain($monster, $player);
   if ($playerUt > $monster->mostTrained) {
     $monster->of(false);
     $monster->mostTrained = $player->id;

@@ -44,10 +44,10 @@
           $out .= '<th>Summary</th>';
           $out .= '<th># of words</th>';
           $out .= '<th>Already trained?</th>';
-          $out .= '<th>Ut gained</th>';
+          $out .= '<th>U.T. gained</th>';
           $out .= '<th>Last training session</th>';
           $out .= '<th>Action</th>';
-          $out .= '<th>Best trained</th>';
+          $out .= '<th>Most trained player</th>';
           $out .= '</tr>';
           $out .= '</thead>';
           $out .= '<tbody>';
