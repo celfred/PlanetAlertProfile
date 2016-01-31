@@ -85,8 +85,7 @@
           // Count # of words
           $exData = $result->exData;
           $allLines = preg_split('/$\r|\n/', $exData);
-          /* $out .= '<td data-sort="'.count($allLines).'">'; */
-          $out .= '<td>';
+          $out .= '<td data-sort="'.count($allLines).'">';
           // Prepare list of French words
           switch ($result->type->name) {
             case 'translate' :
@@ -182,14 +181,17 @@
           }
           $out .= '</td>';
           // Find best trained player on this monster
-          $out .= '<td>';
           if ($result->mostTrained) {
             $bestUt = utGain($result->id, $result->mostTrained);
             if ($result->mostTrained == $player) {
-              $out .= '<span class="label label-success">'.$result->mostTrained->title.' ['.$result->mostTrained->playerTeam.']</span>';
+              $class = 'success';
             } else {
-              $out .= '<span>'.$result->mostTrained->title.' ['.$result->mostTrained->playerTeam.']</span> : '.$bestUt.'UT';
+              $class = 'primary';
             }
+          }
+          $out .= '<td data-sort="'.$bestUt.'">';
+          if ($result->mostTrained) {
+            $out .= '<span class="label label-'.$class.'">'.$bestUt.' UT - '.$result->mostTrained->title.' ['.$result->mostTrained->playerTeam.']</span>';
           }
           $out .= '</td>';
           $out .= '</tr>';

@@ -69,8 +69,7 @@ $allMonsters = $page->children->sort('name');
     // Count # of words
     $exData = $m->exData;
     $allLines = preg_split('/$\r|\n/', $exData);
-    /* $out .= '<td data-sort="'.count($allLines).'">'; */
-    $out .= '<td>';
+    $out .= '<td data-sort="'.count($allLines).'">';
     // Prepare list of French words
     switch ($m->type->name) {
       case 'translate' :
@@ -114,14 +113,17 @@ $allMonsters = $page->children->sort('name');
     $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
     $out .= '</td>';
     // Find best trained player on this monster
-    $out .= '<td>';
     if ($m->mostTrained) {
       $bestUt = utGain($m->id, $m->mostTrained);
       if ($m->mostTrained == $player) {
-        $out .= '<span class="label label-success">'.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.'] : '.$bestUt.'</span>';
+        $class = 'success';
       } else {
-        $out .= '<span class="label label-primary">'.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.'] : '.$bestUt.' UT </span>';
+        $class = 'primary';
       }
+    }
+    $out .= '<td data-sort="'.$bestUt.'">';
+    if ($m->mostTrained) {
+      $out .= '<span class="label label-'.$class.'">'.$bestUt.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span>';
     }
     $out .= '</td>';
     $out .= '</tr>';
