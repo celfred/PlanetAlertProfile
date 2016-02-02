@@ -413,7 +413,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         break;
       case 'quiz' :
 				// Question will be $scope.allWords[0]
-        var quiz = randLine.split("?");
+        var quiz = randLine.split("::");
 				$scope.allWords = quiz[0].split("|");
         // Test for multiple possible answers
         var allCorrections = quiz[1].split("|");
