@@ -55,7 +55,7 @@
         if ($player->playerTeam == '' && !in_array('No team', $allTeams)) {
           array_push($allTeams, 'No team'); 
         } else {
-          if ($player->playerTeam != '') {
+          if ($player->playerTeam != '' && $player->playerTeam != 'testTeam') {
             array_push($allTeams, $player->playerTeam); 
           }
         }

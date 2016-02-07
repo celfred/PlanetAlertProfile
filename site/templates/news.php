@@ -422,7 +422,8 @@
       }
 
       // Last 15 public news
-      $news = $pages->find("template=event, sort=-created, limit=15, task=free|buy|ut-action-v|ut-action-vv");
+      $excluded = $pages->find('name=test|admin');
+      $news = $pages->find("template=event, sort=-created, limit=15, task=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
       if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">
