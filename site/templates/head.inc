@@ -167,13 +167,14 @@
           ?>
 
           <div class="btn-group">
-            <?php $class = ($page->name == 'shop_generator') ? "on" : ""; ?>
+            <?php $class = $page->is("name=shop_generator|makedonation") ? "on" : ""; ?>
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Actions <span class="caret"> </span></button>
             <ul class="dropdown-menu">
               <?php
-              $class = $page->name == 'shop_generator' ? " class='selected-left'" : "";
+							$class = $page->is("name=shop_generator") ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Go to the Marketplace</a></li>";
-              echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Make a donation</a></li>";
+              $class = $page->name == 'makedonation' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=makeDonation')->url}'>Make a donation</a></li>";
               $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
               // Check if memory helmet accessible in player's group
               if ($player->equipment->get("name=memory-helmet")) {

@@ -674,7 +674,6 @@ table.adminTable > thead > tr > th {
 #marketPlaceForm ul li {
   list-style: none;
 }
-#donationDiv { display: none; }
 .pdfLink {
   float: left;
   margin: 5px;

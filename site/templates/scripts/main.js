@@ -198,17 +198,43 @@ $(document).ready(function() {
     return true; // Submit form
   };
   $('#donateFormSubmit').on( "click", submitDonation);
-  $('#amount').on('keyup', function() {
-    if (!$.isNumeric($(this).val())) {
-      alert('You must enter a number!');
-      $(this).val('');
-    } else {
-      if ($(this).val() > parseInt($(this).attr('data-max'))) {
-        alert('Invalid amount!');
-        $(this).val('');
+	var checkAmount = function(amount) {
+    if (!$.isNumeric(amount)) { // A number is needed ! 
+      $('#amount').val('');
+			$('#amount').next('.form-control-feedback').show();
+			$('#donateFormSubmit').prop('disabled', true);
+			return false;
+    } else { // Invalid amount ?
+      if (amount > parseInt($('#amount').attr('data-max'))) {
+        $('#amount').val('');
+				$('#amount').next('.form-control-feedback').show();
+				$('#donateFormSubmit').prop('disabled', true);
+				return false;
       }
     }
+		if ($('#receiver').val() != 0) { // No receiver selected
+			$('#donateFormSubmit').prop('disabled', false);
+		}
+		$('#amount').next('.form-control-feedback').hide();
+		return true;
+	}
+  $('#amount').on('keyup', function() {
+		checkAmount($(this).val());
   });
+	$('#receiver').on('change', function() {
+		if ($(this).val() != 0) {
+			$(this).next('.form-control-feedback').hide();
+			if (checkAmount($('#amount').val())) {
+				$('#donateFormSubmit').prop('disabled', false);
+			}
+		} else {
+			$(this).next('.form-control-feedback').show();
+			$('#donateFormSubmit').prop('disabled', true);
+		}
+	})
+	$('#donateFormSubmit').on('click', function() {
+		$(this).hide();
+	})
 
   $('[data-toggle="tooltip"]').tooltip({ container: 'body'});
 
