@@ -99,7 +99,7 @@
   $out .= '<th data-toggle="tooltip" title="Places"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
   $out .= '<th data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Donation"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></td>';
-  $out .= '<th data-toggle="tooltip" title="Underground training"><span class="glyphicon glyphicon-headphones"></span> U.T.</th>';
+  $out .= '<th data-toggle="tooltip" title="Underground training">U.T.</th>';
   $out .= '</tr>';
   $out .= '</thead>';
   $out .= '<tbody>';
