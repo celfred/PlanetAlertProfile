@@ -191,10 +191,20 @@ function saveHistory($player, $task, $taskComment, $newsBoard = 0, $refPage = ''
 function pick_question($player) {
   $randomPlace = $player->places->getRandom();
     if ($randomPlace) {
+      $type = ['photo'];
       if ($randomPlace->quiz->count > 0) {
-        $type = ['country', 'city', 'photo', 'quiz'];
-      } else {
-        $type = ['country', 'city', 'photo'];
+        switch ($player->rank->name) {
+          case '5emes':
+            array_push($type, 'country', 'country', 'city', 'city');
+            break;
+          case '4emes':
+            array_push($type, 'country', 'country', 'city', 'city', 'quiz', 'quiz');
+            break;
+          case '3emes':
+            array_push($type, 'country', 'city', 'quiz', 'quiz');
+            break;
+          default:
+        }
       }
       $rand = array_rand($type, 1);
       $quiz['type'] = $type[$rand];
