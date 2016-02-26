@@ -40,7 +40,7 @@ $allMonsters = $page->children->sort('name');
 <table id="monstersTable" class="table table-condensed table-hover">
 <thead>
   <tr>
-  <th>Name</th>
+  <th colspan="2">Name</th>
   <th>Topic</th>
   <th>Level</th>
   <th>Type</th>
@@ -53,9 +53,14 @@ $allMonsters = $page->children->sort('name');
 <?php
   foreach ($allMonsters as $m) {
     $out .= '<tr>';
+    if ($m->image) {
+      $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+    } else {
+      $mini = '';
+    }
+    $out .= '<td>'. $mini .'</td>';
     $out .= '<td>';
     $out .= $m->title;
-    // todo : Add image if exists
     $out .= '';
     $out .= '</td>';
     $out .= '<td>';
