@@ -167,7 +167,8 @@
         $receiver->of(false);
         
         // Save donation
-        if ($player && $receiverId && $amount != 0) {
+        // If valid amount
+        if ($player && $receiverId && $amount != 0 && $amount <= $player->GC) {
           // Modify player's page
           $player->GC = $player->GC - $amount;
           $task = $pages->get("template='task', name='donation'");
