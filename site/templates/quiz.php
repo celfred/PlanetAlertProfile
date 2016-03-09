@@ -137,27 +137,18 @@ if ($user->isSuperuser()) {
         if (!in_array($nbPlayerPlaces, $nbPlaces, true)) {
           array_push($nbPlaces, $nbPlayerPlaces);
         }
-        if ($nbPlayerPlaces === 0) {
+        if ($nbPlayerPlaces === 0 || $nbPlayerPlaces === 1) {
           $disabled = "disabled='disabled'";
-          $details = "";
+          $details = "({$nbPlayerPlaces} place.";
           $class = "disabled";
         } else {
           $disabled = "";
           $class = "";
-          if ($player->places->count == 1) {
-            $details = "({$nbPlayerPlaces} place, ";
-            if ($player->nbInvasions == 1) {
-              $details .= "{$player->nbInvasions} invasion)";
-            } else {
-              $details .= "{$player->nbInvasions} invasions)";
-            }
+          $details = "({$nbPlayerPlaces} places, ";
+          if ($player->nbInvasions == 1) {
+            $details .= "{$player->nbInvasions} invasion)";
           } else {
-            $details = "({$nbPlayerPlaces} places, ";
-            if ($player->nbInvasions == 1) {
-              $details .= "{$player->nbInvasions} invasion)";
-            } else {
-              $details .= "{$player->nbInvasions} invasions)";
-            }
+            $details .= "{$player->nbInvasions} invasions)";
           }
           $playerRatio = $player->nbInvasions-$nbPlayerPlaces;
           $details .= ' ['.$playerRatio.']';
