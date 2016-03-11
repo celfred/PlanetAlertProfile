@@ -103,24 +103,28 @@
           // Set new values
           $player->GC = (int) $player->GC - $newItem->GC;
           if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-            $already = $player->equipment->get($newItem);
             switch($newItem->parent->name) {
               case 'potions' : // instant use potions?
+                // If healing potion
                 $player->HP = $player->HP + $newItem->HP;
                 if ($player->HP > 50) {
                   $player->HP = 50;
                 }
-                $player->equipment->add($newItem);
+                /* $player->equipment->add($newItem); */
                 break;
               case 'group-items' : // Make item available to each group member
                 $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
                 foreach ($members as $p) {
                   $p->of(false);
-                  $p->equipment->add($newItem);
-                  $p->save();
+                  $already = $p->equipment->get($newItem);
+                  if (!$already) {
+                    $p->equipment->add($newItem);
+                    $p->save();
+                  }
                 }
                 break;
               default:
+                $already = $player->equipment->get($newItem);
                 $player->equipment->add($newItem);
                 break;
             }
