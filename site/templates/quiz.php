@@ -137,9 +137,9 @@ if ($user->isSuperuser()) {
         if (!in_array($nbPlayerPlaces, $nbPlaces, true)) {
           array_push($nbPlaces, $nbPlayerPlaces);
         }
-        if ($nbPlayerPlaces === 0 || $nbPlayerPlaces === 1) {
+        if ($nbPlayerPlaces === 0 || $nbPlayerPlaces === 1) {
           $disabled = "disabled='disabled'";
-          $details = "({$nbPlayerPlaces} place.";
+          $details = "({$nbPlayerPlaces} place.)";
           $class = "disabled";
         } else {
           $disabled = "";

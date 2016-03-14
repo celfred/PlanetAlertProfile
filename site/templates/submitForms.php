@@ -92,6 +92,7 @@
         $playerId = $input->post->player;
 
         foreach($checkedItems as $item=>$state) {
+          $already = false;
           // Modify player's page
           $player = $pages->get($playerId);
           $player->of(false);
@@ -104,21 +105,26 @@
           if ($newItem->template == 'equipment' || $newItem->template == 'item') {
             switch($newItem->parent->name) {
               case 'potions' : // instant use potions?
+                // If healing potion
                 $player->HP = $player->HP + $newItem->HP;
                 if ($player->HP > 50) {
                   $player->HP = 50;
                 }
-                $player->equipment->add($newItem);
+                /* $player->equipment->add($newItem); */
                 break;
               case 'group-items' : // Make item available to each group member
                 $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
                 foreach ($members as $p) {
                   $p->of(false);
-                  $p->equipment->add($newItem);
-                  $p->save();
+                  $already = $p->equipment->get($newItem);
+                  if (!$already) {
+                    $p->equipment->add($newItem);
+                    $p->save();
+                  }
                 }
                 break;
               default:
+                $already = $player->equipment->get($newItem);
                 $player->equipment->add($newItem);
                 break;
             }
@@ -126,34 +132,40 @@
             $newsBoard = 1;
           }
           if ($newItem->template == 'place') {
-            $player->places->add($newItem);
-            $task = $pages->get("name='free'");
-            $newsBoard = 1;
+            $already = $player->places->get($newItem);
+            if (!$already) {
+              $player->places->add($newItem);
+              $task = $pages->get("name='free'");
+              $newsBoard = 1;
+            }
           }
 
-          // Update player's scores
-          updateScore($player, $task);
+          if (!$already) {
+            // Update player's scores
+            updateScore($player, $task);
 
-          // Save player's new scores
-          $player->save();
+            // Save player's new scores
+            $player->save();
 
-          // Record history (for each group member if necessary)
-          $newsBoard = 1;
-          $taskComment = $newItem->title;
-          if ($members->count > 0) {
-            $taskComment .= ' [unlocked]';
-            foreach ($members as $p) {
-              saveHistory($p, $task, $taskComment, $newsBoard);
+            // Record history (for each group member if necessary)
+            $newsBoard = 1;
+            $taskComment = $newItem->title;
+            if ($members->count > 0) {
+              $taskComment .= ' [unlocked]';
+              foreach ($members as $p) {
+                saveHistory($p, $task, $taskComment, $newsBoard);
+              }
+            } else {
+              saveHistory($player, $task, $taskComment, $newsBoard);
             }
-          } else {
-            saveHistory($player, $task, $taskComment, $newsBoard);
+            
+            // Notify admin
+            $msg = "Player : ". $player->title."\r\n";
+            $msg .= "Team :". $player->playerTeam."\r\n";
+            $msg .= "Item :". $newItem->title;
+            mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
           }
           
-          // Notify admin
-          $msg = "Player : ". $player->title."\r\n";
-          $msg .= "Team :". $player->playerTeam."\r\n";
-          $msg .= "Item :". $newItem->title;
-          mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
 

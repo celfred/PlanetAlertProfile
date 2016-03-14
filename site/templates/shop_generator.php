@@ -22,7 +22,8 @@ $out .= "</h3>";
 $out .= '<form id="marketPlaceForm" name="marketPlaceForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="" role="form">';
 $out .= '<input type="hidden" name="player" value="'.$player->id.'" />';
 // Possible equipment
-$possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, sort=-parent.name, sort=name");
+$possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
+$possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level, parent.name=potions, sort=name");
 
 // Possible places
 $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
@@ -51,6 +52,19 @@ if ( $possibleEquipment.count() > 0) {
     $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
     $out .= '</li>';
     $lastCat = $item->parent->name;
+  }
+  // Add potions
+  $out .= '<li class="label label-primary">Potions</li>';
+  foreach($possiblePotions as $item) {
+    $out .= '<li>';
+    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+    if ($item->image) {
+      $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+    }
+    $out .= $item->title.' ['.$item->GC.'GC]';
+    $out .= '</label>';
+    $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+    $out .= '</li>';
   }
   $out .= "</ul>";
 } else {
