@@ -24,6 +24,7 @@ $allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
   </ul>
 </ul>
 
+<input type="hidden" name="adminTableSubmit" value="Save" />
 <input type="submit" name="adminTableSubmit" value="Save" class="btn btn-block btn-primary" disabled="disabled" />
 
 <table id="adminTable" class="adminTable">

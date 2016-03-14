@@ -28,13 +28,13 @@
   <script src="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="<?php echo $config->urls->templates?>scripts/svg-pan-zoom.min.js"></script>
   <script src="<?php echo $config->urls->templates?>scripts/main.js"></script>
+	<script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.min.js'></script>
+	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.css">
   <?php if ($page->template == 'exercise' || $page->name == 'underground-training') { ?>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular/angular.min.js'></script>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular-animate/angular-animate.min.js'></script>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular-sanitize/angular-sanitize.min.js'></script>
-    <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.min.js'></script>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/chance/dist/chance.min.js'></script>
-    <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.css">
     <!-- Set the game logic !-->
     <script type='text/javascript' src='<?php echo $config->urls->templates?>scripts/exercise.js'></script>
   <?php } ?>

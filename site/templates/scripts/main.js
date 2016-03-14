@@ -436,6 +436,29 @@ $(document).ready(function() {
     // TODO : Record session start...
   });
 
+	$('#adminTableForm :submit').on('click', function(e){
+		var $this = $(this).parents("form");
+		e.preventDefault();
+		swal({
+			html: true,
+			title: "Are you sure?",
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No, let me check again...",
+			confirmButtonText: "Yes, save it!"
+		}, function(isConfirm) {
+			if (isConfirm) { // Send adminTableForm
+				$this.submit();
+				$("#adminTableForm :submit").prop('disabled', true);
+				// return true;
+			} else { // Don't send adminTableForm
+				return false;
+			}
+		});
+		// return confirm("Click OK to continue?");
+	})
+
 }); 
 
 // Hide rows functions
