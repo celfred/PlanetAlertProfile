@@ -51,7 +51,9 @@
   // Monster's health points
   $out .= '<div class="row text-center">';
   $out .= '<div class="col-sm-3">';
-  $out .= '<img class="pull-right" src="'.$page->image->getThumb("mini").'" alt="Avatar" />';
+  if ($page->image) {
+    $out .= '<img class="pull-right" src="'.$page->image->getThumb("mini").'" alt="Avatar" />';
+  }
   $out .= '</div>';
   $out .= '<div class="col-sm-6">';
   $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="Health points">';

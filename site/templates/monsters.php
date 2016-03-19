@@ -11,7 +11,11 @@ echo '<div class="well">';
 echo '<h4>'.$page->summary.'</h4>';
 echo '</div>';
 
-$allMonsters = $page->children->sort('name');
+if ($user->isSuperuser()) {
+  $allMonsters = $page->children("include=all")->sort('name');
+} else {
+  $allMonsters = $page->children->sort('name');
+}
 
 /* $allCategories = $pages->find("parent.name=topics, sort=name"); */
 
