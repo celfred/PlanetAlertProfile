@@ -14,7 +14,7 @@
       if (!$input->get->id) { // Display training catalogue
         // Translate / Quiz types only (for the moment)
         if ($user->isSuperuser()) {
-          $allUt = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=hidden');
+          $allUt = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=all');
         } else {
           $allUt = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
         }
