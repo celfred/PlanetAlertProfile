@@ -5,6 +5,19 @@ $(document).ready(function() {
     $(id).hide();
   });
 
+  $(".adminAction").click(function() {
+    $("#ajaxViewport").html("<p>Loading...</p>"); 
+    
+		var playerId = $('#playerId').val();
+		var action = $(this).attr('data-action');
+		var href = $(this).attr('data-href') + playerId + '/' + action;
+    $.get(href, function(data) { 
+        $("#ajaxViewport").html(data); 
+    }); 
+
+    return false; 
+  }); 
+
   $(".ajax").click(function() {
     $("#reportDiv").html("<p>Loading...</p>"); 
     

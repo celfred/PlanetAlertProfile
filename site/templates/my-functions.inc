@@ -26,6 +26,18 @@ function getMultiDimensional($values, $prefix) {
   return $output;
 }
 
+function initPlayer($player) {
+  $player->karma = 0;
+  $player->HP = 50;
+  $player->GC = 0;
+  $player->XP = 0;
+  $player->level = 1;
+  $player->donation = 0;
+  $player->underground_training = 0;
+  $player->equipment->removeAll();
+  $player->places->removeAll();
+  return $player;
+}
 function updateScore($player, $task) {
   // Task details to calculate new score
   $tXP = $task->XP;
@@ -106,6 +118,23 @@ function checkLevel($player) {
     $player->XP = $player->XP - $threshold;
     $player->HP = 50;
   }
+}
+
+function displayPlayerScores($player) {
+  $out = '<ul class="list list-inline">';
+  $out .= '<li>XP = '.$player->XP.'</li>';
+  $out .= '<li>HP = '.$player->HP.'</li>';
+  $out .= '<li>GC = '.$player->GC.'</li>';
+  $out .= '<li>Level = '.$player->level.'</li>';
+  $out .= '<li>Karma = '.$player->karma.'</li>';
+  $out .= '<li>UT = '.$player->underground_training.'</li>';
+  $out .= '<li>Don. = '.$player->donation.'</li>';
+  $out .= '<li>Eq. = '.$player->equipment->count.'</li>';
+  $out .= '<li>Pl. = '.$player->places->count.'</li>';
+  $out .= '</ul>';
+  $out .= '</div>';
+
+  return $out;
 }
 
 function getKarma($player) {
