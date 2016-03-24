@@ -356,9 +356,9 @@
         echo '&nbsp;&nbsp;';
         echo '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
         echo '&nbsp;&nbsp;';
-        echo '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->XP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+        echo '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
         echo '&nbsp;&nbsp;';
-        echo '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->XP.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
+        echo '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
         echo '&nbsp;&nbsp;';
         echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->places->count().'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
         echo '&nbsp;&nbsp;';
