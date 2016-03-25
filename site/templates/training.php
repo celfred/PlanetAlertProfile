@@ -138,7 +138,9 @@
           }
           $out .= '</td>';
           //Get total UT gained on this monster
-          $utGain = utGain($result->id, $player);
+          if ($result->id) {
+            $utGain = utGain($result->id, $player);
+          }
           $out .= '<td>';
           if ($utGain > 0) {
             $out .= '+'.$utGain;
