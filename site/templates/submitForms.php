@@ -73,16 +73,16 @@
               } else {
                 $taskComment .= ' [unlocked by '.$player->title.']';
               }
-              saveHistory($p, $task, $taskComment, $newsBoard);
+              saveHistory($p, $task, $taskComment, $newsBoard, $newItem);
             }
           } else {
-            saveHistory($player, $task, $taskComment, $newsBoard);
+            saveHistory($player, $task, $taskComment, $newsBoard, $newItem);
           }
           
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
-          $msg .= "Team :". $player->playerTeam."\r\n";
-          $msg .= "Item :". $newItem->title;
+          $msg .= "Team : ". $player->playerTeam."\r\n";
+          $msg .= "Item : ". $newItem->title;
           mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
@@ -153,16 +153,16 @@
             if ($members->count > 0) {
               $taskComment .= ' [unlocked]';
               foreach ($members as $p) {
-                saveHistory($p, $task, $taskComment, $newsBoard);
+                saveHistory($p, $task, $taskComment, $newsBoard, $newItem);
               }
             } else {
-              saveHistory($player, $task, $taskComment, $newsBoard);
+              saveHistory($player, $task, $taskComment, $newsBoard, $newItem);
             }
             
             // Notify admin
             $msg = "Player : ". $player->title."\r\n";
-            $msg .= "Team :". $player->playerTeam."\r\n";
-            $msg .= "Item :". $newItem->title;
+            $msg .= "Team : ". $player->playerTeam."\r\n";
+            $msg .= "Item : ". $newItem->title;
             mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
           }
           
@@ -189,7 +189,7 @@
 
           $player->save();
           // Record history
-          $taskComment = 'Donation of '.$amount. ' GC to '.$receiver->title.' ['.$receiver->playerTeam.']';
+          $taskComment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->playerTeam.']';
           $newsBoard = 1;
           saveHistory($player, $task, $taskComment, $newsBoard);
 
@@ -198,14 +198,14 @@
           $receiver->save();
           // Record history
           $task = $pages->get("template='task', name='donated'");
-          $taskComment = 'Donation of '.$amount. ' GC by '.$player->title.' ['.$player->playerTeam.']';
+          $taskComment = $amount. ' GC received from '.$player->title.' ['.$player->playerTeam.']';
           $newsBoard = 0;
           saveHistory($receiver, $task, $taskComment, $newsBoard);
           
           // Notify admin
           $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
-          $msg .= "Donation amount :". $amount;
-          $msg .= "Donated to :". $receiver->title." [".$receiver->playerTeam."]";
+          $msg .= "Donation amount : ". $amount;
+          $msg .= "Donated to : ". $receiver->title." [".$receiver->playerTeam."]";
           mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
@@ -329,7 +329,7 @@
 
         // Record history
         $taskComment = $newItem->title;
-        saveHistory($player, $task, $taskComment, $newsBoard);
+        saveHistory($player, $task, $taskComment, $newsBoard, $newItem);
       }
       // Redirect to marketPlace
       $team = $player->playerTeam;

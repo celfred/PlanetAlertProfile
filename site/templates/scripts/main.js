@@ -5,16 +5,15 @@ $(document).ready(function() {
     $(id).hide();
   });
 
-  $(".adminAction").click(function() {
+  $(".adminAction").on('click', function() {
     $("#ajaxViewport").html("<p>Loading...</p>"); 
     
 		var playerId = $('#playerId').val();
 		var action = $(this).attr('data-action');
-		var href = $(this).attr('data-href') + playerId + '/' + action;
+		var href = $(this).attr('data-href') + action + '/' + playerId ;
     $.get(href, function(data) { 
         $("#ajaxViewport").html(data); 
     }); 
-
     return false; 
   }); 
 
