@@ -26,6 +26,18 @@ function getMultiDimensional($values, $prefix) {
   return $output;
 }
 
+function initPlayer($player) {
+  $player->karma = 0;
+  $player->HP = 50;
+  $player->GC = 0;
+  $player->XP = 0;
+  $player->level = 1;
+  $player->donation = 0;
+  $player->underground_training = 0;
+  $player->equipment->removeAll();
+  $player->places->removeAll();
+  return $player;
+}
 function updateScore($player, $task) {
   // Task details to calculate new score
   $tXP = $task->XP;
@@ -57,6 +69,9 @@ function updateScore($player, $task) {
         $deltaXP = 0;
       } else { // Positive task
         $deltaHP = 0;
+      }
+      if ($tXP == 0) { // Task provides no XP gain, disable weapons
+        $deltaXP = 0;
       }
     }
   }
@@ -106,6 +121,60 @@ function checkLevel($player) {
     $player->XP = $player->XP - $threshold;
     $player->HP = 50;
   }
+}
+
+function displayTrendScores($player, $old) {
+  $out = '<ul class="list list-inline label label-default">';
+  $trendKarma = $player->karma-$old->karma;
+  if ($trendKarma > 0) { $out .= '<li>+'.$trendKarma.'K.</li>'; }
+  if ($trendKarma < 0) { $out .= '<li>'.$trendKarma.'K.</li>'; }
+  $trendGC = $player->GC-$old->GC;
+  if ($trendGC > 0) { $out .= '<li>+'.$trendGC.'GC → '.$player->GC.'</li>'; }
+  if ($trendGC < 0) { $out .= '<li>'.$trendGC.'GC → '.$player->GC.'</li>'; }
+  $trendLevel = $player->level-$old->level;
+  if ($trendLevel > 0) { $out .= '<li>+'.$trendLevel.'lvl → '.$player->level.'</li>'; }
+  if ($trendLevel < 0) { $out .= '<li>'.$trendLevel.'lvl → '.$player->level.'</li>'; }
+  $trendHP = $player->HP-$old->HP;
+  if ($trendHP > 0) { $out .= '<li>+'.$trendHP.'HP → '.$player->HP.'</li>'; }
+  if ($trendHP < 0) { $out .= '<li>'.$trendHP.'HP → '.$player->HP.'</li>'; }
+  $trendXP = $player->XP-$old->XP;
+  if ($trendXP > 0) { $out .= '<li>+'.$trendXP.'XP → '.$player->XP.'</li>'; }
+  if ($trendXP < 0) { $out .= '<li>'.$trendXP.'XP → '.$player->XP.'</li>'; }
+  $trendEquipment = $player->equipment->count-$old->equipment->count();
+  if ($trendEquipment > 0) { $out .= '<li>+'.$trendEquipment.'Eq. → '.$player->equipment->count.'</li>'; }
+  if ($trendEquipment < 0) { $out .= '<li>'.$trendEquipment.'Eq. → '.$player->equipment->count.'</li>'; }
+  $trendPlaces = $player->places->count-$old->places->count();
+  if ($trendPlaces > 0) { $out .= '<li>+'.$trendPlaces.'Pl. → '.$player->places->count.'</li>'; }
+  if ($trendPlaces < 0) { $out .= '<li>'.$trendPlaces.'Pl. → '.$player->places->count.'</li>'; }
+  $trendDonation = $player->donation-$old->donation;
+  if ($trendDonationHP > 0) { $out .= '<li>+'.$trendDonationHP.'Don. → '.$player->donation.'</li>'; }
+  if ($trendDonationHP < 0) { $out .= '<li>'.$trendDonationHP.'Don. → '.$player->donation.'</li>'; }
+  $trendUT = $player->underground_training-$old->underground_training;
+  if ($trendUT > 0) { $out .= '<li>+'.$trendUT.'UT → '.$player->underground_training.'</li>'; }
+  if ($trendUT < 0) { $out .= '<li>'.$trendUT.'UT → '.$player->underground_training.'</li>'; }
+  $out .= '</ul>&nbsp;&nbsp;';
+
+  return $out;
+}
+
+function displayPlayerScores($player, $type='new') {
+  if ($type == 'new') {
+    $out = '<ul class="list list-inline label label-default">New scores ⇒ ';
+  } else {
+    $out = '<ul class="list list-inline label label-warning"> Previous scores : ';
+  }
+  $out .= '<li>'.$player->karma.'K.</li>';
+  $out .= '<li>'.$player->GC.'GC</li>';
+  $out .= '<li>'.$player->level.'lvl</li>';
+  $out .= '<li>'.$player->HP.'HP</li>';
+  $out .= '<li>'.$player->XP.'XP</li>';
+  $out .= '<li>'.$player->places->count.'Eq.</li>';
+  $out .= '<li>'.$player->equipment->count.'Pl.</li>';
+  $out .= '<li>'.$player->donation.'Don.</li>';
+  $out .= '<li>'.$player->underground_training.'UT</li>';
+  $out .= '</ul>';
+
+  return $out;
 }
 
 function getKarma($player) {
@@ -172,9 +241,8 @@ function saveHistory($player, $task, $taskComment, $newsBoard = 0, $refPage = ''
   date_default_timezone_set('Paris/France');
   $today = date('m/d/Y H:i:s', time());
   $p->date = $today;
-  // Get new values
-  $newValues = ' ['.$player->level.'lvl, '.$player->HP.'HP, '.$player->XP.'XP, '.$player->GC.'GC, '.$player->places->count.'P, '.$player->equipment->count.'E]';
-  $p->title = str_replace('&#039;', '\'', $task->title).$newValues;
+  // Save title
+  $p->title = str_replace('&#039;', '\'', $task->title);
   // Save task
   $p->task = $task;
   // Save refPage

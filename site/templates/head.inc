@@ -139,6 +139,23 @@
             </ul>
           </div>
 					<?php
+						if ($user->isSuperuser()) { // Display Admin specific menu
+					?>
+						<div class="btn-group">
+						<?php
+							$class = $page->is("name=admin-actions") ? "on" : ""; ?>
+							<button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin Zone<span class="caret"> </span></button>
+							<ul class="dropdown-menu">
+								<?php
+								$class = $page->name == 'admin-actions' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}'>Admin Actions</a></li>";
+								?>
+							</ul>
+						</div>
+					<?php
+						}
+					?>
+					<?php
             if ( $user->isLoggedin()) {
               echo '<a class="btn" href="./?logout=1">Log out</a>';
             } else {
