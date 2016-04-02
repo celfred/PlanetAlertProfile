@@ -38,54 +38,91 @@ function initPlayer($player) {
   $player->places->removeAll();
   return $player;
 }
-function updateScore($player, $task) {
-  // Task details to calculate new score
-  $tXP = $task->XP;
-  $tHP = $task->HP;
-  $tGC = $task->GC;
-  
-  // Ponderate task's impact according to player's equipment
-  // Except for training (core values are used)
-  $deltaXP = 0;
-  $deltaHP = 0;
-  if ($task->is('name!=ut-action-v|ut-action-vv')) {
-    if ($player->equipment) {
-      // Limit to the 2 best weapons
-      $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
-      foreach ($concerned_weapons as $item) {
-        $deltaXP = $deltaXP + $item->XP;
-      }
-      // Limit to 1 best protection
-      $concerned_protection = $player->equipment->find("category.name=protections, sort=-HP, limit=1");
-      foreach ($concerned_protection as $item) {
-        $deltaHP = $deltaHP + $item->HP;
-      }
-      if ($tHP < 0) { // Negative task
-        // Loss of 1 minimum whatever the equipment
-        if ( $tHP + $deltaHP > 0 ) {
-          $deltaHP = $tHP-1;
+function updateScore($player, $task, $fake = true) {
+  $pages = wire('pages');
+  $death = $pages->get('name=death');
+  if ($task != $death) {
+    // Task details to calculate new score
+    $tXP = $task->XP;
+    $tHP = $task->HP;
+    $tGC = $task->GC;
+    
+    // Ponderate task's impact according to player's equipment
+    // Except for training (core values are used)
+    $deltaXP = 0;
+    $deltaHP = 0;
+    if ($task->is('name!=ut-action-v|ut-action-vv')) {
+      if ($player->equipment) {
+        // Limit to the 2 best weapons
+        $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
+        foreach ($concerned_weapons as $item) {
+          $deltaXP = $deltaXP + $item->XP;
         }
-        // Get rid of weapons' bonus
-        $deltaXP = 0;
-      } else { // Positive task
-        $deltaHP = 0;
-      }
-      if ($tXP == 0) { // Task provides no XP gain, disable weapons
-        $deltaXP = 0;
+        // Limit to 1 best protection
+        $concerned_protection = $player->equipment->find("category.name=protections, sort=-HP, limit=1");
+        foreach ($concerned_protection as $item) {
+          $deltaHP = $deltaHP + $item->HP;
+        }
+        if ($tHP < 0) { // Negative task
+          // Loss of 1 minimum whatever the equipment
+          if ( $tHP + $deltaHP > 0 ) {
+            $deltaHP = $tHP-1;
+          }
+          // Get rid of weapons' bonus
+          $deltaXP = 0;
+        } else { // Positive task
+          $deltaHP = 0;
+        }
+        if ($tXP == 0) { // Task provides no XP gain, disable weapons
+          $deltaXP = 0;
+        }
       }
     }
-  }
 
-  // Calculate player's new score
-  $player->HP = $player->HP + $tHP + $deltaHP;
-  $player->XP = $player->XP + $tXP + $deltaXP;
-  $player->GC = $player->GC + $tGC;
-  // Check GC
-  if ($player->GC < 0) { $player->GC = 0; }
-  // Check death
-  if ($player->HP <= 0) {
-    // Loose 1 level
-    if ($player->level > 1) {
+    // Calculate player's new score
+    $player->HP = $player->HP + $tHP + $deltaHP;
+    $player->XP = $player->XP + $tXP + $deltaXP;
+    $player->GC = $player->GC + $tGC;
+   
+    // Check if manual action needs to be taken
+    if ($task->name == 'fake-donator') {
+      $player->donation = 0; // Reset donation indicator
+    }
+
+    // Check GC
+    if ($player->GC < 0) { $player->GC = 0; }
+    if ($player->HP < 0) { $player->HP = 0; }
+    if ($player->HP >= 50) { $player->HP = 50; }
+
+    checkLevel($player);
+
+    // Set karma
+    $player->karma = getKarma($player);
+
+    // Save player's new scores if necessary
+    if ($fake == true) {
+      $player->of(false);
+      $player->save();
+
+      if (checkHk($player) >= 3) { // Record a Hk penalty
+        // Update player's scores
+        $task = $pages->get("template=task, name=penalty"); 
+        $player->GC = round($player->GC/2); // Penalty = Half GC taken away
+        // Save player's page
+        $player->of(false);
+        $player->save();
+        // Register a new penalty
+        $comment = 'Automatic homework penalty';
+        $eDate = date('m/d/Y H:i:s', time()+1);
+        saveHistory($player, $task, $comment, 1, '', $eDate);
+      }
+
+      if ($player->HP == 0) { // Player died
+        updateScore($player, $death);
+      }
+    }
+  } else { // Player died
+    if ($player->level > 1) { // Loose 1 level
       $player->level = $player->level - 1;
       $player->HP = 50;
       // Loose all Gold Coins
@@ -100,17 +137,16 @@ function updateScore($player, $task) {
       $player->GC = 0;
       $player->XP = 0;
       $player->equipment->removeAll();
+      /* $player->places->removeAll(); */
     }
-  } else {
-    if ($player->HP >= 50) {
-      $player->HP = 50;
+    if ($fake == true) {
+      $comment = 'Player died.';
+      $eDate = date('m/d/Y H:i:s', time()+1);
+      saveHistory($player, $death, $comment, 1, '', $eDate);
+      $player->of(false);
+      $player->save();
     }
   }
-
-  checkLevel($player);
-
-  // Set karma
-  $player->karma = getKarma($player);
 }
 
 function checkLevel($player) {
@@ -126,32 +162,32 @@ function checkLevel($player) {
 function displayTrendScores($player, $old) {
   $out = '<ul class="list list-inline label label-default">';
   $trendKarma = $player->karma-$old->karma;
-  if ($trendKarma > 0) { $out .= '<li>+'.$trendKarma.'K.</li>'; }
-  if ($trendKarma < 0) { $out .= '<li>'.$trendKarma.'K.</li>'; }
+  if ($trendKarma > 0) { $out .= '<li>+'.$trendKarma.'K.→'.$player->karma.'</li>'; }
+  if ($trendKarma < 0) { $out .= '<li>'.$trendKarma.'K.→'.$player->karma.'</li>'; }
   $trendGC = $player->GC-$old->GC;
-  if ($trendGC > 0) { $out .= '<li>+'.$trendGC.'GC → '.$player->GC.'</li>'; }
-  if ($trendGC < 0) { $out .= '<li>'.$trendGC.'GC → '.$player->GC.'</li>'; }
+  if ($trendGC > 0) { $out .= '<li>+'.$trendGC.'GC→'.$player->GC.'</li>'; }
+  if ($trendGC < 0) { $out .= '<li>'.$trendGC.'GC→'.$player->GC.'</li>'; }
   $trendLevel = $player->level-$old->level;
-  if ($trendLevel > 0) { $out .= '<li>+'.$trendLevel.'lvl → '.$player->level.'</li>'; }
-  if ($trendLevel < 0) { $out .= '<li>'.$trendLevel.'lvl → '.$player->level.'</li>'; }
+  if ($trendLevel > 0) { $out .= '<li>+'.$trendLevel.'lvl→'.$player->level.'</li>'; }
+  if ($trendLevel < 0) { $out .= '<li>'.$trendLevel.'lvl→'.$player->level.'</li>'; }
   $trendHP = $player->HP-$old->HP;
-  if ($trendHP > 0) { $out .= '<li>+'.$trendHP.'HP → '.$player->HP.'</li>'; }
-  if ($trendHP < 0) { $out .= '<li>'.$trendHP.'HP → '.$player->HP.'</li>'; }
+  if ($trendHP > 0) { $out .= '<li>+'.$trendHP.'HP→'.$player->HP.'</li>'; }
+  if ($trendHP < 0) { $out .= '<li>'.$trendHP.'HP→'.$player->HP.'</li>'; }
   $trendXP = $player->XP-$old->XP;
-  if ($trendXP > 0) { $out .= '<li>+'.$trendXP.'XP → '.$player->XP.'</li>'; }
-  if ($trendXP < 0) { $out .= '<li>'.$trendXP.'XP → '.$player->XP.'</li>'; }
+  if ($trendXP > 0) { $out .= '<li>+'.$trendXP.'XP→'.$player->XP.'</li>'; }
+  if ($trendXP < 0) { $out .= '<li>'.$trendXP.'XP→'.$player->XP.'</li>'; }
   $trendEquipment = $player->equipment->count-$old->equipment->count();
-  if ($trendEquipment > 0) { $out .= '<li>+'.$trendEquipment.'Eq. → '.$player->equipment->count.'</li>'; }
-  if ($trendEquipment < 0) { $out .= '<li>'.$trendEquipment.'Eq. → '.$player->equipment->count.'</li>'; }
+  if ($trendEquipment > 0) { $out .= '<li>+'.$trendEquipment.'Eq.→'.$player->equipment->count.'</li>'; }
+  if ($trendEquipment < 0) { $out .= '<li>'.$trendEquipment.'Eq.→'.$player->equipment->count.'</li>'; }
   $trendPlaces = $player->places->count-$old->places->count();
-  if ($trendPlaces > 0) { $out .= '<li>+'.$trendPlaces.'Pl. → '.$player->places->count.'</li>'; }
-  if ($trendPlaces < 0) { $out .= '<li>'.$trendPlaces.'Pl. → '.$player->places->count.'</li>'; }
+  if ($trendPlaces > 0) { $out .= '<li>+'.$trendPlaces.'Pl.→'.$player->places->count.'</li>'; }
+  if ($trendPlaces < 0) { $out .= '<li>'.$trendPlaces.'Pl.→'.$player->places->count.'</li>'; }
   $trendDonation = $player->donation-$old->donation;
-  if ($trendDonationHP > 0) { $out .= '<li>+'.$trendDonationHP.'Don. → '.$player->donation.'</li>'; }
-  if ($trendDonationHP < 0) { $out .= '<li>'.$trendDonationHP.'Don. → '.$player->donation.'</li>'; }
+  if ($trendDonationHP > 0) { $out .= '<li>+'.$trendDonationHP.'Don.→'.$player->donation.'</li>'; }
+  if ($trendDonationHP < 0) { $out .= '<li>'.$trendDonationHP.'Don.→'.$player->donation.'</li>'; }
   $trendUT = $player->underground_training-$old->underground_training;
-  if ($trendUT > 0) { $out .= '<li>+'.$trendUT.'UT → '.$player->underground_training.'</li>'; }
-  if ($trendUT < 0) { $out .= '<li>'.$trendUT.'UT → '.$player->underground_training.'</li>'; }
+  if ($trendUT > 0) { $out .= '<li>+'.$trendUT.'UT→'.$player->underground_training.'</li>'; }
+  if ($trendUT < 0) { $out .= '<li>'.$trendUT.'UT→'.$player->underground_training.'</li>'; }
   $out .= '</ul>&nbsp;&nbsp;';
 
   return $out;
@@ -168,8 +204,8 @@ function displayPlayerScores($player, $type='new') {
   $out .= '<li>'.$player->level.'lvl</li>';
   $out .= '<li>'.$player->HP.'HP</li>';
   $out .= '<li>'.$player->XP.'XP</li>';
-  $out .= '<li>'.$player->places->count.'Eq.</li>';
-  $out .= '<li>'.$player->equipment->count.'Pl.</li>';
+  $out .= '<li>'.$player->places->count.'Pl.</li>';
+  $out .= '<li>'.$player->equipment->count.'Eq.</li>';
   $out .= '<li>'.$player->donation.'Don.</li>';
   $out .= '<li>'.$player->underground_training.'UT</li>';
   $out .= '</ul>';
@@ -223,7 +259,7 @@ function groupBonus($players) {
   */
 }
 
-function saveHistory($player, $task, $taskComment, $newsBoard = 0, $refPage = '') {
+function saveHistory($player, $task, $taskComment, $newsBoard = 0, $refPage = '', $eDate = 'unset') {
   $p = new Page();
   $p->template = 'event';
   $history = $player->child("name=history");
@@ -238,9 +274,11 @@ function saveHistory($player, $task, $taskComment, $newsBoard = 0, $refPage = ''
   $p->parent = $history;
   // Save title
   // Get today's date by default, changeable in backend if needed)
-  date_default_timezone_set('Paris/France');
-  $today = date('m/d/Y H:i:s', time());
-  $p->date = $today;
+  if ($eDate == 'unset') {
+    date_default_timezone_set('Paris/France');
+    $eDate = date('m/d/Y H:i:s', time());
+  }
+  $p->date = $eDate;
   // Save title
   $p->title = str_replace('&#039;', '\'', $task->title);
   // Save task

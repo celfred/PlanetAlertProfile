@@ -56,12 +56,9 @@
               break;
           }
 
-          // Update player's scores
+          // Update player's scores and save
           $task = $pages->get("name='buy'");
           updateScore($player, $task);
-
-          // Save player's new scores
-          $player->save();
 
           // Record history (for each group member if necessary)
           $newsBoard = 1;
@@ -141,11 +138,8 @@
           }
 
           if (!$already) {
-            // Update player's scores
+            // Update player's scores and save
             updateScore($player, $task);
-
-            // Save player's new scores
-            $player->save();
 
             // Record history (for each group member if necessary)
             $newsBoard = 1;
@@ -242,37 +236,14 @@
         $player = $pages->get($playerId);
         $player->of(false);
 
-        // Update player's scores
+        // Update player's scores and save
         $task = $pages->get($taskId); 
         updateScore($player, $task);
-
-        // Check if manual action needs to be taken
-        if ($task->name == 'fake-donator') {
-          $player->donation = 0; // Reset donation indicator
-          // Save player's page
-          $player->save();
-        }
-        // Save player's new scores
-        $player->save();
 
         // Record history
         saveHistory($player, $task, $taskComment);
 
         $team = $player->playerTeam;
-
-        // Check if extra-action needs to be taken
-        // For example : 3 forgotten homework...
-        if (checkHk($player) >= 3) { // Record a penalty
-          // Update player's scores
-          $task = $pages->get("template=task, name=penalty"); 
-          //updateScore($player, $task);
-          $player->GC = round($player->GC/2); // Penalty = Half GC taken away
-          // Save player's page
-          $player->save();
-          // Register a new penalty
-          $comment = 'Automatic homework penalty';
-          saveHistory($player, $task, $comment, 1);
-        }
       }
       // Redirect to team page
       $session->redirect($pages->get('/players')->url.$team);
@@ -321,11 +292,8 @@
           $task = $pages->get("name='free'");
           $newsBoard = 1;
         }
-        // Update player's scores
+        // Update player's scores and save
         updateScore($player, $task);
-
-        // Save player's new scores
-        $player->save();
 
         // Record history
         $taskComment = $newItem->title;

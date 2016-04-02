@@ -2,7 +2,7 @@
   $playerPage = $pages->get("template=player,name=".$input->urlSegment2);
   $playersTotalNb = $pages->count("template=player,playerTeam=$playerPage->playerTeam");
   $playerPlacesNb = $playerPage->places->count();
-  $allEvents = $playerPage->child("name=history")->find("template=event,sort=-created");
+  $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
   $rightInvasions = $allEvents->find("task.name=right-invasion")->count();
   $wrongInvasions = $allEvents->find("task.name=wrong-invasion")->count();
   $allCategories = new PageArray();
@@ -311,7 +311,7 @@
                     $class = '-';
                   }
                   echo "<tr>";
-                  echo "<td data-order='{$event->created}'>";
+                  echo "<td data-order='{$event->date}'>";
                   echo strftime("%d/%m", $event->date);
                   echo "</td>";
                   echo "<td>";
