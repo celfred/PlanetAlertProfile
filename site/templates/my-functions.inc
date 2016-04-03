@@ -38,10 +38,9 @@ function initPlayer($player) {
   $player->places->removeAll();
   return $player;
 }
-function updateScore($player, $task, $fake = true) {
+function updateScore($player, $task, $comment = '', $refPage = '', $real = true) {
   $pages = wire('pages');
-  $death = $pages->get('name=death');
-  if ($task != $death) {
+  if ($task->name != 'death') {
     // Task details to calculate new score
     $tXP = $task->XP;
     $tHP = $task->HP;
@@ -51,7 +50,7 @@ function updateScore($player, $task, $fake = true) {
     // Except for training (core values are used)
     $deltaXP = 0;
     $deltaHP = 0;
-    if ($task->is('name!=ut-action-v|ut-action-vv')) {
+    if ($task->is("name!=ut-action-v|ut-action-vv")) {
       if ($player->equipment) {
         // Limit to the 2 best weapons
         $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
@@ -80,16 +79,57 @@ function updateScore($player, $task, $fake = true) {
     }
 
     // Calculate player's new score
-    $player->HP = $player->HP + $tHP + $deltaHP;
-    $player->XP = $player->XP + $tXP + $deltaXP;
-    $player->GC = $player->GC + $tGC;
+    if ($task->is("name!=penalty")) {
+      $player->GC = (int) $player->GC + $tGC;
+    } else { // Half GC if penalty
+      $player->GC = (int) round($player->GC/2); // Penalty = Half GC taken away
+    }
+    $player->HP = (int) $player->HP + $tHP + $deltaHP;
+    $player->XP = (int) $player->XP + $tXP + $deltaXP;
    
-    // Check if manual action needs to be taken
+    // Extra action?
     if ($task->name == 'fake-donator') {
       $player->donation = 0; // Reset donation indicator
     }
 
-    // Check GC
+    // Add items if needed
+    if ($task->name == 'buy') {
+      $player->GC = (int) $player->GC-$refPage->GC;
+      if ($refPage->template == 'equipment' || $refPage->template == 'item') {
+        switch($refPage->parent->name) {
+          case 'potions' : // instant use potions?
+            $player->HP = $player->HP + $refPage->HP;
+            if ($player->HP > 50) {
+              $player->HP = 50;
+            }
+            $player->equipment->add($refPage);
+            break;
+          case 'group-items' : // Make item available to each group member
+            $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group")->not("$player->id");
+            foreach ($members as $p) {
+              /* $p->of(false); */
+              /* $p->equipment->add($newItem); */
+              /* $p->save(); */
+              $bought = $pages->get("name=bought");
+              $comment = $refPage->title." [unlocked]";
+              updateScore($p, $bought, $comment, $refPage, true);
+            }
+            break;
+          default:
+            $player->equipment->add($refPage);
+            break;
+        }
+      }
+    }
+    // Add place if needed
+    if ($task->name == 'free') {
+      $player->GC = (int) $player->GC-$refPage->GC;
+      if ($refPage->template == 'place') {
+        $player->places->add($refPage);
+      }
+    }
+
+    // Check GC, HP...
     if ($player->GC < 0) { $player->GC = 0; }
     if ($player->HP < 0) { $player->HP = 0; }
     if ($player->HP >= 50) { $player->HP = 50; }
@@ -99,26 +139,37 @@ function updateScore($player, $task, $fake = true) {
     // Set karma
     $player->karma = getKarma($player);
 
-    // Save player's new scores if necessary
-    if ($fake == true) {
+    if ($real == true) { // Save player's new scores if necessary
       $player->of(false);
       $player->save();
 
-      if (checkHk($player) >= 3) { // Record a Hk penalty
-        // Update player's scores
-        $task = $pages->get("template=task, name=penalty"); 
-        $player->GC = round($player->GC/2); // Penalty = Half GC taken away
-        // Save player's page
-        $player->of(false);
-        $player->save();
-        // Register a new penalty
-        $comment = 'Automatic homework penalty';
+      // Publish on Newsboard?
+      if ($task->is("name=buy|free|ut-action-v|ut-action-vv")) {
+        $newsBoard = 1;
+      } else {
+        $newsBoard = 0;
+      }
+
+      // Set date for correct sorting
+      if ($task->is("name!=penalty|team-death|group-death")) {
+        $eDate = date('m/d/Y H:i:s', time());
+      } else {
         $eDate = date('m/d/Y H:i:s', time()+1);
-        saveHistory($player, $task, $comment, 1, '', $eDate);
+      }
+      // Save history
+      saveHistory($player, $task, $comment, $newsBoard, $refPage, $eDate);
+
+      // Extra action?
+      if (checkHk($player) >= 3) { // Record a Hk penalty
+        $penalty = $pages->get("template=task, name=penalty"); 
+        $comment = 'Automatic homework penalty';
+        updateScore($player, $penalty, $comment, '', true);
       }
 
       if ($player->HP == 0) { // Player died
-        updateScore($player, $death);
+        $comment = 'Player died.';
+        $task = $pages->get("name=death");
+        updateScore($player, $task, $comment, '', true);
       }
     }
   } else { // Player died
@@ -129,9 +180,7 @@ function updateScore($player, $task, $fake = true) {
       $player->GC = 0;
       // Loose all equipment
       $player->equipment->removeAll();
-    } else {
-      // TODO : Make an important team loss? (all players get HP loss? Extra free spots on all places?)
-      // For the moment : init player scores for a new start
+    } else { // Init player scores for a new start
       $player->level = 1;
       $player->HP = 50;
       $player->GC = 0;
@@ -139,12 +188,29 @@ function updateScore($player, $task, $fake = true) {
       $player->equipment->removeAll();
       /* $player->places->removeAll(); */
     }
-    if ($fake == true) {
-      $comment = 'Player died.';
+    if ($real == true) { // Save player's death if necessary
       $eDate = date('m/d/Y H:i:s', time()+1);
-      saveHistory($player, $death, $comment, 1, '', $eDate);
+      $task = $pages->get("name=death");
+      saveHistory($player, $task, $comment, 0, '', $eDate);
       $player->of(false);
       $player->save();
+      // Team and group loss because of player's death
+      $teamPlayers = $pages->find("template=player, playerTeam=$player->playerTeam")->not("$player->id");
+      $groupMembers = $teamPlayers->find("group=$player->group")->not("$player->id");
+      // Each group member suffers
+      foreach($groupMembers as $p) {
+        $groupDeath = $pages->get("name=group-death");
+        $comment = 'Group member died!';
+        updateScore($p, $groupDeath, $comment, '', true);
+      }
+      // Each team member suffers
+      foreach($teamMembers as $p) {
+        $teamDeath = $pages->get("name=team-death");
+        $comment = 'Team member died!';
+        if ($p->group != $player->group) {
+          updateScore($p, $teamDeath, $comment, '', true);
+        }
+      }
     }
   }
 }
@@ -259,7 +325,7 @@ function groupBonus($players) {
   */
 }
 
-function saveHistory($player, $task, $taskComment, $newsBoard = 0, $refPage = '', $eDate = 'unset') {
+function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $eDate = 'unset') {
   $p = new Page();
   $p->template = 'event';
   $history = $player->child("name=history");
@@ -288,7 +354,7 @@ function saveHistory($player, $task, $taskComment, $newsBoard = 0, $refPage = ''
     $p->refPage = $refPage;
   }
   // Save comment
-  $p->summary = $taskComment;
+  $p->summary = $comment;
   // Save publish state
   $p->publish = $newsBoard;
   $p->save(); 

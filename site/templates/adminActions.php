@@ -92,7 +92,7 @@
       case 'add-death' :
         if ($selectedPlayer) {
           $allEvents = $selectedPlayer->get("name=history")->children()->sort(date);
-          $out = 'Recalculate scores from complete history ('. $allEvents->count.' events). &nbsp;&nbsp;';
+          $out = '<p>Recalculate scores from complete history ('. $allEvents->count.' events).</p>';
           // Keep initial scores for comparison
           $initialPlayer = clone $selectedPlayer;
           // Init scores
@@ -152,8 +152,9 @@
                   }
                 }
               }
-              updateScore($selectedPlayer, $e->task, false);
+              updateScore($selectedPlayer, $e->task, '', '', false);
               if ($selectedPlayer->HP == 0) {
+                $died = true;
                 if ($allEvents->getNext($e)->task->name == 'death') {
                   $out .= '<span class="label label-success">OK</span>';
                 } else {
@@ -416,7 +417,7 @@
                   }
                 }
               }
-              updateScore($selectedPlayer, $e->task, false);
+              updateScore($selectedPlayer, $e->task, '', '',false);
               $out .= '<br />';
               $out .= displayTrendScores($selectedPlayer, $oldPlayer);
               $out .= displayPlayerScores($selectedPlayer);
@@ -460,6 +461,9 @@
     $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); }) };});';
     $out .= '$(".death").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Please reload!"); $("button[data-action=add-death]").click();}) };});';
     $out .= '</script>';
+
+    if ($action == 'add-death' && $died == true) { $out = '<p class="label label-danger">Player has died! Check history for details</p>'.$out; }
+    if ($action == 'add-death' && $died == false) { $out = '<p class="label label-success">No apparent death :) Check history for details</p>'.$out; }
 
     echo $out;
   }

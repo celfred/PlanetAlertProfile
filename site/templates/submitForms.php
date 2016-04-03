@@ -28,138 +28,42 @@
 
     if ($already == false) {
       if($input->post->buyFormSubmit) { // buyForm submitted
-        // Modify player's page
         $player = $pages->get($playerId);
-        $player->of(false);
-       
-        // Set new values
-        $player->GC = (int) $player->GC - $newItem->GC;
-        if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-          switch($newItem->parent->name) {
-            case 'potions' : // instant use potions
-              $player->HP = $player->HP + $newItem->HP;
-              if ($player->HP > 50) {
-                $player->HP = 50;
-              }
-              $player->equipment->add($newItem);
-              break;
-            case 'group-items' : // Make item available to each group member
-              $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
-              foreach ($members as $p) {
-                $p->of(false);
-                $p->equipment->add($newItem);
-                $p->save();
-              }
-              break;
-            default:
-              $player->equipment->add($newItem);
-              break;
-          }
-
-          // Update player's scores and save
-          $task = $pages->get("name='buy'");
-          updateScore($player, $task);
-
-          // Record history (for each group member if necessary)
-          $newsBoard = 1;
-          $taskComment = $newItem->title;
-          if ($members->count > 0) {
-            foreach ($members as $p) {
-              if ($p->name == $player->name) {
-                $taskComment .= ' [purchase]';
-              } else {
-                $taskComment .= ' [unlocked by '.$player->title.']';
-              }
-              saveHistory($p, $task, $taskComment, $newsBoard, $newItem);
-            }
-          } else {
-            saveHistory($player, $task, $taskComment, $newsBoard, $newItem);
-          }
-          
-          // Notify admin
-          $msg = "Player : ". $player->title."\r\n";
-          $msg .= "Team : ". $player->playerTeam."\r\n";
-          $msg .= "Item : ". $newItem->title;
-          mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
-        }
+        $task = $pages->get("name='buy'");
+        $taskComment = $newItem->title;
+        updateScore($player, $task, $taskComment, $refPage, true);
+        // Notify admin
+        $msg = "Player : ". $player->title."\r\n";
+        $msg .= "Team : ". $player->playerTeam."\r\n";
+        $msg .= "Item : ". $newItem->title;
+        mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
       }
 
       if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
         $checkedItems = $input->post->item;
         $playerId = $input->post->player;
+        $player = $pages->get($playerId);
 
         foreach($checkedItems as $item=>$state) {
-          $already = false;
-          // Modify player's page
-          $player = $pages->get($playerId);
-          $player->of(false);
-          
           // Get item's data
           $newItem = $pages->get($item);
          
-          // Set new values
-          $player->GC = (int) $player->GC - $newItem->GC;
           if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-            switch($newItem->parent->name) {
-              case 'potions' : // instant use potions?
-                // If healing potion
-                $player->HP = $player->HP + $newItem->HP;
-                if ($player->HP > 50) {
-                  $player->HP = 50;
-                }
-                /* $player->equipment->add($newItem); */
-                break;
-              case 'group-items' : // Make item available to each group member
-                $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
-                foreach ($members as $p) {
-                  $p->of(false);
-                  $already = $p->equipment->get($newItem);
-                  if (!$already) {
-                    $p->equipment->add($newItem);
-                    $p->save();
-                  }
-                }
-                break;
-              default:
-                $already = $player->equipment->get($newItem);
-                $player->equipment->add($newItem);
-                break;
-            }
             $task = $pages->get("name='buy'");
-            $newsBoard = 1;
           }
           if ($newItem->template == 'place') {
-            $already = $player->places->get($newItem);
-            if (!$already) {
-              $player->places->add($newItem);
-              $task = $pages->get("name='free'");
-              $newsBoard = 1;
-            }
+            $task = $pages->get("name='free'");
           }
 
-          if (!$already) {
-            // Update player's scores and save
-            updateScore($player, $task);
+          // Update player's scores and save
+          $taskComment = $newItem->title;
+          updateScore($player, $task, $taskComment, $newItem, true);
 
-            // Record history (for each group member if necessary)
-            $newsBoard = 1;
-            $taskComment = $newItem->title;
-            if ($members->count > 0) {
-              $taskComment .= ' [unlocked]';
-              foreach ($members as $p) {
-                saveHistory($p, $task, $taskComment, $newsBoard, $newItem);
-              }
-            } else {
-              saveHistory($player, $task, $taskComment, $newsBoard, $newItem);
-            }
-            
-            // Notify admin
-            $msg = "Player : ". $player->title."\r\n";
-            $msg .= "Team : ". $player->playerTeam."\r\n";
-            $msg .= "Item : ". $newItem->title;
-            mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
-          }
-          
+          // Notify admin
+          $msg = "Player : ". $player->title."\r\n";
+          $msg .= "Team : ". $player->playerTeam."\r\n";
+          $msg .= "Item : ". $newItem->title;
+          mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
 
@@ -176,25 +80,14 @@
         // If valid amount
         if ($player && $receiverId && $amount != 0 && $amount <= $player->GC) {
           // Modify player's page
-          $player->GC = $player->GC - $amount;
           $task = $pages->get("template='task', name='donation'");
-          $player->HP = $player->HP + $task->GC;
-          $player->donation = $player->donation + $amount;
-
-          $player->save();
-          // Record history
           $taskComment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->playerTeam.']';
-          $newsBoard = 1;
-          saveHistory($player, $task, $taskComment, $newsBoard);
+          updateScore($player, $task, $taskComment, '', true);
 
           // Modify receiver's page
-          $receiver->GC = $receiver->GC + $amount;
-          $receiver->save();
-          // Record history
           $task = $pages->get("template='task', name='donated'");
           $taskComment = $amount. ' GC received from '.$player->title.' ['.$player->playerTeam.']';
-          $newsBoard = 0;
-          saveHistory($receiver, $task, $taskComment, $newsBoard);
+          updateScore($receiver, $task, $taskComment, '', true);
           
           // Notify admin
           $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
@@ -231,17 +124,13 @@
       foreach($checkedPlayers as $plyr_task=>$state) {
         list($playerId, $taskId) = explode('_', $plyr_task);
         $comment = 'comment_'.$playerId.'_'.$taskId;
-        $taskComment = trim($input->post->$comment);
 
         $player = $pages->get($playerId);
-        $player->of(false);
 
         // Update player's scores and save
         $task = $pages->get($taskId); 
-        updateScore($player, $task);
-
-        // Record history
-        saveHistory($player, $task, $taskComment);
+        $taskComment = trim($input->post->$comment);
+        updateScore($player, $task, $taskComment, '', true);
 
         $team = $player->playerTeam;
       }
@@ -256,48 +145,21 @@
       foreach($checkedItems as $item=>$state) {
         // Modify player's page
         $player = $pages->get($playerId);
-        $player->of(false);
-        
         // Get item's data
-        $newItem = $pages->get($item);
-       
-        // Set new values
-        $player->GC = (int) $player->GC - $newItem->GC;
-        if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-          switch($newItem->parent->name) {
-            case 'potions' : // instant use potions?
-              $player->HP = $player->HP + $newItem->HP;
-              if ($player->HP > 50) {
-                $player->HP = 50;
-              }
-              $player->equipment->add($newItem);
-              break;
-            case 'group-items' : // Make item available to each group member
-              $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
-              foreach ($members as $p) {
-                $p->of(false);
-                $p->equipment->add($newItem);
-                $p->save();
-              }
-              break;
-            default:
-              $player->equipment->add($newItem);
-              break;
-          }
-          $task = $pages->get("name='buy'");
-          $newsBoard = 1;
-        }
-        if ($newItem->template == 'place') {
-          $player->places->add($newItem);
-          $task = $pages->get("name='free'");
-          $newsBoard = 1;
-        }
+        $refPage = $pages->get($item);
+        
         // Update player's scores and save
-        updateScore($player, $task);
+        if ($refPage->template == 'place') {
+          $task = $pages->get("name=free");
+        }
+        if ($refPage->is("template=equipment|item")) {
+          $task = $pages->get("name=buy");
+        }
+        $taskComment = $refPage->title;
+        if ($task->id) {
+          updateScore($player, $task, $taskComment, $refPage, true);
+        }
 
-        // Record history
-        $taskComment = $newItem->title;
-        saveHistory($player, $task, $taskComment, $newsBoard, $newItem);
       }
       // Redirect to marketPlace
       $team = $player->playerTeam;
