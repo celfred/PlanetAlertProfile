@@ -416,7 +416,7 @@
                   }
                 }
               }
-              updateScore($selectedPlayer, $e->task);
+              updateScore($selectedPlayer, $e->task, false);
               $out .= '<br />';
               $out .= displayTrendScores($selectedPlayer, $oldPlayer);
               $out .= displayPlayerScores($selectedPlayer);
