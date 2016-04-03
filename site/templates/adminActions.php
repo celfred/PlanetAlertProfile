@@ -37,7 +37,7 @@
     include("./foot.inc"); 
   } else { // Ajax call, display requested information
     include("./my-functions.inc"); 
-    $allPlayers = $pages->find("template=player");
+    $allPlayers = $pages->find("template=player")->sort("playerTeam, title");
     $action = $input->urlSegment1;
     $playerId = $input->urlSegment2;
     $confirm = $input->urlSegment3;
@@ -205,36 +205,77 @@
         foreach($allPlayers as $p) {
           $p->of(false);
           $out .= '<li>'.$p->title.' ['.$p->playerTeam.']</li>';
-          if ($p->equipment->has("name=memory-helmet")) { // Player has Memory helmet
+          $out .= '<li>';
+          if ($p->equipment->has("name=memory-helmet")) { // Player has Memory helmet in equipment
             // Check if event exists in History
-            if ($p->get("name=history")->children()->has("task.name=buy, refPage.name=memory-helmet")) {
-              $event = $p->get("name=history")->child("task.name=buy, refPage.name=memory-helmet");
-              $out .= '<span class="label label-success">OK</span> (';
-              $out .= strftime("%d/%m", $event->date);
-              $out .= ')';
+            $event = $p->get("name=history")->children("task.name=buy, refPage.name=memory-helmet")->sort("date")->last();
+            if ($event->id) {
+              // Search if player died after buying the helmet
+              $eDate = $event->date;
+              $death = $p->get("name=history")->child("task.name=death, date>=$eDate");
+              if ($death->id) {
+                $out .= '<span class="label label-danger">Error</span> (Last bought on ';
+                $out .= strftime("%d/%m", $event->date);
+                $out .= ') (Last death on '.strftime("%d/%m", $death->date).')';
+                $out .= '  <button class="remove btn btn-xs btn-warning" data-href="'.$page->url.'" data-itemId="'.$helmet->id.'" data-playerId="'.$p->id.'" data-action="remove-equipment">Remove from equipment</button>';
+              } else {
+                $out .= '<span class="label label-success">OK</span> (Last bought on ';
+                $out .= strftime("%d/%m", $event->date);
+                $out .= ') (No death after this date)';
+              }
             } else { // No Memory helmet in equipment
-              $out .= '<span class="label label-danger">Not OK</span> : Memory helmet in equipment, but not in History!';
+              $out .= '<span class="label label-danger">Error</span> Memory helmet in equipment, but not present in History!';
               $dirty = true;
-              if ($confirm == 1) {
-                // Create new event in History;
-                // TODO
+              // Find if Helmet event exists in the group
+              $members = $allPlayers->find("playerTeam=$p->playerTeam, group=$p->group");
+              foreach($members as $m) {
+                $boughtHelmet = $m->get("name=history")->child("template=event, task.name=buy, refPage.name=memory-helmet");
+                if ($boughtHelmet->id) {
+                  $source = clone $boughtHelmet;
+                }
+              }
+              // Copy the event on the same date
+              if ($source->id) {
+                $out .= ' Copy from '.strftime("%d/%m", $source->date).'?';
+              }
+              if ($confirm == 1) { // Create new event in History;
+                // Find if Helmet event exists in the group
+                $members = $allPlayers->find("playerTeam=$p->playerTeam, group=$p->group");
+                foreach($members as $m) {
+                  $boughtHelmet = $m->get("name=history")->child("template=event, task.name=buy, refPage.name=memory-helmet");
+                  if ($boughtHelmet->id) {
+                    $source = clone $boughtHelmet;
+                  }
+                }
+                // Copy the event on the same date
+                if ($source->id) {
+                  $buy = $pages->get("template=task, name=buy");
+                  $eDate = $source->date;
+                  $comment = "Memory helmet [unlocked]";
+                  foreach($members as $m) {
+                    $boughtHelmet = $m->get("name=history")->child("template=event, task.name=buy, refPage.name=memory-helmet");
+                    if ($boughtHelmet->id == '') {
+                      saveHistory($m, $buy, $comment, 0, $helmet, $eDate);
+                    }
+
+                  }
+                }
               }
             }
-          } else {
+          } else { // Memory helmet not in equipment
             // Let's check History
-            $event = $p->get("name=history")->child("task.name=buy, refPage.name=memory-helmet");
-            if ($event) {
+            $event = $p->get("name=history")->children("task.name=buy, refPage.name=memory-helmet")->sort("date")->last();
+            if ($event->id) {
               // Search if player died after buying the helmet
-              $death = $p->get("name=history")->child("task.name=death");
-              if ($death) {
+              $eDate = $event->date;
+              $death = $p->get("name=history")->child("task.name=death, date>=$eDate");
+              if ($death->id) {
                 $out .= '<span class="label label-success">OK</span>';
-                $out .= ' ('.strftime("%d/%m", $event->date).') (Death on '.strftime("%d/%m", $death->date).')';
-                if ($death->date > $event->date) {
-                } else {
-                  $out .= '<span class="label label-danger">Not OK</span>';
-                  $out .= ': found in History ('.strftime("%d/%m", $event->date).') but not in equipment !';
-                  $dirty = true;
-                }
+                $out .= ' (Last bought on '.strftime("%d/%m", $event->date).') (Last death on '.strftime("%d/%m", $death->date).')';
+              } else {
+                $out .= '<span class="label label-danger">Error</span>';
+                $out .= '(Bought on '.strftime("%d/%m", $event->date).') (No death after this date)';
+                $dirty = true;
               }
               if ($confirm == 1) {
                 // Add to equipment;
@@ -246,6 +287,7 @@
               $out .= '<span class="label label-success">OK</span> (no Memory Helmet at all)';
             }
           }
+          $out .= '</li>';
         }
         $out .= '</ul>';
         if ($dirty && !$input->urlSegment3 && $input->urlSegment3 != 1) {
@@ -397,6 +439,13 @@
           $out .= 'You need to select 1 player.';
         }
         break;
+      case 'remove-equipment' :
+        $item = $pages->get($input->urlSegment3);
+        $player = $pages->get($playerId);
+        $player->of(false);
+        $player->equipment->remove($item);
+        $player->save();
+        break;
       case 'trash' :
         $eventId = $pages->get($input->urlSegment2);
         $pages->trash($eventId);
@@ -407,6 +456,7 @@
 
     $out .= '<script>';
     $out .= '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var href=$(this).attr("data-href") + action +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.hide(); }) };});';
+    $out .= '$(".remove").click( function() { var itemId=$(this).attr("data-itemId"); var action = $(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ itemId; var that=$(this).parents("li"); if (confirm("Remove item?")) {$.get(href, function(data) { that.hide(); }) };});';
     $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); }) };});';
     $out .= '$(".death").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Please reload!"); $("button[data-action=add-death]").click();}) };});';
     $out .= '</script>';
