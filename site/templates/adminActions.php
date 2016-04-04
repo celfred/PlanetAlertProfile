@@ -335,7 +335,7 @@
       case 'view-history' :
         if ($selectedPlayer) {
           $allEvents = $selectedPlayer->get("name=history")->children()->sort('-date');
-          $out = 'History of '.$selectedPlayer->title;
+          $out = 'History of '.$selectedPlayer->title.' ['.$allEvents->count.' events].';
           $out .= '<table class="table table-condensed table-hover">';
           foreach($allEvents as $e) {
             $out .= '<tr><td class="text-left">';

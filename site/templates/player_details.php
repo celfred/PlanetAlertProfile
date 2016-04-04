@@ -305,7 +305,7 @@
               <tbody>
               <?php
                 foreach($allEvents as $event) {
-                  if ($event->task->XP > 0 || ($event->task->category->name === 'place' || $event->task->category->name === 'shop') ) {
+                  if ($event->task->XP > 0 || ($event->task->category->name === 'place' || $event->task->category->name === 'shop' || $event->task->name === 'positive-collective-alchemy') ) {
                     $class = '+';
                   } else {
                     $class = '-';
