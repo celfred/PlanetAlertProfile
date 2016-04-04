@@ -1,4 +1,9 @@
 <?php
+  $whitelist = array(
+      '127.0.0.1',
+      '::1'
+  );
+
   include("./my-functions.inc");
 
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
@@ -36,7 +41,9 @@
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->playerTeam."\r\n";
         $msg .= "Item : ". $newItem->title;
-        mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+        if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+          mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+        }
       }
 
       if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
@@ -63,7 +70,9 @@
           $msg = "Player : ". $player->title."\r\n";
           $msg .= "Team : ". $player->playerTeam."\r\n";
           $msg .= "Item : ". $newItem->title;
-          mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+            mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+          }
         }
       }
 
@@ -91,9 +100,11 @@
           
           // Notify admin
           $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
-          $msg .= "Donation amount : ". $amount;
+          $msg .= "Donation amount : ". $amount."\r\n";
           $msg .= "Donated to : ". $receiver->title." [".$receiver->playerTeam."]";
-          mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
+          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+            mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
+          }
         }
       }
     }

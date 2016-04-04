@@ -1,55 +1,44 @@
 <?php
+  $whitelist = array(
+      '127.0.0.1',
+      '::1'
+  );
+
   include("./my-functions.inc");
 
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
-    $playerId = $input->post->playerId;
-    $player = $pages->get($playerId);
-    $player->of(false);
-
-    $training = $input->post->training;
+    $player = $pages->get("template=player, login=$user->name");
     $exerciseId = $input->post->exerciseId;
     $monster = $pages->get($exerciseId);
-    $summary = $pages->get($exerciseId)->summary;
     $result = $input->post->result;
+    $training = $input->post->training;
 
     if ($training == true) { // Training session
-      // Increase UT value
-      $player->underground_training = $player->underground_training + $result;
-
       if ($result>=1 && $result <=5) {
         $task = $pages->get("name=ut-action-v");
       } else if ($result > 5) {
         $task = $pages->get("name=ut-action-vv");
       }
 
-      if ($exerciseId && $player && $task) {
-        $newsBoard = 0;
-        // Update player's scores
-        updateScore($player, $task);
-
-        // Save player's new scores
-        $player->save();
+      if ($monster->id && $player->id && $task->id) {
+        $taskComment = $monster->title.' [+'.$result.'U.T.]';
+        updateScore($player, $task, $taskComment, $monster, true);
         
-        // Record history
-        $taskComment = $summary.'" [+'.$result.'U.T.]';
-        $refPage = $exerciseId;
-        saveHistory($player, $task, $taskComment, $newsBoard, $refPage);
-        
-        // TODO Test if new best player on this monster
-        setBestPlayer($monster, $player);
-
         // Record to log file
-        $logText = $player->id.' ('.$player->name.'),'.$exerciseId.' ('.$refPage->name.'),'.$result;
-        $log->save('underground-training.txt', $logText);
+        $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result;
+        $log->save('underground-training', $logText);
 
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->playerTeam."\r\n";
         $msg .= "Training : ". $monster->title."\r\n";
         $msg .= "Result : ". $result;
-        mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
+
+        if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+          mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
+        }
       }
-    } else { // Monster fight
+    } else { // Monster fight TODO
       $playerHP = $input->post->playerHP;
       $monsterHP = $input->post->monsterHP;
       $nbAttacks = $input->post->nbAttacks;
@@ -95,6 +84,5 @@
         mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
       }
     }
-    
   }
 ?>

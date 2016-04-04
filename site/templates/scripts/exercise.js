@@ -548,7 +548,6 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       data: $.param({
         exerciseId : $scope.exerciseId,
-        playerId : $scope.playerId,
         training: true,
         result : $scope.result
       })

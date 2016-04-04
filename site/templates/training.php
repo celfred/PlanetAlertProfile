@@ -32,7 +32,9 @@
 
         $out .= '<div class="well">';
         $out .= '<h3 class="text-center">';
-        $out .= '<img width="50" src="'.$helmet->image->url.'" alt="Helmet" />';
+        if ($helmet->image) {
+          $out .= '<img width="50" src="'.$helmet->image->url.'" alt="Helmet" />';
+        }
         $out .= ' Memory Helmet <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Vocabulary Revisions"></span>';
         $out .= '</h3>';
         $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
@@ -194,6 +196,8 @@
           $out .= '<td data-sort="'.$bestUt.'">';
           if ($result->mostTrained) {
             $out .= '<span class="label label-'.$class.'">'.$bestUt.' UT - '.$result->mostTrained->title.' ['.$result->mostTrained->playerTeam.']</span>';
+          } else {
+            $out .= '<span>No record yet.</span>';
           }
           $out .= '</td>';
           $out .= '</tr>';
@@ -241,10 +245,10 @@
             $out .= '<span class="avatarContainer">';
             if ($player->avatar) {
               $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
-            } else {
-              $out .= '<img src="'.$page->image->url.'" alt="Avatar" />';
             }
-            $out .= '<img class="helmet superpose squeeze" src="'.$helmet->image->url.'" alt="image" />';
+            if ($helmet->image) {
+              $out .= '<img class="helmet superpose squeeze" src="'.$helmet->image->url.'" alt="image" />';
+            }
             $out .= '</span>';
             $out .= '</span>';
             $out .= '</div>';

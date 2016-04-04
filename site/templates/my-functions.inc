@@ -40,7 +40,9 @@ function initPlayer($player) {
 }
 function updateScore($player, $task, $comment = '', $refPage = '', $real = true) {
   $pages = wire('pages');
-  if ($task->name != 'death') {
+  $player = $pages->get($player->id);
+  $task = $pages->get($task->id);
+  if ($task->is("name!=death")) {
     // Task details to calculate new score
     $tXP = $task->XP;
     $tHP = $task->HP;
@@ -76,6 +78,9 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
           $deltaXP = 0;
         }
       }
+    } else {
+      preg_match("/\[\+([\d]+)U\.T\.\]/", $comment, $matches);
+      $player->underground_training = $player->underground_training + $matches[1];
     }
 
     // Calculate player's new score
@@ -83,6 +88,14 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
       $player->GC = (int) $player->GC + $tGC;
     } else { // Half GC if penalty
       $player->GC = (int) round($player->GC/2); // Penalty = Half GC taken away
+    }
+    if ($task->is("name=donation")) {
+      preg_match("/\d+/", $comment, $matches);
+      $player->GC = (int) $player->GC - $matches[0];
+    }
+    if ($task->is("name=donated")) {
+      preg_match("/\d+/", $comment, $matches);
+      $player->GC = (int) $player->GC + $matches[0];
     }
     $player->HP = (int) $player->HP + $tHP + $deltaHP;
     $player->XP = (int) $player->XP + $tXP + $deltaXP;
@@ -102,14 +115,11 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
             if ($player->HP > 50) {
               $player->HP = 50;
             }
-            $player->equipment->add($refPage);
+            /* $player->equipment->add($refPage); */
             break;
           case 'group-items' : // Make item available to each group member
             $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group")->not("$player->id");
             foreach ($members as $p) {
-              /* $p->of(false); */
-              /* $p->equipment->add($newItem); */
-              /* $p->save(); */
               $bought = $pages->get("name=bought");
               $comment = $refPage->title." [unlocked]";
               updateScore($p, $bought, $comment, $refPage, true);
@@ -687,17 +697,21 @@ function isTrainingAllowed($player, $monster) {
 }
 
 function utGain($monsterId, $player) {
+  $pages = wire('pages');
+  $player = $pages->get($player->id);
   $prevUt = $player->find('template=event,refPage='.$monsterId.', sort=-date');
-  foreach($prevUt as $p) {
-    preg_match_all("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches, PREG_SET_ORDER);
+  if ($prevUt->count() > 0) {
+    foreach($prevUt as $p) {
+      preg_match("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches);
 
-    if (count($matches) == 0) {
-      $utGain = $utGain+1;
-    } else {
-      foreach ($matches as $val) {
-        $utGain = $utGain+$val[1];
+      if (!$matches) {
+        $utGain = $utGain+1;
+      } else {
+        $utGain = $utGain+$matches[1];
       }
     }
+  } else {
+    $utGain = 0;
   }
   return $utGain;
 }

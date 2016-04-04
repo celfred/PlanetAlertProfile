@@ -1,16 +1,16 @@
 <?php
-
-  $redirectUrl = $player->url;
-  $out = '<div ng-controller="TranslateCtrl" ng-init="init(\''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
-
-  $out .= '<h2 class="row well text-center">';
-  $out .= '<span class="label label-default">Monster fight</span>';
   // Get user info
   if ($user->isSuperuser()) {
     $player->title = 'ADMIN';
   } else {
     $player = $pages->get("template=player, login=$user->name");
   }
+
+  $redirectUrl = $player->url;
+  $out = '<div ng-controller="TranslateCtrl" ng-init="init(\''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
+
+  $out .= '<h2 class="row well text-center">';
+  $out .= '<span class="label label-default">Monster fight</span>';
   $out .= '<span class="">  ';
   $out .= '<img class="pull-left" src="'.$page->image->url.'" alt="Avatar" />';
   $out .= $page->title;

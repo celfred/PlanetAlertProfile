@@ -125,7 +125,7 @@
                 preg_match("/\+(\d+)/", $comment, $matches);
                 /* $out .= $e->summary.' - '.$matches[1]; */
                 $out .= ' '.$comment;
-                $selectedPlayer->underground_training = $selectedPlayer->underground_training + $matches[0];
+                $selectedPlayer->underground_training = $selectedPlayer->underground_training + $matches[1];
               }
               if ($e->task->name == 'buy' || $e->task->name == 'free') { // New equipment, place or potion, add it accordingly
                 $out .= ' ['.$e->refPage->title.']';
@@ -370,18 +370,15 @@
             $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
             $out .= $e->title;
             if ($e->task) {
-              /* $out .= '['.$e->task->name.' / '. $e->task->category->name.']'; */
               if ($e->task->name == 'donation') { // Player gave GC, increase his Donation
                 $comment = $e->summary;
                 preg_match("/\d+/", $comment, $matches);
-                /* $out .= $e->summary.' - '.$matches[0]; */
                 $out .= ' '.$comment;
                 $selectedPlayer->donation = $selectedPlayer->donation + $matches[0];
               }
               if ($e->task->name == 'donated') { // Player received GC, increase his GC
                 $comment = $e->summary;
                 preg_match("/\d+/", $comment, $matches);
-                /* $out .= $e->summary.' - '.$matches[0]; */
                 $out .= ' '.$comment;
                 $selectedPlayer->GC = $selectedPlayer->GC + $matches[0];
               }
