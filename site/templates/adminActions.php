@@ -69,7 +69,9 @@
               $out .= strftime("%d/%m", $e->date).' - ';
               $out .= $e->title;
               $comment = trim($e->summary);
-              $out .= $comment;
+              if ($comment) {
+                $out .= ' ['.$comment.']';
+              }
               if ($e->refPage == false) {
                 // Compare summary to equipment or place title
                 $refPage = $pages->get("title=$comment");
@@ -106,25 +108,29 @@
             $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
             $out .= $e->title;
             if ($e->task) {
+              $comment = trim($e->summary);
               if ($e->task->name == 'donation') { // Player gave GC, increase his Donation
-                $comment = $e->summary;
                 preg_match("/\d+/", $comment, $matches);
                 /* $out .= $e->summary.' - '.$matches[0]; */
-                $out .= ' '.$comment;
+                if ($comment) {
+                  $out .= ' ['.$comment.']';
+                }
                 $selectedPlayer->donation = $selectedPlayer->donation + $matches[0];
               }
               if ($e->task->name == 'donated') { // Player received GC, increase his GC
-                $comment = $e->summary;
                 preg_match("/\d+/", $comment, $matches);
                 /* $out .= $e->summary.' - '.$matches[0]; */
-                $out .= ' '.$comment;
+                if ($comment) {
+                  $out .= ' ['.$comment.']';
+                }
                 $selectedPlayer->GC = $selectedPlayer->GC + $matches[0];
               }
               if ($e->task->name == 'ut-action-v' || $e->task->name == 'ut-action-vv') { // Underground trining, increase UT
-                $comment = $e->summary;
                 preg_match("/\+(\d+)/", $comment, $matches);
                 /* $out .= $e->summary.' - '.$matches[1]; */
-                $out .= ' '.$comment;
+                if ($comment) {
+                  $out .= ' ['.$comment.']';
+                }
                 $selectedPlayer->underground_training = $selectedPlayer->underground_training + $matches[1];
               }
               if ($e->task->name == 'buy' || $e->task->name == 'free') { // New equipment, place or potion, add it accordingly
@@ -370,23 +376,27 @@
             $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
             $out .= $e->title;
             if ($e->task) {
+              $comment = trim($e->summary);
               if ($e->task->name == 'donation') { // Player gave GC, increase his Donation
-                $comment = $e->summary;
                 preg_match("/\d+/", $comment, $matches);
-                $out .= ' '.$comment;
+                if ($comment) {
+                  $out .= ' ['.$comment.']';
+                }
                 $selectedPlayer->donation = $selectedPlayer->donation + $matches[0];
               }
               if ($e->task->name == 'donated') { // Player received GC, increase his GC
-                $comment = $e->summary;
                 preg_match("/\d+/", $comment, $matches);
-                $out .= ' '.$comment;
+                if ($comment) {
+                  $out .= ' ['.$comment.']';
+                }
                 $selectedPlayer->GC = $selectedPlayer->GC + $matches[0];
               }
               if ($e->task->name == 'ut-action-v' || $e->task->name == 'ut-action-vv') { // Underground trining, increase UT
-                $comment = $e->summary;
                 preg_match("/\+(\d+)/", $comment, $matches);
                 /* $out .= $e->summary.' - '.$matches[1]; */
-                $out .= ' '.$comment;
+                if ($comment) {
+                  $out .= ' ['.$comment.']';
+                }
                 $selectedPlayer->underground_training = $selectedPlayer->underground_training + $matches[0];
               }
               if ($e->task->name == 'buy' || $e->task->name == 'free') { // New equipment, place or potion, add it accordingly
