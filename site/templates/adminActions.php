@@ -137,25 +137,22 @@
               if ($e->task->name == 'buy' || $e->task->name == 'free') { // New equipment, place or potion, add it accordingly
                 $out .= ' ['.$e->refPage->title.']';
                 // Get item's data
-                if ($e->refPage) {
+                if ($e->refPage->id) {
                   $newItem = $pages->get("$e->refPage");
                   // Set new values
-                  $selectedPlayer->GC = (int) $selectedPlayer->GC - $newItem->GC;
-                  if ($newItem->template == 'equipment' || $newItem->template == 'item') {
+                  /* $selectedPlayer->GC = (int) $selectedPlayer->GC - $newItem->GC; */
+                  if ($newItem->id("template=equipment|item")) {
                     switch($newItem->parent->name) {
                       case 'potions' : // instant use potions?
                         // If healing potion
-                        $selectedPlayer->HP = $selectedPlayer->HP + $newItem->HP;
-                        if ($selectedPlayer->HP > 50) {
-                          $selectedPlayer->HP = 50;
-                        }
+                        /* $selectedPlayer->HP = $selectedPlayer->HP + $newItem->HP; */
+                        /* if ($selectedPlayer->HP > 50) { */
+                        /*   $selectedPlayer->HP = 50; */
+                        /* } */
                         break;
                       default:
-                        $selectedPlayer->equipment->add($newItem);
+                        /* $selectedPlayer->equipment->add($newItem); */
                     }
-                  }
-                  if ($newItem->template == 'place') {
-                    $selectedPlayer->places->add($newItem);
                   }
                 }
               }
@@ -216,7 +213,7 @@
           $out .= '<li>';
           if ($p->equipment->has("name=memory-helmet")) { // Player has Memory helmet in equipment
             // Check if event exists in History
-            $event = $p->get("name=history")->children("task.name=buy, refPage.name=memory-helmet")->sort("date")->last();
+            $event = $p->get("name=history")->children("task.name=buy|bought, refPage.name=memory-helmet")->sort("date")->last();
             if ($event->id) {
               // Search if player died after buying the helmet
               $eDate = $event->date;
@@ -310,13 +307,11 @@
         $out .= 'Total # of players : '.$allPlayers->count();
         $out .= '<ul>';
         foreach($allMonsters as $m) {
-          $out .= '<li>'.$m->title.' ['.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']]';
+          $bestUt = utGain($m, $m->mostTrained);
+          $out .= '<li>'.$m->title.' ['.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.'] : '.$bestUt.']';
           foreach($allPlayers as $p) {
             $playerUt = utGain($m, $p);
             $p->ut = $playerUt;
-            /* $out .= '<li>'.$p->title.' ['.$p->playerTeam.']'; */
-            /* $out .= ' ⇒'.$playerUt; */
-            /* $out .= '</li>'; */
           }
           $allPlayers->sort("-ut");
           if ($allPlayers->first()->id != $m->mostTrained->id) {
@@ -355,8 +350,10 @@
                 $e->save();
               }
             } else {
-              $out .= '<span class="label label-success">OK</span></li>';
+              $out .= '<span class="label label-success">OK</span>';
             }
+            // Direct link to manually edit page
+            $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
             $out .= '</li>';
           }
           $out .= '</ul>';
@@ -384,6 +381,8 @@
               $out .= ' ['.$comment.']';
             }
             $out .= '  <button class="delete btn btn-xs btn-warning" data-href="'.$page->url.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
+            // Direct link to manually edit page
+            $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
             $out .= '</td></tr>';
           }
           $out .= '</table>';
@@ -407,59 +406,69 @@
             $out .= '<tr><td class="text-left">';
             $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
             $out .= $e->title;
+            $comment = trim($e->summary);
+            if ($comment) {
+              $out .= ' ['.$comment.']';
+            }
+            if ($e->refPage) {
+              $out .= ' ['.$e->refPage->title.']';
+            }
             if ($e->task) {
-              $comment = trim($e->summary);
-              if ($e->task->name == 'donation') { // Player gave GC, increase his Donation
+              if ($e->task->is("name=donation")) { // Player gave GC, increase his Donation
                 preg_match("/\d+/", $comment, $matches);
-                if ($comment) {
-                  $out .= ' ['.$comment.']';
+                $diff = $selectedPlayer->GC - $matches[0];
+                if ($diff <= 0) { // Check for Donation bug
+                  $out .= ' <span class="label label-danger">Error';
+                  $out .= ' ⇒ Amount replaced : '.$selectedPlayer->GC;
+                  $out .= '</span>';
+                  $comment = preg_replace("/\d+/", $selectedPlayer->GC, $comment);
+                  $dirty = true;
                 }
-                $selectedPlayer->donation = $selectedPlayer->donation + $matches[0];
               }
-              if ($e->task->name == 'donated') { // Player received GC, increase his GC
-                preg_match("/\d+/", $comment, $matches);
-                if ($comment) {
-                  $out .= ' ['.$comment.']';
+              if ($e->task->is("name=buy|free")) { // New equipment, place or potion, add it accordingly
+                if ($e->refPage->GC > $selectedPlayer->GC) {
+                  $out .= ' <span class="label label-danger">Error : Not enough GC.</span>';
+                  $dirty = true;
                 }
-                $selectedPlayer->GC = $selectedPlayer->GC + $matches[0];
-              }
-              if ($e->task->name == 'ut-action-v' || $e->task->name == 'ut-action-vv') { // Underground trining, increase UT
-                preg_match("/\+(\d+)/", $comment, $matches);
-                /* $out .= $e->summary.' - '.$matches[1]; */
-                if ($comment) {
-                  $out .= ' ['.$comment.']';
+                if ($e->refPage->level > $selectedPlayer->level) { // Check for Buy/Free bug (if a Death occurred, for example)
+                  $out .= ' <span class="label label-danger">Error : Wrong level.</span>';
+                  $dirty = true;
                 }
-                $selectedPlayer->underground_training = $selectedPlayer->underground_training + $matches[0];
-              }
-              if ($e->task->name == 'buy' || $e->task->name == 'free') { // New equipment, place or potion, add it accordingly
-                $out .= ' ['.$e->refPage->title.']';
                 // Get item's data
                 if ($e->refPage) {
                   $newItem = $pages->get("$e->refPage");
-                  // Set new values
-                  $selectedPlayer->GC = (int) $selectedPlayer->GC - $newItem->GC;
-                  if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-                    switch($newItem->parent->name) {
-                      case 'potions' : // instant use potions?
-                        // If healing potion
-                        $selectedPlayer->HP = $selectedPlayer->HP + $newItem->HP;
-                        if ($selectedPlayer->HP > 50) {
-                          $selectedPlayer->HP = 50;
+                  if ($newItem->parent->is("name=group-items")) {
+                    // [unlocked] or [bought] ?
+                    // refPage should be set accordingly but prevention here for backward compatibility
+                    preg_match("/\[unlocked\]/", $comment, $matches);
+                    if ($matches[0]) {
+                      $dirty = true;
+                      $out .= ' <span class="label label-danger">[unlocked] found, but refPage set to "Buy" instead of "Bought".</span>';
+                    } else {
+                      // Check if group members have [unlocked] item
+                      $members = $allPlayers->find("playerTeam=$selectedPlayer->playerTeam, group=$selectedPlayer->group")->not("$selectedPlayer->id");
+                      foreach ($members as $p) {
+                        $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
+                        if ($bought->id) {
+                          $out .= '1';
+                        } else {
+                          $dirty = true;
+                          $out.= '0';
                         }
-                        break;
-                      default:
-                        $selectedPlayer->equipment->add($newItem);
+                      }
+                      if ($dirty) {
+                        $out .= ' <span class="label label-danger"> Make sure [unlocked] exists in the group and set refPage to "Bought".</span>';
+                      }
                     }
-                  }
-                  if ($newItem->template == 'place') {
-                    $selectedPlayer->places->add($newItem);
                   }
                 }
               }
-              updateScore($selectedPlayer, $e->task, '', '',false);
+              updateScore($selectedPlayer, $e->task, $comment, $e->refPage,false);
               $out .= '<br />';
               $out .= displayTrendScores($selectedPlayer, $oldPlayer);
               $out .= displayPlayerScores($selectedPlayer);
+              // Direct link to manually edit page
+              $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
             }
             $out .='</td></tr>';
           }
@@ -468,6 +477,9 @@
           $out .= '<br />';
           $out .= displayPlayerScores($selectedPlayer);
           $out .= '<br /><br />';
+          if ($dirty) {
+            $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
+          }
           if ($input->urlSegment3 && $input->urlSegment3 == 1) {
             $selectedPlayer->of(false);
             $selectedPlayer->save();

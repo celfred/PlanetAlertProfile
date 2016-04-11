@@ -42,6 +42,9 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
   $pages = wire('pages');
   $player = $pages->get($player->id);
   $task = $pages->get($task->id);
+  if ($refPage) {
+    $refPage = $pages->get($refPage->id);
+  }
   if ($task->is("name!=death")) {
     // Task details to calculate new score
     $tXP = $task->XP;
@@ -80,49 +83,55 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
       }
     } else {
       preg_match("/\[\+([\d]+)U\.T\.\]/", $comment, $matches);
-      $player->underground_training = $player->underground_training + $matches[1];
+      if ($matches[0]) {
+        $player->underground_training = (int) $player->underground_training + $matches[1];
+      } else {
+        $player->underground_training = (int) $player->underground_training + 1;
+      }
     }
 
     // Calculate player's new score
-    if ($task->is("name!=penalty")) {
-      $player->GC = (int) $player->GC + $tGC;
-    } else { // Half GC if penalty
-      $player->GC = (int) round($player->GC/2); // Penalty = Half GC taken away
+    // Minus GC (0 if positive, costless, or needing extra action tasks, so no problem
+    $player->GC = (int) $player->GC + $tGC;
+    $player->HP = (int) $player->HP + $tHP + $deltaHP;
+    $player->XP = (int) $player->XP + $tXP + $deltaXP;
+
+    // Extra action?
+    if ($task->is("name=penalty")) { // Half GC if penalty
+      $player->GC = (int) round($player->GC/2);
     }
     if ($task->is("name=donation")) {
       preg_match("/\d+/", $comment, $matches);
       $player->GC = (int) $player->GC - $matches[0];
+      $player->donation = (int) $player->donation + $matches[0];
     }
     if ($task->is("name=donated")) {
       preg_match("/\d+/", $comment, $matches);
       $player->GC = (int) $player->GC + $matches[0];
     }
-    $player->HP = (int) $player->HP + $tHP + $deltaHP;
-    $player->XP = (int) $player->XP + $tXP + $deltaXP;
-   
-    // Extra action?
-    if ($task->name == 'fake-donator') {
+    if ($task->is("name=fake-donator")) {
       $player->donation = 0; // Reset donation indicator
     }
-
-    // Add items if needed
-    if ($task->name == 'buy') {
+    if ($task->is("name=bought")) {
+      $player->equipment->add($refPage);
+    }
+    if ($task->is("name=buy|free")) {
       $player->GC = (int) $player->GC-$refPage->GC;
-      if ($refPage->template == 'equipment' || $refPage->template == 'item') {
+      // Add item if needed
+      if ($refPage->is("template=equipment|item")) {
         switch($refPage->parent->name) {
           case 'potions' : // instant use potions?
             $player->HP = $player->HP + $refPage->HP;
             if ($player->HP > 50) {
               $player->HP = 50;
             }
-            /* $player->equipment->add($refPage); */
             break;
           case 'group-items' : // Make item available to each group member
             $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group")->not("$player->id");
             foreach ($members as $p) {
               $bought = $pages->get("name=bought");
               $comment = $refPage->title." [unlocked]";
-              updateScore($p, $bought, $comment, $refPage, true);
+              updateScore($p, $bought, $comment, $refPage, $real);
             }
             break;
           default:
@@ -130,11 +139,8 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
             break;
         }
       }
-    }
-    // Add place if needed
-    if ($task->name == 'free') {
-      $player->GC = (int) $player->GC-$refPage->GC;
-      if ($refPage->template == 'place') {
+      // Add place if needed
+      if ($refPage->is("template=place")) {
         $player->places->add($refPage);
       }
     }
@@ -259,8 +265,8 @@ function displayTrendScores($player, $old) {
   if ($trendPlaces > 0) { $out .= '<li>+'.$trendPlaces.'Pl.→'.$player->places->count.'</li>'; }
   if ($trendPlaces < 0) { $out .= '<li>'.$trendPlaces.'Pl.→'.$player->places->count.'</li>'; }
   $trendDonation = $player->donation-$old->donation;
-  if ($trendDonationHP > 0) { $out .= '<li>+'.$trendDonationHP.'Don.→'.$player->donation.'</li>'; }
-  if ($trendDonationHP < 0) { $out .= '<li>'.$trendDonationHP.'Don.→'.$player->donation.'</li>'; }
+  if ($trendDonation > 0) { $out .= '<li>+'.$trendDonation.'Don.→'.$player->donation.'</li>'; }
+  if ($trendDonation < 0) { $out .= '<li>'.$trendDonation.'Don.→'.$player->donation.'</li>'; }
   $trendUT = $player->underground_training-$old->underground_training;
   if ($trendUT > 0) { $out .= '<li>+'.$trendUT.'UT→'.$player->underground_training.'</li>'; }
   if ($trendUT < 0) { $out .= '<li>'.$trendUT.'UT→'.$player->underground_training.'</li>'; }
@@ -717,6 +723,9 @@ function utGain($monsterId, $player) {
 }
 
 function setBestPlayer($monster, $player) {
+  $pages = wire('pages');
+  $player = $pages->get($player->id);
+  $monster = $pages->get($monster->id);
   $playerUt = utGain($monster, $player);
   $bestUt = utGain($monster, $monster->mostTrained);
   if ($playerUt > $bestUt) {
