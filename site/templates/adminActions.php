@@ -23,6 +23,7 @@
   <div>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="refPage">Set refPage</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="helmet">Check Memory helmet</button>
+  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="ut">Check UT scoreboard</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="clean-history">Clean history</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="add-death">Add death</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="view-history">View history</button>
@@ -302,6 +303,37 @@
         } else {
           $out .= '<p>Memory helmets seem to be clean.</p>';
         }
+        break;
+      case 'ut' :
+        $allMonsters = $pages->find("template=exercise");
+
+        $out .= 'Total # of players : '.$allPlayers->count();
+        $out .= '<ul>';
+        foreach($allMonsters as $m) {
+          $out .= '<li>'.$m->title.' ['.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']]';
+          foreach($allPlayers as $p) {
+            $playerUt = utGain($m, $p);
+            $p->ut = $playerUt;
+            /* $out .= '<li>'.$p->title.' ['.$p->playerTeam.']'; */
+            /* $out .= ' ⇒'.$playerUt; */
+            /* $out .= '</li>'; */
+          }
+          $allPlayers->sort("-ut");
+          if ($allPlayers->first()->id != $m->mostTrained->id) {
+            $out .= ' <span class="label label-danger">Error</span>';
+            if ($confirm == 1) { // Save new best players
+              $m->of(false);
+              $m->mostTrained = $allPlayers->first();
+              $m->save();
+            }
+          } else {
+            $out .= ' <span class="label label-success">OK</span>';
+          }
+          $out .= ' : '.$allPlayers->first()->title.' ['.$allPlayers->first()->playerTeam.'] ⇒'.$allPlayers->first()->ut;
+          $out .= '</li>';
+        }
+        $out .= '</ul>';
+        $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'ut/all/1">Save now!</button>';
         break;
       case 'clean-history' :
         if ($selectedPlayer) {
