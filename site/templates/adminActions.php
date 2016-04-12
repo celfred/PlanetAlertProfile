@@ -25,8 +25,6 @@
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="helmet">Check Memory helmet</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="ut">Check UT scoreboard</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="clean-history">Clean history</button>
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="add-death">Add death</button>
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="view-history">View history</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="recalculate">Recalculate scores</button>
   </div>
 </section>
@@ -287,29 +285,6 @@
           } else {
             $out .= '<p>Titles seem to be clean.</p>';
           }
-        } else {
-          $out .= 'You need to select 1 player.';
-        }
-        break;
-      case 'view-history' :
-        if ($selectedPlayer) {
-          $allEvents = $selectedPlayer->get("name=history")->children()->sort('-date');
-          $out = 'History of '.$selectedPlayer->title.' ['.$allEvents->count.' events].';
-          $out .= '<table class="table table-condensed table-hover">';
-          foreach($allEvents as $e) {
-            $out .= '<tr><td class="text-left">';
-            $out .= strftime("%d/%m", $e->date).' - ';
-            $out .= $e->title;
-            $comment = trim($e->summary);
-            if ($comment) {
-              $out .= ' ['.$comment.']';
-            }
-            $out .= '  <button class="delete btn btn-xs btn-warning" data-href="'.$page->url.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
-            // Direct link to manually edit page
-            $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
-            $out .= '</td></tr>';
-          }
-          $out .= '</table>';
         } else {
           $out .= 'You need to select 1 player.';
         }
