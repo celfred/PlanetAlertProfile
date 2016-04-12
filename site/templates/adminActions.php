@@ -13,7 +13,7 @@
       <select id="playerId">
         <?php
           echo "<option value='-1'>Select a player</option>";
-          /* echo "<option value='all'>All players</option>"; */
+          echo "<option value='all'>All players</option>";
           foreach($allPlayers as $p) {
             echo "<option value='{$p->id}'>{$p->title} [{$p->playerTeam}]</option>";
           }
@@ -45,12 +45,15 @@
     switch($playerId) {
       case 'all' : 
         $selectedPlayer = false;
+        $selectedAll = true;
         break;
       case '-1' :
         $selectedPlayer = false;
+        $selectedAll= false;
         break;
       default :
         $selectedPlayer = $pages->get($playerId);
+        $selectedAll= false;
     }
 
     switch ($action) {
@@ -254,41 +257,41 @@
         break;
       case 'clean-history' :
         if ($selectedPlayer) {
-          /* $allEvents = $selectedPlayer->find("template=event")->sort('-date'); */
           $allEvents = $selectedPlayer->get("name=history")->children()->sort(date);
-          $out = 'Clean '.$allEvents->count.' events.';
-          $out .= '<ul>';
-          foreach($allEvents as $e) {
-            $out .= '<li>';
-            $out .= $e->title.'­→ ';
-            preg_match("/\s.?\[.*\]/", $e->title, $matches);
-            if ($matches[0]) {
-              $dirty = true;
-              $title = preg_replace("/(.*)(\s.?\[.*\])/", "$1", $e->title);
-              $out .= $title;
-              if ($input->urlSegment3 && $input->urlSegment3 == 1) {
-                $e->of(false);
-                $e->title = $title;
-                $e->save();
-              }
-            } else {
-              $out .= '<span class="label label-success">OK</span>';
-            }
-            // Direct link to manually edit page
-            $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
-            $out .= '</li>';
-          }
-          $out .= '</ul>';
-          $out .= '<br /><br />';
-          if ($dirty && !$input->urlSegment3 && $input->urlSegment3 != 1) {
-            $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'clean-history/'.$playerId.'/1">Clean now!</button>';
-          } else {
-            $out .= '<p>Titles seem to be clean.</p>';
-          }
-        } else {
-          $out .= 'You need to select 1 player.';
         }
-        break;
+        if ($selectedAll) {
+          $allEvents = $pages->find("template=event")->sort('-date');
+        }
+        $out = 'Clean '.$allEvents->count.' events.';
+        $out .= '<ul>';
+        foreach($allEvents as $e) {
+          $out .= '<li>';
+          $out .= $e->title.'­→ ';
+          preg_match("/\s.?\[.*\]/", $e->title, $matches);
+          if ($matches[0]) {
+            $dirty = true;
+            $title = preg_replace("/(.*)(\s.?\[.*\])/", "$1", $e->title);
+            $out .= $title;
+            if ($input->urlSegment3 && $input->urlSegment3 == 1) {
+              $e->of(false);
+              $e->title = $title;
+              $e->save();
+            }
+          } else {
+            $out .= '<span class="label label-success">OK</span>';
+          }
+          // Direct link to manually edit page
+          $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
+          $out .= '</li>';
+        }
+        $out .= '</ul>';
+        $out .= '<br /><br />';
+        if ($dirty && !$input->urlSegment3 && $input->urlSegment3 != 1) {
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'clean-history/'.$playerId.'/1">Clean now!</button>';
+        } else {
+          $out .= '<p>Titles seem to be clean.</p>';
+        }
+      break;
       case 'recalculate' :
         if ($selectedPlayer) {
           $allEvents = $selectedPlayer->get("name=history")->children()->sort(date);
