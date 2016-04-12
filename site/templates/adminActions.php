@@ -95,112 +95,36 @@
       case 'add-death' :
         if ($selectedPlayer) {
           $allEvents = $selectedPlayer->get("name=history")->children()->sort(date);
-          $out = '<p>Recalculate scores from complete history ('. $allEvents->count.' events).</p>';
-          // Keep initial scores for comparison
-          $initialPlayer = clone $selectedPlayer;
-          // Init scores
-          $selectedPlayer = initPlayer($selectedPlayer);
-          $out .= displayPlayerScores($selectedPlayer);
-          $out .= '<table class="table table-condensed table-hover">';
-          foreach($allEvents as $e) {
-            // Keep previous values to check evolution
-            $oldPlayer = clone $selectedPlayer;
-            $out .= '<tr><td class="text-left">';
-            $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
-            $out .= $e->title;
-            if ($e->task) {
-              $comment = trim($e->summary);
-              if ($e->task->name == 'donation') { // Player gave GC, increase his Donation
-                preg_match("/\d+/", $comment, $matches);
-                /* $out .= $e->summary.' - '.$matches[0]; */
-                if ($comment) {
-                  $out .= ' ['.$comment.']';
-                }
-                $selectedPlayer->donation = $selectedPlayer->donation + $matches[0];
-              }
-              if ($e->task->name == 'donated') { // Player received GC, increase his GC
-                preg_match("/\d+/", $comment, $matches);
-                /* $out .= $e->summary.' - '.$matches[0]; */
-                if ($comment) {
-                  $out .= ' ['.$comment.']';
-                }
-                $selectedPlayer->GC = $selectedPlayer->GC + $matches[0];
-              }
-              if ($e->task->name == 'ut-action-v' || $e->task->name == 'ut-action-vv') { // Underground trining, increase UT
-                preg_match("/\+(\d+)/", $comment, $matches);
-                /* $out .= $e->summary.' - '.$matches[1]; */
-                if ($comment) {
-                  $out .= ' ['.$comment.']';
-                }
-                $selectedPlayer->underground_training = $selectedPlayer->underground_training + $matches[1];
-              }
-              if ($e->task->name == 'buy' || $e->task->name == 'free') { // New equipment, place or potion, add it accordingly
-                $out .= ' ['.$e->refPage->title.']';
-                // Get item's data
-                if ($e->refPage->id) {
-                  $newItem = $pages->get("$e->refPage");
-                  // Set new values
-                  /* $selectedPlayer->GC = (int) $selectedPlayer->GC - $newItem->GC; */
-                  if ($newItem->id("template=equipment|item")) {
-                    switch($newItem->parent->name) {
-                      case 'potions' : // instant use potions?
-                        // If healing potion
-                        /* $selectedPlayer->HP = $selectedPlayer->HP + $newItem->HP; */
-                        /* if ($selectedPlayer->HP > 50) { */
-                        /*   $selectedPlayer->HP = 50; */
-                        /* } */
-                        break;
-                      default:
-                        /* $selectedPlayer->equipment->add($newItem); */
-                    }
-                  }
-                }
-              }
-              updateScore($selectedPlayer, $e->task, '', '', false);
-              if ($selectedPlayer->HP == 0) {
-                $died = true;
-                if ($allEvents->getNext($e)->task->name == 'death') {
-                  $out .= '<span class="label label-success">OK</span>';
-                } else {
-                  $dirty = true;
-                  $out .= '<span class="label label-danger">Death here?</span>';
-                  // Button Add death here
-                  $out .= '<button class="death" data-href="'.$page->url.'add-death/'.$playerId.'/1">Add death</button>';
-                  // Add death (and only 1 until reload)
-                  if ($confirm == 1 && $unique == true) {
-                    $death = $pages->get('name=death');
-                    $comment = 'Player died.';
-                    $eDate = date($e->date+1);
-                    saveHistory($selectedPlayer, $death, $comment, 1, '', $eDate);
-                    
-                    // Move all day events a few seconds later
-                    $eDate = $e->date;
-                    $dayEvents = $allEvents->find("date=$eDate")->not($e);
-                    $seconds = 5;
-                    foreach($dayEvents as $d) {
-                      $d->date = date($e->date + $seconds); 
-                      $seconds = $seconds + 1;
-                      $d->of(false);
-                      $d->save();
-
-                    }
-                    $unique = false; // Reload needed to continue
-                  }
-                }
-              }
-              $out .= '<br />';
-              $out .= displayTrendScores($selectedPlayer, $oldPlayer);
-              $out .= displayPlayerScores($selectedPlayer);
-            }
-            $out .='</td></tr>';
+          $death = $pages->get('name=death');
+          $comment = 'Player died.';
+          $eventId = $confirm; // urlSegment3 used for eventId
+          $e = $pages->get("id=$eventId");
+          $deathDate = date($e->date+1);
+          saveHistory($selectedPlayer, $death, $comment, 0, '', $deathDate);
+          // Move all day events a few seconds later
+          $dayEvents = $allEvents->find("date=$e->date")->not($e);
+          $seconds = 5;
+          foreach($dayEvents as $d) {
+            $d->date = date($e->date + $seconds); 
+            $seconds = $seconds + 1;
+            $d->of(false);
+            $d->save();
           }
-          $out .= '</table>';
-          $out .= displayPlayerScores($initialPlayer, 'previous');
-          $out .= '<br />';
-          $out .= displayPlayerScores($selectedPlayer);
-          $out .= '<br /><br />';
-        } else {
-          $out .= 'You need to select 1 player.';
+          // Team and group loss because of player's death
+          $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam")->not("group=$selectedPlayer->group");
+          $groupMembers = $teamPlayers->find("group=$selectedPlayer->group")->not("$selectedPlayer->id");
+          // Each group member suffers
+          foreach($groupMembers as $p) {
+            $groupDeath = $pages->get("name=group-death");
+            $comment = 'Group member died!';
+            saveHistory($p, $groupDeath, $comment, 0, '', $deathDate);
+          }
+          // Each team member suffers
+          foreach($teamPlayers as $p) {
+            $teamDeath = $pages->get("name=team-death");
+            $comment = 'Team member died!';
+            saveHistory($p, $teamDeath, $comment, 0, '', $deathDate);
+          }
         }
         break;
       case 'helmet' :
@@ -403,6 +327,7 @@
           foreach($allEvents as $e) {
             // Keep previous values to check evolution
             $oldPlayer = clone $selectedPlayer;
+            $out .= '<tbody>';
             $out .= '<tr><td class="text-left">';
             $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
             $out .= $e->title;
@@ -463,15 +388,37 @@
                   }
                 }
               }
-              updateScore($selectedPlayer, $e->task, $comment, $e->refPage,false);
+              updateScore($selectedPlayer, $e->task, $comment, $e->refPage, false);
+              // Test if player died
+              if ($selectedPlayer->HP == 0) {
+                $died = true;
+                if ($allEvents->getNext($e)->task->name == 'death') {
+                  $out .= '<span class="label label-success">Death OK</span>';
+                } else {
+                  $dirty = true;
+                  // Ask only for the first Death
+                  if ($unique == true) {
+                    $out .= '<span class="label label-danger">Death here?</span>';
+                    // Button Add death here
+                    $out .= '<button class="death" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'">Add death</button>';
+                    $unique = false;
+                  } else {
+                    $out .= '<span class="label label-danger">Previous Death?</span>';
+                  }
+                }
+              }
               $out .= '<br />';
               $out .= displayTrendScores($selectedPlayer, $oldPlayer);
               $out .= displayPlayerScores($selectedPlayer);
+              $out .= '  ';
               // Direct link to manually edit page
               $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
+              // Delete event link
+              $out .= '  <button class="delete btn btn-xs btn-danger" data-href="'.$page->url.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
             }
             $out .='</td></tr>';
           }
+          $out .= '</tbody>';
           $out .= '</table>';
           $out .= displayPlayerScores($initialPlayer, 'previous');
           $out .= '<br />';
@@ -507,14 +454,11 @@
     }
 
     $out .= '<script>';
-    $out .= '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var href=$(this).attr("data-href") + action +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.hide(); }) };});';
+    $out .= '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var href=$(this).attr("data-href") + action +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.hide(); $("button[data-action=recalculate]").click(); }) };});';
     $out .= '$(".remove").click( function() { var itemId=$(this).attr("data-itemId"); var action = $(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ itemId; var that=$(this).parents("li"); if (confirm("Remove item?")) {$.get(href, function(data) { that.hide(); }) };});';
     $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); }) };});';
-    $out .= '$(".death").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Please reload!"); $("button[data-action=add-death]").click();}) };});';
+    $out .= '$(".death").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Please reload!"); $("button[data-action=recalculate]").click();}) };});';
     $out .= '</script>';
-
-    if ($action == 'add-death' && $died == true) { $out = '<p class="label label-danger">Player has died! Check history for details</p>'.$out; }
-    if ($action == 'add-death' && $died == false) { $out = '<p class="label label-success">No apparent death :) Check history for details</p>'.$out; }
 
     echo $out;
   }

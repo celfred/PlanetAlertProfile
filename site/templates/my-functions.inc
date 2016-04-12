@@ -220,7 +220,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
         updateScore($p, $groupDeath, $comment, '', true);
       }
       // Each team member suffers
-      foreach($teamMembers as $p) {
+      foreach($teamPlayers as $p) {
         $teamDeath = $pages->get("name=team-death");
         $comment = 'Team member died!';
         if ($p->group != $player->group) {
