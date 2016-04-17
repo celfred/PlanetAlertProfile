@@ -21,11 +21,16 @@
       </select>
   </div>
   <div>
+  <!-- 
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="refPage">Set refPage</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="helmet">Check Memory helmet</button>
+  -->
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="ut">Check UT scoreboard</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="clean-history">Clean history</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="recalculate">Recalculate scores</button>
+  <!--
+  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="script">Script</button>
+  -->
   </div>
 </section>
 <section id="ajaxViewport" class="well"></section>
@@ -57,6 +62,18 @@
     }
 
     switch ($action) {
+      case 'script' :
+        $allEvents = $pages->find("template=event, summary~='team died'");
+        $out .= $allEvents->count();
+        $out .= '<br />';
+        $title = 'Team Death';
+        foreach($allEvents as $e) {
+          $out .= $e->id.': '.$e->title. ' → '.$title.'<br />';
+          $e->of(false);
+          $e->title = $title;
+          $e->save();
+        }
+        break;
       case 'refPage' :
         $out .= 'Total # of players : '.$allPlayers->count();
         $out .= '<ul>';
@@ -95,8 +112,8 @@
         break;
       case 'add-death' :
         if ($selectedPlayer) {
-          $allEvents = $selectedPlayer->get("name=history")->children()->sort(date);
-          $death = $pages->get('name=death');
+          $allEvents = $selectedPlayer->get("name=history")->children()->sort("date");
+          $death = $pages->get("name=death");
           $comment = 'Player died.';
           $eventId = $confirm; // urlSegment3 used for eventId
           $e = $pages->get("id=$eventId");
@@ -111,20 +128,21 @@
             $d->of(false);
             $d->save();
           }
-          // Team and group loss because of player's death
-          $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam")->not("group=$selectedPlayer->group");
-          $groupMembers = $teamPlayers->find("group=$selectedPlayer->group")->not("$selectedPlayer->id");
-          // Each group member suffers
-          foreach($groupMembers as $p) {
-            $groupDeath = $pages->get("name=group-death");
-            $comment = 'Group member died!';
-            saveHistory($p, $groupDeath, $comment, 0, '', $deathDate);
-          }
-          // Each team member suffers
-          foreach($teamPlayers as $p) {
+          // Each team member suffers from player's death
+          if ($deathDate > mktime(date('04/10/2016 00:00:00'))) {
             $teamDeath = $pages->get("name=team-death");
-            $comment = 'Team member died!';
-            saveHistory($p, $teamDeath, $comment, 0, '', $deathDate);
+            $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam")->not("group=$selectedPlayer->group");
+            foreach($teamPlayers as $p) {
+              $comment = 'Team member died!';
+              saveHistory($p, $teamDeath, $comment, 0, '', $deathDate);
+            }
+            // Each group member suffers from player's death
+            $groupMembers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam, group=$selectedPlayer->group")->not("$selectedPlayer->id");
+            $groupDeath = $pages->get("name=group-death");
+            foreach($groupMembers as $p) {
+              $comment = 'Group member died!';
+              saveHistory($p, $groupDeath, $comment, 0, '', $deathDate);
+            }
           }
         }
         break;
@@ -294,7 +312,7 @@
       break;
       case 'recalculate' :
         if ($selectedPlayer) {
-          $allEvents = $selectedPlayer->get("name=history")->children()->sort(date);
+          $allEvents = $selectedPlayer->get("name=history")->children()->sort("date, created");
           $out = 'Recalculate scores from complete history ('. $allEvents->count.' events). &nbsp;&nbsp;';
           // Keep initial scores for comparison
           $initialPlayer = clone $selectedPlayer;
@@ -320,17 +338,23 @@
               if ($e->task->is("name=donation")) { // Player gave GC, increase his Donation
                 preg_match("/\d+/", $comment, $matches);
                 $diff = $selectedPlayer->GC - $matches[0];
-                if ($diff <= 0) { // Check for Donation bug
+                if ($diff < 0) { // Check for Donation bug
                   $out .= ' <span class="label label-danger">Error';
-                  $out .= ' ⇒ Amount replaced : '.$selectedPlayer->GC;
+                  $out .= ' ⇒ Amount replaced : '.$selectedPlayer->GC.' [Edit and reload]';
                   $out .= '</span>';
-                  $comment = preg_replace("/\d+/", $selectedPlayer->GC, $comment);
+                  $comment = preg_replace("/\d+/", $selectedPlayer->GC, $comment, 1);
                   $dirty = true;
+                  /* // Change summary if saved */
+                  /* if ($input->urlSegment3 && $input->urlSegment3 == 1) { */
+                  /*   $e->summary = $comment; */
+                  /*   $e->of(false); */
+                  /*   $e->save(); */
+                  /* } */
                 }
               }
-              if ($e->task->is("name=buy|free")) { // New equipment, place or potion, add it accordingly
-                if ($e->refPage->GC > $selectedPlayer->GC) {
-                  $out .= ' <span class="label label-danger">Error : Not enough GC.</span>';
+              if ($e->task->is("name=buy|free|bought")) { // New equipment, place or potion, add it accordingly
+                if ($e->refPage->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
+                  $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
                   $dirty = true;
                 }
                 if ($e->refPage->level > $selectedPlayer->level) { // Check for Buy/Free bug (if a Death occurred, for example)
@@ -341,28 +365,47 @@
                 if ($e->refPage) {
                   $newItem = $pages->get("$e->refPage");
                   if ($newItem->parent->is("name=group-items")) {
-                    // [unlocked] or [bought] ?
-                    // refPage should be set accordingly but prevention here for backward compatibility
-                    preg_match("/\[unlocked\]/", $comment, $matches);
-                    if ($matches[0]) {
-                      $dirty = true;
-                      $out .= ' <span class="label label-danger">[unlocked] found, but refPage set to "Buy" instead of "Bought".</span>';
-                    } else {
                       // Check if group members have [unlocked] item
-                      $members = $allPlayers->find("playerTeam=$selectedPlayer->playerTeam, group=$selectedPlayer->group")->not("$selectedPlayer->id");
+                      $members = $allPlayers->find("playerTeam=$selectedPlayer->playerTeam, group=$selectedPlayer->group");
+                      $out .= '<ul class="list-inline">';
+                      $out .= '<li>Group item status → </li>';
+                      $boughtNb = 0;
                       foreach ($members as $p) {
                         $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
                         if ($bought->id) {
-                          $out .= '1';
+                          $boughtNb++;
+                          $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
                         } else {
-                          $dirty = true;
-                          $out.= '0';
+                          $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
                         }
                       }
-                      if ($dirty) {
-                        $out .= ' <span class="label label-danger"> Make sure [unlocked] exists in the group and set refPage to "Bought".</span>';
+                      if ($boughtNb != $members->count-1) {
+                        $dirty = true;
+                        $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
                       }
-                    }
+                      // [unlocked] or [bought] ?
+                      // task page should be set accordingly but prevention here for backward compatibility
+                      preg_match("/\[unlocked\]/", $comment, $matches);
+                      if ($matches[0] && $e->task->is("name=buy")) {
+                        $dirty = true;
+                        $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
+                      }
+                      if (!$matches[0] && $e->task->is("name=bought")) {
+                        $dirty = true;
+                        $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
+                      }
+                      $out .= '</ul>';
+                  }
+                }
+              }
+              if ($e->task->is("name=team-death|group-death")) {
+                // Find who died
+                $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam");
+                foreach($teamPlayers as $p) {
+                  $dead = $p->get("name=history")->get("template=event, task.name=death,date=$e->date");
+                  if ($dead->id) {
+                    $deadPlayer = $dead->parent("template=player");
+                    $out .= ' ['.$deadPlayer->title.']';
                   }
                 }
               }
@@ -376,7 +419,7 @@
                   $dirty = true;
                   // Ask only for the first Death
                   if ($unique == true) {
-                    $out .= '<span class="label label-danger">Death here?</span>';
+                    $out .= '<span class="label label-danger">Error : Death here?</span>';
                     // Button Add death here
                     $out .= '<button class="death" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'">Add death</button>';
                     $unique = false;
@@ -392,7 +435,7 @@
               // Direct link to manually edit page
               $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
               // Delete event link
-              $out .= '  <button class="delete btn btn-xs btn-danger" data-href="'.$page->url.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
+              $out .= '  <button class="delete btn btn-xs btn-danger" data-href="'.$page->url.'" data-playerId="'.$selectedPlayer->id.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
             }
             $out .='</td></tr>';
           }
@@ -424,17 +467,27 @@
         $player->save();
         break;
       case 'trash' :
-        $eventId = $pages->get($input->urlSegment2);
-        $pages->trash($eventId);
+        $event = $pages->get($confirm); // urlSegment3 used for eventId
+        $pages->trash($event);
+        // Delete team and group damage if needed (death)
+        if ($event->task->is("name=death")) {
+          $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam");
+          foreach($teamPlayers as $p) {
+            $linkedDeath = $p->get("name=history")->get("template=event, task.name=group-death|team-death, date=$event->date");
+            if ($linkedDeath->id) {
+              $pages->trash($linkedDeath);
+            }
+          }
+        }
         break;
       default :
         $out = 'Problem detected.';
     }
 
     $out .= '<script>';
-    $out .= '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var href=$(this).attr("data-href") + action +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.hide(); $("button[data-action=recalculate]").click(); }) };});';
+    $out .= '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.hide(); $("button[data-action=recalculate]").click(); }) };});';
     $out .= '$(".remove").click( function() { var itemId=$(this).attr("data-itemId"); var action = $(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ itemId; var that=$(this).parents("li"); if (confirm("Remove item?")) {$.get(href, function(data) { that.hide(); }) };});';
-    $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); }) };});';
+    $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); $("button[data-action=recalculate]").click(); }) };});';
     $out .= '$(".death").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Please reload!"); $("button[data-action=recalculate]").click();}) };});';
     $out .= '</script>';
 

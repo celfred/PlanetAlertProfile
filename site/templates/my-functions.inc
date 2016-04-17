@@ -127,7 +127,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
             }
             break;
           case 'group-items' : // Make item available to each group member
-            $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group")->not("$player->id");
+            $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
             foreach ($members as $p) {
               $bought = $pages->get("name=bought");
               $comment = $refPage->title." [unlocked]";
@@ -217,14 +217,20 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
       foreach($groupMembers as $p) {
         $groupDeath = $pages->get("name=group-death");
         $comment = 'Group member died!';
-        updateScore($p, $groupDeath, $comment, '', true);
+        // Applies after the indicated date
+        if ($eDate > mktime(date('04/10/2016 00:00:00'))) {
+          updateScore($p, $groupDeath, $comment, '', true);
+        }
       }
       // Each team member suffers
       foreach($teamPlayers as $p) {
         $teamDeath = $pages->get("name=team-death");
         $comment = 'Team member died!';
         if ($p->group != $player->group) {
-          updateScore($p, $teamDeath, $comment, '', true);
+          // Applies after the indicated date
+          if ($eDate > mktime(date('04/10/2016 00:00:00'))) {
+            updateScore($p, $teamDeath, $comment, '', true);
+          }
         }
       }
     }
