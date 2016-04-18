@@ -18,13 +18,7 @@ if ($user->isSuperuser()) {
    
     // Update player's scores
     $taskComment = $input->post->question.' ['.$input->post->answer.']';
-    updateScore($player, $task);
-
-    // Save player's new scores
-    $player->save();
-
-    // Record history
-    saveHistory($player, $task, $taskComment);
+    updateScore($player, $task, $taskComment, '', true);
 
     // Check if last question was whecked, then redirect
     if ($input->post->lastQuestion) {
