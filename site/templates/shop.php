@@ -136,6 +136,21 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       $out .= '<img class="img-thumbnail" src="'.$item->image->url.'" alt="Image" />&nbsp;&nbsp;';
       $out .= '<h2 class="inline"><strong>'.$item->title.'</strong>';
       $out .= '</h2>';
+      $out .= '<h4>';
+      $out .= '<span class="label label-primary"><span class="glyphicon glyphicon-signal"></span> '.$item->level.'</span>';
+      $out .= '&nbsp;&nbsp;';
+      $out .= '<span class="label label-default"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$item->GC.'GC</span>';
+      $out .= '&nbsp;&nbsp;';
+      if ($item->HP !== 0) {
+        if ($item->HP > 0) { $sign = '+'; } else { $sign = ''; }
+        $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> '.$sign.$item->HP.'HP</span>';
+        $out .= '&nbsp;&nbsp;';
+      }
+      if ($item->XP !== 0) {
+        if ($item->XP > 0) { $sign = '+'; } else { $sign = ''; }
+        $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '.$sign.$item->XP.'XP</span>';
+      }
+      $out .= '</h4>';
       $out .= '<h2 class="">'.$item->summary;
       $out .= '</h2>';
       $out .= '<br />';
