@@ -251,7 +251,7 @@
       }
 
       // Admin news
-      $newsAdmin = $pages->get('/newsboard')->children('publish=1')->sort('-created');
+      $newsAdmin = $pages->get('/newsboard')->children('publish=1')->sort('-date');
       if ($newsAdmin->count() > 0) {
         foreach($newsAdmin as $n) {
         ?>
@@ -423,7 +423,7 @@
 
       // Last 15 public news
       $excluded = $pages->find('name=test|admin');
-      $news = $pages->find("template=event, sort=-created, limit=15, task=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+      $news = $pages->find("template=event, sort=-date, limit=15, task=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
       if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">

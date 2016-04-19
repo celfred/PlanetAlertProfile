@@ -160,7 +160,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
       $player->save();
 
       // Publish on Newsboard?
-      if ($task->is("name=buy|free|ut-action-v|ut-action-vv")) {
+      if ($task->is("name=penalty|buy|free|ut-action-v|ut-action-vv")) {
         $newsBoard = 1;
       } else {
         $newsBoard = 0;
