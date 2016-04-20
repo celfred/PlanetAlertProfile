@@ -10,8 +10,13 @@ $(document).ready(function() {
     
 		var playerId = $('#playerId').val();
 		if (playerId == '-1' || playerId == null) {
-			playerId = $('#teamId').val();
-			var type = '&type=team';
+			var teamId = $('#teamId').val(); 
+			if (teamId != '-1' || teamId != null) {
+				playerId = $('#teamId').val();
+				var type = '&type=team';
+			} else {
+				playerId = '-1';
+			}
 		}
 		var action = $(this).attr('data-action');
 		var startDate = $('#startDate').val();
