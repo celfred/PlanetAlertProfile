@@ -9,8 +9,18 @@ $(document).ready(function() {
     $("#ajaxViewport").html("<p>Loading...</p>"); 
     
 		var playerId = $('#playerId').val();
+		if (playerId == '-1' || playerId == null) {
+			playerId = $('#teamId').val();
+			var type = '&type=team';
+		}
 		var action = $(this).attr('data-action');
-		var href = $(this).attr('data-href') + action + '/' + playerId ;
+		var startDate = $('#startDate').val();
+		var endDate = $('#endDate').val();
+		if (type) {
+			var href = $(this).attr('data-href') + action + '/' + playerId + '?startDate='+ startDate +'&endDate=' + endDate + type;
+		} else {
+			var href = $(this).attr('data-href') + action + '/' + playerId + '?startDate='+ startDate +'&endDate=' + endDate + type;
+		}
     $.get(href, function(data) { 
         $("#ajaxViewport").html(data); 
     }); 

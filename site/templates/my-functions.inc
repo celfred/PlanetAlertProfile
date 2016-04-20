@@ -160,7 +160,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
       $player->save();
 
       // Publish on Newsboard?
-      if ($task->is("name=penalty|buy|free|ut-action-v|ut-action-vv")) {
+      if ($task->is("name=penalty|buy|free|ut-action-v|ut-action-vv|bought")) {
         $newsBoard = 1;
       } else {
         $newsBoard = 0;
@@ -708,10 +708,12 @@ function isTrainingAllowed($player, $monster) {
   }
 }
 
-function utGain($monsterId, $player) {
+function utGain($monsterId, $player, $startDate='', $endDate='') {
+  if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
+  if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
   $pages = wire('pages');
   $player = $pages->get($player->id);
-  $prevUt = $player->find('template=event,refPage='.$monsterId.', sort=-date');
+  $prevUt = $player->find("template=event,refPage=$monsterId, date>$startDate, date<$endDate, sort=-date");
   if ($prevUt->count() > 0) {
     foreach($prevUt as $p) {
       preg_match("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches);

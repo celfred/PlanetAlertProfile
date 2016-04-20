@@ -2,42 +2,96 @@
   if (!$config->ajax) {
     include("./head.inc"); 
 
+    $out = '';
     if ($user->isSuperuser()) {
+      $action = $input->urlSegment1;
       $allPlayers->sort("playerTeam, title");
+      $out .= '<div class="alert alert-warning text-center">Admin Actions : Be careful !</div>';
+      switch ($action) {
+      case 'ut' :
+        $out .= '<p>⇒ Check if UT\'s hall of fame is correct.</p>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
+      case 'ut-stats' :
+        $out .= '<section class="well">';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p.'">'.$p.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<section class="well">';
+        $out .= '<p>Select limiting dates if needed (start empty = 01/01/20000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
+        $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
+        $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
+        $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
+        $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
+        $out .= '</section>';
+        $out .= '</section>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut-stats">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
+      case 'recalculate' :
+        $out .= '<section class="well">';
+        $out .= '<div>';
+        $out .= '<span>Select a player : </span>';
+        $out .= '<select id="playerId">';
+        $out .= '<option value="-1">Select a player</option>';
+        $out .= '<option value="all">All players</option>';
+        foreach($allPlayers as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.' ['.$p->playerTeam.']</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '</section>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="recalculate">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
+      default :
+        $out .= '<section class="well">';
+        $out .= '<div>';
+        $out .= '<span>Select a player : </span>';
+        $out .= '<select id="playerId">';
+        $out .= '<option value="-1">Select a player</option>';
+        $out .= '<option value="all">All players</option>';
+        foreach($allPlayers as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.' ['.$p->playerTeam.']</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p.'">'.$p.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '</section>';
 ?>
-
-<div class="alert alert-warning text-center">Admin Actions : Be careful !</div>
-<section class="well">
-  <div>
-    <span>Select a player : </span>
-      <select id="playerId">
-        <?php
-          echo "<option value='-1'>Select a player</option>";
-          echo "<option value='all'>All players</option>";
-          foreach($allPlayers as $p) {
-            echo "<option value='{$p->id}'>{$p->title} [{$p->playerTeam}]</option>";
-          }
-        ?>
-      </select>
-  </div>
   <div>
   <!-- 
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="refPage">Set refPage</button>
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="helmet">Check Memory helmet</button>
-  -->
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="ut">Check UT scoreboard</button>
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="clean-history">Clean history</button>
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="recalculate">Recalculate scores</button>
+  -->
+  <!-- <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="clean-history">Clean history</button> -->
+  <!-- <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="recalculate">Recalculate scores</button>
+  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="ut-stats">UT Stats</button> -->
   <!--
   <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="script">Script</button>
   -->
-  </div>
-</section>
-<section id="ajaxViewport" class="well"></section>
 <?php
-    } else {
-      echo 'Admin only.';
     }
+    } else {
+      $out .= 'Admin only.';
+    }
+    echo $out;
     include("./foot.inc"); 
   } else { // Ajax call, display requested information
     include("./my-functions.inc"); 
@@ -46,19 +100,28 @@
     $playerId = $input->urlSegment2;
     $confirm = $input->urlSegment3;
     $unique = true;
+    $type = $input->get["type"];
+    $startDate = $input->get["startDate"];
+    $endDate = $input->get["endDate"];
+    if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
+    if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
 
-    switch($playerId) {
-      case 'all' : 
-        $selectedPlayer = false;
-        $selectedAll = true;
-        break;
-      case '-1' :
-        $selectedPlayer = false;
-        $selectedAll= false;
-        break;
-      default :
-        $selectedPlayer = $pages->get($playerId);
-        $selectedAll= false;
+    if ($type == 'team') {
+      $selectedTeam = $playerId;
+    } else {
+      switch($playerId) {
+        case 'all' : 
+          $selectedPlayer = false;
+          $selectedAll = true;
+          break;
+        case '-1' :
+          $selectedPlayer = false;
+          $selectedAll= false;
+          break;
+        default :
+          $selectedPlayer = $pages->get($playerId);
+          $selectedAll= false;
+      }
     }
 
     switch ($action) {
@@ -246,12 +309,11 @@
         break;
       case 'ut' :
         $allMonsters = $pages->find("template=exercise");
-
-        $out .= 'Total # of players : '.$allPlayers->count();
+        $out .= '<h3>Best players among '.$allPlayers->count().' players.</h3>';
         $out .= '<ul>';
         foreach($allMonsters as $m) {
           $bestUt = utGain($m, $m->mostTrained);
-          $out .= '<li>'.$m->title.' ['.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.'] : '.$bestUt.']';
+          $out .= '<li>'.$m->title.' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.'] : '.$bestUt.']';
           foreach($allPlayers as $p) {
             $playerUt = utGain($m, $p);
             $p->ut = $playerUt;
@@ -267,7 +329,7 @@
           } else {
             $out .= ' <span class="label label-success">OK</span>';
           }
-          $out .= ' : '.$allPlayers->first()->title.' ['.$allPlayers->first()->playerTeam.'] ⇒'.$allPlayers->first()->ut;
+          $out .= ' - New best : '.$allPlayers->first()->title.' ['.$allPlayers->first()->playerTeam.'] ⇒'.$allPlayers->first()->ut;
           $out .= '</li>';
         }
         $out .= '</ul>';
@@ -309,11 +371,11 @@
         } else {
           $out .= '<p>Titles seem to be clean.</p>';
         }
-      break;
+        break;
       case 'recalculate' :
         if ($selectedPlayer) {
           $allEvents = $selectedPlayer->get("name=history")->children()->sort("date, created");
-          $out = 'Recalculate scores from complete history ('. $allEvents->count.' events). &nbsp;&nbsp;';
+          $out = '<h3>'.$selectedPlayer->title.' ['.$selectedPlayer->playerTeam.'] → Recalculate scores from complete history ('. $allEvents->count.' events).</h3>';
           // Keep initial scores for comparison
           $initialPlayer = clone $selectedPlayer;
           // Init scores
@@ -419,9 +481,9 @@
                   $dirty = true;
                   // Ask only for the first Death
                   if ($unique == true) {
-                    $out .= '<span class="label label-danger">Error : Death here?</span>';
+                    $out .= '<span class="label label-danger">Error : Death</span>  ';
                     // Button Add death here
-                    $out .= '<button class="death" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'">Add death</button>';
+                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'">Add death here?</button>';
                     $unique = false;
                   } else {
                     $out .= '<span class="label label-danger">Previous Death?</span>';
@@ -453,7 +515,7 @@
             $selectedPlayer->save();
             /* $out .= '<div class="well">New scores saved !</div>'; */
           } else {
-            $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/1">Recalculate now!</button>';
+            $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/1">Recalculate scores</button>';
           }
         } else {
           $out .= 'You need to select 1 player.';
@@ -478,6 +540,62 @@
               $pages->trash($linkedDeath);
             }
           }
+        }
+        break;
+      case 'ut-stats' :
+        if ($selectedPlayer) {
+          $out .= '<h3>';
+          $out .= 'UT Stats for '.$selectedPlayer->title.' ['.$selectedPlayer->playerTeam.']   ';
+          $out .= 'from '.$startDate.' ';
+          $out .= 'to '.$endDate;
+          $out .= '</h3>';
+          /* $allEvents = $selectedPlayer->get("name=history")->find("task.name=ut-action-v|ut-action-vv,date>$start,date<$end")->sort("date"); */
+          $allMonsters = $pages->find("template=exercise")->sort("level, title");
+          foreach($allMonsters as $m) {
+            $playerUt = utGain($m, $selectedPlayer, $startDate, $endDate);
+            if ($playerUt > 0) {
+              $out .= $m->title.' [Level '.$m->level.'] → ';
+              $out .= $playerUt.' UT';
+              $out .= '<br />';
+            }
+          }
+          /* if ($allEvents->count() > 0) { */
+          /*   foreach($allEvents as $e) { */
+          /*     $out .= strftime("%d/%m", $e->date); */
+          /*     $out .= ' : '; */
+          /*     $out .= $e->summary.'<br />'; */
+          /*   } */
+          /* } else { */
+          /*   $out .= '<p>No training yet.</p>'; */
+          /* } */
+        } else if ($selectedTeam && $selectedTeam != '-1') {
+          $out .= '<h3 class="text-center">';
+          $out .= 'UT Stats for '.$selectedTeam .'   ';
+          $out .= 'from '.$startDate.' ';
+          $out .= 'to '.$endDate;
+          $out .= '</h3>';
+          $allMonsters = $pages->find("template=exercise")->sort("level, title");
+          $allPlayers = $allPlayers->find("playerTeam=$selectedTeam");
+          $out .= '<ul>';
+          foreach($allPlayers as $p) {
+            $activity = 0;
+            $out_03 = '<ul>';
+            foreach($allMonsters as $m) {
+              $playerUt = utGain($m, $p, $startDate, $endDate);
+              if ($playerUt > 0) { 
+                $activity += $playerUt;
+                $out_03 .= '<li>'.$m->title. ' [level '.$m->level.']: +'.$playerUt.'UT</li>';
+              }
+            }
+            $out_03 .= '</ul>';
+            $out_02 = '<li><strong>'.$p->title.'</strong> → <span class="label label-success">+'.$activity.'UT</span></li>';
+            if ($activity != 0) {
+              $out .= $out_02.$out_03;
+            }
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= 'You need to select 1 player or 1 team.';
         }
         break;
       default :
