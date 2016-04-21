@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <?php
+		date_default_timezone_set('Europe/Paris');
     include('./my-functions.inc'); // Planet Alert PHP functions
     $whitelist = array('127.0.0.1', 'localhost');
     if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
@@ -153,6 +154,8 @@
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/recalculate'>Edit history (and scores)</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut/'>UT Hall of fame</a></li>";
+								$class = $page->name == 'script' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/script/'>Script</a></li>";
 								?>
 							</ul>
 						</div>

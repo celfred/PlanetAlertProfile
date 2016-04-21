@@ -218,7 +218,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
         $groupDeath = $pages->get("name=group-death");
         $comment = 'Group member died!';
         // Applies after the indicated date
-        if ($eDate > mktime(date('04/10/2016 00:00:00'))) {
+        if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
           updateScore($p, $groupDeath, $comment, '', true);
         }
       }
@@ -228,7 +228,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
         $comment = 'Team member died!';
         if ($p->group != $player->group) {
           // Applies after the indicated date
-          if ($eDate > mktime(date('04/10/2016 00:00:00'))) {
+          if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
             updateScore($p, $teamDeath, $comment, '', true);
           }
         }

@@ -52,27 +52,29 @@
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
       default :
-        $out .= '<section class="well">';
-        $out .= '<div>';
-        $out .= '<span>Select a player : </span>';
-        $out .= '<select id="playerId">';
-        $out .= '<option value="-1">Select a player</option>';
-        $out .= '<option value="all">All players</option>';
-        foreach($allPlayers as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.' ['.$p->playerTeam.']</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p.'">'.$p.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '</section>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        /* $out .= '<section class="well">'; */
+        /* $out .= '<div>'; */
+        /* $out .= '<span>Select a player : </span>'; */
+        /* $out .= '<select id="playerId">'; */
+        /* $out .= '<option value="-1">Select a player</option>'; */
+        /* $out .= '<option value="all">All players</option>'; */
+        /* foreach($allPlayers as $p) { */
+        /*   $out .= '<option value="'.$p->id.'">'.$p->title.' ['.$p->playerTeam.']</option>'; */
+        /* } */
+        /* $out .= '</select>'; */
+        /* $out .= '</div>'; */
+        /* $out .= '<div>'; */
+        /* $out .= '<span>Select a team : </span>'; */
+        /* $out .= '<select id="teamId">'; */
+        /* $out .= '<option value="-1">Select a team</option>'; */
+        /* foreach($allTeams as $p) { */
+        /*   $out .= '<option value="'.$p.'">'.$p.'</option>'; */
+        /* } */
+        /* $out .= '</select>'; */
+        /* $out .= '</div>'; */
+        /* $out .= '</section>'; */
 ?>
   <div>
   <!-- 
@@ -126,16 +128,26 @@
 
     switch ($action) {
       case 'script' :
-        $allEvents = $pages->find("template=event, summary~='team died'");
-        $out .= $allEvents->count();
+        $e = $pages->get("id=40929");
+        $eDate = $e->date;
+        $out .= 'edate : '.$eDate;
         $out .= '<br />';
-        $title = 'Team Death';
-        foreach($allEvents as $e) {
-          $out .= $e->id.': '.$e->title. ' → '.$title.'<br />';
-          $e->of(false);
-          $e->title = $title;
-          $e->save();
+        $out .= 'mktime 04/10 : '.mktime(0,0,0,4,10,2016);
+        if ($eDate > mktime(0,0,0,4,10,2016)) {
+          $out .= ' → UpdateScore()';
+
         }
+        $out .= '<br />';
+        /* $allEvents = $pages->find("template=event, summary~='team died'"); */
+        /* $out .= $allEvents->count(); */
+        /* $out .= '<br />'; */
+        /* $title = 'Team Death'; */
+        /* foreach($allEvents as $e) { */
+        /*   $out .= $e->id.': '.$e->title. ' → '.$title.'<br />'; */
+        /*   $e->of(false); */
+        /*   $e->title = $title; */
+        /*   $e->save(); */
+        /* } */
         break;
       case 'refPage' :
         $out .= 'Total # of players : '.$allPlayers->count();
