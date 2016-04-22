@@ -36,7 +36,7 @@
         $player = $pages->get($playerId);
         $task = $pages->get("name='buy'");
         $taskComment = $newItem->title;
-        updateScore($player, $task, $taskComment, $newItem, true);
+        updateScore($player, $task, $taskComment, $newItem, '', true);
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->playerTeam."\r\n";
@@ -64,7 +64,7 @@
 
           // Update player's scores and save
           $taskComment = $newItem->title;
-          updateScore($player, $task, $taskComment, $newItem, true);
+          updateScore($player, $task, $taskComment, $newItem, '', true);
 
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
@@ -91,12 +91,12 @@
           // Modify player's page
           $task = $pages->get("template='task', name='donation'");
           $taskComment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->playerTeam.']';
-          updateScore($player, $task, $taskComment, '', true);
+          updateScore($player, $task, $taskComment, $receiver, '', true);
 
           // Modify receiver's page
-          $task = $pages->get("template='task', name='donated'");
-          $taskComment = $amount. ' GC received from '.$player->title.' ['.$player->playerTeam.']';
-          updateScore($receiver, $task, $taskComment, '', true);
+          /* $task = $pages->get("template='task', name='donated'"); */
+          /* $taskComment = $amount. ' GC received from '.$player->title.' ['.$player->playerTeam.']'; */
+          /* updateScore($receiver, $task, $taskComment, $player, '', true); */
           
           // Notify admin
           $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
@@ -141,7 +141,7 @@
         // Update player's scores and save
         $task = $pages->get($taskId); 
         $taskComment = trim($input->post->$comment);
-        updateScore($player, $task, $taskComment, '', true);
+        updateScore($player, $task, $taskComment, '', '', true);
 
         $team = $player->playerTeam;
       }
@@ -168,7 +168,7 @@
         }
         $taskComment = $refPage->title;
         if ($task->id) {
-          updateScore($player, $task, $taskComment, $refPage, true);
+          updateScore($player, $task, $taskComment, $refPage, '', true);
         }
 
       }

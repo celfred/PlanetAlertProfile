@@ -38,7 +38,7 @@ function initPlayer($player) {
   $player->places->removeAll();
   return $player;
 }
-function updateScore($player, $task, $comment = '', $refPage = '', $real = true) {
+function updateScore($player, $task, $comment = '', $refPage = '', $linkedId ='', $real = true) {
   $pages = wire('pages');
   $player = $pages->get($player->id);
   $task = $pages->get($task->id);
@@ -105,7 +105,8 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
     if ($task->is("name=donation")) {
       preg_match("/\d+/", $comment, $matches);
       $player->GC = (int) $player->GC - $matches[0];
-      $player->donation = (int) $player->donation + $matches[0];
+      $amount = $matches[0];
+      $player->donation = (int) $player->donation + $amount;
     }
     if ($task->is("name=donated")) {
       preg_match("/\d+/", $comment, $matches);
@@ -136,7 +137,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
               foreach ($members as $p) {
                 $bought = $pages->get("name=bought");
                 $comment = $refPage->title." [unlocked]";
-                updateScore($p, $bought, $comment, $refPage, $real);
+                updateScore($p, $bought, $comment, $refPage, $linkedId, $real);
               }
               break;
             default:
@@ -179,20 +180,30 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
         $eDate = date('m/d/Y H:i:s', time()+1);
       }
       // Save history
-      saveHistory($player, $task, $comment, $newsBoard, $refPage, $eDate);
+      $newLinkedId = saveHistory($player, $task, $comment, $newsBoard, $refPage, $eDate, $linkedId);
 
       // Extra action?
       if (checkHk($player) >= 3) { // Record a Hk penalty
         $penalty = $pages->get("template=task, name=penalty"); 
         $comment = 'Automatic homework penalty';
-        updateScore($player, $penalty, $comment, '', true);
+        updateScore($player, $penalty, $comment, '', $newLinkedId, true);
+      }
+
+      if ($task->is("name=donation")) { // Donation, record the linked donated event
+        $comment = $amount. ' GC received from '.$player->title.' ['.$player->playerTeam.']';
+        $task = $pages->get("name=donated");
+        updateScore($refPage, $task, $comment, '', $newLinkedId, true);
       }
 
       if ($player->HP == 0) { // Player died
         $comment = 'Player died.';
         $task = $pages->get("name=death");
-        updateScore($player, $task, $comment, '', true);
+        updateScore($player, $task, $comment, '', $newLinkedId, true);
       }
+
+      if ($task->is("name=ut-action-v|ut-action-vv")) {
+        setBestPlayer($refPage, $player);
+      )
     }
   } else { // Player died
     if ($player->level > 1) { // Loose 1 level
@@ -213,7 +224,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
     if ($real == true) { // Save player's death if necessary
       $eDate = date('m/d/Y H:i:s', time()+1);
       $task = $pages->get("name=death");
-      saveHistory($player, $task, $comment, 0, '', $eDate);
+      $refDeathId = saveHistory($player, $task, $comment, '', $refPage, $eDate, '');
       $player->of(false);
       $player->save();
       // Team and group loss because of player's death
@@ -225,7 +236,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
         $comment = 'Group member died!';
         // Applies after the indicated date
         if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
-          updateScore($p, $groupDeath, $comment, '', true);
+          updateScore($p, $groupDeath, $comment, '', $refDeathId, true);
         }
       }
       // Each team member suffers
@@ -235,7 +246,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
         if ($p->group != $player->group) {
           // Applies after the indicated date
           if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
-            updateScore($p, $teamDeath, $comment, '', true);
+            updateScore($p, $teamDeath, $comment, '', $refDeathId, true);
           }
         }
       }
@@ -353,7 +364,7 @@ function groupBonus($players) {
   */
 }
 
-function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $eDate = 'unset') {
+function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $eDate = 'unset', $linkedId = '') {
   $p = new Page();
   $p->template = 'event';
   $history = $player->child("name=history");
@@ -366,26 +377,21 @@ function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $e
     $history->save();
   }
   $p->parent = $history;
-  // Save title
   // Get today's date by default, changeable in backend if needed)
   if ($eDate == 'unset') {
     date_default_timezone_set('Paris/France');
     $eDate = date('m/d/Y H:i:s', time());
   }
   $p->date = $eDate;
-  // Save title
   $p->title = str_replace('&#039;', '\'', $task->title);
-  // Save task
   $p->task = $task;
-  // Save refPage
-  if ($refPage) {
-    $p->refPage = $refPage;
-  }
-  // Save comment
+  if ($refPage) { $p->refPage = $refPage; }
   $p->summary = $comment;
-  // Save publish state
   $p->publish = $newsBoard;
+  $p->linkedId = $linkedId;
   $p->save(); 
+
+  return $p->id;
 }
 
 function pick_question($player) {

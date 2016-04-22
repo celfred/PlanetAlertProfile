@@ -22,7 +22,7 @@
 
       if ($monster->id && $player->id && $task->id) {
         $taskComment = $monster->title.' [+'.$result.'U.T.]';
-        updateScore($player, $task, $taskComment, $monster, true);
+        updateScore($player, $task, $taskComment, $monster, '', true);
         
         // Record to log file
         $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result;

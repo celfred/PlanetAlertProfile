@@ -193,7 +193,7 @@
           $eventId = $confirm; // urlSegment3 used for eventId
           $e = $pages->get("id=$eventId");
           $deathDate = date($e->date+1);
-          saveHistory($selectedPlayer, $death, $comment, 0, '', $deathDate);
+          $linkedId = saveHistory($selectedPlayer, $death, $comment, 0, '', $deathDate, '');
           // Move all day events a few seconds later
           $dayEvents = $allEvents->find("date=$e->date")->not($e);
           $seconds = 5;
@@ -209,14 +209,14 @@
             $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam")->not("group=$selectedPlayer->group");
             foreach($teamPlayers as $p) {
               $comment = 'Team member died!';
-              saveHistory($p, $teamDeath, $comment, 0, '', $deathDate);
+              saveHistory($p, $teamDeath, $comment, 0, '', $deathDate, $linkedId);
             }
             // Each group member suffers from player's death
-            $groupMembers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam, group=$selectedPlayer->group")->not("$selectedPlayer->id");
+            $groupMembers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam, group=$selectedPlayer->group")->not("$selectedPlayer");
             $groupDeath = $pages->get("name=group-death");
             foreach($groupMembers as $p) {
               $comment = 'Group member died!';
-              saveHistory($p, $groupDeath, $comment, 0, '', $deathDate);
+              saveHistory($p, $groupDeath, $comment, 0, '', $deathDate, $linkedId);
             }
           }
         }
@@ -278,7 +278,7 @@
                   foreach($members as $m) {
                     $boughtHelmet = $m->get("name=history")->child("template=event, task.name=buy, refPage.name=memory-helmet");
                     if ($boughtHelmet->id == '') {
-                      saveHistory($m, $buy, $comment, 0, $helmet, $eDate);
+                      saveHistory($m, $buy, $comment, 0, $helmet, $eDate, '');
                     }
 
                   }
@@ -483,7 +483,7 @@
                   }
                 }
               }
-              updateScore($selectedPlayer, $e->task, $comment, $e->refPage, false);
+              updateScore($selectedPlayer, $e->task, $comment, $e->refPage, '', false);
               // Test if player died
               if ($selectedPlayer->HP == 0) {
                 $died = true;
@@ -545,13 +545,17 @@
         $pages->trash($event);
         // Delete team and group damage if needed (death)
         if ($event->task->is("name=death")) {
-          $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam");
-          foreach($teamPlayers as $p) {
-            $linkedDeath = $p->get("name=history")->get("template=event, task.name=group-death|team-death, date=$event->date");
-            if ($linkedDeath->id) {
-              $pages->trash($linkedDeath);
-            }
+          $linkedDeath = $pages->find("template=event, linkedId=$event->id");
+          foreach($linkedDeath as $p) {
+            $pages->trash($p);
           }
+          /* $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam"); */
+          /* foreach($teamPlayers as $p) { */
+          /*   $linkedDeath = $p->get("name=history")->get("template=event, task.name=group-death|team-death, date=$event->date"); */
+          /*   if ($linkedDeath->id) { */
+          /*     $pages->trash($linkedDeath); */
+          /*   } */
+          /* } */
         }
         break;
       case 'ut-stats' :
