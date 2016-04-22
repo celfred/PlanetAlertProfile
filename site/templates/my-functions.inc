@@ -44,6 +44,8 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
   $task = $pages->get($task->id);
   if ($refPage) {
     $refPage = $pages->get($refPage->id);
+  } else {
+    $refPage = false;
   }
   if ($task->is("name!=death")) {
     // Task details to calculate new score
@@ -113,35 +115,39 @@ function updateScore($player, $task, $comment = '', $refPage = '', $real = true)
       $player->donation = 0; // Reset donation indicator
     }
     if ($task->is("name=bought")) {
-      $player->equipment->add($refPage);
+      if ($refPage) {
+        $player->equipment->add($refPage);
+      }
     }
     if ($task->is("name=buy|free")) {
-      $player->GC = (int) $player->GC-$refPage->GC;
-      // Add item if needed
-      if ($refPage->is("template=equipment|item")) {
-        switch($refPage->parent->name) {
-          case 'potions' : // instant use potions?
-            $player->HP = $player->HP + $refPage->HP;
-            if ($player->HP > 50) {
-              $player->HP = 50;
-            }
-            break;
-          case 'group-items' : // Make item available to each group member
-            $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
-            foreach ($members as $p) {
-              $bought = $pages->get("name=bought");
-              $comment = $refPage->title." [unlocked]";
-              updateScore($p, $bought, $comment, $refPage, $real);
-            }
-            break;
-          default:
-            $player->equipment->add($refPage);
-            break;
+      if ($refPage) {
+        $player->GC = (int) $player->GC-$refPage->GC;
+        // Add item if needed
+        if ($refPage->is("template=equipment|item")) {
+          switch($refPage->parent->name) {
+            case 'potions' : // instant use potions?
+              $player->HP = $player->HP + $refPage->HP;
+              if ($player->HP > 50) {
+                $player->HP = 50;
+              }
+              break;
+            case 'group-items' : // Make item available to each group member
+              $members = $pages->find("template=player, playerTeam=$player->playerTeam, group=$player->group");
+              foreach ($members as $p) {
+                $bought = $pages->get("name=bought");
+                $comment = $refPage->title." [unlocked]";
+                updateScore($p, $bought, $comment, $refPage, $real);
+              }
+              break;
+            default:
+              $player->equipment->add($refPage);
+              break;
+          }
         }
-      }
-      // Add place if needed
-      if ($refPage->is("template=place")) {
-        $player->places->add($refPage);
+        // Add place if needed
+        if ($refPage->is("template=place")) {
+          $player->places->add($refPage);
+        }
       }
     }
 

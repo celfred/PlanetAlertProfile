@@ -35,8 +35,8 @@ foreach($possiblePlaces as $place) {
 }
 
 $out .= '<section class="row">';
+$out .= "<ul class='itemList col-md-6'><h3>Possible equipment</h3>";
 if ( $possibleEquipment.count() > 0) {
-  $out .= "<ul class='itemList col-md-6'><h3>Possible equipment</h3>";
   foreach($possibleEquipment as $item) {
     // List items by category
     if ($item->parent->name !== $lastCat) {
@@ -53,25 +53,23 @@ if ( $possibleEquipment.count() > 0) {
     $out .= '</li>';
     $lastCat = $item->parent->name;
   }
-  // Add potions
-  $out .= '<li class="label label-primary">Potions</li>';
-  foreach($possiblePotions as $item) {
-    $out .= '<li>';
-    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
-    if ($item->image) {
-      $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
-    }
-    $out .= $item->title.' ['.$item->GC.'GC]';
-    $out .= '</label>';
-    $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
-    $out .= '</li>';
-  }
-  $out .= "</ul>";
 } else {
-  $out .= "<ul class='itemList col-md-6'>";
   $out .= "<li><h3>No equipment to buy!</h3></li>";
-  $out .= "</ul>";
 }
+// Add potions
+$out .= '<li class="label label-primary">Potions</li>';
+foreach($possiblePotions as $item) {
+  $out .= '<li>';
+  $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+  if ($item->image) {
+    $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+  }
+  $out .= $item->title.' ['.$item->GC.'GC]';
+  $out .= '</label>';
+  $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+  $out .= '</li>';
+}
+$out .= "</ul>";
 
 
 if ( $possiblePlaces.count() > 0) {
