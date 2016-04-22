@@ -203,7 +203,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
 
       if ($task->is("name=ut-action-v|ut-action-vv")) {
         setBestPlayer($refPage, $player);
-      )
+      }
     }
   } else { // Player died
     if ($player->level > 1) { // Loose 1 level
