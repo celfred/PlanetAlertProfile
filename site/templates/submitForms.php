@@ -36,7 +36,7 @@
         $player = $pages->get($playerId);
         $task = $pages->get("name='buy'");
         $taskComment = $newItem->title;
-        updateScore($player, $task, $taskComment, $refPage, true);
+        updateScore($player, $task, $taskComment, $newItem, true);
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->playerTeam."\r\n";
