@@ -188,16 +188,15 @@
           $out .= '</td>';
           // Find best trained player on this monster
           if ($result->mostTrained) {
-            $bestUt = utGain($result->id, $result->mostTrained);
             if ($result->mostTrained == $player) {
               $class = 'success';
             } else {
               $class = 'primary';
             }
           }
-          $out .= '<td data-sort="'.$bestUt.'">';
+          $out .= '<td data-sort="'.$result->best.'">';
           if ($result->mostTrained) {
-            $out .= '<span class="label label-'.$class.'">'.$bestUt.' UT - '.$result->mostTrained->title.' ['.$result->mostTrained->playerTeam.']</span>';
+            $out .= '<span class="label label-'.$class.'">'.$result->best.' UT - '.$result->mostTrained->title.' ['.$result->mostTrained->playerTeam.']</span>';
           } else {
             $out .= '<span>No record yet.</span>';
           }

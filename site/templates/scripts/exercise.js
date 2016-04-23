@@ -565,6 +565,10 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 						$window.location.href = $scope.redirectUrl;
 					}
 				});
+			} else {
+				if (redirect === true) {
+					$window.location.href = $scope.redirectUrl;
+				}
 			}
     }, function(data, status, headers, config) {
 			swal("Sorry, but an error occurred.", "Please, contact the admin.", "error");
