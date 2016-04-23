@@ -200,10 +200,6 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         $task = $pages->get("name=death");
         updateScore($player, $task, $comment, '', $newLinkedId, true);
       }
-
-      if ($task->is("name=ut-action-v|ut-action-vv")) {
-        setBestPlayer($refPage, $player);
-      }
     }
   } else { // Player died
     if ($player->level > 1) { // Loose 1 level
@@ -742,17 +738,14 @@ function utGain($monsterId, $player, $startDate='', $endDate='') {
   return $utGain;
 }
 
-function setBestPlayer($monster, $player) {
+function setBestPlayer($monster, $player, $utGain) {
   $pages = wire('pages');
   $player = $pages->get($player->id);
   $monster = $pages->get($monster->id);
-  $playerUt = utGain($monster, $player);
-  $bestUt = utGain($monster, $monster->mostTrained);
-  if ($playerUt > $bestUt) {
-    $monster->of(false);
-    $monster->mostTrained = $player;
-    $monster->save();
-  }
+  $monster->of(false);
+  $monster->mostTrained = $player;
+  $monster->best = $utGain;
+  $monster->save();
 }
 
 ?>

@@ -320,32 +320,37 @@
         }
         break;
       case 'ut' :
-        $allMonsters = $pages->find("template=exercise");
+        $dirty = false;
+        $allMonsters = $pages->find("template=exercise")->sort("level, title");
         $out .= '<h3>Best players among '.$allPlayers->count().' players.</h3>';
         $out .= '<ul>';
         foreach($allMonsters as $m) {
-          $bestUt = utGain($m, $m->mostTrained);
+          $bestUt = $m->best;
           $out .= '<li>'.$m->title.' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.'] : '.$bestUt.']';
           foreach($allPlayers as $p) {
             $playerUt = utGain($m, $p);
             $p->ut = $playerUt;
           }
           $allPlayers->sort("-ut");
-          if ($allPlayers->first()->id != $m->mostTrained->id) {
+          if ($allPlayers->first()->ut != $m->best) {
             $out .= ' <span class="label label-danger">Error</span>';
+            $out .= ' - New best : '.$allPlayers->first()->title.' ['.$allPlayers->first()->playerTeam.'] ⇒'.$allPlayers->first()->ut;
             if ($confirm == 1) { // Save new best players
               $m->of(false);
               $m->mostTrained = $allPlayers->first();
+              $m->best = $allPlayers->first()->ut;
               $m->save();
             }
           } else {
+            $dirty = true;
             $out .= ' <span class="label label-success">OK</span>';
           }
-          $out .= ' - New best : '.$allPlayers->first()->title.' ['.$allPlayers->first()->playerTeam.'] ⇒'.$allPlayers->first()->ut;
           $out .= '</li>';
         }
         $out .= '</ul>';
-        $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'ut/all/1">Save now!</button>';
+        if ($dirty) {
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'ut/all/1">Save now!</button>';
+        }
         break;
       case 'clean-history' :
         if ($selectedPlayer) {

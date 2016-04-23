@@ -23,6 +23,12 @@
       if ($monster->id && $player->id && $task->id) {
         $taskComment = $monster->title.' [+'.$result.'U.T.]';
         updateScore($player, $task, $taskComment, $monster, '', true);
+        // Check if new record
+        $utGain = utGain($monster, $player);
+        if ($utGain > $monster->best) {
+          setBestPlayer($monster, $player, $utGain);
+          echo '1';
+        }
         
         // Record to log file
         $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result;

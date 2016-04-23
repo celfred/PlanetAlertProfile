@@ -223,7 +223,19 @@
 
             $out .= '<div class="col-sm-3">';
             $out .= '<h3><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Training session <span class="blink">started</span></span></h3>';
-            $out .= '<h1><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Word count: {{counter}}</span></h1>';
+            $out .= '<h2><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Word count: {{counter}}</span></h2>';
+            $out .= '<br /><br />';
+            $out .= '<div class="panel panel-success">';
+            $out .= '<div class="panel-heading">';
+            $out .= '<h4 class="panel-title"><span class="glyphicon glyphicon-education"></span> Current record</h4>';
+            $out .= '</div>';
+            $out .= '<div class="panel-body">';
+            $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->playerTeam.']</h4>';
+            $out .= '</div>';
+            $out .= '<div class="panel-footer">';
+            $out .= '<p>Your global UT for this monster: '.utGain($monster, $player).'</p>';
+            $out .= '</div>';
+            $out .= '</div>';
             /* $out .= '<h1 ng-class="{zoom:utPoint}"><span class="label label-primary">+{{result}} U.T.</span></h1>'; */
             /* $out .= '<h1><span class="glyphicon glyphicon-warning-sign"></span> Don\'t forget to save your result!</h1>'; */
             $out .= '</div>';
