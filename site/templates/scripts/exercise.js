@@ -553,10 +553,25 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       })
     }).then(function(data, status, headers, config){ //make a get request to mock json file.
       $scope.saved = 'Result saved!';
-      if (redirect === true) {
-        $window.location.href = $scope.redirectUrl;
-      }
+			if (data["data"] == '1') {
+				swal({
+					html: true,
+					title: "Congratulations !",
+					text: "You've just set a new training record !<br /><br /><small>This message should disappear in 2 seconds. If not, click 'OK' below :)</small>",
+					type: "success",
+					timer: 2000
+				}, function() {
+					if (redirect === true) {
+						$window.location.href = $scope.redirectUrl;
+					}
+				});
+			} else {
+				if (redirect === true) {
+					$window.location.href = $scope.redirectUrl;
+				}
+			}
     }, function(data, status, headers, config) {
+			swal("Sorry, but an error occurred.", "Please, contact the admin.", "error");
       $scope.saved = 'Error! Please contact the administrator.';
     })
   }
