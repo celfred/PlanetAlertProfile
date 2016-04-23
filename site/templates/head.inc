@@ -49,7 +49,7 @@
 <body>
   <?php
     $homepage = $pages->get("/"); 
-    $allPlayers = $pages->find("template=player");
+    $allPlayers = $pages->find("template=player")->sort("playerTeam, title");
     $allTeams = [];
     foreach ($allPlayers as $player) {
       if (!in_array($player->playerTeam, $allTeams)) {
@@ -93,7 +93,15 @@
                     echo "<li class='dropdown-submenu'>";
                     echo "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a>";
                     echo "<ul class='dropdown-menu'>";
-                    echo "<li><a href='{$homepage->url}players/{$sanitizer->pageName($team)}'>{$team} team</a></li>";
+                    echo "<li class='dropdown-submenu'><a href='{$homepage->url}players/{$sanitizer->pageName($team)}'>{$team} team</a>";
+                    echo "<ul class='dropdown-menu'>";
+										foreach ($allPlayers as $player) {
+											if ($player->playerTeam == $team) {
+												echo "<li><a href='{$homepage->url}players/{$sanitizer->pageName($player->playerTeam)}/{$player->name}'>{$player->title}</a></li>";
+											}
+										}
+                    echo "</ul>";
+                    echo "</li>";
                     echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team)}'>{$team} world</a></li>";
                     echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team)}'>{$team} marketplace</a></li>";
                     echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team)}'>{$team} adminTable</a></li>";
