@@ -35,6 +35,36 @@
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut-stats">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
+      case 'task-report' :
+        $out .= '<section class="well">';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p.'">'.$p.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '<span>Select a task : </span>';
+        $out .= '<select id="taskId">';
+        $out .= '<option value="-1">Select a task</option>';
+        $allTasks = $pages->find("template=task, sort=title");
+        foreach($allTasks as $t) {
+          $out .= '<option value="'.$t.'">'.$t->title.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<section class="well">';
+        $out .= '<p>Select limiting dates if needed (start empty = 01/01/20000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
+        $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
+        $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
+        $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
+        $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
+        $out .= '</section>';
+        $out .= '</section>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="task-report">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
       case 'recalculate' :
         $out .= '<section class="well">';
         $out .= '<div>';
@@ -103,10 +133,18 @@
     $confirm = $input->urlSegment3;
     $unique = true;
     $type = $input->get["type"];
-    $startDate = $input->get["startDate"];
-    $endDate = $input->get["endDate"];
-    if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
-    if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
+    $startDate = $input->get["startDate"]; 
+    $endDate = $input->get["endDate"]; 
+    if ($startDate == '') {
+      $startDate = date('2000-01-01 00:00:00');
+    } else {
+      $startDate = $startDate.' 00:00:00';
+    }
+    if ($endDate == '') {
+      $endDate = date('Y-m-d 23:59:59');
+    } else {
+      $endDate = $endDate.' 23:59:59';
+    }
 
     if ($type == 'team') {
       $selectedTeam = $playerId;
@@ -128,16 +166,6 @@
 
     switch ($action) {
       case 'script' :
-        $e = $pages->get("id=40929");
-        $eDate = $e->date;
-        $out .= 'edate : '.$eDate;
-        $out .= '<br />';
-        $out .= 'mktime 04/10 : '.mktime(0,0,0,4,10,2016);
-        if ($eDate > mktime(0,0,0,4,10,2016)) {
-          $out .= ' → UpdateScore()';
-
-        }
-        $out .= '<br />';
         /* $allEvents = $pages->find("template=event, summary~='team died'"); */
         /* $out .= $allEvents->count(); */
         /* $out .= '<br />'; */
@@ -617,6 +645,31 @@
           $out .= '</ul>';
         } else {
           $out .= 'You need to select 1 player or 1 team.';
+        }
+        break;
+      case 'task-report' :
+        $taskId = $input->get['taskId'];
+        $task = $pages->get("id=$taskId");
+        $taskCount = 0;
+        if ($selectedTeam && $selectedTeam != '-1' && $taskId!= -1) {
+          $out .= '<h3 class="text-center">';
+          $out .= '['.$task->title.'] report for '.$selectedTeam .'   ';
+          $out .= 'from '.$startDate.' ';
+          $out .= 'to '.$endDate;
+          $out .= '</h3>';
+          $allPlayers = $allPlayers->find("playerTeam=$selectedTeam");
+          $out .= '<ul>';
+          foreach($allPlayers as $p) {
+            $prevTask = $p->find("template=event,task=$task, date>$startDate, date<$endDate, sort=-date");
+            if ($prevTask->count() > 0) {
+              $taskCount += $prevTask->count();
+              $out .= '<li>'.$p->title. ': Task found '.$prevTask->count().' time(s).</li>';
+            }
+          }
+          $out .= '</ul>';
+          $out .= '<p class="label label-primary">Total count : '.$taskCount.'</p>';
+        } else {
+          $out .= 'You need to select a team and a task.';
         }
         break;
       default :

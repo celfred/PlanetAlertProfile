@@ -23,6 +23,10 @@ $(document).ready(function() {
 		var endDate = $('#endDate').val();
 		if (type) {
 			var href = $(this).attr('data-href') + action + '/' + playerId + '?startDate='+ startDate +'&endDate=' + endDate + type;
+			var taskId = $('#taskId').val();
+			if (taskId) {
+				href = href + '&taskId='+taskId;
+			}
 		} else {
 			var href = $(this).attr('data-href') + action + '/' + playerId + '?startDate='+ startDate +'&endDate=' + endDate + type;
 		}
