@@ -64,7 +64,11 @@ if ($user->isSuperuser()) {
     }
     $out .= '<td>'. $mini .'</td>';
     $out .= '<td>';
-    $out .= $m->title;
+    if ($m->is(Page::statusUnpublished)) {
+      $out .= '<span style="text-decoration: line-through">'.$m->title.'</span>';
+    } else {
+      $out .= $m->title;
+    }
     $out .= '';
     $out .= '</td>';
     $out .= '<td>';
