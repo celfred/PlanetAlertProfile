@@ -12,9 +12,9 @@ echo '<h4>'.$page->summary.'</h4>';
 echo '</div>';
 
 if ($user->isSuperuser()) {
-  $allMonsters = $page->children("include=all")->sort('name');
+  $allMonsters = $page->children("include=all")->sort("level, name");
 } else {
-  $allMonsters = $page->children->sort('name');
+  $allMonsters = $page->children->sort("level, name");
 }
 
 /* $allCategories = $pages->find("parent.name=topics, sort=name"); */
