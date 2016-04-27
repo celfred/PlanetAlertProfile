@@ -52,9 +52,6 @@ table.miniTable td {
 table.miniTable td.empty {
   border: 0;
 }
-table.big td {
-  font-size: 16px;
-}
 td.important {
   font-weight: bold;
 }
@@ -74,4 +71,8 @@ p, h1 {
 span.negative {
   background-color: #000;
   color: #FFF;
+}
+li.bigger {
+	font-size: 18pt;
+	margin-bottom: 10px;
 }

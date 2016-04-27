@@ -44,6 +44,11 @@ if ($user->isSuperuser()) {
 <table id="monstersTable" class="table table-condensed table-hover">
 <thead>
   <tr>
+  <?php
+  if ($user->isSuperuser()) {
+    echo '<th></th>';
+  }
+  ?>
   <th colspan="2">Name</th>
   <th>Topic</th>
   <th>Level</th>
@@ -61,6 +66,9 @@ if ($user->isSuperuser()) {
       $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
     } else {
       $mini = '';
+    }
+    if ($user->isSuperuser()) {
+      $out .= '<td><a class="pdfLink btn btn-info" href="'.$page->url().'?id='.$m->id.'&pages2pdf=1">[PDF]</a></td>';
     }
     $out .= '<td>'. $mini .'</td>';
     $out .= '<td>';
