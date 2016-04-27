@@ -30,6 +30,14 @@ if ($m->type->name == 'translate') {
     list($left, $right) = preg_split('/::/', $l);
     $left = str_replace("(separated by 1 space)", " ", $left);
     if ($left != '') {
+      // Basic marker replacements
+      // TODO : Add random choice from list
+      $left = str_replace("%fname%", "Mike", $left);
+      $left = str_replace("%fnamef%", "Sarah", $left);
+      $left = str_replace("%fnamem%", "John", $left);
+      $left = str_replace("%name%", "Simon Keats", $left);
+      $left = str_replace("%age%", "13", $left);
+      $left = str_replace("%nationality%", "American", $left);
       array_push($listWords, $left);
     }
   }
