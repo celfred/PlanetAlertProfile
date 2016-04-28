@@ -86,7 +86,7 @@ if ( $possiblePlaces.count() > 0) {
 }
 $out .= '</section>';
 
-if ( $possibleEquipment.count() > 0 || $possiblePlaces.count() >0) {
+if ( $possibleEquipment->count() > 0 || $possiblePlaces->count() > 0 || $possiblePotions->count() > 0 ) {
   $out .= '<input type="submit" name="marketPlaceSubmit" value="Yes, buy the selected items!" class="btn btn-block btn-primary" disabled="disabled" />';
   $out .= '<a href="'.$homepage->url.'players/'.$player->playerTeam.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
 }
