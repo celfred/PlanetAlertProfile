@@ -507,13 +507,10 @@
               }
               if ($e->task->is("name=team-death|group-death")) {
                 // Find who died
-                $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam");
-                foreach($teamPlayers as $p) {
-                  $dead = $p->get("name=history")->get("template=event, task.name=death,date=$e->date");
-                  if ($dead->id) {
-                    $deadPlayer = $dead->parent("template=player");
-                    $out .= ' ['.$deadPlayer->title.']';
-                  }
+                if ($e->linkedId) {
+                  $linkedId = $pages->get("$e->linkedId");
+                  $dead = $linkedId->parent("template=player");
+                  $out .= ' ['.$dead->title.']';
                 }
               }
               updateScore($selectedPlayer, $e->task, $comment, $e->refPage, '', false);
@@ -582,13 +579,6 @@
           foreach($linkedDeath as $p) {
             $pages->trash($p);
           }
-          /* $teamPlayers = $pages->find("template=player, playerTeam=$selectedPlayer->playerTeam"); */
-          /* foreach($teamPlayers as $p) { */
-          /*   $linkedDeath = $p->get("name=history")->get("template=event, task.name=group-death|team-death, date=$event->date"); */
-          /*   if ($linkedDeath->id) { */
-          /*     $pages->trash($linkedDeath); */
-          /*   } */
-          /* } */
         }
         break;
       case 'ut-stats' :

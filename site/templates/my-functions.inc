@@ -236,14 +236,13 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         }
       }
       // Each team member suffers
-      foreach($teamPlayers as $p) {
+      $teamMembers = $teamPlayers->not("$groupMembers");
+      foreach($teamMembers as $p) {
         $teamDeath = $pages->get("name=team-death");
         $comment = 'Team member died!';
-        if ($p->group != $player->group) {
-          // Applies after the indicated date
-          if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
-            updateScore($p, $teamDeath, $comment, '', $refDeathId, true);
-          }
+        // Applies after the indicated date
+        if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
+          updateScore($p, $teamDeath, $comment, '', $refDeathId, true);
         }
       }
     }
