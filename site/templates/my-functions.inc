@@ -71,8 +71,8 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         }
         if ($tHP < 0) { // Negative task
           // Loss of 1 minimum whatever the equipment
-          if ( $tHP + $deltaHP > 0 ) {
-            $deltaHP = $tHP-1;
+          if ( $tHP + $deltaHP >= 0 ) {
+            $deltaHP = abs($tHP) - 1;
           }
           // Get rid of weapons' bonus
           $deltaXP = 0;
