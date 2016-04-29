@@ -214,8 +214,11 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
       $player->HP = 50;
       $player->GC = 0;
       $player->XP = 0;
-      $player->equipment->removeAll();
-      /* $player->places->removeAll(); */
+      foreach($player->equipment as $e) {
+        if ($e->category->name != 'group-items') {
+          $player->equipment->remove($e);
+        }
+      }
     }
     if ($real == true) { // Save player's death if necessary
       $eDate = date('m/d/Y H:i:s', time()+1);
