@@ -229,17 +229,17 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
       // Each group member suffers
       foreach($groupMembers as $p) {
         $groupDeath = $pages->get("name=group-death");
-        $comment = 'Group member died!';
+        $comment = 'Group member died! ['.$player->title.']';
         // Applies after the indicated date
         if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
           updateScore($p, $groupDeath, $comment, '', $refDeathId, true);
         }
       }
       // Each team member suffers
-      $teamMembers = $teamPlayers->not("$groupMembers");
+      $teamMembers = $teamPlayers->find("group!=$player->group");
       foreach($teamMembers as $p) {
         $teamDeath = $pages->get("name=team-death");
-        $comment = 'Team member died!';
+        $comment = 'Team member died! ['.$player->title.']';
         // Applies after the indicated date
         if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
           updateScore($p, $teamDeath, $comment, '', $refDeathId, true);
