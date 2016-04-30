@@ -229,7 +229,11 @@
             $out .= '<h4 class="panel-title"><span class="glyphicon glyphicon-education"></span> Current record</h4>';
             $out .= '</div>';
             $out .= '<div class="panel-body">';
-            $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->playerTeam.']</h4>';
+            if ($monster->mostTrained->id) {
+              $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->playerTeam.']</h4>';
+            } else {
+              $out .= '<h4 class="text-center">No record yet.</h4>';
+            }
             $out .= '</div>';
             $out .= '<div class="panel-footer">';
             $out .= '<p>Your global UT for this monster: '.utGain($monster, $player).'</p>';
