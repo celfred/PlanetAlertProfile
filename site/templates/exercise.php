@@ -1,31 +1,23 @@
 <?php
   include("./head.inc"); 
 
-  // TODO : Test player login
+  if ($user->isLoggedin() || $user->isSuperuser()) {
+    echo '<div ng-app="exerciseApp">';
+    // Get player's equipment to set scores alternatives
+    $weaponRatio = 0;
+    $protectionRatio = 0;
+    $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+    if ($bestWeapon->id) { $weaponRatio = $bestWeapon->XP; }
+    $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
+    if ($bestProtection->id) { $protectionRatio = $bestProtection->HP; }
 
-  echo '<div ng-app="exerciseApp">';
-  
-  // Get player's equipment to set scores alternatives
-  $weaponRatio = 0;
-  $protectionRatio = 0;
-  if ($player && $player->equipment->count() > 0) {
-    foreach ($player->equipment as $equipment) {
-      if ($equipment->parent()->name === 'weapons') {
-        $weaponRatio += $equipment->XP;
-      }
-      if ($equipment->parent->name === 'protections') {
-        $protectionRatio += $equipment->HP;
-      }
-    }
-    // Limit to 5
-    if ($weaponRatio > 5) { $weaponRatio = 5; }
-    if ($protectionRatio > 5) { $protectionRatio = 5; }
+    // Get exercise type
+    include('./exTemplates/'.$page->type->name.'.php');
+
+    echo '</div>';
+  } else {
+    echo '<div class="well"><p>You have to log in to see this page.</p></div>';
   }
-
-  // Get exercise type
-  include('./exTemplates/'.$page->type->name.'.php');
-
-  echo '</div>';
 
   include("./foot.inc"); 
 ?>

@@ -7,36 +7,33 @@
   }
 
   $redirectUrl = $player->url;
-  $out = '<div ng-controller="TranslateCtrl" ng-init="init(\''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
+  $out = '<div ng-controller="FightCtrl" ng-init="init(\''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
 
   $out .= '<h2 class="row well text-center">';
   $out .= '<span class="label label-default">Monster fight</span>';
   $out .= '<span class="">  ';
-  $out .= '<img class="pull-left" src="'.$page->image->url.'" alt="Avatar" />';
+  $out .= '<img ng-class="{\'pull-left\':true, hidden:started}" src="'.$page->image->url.'" alt="Avatar" />';
   $out .= $page->title;
-  $out .= ' VS ';
+  $out .= ' vs. ';
   $out .= $player->title;
   $out .= '</span>';
   $out .= '<span class="pull-right">';
   $out .= '<span class="avatarContainer">';
   if ($player->avatar) {
-    $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+    $out .= '<img ng-class="{hidden:started}" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
   } else {
     $out .= '<Avatar>';
   }
   if ($weaponRatio > 0) { // Player has weapons
-    // TODO : limit equipment and weapons
-    foreach ($player->equipment as $equipment) {
-      if ($equipment->parent()->name === 'weapons') {
-        $out .= '<img ng-class="{weapon:true, superpose:true, explode:correct}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
-      }
+    $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+    if ($bestWeapon->id && $bestWeapon->image) {
+        $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct, hidden:started}" src="'.$bestWeapon->image->getThumb("small").'" alt="'.$bestWeapon->title.'" />';
     }
   }
   if ($protectionRatio > 0) { // Player has protections
-    foreach ($player->equipment as $equipment) {
-      if ($equipment->parent()->name === 'protections') {
-        $out .= '<img ng-class="{protection:true, superpose:true, squeeze:wrong}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
-      }
+    $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
+    if ($bestProtection->id && $bestProtection->image) {
+        $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong, hidden:started}" src="'.$bestProtection->image->getThumb("small").'" alt="'.$bestProtection->title.'" />';
     }
   }
   $out .= '</span>';
@@ -102,12 +99,14 @@
   $out .= '<button class="btn btn-primary btn-lg btn-block text-center" ng-disabled="waitForStart" ng-click="startFight()" id="startFight">I understand. Start the fight ! </button>';
   $out .= '</h3>';
 
-  $out .= '<div id="fightForm" class="row">';
+  $out .= '<div id="fightForm" ng-class="{row:true, hidden: wonFight}">';
   $out .= '<div class="text-left">';
   if ($page->image) {
-    $out .= '<img class="pull-left" src="'.$page->image->url.'" alt="Avatar" />';
+    $out .= '<img class="pull-left squeeze" src="'.$page->image->url.'" alt="Avatar" />';
+  } else {
+    $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getThumb('thumbnail').'" alt="Antenna" />';
   }
-  $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getThumb('thumbnail').'" alt="Antenna" />';
+  $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}HP</span>';
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
   $out .= '<h3 class="inline" ng-bind-html="word"></h3>&nbsp;';
   $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span></h2>  ';
@@ -117,36 +116,25 @@
   $out .= '<div class="bubble-right">';
   $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
   $out .= '&nbsp;';
-  $out .= '<button ng-click="attack()" class="btn btn-success">Attack!</button>';
+  $out .= '<button ng-click="attack()" ng-disabled="waitForStart" class="btn btn-success">Attack!</button>';
   $out .= '&nbsp;';
-  $out .= '<button ng-click="dodge()" class="btn btn-info">Dodge</button>';
+  $out .= '<button ng-click="dodge()" ng-disabled="waitForStart" class="btn btn-info">Dodge</button>';
   $out .= '&nbsp;';
   $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
   $out .='</div>';
   $out .='</h3>';
-  if ($player->avatar) {
   $out .= '<span class="pull-right">';
+  $out .= '<span ng-class="{damage:true, blink: true, hidden: hidePlayerDamage}">- {{playerDamage}}HP</span>';
   $out .= '<span class="avatarContainer">';
   if ($player->avatar) {
     $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
   } else {
     $out .= '<Avatar>';
   }
-  if ($weaponRatio > 0) { // Player has weapons
-    // TODO : limit equipment and weapons
-    foreach ($player->equipment as $equipment) {
-      if ($equipment->parent()->name === 'weapons') {
-        $out .= '<img ng-class="{weapon:true, superpose:true, explode:correct}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
-      }
-    }
-  }
-  if ($protectionRatio > 0) { // Player has protections
-    foreach ($player->equipment as $equipment) {
-      if ($equipment->parent()->name === 'protections') {
-        $out .= '<img ng-class="{protection:true, superpose:true, squeeze:wrong}" src="'.$equipment->image->getThumb("small").'" alt="'.$equipment->title.'" />';
-      }
-    }
-  }
+  $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+  $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getThumb("small").'" alt="'.$bestWeapon->title.'" />';
+  if ($bestProtection->id && $bestProtection->image) {
+    $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong}" src="'.$bestProtection->image->getThumb("small").'" alt="'.$bestProtection->title.'" />';
   $out .= '</span>';
   $out .= '</span>';
   }

@@ -183,10 +183,25 @@
         </div>
         </ul>
       <?php } else { // Logged user's Menu ?>
-        <div style="float:left; color: #FFF;">
+        <div style=" color: #FFF;">
         <?php
           $player = $pages->get("template=player, login=$user->name");
-          echo '<img class="" src="'.$player->avatar->url.'" width="95" alt="No avatar" />';
+					$bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+					$bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
+          /* echo '<img class="" src="'.$player->avatar->url.'" width="95" alt="No avatar" />'; */
+					echo '<span class="avatarContainer">';
+					if ($player->avatar) {
+						echo '<img class="avatar superpose" src="'.$player->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />';
+					} else {
+						echo '<Avatar>';
+					}
+					if ($bestWeapon->id && $bestWeapon->image) {
+						echo '<img class="weapon mini superpose" src="'.$bestWeapon->image->getThumb("mini").'" alt="'.$bestWeapon->title.'" />';
+					}
+					if ($bestProtection->id && $bestProtection->image) {
+						echo '<img class="protection mini superpose" src="'.$bestProtection->image->getThumb("mini").'" alt="'.$bestProtection->title.'" />';
+					}
+					echo '</span>';
         ?>
         </div>
         <ul>
@@ -213,11 +228,12 @@
               // Check if memory helmet accessible in player's group
               if ($player->equipment->get("name=memory-helmet")) {
                 echo "<li><a$class href='{$pages->get('name=underground-training')->url}'>Use the memory helmet</a></li>";
+								$class = $page->name == 'fighting-zone' ? " class='selected-left'" : "";
+                echo "<li><a$class href='{$pages->get('name=fighting-zone')->url}'>Fight a monster</a></li>";
               } else {
-                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Memory helmet</li>";
+                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Use the Memory helmet</li>";
+                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Fight a monster</li>";
               }
-              /* $class = $page->name == 'places' ? " class='selected-left'" : ""; */
-              /* echo "<li><a$class href='{$pages->get('/places')->url}'>Fight a monster</a></li>"; */
               ?>
             </ul>
           </div>

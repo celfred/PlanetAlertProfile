@@ -92,6 +92,11 @@
             ?>
           </ul>
         </div>
+        <div class="panel-footer text-center">
+          <?php 
+            echo '<p>Fighting power : '.$player->fighting_power.'</p>';
+          ?>
+        </div>
       </div>
 
     </div>
@@ -178,19 +183,19 @@
               echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
               echo 'Greatest # of places : No ranking.</p></li>';
             }
-            // Most equipped (equipment)
-            list($playerPos, $totalPlayers) = getPosition($playerPage, 'equipment');
+            // Best warrior (fighting_power)
+            list($playerPos, $totalPlayers) = getPosition($playerPage, 'fighting_power');
             if ($playerPos) {
               if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
               echo '<li>';
               echo '<p>';
-              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=equipment"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
-              echo 'Most equipped : '.$playerPos.'/'.$totalPlayers.' '. $star.'</p></li>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Best warriors : '.$playerPos.'/'.$totalPlayers.' '. $star.'</p></li>';
             } else {
               echo '<li>';
               echo '<p>';
-              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=equipment"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
-              echo 'Most equipped : No ranking.</p></li>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Best warriors : No ranking.</p></li>';
             }
             // Best donators (donation)
             list($playerPos, $totalPlayers) = getPosition($playerPage, 'donation');

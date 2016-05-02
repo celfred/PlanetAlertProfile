@@ -151,6 +151,21 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         }
       }
     }
+    // Set fighting power
+    if ($player->fighting_power == '') {$player->fighting_power = 0; }
+    if ($task->is("name=test-rr||fight-rr")) {
+      $player->fighting_power = $player->fighting_power-2;
+    }
+    if ($task->is("name=test-r||fight-r")) {
+      $player->fighting_power = $player->fighting_power-1;
+    }
+    if ($task->is("name=test-v||fight-v")) {
+      $player->fighting_power = $player->fighting_power+1;
+    }
+    if ($task->is("name=test-vv||fight-vv")) {
+      $player->fighting_power = $player->fighting_power+2;
+    }
+    if ($player->fighting_power < 0) { $player->fighting_power = 0; }
 
     // Check GC, HP...
     if ($player->GC < 0) { $player->GC = 0; }
@@ -223,7 +238,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     if ($real == true) { // Save player's death if necessary
       $eDate = date('m/d/Y H:i:s', time()+1);
       $task = $pages->get("name=death");
-      $refDeathId = saveHistory($player, $task, $comment, '', $refPage, $eDate, '');
+      $newLinkedId = saveHistory($player, $task, $comment, '', $refPage, $eDate, '');
       $player->of(false);
       $player->save();
       // Team and group loss because of player's death
@@ -235,7 +250,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         $comment = 'Group member died! ['.$player->title.']';
         // Applies after the indicated date
         if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
-          updateScore($p, $groupDeath, $comment, '', $refDeathId, true);
+          updateScore($p, $groupDeath, $comment, '', $newLinkedId, true);
         }
       }
       // Each team member suffers
@@ -245,11 +260,12 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         $comment = 'Team member died! ['.$player->title.']';
         // Applies after the indicated date
         if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
-          updateScore($p, $teamDeath, $comment, '', $refDeathId, true);
+          updateScore($p, $teamDeath, $comment, '', $newLinkedId, true);
         }
       }
     }
   }
+  return $newLinkedId;
 }
 
 function checkLevel($player) {
@@ -535,6 +551,9 @@ function getPosition($player, $field) {
     case 'places' :
       $allPlayers = $pages->find("template=player, sort=-places.count, sort=-karma, places.count>0");
       break;
+    case 'fighting_power' :
+      $allPlayers = $pages->find('template=player, sort=-fighting_power, sort=-karma, fighting_power>0');
+      break;
     case 'equipment' :
       $allPlayers = $pages->find('template=player, sort=-equipment.count, sort=-karma, equipment.count>0');
       break;
@@ -665,57 +684,93 @@ function groupScoreBoard($limit) {
 }
 
 function isTrainingAllowed($player, $monster) {
-  $prevUt = $player->find("template=event,refPage=$monster->id, sort=-date");
-
-  if ($prevUt->count > 0) {
+  $utGain = utGain($monster->id, $player);
+  $prevTrainings = $player->find("template=event,task.name=ut-training-v|ut-training-vv, refPage=$monster->id, sort=-date");
+  if ($utGain > 0) { // Already trained
+    $lastTraining = $prevTrainings->first();
     // Find # of days compared to today
     $date1 = new DateTime("today");
-    $date2 = new DateTime(date("Y-m-d", $prevUt->first->date));
+    $date2 = new DateTime(date("Y-m-d", $lastTraining->date));
     $interval = $date1->diff($date2);
-  }
-
-  // Set spaced repetition according to monster's level?
-  if ($monster->level >= 1 ) {
-    // Limit to 1 training session a day if prevUt<5
-    // Limit to 1 training session a week if prevUt<10
-    // Limit to 1 training session a month if prevUt>15
-    if ($prevUt->count > 0 && $prevUt->count < 5) {
-      $spaced = 1;
-    }
-    if ($prevUt->count > 5 && $prevUt->count < 10) {
-      $spaced = 7;
-    }
-    if ($prevUt->count > 10) {
-      $spaced = 30;
-    }
-  }
-  if ($monster->level === 1) {
-    // Limit to 1 training session a day if prevUt<5
-    // Limit to 1 training session a week if prevUt<10
-    // Limit to 1 training session a month if prevUt>15
-    if ($prevUt->count > 0 && $prevUt->count <= 5) {
-      $spaced = 1;
-    }
-    if ($prevUt->count > 5 && $prevUt->count <= 10) {
-      $spaced = 7;
-    }
-    if ($prevUt->count > 10) {
-      $spaced = 30;
-    }
-  }
-
-  if ($interval->days < $spaced && $prevUt->count > 0) {
-    $nbDays = $spaced - $interval->days;
-    if ($nbDays == $spaced) {
-      return $spaced;
-    } else {
-      if ($nbDays > 1) {
-        return $nbDays;
+    // Set spaced repetition according to monster's level?
+    if ($monster->level >= 1 ) { // For the moment, all levels
+      // Limit to 1 training session a day if prevTrainings<5
+      // Limit to 1 training session a week if prevTrainings<10
+      // Limit to 1 training session a month if prevTrainings>15
+      if ($prevTrainings->count() > 0 && $prevTrainings->count() <= 5) {
+        $spaced = 1;
+      }
+      if ($prevTrainings->count() > 5 && $prevTrainings->count() <= 10) {
+        $spaced = 7;
+      }
+      if ($prevTrainings->count() > 10) {
+        $spaced = 30;
       }
     }
-  } else {
-    return 0;
+    $monster->lastTrainingDate = $lastTraining->date;
+    $monster->interval = $interval->days;
+    $monster->utGain = $utGain;
+    if ($interval->days < $spaced && $interval->days!= 0) {
+      $monster->isTrainable = 0;
+      $nbDays = $spaced-$interval->days;
+      $monster->spaced = $nbDays;
+    } else if ($interval->days == 0) { // Today's training
+      $monster->isTrainable = 2;
+      $monster->spaced = $spaced;
+    } else {
+      $monster->isTrainable = 1;
+      $monster->spaced = 0;
+    }
+  } else { // Never trained
+    $monster->isTrainable = 1;
+    $monster->lastTrainingDate = 0;
+    $monster->interval = -1;
+    $monster->spaced = 0;
   }
+  return $monster;
+}
+
+function isFightAllowed($player, $monster) {
+  $minUt = 20; // Previous training required to be able to fight
+  $spaced = 15; // 15 days between fights
+  $utGain = utGain($monster->id, $player);
+  $monster->utGain = $utGain;
+  if ($utGain >= $minUt) { // Player has trained enough
+    // Check last fight interval
+    $allFights = $player->find("template=event, task.name=fight-vv|fight-v|fight-r|fight-rr, refPage=$monster, sort=-date"); 
+    $lastFight = $allFights->first();
+    if ($lastFight->id) {
+      $monster->allFightsNb = $allFights->count();
+      // Find # of days compared to today
+      $date1 = new DateTime("today");
+      $date2 = new DateTime(date("Y-m-d", $lastFight->date));
+      $interval = $date1->diff($date2);
+      $monster->lastFightDate = $lastFight->date;
+      $monster->interval = $interval->days;
+      if ($interval->days < $spaced) {
+        $monster->isFightable = 0;
+      } else {
+        if ($spaced == 0 && $interval->days == 0) {
+          $monster->isFightable = 0;
+        } else {
+          $monster->isFightable = 1;
+        }
+      }
+      if ($spaced == 0) {
+        $monster->spaced = 1;
+      } else {
+        $monster->spaced = $spaced-$interval->days;
+      }
+    } else { // Never fought
+      $monster->isFightable = 1;
+      $monster->lastFightDate = 0;
+      $monster->interval = -1;
+    }
+  } else {
+    $monster->isFightable = 0;
+    $monster->interval = -1;
+  }
+  return $monster;
 }
 
 function utGain($monsterId, $player, $startDate='', $endDate='') {
@@ -750,4 +805,117 @@ function setBestPlayer($monster, $player, $utGain) {
   $monster->save();
 }
 
+function pma($player) {
+  $out = '';
+  $pages = wire('pages');
+  $player = $pages->get($player->id);
+  switch ($player->rank->name) {
+    case '6emes':
+      /* $levels = '1|2'; */
+      $levels = '1|2|3|4|5';
+      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
+      break;
+    case '5emes':
+      /* $levels = '1|2'; */
+      $levels = '1|2|3|4|5';
+      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
+      break;
+    case '4emes':
+      $levels = '1|2|3|4|5';
+      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=-level, sort=name");
+    case '3emes':
+      $levels = '1|2|3|4|5';
+      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=-level, sort=name");
+    default:
+      $levels = '1|2|3|4|5';
+      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
+    default:
+      $levels = '1|2|3|4|5';
+      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
+  }
+  foreach($allMonsters as $m) {
+    $m = isTrainingAllowed($player, $m);
+    $m = isFightAllowed($player, $m);
+  }
+  $suggestedFights = $allMonsters->find("isFightable=0, interval=0, sort=random, limit=3"); // Pick today's fights first to check for today's mission
+  if ($suggestedFights->count() < 3) { // Complete with never fought
+    $n = 3-$suggestedFights->count();
+    $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate=0, level=$levels, sort=random, limit=$n"));
+    if ($suggestedFights->count() < 3) { // Complete with oldest
+      $n = 3-$suggestedFights->count();
+      $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate!=0, level=$levels, sort=lastFightDate, limit=$n"));
+    }
+  }
+  $suggestedTrainings = $allMonsters->find("isTrainable=2, sort=name, limit=3");
+  if ($suggestedTrainings->count() < 3) {
+    $n = 3-$suggestedTrainings->count();
+    $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingDate=0, level=$levels, sort=random, limit=$n"));
+    if ($suggestedTrainings->count() < 3) {
+      $n = 3-$suggestedTrainings->count();
+      $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingDate!=0, level=$levels, sort=lastTrainingDate, limit=$n"));
+    }
+  }
+
+  $out .= '<div class="row">';
+  $out .= '<div class="pma panel panel-primary">';
+  $out .= '<div class="panel-heading">';
+  $out .= '<h4><span class="glyphicon glyphicon-calendar"></span> Personal Mission Analyzer</h4>';
+  $out .= '</div>';
+  $out .= '<div class="panel-body">';
+  $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" title="This analyser is here to help you organize better. Feel free to go directly to the Training Zone or to the Fighting Zone to do more work :)"></span>';
+  $out .= '<span class="label label-primary">';
+  $helmet = $pages->get("name=memory-helmet");
+  if ($helmet->image) {
+    $out .= '<img width="20" src="'.$helmet->image->url.'" alt="Helmet" />';
+  }
+  $out .= ' Underground Training</span> ⇒ ';
+  if ($suggestedTrainings->count() > 0) {
+    foreach($suggestedTrainings as $m) {
+      if ($m->image) {
+        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+      } else {
+        $mini = '';
+      }
+      if ($m->isTrainable == 2) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
+      $out .= '<a href="'.$pages->get("name=underground-training")->url.'?id='.$m->id.'" class="btn btn-sm btn-info" '.$style.' data-toggle="tooltip" data-html="true">'.$m->title.' '.$tag.'</a> ';
+    }
+  } else {
+    $out .= 'You have no possible training today.';
+  }
+  $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+  $out .= '<span class="label label-primary">Monster Fight(s)</span> ⇒ ';
+  if ($suggestedFights->count() > 0) {
+    foreach($suggestedFights as $m) {
+      if ($m->image) {
+        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+      } else {
+        $mini = '';
+      }
+      if ($m->interval == 0) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
+      $out .= '<a href="'.$m->url.'" class="btn btn-sm btn-danger" '.$style.' data-toggle="tooltip" data-html="true">'.$mini.' '.$m->title.' '.$tag.'</a> ';
+    }
+  } else {
+    $out .= 'You have no possible fights today.';
+  }
+  $out .= '</p>';
+  $out .= '</div>';
+  $out .= '<div class="panel-footer">';
+  $lowTeamMembers = $pages->find("template=player, playerTeam=$player->playerTeam, HP<10");
+  if ($lowTeamMembers->count() > 0) {
+    $out .= '<p><span class="label label-danger">Low HP in your team <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Maybe you can help them?"></span>: </span>';
+    foreach($lowTeamMembers as $p) {
+      $out .= ''.$p->title.' ';
+    }
+    $out .= '</p>';
+  }
+  if ($player->GC > 100) {
+    $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> You have '.$player->GC.' GC ! You should use it to increase your karma :)</p>';
+  
+  }
+  $out .= '</div>';
+  $out .= '</div>';
+  $out .= '</div>';
+
+  return $out;
+}
 ?>

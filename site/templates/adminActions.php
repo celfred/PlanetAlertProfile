@@ -166,16 +166,36 @@
 
     switch ($action) {
       case 'script' :
-        /* $allEvents = $pages->find("template=event, summary~='team died'"); */
-        /* $out .= $allEvents->count(); */
-        /* $out .= '<br />'; */
-        /* $title = 'Team Death'; */
-        /* foreach($allEvents as $e) { */
-        /*   $out .= $e->id.': '.$e->title. ' → '.$title.'<br />'; */
-        /*   $e->of(false); */
-        /*   $e->title = $title; */
-        /*   $e->save(); */
-        /* } */
+        $allPlayers = $pages->find("template=player");
+        $out .= '<ul>';
+        foreach($allPlayers as $p) {
+          $allEvents = $p->get("name=history")->children("task.name=test-rr|test-r|test-v|test-vv|right-invasion|wrong-invasion");
+          $fighting_power = 0;
+          foreach($allEvents as $e) {
+            switch ($e->task->name) {
+              case 'test-rr' : $fighting_power -= 2;
+                break;
+              case 'test-r' : $fighting_power -= 1;
+                break;
+              case 'wrong-invasion' : $fighting_power -= 1;
+                break;
+              case 'test-v' : $fighting_power += 1;
+                break;
+              case 'right-invasion' : $fighting_power += 1;
+                break;
+              case 'test-vv' : $fighting_power += 2;
+                break;
+              default: $fighting_power += 1;
+            }
+
+          }
+          $out .= '<li>'.$p->title. '['.$p->playerTeam.'] → '.$fighting_power.'</li>';
+          if ($fighting_power < 0) { $fighting_power = 0; }
+          $p->fighting_power = $fighting_power;
+          $p->of(false);
+          $p->save();
+        }
+        $out .= '</ul>';
         break;
       case 'refPage' :
         $out .= 'Total # of players : '.$allPlayers->count();

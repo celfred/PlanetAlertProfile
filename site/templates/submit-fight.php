@@ -8,8 +8,7 @@
 
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
     $player = $pages->get("template=player, login=$user->name");
-    $exerciseId = $input->post->exerciseId;
-    $monster = $pages->get($exerciseId);
+    $monster = $pages->get($input->post->exerciseId);
     $result = $input->post->result;
     $training = $input->post->training;
 
@@ -44,10 +43,8 @@
           mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
         }
       }
-    } else { // Monster fight TODO
-      $playerHP = $input->post->playerHP;
-      $monsterHP = $input->post->monsterHP;
-      $nbAttacks = $input->post->nbAttacks;
+    } else { // Monster fight
+      $quality = $input->post->quality;
 
       switch($result) {
         case 'RR' :
@@ -66,28 +63,23 @@
           break;
       }
 
-      if ($exerciseId && $player && $task) {
-        $newsBoard = 0;
+      if ($monster->id && $player->id && $task->id) {
         // Update player's scores
-        // TODO : Set manual score depending on the exercise difficulty?
-        updateScore($player, $task);
+        $taskComment = $monster->title.' ['.$result.']';
+        $newLinkedId = updateScore($player, $task, $taskComment, $monster, '', true);
 
-        // Save player's new scores
-        $player->save();
-
-        // Record history
-        $taskComment = 'Fight vs. '.$monster->title.' ['.$result.']';
-        saveHistory($player, $task, $taskComment, $newsBoard);
-        
         // Record to log file
-        $this->log($taskComment.','.$playerHP.','.$monsterHP.','.$nbAttacks.','.$result);
+        $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
+        $log->save('monster-fights', $logText);
 
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->playerTeam."\r\n";
         $msg .= "Fight : ". $monster->title."\r\n";
         $msg .= "Result : ". $result;
-        mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
+        if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+          mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
+        }
       }
     }
   }

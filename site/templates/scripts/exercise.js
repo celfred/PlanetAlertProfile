@@ -1,18 +1,207 @@
 var exerciseApp = angular.module('exerciseApp', ['ngAnimate', 'ngSanitize']);
 
-exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $interval, $window) {
+exerciseApp.service('myData', function($http) {
+	var exerciseData = [];
+	var allLines = [];
+	var lineHistory = [];
+	var history = [];
+
+	return {
+		getData : function(url) {
+			return $http.get(url).then(function(response){
+				exerciseData['exType'] = response.data.matches[0].type.name;
+				exerciseData['rawData'] = response.data.matches[0].exData;
+
+				return exerciseData;
+			})
+		},
+
+		parseData : function() {
+			var newLines = new Array();
+			// Replace some escaped characters
+			// var tmp = rawData;
+			var tmp = exerciseData['rawData'];
+			rawData = tmp.replace(/&#039;/g, "'");
+			// Build data array
+			allLines = rawData.split("\n");
+			// Manage priorities
+			var pattern = /^{(\d+)}/i; // {n} at the beginning of a line
+			for (var i=0; i<allLines.length; i++) {
+				var str = allLines[i];
+				if (str.search(pattern) != -1 ) {
+					// Get n and copy the line accordingly
+					var n = str.match(pattern);
+					// Clean original line
+					allLines[i] = str.replace(pattern, '');
+					for (var j=0; j<n[1]; j++) {
+						newLines.push(allLines[i]);
+					}
+				}
+				// Manage special variables
+				// %fname% : First name (female or male)
+				// %fnamef% : First name female
+				// %fnamem% : First name male
+				// %name% : Full name (female or male)
+				// %age% : Age
+				// %nationality% : Nationality
+				// (...) : Displayed text but optional in answers
+				var nationality = ['French', 'English', 'Scottish', 'Welsh', 'American', 'Australian', 'Canadian', 'Irish', 'German', 'Spanish', 'Italian', 'Swedish', 'Brazilian', 'Greek', 'Turkish', 'Russian', 'Chinese', 'Belgian'];
+				for (var i=0; i<allLines.length; i++) {
+					var str = allLines[i];
+					var pattern = /%name%/i;
+					if (str.search(pattern) != -1 ) {
+						var sub = chance.name();
+						allLines[i] = str.replace(pattern, sub);
+						str = allLines[i];
+					}
+					var pattern = /%fname%/i;
+					if (str.search(pattern) != -1 ) {
+						var sub = chance.first();
+						allLines[i] = str.replace(pattern, sub);
+						str = allLines[i];
+					}
+					var pattern = /%fnamef%/i;
+					if (str.search(pattern) != -1 ) {
+						var sub = chance.first({gender:"female"});
+						allLines[i] = str.replace(pattern, sub);
+						str = allLines[i];
+					}
+					var pattern = /%fnamem%/i;
+					if (str.search(pattern) != -1 ) {
+						var sub = chance.first({gender:"male"});
+						allLines[i] = str.replace(pattern, sub);
+						str = allLines[i];
+					}
+					var pattern = /%age%/i;
+					if (str.search(pattern) != -1 ) {
+						var sub = chance.age();
+						allLines[i] = str.replace(pattern, sub);
+						str = allLines[i];
+					}
+					var pattern = /%nationality%/i;
+					if (str.search(pattern) != -1 ) {
+						var sub = chance.pick(nationality);
+						allLines[i] = str.replace(pattern, sub);
+						str = allLines[i];
+					}
+				}
+			}
+			// Add new lines
+			for (var i=0; i<newLines.length; i++) {
+				allLines.push(newLines[i]);
+			}
+
+			return allLines;
+		},
+
+		pickQuestion : function () {
+			var question = [];
+			// Pick a random line
+			// Different from previous line
+			var randNum = Math.floor(Math.random()*allLines.length);
+			if ( lineHistory.length >= 1) {
+				while ( randNum == lineHistory[lineHistory.length-1] ) {
+					var randNum = Math.floor(Math.random()*allLines.length);
+				}
+			}
+			lineHistory.push(randNum);
+			var randLine = allLines[randNum];
+			switch(exerciseData['exType']) {
+				case 'translate' :
+					var randWords = randLine.split(",");
+					// Pick target language (right)
+					// Test for multiple possible words and answers
+					var allWords = randWords[1].split("|");
+					// Trim eventual extra spaces
+					for (i=0; i<allWords.length; i++) {
+						allWords[i] = allWords[i].trim();
+					}
+					var allCorrections = randWords[0].split("|");
+					question['allCorrections'] = this.parseCorrections(allCorrections);
+					break;
+				case 'quiz' :
+					// Question will be allWords[0]
+					var quiz = randLine.split("::");
+					var allWords = quiz[0].split("|");
+					// Test for multiple possible answers
+					var allCorrections = quiz[1].split("|");
+					question['allCorrections'] = this.parseCorrections(allCorrections);
+					break;
+				default: 
+					console.log('Unknown exType');
+			}
+			// Pick 1 random word from possible words
+			if (allWords.length > 1) {
+				question['word'] = chance.pick(allWords);
+			} else {
+				question['word'] = allWords[0];
+			}
+			// Add word to history
+			history.push(question['word']);
+			// Help with 1st mixed answers
+			question['mixedWord'] = this.shuffle(question['allCorrections'][0]);
+
+			return question;
+		},
+
+		parseCorrections : function(allCorrections) {
+			var newCorrections = [];
+			var tempCorrections = [];
+			for (i=0; i<allCorrections.length; i++) {
+				// Trim extra spaces
+				allCorrections[i] = allCorrections[i].trim();
+				// Add optional text functionality : (...)
+				var pattern = /\((.*?)\)/i;
+				var str = allCorrections[i];
+				if (str.search(pattern) != -1 ) {
+					tempCorrections.push(str.replace(pattern, ""));
+					tempCorrections.push(str.replace(pattern, "$1"));
+				}
+				// Add to newCorrections
+				for (var j=0; j<tempCorrections.length; j++) {
+					newCorrections.push(tempCorrections[j].trim());
+				}
+				tempCorrections = [];
+			}
+			// Add to allCorrections
+			for (var j=0; j<newCorrections.length; j++) {
+				allCorrections.push(newCorrections[j]);
+			}
+			newCorrections = [];
+
+			return allCorrections;
+		},
+
+		shuffle : function(str) {
+      var a = str.split(""),
+          n = a.length;
+      for(var i = n - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = a[i];
+          a[i] = a[j];
+          a[j] = tmp;
+      }
+      return a.join("");
+		}
+	}
+});
+
+exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval, $window, myData) {
   $scope.waitForStart = true;
-  $scope.history = new Array();
   $scope.monsterHP = 100;
   $scope.playerHP = 100;
-  $scope.monsterPower = 10; // 10 wrong answers = to lose, depending on player's equipment
-  $scope.playerPower = 10; // 10 correct answers to win, depending on player's equipment
+  $scope.monsterPower = 8; // Depending on player's equipment
+  $scope.playerPower = 3; // Depending on player's equipment
   $scope.nbAttacks = 0; // # of words
   $scope.counter = 0; // # of tries to copy correction
-  $scope.exType = '';
-  $scope.exData = '';
+	$scope.playerDamage = 0;
+	$scope.hidePlayerDamage = true;
+	$scope.monsterDamage = 0;
+	$scope.hideMonsterDamage = true;
+	$scope.question = [];
   $scope.correct = false;
   $scope.wrong = false;
+	$scope.shownWords = 0;
   $scope.wonFight = false;
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
@@ -31,83 +220,42 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
   $scope.init = function(exerciseId, redirectUrl, playerId, weaponRatio, protectionRatio, submitUrl) {
     $scope.playerPower += parseInt(weaponRatio);
     $scope.monsterPower -= parseInt(protectionRatio);
-    $http.get('service-pages/?template=exercise&id='+exerciseId).then(function(response){
-      var newLines = new Array();
-      $scope.exType = response.data.matches[0].type.name;
-      $scope.exData = response.data.matches[0].exData;
-      // Replace some escaped characters
-      var tmp = $scope.exData;
-      $scope.exData = tmp.replace(/&#039;/g, "'");
-      // Build data array
-      $scope.allLines = $scope.exData.split("\n");
-      // Manage priorities
-      var pattern = /^{(\d+)}/i; // {n} at the beginning of a line
-      for (var i=0; i<$scope.allLines.length; i++) {
-        var str = $scope.allLines[i];
-        if (str.search(pattern) != -1 ) {
-          // Get n and copy the line accordingly
-          var n = str.match(pattern);
-          // Clean original line
-          $scope.allLines[i] = str.replace(pattern, '');
-          for (var j=0; j<n[1]; j++) {
-            newLines.push($scope.allLines[i]);
-          }
-        }
-      }
-      // Add new lines
-      for (var i=0; i<newLines.length; i++) {
-        $scope.allLines.push(newLines[i]);
-      }
-      // Enable start Fight button
-      $scope.waitForStart = false;
-      $scope.submitUrl = submitUrl;
+		var url = 'service-pages/?template=exercise&id='+exerciseId;
+		myData.getData(url).then( function(exerciseData) {
+			$scope.exType = exerciseData['exType'];
+			$scope.allLines = myData.parseData();
+			// Enable start Fight button
+			$scope.waitForStart = false;
     })
-
     $scope.exerciseId = exerciseId;
     $scope.redirectUrl = redirectUrl;
+		$scope.submitUrl = submitUrl;
     $scope.playerId = playerId;
   }
 
   $scope.startFight = function() {
-    $scope.pickQuestion($scope.exType);
+		$scope.started = true;
+		// Pick a new question
+		$scope.question = myData.pickQuestion();
+		$scope.initQuestion();
   }
 
-  $scope.pickQuestion = function(exType) {
-    $scope.correct = false;
+	$scope.initQuestion = function() {
+		$scope.word = $scope.question['word'];
+		$scope.mixedWord = $scope.question['mixedWord'];
+		$scope.allCorrections = $scope.question['allCorrections'];
+    // End animation
+    $timeout(function() { $scope.correct = false; }, 1000);
+		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
-    switch(exType) {
-      case 'translate' :
-        // Pick a random line and build words array
-				// TODO : Copy from training for a random line different from previous
-        var randLine = $scope.allLines[Math.floor(Math.random()*$scope.allLines.length)];
-        var randWords = randLine.split(",");
-        // Pick a random word
-        var randIndex = Math.round(Math.random());
-        if (randIndex == 0) { randOpp = 1; } else { randOpp = 0; }
-        // Test for multiple possible words and answers
-        $scope.allWords = randWords[randIndex].trim().split("|");
-        $scope.allCorrections = randWords[randOpp].trim().split("|");
-        // Pick 1 random word (different from previous word)
-				var prevWord = $scope.history[$scope.history.length-1];
-        //if ( $scope.nbAttacks > 1) { // More than 1 word in history
-        if ( prevWord ) { // More than 1 word in history
-          while ( $scope.word == $scope.history[$scope.history.length-1]) {
-            $scope.word = chance.pick($scope.allWords);
-          }
-        } else {
-            $scope.word = chance.pick($scope.allWords);
-        }
-        // Add word to history
-        $scope.history.push($scope.word);
-        $scope.nbAttacks += 1;
-        $scope.throwQuestion();
-        break;
-      default:
-        console.log('Unknown exType');
-        break;
-    }
-  }
+		// Throw question
+		$scope.throwQuestion();
+		// Count new question
+		$scope.nbAttacks += 1;
+		// Reset counter
+		$scope.counter = 0;
+	}
 
   $scope.throwQuestion = function() {
     // Set focus on input field
@@ -128,13 +276,15 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
   }
 
   $scope.dodge = function() {
+		// Show correction
     $scope.showCorrection = $scope.allCorrections.join(', ');
-    // Player admits "I don't know" : reduced loss speed
-    // Stop animation and start again slowly
-    $interval.cancel($scope.promise);
-    $scope.promise = $interval($scope.loseHP, 1500);
-    // Reduce monster loss
+    // Player admits "I don't know" : reduced loss
+		$scope.playerDamage = Math.round($scope.monsterPower/2);
+		$scope.playerHP = $scope.playerHP - $scope.playerDamage;
+		$scope.hidePlayerDamage = false;
+		$timeout(function() { $scope.hidePlayerDamage = true; }, 1500);
     $scope.counter = 10;
+		$scope.shownWords += 1;
   }
 
   $scope.checkAnswer = function(submitted) {
@@ -146,32 +296,48 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
       $scope.runningInterval = false;
       if ($scope.showCorrection != '') { // Previous wrong answer, just copy correction, partial loss for monster
         // Check time and change loss accordingly
+				// Player answered under 5 seconds
         if ($scope.counter <= 5) {
-          $scope.monsterHP = $scope.monsterHP - Math.round($scope.playerPower/2);
+					$scope.monsterDamage = Math.round($scope.playerPower/2);
         }
+				// Player answered between 5 and 10 seconds
         if ($scope.counter > 5 && $scope.counter <= 10) {
-          $scope.monsterHP = $scope.monsterHP - Math.round($scope.playerPower/3);
+          $scope.monsterDamage = Math.round($scope.playerPower/3);
         }
+				// Player answered after 10 seconds
         if ($scope.counter > 10) {
-          $scope.monsterHP = $scope.monsterHP - 1;
+          $scope.monsterDamage = 1;
         }
         $scope.counter = 0;
-      } else { // First time hit, full loss for monster
-        $scope.monsterHP = $scope.monsterHP - $scope.playerPower;
-      }
+      } else { // First time hit
+        if ($scope.counter <= 10) { // Player answered under 10 seconds, full loss for monster
+					$scope.monsterDamage = $scope.playerPower;
+				} else { // Half-powered loss
+          $scope.monsterDamage = Math.round($scope.playerPower/2);
+				}
+				$scope.playerHP += 1;
+				if ($scope.playerHP > 100) { $scope.playerHP = 100;}
+			}
+			$scope.monsterHP = $scope.monsterHP - $scope.monsterDamage;
+			$scope.hideMonsterDamage = false;
+			$timeout(function() { $scope.hideMonsterDamage = true; }, 1500);
       if ($scope.monsterHP <= 0) { // Player wins, monster loses
         $scope.winFight();
       } else {
         $scope.playerAnswer = '';
         $scope.isFocused = false;
         // Pick another question (timeout workaround so animation starts from 0)
-        $timeout(function() { $scope.pickQuestion($scope.exType); }, 550);
-        //$scope.pickQuestion($scope.exType);
+        $timeout(function() { $scope.question = myData.pickQuestion(); $scope.initQuestion(); }, 550);
       }
     } else { // Wrong answer
+			$scope.shownWords += 1;
       $scope.wrong = true;
       // Full HP loss
-      $scope.playerHP = $scope.playerHP - $scope.monsterPower;
+			$scope.playerDamage = $scope.monsterPower;
+      $scope.playerHP = $scope.playerHP - $scope.playerDamage;
+			$scope.hidePlayerDamage = false;
+			$timeout(function() { $scope.hidePlayerDamage = true; }, 1500);
+
       if ($scope.playerHP <= 0) { // Monster wins, player loses
         $scope.loseFight();
       } else { // Player must copy the correct translation
@@ -195,12 +361,22 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
     $scope.runningInterval = false;
     // Get rid of monster
     $scope.wonFight = true;
-    // $scope.saveData();
+		$scope.waitForStart = true;
+		$scope.quality = Math.round(100-(($scope.shownWords/$scope.nbAttacks)*100));
+		if ($scope.quality > 90) {
+			var feedback = 'sweeping victory (VV)';
+			$scope.result = 'VV';
+		} else {
+			var feedback = 'won (V)';
+			$scope.result = 'V';
+		}
+    $scope.saveData();
     swal({
-      title: "Congratulations! You won!",
-      text: "The monster ran away! But beware, he may come back in a few weeks ;) This excellent fight credited your player with XP and GC.",
+			html: true,
+      title: "Congratulations !",
+      text: "The monster ran away ! You have repelled "+ $scope.nbAttacks +" words with a quality of "+ $scope.quality +"%.<br />This is a <span class='label label-primary'>"+ feedback +"</span> fight !",
       type: "success",
-      confirmButtonText: "Cool! Let's see my updated profile!"
+      confirmButtonText: "Cool ! Let's see my updated profile !"
     }, function() {
       $window.location.href = $scope.redirectUrl;
     });;
@@ -210,10 +386,20 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
     // Stop animation
     $interval.cancel($scope.promise);
     $scope.runningInterval = false;
-    // $scope.saveData();
+		$scope.waitForStart = true;
+		$scope.quality = Math.round(100-(($scope.shownWords/$scope.nbAttacks)*100));
+		if ($scope.monsterHP < 50) {
+			var feedback = 'lost (R)';
+			$scope.result = 'R';
+		} else {
+			var feedback = 'heavy defeat (RR)';
+			$scope.result = 'RR';
+		}
+    $scope.saveData();
     swal({
-      title: "You lost!",
-      text: "You need to revise more and fight back against this monster! Don't give up!",
+			html: true,
+      title: "Sorry !",
+      text: "You need to revise more and fight back against this monster ! Don't give up !<br />This is a <span class='label label-primary'>"+feedback+"</span> fight.",
       type: "error",
       confirmButtonText: "Ok, I'll do better next time..."
     }, function() {
@@ -221,43 +407,20 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
     });
   }
 
-  $scope.saveData = function () {
-    // $scope.monsterHP = correct answers
-    // $scope.playerHP = wrong answers, needed time
-    // $scope.nbAttacks = nb of words, the more = a lot of copying
-    // Get some quality indicator
-    if ($scope.playerHP <= 0) { // Lost fight : very bad exercise
-      if ($scope.monsterHP > 50) { // Very bad result
-        $scope.result = 'RR';
-      } else { // Bad result
-        $scope.result = 'R';
-      }
-    }
-    if ($scope.monsterHP <= 0) { // Won fight : Good exercise
-      if ($scope.playerHP > 50 && $scope.nbAttacks < 15) { // Very good result
-        $scope.result = 'VV';
-      } else { // Good result
-        $scope.result = 'V';
-      }
-    }
-    // Save result
+  $scope.saveData = function () { // Save result
     $http({
       url: $scope.submitUrl,
-      // url: 'service-pages/?name=submitFight',
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      //data : myData
       data: $.param({
         exerciseId : $scope.exerciseId,
-        playerId : $scope.playerId,
-        playerHP : $scope.playerHP,
-        monsterHP : $scope.monsterHP,
-        nbAttacks : $scope.nbAttacks,
+        quality : $scope.quality,
         result : $scope.result
       })
-      }).then(function(data, status, headers, config){ //make a get request to mock json file.
+		}).then(function(data, status, headers, config){ //make a get request to mock json file.
       $scope.saved = 'Result saved!';
     }, function(data, status, headers, config) {
+			swal("Sorry, but an error occurred.", "Please, contact the admin.", "error");
       $scope.saved = 'Error! Please contact the administrator.';
     })
   }
@@ -267,11 +430,10 @@ exerciseApp.controller('TranslateCtrl', function ($scope, $http, $timeout, $inte
   }
 });
 
-exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $interval, $window) {
+exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $interval, $window, myData) {
   $scope.waitForStart = true;
   $scope.result = 0;
-  $scope.history = new Array();
-  $scope.lineHistory = new Array();
+	$scope.question = [];
 	$scope.newCorrections = new Array();
   $scope.counter = 0; // #
   $scope.exType = '';
@@ -292,87 +454,16 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		}
 	});
 
-	$scope.nationality = ['French', 'English', 'Scottish', 'Welsh', 'American', 'Australian', 'Canadian', 'Irish', 'German', 'Spanish', 'Italian', 'Swedish', 'Brazilian', 'Greek', 'Turkish', 'Russian', 'Chinese', 'Belgian'];
-
   $scope.init = function(exerciseId, redirectUrl, playerId, submitUrl) {
-    $http.get('service-pages/?template=exercise&id='+exerciseId).then(function(response){
-      var newLines = new Array();
-      $scope.exType = response.data.matches[0].type.name;
-      $scope.exData = response.data.matches[0].exData;
-      // Replace some escaped characters
-      var tmp = $scope.exData;
-      $scope.exData = tmp.replace(/&#039;/g, "'");
-      // Build data array
-      $scope.allLines = $scope.exData.split("\n");
-      // Manage priorities
-      var pattern = /^{(\d+)}/i; // {n} at the beginning of a line
-      for (var i=0; i<$scope.allLines.length; i++) {
-        var str = $scope.allLines[i];
-        if (str.search(pattern) != -1 ) {
-          // Get n and copy the line accordingly
-          var n = str.match(pattern);
-          // Clean original line
-          $scope.allLines[i] = str.replace(pattern, '');
-          for (var j=0; j<n[1]; j++) {
-            newLines.push($scope.allLines[i]);
-          }
-        }
-      }
-      // Add new lines
-      for (var i=0; i<newLines.length; i++) {
-        $scope.allLines.push(newLines[i]);
-      }
-      // Manage special variables
-			// %fname% : First name (female or male)
-			// %fnamef% : First name female
-			// %fnamem% : First name male
-			// %name% : Full name (female or male)
-			// %age% : Age
-			// %nationality% : Nationality
-			// (...) : Displayed text but optional in answers
-      for (var i=0; i<$scope.allLines.length; i++) {
-        var str = $scope.allLines[i];
-				var pattern = /%name%/i;
-        if (str.search(pattern) != -1 ) {
-					var sub = chance.name();
-          $scope.allLines[i] = str.replace(pattern, sub);
-					str = $scope.allLines[i];
-				}
-				var pattern = /%fname%/i;
-        if (str.search(pattern) != -1 ) {
-					var sub = chance.first();
-          $scope.allLines[i] = str.replace(pattern, sub);
-					str = $scope.allLines[i];
-				}
-				var pattern = /%fnamef%/i;
-        if (str.search(pattern) != -1 ) {
-					var sub = chance.first({gender:"female"});
-          $scope.allLines[i] = str.replace(pattern, sub);
-					str = $scope.allLines[i];
-				}
-				var pattern = /%fnamem%/i;
-        if (str.search(pattern) != -1 ) {
-					var sub = chance.first({gender:"male"});
-          $scope.allLines[i] = str.replace(pattern, sub);
-					str = $scope.allLines[i];
-				}
-				var pattern = /%age%/i;
-        if (str.search(pattern) != -1 ) {
-					var sub = chance.age();
-          $scope.allLines[i] = str.replace(pattern, sub);
-					str = $scope.allLines[i];
-				}
-				var pattern = /%nationality%/i;
-        if (str.search(pattern) != -1 ) {
-					var sub = chance.pick($scope.nationality);
-          $scope.allLines[i] = str.replace(pattern, sub);
-					str = $scope.allLines[i];
-				}
-			}
-      // Enable start Fight button
-      $scope.waitForStart = false;
-      // Pick first question
-      $scope.pickQuestion($scope.exType);
+		var url = 'service-pages/?template=exercise&id='+exerciseId;
+		myData.getData(url).then( function(exerciseData) {
+			$scope.exType = exerciseData['exType'];
+			$scope.allLines = myData.parseData();
+			// Enable start Fight button
+			$scope.waitForStart = false;
+			// Pick another question
+			$scope.question = myData.pickQuestion();
+			$scope.initQuestion();
     })
     $scope.exerciseId = exerciseId;
     $scope.redirectUrl = redirectUrl;
@@ -380,108 +471,22 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     $scope.submitUrl = submitUrl;
   }
 
-  $scope.pickQuestion = function(exType) {
-    // End animation
-    $timeout(function() { $scope.correct = false; }, 1000);
-		// Init new question
-    $scope.wrong = false;
-    $scope.showCorrection = '';
-		// Pick a random line
-		// Different from previous line
-		var randNum = Math.floor(Math.random()*$scope.allLines.length);
-		if ( $scope.lineHistory.length > 1) {
-			while ( randNum == $scope.lineHistory[$scope.lineHistory.length-1] ) {
-				var randNum = Math.floor(Math.random()*$scope.allLines.length);
-			}
-		}
-		$scope.lineHistory.push(randNum);
-		var randLine = $scope.allLines[randNum];
-    switch(exType) {
-      case 'translate' :
-        var randWords = randLine.split(",");
-        // Pick a random word : either left or right
-        var randIndex = Math.round(Math.random());
-        if (randIndex == 0) { randOpp = 1; } else { randOpp = 0; }
-        // Test for multiple possible words and answers
-        $scope.allWords = randWords[randIndex].split("|");
-				// Trim eventual extra spaces
-				for (i=0; i<$scope.allWords.length; i++) {
-					$scope.allWords[i] = $scope.allWords[i].trim();
-				}
-				var allCorrections = randWords[randOpp].split("|");
-				$scope.allCorrections = $scope.parseCorrections(allCorrections);
-        break;
-      case 'quiz' :
-				// Question will be $scope.allWords[0]
-        var quiz = randLine.split("::");
-				$scope.allWords = quiz[0].split("|");
-        // Test for multiple possible answers
-        var allCorrections = quiz[1].split("|");
-				$scope.allCorrections = $scope.parseCorrections(allCorrections);
-        break;
-      default:
-        console.log('Unknown exType');
-        break;
-    }
-		// Pick 1 random word from possible words
-		if ($scope.allWords.length > 1) {
-			$scope.word = chance.pick($scope.allWords);
-		} else {
-			$scope.word = $scope.allWords[0];
-		}
-		// Add word to history
-		$scope.history.push($scope.word);
-		// Help with 1st mixed answers
-		$scope.mixedWord = $scope.shuffle($scope.allCorrections[0]);
-		// Set focus on input field
-		$timeout($scope.focusInput, 300);
-  }
-
-	$scope.parseCorrections = function(allCorrections) {
-		var newCorrections = [];
-		var tempCorrections = [];
-		for (i=0; i<allCorrections.length; i++) {
-			// Trim extra spaces
-			allCorrections[i] = allCorrections[i].trim();
-			// Add optional text functionality : (...)
-			var pattern = /\((.*?)\)/i;
-			var str = allCorrections[i];
-			if (str.search(pattern) != -1 ) {
-				tempCorrections.push(str.replace(pattern, ""));
-				tempCorrections.push(str.replace(pattern, "$1"));
-			}
-			// Add to newCorrections
-			for (var j=0; j<tempCorrections.length; j++) {
-				newCorrections.push(tempCorrections[j].trim());
-			}
-			tempCorrections = [];
-		}
-		// Add to allCorrections
-		for (var j=0; j<newCorrections.length; j++) {
-			allCorrections.push(newCorrections[j]);
-		}
-		newCorrections = [];
-		return allCorrections;
-	}
-
-  $scope.shuffle = function (str) {
-      var a = str.split(""),
-          n = a.length;
-
-      for(var i = n - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = a[i];
-          a[i] = a[j];
-          a[j] = tmp;
-      }
-      return a.join("");
-  }
-
   $scope.attack = function() {
     if ($scope.playerAnswer) {
       $scope.checkAnswer($scope.playerAnswer);
     }
   }
+
+	$scope.initQuestion = function() {
+		$scope.word = $scope.question['word'];
+		$scope.mixedWord = $scope.question['mixedWord'];
+		$scope.allCorrections = $scope.question['allCorrections'];
+		// Init new question
+    $scope.wrong = false;
+    $scope.showCorrection = '';
+    // Set focus on input field
+    $timeout($scope.focusInput, 300);
+	}
 
   $scope.checkAnswer = function(submitted) {
     if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
@@ -501,8 +506,9 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
           $scope.stopSession(); // Alert +1 U.T. : Stop or continue?
         }
       }
-      // Pick another question (timeout workaround so animation starts from 0)
-      $scope.pickQuestion($scope.exType);
+      // Pick another question
+			$scope.question = myData.pickQuestion();
+			$scope.initQuestion();
     } else { // Wrong answer
       $scope.wrong = true;
     }
@@ -584,33 +590,32 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 });
 
 exerciseApp.directive('syncFocusWith', function($timeout, $rootScope) {
-    return {
-        restrict: 'A',
-        scope: {
-            focusValue: "=syncFocusWith"
-        },
-        link: function($scope, $element, attrs) {
-            $scope.$watch("focusValue", function(currentValue, previousValue) {
-                if (currentValue === true && !previousValue) {
-                    $element[0].focus();
-                } else if (currentValue === false && previousValue) {
-                    $element[0].blur();
-                }
-            })
-        }
-    }
+	return {
+		restrict: 'A',
+		scope: {
+			focusValue: "=syncFocusWith"
+		},
+		link: function($scope, $element, attrs) {
+			$scope.$watch("focusValue", function(currentValue, previousValue) {
+				if (currentValue === true && !previousValue) {
+					$element[0].focus();
+				} else if (currentValue === false && previousValue) {
+					$element[0].blur();
+				}
+			})
+		}
+	}
 });
 
 exerciseApp.directive('myEnter', function () {
-    return function (scope, element, attrs) {
-        element.bind("keydown keypress", function (event) {
-            if(event.which === 13) {
-                scope.$apply(function (){
-                    scope.$eval(attrs.myEnter);
-                });
-
-                event.preventDefault();
- ;           }
-        });
-    };
+	return function (scope, element, attrs) {
+		element.bind("keydown keypress", function (event) {
+			if(event.which === 13) {
+				scope.$apply(function (){
+					scope.$eval(attrs.myEnter);
+				});
+				event.preventDefault();
+			}
+		});
+	};
 });

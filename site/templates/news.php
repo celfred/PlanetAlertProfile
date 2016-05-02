@@ -4,10 +4,18 @@
 
   $totalPlaces = $pages->find("template='place', name!='places'");
 
+  if ($user->isLoggedin() || $user->isSuperuser()) {
+    $helmet = $player->equipment->get("name=memory-helmet");
+    if ($helmet->id) {
+      // Display Personal Mission Analyzer
+      echo pma($pages->get("login=$user->name"));
+    }
+  }
+
   echo '<div class="row">';
     display_scores($allPlayers, $allTeams, $totalPlaces);
   echo '</div>';
-
+  
 ?>
 
 <div class="row">
@@ -74,13 +82,13 @@
 
     <div class="panel panel-info">
       <div class="panel-heading">
-        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=equipment"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><span class="glyphicon glyphicon-wrench"></span> Most equipped</h4>
+        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+        <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> Best warriors</h4>
       </div>
       <div class="panel-body">
         <ol>
           <?php
-            $players = $pages->find('template=player, name!=test, sort=-equipment.count, sort=-karma, equipment.count>0, limit=10');
+            $players = $pages->find('template=player, name!=test, sort=-fighting_power, sort=-karma, fighting_power>0, limit=10');
             foreach($players as $player) {
               if ($player->avatar) {
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
@@ -93,10 +101,15 @@
                 $focus = "";
               }
               if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->equipment->count.' equipment</span></li>';
+              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->fighting_power.' F.P.</span></li>';
             }
           ?>
         </ol>
+        <?php 
+          if ($players->count() == 0) {
+            echo '<p>No player in this scoreboard yet.</p>';
+          }
+        ?>
       </div>
     </div>
 
@@ -205,12 +218,12 @@
 
         $stats = '<div id="stats" class="news panel panel-primary">';
         $stats .= '<div class="panel-heading">';
-        $stats .= '<h4 class="panel-title">Planet Alert Statistics (started 17/09/2015)';
+        $stats .= '<h5 class="panel-title">Planet Alert Statistics (started 17/09/2015)';
         $stats .= '<button type="button" class="close" data-id="#stats" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-        $stats .= '</h4>';
+        $stats .= '</h5>';
         $stats .= '</div>';
         $stats .= '<div class="panel-body">';
-        $stats .= '<p class="lead">';
+        $stats .= '<p>';
         $stats .= '&nbsp;&nbsp;&nbsp';
         $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Today : '.count($todaysPlayers).'</span>';
         $stats .= '&nbsp;&nbsp;&nbsp';
@@ -347,29 +360,28 @@
         // Get player's indicators
         $player = $pages->get("template=player, login=$user->name");
         //echo '<h2><img src="'.$player->avatar->getThumb('thumbnail').'" alt="avatar" /> '.$player->title.' ['.$player->playerTeam.']</h2>';
-        echo '<div class="">';
-        echo '<h3 class="text-center">'.$player->title.' ['.$player->playerTeam.']</h3>';
-        echo '<h3 class="">';
-        echo '<span class="label label-success">Your Karma : '.$player->karma.'</span>';
-        echo '&nbsp;&nbsp;';
-        echo '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
-        echo '&nbsp;&nbsp;';
-        echo '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
-        echo '&nbsp;&nbsp;';
-        echo '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
-        echo '&nbsp;&nbsp;';
-        echo '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
-        echo '&nbsp;&nbsp;';
-        echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->places->count().'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
-        echo '&nbsp;&nbsp;';
-        echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>';
-        echo '&nbsp;&nbsp;';
-        if ($player->donation == false) {$player->donation = 0; }
-        echo '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
-        echo '&nbsp;&nbsp;';
-        echo '<span class="label label-primary" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' U.T.</span>';
-        echo ' </h3>';
-        echo '</div>';
+        echo '<div class="well">';
+          echo '<span class="label label-success">Your Karma : '.$player->karma.'</span>';
+          echo '&nbsp;&nbsp;';
+          echo '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
+          echo '&nbsp;&nbsp;';
+          echo '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
+          echo '&nbsp;&nbsp;';
+          echo '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+          echo '&nbsp;&nbsp;';
+          echo '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
+          echo '&nbsp;&nbsp;';
+          echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->places->count().'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
+          echo '&nbsp;&nbsp;';
+          echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>';
+          echo '&nbsp;&nbsp;';
+          if ($player->donation == false) {$player->donation = 0; }
+          echo '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+          echo '&nbsp;&nbsp;';
+          echo '<span class="label label-primary" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' UT</span>';
+          echo '&nbsp;&nbsp;';
+          echo '<span class="label label-primary" data-toggle="tooltip" title="Fighting Power">'.$player->fighting_power.' FP</span>';
+        echo ' </div>';
 
         // Get last 10 players's events
         $allEvents = $player->child("name=history")->find("template=event,sort=-created,limit=10");
@@ -382,7 +394,7 @@
             </h4>
           </div>
           <div class="panel-body">
-            <ul class="double list-unstyled">
+            <ul class="list-unstyled">
             <?php
               if ($allEvents->count() > 0) {
                 foreach ($allEvents as $event) {
@@ -399,8 +411,8 @@
                   echo '<li class="'.$className.'">';
                   echo $signicon;
                   echo date("F j (l)", $event->date).' : ';
-                  echo '<span data-toggle="tooltip" title="XP" class="badge badge-success">'.$sign.$event->task->XP.'</span><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> ';
-                  echo '<span data-toggle="tooltip" title="GC" class="badge badge-default">'.$sign.$event->task->GC.'</span><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> ';
+                  /* echo '<span data-toggle="tooltip" title="XP" class="badge badge-success">'.$sign.$event->task->XP.'</span><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '; */
+                  /* echo '<span data-toggle="tooltip" title="GC" class="badge badge-default">'.$sign.$event->task->GC.'</span><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '; */
                   if ($className == 'negative') {
                     echo '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'</span><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> ';
                   }
@@ -438,7 +450,7 @@
             foreach($news as $n) {
               $currentPlayer = $n->parent('template=player');
               if ($currentPlayer->avatar) {
-                $thumb = $currentPlayer->avatar->size(40,40);
+                $thumb = $currentPlayer->avatar->size(20,20);
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
               } else {
                 $mini = '';

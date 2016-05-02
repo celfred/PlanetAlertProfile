@@ -100,6 +100,7 @@
   $out .= '<th data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Donation"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></td>';
   $out .= '<th data-toggle="tooltip" title="Underground training">U.T.</th>';
+  $out .= '<th data-toggle="tooltip" title="Fighting Power">F.P.</th>';
   $out .= '</tr>';
   $out .= '</thead>';
   $out .= '<tbody>';
@@ -199,6 +200,7 @@
     $out .= '<td '.$tooltipEquipment.'>'. $player->equipment->count() .'</td>';
     $out .= '<td>'. $player->donation .'</td>';
     $out .= '<td>'. $player->underground_training .'</td>';
+    $out .= '<td>'. $player->fighting_power .'</td>';
     $out .= '</tr>';
   }
   $out .= '</tbody>';

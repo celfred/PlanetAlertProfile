@@ -12,11 +12,14 @@
     if ($helmet) {
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
+        // Display Personal Mission Analyzer
+        echo pma($player);
+
         // Translate / Quiz types only (for the moment)
         if ($user->isSuperuser()) {
-          $allUt = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=all');
+          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=all');
         } else {
-          $allUt = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
+          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
         }
 
         $out .= '<div class="row">';
@@ -45,7 +48,6 @@
           $out .= '<th>Level</th>';
           $out .= '<th>Summary</th>';
           $out .= '<th># of words</th>';
-          $out .= '<th>Already trained?</th>';
           $out .= '<th>U.T. gained</th>';
           $out .= '<th>Last training session</th>';
           $out .= '<th>Action</th>';
@@ -53,45 +55,46 @@
           $out .= '</tr>';
           $out .= '</thead>';
           $out .= '<tbody>';
-        foreach($allUt as $result) {
+        foreach($allMonsters as $m) {
+          $m = isTrainingAllowed($player, $m);
           // Get previous player's statistics
           $prevUt = $player->find('template=event,refPage='.$result->id.', sort=-date');
           $out .= '<tr>';
           $out .= '<td>';
-          $out .= $result->title;
+          $out .= $m->title;
           // Find # of days compared to today to set 'New' indicator
           $date1 = new DateTime("today");
-          $date2 = new DateTime(date("Y-m-d", $result->published));
+          $date2 = new DateTime(date("Y-m-d", $m->published));
           $interval = $date1->diff($date2);
           if ($interval->days < 7) {
             $out .= ' <span class="badge">New</span>';
           }
           $out .= '</td>';
           $out .= '<td>';
-          foreach ($result->topic as $t) {
+          foreach ($m->topic as $t) {
             $out .= '<span class="label label-primary">'.$t->title.'</span> ';
           }
           $out .= '</td>';
           $out .= '<td>';
-          $out .= $result->level;
+          $out .= $m->level;
           $out .= '</td>';
           $out .= '<td>';
-          $out .= $result->summary;
-          if ($result->frenchSummary != '') {
-            $fr = $result->frenchSummary;
+          $out .= $m->summary;
+          if ($m->frenchSummary != '') {
+            $fr = $m->frenchSummary;
           } else {
             $fr = 'French version in preparation, sorry ;)';
           }
           $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$fr.'"></span>';
           $out .= '</td>';
           // Count # of words
-          $exData = $result->exData;
+          $exData = $m->exData;
           $allLines = preg_split('/$\r|\n/', $exData);
           /* Unused because triggers a bug with tooltip display */
           /* $out .= '<td data-sort="'.count($allLines).'">'; */
           $out .= '<td>';
           // Prepare list of French words
-          switch ($result->type->name) {
+          switch ($m->type->name) {
             case 'translate' :
               $out .= count($allLines).' words';
               if (count($allLines)>15) {
@@ -133,70 +136,56 @@
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
           $out .= '<td>';
-          if ($prevUt->count > 0) {
-            $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.$prevUt->count.'</span> ';
+          if ($m->utGain > 0) {
+            $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> +'.$m->utGain.'</span> ';
           } else {
-            $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span></span> ';
-          }
-          $out .= '</td>';
-          //Get total UT gained on this monster
-          if ($result->id) {
-            $utGain = utGain($result->id, $player);
-          }
-          $out .= '<td>';
-          if ($utGain > 0) {
-            $out .= '+'.$utGain;
+            $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span> 0</span> ';
           }
           $out .= '</td>';
           // Last training session date
           $out .= '<td>';
-          if ($prevUt->count > 0) {
-            // Find # of days compared to today
-            $date1 = new DateTime("today");
-            $date2 = new DateTime(date("Y-m-d", $prevUt->first->date));
-            $interval = $date1->diff($date2);
-            switch ($interval->days) {
-              case 1 : 
-                $out .= "1 day ago.";
-                break;
+          if ($m->lastTrainingDate != 0) {
+            switch ($m->interval) {
               case 0 :
                 $out .= "Today !";
                 break;
+              case 1 : 
+                $out .= "1 day ago.";
+                break;
               default:
-                $out .= $interval->days . " days ago.";
+                $out .= $m->interval . " days ago.";
                 break;
             }
+          } else {
+            $out .= "Not trained yet.";
           }
           $out .= '</td>';
           $out .= '<td>';
-          $spaced = isTrainingAllowed($player, $result);
-          switch ($spaced) {
-            case 1 : 
+          if ($m->isTrainable != 0 && $m->spaced == 0) {
+            $out .= ' <a class="label label-sm label-primary" href="'.$page->url.'?id='.$m->id.'">Put the helmet on!</a>';
+          } else {
+            if ($m->spaced == 1) {
               $out .= 'Come back tomorrow ;)';
-              break;
-            case 0 :
-              $out .= ' <a class="label label-sm label-primary" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
-              break;
-            default:
-              $out .= 'Come back in '.$spaced.' days ;)';
-              break;
+            } else {
+              $out .= 'Come back in '.$m->spaced.' days ;)';
+            }
           }
           // Admin access
           if ($user->isSuperuser()) {
-            $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$result->id.'">Put the helmet on!</a>';
+            $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$m->id.'">Put the helmet on!</a>';
           }
           $out .= '</td>';
           // Find best trained player on this monster
-          if ($result->mostTrained) {
-            if ($result->mostTrained == $player) {
+          if ($m->mostTrained) {
+            if ($m->mostTrained == $player) {
               $class = 'success';
             } else {
               $class = 'primary';
             }
           }
-          $out .= '<td data-sort="'.$result->best.'">';
-          if ($result->mostTrained) {
-            $out .= '<span class="label label-'.$class.'">'.$result->best.' UT - '.$result->mostTrained->title.' ['.$result->mostTrained->playerTeam.']</span>';
+          $out .= '<td data-sort="'.$m->best.'">';
+          if ($m->mostTrained) {
+            $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span>';
           } else {
             $out .= '<span>No record yet.</span>';
           }
@@ -210,8 +199,8 @@
         $monster = $pages->get($input->get->id);
         $redirectUrl = $pages->get('name=underground-training')->url;
 
-        $isAllowed = isTrainingAllowed($player, $monster);
-        if ($isAllowed !== 0) { // Not allowed because of spaced repetition.
+        $monster = isTrainingAllowed($player, $monster);
+        if ($monster->isTrainable == 0) { // Not allowed because of spaced repetition.
           // Redirect to training page
           $session->redirect($redirectUrl);
         } else { // Ok, let's start the training session !
