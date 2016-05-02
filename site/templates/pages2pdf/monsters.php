@@ -80,9 +80,9 @@ for($i=0; $i<=$nb; $i++) {
 }
 $out .= '</table>';
 $out .= '<p class="text-center" style="margin: 0pt;">';
-$out .= '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⇒ Successful - Well done - Failed - Disastrous </span>';
+$out .= '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⇒ Sweeping victory - Won fight - Lost fight - Heavy defeat </span>';
 if (count($allLines) > 24) {
-  $out .= '&nbsp;&nbsp;&nbsp;[Selection of 25 words out of '.count($allLines).']';
+  $out .= '<span style="font-size:8pt;">&nbsp;&nbsp;&nbsp;[Selection of 25 words out of '.count($allLines).']</span>';
 }
 $out .= '</p>';
 
