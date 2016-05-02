@@ -485,11 +485,13 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 
   $scope.checkAnswer = function(submitted) {
     if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
-      // Trigger animation
-      $scope.correct = true;
-      $scope.playerAnswer = '';
-      $scope.isFocused = false;
-      $scope.counter++;
+			$scope.playerAnswer = '';
+			$scope.isFocused = false;
+			if (!$scope.wrong) { // Count word only if no need for answer
+				// Trigger animation
+				$scope.correct = true;
+				$scope.counter++;
+			}
       // Get number of words and calculate result
       if ($scope.counter >= 10) {
         if (Math.floor($scope.counter/10) > $scope.result) {
