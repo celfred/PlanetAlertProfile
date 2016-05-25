@@ -94,7 +94,7 @@
         </div>
         <div class="panel-footer text-center">
           <?php 
-            echo '<p>Fighting power : '.$player->fighting_power.'</p>';
+            echo '<p>Fighting power : '.$playerPage->fighting_power.'</p>';
           ?>
         </div>
       </div>
