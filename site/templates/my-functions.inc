@@ -685,7 +685,7 @@ function groupScoreBoard($limit) {
 
 function isTrainingAllowed($player, $monster) {
   $utGain = utGain($monster->id, $player);
-  $prevTrainings = $player->find("template=event,task.name=ut-training-v|ut-training-vv, refPage=$monster->id, sort=-date");
+  $prevTrainings = $player->find("template=event,task.name=ut-action-v|ut-action-vv, refPage=$monster->id, sort=-date");
   if ($utGain > 0) { // Already trained
     $lastTraining = $prevTrainings->first();
     // Find # of days compared to today
