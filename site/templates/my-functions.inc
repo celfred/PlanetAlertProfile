@@ -34,6 +34,7 @@ function initPlayer($player) {
   $player->level = 1;
   $player->donation = 0;
   $player->underground_training = 0;
+  $player->fighting_power = 0;
   $player->equipment->removeAll();
   $player->places->removeAll();
   return $player;
@@ -153,16 +154,16 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     }
     // Set fighting power
     if ($player->fighting_power == '') {$player->fighting_power = 0; }
-    if ($task->is("name=test-rr|fight-rr")) {
+    if ($task->is("name=test-rr")) {
       $player->fighting_power = $player->fighting_power-2;
     }
-    if ($task->is("name=test-r|fight-r")) {
+    if ($task->is("name=test-r|wrong-invasion")) {
       $player->fighting_power = $player->fighting_power-1;
     }
-    if ($task->is("name=test-v|fight-v")) {
+    if ($task->is("name=test-v|right-invasion")) {
       $player->fighting_power = $player->fighting_power+1;
     }
-    if ($task->is("name=test-vv|fight-vv")) {
+    if ($task->is("name=test-vv")) {
       $player->fighting_power = $player->fighting_power+2;
     }
     if ($player->fighting_power < 0) { $player->fighting_power = 0; }
@@ -307,6 +308,9 @@ function displayTrendScores($player, $old) {
   $trendUT = $player->underground_training-$old->underground_training;
   if ($trendUT > 0) { $out .= '<li>+'.$trendUT.'UT→'.$player->underground_training.'</li>'; }
   if ($trendUT < 0) { $out .= '<li>'.$trendUT.'UT→'.$player->underground_training.'</li>'; }
+  $trendFP = $player->fighting_power-$old->fighting_power;
+  if ($trendFP > 0) { $out .= '<li>+'.$trendFP.'FP→'.$player->fighting_power.'</li>'; }
+  if ($trendFP < 0) { $out .= '<li>'.$trendFP.'FP→'.$player->fighting_power.'</li>'; }
   $out .= '</ul>&nbsp;&nbsp;';
 
   return $out;
@@ -327,6 +331,7 @@ function displayPlayerScores($player, $type='new') {
   $out .= '<li>'.$player->equipment->count.'Eq.</li>';
   $out .= '<li>'.$player->donation.'Don.</li>';
   $out .= '<li>'.$player->underground_training.'UT</li>';
+  $out .= '<li>'.$player->fighting_power.'FP</li>';
   $out .= '</ul>';
 
   return $out;
@@ -737,7 +742,7 @@ function isFightAllowed($player, $monster) {
   $monster->utGain = $utGain;
   if ($utGain >= $minUt) { // Player has trained enough
     // Check last fight interval
-    $allFights = $player->find("template=event, task.name=fight-vv|fight-v|fight-r|fight-rr, refPage=$monster, sort=-date"); 
+    $allFights = $player->find("template=event, task.name=test-vv|test-v|test-r|test-rr, refPage=$monster, sort=-date");
     $lastFight = $allFights->first();
     if ($lastFight->id) {
       $monster->allFightsNb = $allFights->count();

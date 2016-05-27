@@ -110,6 +110,7 @@ exerciseApp.service('myData', function($http) {
 				case 'translate' :
 					var randWords = randLine.split(",");
 					// Pick target language (right)
+					// TODO : parameter to test if memory or fight
 					// Test for multiple possible words and answers
 					var allWords = randWords[1].split("|");
 					// Trim eventual extra spaces
