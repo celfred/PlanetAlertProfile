@@ -48,25 +48,27 @@
 
       switch($result) {
         case 'RR' :
-          $task = $pages->get("name=fight-rr");
+          $task = $pages->get("name=test-rr|fight-rr");
           break;
         case 'R' :
-          $task = $pages->get("name=fight-r");
+          $task = $pages->get("name=test-r|fight-r");
           break;
         case 'V' :
-          $task = $pages->get("name=fight-v");
+          $task = $pages->get("name=test-v|fight-v");
           break;
         case 'VV' :
-          $task = $pages->get("name=fight-vv");
+          $task = $pages->get("name=test-vv|fight-vv");
           break;
         default:
           break;
       }
 
+      echo 'Before Saving';
       if ($monster->id && $player->id && $task->id) {
         // Update player's scores
         $taskComment = $monster->title.' ['.$result.']';
-        $newLinkedId = updateScore($player, $task, $taskComment, $monster, '', true);
+        updateScore($player, $task, $taskComment, $monster, '', true);
+        echo 'Saving';
 
         // Record to log file
         $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;

@@ -2,7 +2,7 @@
   include("./head.inc"); 
 
   $out = '';
-  $anyFight = false;
+  /* $anyFight = false; */
   // Test player login
   if ($player && $user->isLoggedin() || $user->isSuperuser()) {
     // Display Personal Mission Analyzer
@@ -15,11 +15,8 @@
     $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
     foreach($allMonsters as $m) {
       $m = isFightAllowed($player, $m);
-      if ($m->isFightable !== 0) {
-        $anyFight = true;
-      }
     }
-    $availableFights = $allMonsters->find("isFightable=1, interval>0");
+    $availableFights = $allMonsters->find("isFightable=1");
     $waitingFights = $allMonsters->find("isFightable=0, interval!= -1, sort=spaced, sort=allFightsNb");
     $impossibleFights = $allMonsters->find("isFightable=0, interval=-1");
 
@@ -72,7 +69,7 @@
       $out .= '<p class="label label-warning">Out of reach monsters ! (You can\'t fight them, you must do underground training first)</p>';
       $out .= '<ul class="list list-inline">';
       foreach($impossibleFights as $m) {
-        $out .= '<li><span class="">'.$m->title.'</span> : you have only <span class="badge badge-primary">'.$m->utGain.'UT...</span></li>';
+        $out .= '<li><span class="">'.$m->title.'</span> <span class="badge badge-primary">only '.$m->utGain.'UT</span></li>';
       }
       $out .= '</ul>';
     }
@@ -138,9 +135,9 @@
     /*   $out .= '<tbody>'; */
     /* $out .= '</table>'; */
 
-    if (!$anyFight) {
-      $out = '<p class="well">You have not trained enough to fight any monster. Go to the <a href="'.$pages->get("name=underground-training")->url.'">Training Zone</a> first and use the Memory helmet. You need at least +20UT on an monster to be able to fight!</p>';
-    }
+    /* if (!$anyFight) { */
+    /*   $out = '<p class="well">You have not trained enough to fight any monster. Go to the <a href="'.$pages->get("name=underground-training")->url.'">Training Zone</a> first and use the Memory helmet. You need at least +20UT on an monster to be able to fight!</p>'; */
+    /* } */
 
     echo $out;
 

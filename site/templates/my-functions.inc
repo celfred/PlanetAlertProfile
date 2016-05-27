@@ -153,16 +153,16 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     }
     // Set fighting power
     if ($player->fighting_power == '') {$player->fighting_power = 0; }
-    if ($task->is("name=test-rr||fight-rr")) {
+    if ($task->is("name=test-rr|fight-rr")) {
       $player->fighting_power = $player->fighting_power-2;
     }
-    if ($task->is("name=test-r||fight-r")) {
+    if ($task->is("name=test-r|fight-r")) {
       $player->fighting_power = $player->fighting_power-1;
     }
-    if ($task->is("name=test-v||fight-v")) {
+    if ($task->is("name=test-v|fight-v")) {
       $player->fighting_power = $player->fighting_power+1;
     }
-    if ($task->is("name=test-vv||fight-vv")) {
+    if ($task->is("name=test-vv|fight-vv")) {
       $player->fighting_power = $player->fighting_power+2;
     }
     if ($player->fighting_power < 0) { $player->fighting_power = 0; }
