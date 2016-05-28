@@ -40,7 +40,7 @@
         $msg .= "Result : ". $result;
 
         if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-          mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
+          mail("planetalert@tuxfamily.org", "submitTraining", $msg, "From: planetalert@tuxfamily.org");
         }
       }
     } else { // Monster fight
