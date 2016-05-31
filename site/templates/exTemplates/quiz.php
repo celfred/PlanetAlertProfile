@@ -103,9 +103,10 @@
   $out .= '<div class="text-left">';
   /* $out .= 'Monsterpower : {{monsterPower}} / playerPower:{{playerPower}}'; */
   if ($page->image) {
-    $out .= '<img class="pull-left" src="'.$page->image->url.'" alt="Avatar" />';
+    $out .= '<img class="pull-left squeeze" src="'.$page->image->url.'" alt="Avatar" />';
+  } else {
+    $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getThumb('thumbnail').'" alt="Antenna" />';
   }
-  $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getThumb('thumbnail').'" alt="Antenna" />';
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}HP</span>';
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
   $out .= '<h3 class="inline" ng-bind-html="word"></h3>&nbsp;';
