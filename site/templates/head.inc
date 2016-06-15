@@ -156,6 +156,8 @@
 							<button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin Zone<span class="caret"> </span></button>
 							<ul class="dropdown-menu">
 								<?php
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'team-options' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/team-options/'>Team options</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut-stats/'>UT Stats</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'task-report' ? " class='selected-left'" : "";

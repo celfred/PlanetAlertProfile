@@ -81,6 +81,20 @@
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="recalculate">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
+      case 'team-options' :
+        $out .= '<section class="well">';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p.'">'.$p.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="team-options">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
       default :
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
@@ -131,8 +145,8 @@
     $action = $input->urlSegment1;
     $playerId = $input->urlSegment2;
     $confirm = $input->urlSegment3;
-    $unique = true;
     $type = $input->get["type"];
+    $unique = true;
     $startDate = $input->get["startDate"]; 
     $endDate = $input->get["endDate"]; 
     if ($startDate == '') {
@@ -144,6 +158,9 @@
       $endDate = date('Y-m-d 23:59:59');
     } else {
       $endDate = $endDate.' 23:59:59';
+    }
+    if ($action == 'toggle-lock') {
+      $type = 'team';
     }
 
     if ($type == 'team') {
@@ -590,6 +607,21 @@
         $player->equipment->remove($item);
         $player->save();
         break;
+      case 'toggle-lock':
+        $lock = $page->lockFights->get("playerTeam=$selectedTeam");
+        $page->of(false);
+        if ($lock) {
+          // Remove lock
+          $page->lockFights->remove($lock);
+        } else {
+          // Add new
+          $lock = $page->lockFights->getNew();
+          $lock->playerTeam = $selectedTeam;
+          $lock->save();
+          $page->lockFights->add($lock);
+        }
+        $page->save();
+        break;
       case 'trash' :
         $event = $pages->get($confirm); // urlSegment3 used for eventId
         $pages->trash($event);
@@ -681,6 +713,25 @@
         } else {
           $out .= 'You need to select a team and a task.';
         }
+        break;
+      case 'team-options' :
+        if ($selectedTeam && $selectedTeam != '-1') {
+          $out .= '<h3 class="text-center">';
+          $out .= 'Team options for '.$selectedTeam;
+          $out .= '</h3>';
+          $lock = $page->lockFights->get("playerTeam=$selectedTeam");
+          if ($lock) {
+            $status = 'checked="checked"';
+          } else {
+            $status = '';
+          }
+          $out .= '<ul>';
+          $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label></li>';
+          $out .= '</ul>';
+        } else {
+          $out .= 'You need to select a team.';
+        }
+        $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
         break;
       default :
         $out = 'Problem detected.';

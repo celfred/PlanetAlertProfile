@@ -889,18 +889,24 @@ function pma($player) {
   }
   $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
   $out .= '<span class="label label-primary">Monster Fight(s)</span> ⇒ ';
-  if ($suggestedFights->count() > 0) {
-    foreach($suggestedFights as $m) {
-      if ($m->image) {
-        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
-      } else {
-        $mini = '';
-      }
-      if ($m->interval == 0) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
-      $out .= '<a href="'.$m->url.'" class="btn btn-sm btn-danger" '.$style.' data-toggle="tooltip" data-html="true">'.$mini.' '.$m->title.' '.$tag.'</a> ';
-    }
+  // Test if fights have been disabled by Admin
+  $lock = $pages->get("name=admin-actions")->lockFights->get("playerTeam=$player->playerTeam");
+  if ($lock) {
+    $out .= 'The administrator has disabled this feature.';
   } else {
-    $out .= 'You have no possible fights today.';
+    if ($suggestedFights->count() > 0) {
+      foreach($suggestedFights as $m) {
+        if ($m->image) {
+          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+        } else {
+          $mini = '';
+        }
+        if ($m->interval == 0) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
+        $out .= '<a href="'.$m->url.'" class="btn btn-sm btn-danger" '.$style.' data-toggle="tooltip" data-html="true">'.$mini.' '.$m->title.' '.$tag.'</a> ';
+      }
+    } else {
+      $out .= 'You have no possible fights today.';
+    }
   }
   $out .= '</p>';
   $out .= '</div>';
