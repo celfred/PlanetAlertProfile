@@ -2,6 +2,20 @@
   if (!$config->ajax) {
     include("./head.inc"); 
 
+    $allTeams = [];
+    foreach ($allPlayers as $player) {
+      if (!in_array($player->playerTeam, $allTeams)) {
+        if ($player->playerTeam == '' && !in_array('No team', $allTeams)) {
+          array_push($allTeams, 'No team'); 
+        } else {
+          if ($player->playerTeam != '') {
+            array_push($allTeams, $player->playerTeam); 
+          }
+        }
+      }
+    }
+    arsort($allTeams);
+
     $out = '';
     if ($user->isSuperuser()) {
       $action = $input->urlSegment1;
