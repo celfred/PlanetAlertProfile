@@ -94,7 +94,7 @@ exerciseApp.service('myData', function($http) {
 			return allLines;
 		},
 
-		pickQuestion : function () {
+		pickQuestion : function (type) {
 			var question = [];
 			// Pick a random line
 			// Different from previous line
@@ -105,19 +105,33 @@ exerciseApp.service('myData', function($http) {
 				}
 			}
 			lineHistory.push(randNum);
+			console.log(type);
 			var randLine = allLines[randNum];
+			// Test if training or fight
+			if (type == 'fight') {
+				// Pick target language (right)
+				var randNum = 1;
+				var randOpp = 0;
+			} else {
+				// Pick random target or source target language
+				var randNum = Math.round(Math.random());
+				if (randNum == 1) {
+					var randOpp = 0;
+				} else {
+					var randOpp = 1;
+				}
+			}
+			console.log(randNum);
 			switch(exerciseData['exType']) {
 				case 'translate' :
 					var randWords = randLine.split(",");
-					// Pick target language (right)
-					// TODO : parameter to test if memory or fight
 					// Test for multiple possible words and answers
-					var allWords = randWords[1].split("|");
+					var allWords = randWords[randNum].split("|");
 					// Trim eventual extra spaces
 					for (i=0; i<allWords.length; i++) {
 						allWords[i] = allWords[i].trim();
 					}
-					var allCorrections = randWords[0].split("|");
+					var allCorrections = randWords[randOpp].split("|");
 					question['allCorrections'] = this.parseCorrections(allCorrections);
 					break;
 				case 'quiz' :
@@ -237,7 +251,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
   $scope.startFight = function() {
 		$scope.started = true;
 		// Pick a new question
-		$scope.question = myData.pickQuestion();
+		$scope.question = myData.pickQuestion('fight');
 		$scope.initQuestion();
   }
 
@@ -328,7 +342,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
         $scope.playerAnswer = '';
         $scope.isFocused = false;
         // Pick another question (timeout workaround so animation starts from 0)
-        $timeout(function() { $scope.question = myData.pickQuestion(); $scope.initQuestion(); }, 550);
+        $timeout(function() { $scope.question = myData.pickQuestion('fight'); $scope.initQuestion(); }, 550);
       }
     } else { // Wrong answer
 			$scope.shownWords += 1;
@@ -463,7 +477,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			// Enable start Fight button
 			$scope.waitForStart = false;
 			// Pick another question
-			$scope.question = myData.pickQuestion();
+			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
     })
     $scope.exerciseId = exerciseId;
@@ -508,7 +522,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         }
       }
       // Pick another question
-			$scope.question = myData.pickQuestion();
+			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
     } else { // Wrong answer
       $scope.wrong = true;
