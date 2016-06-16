@@ -132,12 +132,14 @@
     $out .= '<Avatar>';
   }
   $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
-  $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getThumb("small").'" alt="'.$bestWeapon->title.'" />';
+  if ($bestWeapon->id && $bestWeapon->image) {
+    $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getThumb("small").'" alt="'.$bestWeapon->title.'" />';
+  }
   if ($bestProtection->id && $bestProtection->image) {
     $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong}" src="'.$bestProtection->image->getThumb("small").'" alt="'.$bestProtection->title.'" />';
-  $out .= '</span>';
-  $out .= '</span>';
   }
+  $out .= '</span>';
+  $out .= '</span>';
   $out .='</div>';
   $out .= '</div>';
 

@@ -124,23 +124,23 @@
   $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
   $out .='</div>';
   $out .='</h3>';
-  if ($player->avatar) {
   $out .= '<span class="pull-right">';
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hidePlayerDamage}">- {{playerDamage}}HP</span>';
   $out .= '<span class="avatarContainer">';
-    if ($player->avatar) {
-      $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
-    } else {
-      $out .= '<Avatar>';
-    }
+  if ($player->avatar) {
+    $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+  } else {
+    $out .= '<Avatar>';
+  }
   $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+  if ($bestWeapon->id && $bestWeapon->image) {
     $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getThumb("small").'" alt="'.$bestWeapon->title.'" />';
   }
   if ($bestProtection->id && $bestProtection->image) {
     $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong}" src="'.$bestProtection->image->getThumb("small").'" alt="'.$bestProtection->title.'" />';
-  $out .= '</span>';
-  $out .= '</span>';
   }
+  $out .= '</span>';
+  $out .= '</span>';
   $out .='</div>';
   $out .= '</div>';
 
