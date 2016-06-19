@@ -152,6 +152,9 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         }
       }
     }
+    if ($task->is("name=group-death|team-death")) { // No death because of others
+      if ($player->HP <= 0) { $player->HP = 1; }
+    }
     // Set fighting power
     if ($player->fighting_power == '') {$player->fighting_power = 0; }
     if ($task->is("name=test-rr")) {
