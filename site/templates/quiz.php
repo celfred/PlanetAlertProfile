@@ -19,6 +19,7 @@ if ($user->isSuperuser()) {
     // Update player's scores
     $taskComment = $input->post->question.' ['.$input->post->answer.']';
     updateScore($player, $task, $taskComment, '', '', true);
+    checkDeath($player, true);
 
     // Check if last question was whecked, then redirect
     if ($input->post->lastQuestion) {

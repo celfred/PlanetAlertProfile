@@ -68,6 +68,7 @@
         // Update player's scores
         $taskComment = $monster->title.' ['.$result.']';
         updateScore($player, $task, $taskComment, $monster, '', true);
+        checkDeath($player, true);
         echo 'Saving';
 
         // Record to log file

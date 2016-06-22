@@ -132,8 +132,12 @@
     if($input->post->adminTableSubmit) { // adminTableForm submitted
       // Consider checked players only
       $checkedPlayers = $input->post->player;
-      foreach($checkedPlayers as $plyr_task=>$state) {
-        list($playerId, $taskId) = explode('_', $plyr_task);
+      $checked = array_keys($checkedPlayers);
+      /* foreach($checkedPlayers as $plyr_task=>$state) { */
+        /* list($playerId, $taskId) = explode('_', $plyr_task); */
+      // Record checked task for each player
+      for ($i=0; $i<count($checked); $i++) {
+        list($playerId, $taskId) = explode('_', $checked[$i]);
         $comment = 'comment_'.$playerId.'_'.$taskId;
 
         $player = $pages->get($playerId);
@@ -144,6 +148,12 @@
         updateScore($player, $task, $taskComment, '', '', true);
 
         $team = $player->playerTeam;
+      }
+      // Check death for each player
+      for ($i=0; $i<count($checked); $i++) {
+        list($playerId, $taskId) = explode('_', $checked[$i]);
+        $player = $pages->get($playerId);
+        checkDeath($player, true);
       }
       // Redirect to team page
       $session->redirect($pages->get('/players')->url.$team);

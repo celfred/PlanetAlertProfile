@@ -96,6 +96,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     // Calculate player's new score
     // Minus GC (0 if positive, costless, or needing extra action tasks, so no problem
     $player->GC = (int) $player->GC + $tGC;
+    $player->oldHP = $player->HP; // Record previous HP for checkDeath function
     $player->HP = (int) $player->HP + $tHP + $deltaHP;
     $player->XP = (int) $player->XP + $tXP + $deltaXP;
 
@@ -153,7 +154,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
       }
     }
     if ($task->is("name=group-death|team-death")) { // No death because of others
-      if ($player->HP <= 0) { $player->HP = 1; }
+      if ($player->oldHP > 0 && $player->HP<=0) { $player->HP = 1; }
     }
     // Set fighting power
     if ($player->fighting_power == '') {$player->fighting_power = 0; }
@@ -214,33 +215,32 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         updateScore($refPage, $task, $comment, '', $newLinkedId, true);
       }
 
-      if ($player->HP == 0) { // Player died
-        $comment = 'Player died.';
-        $task = $pages->get("name=death");
-        updateScore($player, $task, $comment, '', $newLinkedId, true);
-      }
+      /* if ($player->HP == 0) { // Player died */
+      /*   $comment = 'Player died.'; */
+      /*   $task = $pages->get("name=death"); */
+      /*   updateScore($player, $task, $comment, '', $newLinkedId, true); */
+      /* } */
     }
   } else { // Player died
-    if ($player->level > 1) { // Loose 1 level
+    if ($player->level > 1) { // Lose 1 level
       $player->level = $player->level - 1;
       $player->HP = 50;
-      // Loose all Gold Coins
+      // Lose all Gold Coins
       $player->GC = 0;
-      // Loose all equipment
-      $player->equipment->removeAll();
     } else { // Init player scores for a new start
       $player->level = 1;
       $player->HP = 50;
       $player->GC = 0;
       $player->XP = 0;
-      foreach($player->equipment as $e) {
-        if ($e->category->name != 'group-items') {
-          $player->equipment->remove($e);
-        }
+    }
+    // Lose all equipment but group-items
+    foreach($player->equipment as $e) {
+      if ($e->category->name != 'group-items') {
+        $player->equipment->remove($e);
       }
     }
     if ($real == true) { // Save player's death if necessary
-      $eDate = date('m/d/Y H:i:s', time()+1);
+      $eDate = date('m/d/Y H:i:s', time()+60);
       $task = $pages->get("name=death");
       $newLinkedId = saveHistory($player, $task, $comment, '', $refPage, $eDate, '');
       $player->of(false);
@@ -270,6 +270,15 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     }
   }
   return $newLinkedId;
+}
+
+function checkDeath($player, $real=true) {
+  $pages = wire('pages');
+  if ($player->HP <= 0) {
+      $comment = 'Player died.';
+      $task = $pages->get("name=death");
+      updateScore($player, $task, $comment, '', '', true);
+  }
 }
 
 function checkLevel($player) {
