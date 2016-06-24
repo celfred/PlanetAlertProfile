@@ -13,7 +13,7 @@
   }
 
   echo '<div class="row">';
-    display_scores($allPlayers, $allTeams, $totalPlaces);
+    displayScores($allTeams);
   echo '</div>';
   
 ?>
@@ -189,6 +189,7 @@
     <?php
       // Admin is logged in, show stats
       if ($user->isSuperuser()) {
+        if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
         // Get current school year dates
         $period = $pages->get("template='period', name='school-year'");
         // Get today's unique logged players' names
@@ -261,6 +262,9 @@
         $stats .= '</div>';
         $stats .= '</div>';
         echo $stats;
+        } else {
+          echo '<div>Localhost : No stats.</div>';
+        }
       }
 
       // Admin news

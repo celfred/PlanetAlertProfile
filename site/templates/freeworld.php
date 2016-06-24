@@ -27,7 +27,7 @@
   // Nav tabs
   include("./tabList.inc"); 
 
-  echo '<p class="text-center lead well"><strong title="'.$teamOwners.'/'.$totalOwners.'">'.$team.' - Free world : '.$teamScore.'%</strong></p>';
+  displayScores($team);
 ?>
   <a class="pdfLink btn btn-info" href="<?php echo $page->url.$input->urlSegment1; ?>/places?pages2pdf=1">Get PDF</a>
   <h3 class="text-center"><span class="label label-default"><?php echo $completed; ?> completed out of <?php echo $totalPlaces->count(); ?> places (<?php echo ($totalPlaces->count())-$completed; ?> left)</span></h3>
