@@ -525,6 +525,11 @@ function calculate_average($arr) {
   return $average;
 }
 
+function taskCount($taskName, $allEvents) {
+  $all = $allEvents->find("task.name=$taskName");
+  return $all->count();
+}
+
 function checkHk($player) {
   $count = 0;
   // Check last penalty's date

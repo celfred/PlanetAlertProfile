@@ -258,20 +258,6 @@
           </div>
 
           <div class="btn-group">
-            <?php $class = ($page->name == 'report_generator') ? "on" : ""; ?>
-            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Reports <span class="caret"> </span></button>
-            <ul class="dropdown-menu">
-              <?php
-              $class = $page->name == 'report_generator' ? " class='selected-left'" : "";
-              $allPeriods = $pages->find("template=period, adminOnly=0");
-              foreach($allPeriods as $period) {
-                echo "<li><a$class target='_blank' href='{$pages->get('/report_generator')->url}all/{$player->name}/{$period->id}/'>{$period->title}</a></li>";
-              }
-              ?>
-            </ul>
-          </div>
-
-          <div class="btn-group">
           <?php
             $class = $page->is("name=blog|documentation|contact") ? "on" : ""; ?>
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>
