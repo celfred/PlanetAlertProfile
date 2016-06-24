@@ -4,7 +4,7 @@
 
   $totalPlaces = $pages->find("template='place', name!='places'");
 
-  if ($user->isLoggedin() || $user->isSuperuser()) {
+  if ($user->isLoggedin() && $user->isSuperuser()==false) {
     $helmet = $player->equipment->get("name=memory-helmet");
     if ($helmet->id) {
       // Display Personal Mission Analyzer
