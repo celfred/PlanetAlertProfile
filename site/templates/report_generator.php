@@ -17,38 +17,37 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
   if ($selected->template == 'player') { // Player's report
     $player = $selected;
     $global = false;
-    $reportTitle = 'Bilan ';
+    $reportTitle = '';
     if ($category == 'all') { // Global report
-      //$reportTitle .= ' global ';
     } else { // Category report
-      $reportTitle .= " '".$category."' ";
+      $reportTitle .= "'".$category."' report.";
       switch ($category) {
         case 'participation' : $reportType = 'participation'; break;
         case 'planetAlert' : $reportType = 'planetAlert'; break;
         default: break;
       }
     }
-    $reportTitle .= ' de '.$selected->title.' '.$selected->lastName.' ('.$selected->playerTeam.')'; 
+    $reportTitle .= ' for '.$selected->title.' '.$selected->lastName.' ('.$selected->playerTeam.')'; 
     $reportTitle .= '<br />';
-    $reportTitle .= 'Période couverte : '.$period->title;
+    $reportTitle .= 'Period : '.$period->title;
   } else { // Team's report
     $global = true;
     $selected = strtoupper($input->urlSegment2);
     $allPlayers = $pages->find("playerTeam=$selected, template=player, sort=$sort");
-    $reportTitle = 'Bilan ';
+    $reportTitle = '';
     if ($category == 'all') { // Global report
-      $reportTitle .= ' global';
+      $reportTitle .= 'Global report';
     } else { // Category report
-      $reportTitle .= " '".$category."'";
+      $reportTitle .= "'".$category."' report";
       switch ($category) {
         case 'participation' : $reportType = 'participation'; break;
         case 'planetAlert' : $reportType = 'planetAlert'; break;
         default: break;
       }
     }
-    $reportTitle .= ' (classe de '.$selected.')'; 
+    $reportTitle .= ' ('.$selected.' team)'; 
     $reportTitle .= '<br />';
-    $reportTitle .= 'Période couverte : '.$period->title;
+    $reportTitle .= 'Period : '.$period->title;
   }
    
   // PDF Download link
