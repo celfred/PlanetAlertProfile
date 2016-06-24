@@ -78,7 +78,7 @@
   // Nav tabs
   include("./tabList.inc"); 
 
-  echo '<p class="text-center lead well"><strong title="'.$teamOwners.'/'.$totalOwners.'">'.$team.' - Free world : '.$teamScore.'%</strong></p>';
+  displayScores($team);
 
   echo $outGroups;
 

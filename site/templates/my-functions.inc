@@ -474,6 +474,20 @@ function pick_question($player) {
   return $quiz;
 }
 
+function nbFreedomActs($playerTeam, $startDate='', $endDate='') {
+  $pages = wire('pages');
+  if ($startDate == '') { $startDate = date('2015-09-01 00:00:00'); }
+  if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
+  $players = $pages->find("template=player, playerTeam=$playerTeam");
+  $free = 0;
+  foreach ($players as $p) {
+    $freeActs = $p->find("template=event, task.name=free, date>=$startDaten, date<=$endDate")->count();
+    $free = $free+$freeActs;
+  }
+
+  return $free;
+}
+
 function globalScore($players, $totalPlaces) {
   $totalOwners = 0;
   foreach($totalPlaces as $place) {
@@ -513,6 +527,20 @@ function display_scores($allPlayers, $allTeams, $totalPlaces) {
   }
   echo '</ul>';
   echo '</h3>';
+}
+
+function displayScores($allTeams) {
+  echo '<h4 class="text-center scores">';
+  echo '<ul class="list-inline">School year\'s Acts of Freedom : ';
+  if (is_array($allTeams)) {
+    foreach($allTeams as $t) {
+      echo '<li class="label label-default"><strong>'.$t.' : '.nbFreedomActs($t).'</strong></li>';
+    }
+  } else {
+    echo '<li class="label label-default"><h4><strong>'.$allTeams.' : '.nbFreedomActs($allTeams).'</strong></h4></li>';
+  }
+  echo '</ul>';
+  echo '</h4>';
 }
 
 function calculate_average($arr) {
