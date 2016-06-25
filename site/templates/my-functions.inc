@@ -559,15 +559,20 @@ function taskCount($taskName, $allEvents) {
 }
 
 function checkHk($player) {
+  $pages = wire('pages');
+  // Get official period
+  $period = $pages->get("name=admin-actions")->periods;
+  // Select homework tasks over the period
+  $allHk = $player->find("template=event, task.category.name=homework, date>=$period->dateStart, date<=$period->dateEnd");
   $count = 0;
   // Check last penalty's date
-  $penalty = $player->find("template=event, task.name=penalty");
+  $penalty = $allHk->find("task.name=penalty");
   if ($penalty->count() != 0) {
     // Count all negative homework tasks since then
     $lastDate = $penalty->last()->date;
-    $allHk = $player->find("template=event, task.category=homework, task.HP<0, task.name!=penalty, date>$lastDate");
-    if ($allHk->count() > 0) {
-      foreach ($allHk as $event) {
+    $negHk = $allHk->find("task.HP<0, task.name!=penalty, date>=$lastDate");
+    if ($negHk->count() > 0) {
+      foreach ($negHk as $event) {
         if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
           $count = $count + 0.5;
         } else {
@@ -577,9 +582,9 @@ function checkHk($player) {
     }
   } else { // No previous penalty
     // Count all negative homework tasks
-    $allHk = $player->find("template=event, task.category=homework, task.name!=penalty, task.HP<0");
-    if ($allHk->count() > 0) {
-      foreach ($allHk as $event) {
+    $negHk = $allHk->find("task.name!=penalty, task.HP<0");
+    if ($negHk->count() > 0) {
+      foreach ($negHk as $event) {
         if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
           $count = $count + 0.5;
         } else {
