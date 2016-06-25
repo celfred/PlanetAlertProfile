@@ -97,6 +97,31 @@
         break;
       case 'team-options' :
         $out .= '<section class="well">';
+        $out .= '<h3 class="text-center">';
+        $out .=   'Global options';
+        $out .= '</h3>';
+        $out .= '<div>';
+        $allPeriods = $pages->find("template=period");
+        $officialPeriod = $page->periods;
+        $out .=   '<span>Official period : </span>';
+        $out .=   '<select id="periodId">';
+        $out .=     '<option value="-1">Select a period</option>';
+        foreach($allPeriods as $p) {
+          if ($p->id == $officialPeriod->id) {
+            $status = 'selected="selected"';
+          } else {
+            $status = '';
+          }
+          $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.'</option>';
+        }
+        $out .= ' </select>';
+        $out .= '<button class="adminAction btn btn-block btn-primary" data-href="'.$page->url.'" data-action="save-options">Save</button>';
+        $out .= '</div>';
+        $out .= '</section>';
+        $out .= '<section class="well">';
+        $out .= '<h3 class="text-center">';
+        $out .=   'Team options';
+        $out .= '</h3>';
         $out .= '<div>';
         $out .= '<span>Select a team : </span>';
         $out .= '<select id="teamId">';
@@ -621,6 +646,12 @@
         $player->equipment->remove($item);
         $player->save();
         break;
+      case 'save-options':
+        $periodId = $input->get['periodId'];
+        $page->of(false);
+        $page->periods = $periodId;
+        $page->save();
+        break;
       case 'toggle-lock':
         $lock = $page->lockFights->get("playerTeam=$selectedTeam");
         $page->of(false);
@@ -729,29 +760,12 @@
         }
         break;
       case 'team-options' :
-        $out .= '<h3 class="text-center">';
-        $out .=   'Global options';
-        $out .= '</h3>';
-        $out .= '<div>';
-        $allPeriods = $pages->find("template=period, adminOnly=0");
-        $officialPeriod = $page->periods;
-        $out .=   '<span>Select a period : </span>';
-        $out .=   '<select id="periodId">';
-        $out .=     '<option value="-1">Select a period</option>';
-        foreach($allPeriods as $p) {
-          if ($officialPeriod->id) {
-            $status = 'selected="selected"';
-          } else {
-            $status = '';
-          }
-          $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.'</option>';
-        }
-        $out .= ' </select>';
-        $out .= '</div>';
-        $out .= '<h3 class="text-center">';
-        $out .=   'Team options for '.$selectedTeam;
-        $out .= '</h3>';
+        $out = '';
         if ($selectedTeam && $selectedTeam != '-1') {
+          $out .= '</div>';
+          $out .= '<h4 class="text-center">';
+          $out .=   'Team options for '.$selectedTeam;
+          $out .= '</h4>';
           $lock = $page->lockFights->get("playerTeam=$selectedTeam");
           if ($lock) {
             $status = 'checked="checked"';
@@ -761,11 +775,10 @@
           $out .= '<ul>';
           $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label></li>';
           $out .= '</ul>';
-        $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
         } else {
           $out .= '<p>You need to select a team for more options.</p>';
         }
-        $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
         break;
       default :
         $out = 'Problem detected.';

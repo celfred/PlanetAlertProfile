@@ -190,78 +190,78 @@
       // Admin is logged in, show stats
       if ($user->isSuperuser()) {
         if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-        // Get current school year dates
-        $period = $pages->get("template='period', name='school-year'");
-        // Get today's unique logged players' names
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp >= CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
-        $query->execute();
-        $todaysPlayers = $query->fetchAll();
-        // Get yesterday's unique logged players' names
-        $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -1 DAY) AND CURDATE()");   
-        $query->execute();
-        $yesterdaysPlayers = $query->fetchAll();
-        // Get total # of unique logged players during the last 7 days
-        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
-        $query->execute();
-        $totalNbUniqueVisitors7Days = $query->fetchColumn();
-        // Get total # of logged players during the last 7 days
-        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
-        $query->execute();
-        $totalNbVisitors7Days = $query->fetchColumn();
-        // Get total # of unique logged players during the current school year
-        $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
-        $query->execute();
-        $totalNbUniqueVisitors = $query->fetchColumn();
-        // Get total # of logged players during the current school year
-        $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
-        $query->execute();
-        $totalNbVisitors = $query->fetchColumn();
+          // Get current school year dates
+          $period = $pages->get("template='period', name='school-year'");
+          // Get today's unique logged players' names
+          $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp >= CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+          $query->execute();
+          $todaysPlayers = $query->fetchAll();
+          // Get yesterday's unique logged players' names
+          $query = $database->prepare("SELECT DISTINCT username FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -1 DAY) AND CURDATE()");   
+          $query->execute();
+          $yesterdaysPlayers = $query->fetchAll();
+          // Get total # of unique logged players during the last 7 days
+          $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+          $query->execute();
+          $totalNbUniqueVisitors7Days = $query->fetchColumn();
+          // Get total # of logged players during the last 7 days
+          $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+          $query->execute();
+          $totalNbVisitors7Days = $query->fetchColumn();
+          // Get total # of unique logged players during the current school year
+          $query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+          $query->execute();
+          $totalNbUniqueVisitors = $query->fetchColumn();
+          // Get total # of logged players during the current school year
+          $query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+          $query->execute();
+          $totalNbVisitors = $query->fetchColumn();
 
-        $stats = '<div id="stats" class="news panel panel-primary">';
-        $stats .= '<div class="panel-heading">';
-        $stats .= '<h5 class="panel-title">Planet Alert Statistics (started 17/09/2015)';
-        $stats .= '<button type="button" class="close" data-id="#stats" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-        $stats .= '</h5>';
-        $stats .= '</div>';
-        $stats .= '<div class="panel-body">';
-        $stats .= '<p>';
-        $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Today : '.count($todaysPlayers).'</span>';
-        $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Yesterday : '.count($yesterdaysPlayers).'</span>';
-        $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">Last 7 days : '.$totalNbUniqueVisitors7Days.'/'.$totalNbVisitors7Days.'</span>';
-        $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors.'</span>';
-        $stats .= '&nbsp;&nbsp;&nbsp';
-        $stats .= '</p>';
-        if ( count($todaysPlayers) > 0 ) {
-          $stats .= '<ul class="list-inline list-unstyled">';
-          $stats .= '<span>Today\'s players : </span>';
-          foreach($todaysPlayers as $r) {
-            // Get player's name
-            $login = $r['username'];
-            $player = $pages->get("template='player', login=$login");
-            $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+          $stats = '<div id="stats" class="news panel panel-primary">';
+          $stats .= '<div class="panel-heading">';
+          $stats .= '<h5 class="panel-title">Planet Alert Statistics (started 17/09/2015)';
+          $stats .= '<button type="button" class="close" data-id="#stats" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+          $stats .= '</h5>';
+          $stats .= '</div>';
+          $stats .= '<div class="panel-body">';
+          $stats .= '<p>';
+          $stats .= '&nbsp;&nbsp;&nbsp';
+          $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Today : '.count($todaysPlayers).'</span>';
+          $stats .= '&nbsp;&nbsp;&nbsp';
+          $stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">Yesterday : '.count($yesterdaysPlayers).'</span>';
+          $stats .= '&nbsp;&nbsp;&nbsp';
+          $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">Last 7 days : '.$totalNbUniqueVisitors7Days.'/'.$totalNbVisitors7Days.'</span>';
+          $stats .= '&nbsp;&nbsp;&nbsp';
+          $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors.'</span>';
+          $stats .= '&nbsp;&nbsp;&nbsp';
+          $stats .= '</p>';
+          if ( count($todaysPlayers) > 0 ) {
+            $stats .= '<ul class="list-inline list-unstyled">';
+            $stats .= '<span>Today\'s players : </span>';
+            foreach($todaysPlayers as $r) {
+              // Get player's name
+              $login = $r['username'];
+              $player = $pages->get("template='player', login=$login");
+              $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+            }
+            $stats .= '</ul>';
           }
-          $stats .= '</ul>';
-        }
-        if ( count($yesterdaysPlayers) > 0 ) {
-          $stats .= '<span>Yesterday\'s players : </span>';
-          $stats .= '<ul class="list-inline list-unstyled">';
-          foreach($yesterdaysPlayers as $r) {
-            // Get player's name
-            $login = $r['username'];
-            $player = $pages->get("template='player', login=$login");
-            $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+          if ( count($yesterdaysPlayers) > 0 ) {
+            $stats .= '<span>Yesterday\'s players : </span>';
+            $stats .= '<ul class="list-inline list-unstyled">';
+            foreach($yesterdaysPlayers as $r) {
+              // Get player's name
+              $login = $r['username'];
+              $player = $pages->get("template='player', login=$login");
+              $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+            }
+            $stats .= '</ul>';
           }
-          $stats .= '</ul>';
-        }
-        // Link to Statistics page
-        $stats .= '<p class="text-center"><a href='.$pages->get('name=statistics')->url.'>[See the complete Planet Alert statistics]</a></p>';
-        $stats .= '</div>';
-        $stats .= '</div>';
-        echo $stats;
+          // Link to Statistics page
+          $stats .= '<p class="text-center"><a href='.$pages->get('name=statistics')->url.'>[See the complete Planet Alert statistics]</a></p>';
+          $stats .= '</div>';
+          $stats .= '</div>';
+          echo $stats;
         } else {
           echo '<div>Localhost : No stats.</div>';
         }

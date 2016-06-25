@@ -30,6 +30,9 @@ $(document).ready(function() {
 		} else {
 			var href = $(this).attr('data-href') + action + '/' + playerId + '?startDate='+ startDate +'&endDate=' + endDate + type;
 		}
+		if (action == 'save-options') {
+			var href = $(this).attr('data-href') + action + '?&periodId=' + $('#periodId').val();
+		}
     $.get(href, function(data) { 
         $("#ajaxViewport").html(data); 
     }); 
