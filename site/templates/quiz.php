@@ -5,6 +5,12 @@ include("./head.inc");
 if ($user->isSuperuser()) {
   // Nav tabs
   include("./tabList.inc"); 
+  
+  if ($input->post->quizFormSubmit) {
+    $quizzing = true;
+  } else {
+    $quizzing = false;
+  }
 
   if ($input->post->RightButton || $input->post->WrongButton) { // Quiz form submitted
     $player = $pages->get($input->post->playerId);
@@ -18,59 +24,38 @@ if ($user->isSuperuser()) {
    
     // Update player's scores
     $taskComment = $input->post->question.' ['.$input->post->answer.']';
-    updateScore($player, $task, $taskComment, '', '', true);
+    $refPage = $pages->get($input->post->quizId);
+    updateScore($player, $task, $taskComment, $refPage, '', true);
     checkDeath($player, true);
-
-    // Check if last question was whecked, then redirect
-    if ($input->post->lastQuestion) {
-      $session->redirect($homepage->url.'players/'.$input->urlSegment1);
-    }
   }
 
   $selectedTeam = $input->urlSegment1;
-  $selectedPlayer = $input->post->selectedPlayer;
+  $selectedIds = $input->post->selected; // Checked players
   $allPlayers = $pages->find("template='player', playerTeam=$selectedTeam, sort='name'");
-
-  
-  $reportTitle = '';
+  $allConcerned = $allPlayers->find("places.count>=3"); // Find players having at least 3 places
   $out = '';
-  $lastQuestion = '';
 
-  if ($input->post->selectedIds) { // Players have been checked
-    if ($input->post->selectedIds !== '') {
-      $display = 'hidden'; // Hide players list
-      $formerSelected = explode(',' ,$input->post->selectedIds);
-    }
+  if ( count($selectedIds) > 0 ) { // Players have been checked
+    // Pick one
+    shuffle($selectedIds);
+    $selectedPlayer = $selectedIds[0];
+    // Get rid of it
+    array_splice($selectedIds, 0, 1);
+    $display = 'hidden'; // Hide players list
   } else {
-    if ($input->post->selectedPlayer) { // Last selected player
-      $formerSelected = -1;
-      $lastChecked = "checked = 'checked'";
-      $display = 'hidden'; // Hide players list
-    }
+    $display = 'shown'; // Show players list
   }
-
-  // Get minimum number of invasions in the team (to find who is the next invaded player)
-  
-  // Find players having at least 1 place
-  $allConcerned = $allPlayers->find("places.count>0");
 
   // Set nbInvasion foreach players
-  foreach($allConcerned as $player) {
-    $nbInvasions[$player->id] = $player->find("template=event, task.name=right-invasion|wrong-invasion")->count();
-    $player->nbInvasions = $nbInvasions[$player->id];
-  }
-  // Find minimum nb of invasions (for pre-checked players at first load)
-  $min = min($nbInvasions);
-  $allMinConcerned = $allConcerned->find("nbInvasions=$min");
-  if (!$formerSelected) { // First load
-    foreach($allMinConcerned as $player) {
-      // Disabled since quick selection tools have been added
-      //$player->checked = "checked='checked'"; 
-    }
-  } else { // Some players have already been checked
-    foreach($allPlayers as $player) {
-      if (in_array($player->id, $formerSelected)) {
-        $player->checked = "checked='checked'";
+  foreach($allConcerned as $p) {
+    $p->nbInvasions = $p->find("template=event, task.name=right-invasion|wrong-invasion")->count();
+    if (in_array($p, $selectedIds)) { // Keep checked players
+      $p->checked = "checked='checked'";
+    } else {
+      if ( $quizzing == true ) { // Quiz has already started
+        $p->checked = '';
+      } else { // First load, check all concerned players
+        $p->checked = "checked='checked'";
       }
     }
   }
@@ -109,11 +94,10 @@ if ($user->isSuperuser()) {
         $out .= $quiz['answer'];
         $out .= '</h2>';
         $out .= '<input type="hidden" name="playerId" value="'.$player->id.'" />';
+        $out .= '<input type="hidden" name="quizId" value="'.$sanitizer->text($quiz['id']).'" />';
         $out .= '<input type="hidden" name="question" value="'.$sanitizer->text($quiz['question']).'" />';
         $out .= '<input type="hidden" name="answer" value="'.$sanitizer->text($quiz['answer']).'" />';
         $out .= '<p class="text-center">';
-        $out .= '<label for="lastQuestion" class=""><input type="checkbox" id="lastQuestion" name="lastQuestion" value="lastQuestion" '.$lastChecked.' /> Last question</label>';
-        $out .= '&nbsp;&nbsp;';
         $out .= '<button class="btn btn-success generateQuiz" type="submit" name="RightButton" value="right"><span class="glyphicon glyphicon-ok"></span> Right</button>';
         $out .= '&nbsp;&nbsp;';
         $out .= '<button class="btn btn-danger generateQuiz" type="submit" name="WrongButton" value="wrong"><span class="glyphicon glyphicon-remove"></span> Wrong</button>';
@@ -122,72 +106,37 @@ if ($user->isSuperuser()) {
     }
 
     // Players list display
-    $nbPlaces = [];
-    $ratio = [];
-    $out .= '<div class="well">';
+    $out .= '<section class="well">';
     $out .= '<button id="toggle" class="btn btn-default">See list</button>';
-    $out .= '<ul class="list-group '.$display.'">';
-      foreach($allPlayers as $player) {
-        $nbPlayerPlaces = $player->places->count();
-        if (!in_array($nbPlayerPlaces, $nbPlaces, true)) {
-          array_push($nbPlaces, $nbPlayerPlaces);
-        }
-        if ($nbPlayerPlaces === 0 || $nbPlayerPlaces === 1) {
-          $disabled = "disabled='disabled'";
-          $details = "({$nbPlayerPlaces} place.)";
-          $class = "disabled";
-        } else {
-          $disabled = "";
-          $class = "";
-          $details = "({$nbPlayerPlaces} places, ";
-          if ($player->nbInvasions == 1) {
-            $details .= "{$player->nbInvasions} invasion)";
-          } else {
-            $details .= "{$player->nbInvasions} invasions)";
-          }
-          $playerRatio = $player->nbInvasions-$nbPlayerPlaces;
-          $details .= ' ['.$playerRatio.']';
-          array_push($ratio, $playerRatio);
-        }
-        $out .= "<li class='list-group-item'><label class='{$class}' for='ch[{$player->id}]'><input type='checkbox' id='ch[{$player->id}]' value='{$player->id}' {$player->checked} {$disabled} data-nbPlaces='{$nbPlayerPlaces}' data-nbInvasions='{$player->nbInvasions}' data-ratio='{$playerRatio}'> {$player->title} {$details}</label></li>";
+    $out .= '<div id="quizMenu" class="'.$display.'">';
+    $out .= '<p>You need at least 3 free elements to appear in the list.</p>';
+    $out .= '<ul class="list-group">';
+      foreach($allConcerned as $p) {
+          $details = "({$p->nbInvasions} inv. / ";
+          $details .= "{$p->places->count()} el.)";
+          $out .= "<li class='list-group-item'><label for='ch[{$p->id}]'><input type='checkbox' id='ch[{$p->id}]' name='selected[]' value='{$p->id}' {$p->checked}'> {$p->title} {$details}</label></li>";
       }
-    $out .= '<li class="list-group-item"># of Places selection :<br />';
-    sort($nbPlaces);
-    foreach($nbPlaces as $nb) {
-      $out .= '<label class="btn btn-info btn-xs"><input type="checkbox" class="tickNbPlaces" value="'.$nb.'"><span class="">'.$nb.'</span></label>';
-    }
-    $out .= '</li>';
-    $out .= '<li class="list-group-item"># of Invasions selection :<br />';
-    $nbInvasions = array_unique($nbInvasions);
-    sort($nbInvasions);
-    foreach($nbInvasions as $nb) {
-      $out .= '<label class="btn btn-info btn-xs"><input type="checkbox" class="tickNbInvasions" value="'.$nb.'"><span class="">'.$nb.'</span></label>';
-    }
-    $out .= '</li>';
-    $out .= '<li class="list-group-item">Ratio selection :<br />';
-    $ratio = array_unique($ratio);
-    sort($ratio);
-    foreach($ratio as $nb) {
-      if ($nb !== 0) {
-        $out .= '<label class="btn btn-info btn-xs"><input type="checkbox" class="tickRatio" value="'.$nb.'">'.$nb.'</label>';
-      } else {
-        $out .= '<label class="btn btn-primary btn-xs"><input type="checkbox" class="tickRatio" value="'.$nb.'">'.$nb.'</label>';
-      }
-    }
-    $out .= '</li>';
-    $out .= '<li class="list-group-item">';
-    $out .= '<button id="tickAll" class="btn btn-success btn-sm">Tick all</button>';
-    $out .= '<button id="untickAll" class="btn btn-danger btn-sm">Untick all</button>';
-    $out .= '</li>';
+      $out .= '<button id="tickAll" class="btn btn-success btn-sm">Tick all</button>';
+      $out .= '<button id="untickAll" class="btn btn-danger btn-sm">Untick all</button>';
     $out .= '</ul>';
-    $out .= '<button type="submit" class="btn btn-info btn-block generateQuiz">Generate</button>';
-    $out .= '<input type="hidden" id="selectedIds" name="selectedIds" value="'.$input->post->selectedIds.'">';
-    $out .= '<input type="hidden" id="selectedPlayer" name="selectedPlayer" value="">';
-    $out .= '</form>';
+    $out .= '<p>(Not concerned : ';
+      $notConcerned = '';
+      foreach($allPlayers as $p) {
+        if (!($allConcerned->get($p))) {
+          $notConcerned .= $p->title.', ';
+        }
+      }
+      $notConcerned = trim($notConcerned, ', ').')';
+      $out .= $notConcerned;
+    $out .= '</p>';
+    // TODO : Build Ambassadors list
+    /* $out .= '<a class="btn btn-info pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a>'; */
     $out .= '</div>';
+    $out .= '</section>';
+    $out .= '<input type="hidden" name="quizFormSubmit" value="Save" />';
+    $out .= '<button type="submit" name="quizFormSubmitButton" class="btn btn-info btn-block generateQuiz">Generate</button>';
+    $out .= '</form>';
     
-  } else {
-    $out .= '<p class="text-center lead well">Select a team and prepare for a... Monster invasion!</p>';
   }
 
 } else {
