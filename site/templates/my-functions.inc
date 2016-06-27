@@ -172,6 +172,15 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     }
     if ($player->fighting_power < 0) { $player->fighting_power = 0; }
 
+    if ($task->is("name=remove") && $refPage != '') { // Remove element
+      if ($refPage->template == 'place') {
+        $player->places->remove($refPage);
+      }
+      /* if ($refPage->template == 'people') { */
+      /*   $player->people->remove($refPage); */
+      /* } */
+    }
+
     // Check GC, HP...
     if ($player->GC < 0) { $player->GC = 0; }
     if ($player->HP < 0) { $player->HP = 0; }
@@ -215,11 +224,14 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         updateScore($refPage, $task, $comment, '', $newLinkedId, true);
       }
 
-      /* if ($player->HP == 0) { // Player died */
-      /*   $comment = 'Player died.'; */
-      /*   $task = $pages->get("name=death"); */
-      /*   updateScore($player, $task, $comment, '', $newLinkedId, true); */
-      /* } */
+      if ($task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
+        $prevInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$refPage, sort=-date");
+        if ($prevInvasions->count() >= 2) {
+          $remove = $pages->get("template=task, name=remove");
+          $removeComment = '3rd wrong invasions on '.$refPage->title;
+          updateScore($player, $remove, $removeComment, $refPage, '', $real);
+        }
+      }
     }
   } else { // Player died
     if ($player->level > 1) { // Lose 1 level
@@ -474,6 +486,20 @@ function pick_question($player) {
   return $quiz;
 }
 
+function nbFreedomActs($playerTeam, $startDate='', $endDate='') {
+  $pages = wire('pages');
+  if ($startDate == '') { $startDate = date('2015-09-01 00:00:00'); }
+  if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
+  $players = $pages->find("template=player, playerTeam=$playerTeam");
+  $free = 0;
+  foreach ($players as $p) {
+    $freeActs = $p->get("name=history")->find("template=event, task.name=free, date>=$startDaten, date<=$endDate")->count();
+    $free = $free+$freeActs;
+  }
+
+  return $free;
+}
+
 function globalScore($players, $totalPlaces) {
   $totalOwners = 0;
   foreach($totalPlaces as $place) {
@@ -515,6 +541,20 @@ function display_scores($allPlayers, $allTeams, $totalPlaces) {
   echo '</h3>';
 }
 
+function displayScores($allTeams) {
+  echo '<h4 class="text-center scores">';
+  echo '<ul class="list-inline">School year\'s Acts of Freedom : ';
+  if (is_array($allTeams)) {
+    foreach($allTeams as $t) {
+      echo '<li class="label label-default"><strong>'.$t.' : '.nbFreedomActs($t).'</strong></li>';
+    }
+  } else {
+    echo '<li class="label label-default"><h4><strong>'.$allTeams.' : '.nbFreedomActs($allTeams).'</strong></h4></li>';
+  }
+  echo '</ul>';
+  echo '</h4>';
+}
+
 function calculate_average($arr) {
   $total = 0;
   $count = count($arr); //total numbers in array
@@ -525,16 +565,26 @@ function calculate_average($arr) {
   return $average;
 }
 
+function taskCount($taskName, $allEvents) {
+  $all = $allEvents->find("task.name=$taskName");
+  return $all->count();
+}
+
 function checkHk($player) {
+  $pages = wire('pages');
+  // Get official period
+  $period = $pages->get("name=admin-actions")->periods;
+  // Select homework tasks over the period
+  $allHk = $player->find("template=event, task.category.name=homework, date>=$period->dateStart, date<=$period->dateEnd");
   $count = 0;
   // Check last penalty's date
-  $penalty = $player->find("template=event, task.name=penalty");
+  $penalty = $allHk->find("task.name=penalty");
   if ($penalty->count() != 0) {
     // Count all negative homework tasks since then
     $lastDate = $penalty->last()->date;
-    $allHk = $player->find("template=event, task.category=homework, task.HP<0, task.name!=penalty, date>$lastDate");
-    if ($allHk->count() > 0) {
-      foreach ($allHk as $event) {
+    $negHk = $allHk->find("task.HP<0, task.name!=penalty, date>=$lastDate");
+    if ($negHk->count() > 0) {
+      foreach ($negHk as $event) {
         if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
           $count = $count + 0.5;
         } else {
@@ -544,9 +594,9 @@ function checkHk($player) {
     }
   } else { // No previous penalty
     // Count all negative homework tasks
-    $allHk = $player->find("template=event, task.category=homework, task.name!=penalty, task.HP<0");
-    if ($allHk->count() > 0) {
-      foreach ($allHk as $event) {
+    $negHk = $allHk->find("task.name!=penalty, task.HP<0");
+    if ($negHk->count() > 0) {
+      foreach ($negHk as $event) {
         if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
           $count = $count + 0.5;
         } else {

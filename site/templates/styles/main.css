@@ -472,7 +472,13 @@ tr.selected {
 .panel-footer {
   border-radius: 0px 0px 10px 10px;
 }
-.scores li {
+h4.scores {
+	background : #FFF;
+	border: 1px solid #000;
+	border-radius: 20px 20px 0px 0px;
+	padding : 5px;
+}
+.scores ul li {
   margin : 0px 5px;
 }
 #taskForm td:nth-of-type(0), #taskForm th:nth-of-type(1) {

@@ -30,6 +30,9 @@ $(document).ready(function() {
 		} else {
 			var href = $(this).attr('data-href') + action + '/' + playerId + '?startDate='+ startDate +'&endDate=' + endDate + type;
 		}
+		if (action == 'save-options') {
+			var href = $(this).attr('data-href') + action + '?&periodId=' + $('#periodId').val();
+		}
     $.get(href, function(data) { 
         $("#ajaxViewport").html(data); 
     }); 
@@ -356,60 +359,16 @@ $(document).ready(function() {
     }
   });
 
-  $('#lastQuestion').on('click', function() {
-    $('#toggle').click();
-  });
+	// Monster invasions
   $('#toggle').on('click', function() {
-    $('.list-group').toggleClass('shown');
-    $('.list-group').toggleClass('hidden');
+    $('#quizMenu').toggleClass('shown');
+    $('#quizMenu').toggleClass('hidden');
 
     return false;
   });
-
-  $('.tickNbPlaces').on('click', function() {
-    var nbPlaces = $(this).val();
-    var sender = $(this);
-    $('.list-group-item input[type=checkbox]').each( function() {
-      if ($(this).attr('data-nbPlaces') === nbPlaces) {
-        if (sender.prop('checked')) {
-          $(this).prop('checked', true);
-        } else {
-          $(this).prop('checked', false);
-        }
-      }
-    });
-  });
-  $('.tickNbInvasions').on('click', function() {
-    var nbInvasions = $(this).val();
-    var sender = $(this);
-    $('.list-group-item input[type=checkbox]').each( function() {
-      if ($(this).attr('data-nbInvasions') === nbInvasions) {
-        if (sender.prop('checked')) {
-          $(this).prop('checked', true);
-        } else {
-          $(this).prop('checked', false);
-        }
-      }
-    });
-  });
-  $('.tickRatio').on('click', function() {
-    var ratio = $(this).val();
-    var sender = $(this);
-    $('.list-group-item input[type=checkbox]').each( function() {
-      if ($(this).attr('data-ratio') === ratio) {
-        if (sender.prop('checked')) {
-          $(this).prop('checked', true);
-        } else {
-          $(this).prop('checked', false);
-        }
-      }
-    });
-  });
   $('#tickAll').on('click', function() {
     $('.list-group-item input[type=checkbox]').each( function() {
-      if (!$(this).prop('disabled')) {
-        $(this).prop('checked', true);
-      }
+			$(this).prop('checked', true);
     });
     return false;
   });
@@ -420,41 +379,17 @@ $(document).ready(function() {
     return false;
   });
   $('button.generateQuiz').on('click', function() {
-    var noChecked = true;
-    var urls = [];
-    var ids = [];
-    var playersIndex = [];
-    $('.list-group-item input[type=checkbox]').not('.tickRatio, .tickNbInvasions, .tickNbPlaces').each( function(index) {
+		var noChecked = true;
+    $('.list-group-item input[type=checkbox]').each( function(index) {
       if ( $(this).prop('checked') === true) {
+				// At least 1 player is checked
         noChecked = false;
-        urls.push($(this).val());
-        ids.push($(this).val());
-        playersIndex.push(index);
-      }
-    });
-    if (noChecked == true) {
-      // No checked
-      // Check if last question is checked
-      if ($('#lastQuestion').prop('checked') === true) {
-        return true;
-      } else {
-        alert('Please, select at least 1 player!');
-        return false;
-      }
-    } else {
-      // Pick a random player and go to quiz
-      if (ids.length > 0) {
-        var randomIndex = Math.floor(Math.random() * ids.length);
-        var randomId = ids[randomIndex];
-        // Get rid of selected player
-        ids.splice(randomIndex, 1);
-      } else {
-        var randomId = '-1';
-      }
-      // Modify form parameters accordingly & send form
-      $('#selectedIds').val(ids);
-      $('#selectedPlayer').val(randomId);
-    }
+			}
+		});
+		if (noChecked == true && $('#quizMenu').is(':visible')) { // No checked players
+			alert('Please, select at least 1 player!');
+			return false;
+		}
   });
 
   $('#startFight').on('click', function() {
