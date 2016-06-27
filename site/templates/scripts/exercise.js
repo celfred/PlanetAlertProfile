@@ -11,7 +11,6 @@ exerciseApp.service('myData', function($http) {
 			return $http.get(url).then(function(response){
 				exerciseData['exType'] = response.data.matches[0].type.name;
 				exerciseData['rawData'] = response.data.matches[0].exData;
-
 				return exerciseData;
 			})
 		},
@@ -24,11 +23,11 @@ exerciseApp.service('myData', function($http) {
 			rawData = tmp.replace(/&#039;/g, "'");
 			// Build data array
 			allLines = rawData.split("\n");
-			// Manage priorities
-			var pattern = /^{(\d+)}/i; // {n} at the beginning of a line
 			for (var i=0; i<allLines.length; i++) {
+				// Manage priorities
+				var pattern = /{(\d+)}/i; // {n} at the beginning of a line
 				var str = allLines[i];
-				if (str.search(pattern) != -1 ) {
+				if (str.match(pattern) != null ) {
 					// Get n and copy the line accordingly
 					var n = str.match(pattern);
 					// Clean original line
@@ -37,53 +36,53 @@ exerciseApp.service('myData', function($http) {
 						newLines.push(allLines[i]);
 					}
 				}
-				// Manage special variables
-				// %fname% : First name (female or male)
-				// %fnamef% : First name female
-				// %fnamem% : First name male
-				// %name% : Full name (female or male)
-				// %age% : Age
-				// %nationality% : Nationality
-				// (...) : Displayed text but optional in answers
-				var nationality = ['French', 'English', 'Scottish', 'Welsh', 'American', 'Australian', 'Canadian', 'Irish', 'German', 'Spanish', 'Italian', 'Swedish', 'Brazilian', 'Greek', 'Turkish', 'Russian', 'Chinese', 'Belgian'];
-				for (var i=0; i<allLines.length; i++) {
-					var str = allLines[i];
-					var pattern = /%name%/i;
-					if (str.search(pattern) != -1 ) {
-						var sub = chance.name();
-						allLines[i] = str.replace(pattern, sub);
-						str = allLines[i];
-					}
-					var pattern = /%fname%/i;
-					if (str.search(pattern) != -1 ) {
-						var sub = chance.first();
-						allLines[i] = str.replace(pattern, sub);
-						str = allLines[i];
-					}
-					var pattern = /%fnamef%/i;
-					if (str.search(pattern) != -1 ) {
-						var sub = chance.first({gender:"female"});
-						allLines[i] = str.replace(pattern, sub);
-						str = allLines[i];
-					}
-					var pattern = /%fnamem%/i;
-					if (str.search(pattern) != -1 ) {
-						var sub = chance.first({gender:"male"});
-						allLines[i] = str.replace(pattern, sub);
-						str = allLines[i];
-					}
-					var pattern = /%age%/i;
-					if (str.search(pattern) != -1 ) {
-						var sub = chance.age();
-						allLines[i] = str.replace(pattern, sub);
-						str = allLines[i];
-					}
-					var pattern = /%nationality%/i;
-					if (str.search(pattern) != -1 ) {
-						var sub = chance.pick(nationality);
-						allLines[i] = str.replace(pattern, sub);
-						str = allLines[i];
-					}
+			}
+			// Manage special variables
+			// %fname% : First name (female or male)
+			// %fnamef% : First name female
+			// %fnamem% : First name male
+			// %name% : Full name (female or male)
+			// %age% : Age
+			// %nationality% : Nationality
+			// (...) : Displayed text but optional in answers
+			var nationality = ['French', 'English', 'Scottish', 'Welsh', 'American', 'Australian', 'Canadian', 'Irish', 'German', 'Spanish', 'Italian', 'Swedish', 'Brazilian', 'Greek', 'Turkish', 'Russian', 'Chinese', 'Belgian'];
+			for (var i=0; i<allLines.length; i++) {
+				var str = allLines[i];
+				var pattern = /%name%/i;
+				if (str.search(pattern) != -1 ) {
+					var sub = chance.name();
+					allLines[i] = str.replace(pattern, sub);
+					str = allLines[i];
+				}
+				var pattern = /%fname%/i;
+				if (str.search(pattern) != -1 ) {
+					var sub = chance.first();
+					allLines[i] = str.replace(pattern, sub);
+					str = allLines[i];
+				}
+				var pattern = /%fnamef%/i;
+				if (str.search(pattern) != -1 ) {
+					var sub = chance.first({gender:"female"});
+					allLines[i] = str.replace(pattern, sub);
+					str = allLines[i];
+				}
+				var pattern = /%fnamem%/i;
+				if (str.search(pattern) != -1 ) {
+					var sub = chance.first({gender:"male"});
+					allLines[i] = str.replace(pattern, sub);
+					str = allLines[i];
+				}
+				var pattern = /%age%/i;
+				if (str.search(pattern) != -1 ) {
+					var sub = chance.age();
+					allLines[i] = str.replace(pattern, sub);
+					str = allLines[i];
+				}
+				var pattern = /%nationality%/i;
+				if (str.search(pattern) != -1 ) {
+					var sub = chance.pick(nationality);
+					allLines[i] = str.replace(pattern, sub);
+					str = allLines[i];
 				}
 			}
 			// Add new lines
@@ -91,7 +90,8 @@ exerciseApp.service('myData', function($http) {
 				allLines.push(newLines[i]);
 			}
 
-			return allLines;
+			console.log(allLines);
+			// return allLines;
 		},
 
 		pickQuestion : function (type) {
@@ -238,7 +238,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		var url = 'service-pages/?template=exercise&id='+exerciseId;
 		myData.getData(url).then( function(exerciseData) {
 			$scope.exType = exerciseData['exType'];
-			$scope.allLines = myData.parseData();
+			myData.parseData();
 			// Enable start Fight button
 			$scope.waitForStart = false;
     })
@@ -473,7 +473,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		var url = 'service-pages/?template=exercise&id='+exerciseId;
 		myData.getData(url).then( function(exerciseData) {
 			$scope.exType = exerciseData['exType'];
-			$scope.allLines = myData.parseData();
+			myData.parseData();
 			// Enable start Fight button
 			$scope.waitForStart = false;
 			// Pick another question
