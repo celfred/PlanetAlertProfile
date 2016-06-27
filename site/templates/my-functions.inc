@@ -172,6 +172,15 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     }
     if ($player->fighting_power < 0) { $player->fighting_power = 0; }
 
+    if ($task->is("name=remove") && $refPage != '') { // Remove element
+      if ($refPage->template == 'place') {
+        $player->places->remove($refPage);
+      }
+      /* if ($refPage->template == 'people') { */
+      /*   $player->people->remove($refPage); */
+      /* } */
+    }
+
     // Check GC, HP...
     if ($player->GC < 0) { $player->GC = 0; }
     if ($player->HP < 0) { $player->HP = 0; }
@@ -215,11 +224,14 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         updateScore($refPage, $task, $comment, '', $newLinkedId, true);
       }
 
-      /* if ($player->HP == 0) { // Player died */
-      /*   $comment = 'Player died.'; */
-      /*   $task = $pages->get("name=death"); */
-      /*   updateScore($player, $task, $comment, '', $newLinkedId, true); */
-      /* } */
+      if ($task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
+        $prevInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$refPage, sort=-date");
+        if ($prevInvasions->count() >= 2) {
+          $remove = $pages->get("template=task, name=remove");
+          $removeComment = '3rd wrong invasions on '.$refPage->title;
+          updateScore($player, $remove, $removeComment, $refPage, '', $real);
+        }
+      }
     }
   } else { // Player died
     if ($player->level > 1) { // Lose 1 level
@@ -481,7 +493,7 @@ function nbFreedomActs($playerTeam, $startDate='', $endDate='') {
   $players = $pages->find("template=player, playerTeam=$playerTeam");
   $free = 0;
   foreach ($players as $p) {
-    $freeActs = $p->find("template=event, task.name=free, date>=$startDaten, date<=$endDate")->count();
+    $freeActs = $p->get("name=history")->find("template=event, task.name=free, date>=$startDaten, date<=$endDate")->count();
     $free = $free+$freeActs;
   }
 
