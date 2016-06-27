@@ -504,7 +504,7 @@
             } else { $out03='';}
             echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Exercices non faits ou à moitié faits"></span> Training problems :';
             echo ' <span class="">'.$pb.'</span>';
-            echo ' [<span data-toggle="tooltip" data-html="true" title="'.$out.'">'.$noHomework->count().' Hk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$halfHomework->count().' HalfHk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out03.'">'.$noSignature->count().' Signatures</span>]';
+            echo ' [<span data-toggle="tooltip" data-html="true" title="'.$out.'">'.$noHomework->count().' Hk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$halfHomework->count().' HalfHk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out03.'">'.$noSignature->count().' notSigned</span>]';
             echo ' ⇒ ';
             if ($pb >= 3) {
               echo '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-danger">RR</span>';
@@ -571,7 +571,7 @@
             }
             echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Travail supplémentaire : extra-homework, personal initiative, underground training..."></span> Personal motivation :';
             echo ' <span data-toggle="tooltip" data-html="true" title="'.$out.'"> ['.$extra->count().' extra - </span>';
-            echo ' <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$initiative->count().' personal initiative - </span>';
+            echo ' <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$initiative->count().' initiative - </span>';
             echo ' <span class="">'.$ut->count().' UT session(s)]</span>';
             echo ' ⇒ ';
             if ($all-$ut->count()>=8 || $ut->count()>=50) {
