@@ -270,7 +270,7 @@
         <div class="panel-footer">
             <?php
             if ($rightInvasions > 0 || $wrongInvasions > 0) {
-              echo 'Defensive power : <span>'.(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)';
+              echo 'Defensive power : <span>'.Math.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)';
             } else {
               echo 'You have not faced any monster invasion yet.';
             }

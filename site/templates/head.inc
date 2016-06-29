@@ -226,6 +226,8 @@
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Go to the Marketplace</a></li>";
               $class = $page->name == 'makedonation' ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('name=makeDonation')->url}'>Make a donation</a></li>";
+              $class = $page->name == 'quiz' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=quiz')->url}'>Prepare my defense</a></li>";
               $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
               // Check if memory helmet accessible in player's group
               if ($player->equipment->get("name=memory-helmet")) {

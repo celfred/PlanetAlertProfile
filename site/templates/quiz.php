@@ -2,6 +2,7 @@
 
 include("./head.inc"); 
 
+$out = '';
 if ($user->isSuperuser()) {
   // Nav tabs
   include("./tabList.inc"); 
@@ -33,7 +34,6 @@ if ($user->isSuperuser()) {
   $selectedIds = $input->post->selected; // Checked players
   $allPlayers = $pages->find("template='player', playerTeam=$selectedTeam, sort='name'");
   $allConcerned = $allPlayers->find("places.count>=3"); // Find players having at least 3 places
-  $out = '';
 
   if ( count($selectedIds) > 0 ) { // Players have been checked
     // Pick one
@@ -85,7 +85,8 @@ if ($user->isSuperuser()) {
         if ( $quiz['type'] === 'photo' ) {
           $out .= '<section class="text-center">';
           $placeId = $quiz['id'];
-          $photo = $pages->get("$placeId")->photo->getRandom();
+          $options = array('upscaling'=>false);
+          $photo = $pages->get("$placeId")->photo->getRandom()->size(300,300, $options);
             $out .= '<img src="'.$photo->url.'" alt="Photo" />';
           $out .= '</section>';
         }
@@ -101,6 +102,7 @@ if ($user->isSuperuser()) {
         $out .= '<button class="btn btn-success generateQuiz" type="submit" name="RightButton" value="right"><span class="glyphicon glyphicon-ok"></span> Right</button>';
         $out .= '&nbsp;&nbsp;';
         $out .= '<button class="btn btn-danger generateQuiz" type="submit" name="WrongButton" value="wrong"><span class="glyphicon glyphicon-remove"></span> Wrong</button>';
+        $out .= '</p>';
 
       $out .= '</div>';
     }
@@ -140,7 +142,43 @@ if ($user->isSuperuser()) {
   }
 
 } else {
-  $out = '<p>Admin only ;)</p>';
+  if ($user->isLoggedin()) {
+    $player = $pages->get("login=$user->name");
+
+    $quiz = pick_question($player);
+    $out .= '<div class="well quiz">';
+      $logo = $homepage->photo->eq(0)->getThumb('thumbnail');
+      $out .= '<img class="monster" src="'.$logo.'" />';
+      $out .= '<h3>Defensive preparation ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="This is a simple practice area. Click on \'Check answer\' below to see the solution. Then you can click on \'Next question\'. Stop the session when you\'re tired :)"></span></h3>';
+      $out .= '<h2 class="alert alert-danger text-center">';
+      $out .= $quiz['question'].'&nbsp;&nbsp;';
+      $out .= '</h2>';
+      // Display map if necessary
+      if ( $quiz['type'] === 'map' ) {
+        $out .= '<section class="">';
+        $out .= '<object id="worldMap" type="image/svg+xml" data="'.$config->urls->templates.'img/worldMap.svg" style="width: 100%; height: 400px; border:1px solid black; ">Your browser does not support SVG</object>';
+        $out .= '</section>';
+      }
+      // Display photo if necessary
+      if ( $quiz['type'] === 'photo' ) {
+        $out .= '<section class="text-center">';
+        $placeId = $quiz['id'];
+        $options = array('upscaling'=>false);
+        $photo = $pages->get("$placeId")->photo->getRandom()->size(300,300, $options);
+          $out .= '<img src="'.$photo->url.'" alt="Photo" />';
+        $out .= '</section>';
+      }
+      $out .= '<a id="showAnswer" class="label label-info lead">[Check answer]</a>';
+      $out .= '<h2 id="answer" class="lead text-center">';
+      $out .= $quiz['answer'];
+      $out .= ' <a class="btn btn-primary" href="'.$page->url.'">Next question</a>';
+      $out .= '</h2>';
+    $out .= '</div>';
+
+  } else {
+    $out = '<p>You need to be logged in to access this page.</p>';
+  }
+
 }
 
 echo $out;
