@@ -97,6 +97,7 @@
   $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="" /> HP</th>';
   $out .= '<th><img src="'.$config->urls->templates.'img/star.png" alt="" /> XP</th>';
   $out .= '<th data-toggle="tooltip" title="Places"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
+  $out .= '<th data-toggle="tooltip" title="People"><span class="glyphicon glyphicon-user"></span></th>';
   $out .= '<th data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Donation"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></td>';
   $out .= '<th data-toggle="tooltip" title="Underground training">U.T.</th>';
@@ -160,6 +161,17 @@
     } else {
       $tooltipPlaces = '';
     }
+    // People list
+    $listPeople .= '<ul>';
+    foreach ($player->people as $people) {
+      $listPeople .= '<li>'.$people->title.'</li>';
+    }
+    $listPeople .= '</ul>';
+    if ($player->people->count() > 0) {
+      $tooltipPeople =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listPeople.'"';
+    } else {
+      $tooltipPeople = '';
+    }
     // Equipment list
     $tooltipEquipment = '';
     $listEquipment = '<ul>';
@@ -197,6 +209,7 @@
     $out .= '</div>';
     $out .= '</td>';
     $out .= '<td '.$tooltipPlaces.'>'. $player->places->count() .'</td>';
+    $out .= '<td '.$tooltipPeople.'>'. $player->people->count() .'</td>';
     $out .= '<td '.$tooltipEquipment.'>'. $player->equipment->count() .'</td>';
     $out .= '<td>'. $player->donation .'</td>';
     $out .= '<td>'. $player->underground_training .'</td>';

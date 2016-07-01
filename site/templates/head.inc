@@ -125,6 +125,8 @@
               echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
               $class = $page->name == 'places' ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
+              $class = $page->name == 'people' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/people')->url}'>The People</a></li>";
               $class = ($page->name == 'tasks' || $page->template == 'task') ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
               $class = $page->name == 'monsters' ? " class='selected-left'" : "";
@@ -251,6 +253,8 @@
               echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
               $class = $page->name == 'places' ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
+              $class = $page->name == 'people' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/people')->url}'>The People</a></li>";
               $class = $page->name == 'tasks' ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
               $class = $page->name == 'monsters' ? " class='selected-left'" : "";

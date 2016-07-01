@@ -2,6 +2,7 @@
   $playerPage = $pages->get("template=player,name=".$input->urlSegment2);
   $playersTotalNb = $pages->count("template=player,playerTeam=$playerPage->playerTeam");
   $playerPlacesNb = $playerPage->places->count();
+  $playerPeopleNb = $playerPage->people->count();
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
   $rightInvasions = $allEvents->find("task.name=right-invasion")->count();
   $wrongInvasions = $allEvents->find("task.name=wrong-invasion")->count();
@@ -270,10 +271,37 @@
         <div class="panel-footer">
             <?php
             if ($rightInvasions > 0 || $wrongInvasions > 0) {
-              echo 'Defensive power : <span>'.Math.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)';
+              echo 'Defensive power : <span>'.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)';
             } else {
               echo 'You have not faced any monster invasion yet.';
             }
+            ?>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-12">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free people: <?php echo $playerPeopleNb; ?></span></h4>
+        </div>
+        <div class="panel-body">
+            <ul class="playerPlaces list-inline">
+            <?php
+              foreach($playerPage->people as $p) {
+                $thumbImage = $p->photo->eq(0)->getThumb('thumbnail');
+                echo "<li><a href='{$p->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$p->title<br />$p->summary' /></a></li>";
+              }
+            ?>
+            </ul>
+        </div>
+        <div class="panel-footer">
+            <?php
+            /* if ($rightInvasions > 0 || $wrongInvasions > 0) { */
+            /*   echo 'Defensive power : <span>'.Math.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)'; */
+            /* } else { */
+            /*   echo 'You have not faced any monster invasion yet.'; */
+            /* } */
             ?>
         </div>
       </div>

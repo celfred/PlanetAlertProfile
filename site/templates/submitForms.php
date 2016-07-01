@@ -14,7 +14,7 @@
       $newItem = $pages->get($itemId);
     }
 
-    // Check if equipment or place not already there
+    // Check if equipment, place or people not already there
     // Except 'Potions'
     $already = false;
     $player = $pages->get($playerId);
@@ -26,6 +26,11 @@
       }
     }
     foreach ($player->places as $pl) {
+      if ($pl->id == $itemId) {
+        $already = true;
+      }
+    }
+    foreach ($player->people as $pl) {
       if ($pl->id == $itemId) {
         $already = true;
       }
@@ -58,7 +63,7 @@
           if ($newItem->template == 'equipment' || $newItem->template == 'item') {
             $task = $pages->get("name='buy'");
           }
-          if ($newItem->template == 'place') {
+          if ($newItem->template == 'place' || $newItem->template == 'people') {
             $task = $pages->get("name='free'");
           }
 
@@ -93,11 +98,6 @@
           $taskComment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->playerTeam.']';
           updateScore($player, $task, $taskComment, $receiver, '', true);
 
-          // Modify receiver's page
-          /* $task = $pages->get("template='task', name='donated'"); */
-          /* $taskComment = $amount. ' GC received from '.$player->title.' ['.$player->playerTeam.']'; */
-          /* updateScore($receiver, $task, $taskComment, $player, '', true); */
-          
           // Notify admin
           $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
           $msg .= "Donation amount : ". $amount."\r\n";
@@ -170,7 +170,7 @@
         $refPage = $pages->get($item);
         
         // Update player's scores and save
-        if ($refPage->template == 'place') {
+        if ($refPage->is("template=place|people")) {
           $task = $pages->get("name=free");
         }
         if ($refPage->is("template=equipment|item")) {

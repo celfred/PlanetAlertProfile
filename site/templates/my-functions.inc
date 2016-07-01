@@ -151,6 +151,10 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         if ($refPage->is("template=place")) {
           $player->places->add($refPage);
         }
+        // Add people if needed
+        if ($refPage->is("template=people")) {
+          $player->people->add($refPage);
+        }
       }
     }
     if ($task->is("name=group-death|team-death")) { // No death because of others
@@ -518,6 +522,14 @@ function placeFreedomRate($place, $allPlayers) {
   $maxOwners = $place->maxOwners;
   $placeId = $place->id;
   $teamOwners = $allPlayers->find("places=$placeId")->count();
+  $rate = (100*$teamOwners)/$maxOwners;
+
+  return $rate;
+}
+
+function peopleFreedomRate($element, $allPlayers) {
+  $maxOwners = $element->maxOwners;
+  $teamOwners = $allPlayers->find("people=$element->id")->count();
   $rate = (100*$teamOwners)/$maxOwners;
 
   return $rate;

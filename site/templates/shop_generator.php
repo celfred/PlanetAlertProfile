@@ -7,6 +7,7 @@ if (!$config->ajax) {
 
 $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");
 $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
+$allPeople = $pages->find("template=people, name!=people, sort=title");
 
 $playerId = $input->urlSegment1;
 $player = $pages->get($playerId);
@@ -33,10 +34,18 @@ foreach($possiblePlaces as $place) {
     $possiblePlaces->remove($place);
   }
 }
+// Possible people
+$possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name");
+// Delete completed people
+foreach($possiblePeople as $people) {
+  if (peopleFreedomRate($people, $allPlayers) === 100) {
+    $possiblePeople->remove($people);
+  }
+}
 
 $out .= '<section class="row">';
-$out .= "<ul class='itemList col-md-6'><h3>Possible equipment</h3>";
-if ( $possibleEquipment.count() > 0) {
+$out .= "<ul class='itemList col-md-6'>";
+if ( $possibleEquipment->count() > 0) {
   foreach($possibleEquipment as $item) {
     // List items by category
     if ($item->parent->name !== $lastCat) {
@@ -72,8 +81,9 @@ foreach($possiblePotions as $item) {
 $out .= "</ul>";
 
 
-if ( $possiblePlaces.count() > 0) {
-  $out .= "<ul class='itemList col-md-6'><h3>Possible places</h3>";
+if ( $possiblePlaces->count() > 0) {
+  $out .= "<ul class='itemList col-md-6'>";
+  $out .= '<li class="label label-primary">Possible Places</li>';
   foreach($possiblePlaces as $item) {
     $out .= '<li>';
     $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->country->title.'] ['.$item->GC.'GC]</label></li>';
@@ -82,6 +92,22 @@ if ( $possiblePlaces.count() > 0) {
 } else {
   $out .= "<ul class='itemList col-md-6'>";
   $out .= "<li><h3>No place to free!</h3></li>";
+  $out .= "</ul>";
+}
+if ( $possiblePeople->count() > 0) {
+  $out .= "<ul class='itemList col-md-6'>";
+  $out .= "<li class='label label-primary'>Possible People</li>";
+  foreach($possiblePeople as $item) {
+    $out .= '<li>';
+    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->GC.'GC]</label></li>';
+    /* if ($item->photo) { */
+    /*   $out .= ' <img src="'.$item->photo->eq(0)->getThumb('mini').'" alt="Image" /> '; */
+    /* } */
+  }
+  $out .= "</ul>";
+} else {
+  $out .= "<ul class='itemList col-md-6'>";
+  $out .= "<li><h3>No people to free!</h3></li>";
   $out .= "</ul>";
 }
 $out .= '</section>';
