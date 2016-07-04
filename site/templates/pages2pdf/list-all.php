@@ -56,7 +56,7 @@ if ($input->urlSegment2) { // Player details
 
   $out .= '<div style="margin-top: 10px; text-align: center; background-color: #C366FF; padding: 5px;">';
   $out .= '<div style="padding: 0px; background-color: #FFF; border-radius: 20px 20px 0px 0px;">';
-  $out .= '<h3 style="margin: 0px;">My Places / My People</h3>';
+  $out .= '<h3 style="margin: 0px;">My Acts of Freedom</h3>';
   for ($i=0; $i<$allElements->count(); $i+=2) {
     if (in_array($i, [6, 11, 16, 21, 26])) {
       $out .= '</div>';
@@ -64,7 +64,7 @@ if ($input->urlSegment2) { // Player details
       $out .= '<pagebreak />';
       $out .= '<div style="margin-top: 10px; text-align: center; background-color: #C366FF; padding: 5px;">';
       $out .= '<div style="padding: 0px; background-color: #FFF; border-radius: 20px 20px 0px 0px;">';
-      $out .= '<h3>My Places / My People</h3>';
+      $out .= '<h3>My Acts of Freedom</h3>';
     }
     $e = $allElements->eq($i);
     $nextEl = $allElements->eq($i+1);
@@ -80,7 +80,7 @@ if ($input->urlSegment2) { // Player details
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
-    $out .= '<th colspan="2" style="width: 4.5cm;">'.$e->title.'</th>';
+    $out .= '<th colspan="2" style="width: 4.5cm; height:0.7cm;">'.$e->title.'</th>';
 
     if ($nextEl) {
       $out .= '<td class="empty" style="width: 0.5cm;">&nbsp;</td>';
@@ -106,7 +106,7 @@ if ($input->urlSegment2) { // Player details
     $out .= '<td style="">&nbsp;</td>';
     if ($e->template == 'people') { $field = $e->nationality; }
     if ($e->template == 'place') { $field = $e->city->title; }
-    $out .= '<th style="width: 2cm;">'.$field.'</th>';
+    $out .= '<th style="width: 2cm; height:0.7cm;">'.$field.'</th>';
     $out .= '<th style="width: 2cm;">'.$e->country->title.'</th>';
 
     if ($nextEl) {
@@ -128,7 +128,7 @@ if ($input->urlSegment2) { // Player details
 
 
     $out .= '<tr>';
-    $out .= '<td colspan="8" style="width:2cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
+    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
     $out .= '<td colspan="2" style="width:7cm;">'.$e->summary.'</td>';
 
     if ($nextEl) {
