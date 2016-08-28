@@ -173,7 +173,11 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
 
           $out = '';
           $team = $input->urlSegment1;
-          $allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
+          if ($team != 'no-team') {
+            $allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
+          } else {
+            $allPlayers = $pages->find("template='player', playerTeam='', sort='title'");
+          }
           // Select form
           $out .= '<select class="" id="shopSelect" name="shopSelect">';
             $out .= '<option value="">Select a player</option>';

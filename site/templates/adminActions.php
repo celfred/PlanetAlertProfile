@@ -198,7 +198,7 @@
     } else {
       $endDate = $endDate.' 23:59:59';
     }
-    if ($action == 'toggle-lock') {
+    if ($action == 'toggle-lock' || $action == 'archive') {
       $type = 'team';
     }
 
@@ -667,6 +667,39 @@
         }
         $page->save();
         break;
+      case 'archive':
+        $allPlayers = $pages->find("template=player, playerTeam=$selectedTeam");
+        foreach($allPlayers as $p) {
+          $currentHistory = $p->children()->get("name=history");
+          $counter = $p->children()->count();
+          if ($counter > 0 && $currentHistory) {
+            $currentHistory->of(false);
+            // Save scores
+            $currentHistory->name = 'history-'.$counter;
+            $currentHistory->title = 'history-'.$counter;
+            $currentHistory->playerTeam = $p->playerTeam;
+            $currentHistory->rank = $p->rank;
+            $currentHistory->karma = $p->karma;
+            $currentHistory->level = $p->level;
+            $currentHistory->HP = $p->HP;
+            $currentHistory->XP = $p->XP;
+            $currentHistory->GC = $p->GC;
+            $currentHistory->underground_training = $p->underground_training;
+            $currentHistory->fighting_power = $p->fighting_power;
+            $currentHistory->donation = $p->donation;
+            $currentHistory->equipment = $p->equipment;
+            $currentHistory->places = $p->places;
+            $currentHistory->save();
+          }
+          // 'Init' player
+          $p->of(false);
+          $p->HP = 50;
+          $p->playerTeam = '';
+          $p->group = '';
+          $p->rank = '';
+          $p->save();
+        }
+        break;
       case 'trash' :
         $event = $pages->get($confirm); // urlSegment3 used for eventId
         $pages->trash($event);
@@ -773,9 +806,14 @@
             $status = '';
           }
           $out .= '<ul>';
-          $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label></li>';
+          $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
+
+          $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> Archive</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
           $out .= '</ul>';
-          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
         } else {
           $out .= '<p>You need to select a team for more options.</p>';
         }

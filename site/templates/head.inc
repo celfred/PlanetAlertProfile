@@ -56,7 +56,8 @@
         if ($player->playerTeam == '' && !in_array('No team', $allTeams)) {
           array_push($allTeams, 'No team'); 
         } else {
-          if ($player->playerTeam != '' && $player->playerTeam != 'testTeam') {
+          /* if ($player->playerTeam != '' && $player->playerTeam != 'testTeam') { */
+          if ($player->playerTeam != '') {
             array_push($allTeams, $player->playerTeam); 
           }
         }
@@ -99,10 +100,15 @@
 											if ($player->playerTeam == $team) {
 												echo "<li><a href='{$homepage->url}players/{$sanitizer->pageName($player->playerTeam)}/{$player->name}'>{$player->title}</a></li>";
 											}
+											if ($player->playerTeam == '' && $team == 'No team') {
+												echo "<li><a href='{$homepage->url}players/no-team/{$player->name}'>{$player->title}</a></li>";
+											}
 										}
                     echo "</ul>";
                     echo "</li>";
-                    echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team)}'>{$team} world</a></li>";
+										if ($player->playerTeam != '') {
+											echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team)}'>{$team} world</a></li>";
+										}
                     echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team)}'>{$team} marketplace</a></li>";
                     echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team)}'>{$team} adminTable</a></li>";
                     echo "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team)}'>{$team} monster invasions</a></li>";
@@ -213,8 +219,10 @@
             echo "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
             $class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
             echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}/{$player->name}'>My Profile</a>";
-            $class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}'>My Team</a>";
+						if ($player->playerTeam != '') {
+							$class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
+							echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}'>My Team</a>";
+						}
           ?>
 
           <div class="btn-group">
