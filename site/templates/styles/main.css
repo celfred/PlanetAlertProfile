@@ -265,6 +265,11 @@ img.superpose {
   left: 0px;
 	z-index: 11;
 }
+.player-details li {
+	margin : 5px;
+	margin-left: -20px;
+	font-size : 1.2em;
+}
 .damage {
   border: 3px solid #000;
   background: #FFF;

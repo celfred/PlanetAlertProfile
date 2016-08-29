@@ -631,6 +631,9 @@ function getPosition($player, $field) {
     case 'places' :
       $allPlayers = $pages->find("template=player, sort=-places.count, sort=-karma, places.count>0");
       break;
+    case 'people' :
+      $allPlayers = $pages->find("template=player, sort=-people.count, sort=-karma, people.count>0");
+      break;
     case 'fighting_power' :
       $allPlayers = $pages->find('template=player, sort=-fighting_power, sort=-karma, fighting_power>0');
       break;

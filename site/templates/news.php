@@ -51,7 +51,7 @@
     <div class="panel panel-success">
       <div class="panel-heading">
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Free Places</h4>
+        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Places</h4>
       </div>
       <div class="panel-body">
         <ol>
@@ -74,6 +74,34 @@
               } else {
                 echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->places->count.' place</span></li>';
               }
+          }
+        ?>
+        </ol>
+      </div>
+    </div>
+
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of People</h4>
+      </div>
+      <div class="panel-body">
+        <ol>
+          <?php
+            $players = $pages->find('template=player, name!=test, sort=-people.count, sort=-karma, people.count>0, limit=10');
+            foreach($players as $player) {
+              if ($player->avatar) {
+                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
+              } else {
+                $mini = '';
+              }
+              if ($player->login == $user->name) {
+                $focus = "class='focus'";
+              } else {
+                $focus = "";
+              }
+              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
+              echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->people->count.' people</span></li>';
           }
         ?>
         </ol>
@@ -334,7 +362,13 @@
                 echo date("F j (l)", $n->date).' : ';
                 echo '<span>';
                 switch ($n->task->category->name) {
-                case 'place' : echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'place' :
+                if ($n->refPage->template == 'place') {
+                  echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                }
+                if ($n->refPage->template == 'people') {
+                  echo '<span class="">New people for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                }
                   break;
                 case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                   break;
@@ -375,9 +409,10 @@
           echo '&nbsp;&nbsp;';
           echo '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
           echo '&nbsp;&nbsp;';
-          echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->places->count().'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
+          $freeElements = $player->places->count()+$player->people->count();
+          echo '<span class="label label-info" data-toggle="tooltip" title="Free places/people">'.$freeElements.'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
           echo '&nbsp;&nbsp;';
-          echo '<span class="label label-info" data-toggle="tooltip" title="Free places">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>';
+          echo '<span class="label label-info" data-toggle="tooltip" title="Equipment">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>';
           echo '&nbsp;&nbsp;';
           if ($player->donation == false) {$player->donation = 0; }
           echo '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
@@ -665,7 +700,8 @@
 
       // Last 15 public news
       $excluded = $pages->find('name=test|admin');
-      $news = $pages->find("template=event, sort=-date, limit=15, task=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+      $included = $pages->find("name=history, has_parent!=$excluded");
+      $news = $pages->find("template=event, sort=-date, limit=15, task=free|buy|ut-action-v|ut-action-vv, has_parent=$included");
       if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">
@@ -690,7 +726,13 @@
               echo date("F j (l)", $n->date).' : ';
               echo '<span>';
               switch ($n->task->category->name) {
-              case 'place' : echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'place' : 
+                if ($n->refPage->template == 'place') {
+                  echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                }
+                if ($n->refPage->template == 'people') {
+                  echo '<span class="">New people for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                }
                 break;
               case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
                 break;
@@ -710,7 +752,7 @@
       </div>
       <?php
       } else {
-        echo '<h4 class="well">No player\'s news... :(</h4>';
+        echo '<h4 class="well">No public news... :(</h4>';
       }
     ?>
   </div>

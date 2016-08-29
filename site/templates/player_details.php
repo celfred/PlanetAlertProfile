@@ -51,11 +51,12 @@
             <img src="<?php if ($playerPage->avatar) echo $playerPage->avatar->url; ?>" alt="No avatar" />
           </div>
           <div class="col-sm-6">
-            <h3>Karma : <span class="label label-default"><?php echo $karma; ?></span> <span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span></h3>
-            <br />
-            <h4><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></h4>
-            <br />
-            <h4><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></h4>
+            <ul class="player-details">
+            <li>Karma : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->playerTeam != '') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
+            <li>Level : <?php echo $player->level; ?></li>
+            <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></li>
+            <li><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></li>
+            </ul>
           </div>
           </div>
           <div class="col-sm-2 text-right">
@@ -106,7 +107,6 @@
           ?>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -191,6 +191,20 @@
               echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
               echo 'Greatest # of places : No ranking.</p></li>';
             }
+            // Greatest # of people (people)
+            list($playerPos, $totalPlayers) = getPosition($playerPage, 'people');
+            if ($playerPos) {
+              if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Greatest # of people : '.$playerPos.'/'.$totalPlayers.' '.$star.'</p></li>';
+            } else {
+              echo '<li>';
+              echo '<p>';
+              echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
+              echo 'Greatest # of people : No ranking.</p></li>';
+            }
             // Best warrior (fighting_power)
             list($playerPos, $totalPlayers) = getPosition($playerPage, 'fighting_power');
             if ($playerPos) {
@@ -251,7 +265,7 @@
               echo '<li>';
               echo '<p>';
               echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a> ';
-              echo 'Most trained : No ranking.';
+              echo 'Most active groups : No ranking.';
               echo '</p></li>';
             }
           ?>
@@ -263,8 +277,9 @@
     <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
-          <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free places: <?php echo $playerPlacesNb; ?></span></h4>
+          <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free elements : <?php echo $playerPlacesNb+$playerPeopleNb; ?></span></h4>
         </div>
+          <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free places </span></h4>
         <div class="panel-body">
             <ul class="playerPlaces list-inline">
             <?php
@@ -274,7 +289,24 @@
               }
             ?>
             </ul>
+
+            <?php
+              if ($playerPage->rank->name == '4emes' || $playerPage->rank->name == '3emes') {
+            ?>
+            <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free people </span></h4>
+            <ul class="playerPlaces list-inline">
+            <?php
+              foreach($playerPage->people as $p) {
+                $thumbImage = $p->photo->eq(0)->getThumb('thumbnail');
+                echo "<li><a href='{$p->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$p->title<br />$p->summary' /></a></li>";
+              }
+            ?>
+            </ul>
         </div>
+        <?php } else { ?>
+          <p class="badge badge-danger">People are available for 4emes and 3emes only.</p>
+        <?php } ?>
+
         <div class="panel-footer">
             <?php
             if ($rightInvasions > 0 || $wrongInvasions > 0) {
@@ -286,34 +318,6 @@
         </div>
       </div>
     </div>
-
-    <div class="col-sm-12">
-      <div class="panel panel-success">
-        <div class="panel-heading">
-          <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free people: <?php echo $playerPeopleNb; ?></span></h4>
-        </div>
-        <div class="panel-body">
-            <ul class="playerPlaces list-inline">
-            <?php
-              foreach($playerPage->people as $p) {
-                $thumbImage = $p->photo->eq(0)->getThumb('thumbnail');
-                echo "<li><a href='{$p->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$p->title<br />$p->summary' /></a></li>";
-              }
-            ?>
-            </ul>
-        </div>
-        <div class="panel-footer">
-            <?php
-            /* if ($rightInvasions > 0 || $wrongInvasions > 0) { */
-            /*   echo 'Defensive power : <span>'.Math.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)'; */
-            /* } else { */
-            /*   echo 'You have not faced any monster invasion yet.'; */
-            /* } */
-            ?>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <?php
     if ($user->name === $playerPage->login || ($user->isSuperuser())) { // Logged-in user or Admin front-end
@@ -358,7 +362,11 @@
                   echo $class;
                   echo "</td>";
                   echo "<td>";
-                  echo "{$event->task->category->title}";
+                  /* echo "{$event->task->category->title}"; */
+                  if ($event->name == 'freeing') {
+                    if ($event->refPage->template == 'place') { echo 'Place'; }
+                    if ($event->refPage->template == 'people') { echo 'People'; }
+                  }
                   echo "</td>";
                   if ($user->isSuperuser()) {
                     echo "<td>".$event->title."</td>";

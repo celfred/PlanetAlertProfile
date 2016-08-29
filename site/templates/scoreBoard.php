@@ -13,6 +13,11 @@
       $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
       $players = $pages->find("template=player, sort=-places.count, sort=-karma, places.count>0");
       break;
+    case 'people' :
+      $title = 'Greatest # of people';
+      $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+      $players = $pages->find("template=player, sort=-people.count, sort=-karma, people.count>0");
+      break;
     case 'fighting_power' :
       $title = 'Best warriors';
       $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
@@ -71,6 +76,10 @@
                 case 'places' :
                   $indicator = $player->places->count;
                   $tag = 'places';
+                  break;
+                case 'people' :
+                  $indicator = $player->people->count;
+                  $tag = 'people';
                   break;
                 case 'fighting_power' :
                   $indicator = $player->fighting_power;
