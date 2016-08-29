@@ -30,6 +30,13 @@
   }
 ?>
 
+<?php
+  if ($user->isSuperuser()) {
+    echo '<div class="row">';
+    echo '<a class="pdfLink btn btn-info" href="' . $page->url.$input->urlSegment1.'/'.$input->urlSegment2.'/'.$input->urlSegment3. '?pages2pdf=1">Get PDF</a>';
+    echo '</div>';
+  }
+?>
 <div>
   <div class="row">
     <div class="col-sm-12">

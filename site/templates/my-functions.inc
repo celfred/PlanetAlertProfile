@@ -39,6 +39,7 @@ function initPlayer($player) {
   $player->places->removeAll();
   return $player;
 }
+
 function updateScore($player, $task, $comment = '', $refPage = '', $linkedId ='', $real = true) {
   $pages = wire('pages');
   $player = $pages->get($player->id);
@@ -418,9 +419,9 @@ function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $e
   if (!$history->id) { // Creation of history page if doesn't exist
     $history = new Page();
     $history->parent = $player;
-    $history->template = 'basic-page';
+    $history->template = 'archive';
     $history->name = 'history';
-    $history->title = 'History';
+    $history->title = 'history';
     $history->save();
   }
   $p->parent = $history;

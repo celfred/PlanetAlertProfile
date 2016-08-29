@@ -92,24 +92,24 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '<table class="miniTable">';
     $out .= '<tr>';
     $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<th colspan="2">'.$page->title.'</th>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<th colspan="2" style="width:4.5cm; height:0.7cm;">'.$page->title.'</th>';
 
-    $out .= '<td class="empty">&nbsp;&nbsp;&nbsp;</td>';
+    $out .= '<td class="empty" style="width:0.5cm">&nbsp;</td>';
 
     $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
-    $out .= '<th colspan="2">'.$page->title.'</th>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<th colspan="2" style="width:4.5cm;">'.$page->title.'</th>';
     $out .= '</tr>';
 
     $out .= '<tr>';
@@ -119,10 +119,12 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
-    $out .= '<th>'.$page->city->title.'</th>';
-    $out .= '<th>'.$page->country->title.'</th>';
+    if ($page->template == 'people') { $field = $page->nationality; }
+    if ($page->template == 'place') { $field = $page->city->title; }
+    $out .= '<th style="width: 2cm; height:0.7cm;">'.$field.'</th>';
+    $out .= '<th style="width: 2cm;">'.$page->country->title.'</th>';
 
-    $out .= '<td class="empty">&nbsp;&nbsp;&nbsp;</td>';
+    $out .= '<td class="empty" style="width:0.5cm;">&nbsp;</td>';
 
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
@@ -130,18 +132,36 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
-    $out .= '<th>'.$page->city->title.'</th>';
-    $out .= '<th>'.$page->country->title.'</th>';
+    if ($page->template == 'people') { $field = $page->nationality; }
+    if ($page->template == 'place') { $field = $page->city->title; }
+    $out .= '<th style="width: 2cm; height:0.7cm;">'.$field.'</th>';
+    $out .= '<th style="width: 2cm;">'.$page->country->title.'</th>';
     $out .= '</tr>';
 
     $out .= '<tr>';
-    $out .= '<td colspan="8"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
-    $out .= '<td colspan="2">'.$page->summary.'</td>';
+    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
+    $textLength = strlen($page->summary);
+    $fontSize = '10px;';
+    if ($textLength >= 600) { $fontSize = '8px'; }
+    if ($textLength >= 500 && $textLength < 600) { $fontSize = '10px'; }
+    if ($textLength >= 400 && $textLength < 500) { $fontSize = '11px'; }
+    if ($textLength >= 300 && $textLength < 400) { $fontSize = '12px'; }
+    if ($textLength >= 200 && $textLength < 300) { $fontSize = '14px'; }
+    if ($textLength < 200) { $fontSize = '16px'; }
+    $out .= '<td colspan="2" style="width:7cm; font-size:'.$fontSize.';">'.$page->summary.'</td>';
 
-    $out .= '<td class="empty">&nbsp;&nbsp;&nbsp;</td>';
+    $out .= '<td class="empty" style="width:0.5cm;">&nbsp;</td>';
 
-    $out .= '<td colspan="8"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
-    $out .= '<td colspan="2">'.$page->summary.'</td>';
+    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
+    $textLength = strlen($page->summary);
+    $fontSize = '10px;';
+    if ($textLength >= 600) { $fontSize = '8px'; }
+    if ($textLength >= 500 && $textLength < 600) { $fontSize = '10px'; }
+    if ($textLength >= 400 && $textLength < 500) { $fontSize = '11px'; }
+    if ($textLength >= 300 && $textLength < 400) { $fontSize = '12px'; }
+    if ($textLength >= 200 && $textLength < 300) { $fontSize = '14px'; }
+    if ($textLength < 200) { $fontSize = '16px'; }
+    $out .= '<td colspan="2" style="width:7cm; font-size:'.$fontSize.';">'.$page->summary.'</td>';
     $out .= '</tr>';
 
     $out .= '</table>';

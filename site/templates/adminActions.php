@@ -198,7 +198,7 @@
     } else {
       $endDate = $endDate.' 23:59:59';
     }
-    if ($action == 'toggle-lock') {
+    if ($action == 'toggle-lock' || $action == 'archive') {
       $type = 'team';
     }
 
@@ -223,35 +223,46 @@
     switch ($action) {
       case 'script' :
         $allPlayers = $pages->find("template=player");
+        $allUsers = $pages->find("template=user")->not("name=guest|admin");
+        $counter = 0;
         $out .= '<ul>';
-        foreach($allPlayers as $p) {
-          $allEvents = $p->get("name=history")->children("task.name=test-rr|test-r|test-v|test-vv|right-invasion|wrong-invasion");
-          $fighting_power = 0;
-          foreach($allEvents as $e) {
-            switch ($e->task->name) {
-              case 'test-rr' : $fighting_power -= 2;
-                break;
-              case 'test-r' : $fighting_power -= 1;
-                break;
-              case 'wrong-invasion' : $fighting_power -= 1;
-                break;
-              case 'test-v' : $fighting_power += 1;
-                break;
-              case 'right-invasion' : $fighting_power += 1;
-                break;
-              case 'test-vv' : $fighting_power += 2;
-                break;
-              default: $fighting_power += 1;
-            }
-
+        foreach($allUsers as $u) {
+          $u->of(false);
+          if ($allPlayers->get("login=$u->name")) {
+            $out .= '<li>'.$u->name.' : OK</li>';
+          } else {
+            $out .= '<li>'.$u->name.' : Not OK</li>';
+            /* $users->delete($u); */
           }
-          $out .= '<li>'.$p->title. '['.$p->playerTeam.'] → '.$fighting_power.'</li>';
-          if ($fighting_power < 0) { $fighting_power = 0; }
-          $p->fighting_power = $fighting_power;
-          $p->of(false);
-          $p->save();
+          $counter++;
+          /* $allEvents = $p->get("name=history")->children("task.name=test-rr|test-r|test-v|test-vv|right-invasion|wrong-invasion"); */
+          /* $fighting_power = 0; */
+          /* foreach($allEvents as $e) { */
+          /*   switch ($e->task->name) { */
+          /*     case 'test-rr' : $fighting_power -= 2; */
+          /*       break; */
+          /*     case 'test-r' : $fighting_power -= 1; */
+          /*       break; */
+          /*     case 'wrong-invasion' : $fighting_power -= 1; */
+          /*       break; */
+          /*     case 'test-v' : $fighting_power += 1; */
+          /*       break; */
+          /*     case 'right-invasion' : $fighting_power += 1; */
+          /*       break; */
+          /*     case 'test-vv' : $fighting_power += 2; */
+          /*       break; */
+          /*     default: $fighting_power += 1; */
+          /*   } */
+
+          /* } */
+          /* $out .= '<li>'.$p->title. '['.$p->playerTeam.'] → '.$fighting_power.'</li>'; */
+          /* if ($fighting_power < 0) { $fighting_power = 0; } */
+          /* $p->fighting_power = $fighting_power; */
+          /* $p->of(false); */
+          /* $p->save(); */
         }
         $out .= '</ul>';
+        $out .= '<p>'.$counter.'</p>';
         break;
       case 'refPage' :
         $out .= 'Total # of players : '.$allPlayers->count();
@@ -667,6 +678,39 @@
         }
         $page->save();
         break;
+      case 'archive':
+        $allPlayers = $pages->find("template=player, playerTeam=$selectedTeam");
+        foreach($allPlayers as $p) {
+          $currentHistory = $p->children()->get("name=history");
+          $counter = $p->children()->count();
+          if ($counter > 0 && $currentHistory) {
+            $currentHistory->of(false);
+            // Save scores
+            $currentHistory->name = 'history-'.$counter;
+            $currentHistory->title = 'history-'.$counter;
+            $currentHistory->playerTeam = $p->playerTeam;
+            $currentHistory->rank = $p->rank;
+            $currentHistory->karma = $p->karma;
+            $currentHistory->level = $p->level;
+            $currentHistory->HP = $p->HP;
+            $currentHistory->XP = $p->XP;
+            $currentHistory->GC = $p->GC;
+            $currentHistory->underground_training = $p->underground_training;
+            $currentHistory->fighting_power = $p->fighting_power;
+            $currentHistory->donation = $p->donation;
+            $currentHistory->equipment = $p->equipment;
+            $currentHistory->places = $p->places;
+            $currentHistory->save();
+          }
+          // 'Init' player
+          $p->of(false);
+          $p->HP = 50;
+          $p->playerTeam = '';
+          $p->group = '';
+          $p->rank = '';
+          $p->save();
+        }
+        break;
       case 'trash' :
         $event = $pages->get($confirm); // urlSegment3 used for eventId
         $pages->trash($event);
@@ -773,9 +817,14 @@
             $status = '';
           }
           $out .= '<ul>';
-          $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label></li>';
+          $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
+
+          $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> Archive</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
           $out .= '</ul>';
-          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
         } else {
           $out .= '<p>You need to select a team for more options.</p>';
         }

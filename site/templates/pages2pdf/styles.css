@@ -40,14 +40,17 @@ span.label-info {
 }
 
 table.miniTable {
-  float: right;
-  width: 350px;
-  font-size: 9px;
-  margin: 20px;
+  /* float: right; */
+  /* width: 350px; */
+  /* font-size: 9px; */
+  margin: 5px;
   border: 0px;
 }
 table.miniTable td {
   border: 1px solid #000;
+}
+table.miniTable td.summary {
+	padding: 0px;
 }
 table.miniTable td.empty {
   border: 0;
