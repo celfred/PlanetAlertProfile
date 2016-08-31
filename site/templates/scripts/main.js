@@ -425,6 +425,22 @@ $(document).ready(function() {
 		// return confirm("Click OK to continue?");
 	})
 
+	if ($('div.ajax')) {
+		var timer = 500;
+		$('div.ajax').each( function() {
+			var type = $(this).attr('data-ajax');
+			var url = $(this).attr('data-href');
+			setTimeout( function() { getFromAjax(url, type); }, timer);
+			timer += 500;
+		});
+	}
+	function getFromAjax(url, type) {
+    $.get(url+'?type='+type, function(data) { 
+        $("#"+type).html(data); 
+    }); 
+    return false; 
+	}
+
 }); 
 
 // Hide rows functions

@@ -730,37 +730,41 @@ function groupScoreBoard($limit) {
     $limit = $allGroups->count();
   }
   $index = 0;
-  foreach( $allGroups as $group) {
-    if ($index < $limit) {
-      if ($loggedGroup == $group->name) {
-        $focus = "class='focus'";
+  if ($allGroups->count() > 0) {
+    foreach( $allGroups as $group) {
+      if ($index < $limit) {
+        if ($loggedGroup == $group->name) {
+          $focus = "class='focus'";
+        } else {
+          $focus = "";
+        }
+        $outGroups .= '<li>';
+        $outGroups .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+        $outGroups .= $group->title.' ['.$group->team.']</span> <span class="badge">'.$group->karma.'</span>';
+        // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
+        $starsGroups = floor($group->nbBonus/5);
+        if ( $starsGroups < 1) {
+          for ($i=0; $i<$group->nbBonus; $i++) {
+            $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
+          }
+        } else {
+          for ($i=0; $i<$starsGroups; $i++) {
+            $outGroups .= ' <span class="glyphicon glyphicon-star"></span>';
+          }
+          $group->nbBonus = $group->nbBonus - $starsGroups*5;
+          for ($i=0; $i<$group->nbBonus; $i++) {
+            $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
+          }
+        }
+        $outGroups .= '</p>';
+        $outGroups .= '</li>';
+        $index++;
       } else {
-        $focus = "";
+        return $outGroups;
       }
-      $outGroups .= '<li>';
-      $outGroups .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
-      $outGroups .= $group->title.' ['.$group->team.']</span> <span class="badge">'.$group->karma.'</span>';
-      // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
-      $starsGroups = floor($group->nbBonus/5);
-      if ( $starsGroups < 1) {
-        for ($i=0; $i<$group->nbBonus; $i++) {
-          $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-        }
-      } else {
-        for ($i=0; $i<$starsGroups; $i++) {
-          $outGroups .= ' <span class="glyphicon glyphicon-star"></span>';
-        }
-        $group->nbBonus = $group->nbBonus - $starsGroups*5;
-        for ($i=0; $i<$group->nbBonus; $i++) {
-          $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-        }
-      }
-      $outGroups .= '</p>';
-      $outGroups .= '</li>';
-      $index++;
-    } else {
-      return $outGroups;
     }
+  } else {
+    $outGroups .= '<li>No groups yet.</li>';
   }
 
   return $outGroups;

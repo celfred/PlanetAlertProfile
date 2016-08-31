@@ -2,16 +2,18 @@
 
   include("./head.inc"); 
 
-  $totalPlaces = $pages->find("template='place', name!='places'");
+  $totalPlaces = $pages->find("template=place, name!=places");
+  $allPlayers = $pages->find("template=player, name!=test");
 
+  // Display Personal Mission Analyzer if user is logged in
   if ($user->isLoggedin() && $user->isSuperuser()==false) {
     $helmet = $player->equipment->get("name=memory-helmet");
     if ($helmet->id) {
-      // Display Personal Mission Analyzer
       echo pma($pages->get("login=$user->name"));
     }
   }
 
+  // Display team scores
   echo '<div class="row">';
     displayScores($allTeams);
   echo '</div>';
@@ -25,26 +27,8 @@
       <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
       <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
       </div>
-      <div class="panel-body">
-        <ol>
-          <?php
-            $players = $pages->find('template=player, name!=test, sort=-karma, karma>0, limit=10');
-            foreach($players as $player) {
-              if ($player->avatar) {
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
-              } else {
-                $mini = '';
-              }
-              if ($player->login == $user->name) {
-                $focus = "class='focus'";
-              } else {
-                $focus = "";
-              }
-              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->karma.' karma</span></li>';
-            }
-          ?>
-        </ol>
+      <div id="karma" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="karma">
+        Loading...
       </div>
     </div>
 
@@ -53,30 +37,8 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Places</h4>
       </div>
-      <div class="panel-body">
-        <ol>
-          <?php
-            $players = $pages->find('template=player, name!=test, sort=-places.count, sort=-karma, places.count>0, limit=10');
-            foreach($players as $player) {
-              if ($player->avatar) {
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
-              } else {
-                $mini = '';
-              }
-              if ($player->login == $user->name) {
-                $focus = "class='focus'";
-              } else {
-                $focus = "";
-              }
-              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              if ($player->places->count > 1) {
-                echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->places->count.' places</span></li>';
-              } else {
-                echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->places->count.' place</span></li>';
-              }
-          }
-        ?>
-        </ol>
+      <div id="places" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="places">
+        Loading...
       </div>
     </div>
 
@@ -85,26 +47,8 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of People</h4>
       </div>
-      <div class="panel-body">
-        <ol>
-          <?php
-            $players = $pages->find('template=player, name!=test, sort=-people.count, sort=-karma, people.count>0, limit=10');
-            foreach($players as $player) {
-              if ($player->avatar) {
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
-              } else {
-                $mini = '';
-              }
-              if ($player->login == $user->name) {
-                $focus = "class='focus'";
-              } else {
-                $focus = "";
-              }
-              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->people->count.' people</span></li>';
-          }
-        ?>
-        </ol>
+      <div id="people" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="people">
+        Loading...
       </div>
     </div>
 
@@ -113,31 +57,8 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> Best warriors</h4>
       </div>
-      <div class="panel-body">
-        <ol>
-          <?php
-            $players = $pages->find('template=player, name!=test, sort=-fighting_power, sort=-karma, fighting_power>0, limit=10');
-            foreach($players as $player) {
-              if ($player->avatar) {
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
-              } else {
-                $mini = '';
-              }
-              if ($player->login == $user->name) {
-                $focus = "class='focus'";
-              } else {
-                $focus = "";
-              }
-              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->fighting_power.' F.P.</span></li>';
-            }
-          ?>
-        </ol>
-        <?php 
-          if ($players->count() == 0) {
-            echo '<p>No player in this scoreboard yet.</p>';
-          }
-        ?>
+      <div id="fighting_power" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="fighting_power">
+        Loading...
       </div>
     </div>
 
@@ -146,26 +67,8 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> Best donators</h4>
       </div>
-      <div class="panel-body">
-        <ol>
-          <?php
-            $players = $pages->find('template=player, name!=test, sort=-donation, sort=-karma, donation>0, limit=10');
-            foreach($players as $player) {
-              if ($player->avatar) {
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
-              } else {
-                $mini = '';
-              }
-              if ($player->login == $user->name) {
-                $focus = "class='focus'";
-              } else {
-                $focus = "";
-              }
-              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->donation.' GC</span></li>';
-            }
-          ?>
-        </ol>
+      <div id="donation" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="donation">
+        Loading...
       </div>
     </div>
 
@@ -174,26 +77,8 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
       </div>
-      <div class="panel-body">
-        <ol>
-          <?php
-            $players = $pages->find('template=player, name!=test, sort=-underground_training, sort=-karma, underground_training>0, limit=10');
-            foreach($players as $player) {
-              if ($player->avatar) {
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
-              } else {
-                $mini = '';
-              }
-              if ($player->login == $user->name) {
-                $focus = "class='focus'";
-              } else {
-                $focus = "";
-              }
-              if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
-              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->underground_training.' U.T.</span></li>';
-            }
-          ?>
-        </ol>
+      <div id="underground_training" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="underground_training">
+        Loading...
       </div>
     </div>
 
@@ -695,8 +580,10 @@
           <p>To see your complete history, go the the <a href="<?php echo $pages->get('/players')->url.$player->playerTeam.'/'.$player->name; ?>">'My Profile'</a> page.</p>
           </div>
         </div>
+
       <?php 
       }
+
 
       // Last 15 public news
       $excluded = $pages->find('name=test|admin');

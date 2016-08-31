@@ -23,13 +23,16 @@
 
 	?>
   <script src="<?php echo $config->urls->templates?>bower_components/jquery/dist/jquery.min.js"></script>
-  <script src="<?php echo $config->urls->templates?>bower_components/DataTables/media/js/jquery.dataTables.min.js"></script>
-  <script src="<?php echo $config->urls->templates?>bower_components/datatables-plugins-bootstrap3/dist/js/datatables-plugins-bootstrap3.min.js"></script>
   <script src="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-  <script src="<?php echo $config->urls->templates?>scripts/svg-pan-zoom.min.js"></script>
-  <script src="<?php echo $config->urls->templates?>scripts/main.js"></script>
-	<script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.min.js'></script>
-	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.css">
+  <?php if ($page->template != 'newsboard') { ?>
+		<script src="<?php echo $config->urls->templates?>bower_components/DataTables/media/js/jquery.dataTables.min.js"></script>
+		<script src="<?php echo $config->urls->templates?>bower_components/datatables-plugins-bootstrap3/dist/js/datatables-plugins-bootstrap3.min.js"></script>
+		<script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.min.js'></script>
+		<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.css">
+  <?php } ?>
+  <?php if ($page->template == 'quiz') { ?>
+		<script src="<?php echo $config->urls->templates?>scripts/svg-pan-zoom.min.js"></script>
+  <?php } ?>
   <?php if ($page->template == 'exercise' || $page->name == 'underground-training') { ?>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular/angular.min.js'></script>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular-animate/angular-animate.min.js'></script>
@@ -38,5 +41,6 @@
     <!-- Set the game logic !-->
     <script type='text/javascript' src='<?php echo $config->urls->templates?>scripts/exercise.js'></script>
   <?php } ?>
+  <script src="<?php echo $config->urls->templates?>scripts/main.js"></script>
 </body>
 </html>
