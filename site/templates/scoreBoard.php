@@ -196,8 +196,9 @@
             $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->donation.' GC</span></li>';
             break;
           case 'underground_training':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->underground_training.' GC</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->underground_training.' UT</span></li>';
             break;
+          default: $out .= 'Error.';
         }
       }
     } else {
