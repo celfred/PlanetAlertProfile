@@ -4,9 +4,13 @@
   $people = $pages->find("template=people, name!='people', sort=title");
   $totalPeopleCount = count($people);
   $out = '';
+
+  if ($user->isSuperuser()) {
+    $out .= '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF</a>';
+  }
 ?>
 <div class="row">
-  <p>Total people : <?php echo $totalPeopleCount; ?></p>
+  <p class="label label-success">Total people : <?php echo $totalPeopleCount; ?></p>
   <?php
     $out .= '<table id="peopleTable" class="table table-hover table-condensed">';
     $out .= '<thead>';
