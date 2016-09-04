@@ -27,7 +27,7 @@
       <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
       <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
       </div>
-      <div id="karma" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="karma">
+      <div id="karma" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="karma">
         Loading...
       </div>
     </div>
@@ -37,7 +37,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Places</h4>
       </div>
-      <div id="places" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="places">
+      <div id="places" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="places">
         Loading...
       </div>
     </div>
@@ -47,7 +47,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of People</h4>
       </div>
-      <div id="people" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="people">
+      <div id="people" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="people">
         Loading...
       </div>
     </div>
@@ -57,7 +57,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> Best warriors</h4>
       </div>
-      <div id="fighting_power" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="fighting_power">
+      <div id="fighting_power" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="fighting_power">
         Loading...
       </div>
     </div>
@@ -67,7 +67,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> Best donators</h4>
       </div>
-      <div id="donation" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="donation">
+      <div id="donation" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="donation">
         Loading...
       </div>
     </div>
@@ -77,7 +77,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
       </div>
-      <div id="underground_training" class="panel-body ajax" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="underground_training">
+      <div id="underground_training" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="underground_training">
         Loading...
       </div>
     </div>
