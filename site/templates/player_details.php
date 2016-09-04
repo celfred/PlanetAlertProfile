@@ -33,7 +33,8 @@
 <?php
   if ($user->isSuperuser()) {
     echo '<div class="row">';
-    echo '<a class="pdfLink btn btn-info" href="' . $page->url.$input->urlSegment1.'/'.$input->urlSegment2.'/'.$input->urlSegment3. '?pages2pdf=1">Get PDF</a>';
+    $pPage = $pages->get("name=$input->urlSegment2");
+    echo '<a class="pdfLink btn btn-info" href="players/'.$pPage->name.'/?pages2pdf=1">Get PDF</a>';
     echo '</div>';
   }
 ?>
