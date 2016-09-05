@@ -15,14 +15,14 @@
     $place->teamOwners = $allPlayers->find("places=$placeId");
     $place->rate = (100*$place->teamOwners->count())/$place->maxOwners;
     $place->rateWidth = ($place->rate*150)/100;
-    if ($place->rate == 100) {
+    if ($place->rate >= 100) {
       $place->cssClass = 'completed';
     } else {
       $place->cssClass = '';
     }
   }
   $totalPlaces->sort("-rate");
-  $completed = $totalPlaces->find("rate=100")->count();
+  $completed = $totalPlaces->find("rate>=100")->count();
 
   // Nav tabs
   include("./tabList.inc"); 
