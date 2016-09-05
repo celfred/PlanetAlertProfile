@@ -425,9 +425,9 @@ $(document).ready(function() {
 		// return confirm("Click OK to continue?");
 	})
 
-	if ($('div.ajax')) {
+	if ($('div.ajaxScore')) {
 		var timer = 500;
-		$('div.ajax').each( function() {
+		$('div.ajaxScore').each( function() {
 			var type = $(this).attr('data-ajax');
 			var url = $(this).attr('data-href');
 			setTimeout( function() { getFromAjax(url, type); }, timer);
