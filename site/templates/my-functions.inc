@@ -27,16 +27,33 @@ function getMultiDimensional($values, $prefix) {
 }
 
 function initPlayer($player) {
-  $player->karma = 0;
-  $player->HP = 50;
-  $player->GC = 0;
-  $player->XP = 0;
-  $player->level = 1;
-  $player->donation = 0;
-  $player->underground_training = 0;
-  $player->fighting_power = 0;
-  $player->equipment->removeAll();
-  $player->places->removeAll();
+  $pages = wire('pages');
+  // Get previous score from last archived page
+  $prevScores = $player->find("template=archive, name!=history")->sort("date")->last();
+  if ($prevScores->id) {
+    $player->karma = $prevScores->karma;
+    $player->HP = 50;
+    $player->GC = $prevScores->GC;
+    $player->XP = $prevScores->XP;
+    $player->level = $prevScores->level;
+    $player->places = $prevScores->places;
+    $player->people = $prevScores->people;
+    $player->donation = $prevScores->donation;
+    $player->underground_training = $prevScores->underground_training;
+    $player->fighting_power = $prevScores->fighting_power;
+  } else {
+    $player->karma = 0;
+    $player->HP = 50;
+    $player->GC = 0;
+    $player->XP = 0;
+    $player->level = 1;
+    $player->donation = 0;
+    $player->underground_training = 0;
+    $player->fighting_power = 0;
+    $player->equipment->removeAll();
+    $player->places->removeAll();
+    $player->people->removeAll();
+  }
   return $player;
 }
 
@@ -328,9 +345,12 @@ function displayTrendScores($player, $old) {
   $trendEquipment = $player->equipment->count-$old->equipment->count();
   if ($trendEquipment > 0) { $out .= '<li>+'.$trendEquipment.'Eq.→'.$player->equipment->count.'</li>'; }
   if ($trendEquipment < 0) { $out .= '<li>'.$trendEquipment.'Eq.→'.$player->equipment->count.'</li>'; }
-  $trendPlaces = $player->places->count-$old->places->count();
-  if ($trendPlaces > 0) { $out .= '<li>+'.$trendPlaces.'Pl.→'.$player->places->count.'</li>'; }
-  if ($trendPlaces < 0) { $out .= '<li>'.$trendPlaces.'Pl.→'.$player->places->count.'</li>'; }
+  $trendPlaces = $player->places->count()-$old->places->count();
+  if ($trendPlaces > 0) { $out .= '<li>+'.$trendPlaces.'Pl.→'.$player->places->count().'</li>'; }
+  if ($trendPlaces < 0) { $out .= '<li>'.$trendPlaces.'Pl.→'.$player->places->count().'</li>'; }
+  $trendPeople = $player->people->count()-$old->people->count();
+  if ($trendPeople > 0) { $out .= '<li>+'.$trendPeople.'Peo.→'.$player->people->count().'</li>'; }
+  if ($trendPeople < 0) { $out .= '<li>'.$trendPeople.'Peo.→'.$player->people->count().'</li>'; }
   $trendDonation = $player->donation-$old->donation;
   if ($trendDonation > 0) { $out .= '<li>+'.$trendDonation.'Don.→'.$player->donation.'</li>'; }
   if ($trendDonation < 0) { $out .= '<li>'.$trendDonation.'Don.→'.$player->donation.'</li>'; }
@@ -357,6 +377,7 @@ function displayPlayerScores($player, $type='new') {
   $out .= '<li>'.$player->HP.'HP</li>';
   $out .= '<li>'.$player->XP.'XP</li>';
   $out .= '<li>'.$player->places->count.'Pl.</li>';
+  $out .= '<li>'.$player->people->count.'Peo.</li>';
   $out .= '<li>'.$player->equipment->count.'Eq.</li>';
   $out .= '<li>'.$player->donation.'Don.</li>';
   $out .= '<li>'.$player->underground_training.'UT</li>';
@@ -372,9 +393,9 @@ function getKarma($player) {
     for ($i=1; $i<=$player->level; $i++) {
       $levelKarma = $levelKarma + (($i*10)+90);
     }
-    $karma = $levelKarma + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
+    $karma = $levelKarma + $player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
   } else {
-    $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
+    $karma = ($player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
   }
   if ($karma < 0) { $karma = 0; }
   //echo $player->title.':'.$karma.'-';

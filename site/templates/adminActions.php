@@ -546,7 +546,7 @@
                   /* } */
                 }
               }
-              if ($e->task->is("name=buy|free|bought")) { // New equipment, place or potion, add it accordingly
+              if ($e->task->is("name=buy|free|bought")) { // New equipment, place, people or potion, add it accordingly
                 if ($e->refPage->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
                   $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
                   $dirty = true;
