@@ -62,7 +62,7 @@
         $out .= '<span>Select a task : </span>';
         $out .= '<select id="taskId">';
         $out .= '<option value="-1">Select a task</option>';
-        $allTasks = $pages->find("template=task, sort=title");
+        $allTasks = $pages->find("template=task, include=hidden, sort=title");
         foreach($allTasks as $t) {
           $out .= '<option value="'.$t.'">'.$t->title.'</option>';
         }

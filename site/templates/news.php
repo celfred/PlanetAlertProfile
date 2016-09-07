@@ -246,6 +246,7 @@
                 echo '<li class="">';
                 echo date("F j (l)", $n->date).' : ';
                 echo '<span>';
+
                 switch ($n->task->category->name) {
                 case 'place' :
                 if ($n->refPage->template == 'place') {

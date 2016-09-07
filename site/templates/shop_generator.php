@@ -28,21 +28,8 @@ $possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level,
 
 // Possible places
 $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
-// Delete completed places
-foreach($possiblePlaces as $place) {
-  if (placeFreedomRate($place, $allPlayers) === 100) {
-    $possiblePlaces->remove($place);
-  }
-}
 // Possible people
 $possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name");
-
-// Delete completed people
-foreach($possiblePeople as $people) {
-  if (peopleFreedomRate($people, $allPlayers) === 100) {
-    $possiblePeople->remove($people);
-  }
-}
 
 $out .= '<section class="row">';
 $out .= "<ul class='itemList col-md-6'>";
