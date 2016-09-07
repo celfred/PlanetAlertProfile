@@ -45,9 +45,6 @@ if ($input->urlSegment1  == 'all') { // All places catalog
       $out .= 'Summary';
       $out .= '</th>';
       $out .= '<th>';
-      $out .= '# of owners';
-      $out .= '</th>';
-      $out .= '<th>';
       $out .= 'Photo';
       $out .= '</th>';
       $out .= '<tr>';
@@ -71,9 +68,6 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '</td>';
     $out .= '<td>';
     $out .= $place->summary;
-    $out .= '</td>';
-    $out .= '<td>';
-    $out .= $place->maxOwners;
     $out .= '</td>';
     $out .= '<td>';
     $thumbImage = $place->photo->eq(0)->getThumb('thumbnail');

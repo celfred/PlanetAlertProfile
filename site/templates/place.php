@@ -196,7 +196,6 @@ if ($page->name != 'places') { // Single place view
         <th>City</th>
         <th>GC</th>
         <th>Level</th>
-        <th># of 'owners'</th>
       </tr>
       </thead>
       <tbody>
@@ -210,7 +209,6 @@ if ($page->name != 'places') { // Single place view
         <td><?php echo $place->city->title; ?></td>
         <td><?php echo $place->GC; ?></td>
         <td><?php echo $place->level; ?></td>
-        <td><?php echo $place->maxOwners; ?></td>
       </tr>
       <?php } ?>
       </tbody>

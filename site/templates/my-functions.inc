@@ -517,73 +517,59 @@ function nbFreedomActs($playerTeam, $startDate='', $endDate='') {
   if ($startDate == '') { $startDate = date('2015-09-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
   $players = $pages->find("template=player, playerTeam=$playerTeam");
-  $free = 0;
-  foreach ($players as $p) {
-    $freeActs = $p->get("name=history")->find("template=event, task.name=free, date>=$startDaten, date<=$endDate")->count();
-    $free = $free+$freeActs;
-  }
-
+  $free = $pages->find("has_parent=$players, template=event, task.name=free, date>=$startDate, date<=$endDate")->count();
   return $free;
 }
 
-function globalScore($players, $totalPlaces) {
-  $totalOwners = 0;
-  foreach($totalPlaces as $place) {
-    $totalOwners = $totalOwners + $place->maxOwners;
+function teamFreeworld($team) {
+  $pages = wire('pages');
+  $allPlayers = $pages->find("template=player, playerTeam=$team");
+  $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
+  // Get all possible elements
+  $allElements = new pageArray();
+  $allPlaces = $pages->find("template=place, name!=places");
+  $allPeople = $pages->find("template=people, name!=people");
+  $rank = $allPlayers->first()->rank->name;
+  if ($rank == '4emes' || $rank == '3emes') {
+    $allElements->add($allPlaces);
+    $allElements->add($allPeople);
+  } else {
+    $allElements->add($allPlaces);
   }
-  $teamOwners = 0;
-  foreach( $players as $player) {
-    $teamOwners = $teamOwners + $player->places->count();
+  // Test if teamRate is reached
+  foreach( $allElements as $el) {
+    $teamOwners = $allPlayers->find("places=$el|people=$el");
+    if ($teamOwners->count() >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'almost'; }
+    if ($teamOwners->count() >= $teamRate) { $el->completed = 1; $el->cssClass = 'completed'; }
+    if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = ''; }
+    $el->teamOwners = $teamOwners;
   }
-  $globalScore = round((100*$teamOwners)/$totalOwners);
-
-  return array($globalScore, $teamOwners, $totalOwners);
-}
-
-function placeFreedomRate($place, $allPlayers) {
-  $maxOwners = $place->maxOwners;
-  $placeId = $place->id;
-  $teamOwners = $allPlayers->find("places=$placeId")->count();
-  $rate = (100*$teamOwners)/$maxOwners;
-
-  return $rate;
-}
-
-function peopleFreedomRate($element, $allPlayers) {
-  $maxOwners = $element->maxOwners;
-  $teamOwners = $allPlayers->find("people=$element->id")->count();
-  $rate = (100*$teamOwners)/$maxOwners;
-
-  return $rate;
-}
-
-function display_scores($allPlayers, $allTeams, $totalPlaces) {
-  // Calculate each team scores and display it
-  echo '<h3 class="text-center ">';
-  echo '<ul class="scores list-inline">Free world : ';
-  foreach($allTeams as $team) {
-    if ($team != 'No team') {
-      $teamPlayers = $allPlayers->find("playerTeam=$team");
-      $globalScore = globalScore($teamPlayers, $totalPlaces); $teamScore = $globalScore[0];
-      $teamOwners = $globalScore[1];
-      $totalOwners = $globalScore[2];
-
-      echo '<li class="label label-default"><strong title="'.$teamOwners.'/'.$totalOwners.'">'.$team.' : '.$teamScore.'%</strong></li>';
-    }
-  }
-  echo '</ul>';
-  echo '</h3>';
+  $allElements->sort("-completed, title");
+  return $allElements;
 }
 
 function displayScores($allTeams) {
+  $pages = wire('pages');
   echo '<h4 class="text-center scores">';
-  echo '<ul class="list-inline">School year\'s Acts of Freedom : ';
+  echo '<ul class="list-inline">';
+  // Find current school year date
+  $schoolYear = $pages->get("template=period, name=school-year");
   if (is_array($allTeams)) {
     foreach($allTeams as $t) {
-      echo '<li class="label label-default"><strong>'.$t.' : '.nbFreedomActs($t).'</strong></li>';
+      if ($t != 'No team') {
+        // Freeworld
+        $allElements = teamFreeworld($t);
+        $nbCompleted = $allElements->find("completed=1")->count();
+        $percent = round((100*$nbCompleted)/$allElements->count());
+        echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t.' :'.nbFreedomActs($t, $schoolYear->dateStart, $schoolYear->dateEnd).'</strong> ('.$percent.'%)</strong></h4></li>';
+      }
     }
   } else {
-    echo '<li class="label label-default"><h4><strong>'.$allTeams.' : '.nbFreedomActs($allTeams).'</strong></h4></li>';
+    // Freeworld
+    $allElements = teamFreeworld($allTeams);
+    $nbCompleted = $allElements->find("completed=1")->count();
+    $percent = round((100*$nbCompleted)/$allElements->count());
+    echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$allTeams.' :'.nbFreedomActs($allTeams, $schoolYear->dateStart, $schoolYear->dateEnd).'</strong> ('.$percent.'%)</h4></li>';
   }
   echo '</ul>';
   echo '</h4>';
