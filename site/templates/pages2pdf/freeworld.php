@@ -1,4 +1,6 @@
 <?php 
+// TODO : People or not according to rank...
+// Re-activate PDF link in freeworld.php
 
 $logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
 

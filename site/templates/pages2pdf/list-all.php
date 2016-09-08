@@ -1,4 +1,5 @@
 <?php 
+// NO more in use?
 
 $logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
 
