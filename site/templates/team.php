@@ -13,11 +13,6 @@
   }
   $allGroups = $pages->get("/groups")->children('sort=title');
   $outGroups = '';
-  $totalPlaces = $pages->find("template='place', name!='places'");
-  $globalScore = globalScore($allPlayers, $totalPlaces);
-  $teamScore = $globalScore[0];
-  $teamOwners = $globalScore[1];
-  $totalOwners = $globalScore[2];
 
   // Calculate groups Karma
   $index = 0;

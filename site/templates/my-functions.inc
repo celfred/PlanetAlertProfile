@@ -27,16 +27,33 @@ function getMultiDimensional($values, $prefix) {
 }
 
 function initPlayer($player) {
-  $player->karma = 0;
-  $player->HP = 50;
-  $player->GC = 0;
-  $player->XP = 0;
-  $player->level = 1;
-  $player->donation = 0;
-  $player->underground_training = 0;
-  $player->fighting_power = 0;
-  $player->equipment->removeAll();
-  $player->places->removeAll();
+  $pages = wire('pages');
+  // Get previous score from last archived page
+  $prevScores = $player->find("template=archive, name!=history")->sort("date")->last();
+  if ($prevScores->id) {
+    $player->karma = $prevScores->karma;
+    $player->HP = 50;
+    $player->GC = $prevScores->GC;
+    $player->XP = $prevScores->XP;
+    $player->level = $prevScores->level;
+    $player->places = $prevScores->places;
+    $player->people = $prevScores->people;
+    $player->donation = $prevScores->donation;
+    $player->underground_training = $prevScores->underground_training;
+    $player->fighting_power = $prevScores->fighting_power;
+  } else {
+    $player->karma = 0;
+    $player->HP = 50;
+    $player->GC = 0;
+    $player->XP = 0;
+    $player->level = 1;
+    $player->donation = 0;
+    $player->underground_training = 0;
+    $player->fighting_power = 0;
+    $player->equipment->removeAll();
+    $player->places->removeAll();
+    $player->people->removeAll();
+  }
   return $player;
 }
 
@@ -328,9 +345,12 @@ function displayTrendScores($player, $old) {
   $trendEquipment = $player->equipment->count-$old->equipment->count();
   if ($trendEquipment > 0) { $out .= '<li>+'.$trendEquipment.'Eq.→'.$player->equipment->count.'</li>'; }
   if ($trendEquipment < 0) { $out .= '<li>'.$trendEquipment.'Eq.→'.$player->equipment->count.'</li>'; }
-  $trendPlaces = $player->places->count-$old->places->count();
-  if ($trendPlaces > 0) { $out .= '<li>+'.$trendPlaces.'Pl.→'.$player->places->count.'</li>'; }
-  if ($trendPlaces < 0) { $out .= '<li>'.$trendPlaces.'Pl.→'.$player->places->count.'</li>'; }
+  $trendPlaces = $player->places->count()-$old->places->count();
+  if ($trendPlaces > 0) { $out .= '<li>+'.$trendPlaces.'Pl.→'.$player->places->count().'</li>'; }
+  if ($trendPlaces < 0) { $out .= '<li>'.$trendPlaces.'Pl.→'.$player->places->count().'</li>'; }
+  $trendPeople = $player->people->count()-$old->people->count();
+  if ($trendPeople > 0) { $out .= '<li>+'.$trendPeople.'Peo.→'.$player->people->count().'</li>'; }
+  if ($trendPeople < 0) { $out .= '<li>'.$trendPeople.'Peo.→'.$player->people->count().'</li>'; }
   $trendDonation = $player->donation-$old->donation;
   if ($trendDonation > 0) { $out .= '<li>+'.$trendDonation.'Don.→'.$player->donation.'</li>'; }
   if ($trendDonation < 0) { $out .= '<li>'.$trendDonation.'Don.→'.$player->donation.'</li>'; }
@@ -357,6 +377,7 @@ function displayPlayerScores($player, $type='new') {
   $out .= '<li>'.$player->HP.'HP</li>';
   $out .= '<li>'.$player->XP.'XP</li>';
   $out .= '<li>'.$player->places->count.'Pl.</li>';
+  $out .= '<li>'.$player->people->count.'Peo.</li>';
   $out .= '<li>'.$player->equipment->count.'Eq.</li>';
   $out .= '<li>'.$player->donation.'Don.</li>';
   $out .= '<li>'.$player->underground_training.'UT</li>';
@@ -372,9 +393,9 @@ function getKarma($player) {
     for ($i=1; $i<=$player->level; $i++) {
       $levelKarma = $levelKarma + (($i*10)+90);
     }
-    $karma = $levelKarma + $player->XP + $player->places->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
+    $karma = $levelKarma + $player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
   } else {
-    $karma = ($player->XP + $player->places->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
+    $karma = ($player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
   }
   if ($karma < 0) { $karma = 0; }
   //echo $player->title.':'.$karma.'-';
@@ -443,40 +464,81 @@ function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $e
 }
 
 function pick_question($player) {
-  $randomPlace = $player->places->getRandom();
-    if ($randomPlace) {
-      $type = ['photo'];
-      if ($randomPlace->quiz->count > 0) {
-        switch ($player->rank->name) {
-          case '5emes':
-            array_push($type, 'country', 'country', 'city', 'city');
-            break;
-          case '4emes':
+  $rank = $player->rank->name;
+  if ( $rank == '4emes' || $rank == '3emes' ) {
+    $randList = ['people', 'places'];
+    $randList = $randList[array_rand($randList, 1)];
+  } else {
+    $randList = 'places';
+  }
+  switch ($randList) {
+    case 'people' : 
+      $randEl = $player->people->getRandom();
+      break;
+    default : 
+      $randEl = $player->places->getRandom();
+  }
+  if ($randEl) {
+    $type = ['photo'];
+    if ($randList == 'places') {
+      switch ($player->rank->name) {
+        case '5emes':
+          array_push($type, 'country', 'country', 'city', 'city');
+          break;
+        case '4emes':
+          if ($randEl->quiz->count > 0) {
             array_push($type, 'country', 'country', 'city', 'city', 'quiz', 'quiz');
-            break;
-          case '3emes':
+          } else {
+            array_push($type, 'country', 'country', 'city', 'city');
+          }
+          break;
+        case '3emes':
+          if ($randEl->quiz->count > 0) {
             array_push($type, 'country', 'city', 'quiz', 'quiz');
-            break;
-          default:
-        }
+          } else {
+            array_push($type, 'country', 'country', 'city', 'city');
+          }
+          break;
+        default:
       }
-      $rand = array_rand($type, 1);
+    }
+    if ($randList == 'people') {
+      switch ($player->rank->name) {
+        case '4emes':
+          if ($randEl->quiz->count > 0) {
+            array_push($type, 'country', 'nationality', 'quiz');
+          } else {
+            array_push($type, 'country', 'nationality');
+          }
+          break;
+        case '3emes':
+          if ($randEl->quiz->count > 0) {
+            array_push($type, 'country', 'nationality', 'quiz', 'quiz');
+          } else {
+            array_push($type, 'country', 'nationality');
+          }
+          break;
+        default:
+      }
+    }
+    $rand = array_rand($type, 1);
+    if ($randList == 'places') {
       $quiz['type'] = $type[$rand];
       switch($quiz['type']) {
         case 'country' :
-          $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randomPlace->title.'</strong>?';
-          $quiz['answer'] = $randomPlace->country->title;
+          $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randEl->title.'</strong>?';
+          $quiz['answer'] = $randEl->country->title;
           break;    
         case 'city' :
-          $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randomPlace->title.'</strong>?';
-          $quiz['answer'] = $randomPlace->city->title;
+          $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randEl->title.'</strong>?';
+          $quiz['answer'] = $randEl->city->title;
           break;    
         case 'photo' :
           $quiz['question'] = 'What <strong>monument</strong> is it?';
-          $quiz['answer'] = $randomPlace->title. ' in '. $randomPlace->city->title.', '.$randomPlace->country->title;
+          $quiz['answer'] = $randEl->title. ' in '. $randEl->city->title.', '.$randEl->country->title;
           break;    
         case 'quiz' :
-          $randQuiz = $randomPlace->quiz->getRandom();
+          $randQuiz = $randEl->quiz->getRandom();
           $quiz['question'] = $randQuiz->question;
           $quiz['answer'] = $randQuiz->answer;
           if (  strpos($quiz['question'], 'on the map') == true) {
@@ -486,8 +548,31 @@ function pick_question($player) {
         default : $quiz['answer'] = 'Question type error!'; break;
       }
     }
-
-  $quiz['id'] = $randomPlace->id;
+    if ($randList == 'people') {
+      $quiz['type'] = $type[$rand];
+      switch($quiz['type']) {
+        case 'country' :
+          $quiz['question'] = 'Where is '.$randEl->title.' from ? (<strong>'.$type[$rand].'</strong></strong>)';
+          $quiz['answer'] = $randEl->country->title;
+          break;    
+        case 'nationality' :
+          $quiz['question'] = 'What\'s '.$randEl->title.'\'s <strong>'.$type[$rand].'</strong> ?';
+          $quiz['answer'] = $randEl->nationality;
+          break;    
+        case 'photo' :
+          $quiz['question'] = '<strong>Who</strong> is this ?';
+          $quiz['answer'] = $randEl->title. ', '. $randEl->country->title.' ('.$randEl->nationality.')';
+          break;    
+        case 'quiz' :
+          $randQuiz = $randEl->quiz->getRandom();
+          $quiz['question'] = $randQuiz->question;
+          $quiz['answer'] = $randQuiz->answer;
+          break;    
+        default : $quiz['answer'] = 'Question type error!'; break;
+      }
+    }
+  }
+  $quiz['id'] = $randEl->id;
   return $quiz;
 }
 
@@ -496,73 +581,59 @@ function nbFreedomActs($playerTeam, $startDate='', $endDate='') {
   if ($startDate == '') { $startDate = date('2015-09-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
   $players = $pages->find("template=player, playerTeam=$playerTeam");
-  $free = 0;
-  foreach ($players as $p) {
-    $freeActs = $p->get("name=history")->find("template=event, task.name=free, date>=$startDaten, date<=$endDate")->count();
-    $free = $free+$freeActs;
-  }
-
+  $free = $pages->find("has_parent=$players, template=event, task.name=free, date>=$startDate, date<=$endDate")->count();
   return $free;
 }
 
-function globalScore($players, $totalPlaces) {
-  $totalOwners = 0;
-  foreach($totalPlaces as $place) {
-    $totalOwners = $totalOwners + $place->maxOwners;
+function teamFreeworld($team) {
+  $pages = wire('pages');
+  $allPlayers = $pages->find("template=player, playerTeam=$team");
+  $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
+  // Get all possible elements
+  $allElements = new pageArray();
+  $allPlaces = $pages->find("template=place, name!=places");
+  $allPeople = $pages->find("template=people, name!=people");
+  $rank = $allPlayers->first()->rank->name;
+  if ($rank == '4emes' || $rank == '3emes') {
+    $allElements->add($allPlaces);
+    $allElements->add($allPeople);
+  } else {
+    $allElements->add($allPlaces);
   }
-  $teamOwners = 0;
-  foreach( $players as $player) {
-    $teamOwners = $teamOwners + $player->places->count();
+  // Test if teamRate is reached
+  foreach( $allElements as $el) {
+    $teamOwners = $allPlayers->find("places=$el|people=$el");
+    if ($teamOwners->count() >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'almost'; }
+    if ($teamOwners->count() >= $teamRate) { $el->completed = 1; $el->cssClass = 'completed'; }
+    if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = ''; }
+    $el->teamOwners = $teamOwners;
   }
-  $globalScore = round((100*$teamOwners)/$totalOwners);
-
-  return array($globalScore, $teamOwners, $totalOwners);
-}
-
-function placeFreedomRate($place, $allPlayers) {
-  $maxOwners = $place->maxOwners;
-  $placeId = $place->id;
-  $teamOwners = $allPlayers->find("places=$placeId")->count();
-  $rate = (100*$teamOwners)/$maxOwners;
-
-  return $rate;
-}
-
-function peopleFreedomRate($element, $allPlayers) {
-  $maxOwners = $element->maxOwners;
-  $teamOwners = $allPlayers->find("people=$element->id")->count();
-  $rate = (100*$teamOwners)/$maxOwners;
-
-  return $rate;
-}
-
-function display_scores($allPlayers, $allTeams, $totalPlaces) {
-  // Calculate each team scores and display it
-  echo '<h3 class="text-center ">';
-  echo '<ul class="scores list-inline">Free world : ';
-  foreach($allTeams as $team) {
-    if ($team != 'No team') {
-      $teamPlayers = $allPlayers->find("playerTeam=$team");
-      $globalScore = globalScore($teamPlayers, $totalPlaces); $teamScore = $globalScore[0];
-      $teamOwners = $globalScore[1];
-      $totalOwners = $globalScore[2];
-
-      echo '<li class="label label-default"><strong title="'.$teamOwners.'/'.$totalOwners.'">'.$team.' : '.$teamScore.'%</strong></li>';
-    }
-  }
-  echo '</ul>';
-  echo '</h3>';
+  $allElements->sort("-completed, title");
+  return $allElements;
 }
 
 function displayScores($allTeams) {
+  $pages = wire('pages');
   echo '<h4 class="text-center scores">';
-  echo '<ul class="list-inline">School year\'s Acts of Freedom : ';
+  echo '<ul class="list-inline">';
+  // Find current school year date
+  $schoolYear = $pages->get("template=period, name=school-year");
   if (is_array($allTeams)) {
     foreach($allTeams as $t) {
-      echo '<li class="label label-default"><strong>'.$t.' : '.nbFreedomActs($t).'</strong></li>';
+      if ($t != 'No team') {
+        // Freeworld
+        $allElements = teamFreeworld($t);
+        $nbCompleted = $allElements->find("completed=1")->count();
+        $percent = round((100*$nbCompleted)/$allElements->count());
+        echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t.' :'.nbFreedomActs($t, $schoolYear->dateStart, $schoolYear->dateEnd).'</strong> ('.$percent.'%)</strong></h4></li>';
+      }
     }
   } else {
-    echo '<li class="label label-default"><h4><strong>'.$allTeams.' : '.nbFreedomActs($allTeams).'</strong></h4></li>';
+    // Freeworld
+    $allElements = teamFreeworld($allTeams);
+    $nbCompleted = $allElements->find("completed=1")->count();
+    $percent = round((100*$nbCompleted)/$allElements->count());
+    echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$allTeams.' :'.nbFreedomActs($allTeams, $schoolYear->dateStart, $schoolYear->dateEnd).'</strong> ('.$percent.'%)</h4></li>';
   }
   echo '</ul>';
   echo '</h4>';

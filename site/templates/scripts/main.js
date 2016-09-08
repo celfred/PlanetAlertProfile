@@ -437,6 +437,7 @@ $(document).ready(function() {
 	function getFromAjax(url, type) {
     $.get(url+'?type='+type, function(data) { 
         $("#"+type).html(data); 
+				$("#"+type+' [data-toggle="tooltip"]').tooltip();
     }); 
     return false; 
 	}

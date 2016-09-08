@@ -155,7 +155,8 @@
               // Get player's name
               $login = $r['username'];
               $player = $pages->get("template='player', login=$login");
-              $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+              if ($player->playerTeam == '' || $player->playerTeam == 'No team') { $team = ''; } else { $team = '['.$player->playerTeam.']'; }
+              $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> '.$team.'</li>';
             }
             $stats .= '</ul>';
           }
@@ -163,10 +164,10 @@
             $stats .= '<span>Yesterday\'s players : </span>';
             $stats .= '<ul class="list-inline list-unstyled">';
             foreach($yesterdaysPlayers as $r) {
-              // Get player's name
               $login = $r['username'];
               $player = $pages->get("template='player', login=$login");
-              $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+              if ($player->playerTeam == '' || $player->playerTeam == 'No team') { $team = ''; } else { $team = '['.$player->playerTeam.']'; }
+              $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> '.$team.'</li>';
             }
             $stats .= '</ul>';
           }
@@ -243,23 +244,25 @@
               <?php
               foreach($news as $n) {
                 $currentPlayer = $n->parent('template=player');
+                if ($currentPlayer->playerTeam == '' || $currentPlayer->playerTeam == 'No team') { $team = ''; } else { $team = '['.$currentPlayer->playerTeam.']'; }
                 echo '<li class="">';
                 echo date("F j (l)", $n->date).' : ';
                 echo '<span>';
+
                 switch ($n->task->category->name) {
                 case 'place' :
                 if ($n->refPage->template == 'place') {
-                  echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 }
                 if ($n->refPage->template == 'people') {
-                  echo '<span class="">New people for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  echo '<span class="">New people for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 }
                   break;
-                case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                   break;
-                case 'homework' : echo '<span class="">Penalty for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                case 'homework' : echo '<span class="">Penalty for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                   break;
                 default : echo 'todo : ';
                   break;
@@ -282,7 +285,6 @@
       if ($user->isLoggedin() && $user->isSuperuser() == false) {
         // Get player's indicators
         $player = $pages->get("template=player, login=$user->name");
-        //echo '<h2><img src="'.$player->avatar->getThumb('thumbnail').'" alt="avatar" /> '.$player->title.' ['.$player->playerTeam.']</h2>';
         echo '<div class="well">';
           echo '<span class="label label-success">Your Karma : '.$player->karma.'</span>';
           echo '&nbsp;&nbsp;';
@@ -601,6 +603,7 @@
             <?php
             foreach($news as $n) {
               $currentPlayer = $n->parent('template=player');
+              if ($currentPlayer->playerTeam == '' || $currentPlayer->playerTeam == 'No team') { $team = ''; } else { $team = '['.$currentPlayer->playerTeam.']'; }
               if ($currentPlayer->avatar) {
                 $thumb = $currentPlayer->avatar->size(20,20);
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
@@ -614,16 +617,16 @@
               switch ($n->task->category->name) {
               case 'place' : 
                 if ($n->refPage->template == 'place') {
-                  echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 }
                 if ($n->refPage->template == 'people') {
-                  echo '<span class="">New people for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+                  echo '<span class="">New people for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 }
                 break;
-              case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
-              case 'individual-work' : echo '<span class="">Underground Training for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> ['.$currentPlayer->playerTeam.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.'] : '.html_entity_decode($n->summary).'</span>';
+              case 'individual-work' : echo '<span class="">Underground Training for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : echo 'todo : ';
                 break;

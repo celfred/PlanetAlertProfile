@@ -62,7 +62,7 @@
         $out .= '<span>Select a task : </span>';
         $out .= '<select id="taskId">';
         $out .= '<option value="-1">Select a task</option>';
-        $allTasks = $pages->find("template=task, sort=title");
+        $allTasks = $pages->find("template=task, include=hidden, sort=title");
         foreach($allTasks as $t) {
           $out .= '<option value="'.$t.'">'.$t->title.'</option>';
         }
@@ -546,7 +546,7 @@
                   /* } */
                 }
               }
-              if ($e->task->is("name=buy|free|bought")) { // New equipment, place or potion, add it accordingly
+              if ($e->task->is("name=buy|free|bought")) { // New equipment, place, people or potion, add it accordingly
                 if ($e->refPage->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
                   $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
                   $dirty = true;

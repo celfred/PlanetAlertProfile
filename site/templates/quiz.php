@@ -33,7 +33,12 @@ if ($user->isSuperuser()) {
   $selectedTeam = $input->urlSegment1;
   $selectedIds = $input->post->selected; // Checked players
   $allPlayers = $pages->find("template='player', playerTeam=$selectedTeam, sort='name'");
-  $allConcerned = $allPlayers->find("places.count>=3"); // Find players having at least 3 places
+  $rank = $allPlayers->first()->rank->name;
+  if ( $rank == '4emes' || $rank == '3emes' ) {
+    $allConcerned = $allPlayers->find("places.count|people.count>=3"); // Find players having at least 3 places
+  } else {
+    $allConcerned = $allPlayers->find("places.count>=3"); // Find players having at least 3 places
+  }
 
   if ( count($selectedIds) > 0 ) { // Players have been checked
     // Pick one
@@ -115,7 +120,12 @@ if ($user->isSuperuser()) {
     $out .= '<ul class="list-group">';
       foreach($allConcerned as $p) {
           $details = "({$p->nbInvasions} inv. / ";
-          $details .= "{$p->places->count()} el.)";
+          if ( $rank == '4emes' || $rank == '3emes' ) {
+            $freeElements = $p->places->count()+$p->people->count();
+          } else {
+            $freeElements = $p->places->count();
+          }
+          $details .= "{$freeElements} el.)";
           $out .= "<li class='list-group-item'><label for='ch[{$p->id}]'><input type='checkbox' id='ch[{$p->id}]' name='selected[]' value='{$p->id}' {$p->checked}'> {$p->title} {$details}</label></li>";
       }
       $out .= '<button id="tickAll" class="btn btn-success btn-sm">Tick all</button>';
