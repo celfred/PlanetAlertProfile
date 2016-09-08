@@ -464,40 +464,81 @@ function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $e
 }
 
 function pick_question($player) {
-  $randomPlace = $player->places->getRandom();
-    if ($randomPlace) {
-      $type = ['photo'];
-      if ($randomPlace->quiz->count > 0) {
-        switch ($player->rank->name) {
-          case '5emes':
-            array_push($type, 'country', 'country', 'city', 'city');
-            break;
-          case '4emes':
+  $rank = $player->rank->name;
+  if ( $rank == '4emes' || $rank == '3emes' ) {
+    $randList = ['people', 'places'];
+    $randList = $randList[array_rand($randList, 1)];
+  } else {
+    $randList = 'places';
+  }
+  switch ($randList) {
+    case 'people' : 
+      $randEl = $player->people->getRandom();
+      break;
+    default : 
+      $randEl = $player->places->getRandom();
+  }
+  if ($randEl) {
+    $type = ['photo'];
+    if ($randList == 'places') {
+      switch ($player->rank->name) {
+        case '5emes':
+          array_push($type, 'country', 'country', 'city', 'city');
+          break;
+        case '4emes':
+          if ($randEl->quiz->count > 0) {
             array_push($type, 'country', 'country', 'city', 'city', 'quiz', 'quiz');
-            break;
-          case '3emes':
+          } else {
+            array_push($type, 'country', 'country', 'city', 'city');
+          }
+          break;
+        case '3emes':
+          if ($randEl->quiz->count > 0) {
             array_push($type, 'country', 'city', 'quiz', 'quiz');
-            break;
-          default:
-        }
+          } else {
+            array_push($type, 'country', 'country', 'city', 'city');
+          }
+          break;
+        default:
       }
-      $rand = array_rand($type, 1);
+    }
+    if ($randList == 'people') {
+      switch ($player->rank->name) {
+        case '4emes':
+          if ($randEl->quiz->count > 0) {
+            array_push($type, 'country', 'nationality', 'quiz');
+          } else {
+            array_push($type, 'country', 'nationality');
+          }
+          break;
+        case '3emes':
+          if ($randEl->quiz->count > 0) {
+            array_push($type, 'country', 'nationality', 'quiz', 'quiz');
+          } else {
+            array_push($type, 'country', 'nationality');
+          }
+          break;
+        default:
+      }
+    }
+    $rand = array_rand($type, 1);
+    if ($randList == 'places') {
       $quiz['type'] = $type[$rand];
       switch($quiz['type']) {
         case 'country' :
-          $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randomPlace->title.'</strong>?';
-          $quiz['answer'] = $randomPlace->country->title;
+          $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randEl->title.'</strong>?';
+          $quiz['answer'] = $randEl->country->title;
           break;    
         case 'city' :
-          $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randomPlace->title.'</strong>?';
-          $quiz['answer'] = $randomPlace->city->title;
+          $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randEl->title.'</strong>?';
+          $quiz['answer'] = $randEl->city->title;
           break;    
         case 'photo' :
           $quiz['question'] = 'What <strong>monument</strong> is it?';
-          $quiz['answer'] = $randomPlace->title. ' in '. $randomPlace->city->title.', '.$randomPlace->country->title;
+          $quiz['answer'] = $randEl->title. ' in '. $randEl->city->title.', '.$randEl->country->title;
           break;    
         case 'quiz' :
-          $randQuiz = $randomPlace->quiz->getRandom();
+          $randQuiz = $randEl->quiz->getRandom();
           $quiz['question'] = $randQuiz->question;
           $quiz['answer'] = $randQuiz->answer;
           if (  strpos($quiz['question'], 'on the map') == true) {
@@ -507,8 +548,31 @@ function pick_question($player) {
         default : $quiz['answer'] = 'Question type error!'; break;
       }
     }
-
-  $quiz['id'] = $randomPlace->id;
+    if ($randList == 'people') {
+      $quiz['type'] = $type[$rand];
+      switch($quiz['type']) {
+        case 'country' :
+          $quiz['question'] = 'Where is '.$randEl->title.' from ? (<strong>'.$type[$rand].'</strong></strong>)';
+          $quiz['answer'] = $randEl->country->title;
+          break;    
+        case 'nationality' :
+          $quiz['question'] = 'What\'s '.$randEl->title.'\'s <strong>'.$type[$rand].'</strong> ?';
+          $quiz['answer'] = $randEl->nationality;
+          break;    
+        case 'photo' :
+          $quiz['question'] = '<strong>Who</strong> is this ?';
+          $quiz['answer'] = $randEl->title. ', '. $randEl->country->title.' ('.$randEl->nationality.')';
+          break;    
+        case 'quiz' :
+          $randQuiz = $randEl->quiz->getRandom();
+          $quiz['question'] = $randQuiz->question;
+          $quiz['answer'] = $randQuiz->answer;
+          break;    
+        default : $quiz['answer'] = 'Question type error!'; break;
+      }
+    }
+  }
+  $quiz['id'] = $randEl->id;
   return $quiz;
 }
 
