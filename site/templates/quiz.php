@@ -32,7 +32,7 @@ if ($user->isSuperuser()) {
 
   $selectedTeam = $input->urlSegment1;
   $selectedIds = $input->post->selected; // Checked players
-  $allPlayers = $pages->find("template='player', playerTeam=$selectedTeam, sort='name'");
+  $allPlayers = $pages->find("template='player', team.name=$selectedTeam, sort='name'");
   $rank = $allPlayers->first()->rank->name;
   if ( $rank == '4emes' || $rank == '3emes' ) {
     $allConcerned = $allPlayers->find("places.count|people.count>=3"); // Find players having at least 3 places
@@ -76,7 +76,7 @@ if ($user->isSuperuser()) {
         $out .= '<img class="monster" src="'.$logo.'" />';
         $out .= '<img class="avatar" src="'.$player->avatar->url.'" />';
         $out .= '<h1 class="playerName">'.$player->title.'</h1>';
-        $out .= '<h3>Monster invasion ! Team '.$player->playerTeam.' has to react!</h3>';
+        $out .= '<h3>Monster invasion ! Team '.$player->team->title.' has to react!</h3>';
         $out .= '<h2 class="alert alert-danger text-center">';
         $out .= $quiz['question'].'&nbsp;&nbsp;';
         $out .= '</h2>';

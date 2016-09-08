@@ -15,7 +15,8 @@
 
   // Display team scores
   echo '<div class="row">';
-    displayScores($allTeams);
+    /* displayScores($allTeams); */
+    showScores($allTeams);
   echo '</div>';
   
 ?>
@@ -155,7 +156,7 @@
               // Get player's name
               $login = $r['username'];
               $player = $pages->get("template='player', login=$login");
-              if ($player->playerTeam == '' || $player->playerTeam == 'No team') { $team = ''; } else { $team = '['.$player->playerTeam.']'; }
+              if ($player->team->name == 'no-team') { $team = ''; } else { $team = '['.$player->team->title.']'; }
               $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> '.$team.'</li>';
             }
             $stats .= '</ul>';
@@ -166,7 +167,7 @@
             foreach($yesterdaysPlayers as $r) {
               $login = $r['username'];
               $player = $pages->get("template='player', login=$login");
-              if ($player->playerTeam == '' || $player->playerTeam == 'No team') { $team = ''; } else { $team = '['.$player->playerTeam.']'; }
+              if ($player->team->name == 'no-team') { $team = ''; } else { $team = '['.$player->team->title.']'; }
               $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> '.$team.'</li>';
             }
             $stats .= '</ul>';
@@ -244,7 +245,7 @@
               <?php
               foreach($news as $n) {
                 $currentPlayer = $n->parent('template=player');
-                if ($currentPlayer->playerTeam == '' || $currentPlayer->playerTeam == 'No team') { $team = ''; } else { $team = '['.$currentPlayer->playerTeam.']'; }
+                if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
                 echo '<li class="">';
                 echo date("F j (l)", $n->date).' : ';
                 echo '<span>';
@@ -579,7 +580,7 @@
             </ul>
           </div>
           <div class="panel-footer text-right">
-          <p>To see your complete history, go the the <a href="<?php echo $pages->get('/players')->url.$player->playerTeam.'/'.$player->name; ?>">'My Profile'</a> page.</p>
+          <p>To see your complete history, go the the <a href="<?php echo $pages->get('/players')->url.$player->team->name.'/'.$player->name; ?>">'My Profile'</a> page.</p>
           </div>
         </div>
 
@@ -603,7 +604,7 @@
             <?php
             foreach($news as $n) {
               $currentPlayer = $n->parent('template=player');
-              if ($currentPlayer->playerTeam == '' || $currentPlayer->playerTeam == 'No team') { $team = ''; } else { $team = '['.$currentPlayer->playerTeam.']'; }
+              if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
               if ($currentPlayer->avatar) {
                 $thumb = $currentPlayer->avatar->size(20,20);
                 $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";

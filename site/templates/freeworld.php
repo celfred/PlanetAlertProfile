@@ -1,9 +1,9 @@
 <?php
   include("./head.inc"); 
 
-  $allPlayers = $pages->find("template='player', playerTeam=$input->urlSegment1, sort='group'");
+  $team = $pages->find("name=$input->urlSegment1");
+  $allPlayers = $pages->find("template='player', team=$team, sort='group'");
   $rank = $allPlayers->first()->rank->name;
-  $team = $allPlayers->first->playerTeam;
   if ($rank == '4emes' || $rank == '3emes') {
     $totalElements = $pages->find("template=place|people, name!=places|people, sort=level");
     $title = 'places or people';
@@ -18,13 +18,12 @@
   // Nav tabs
   include("./tabList.inc"); 
 
-  displayScores($team);
+  showScores($team);
   $allElements = teamFreeworld($team);
   $nbCompleted = $allElements->find("completed=1")->count();
 ?>
   <!-- <a class="pdfLink btn btn-info" href="<?php echo $page->url.$input->urlSegment1; ?>/places?pages2pdf=1">Get PDF</a> -->
-  <h3 class="text-center"><span class="label label-default"><?php echo $nbCompleted.' completed (out of '.$allElements->count().' '.$title; ?>)</span></h3>
-  <h4 class="text-center">Completing team rate : <?php echo $teamRate; ?></h4> <!-- (20% of team members) !-->
+  <h4 class="text-center"><span class="label label-info"><?php echo $nbCompleted.'/'.$allElements->count().'</span> completed '.$title; ?> (team rate : <?php echo $teamRate; ?>)</h4>
 
   <table id="freeWorld" class="table table-condensed table-hover">
     <thead>

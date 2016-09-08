@@ -49,22 +49,8 @@
 <body>
   <?php
     $homepage = $pages->get("/"); 
-    $allPlayers = $pages->find("template=player")->sort("playerTeam, title");
-    $allTeams = [];
-    foreach ($allPlayers as $player) {
-      if (!in_array($player->playerTeam, $allTeams)) {
-        if ($player->playerTeam == '' && !in_array('No team', $allTeams)) {
-          array_push($allTeams, 'No team'); 
-        } else {
-          /* if ($player->playerTeam != '' && $player->playerTeam != 'testTeam') { */
-          if ($player->playerTeam != '') {
-            array_push($allTeams, $player->playerTeam); 
-          }
-        }
-      }
-    }
-    arsort($allTeams);
-
+    $allPlayers = $pages->find("template=player")->sort("team->name, title");
+		$allTeams = $pages->find("template=team")->sort("title");
   ?>
           
   <div id="wrap">
@@ -89,34 +75,30 @@
             <ul class="dropdown-menu">
               <?php
                 foreach($allTeams as $team) {
-                  $class = $team == $input->urlSegment1 ? " class='selected-left'" : "";
+                  $class = $team->name == $input->urlSegment1 ? " class='selected-left'" : "";
                   if ($user->isSuperuser()) { // Display direct access via submenu only for admin
+										$teamPlayers = $allPlayers->find("team=$team");
                     echo "<li class='dropdown-submenu'>";
-                    echo "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a>";
+                    echo "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/'>{$team->title}</a>";
                     echo "<ul class='dropdown-menu'>";
-                    echo "<li class='dropdown-submenu'><a href='{$homepage->url}players/{$sanitizer->pageName($team)}'>{$team} team</a>";
+                    echo "<li class='dropdown-submenu'><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} team</a>";
                     echo "<ul class='dropdown-menu'>";
-										foreach ($allPlayers as $player) {
-											if ($player->playerTeam == $team) {
-												echo "<li><a href='{$homepage->url}players/{$sanitizer->pageName($player->playerTeam)}/{$player->name}'>{$player->title}</a></li>";
-											}
-											if ($player->playerTeam == '' && $team == 'No team') {
-												echo "<li><a href='{$homepage->url}players/no-team/{$player->name}'>{$player->title}</a></li>";
-											}
+										foreach ($teamPlayers as $p) {
+											echo "<li><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/{$p->name}'>{$p->title}</a></li>";
 										}
                     echo "</ul>";
                     echo "</li>";
-										if ($player->playerTeam != '') {
-											echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team)}'>{$team} world</a></li>";
+										if ($player->team != '') {
+											echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team->name)}'>{$team->title} world</a></li>";
 										}
-                    echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team)}'>{$team} marketplace</a></li>";
-                    echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team)}'>{$team} adminTable</a></li>";
-                    echo "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team)}'>{$team} monster invasions</a></li>";
-                    echo "<li><a href='{$homepage->url}reports/{$sanitizer->pageName($team)}'>{$team} reports</a></li>";
+                    echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team->name)}'>{$team->title} marketplace</a></li>";
+                    echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team->name)}'>{$team->title} adminTable</a></li>";
+                    echo "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team->name)}'>{$team->title} monster invasions</a></li>";
+                    echo "<li><a href='{$homepage->url}reports/{$sanitizer->pageName($team->name)}'>{$team->title} reports</a></li>";
                     echo "</ul>";
                     echo "</li>";
                   } else {
-                      echo "<li><a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a></li>";
+                      echo "<li><a$class href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/'>{$team->title}</a></li>";
                   }
                 }
               ?>
@@ -219,11 +201,11 @@
           <?php
             $class = $page->name == 'newsboard' ? "on" : "";
             echo "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
-            $class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}/{$player->name}'>My Profile</a>";
-						if ($player->playerTeam != '') {
-							$class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
-							echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}'>My Team</a>";
+            $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}/{$player->name}'>My Profile</a>";
+						if ($player->team != '') {
+							$class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
+							echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}'>My Team</a>";
 						}
           ?>
 

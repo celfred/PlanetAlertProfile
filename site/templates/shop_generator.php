@@ -11,11 +11,11 @@ $allPeople = $pages->find("template=people, name!=people, sort=title");
 
 $playerId = $input->urlSegment1;
 $player = $pages->get($playerId);
-$allPlayers = $pages->find("template='player', playerTeam=$player->playerTeam");
+$allPlayers = $pages->find("template='player', team=$player->team");
 
 $out = '';
 
-$out .= "<h2 class='well text-center'>Marketplace for {$player->title} ({$player->playerTeam})</h2>";
+$out .= "<h2 class='well text-center'>Marketplace for {$player->title} ({$player->team->title})</h2>";
 $out .= "<h3 class='text-center well'>";
 $out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='' />&nbsp;<span id='remainingGC'>{$player->GC}</span> GC available.";
 $out .= "</h3>";
@@ -109,7 +109,7 @@ $out .= '</section>';
 
 if ( $possibleEquipment->count() > 0 || $possiblePlaces->count() > 0 || $possiblePotions->count() > 0 ) {
   $out .= '<input type="submit" name="marketPlaceSubmit" value="Yes, buy the selected items!" class="btn btn-block btn-primary" disabled="disabled" />';
-  $out .= '<a href="'.$homepage->url.'players/'.$player->playerTeam.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
+  $out .= '<a href="'.$homepage->url.'players/'.$player->team->name.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
 }
 
 $out .= '</form>';

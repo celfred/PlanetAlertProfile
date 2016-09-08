@@ -4,13 +4,8 @@
 
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
-  if ($input->urlSegment1 != 'no-team') {
-    $allPlayers = $pages->find("template='player', playerTeam=$input->urlSegment1, sort='group'");
-    $team = $allPlayers->first->playerTeam;
-  } else {
-    $allPlayers = $pages->find("template='player', playerTeam='', sort='group'");
-    $team = 'No team';
-  }
+  $team = $pages->find("name=$input->urlSegment1");
+  $allPlayers = $pages->find("template=player, team=$team, sort=group");
   $allGroups = $pages->get("/groups")->children('sort=title');
   $outGroups = '';
 
@@ -73,7 +68,7 @@
   // Nav tabs
   include("./tabList.inc"); 
 
-  displayScores($team);
+  showScores($team);
 
   echo $outGroups;
 

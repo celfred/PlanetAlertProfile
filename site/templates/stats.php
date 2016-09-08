@@ -55,7 +55,7 @@ if ($user->isSuperuser()) {
       // Get player's name
       $login = $r['username'];
       $player = $pages->get("template='player', login=$login");
-      $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+      $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->team->title.']</li>';
     }
     $stats .= '</ul>';
   }
@@ -66,7 +66,7 @@ if ($user->isSuperuser()) {
       // Get player's name
       $login = $r['username'];
       $player = $pages->get("template='player', login=$login");
-      $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+      $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->team->title.']</li>';
     }
     $stats .= '</ul>';
   }
@@ -106,7 +106,7 @@ foreach ($allPlayers as $p) {
   $query = $database->prepare("SELECT login_timestamp FROM process_login_history WHERE username = :username AND login_was_successful=1 ORDER BY login_timestamp DESC LIMIT 1");   
   $query->execute(array(':username' => $p->name));
   $lastvisit = $query->fetchColumn();
-  $stats .= '<tr><td>'.$p->title.' ['.$p->playerTeam.']</td><td>'. $lastvisit .'</td></tr>';
+  $stats .= '<tr><td>'.$p->title.' ['.$p->team->title.']</td><td>'. $lastvisit .'</td></tr>';
 }
 $stats .= '</tbody>';
 $stats .= '</table>';

@@ -185,7 +185,7 @@
           }
           $out .= '<td data-sort="'.$m->best.'">';
           if ($m->mostTrained) {
-            $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span>';
+            $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
           } else {
             $out .= '<span>No record yet.</span>';
           }
@@ -219,7 +219,7 @@
             $out .= '</div>';
             $out .= '<div class="panel-body">';
             if ($monster->mostTrained->id) {
-              $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->playerTeam.']</h4>';
+              $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->team->title.']</h4>';
             } else {
               $out .= '<h4 class="text-center">No record yet.</h4>';
             }

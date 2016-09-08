@@ -1,6 +1,6 @@
 <?php
   $playerPage = $pages->get("template=player,name=".$input->urlSegment2);
-  $playersTotalNb = $pages->count("template=player,playerTeam=$playerPage->playerTeam");
+  $playersTotalNb = $pages->count("template=player,team=$playerPage->team");
   $playerPlacesNb = $playerPage->places->count();
   $playerPeopleNb = $playerPage->people->count();
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
@@ -18,7 +18,7 @@
   if (!$karma) $karma = 0;
   if ($karma > 0) { // Team Position
     // Number of players having a better karma than current player
-    $playerPos = $pages->count("template=player,playerTeam=$playerPage->playerTeam,karma>$karma") + 1;
+    $playerPos = $pages->count("template=player,team=$playerPage->team,karma>$karma") + 1;
   } else {
     $playerPos = $playersTotalNb;
   }
@@ -52,7 +52,7 @@
           </div>
           <div class="col-sm-6">
             <ul class="player-details">
-            <li>Karma : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->playerTeam != '') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
+            <li>Karma : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
             <li>Level : <?php echo $player->level; ?></li>
             <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></li>
             <li><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></li>

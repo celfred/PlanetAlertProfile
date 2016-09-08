@@ -30,12 +30,12 @@
         }
         
         // Record to log file
-        $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result;
+        $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result;
         $log->save('underground-training', $logText);
 
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
-        $msg .= "Team : ". $player->playerTeam."\r\n";
+        $msg .= "Team : ". $player->team->title."\r\n";
         $msg .= "Training : ". $monster->title."\r\n";
         $msg .= "Result : ". $result;
 
@@ -72,12 +72,12 @@
         echo 'Saving';
 
         // Record to log file
-        $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
+        $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
         $log->save('monster-fights', $logText);
 
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
-        $msg .= "Team : ". $player->playerTeam."\r\n";
+        $msg .= "Team : ". $player->team->title."\r\n";
         $msg .= "Fight : ". $monster->title."\r\n";
         $msg .= "Result : ". $result;
         if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
