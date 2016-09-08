@@ -164,10 +164,10 @@
             $stats .= '<span>Yesterday\'s players : </span>';
             $stats .= '<ul class="list-inline list-unstyled">';
             foreach($yesterdaysPlayers as $r) {
-              // Get player's name
               $login = $r['username'];
               $player = $pages->get("template='player', login=$login");
-              $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+              if ($player->playerTeam == '' || $player->playerTeam == 'No team') { $team = ''; } else { $team = '['.$player->playerTeam.']'; }
+              $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> '.$team.'</li>';
             }
             $stats .= '</ul>';
           }
