@@ -258,9 +258,8 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
 
       // Save new team scores (for cache) if necessary
       $newNbEl = $player->places->count()+$player->people->count();
-        updateTeamScores($player->team);
       if ($newNbEl != $oldNbEl) {
-        /* updateTeamScores($player->team); */
+        updateTeamScores($player->team);
       }
     }
   } else { // Player died
@@ -587,11 +586,13 @@ function pick_question($player) {
   return $quiz;
 }
 
-function nbFreedomActs($playerTeam, $startDate='', $endDate='') {
+function nbFreedomActs($team, $startDate='', $endDate='') {
   $pages = wire('pages');
-  if ($startDate == '') { $startDate = date('2015-09-01 00:00:00'); }
-  if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
-  $players = $pages->find("template=player, team=$playerTeam");
+  // Find current school year date
+  $schoolYear = $pages->get("template=period, name=school-year");
+  if ($startDate == '') { $startDate = $schoolYear->dateStart; }
+  if ($endDate == '') { $endDate = $schoolYear->dateEnd; }
+  $players = $pages->find("template=player, team=$team");
   $free = $pages->find("has_parent=$players, template=event, task.name=free, date>=$startDate, date<=$endDate")->count();
   return $free;
 }
@@ -604,7 +605,7 @@ function teamFreeworld($team) {
   $allElements = new pageArray();
   $allPlaces = $pages->find("template=place, name!=places");
   $allPeople = $pages->find("template=people, name!=people");
-  $rank = $allPlayers->first()->rank->name;
+  $rank = $team->rank->name;
   if ($rank == '4emes' || $rank == '3emes') {
     $allElements->add($allPlaces);
     $allElements->add($allPeople);
@@ -626,13 +627,11 @@ function teamFreeworld($team) {
 function updateTeamScores($team) {
   $pages = wire('pages');
   $team = $pages->get("$team");
-  // Find current school year date
-  $schoolYear = $pages->get("template=period, name=school-year");
-  $team->freeActs = nbFreedomActs($team->name, $schoolYear->dateStart, $schoolYear->dateEnd);
+  $team->of(false);
+  $team->freeActs = nbFreedomActs($team);
   if ($team->name != '' || $team->name != 'no-name') {
-    $team->of(false);
     $team->freeelements->removeAll();
-    $allElements = teamFreeworld($team->name);
+    $allElements = teamFreeworld($team);
     $completed = $allElements->find("completed=1");
     $percent = round((100*$completed->count())/$allElements->count());
     foreach ($completed as $el) {
@@ -648,7 +647,7 @@ function showScores($allTeams) {
   echo '<ul class="list-inline">';
   foreach($allTeams as $t) {
     if ($t->name != 'no-team') {
-      echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t->title.' :'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
+      echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t->title.':'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
     }
   }
   echo '</ul>';

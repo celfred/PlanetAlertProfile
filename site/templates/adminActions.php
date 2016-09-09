@@ -1,22 +1,7 @@
 <?php /* adminActions template */
   if (!$config->ajax) {
     include("./head.inc"); 
-
-    /* $allTeams = []; */
-    /* foreach ($allPlayers as $player) { */
-      /* if (!in_array($player->playerTeam, $allTeams)) { */
-      /*   if ($player->team->name == '' && !in_array('No team', $allTeams)) { */
-      /*     array_push($allTeams, 'No team'); */ 
-      /*   } else { */
-      /*     if ($player->playerTeam != '') { */
-      /*       array_push($allTeams, $player->playerTeam); */ 
-      /*     } */
-      /*   } */
-      /* } */
-    /* } */
     $allTeams = $pages->find("template=team")->sort("title");
-    /* arsort($allTeams); */
-
     $out = '';
     if ($user->isSuperuser()) {
       $action = $input->urlSegment1;
@@ -135,30 +120,26 @@
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="team-options">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
+      case 'setScores' :
+        $out .= '<section class="well">';
+        $out .= '<h3 class="text-center">';
+        $out .=   'Set scores';
+        $out .= '</h3>';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setScores">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
       default :
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
-        /* $out .= '<section class="well">'; */
-        /* $out .= '<div>'; */
-        /* $out .= '<span>Select a player : </span>'; */
-        /* $out .= '<select id="playerId">'; */
-        /* $out .= '<option value="-1">Select a player</option>'; */
-        /* $out .= '<option value="all">All players</option>'; */
-        /* foreach($allPlayers as $p) { */
-        /*   $out .= '<option value="'.$p->id.'">'.$p->title.' ['.$p->team->title.']</option>'; */
-        /* } */
-        /* $out .= '</select>'; */
-        /* $out .= '</div>'; */
-        /* $out .= '<div>'; */
-        /* $out .= '<span>Select a team : </span>'; */
-        /* $out .= '<select id="teamId">'; */
-        /* $out .= '<option value="-1">Select a team</option>'; */
-        /* foreach($allTeams as $p) { */
-        /*   $out .= '<option value="'.$p.'">'.$p.'</option>'; */
-        /* } */
-        /* $out .= '</select>'; */
-        /* $out .= '</div>'; */
-        /* $out .= '</section>'; */
 ?>
   <div>
   <!-- 
@@ -667,6 +648,34 @@
         $page->of(false);
         $page->periods = $periodId;
         $page->save();
+        break;
+      case 'setScores':
+        $out = '';
+        if ($selectedTeam && $selectedTeam != '-1') {
+          $out .= '</div>';
+          $out .= '<h4 class="text-center">';
+          $out .=   'School year Team scores for '.$selectedTeam->title;
+          $out .= '</h4>';
+          $out .= '<section>';
+          $out .= '<ul><span class="label label-default">Actual scores</span>';
+          $out .= '<li>'.$selectedTeam->freeworld.'%</li>';
+          $out .= '<li>'.$selectedTeam->freeActs.' free acts</li>';
+          $out .= '</section>';
+          $out .= '<section>';
+          $out .= '<ul><span class="label label-danger">New scores</span>';
+          $free = nbFreedomActs($selectedTeam);
+          $allElements = teamFreeworld($selectedTeam);
+          $completed = $allElements->find("completed=1");
+          $percent = round((100*$completed->count())/$allElements->count());
+          $out .= '<li>'.$percent.'%</li>';
+          $out .= '<li>'.$free.' free acts</li>';
+          $out .= '</section>';
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveScores/'.$selectedTeam->id.'/1">Save new scores</button>';
+        }
+        break;
+      case 'saveScores':
+        $selectedTeam = $pages->get("$input->urlSegment2");
+        updateTeamScores($selectedTeam);
         break;
       case 'toggle-lock':
         $team = $pages->get("$selectedTeam");
