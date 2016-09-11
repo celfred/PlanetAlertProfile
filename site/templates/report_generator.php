@@ -27,13 +27,13 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
         default: break;
       }
     }
-    $reportTitle .= ' for '.$selected->title.' '.$selected->lastName.' ('.$selected->playerTeam.')'; 
+    $reportTitle .= ' for '.$selected->title.' '.$selected->lastName.' ('.$selected->team->title.')'; 
     $reportTitle .= '<br />';
     $reportTitle .= 'Period : '.$period->title;
   } else { // Team's report
     $global = true;
     $selected = strtoupper($input->urlSegment2);
-    $allPlayers = $pages->find("playerTeam=$selected, template=player, sort=$sort");
+    $allPlayers = $pages->find("team.name=$selected, template=player, sort=$sort");
     $reportTitle = '';
     if ($category == 'all') { // Global report
       $reportTitle .= 'Global report';

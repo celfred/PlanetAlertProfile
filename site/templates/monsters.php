@@ -145,7 +145,7 @@ if ($user->isSuperuser()) {
     }
     $out .= '<td data-sort="'.$m->best.'">';
     if ($m->mostTrained) {
-      $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span>';
+      $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
     }
     $out .= '</td>';
     $out .= '</tr>';

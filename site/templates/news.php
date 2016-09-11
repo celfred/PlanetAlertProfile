@@ -15,7 +15,6 @@
 
   // Display team scores
   echo '<div class="row">';
-    /* displayScores($allTeams); */
     showScores($allTeams);
   echo '</div>';
   
@@ -589,8 +588,11 @@
 
 
       // Last 15 public news
-      $excluded = $pages->find('name=test|admin');
-      $news = $pages->find("template=event, sort=-date, limit=15, task=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+      $excluded = $pages->find("name=test|admin");
+      $included = $pages->find("name=history");
+      // Find current school year date
+      $schoolYear = $pages->get("template=period, name=school-year");
+      $news = $pages->find("template=event, date>= $schoolYear->dateStart, sort=-date, limit=15, task=free|buy|ut-action-v|ut-action-vv, has_parent=$included, has_parent!=$excluded");
       if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">
