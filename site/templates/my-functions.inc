@@ -1043,8 +1043,8 @@ function pma($player) {
   $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
   $out .= '<span class="label label-primary">Monster Fight(s)</span> ⇒ ';
   // Test if fights have been disabled by Admin
-  $lock = $pages->get("name=admin-actions")->lockFights->get("playerTeam=$player->playerTeam");
-  if ($lock) {
+  $lock = $pages->get("template=team, name=$player->team")->lockFights;
+  if ($lock == 1) {
     $out .= 'The administrator has disabled this feature.';
   } else {
     if ($suggestedFights->count() > 0) {

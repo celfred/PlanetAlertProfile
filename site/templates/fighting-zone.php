@@ -6,8 +6,8 @@
   // Test player login
   if ($player && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if fights have been disabled by Admin
-    $lock = $pages->get("name=admin-actions")->lockFights->get("playerTeam=$player->playerTeam");
-    if ($lock) {
+    $lock = $pages->get("template=team, name=$player->team")->lockFights;
+    if ($lock == 1) {
       echo '<p class="alert alert-warning">Sorry, but the administrator has disabled this option for the moment.</p> ';
     } else {
       // Display Personal Mission Analyzer

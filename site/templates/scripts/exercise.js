@@ -393,7 +393,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
       type: "success",
       confirmButtonText: "Cool ! Let's see my updated profile !"
     }, function() {
-      $window.location.href = $scope.redirectUrl;
+			$timeout($scope.redirect($scope.redirectUrl), 200);
     });;
   }
 
@@ -418,7 +418,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
       type: "error",
       confirmButtonText: "Ok, I'll do better next time..."
     }, function() {
-      $window.location.href = $scope.redirectUrl;
+			$timeout($scope.redirect($scope.redirectUrl), 200);
     });
   }
 
@@ -439,6 +439,10 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
       $scope.saved = 'Error! Please contact the administrator.';
     })
   }
+
+	$scope.redirect = function(url) {
+		$window.location.href = url;
+	}
 
   $scope.focusInput = function() {
     $scope.isFocused = !$scope.isFocused;
@@ -558,7 +562,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         confirmButtonText: "Take the helmet off (Stop training)"
       }, function() {
         // DO not save, but redirect
-        $window.location.href = $scope.redirectUrl;
+				$timeout($scope.redirect($scope.redirectUrl), 200);
       });;
     }
   }
@@ -585,12 +589,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 					timer: 2000
 				}, function() {
 					if (redirect === true) {
-						$window.location.href = $scope.redirectUrl;
+						$timeout($scope.redirect($scope.redirectUrl), 200);
 					}
 				});
 			} else {
 				if (redirect === true) {
-					$window.location.href = $scope.redirectUrl;
+					$timeout($scope.redirect($scope.redirectUrl), 200);
 				}
 			}
     }, function(data, status, headers, config) {
@@ -598,6 +602,10 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       $scope.saved = 'Error! Please contact the administrator.';
     })
   }
+
+	$scope.redirect = function(url) {
+		$window.location.href = url;
+	}
 
   $scope.focusInput = function() {
     $scope.isFocused = !$scope.isFocused;

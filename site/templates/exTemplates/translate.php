@@ -83,7 +83,12 @@
 
   // First step : Display exercise summary to prepare the activity
   $out .= '<h3 class="alert alert-info" role="alert">';
-  $out .= '<strong><span class="glyphicon glyphicon-hand-up"></span> '.$page->type->summary.'</strong>';
+  if ($page->type->summary != '') {
+    $indications = $page->type->summary;
+  } else {
+    $indications = 'No indications';
+  }
+  $out .= '<strong><span class="glyphicon glyphicon-hand-up"></span> '.$indications.'</strong>';
   $out .= '<span class="glyphicon glyphicon-question-sign pull-right" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
   $out .= '<br /><br />';
   $out .= '<a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$n->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
