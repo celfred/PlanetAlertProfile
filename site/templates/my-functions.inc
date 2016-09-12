@@ -628,7 +628,6 @@ function teamFreeworld($team) {
 function updateTeamScores($team) {
   $pages = wire('pages');
   $team = $pages->get("$team");
-  $team->of(false);
   $team->freeActs = nbFreedomActs($team);
   if ($team->name != 'no-name') {
     $team->freeelements->removeAll();
@@ -639,6 +638,7 @@ function updateTeamScores($team) {
       $team->freeelements->add($el);
     }
     $team->freeworld = $percent;
+    $team->of(false);
     $team->save();
   }
 }
