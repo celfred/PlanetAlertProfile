@@ -29,7 +29,8 @@
     <thead>
     <tr>
       <th>Level</th>
-      <th>Place / People</th>
+      <th>Type</th>
+      <th>Name</th>
       <th>City / Nationality</th>
       <th>Country</th>
       <th>GC</th>
@@ -41,6 +42,9 @@
       foreach($allElements as $el) {
         $out .= '<tr class="'.$el->cssClass.'">';
         $out .= '<td>'.$el->level.'</td>';
+        if ($el->template == "place") { $type = 'Place'; }
+        if ($el->template == "people") { $type = 'People'; }
+        $out .= '<td>'.$type.'</td>';
         $out .= '<td>'.$el->title.'</td>';
         if ($el->template == 'place') {
           $out .= '<td>'.$el->city->title.'</td>';

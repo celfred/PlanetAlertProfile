@@ -599,7 +599,8 @@ function nbFreedomActs($team, $startDate='', $endDate='') {
 
 function teamFreeworld($team) {
   $pages = wire('pages');
-  $allPlayers = $pages->find("template=player, team=$team");
+  $team = $pages->get("$team");
+  $allPlayers = $pages->find("template=player, team=$team->name");
   $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
   // Get all possible elements
   $allElements = new pageArray();
@@ -620,7 +621,7 @@ function teamFreeworld($team) {
     if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = ''; }
     $el->teamOwners = $teamOwners;
   }
-  $allElements->sort("-completed, title");
+  $allElements->sort("-completed, level, title");
   return $allElements;
 }
 
@@ -629,7 +630,7 @@ function updateTeamScores($team) {
   $team = $pages->get("$team");
   $team->of(false);
   $team->freeActs = nbFreedomActs($team);
-  if ($team->name != '' || $team->name != 'no-name') {
+  if ($team->name != 'no-name') {
     $team->freeelements->removeAll();
     $allElements = teamFreeworld($team);
     $completed = $allElements->find("completed=1");
