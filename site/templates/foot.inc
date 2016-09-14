@@ -31,7 +31,7 @@
 		<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.css">
   <?php } ?>
   <?php if ($page->template == 'quiz') { ?>
-		<script src="<?php echo $config->urls->templates?>scripts/svg-pan-zoom.min.js"></script>
+		<script src="<?php echo $config->urls->templates?>bower_components/svg-pan-zoom/dist/svg-pan-zoom.min.js"></script>
   <?php } ?>
   <?php if ($page->template == 'exercise' || $page->name == 'underground-training') { ?>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular/angular.min.js'></script>
