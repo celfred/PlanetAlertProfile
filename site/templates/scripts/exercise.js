@@ -90,7 +90,7 @@ exerciseApp.service('myData', function($http) {
 				allLines.push(newLines[i]);
 			}
 
-			console.log(allLines);
+			// console.log(allLines);
 			// return allLines;
 		},
 
@@ -105,7 +105,7 @@ exerciseApp.service('myData', function($http) {
 				}
 			}
 			lineHistory.push(randNum);
-			console.log(type);
+			// console.log(type);
 			var randLine = allLines[randNum];
 			// Test if training or fight
 			if (type == 'fight') {
@@ -121,7 +121,7 @@ exerciseApp.service('myData', function($http) {
 					var randOpp = 1;
 				}
 			}
-			console.log(randNum);
+			// console.log(randNum);
 			switch(exerciseData['exType']) {
 				case 'translate' :
 					var randWords = randLine.split(",");
@@ -143,7 +143,7 @@ exerciseApp.service('myData', function($http) {
 					question['allCorrections'] = this.parseCorrections(allCorrections);
 					break;
 				default: 
-					console.log('Unknown exType');
+					// console.log('Unknown exType');
 			}
 			// Pick 1 random word from possible words
 			if (allWords.length > 1) {
