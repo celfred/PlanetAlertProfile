@@ -5,19 +5,16 @@
   $totalPlaces = $pages->find("template=place, name!=places");
   $allPlayers = $pages->find("template=player, name!=test");
 
-  // Display Personal Mission Analyzer if user is logged in
-  if ($user->isLoggedin() && $user->isSuperuser()==false) {
-    $helmet = $player->equipment->get("name=memory-helmet");
-    if ($helmet->id) {
-      echo pma($pages->get("login=$user->name"));
-    }
-  }
-
   // Display team scores
   echo '<div class="row">';
     showScores($allTeams);
   echo '</div>';
   
+  // Display Personal Analyzer if user is logged in
+  if ($user->isLoggedin() && $user->isSuperuser()==false) {
+    echo pma($pages->get("login=$user->name"));
+  }
+
 ?>
 
 <div class="row">
@@ -283,32 +280,6 @@
 
       // User is logged in, show personal news
       if ($user->isLoggedin() && $user->isSuperuser() == false) {
-        // Get player's indicators
-        $player = $pages->get("template=player, login=$user->name");
-        echo '<div class="well">';
-          echo '<span class="label label-success">Your Karma : '.$player->karma.'</span>';
-          echo '&nbsp;&nbsp;';
-          echo '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
-          echo '&nbsp;&nbsp;';
-          echo '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
-          echo '&nbsp;&nbsp;';
-          echo '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
-          echo '&nbsp;&nbsp;';
-          echo '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
-          echo '&nbsp;&nbsp;';
-          $freeElements = $player->places->count()+$player->people->count();
-          echo '<span class="label label-info" data-toggle="tooltip" title="Free places/people">'.$freeElements.'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
-          echo '&nbsp;&nbsp;';
-          echo '<span class="label label-info" data-toggle="tooltip" title="Equipment">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>';
-          echo '&nbsp;&nbsp;';
-          if ($player->donation == false) {$player->donation = 0; }
-          echo '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
-          echo '&nbsp;&nbsp;';
-          echo '<span class="label label-primary" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' UT</span>';
-          echo '&nbsp;&nbsp;';
-          echo '<span class="label label-primary" data-toggle="tooltip" title="Fighting Power">'.$player->fighting_power.' FP</span>';
-        echo ' </div>';
-
         // Get current period statistics
         $officialPeriod = $pages->get("name=admin-actions")->periods;
         $allEvents = $player->child("name=history")->find("template=event, date>=$officialPeriod->dateStart, date<=$officialPeriod->dateEnd");

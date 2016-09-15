@@ -982,6 +982,7 @@ function setBestPlayer($monster, $player, $utGain) {
 function pma($player) {
   $out = '';
   $pages = wire('pages');
+  $config = wire('config');
   $player = $pages->get($player->id);
   switch ($player->rank->name) {
     case '6emes':
@@ -1031,12 +1032,37 @@ function pma($player) {
   }
 
   $out .= '<div class="row">';
+  $out .= '<div class="col-sm-12">';
   $out .= '<div class="pma panel panel-primary">';
   $out .= '<div class="panel-heading">';
-  $out .= '<h4><span class="glyphicon glyphicon-calendar"></span> Personal Mission Analyzer</h4>';
+  $out .= '<h4><span class="glyphicon glyphicon-calendar"></span> Personal Analyzer';
+  $out .= '<span class="pull-right">';
+  $out .= '<span class="label label-success">Your Karma : '.$player->karma.'</span>';
+  $out .= '&nbsp;&nbsp;';
+  $out .= '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
+  $out .= '&nbsp;&nbsp;';
+  $out .= '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
+  $out .= '&nbsp;&nbsp;';
+  $out .= '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+  $out .= '&nbsp;&nbsp;';
+  $out .= '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
+  $out .= '&nbsp;&nbsp;';
+  $freeElements = $player->places->count()+$player->people->count();
+  $out .= '<span class="label label-info" data-toggle="tooltip" title="Free places/people">'.$freeElements.'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
+  $out .= '&nbsp;&nbsp;';
+  $out .= '<span class="label label-info" data-toggle="tooltip" title="Equipment">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>';
+  $out .= '&nbsp;&nbsp;';
+  if ($player->donation == false) {$player->donation = 0; }
+  $out .= '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+  $out .= '&nbsp;&nbsp;';
+  $out .= '<span class="label label-primary" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' UT</span>';
+  $out .= '&nbsp;&nbsp;';
+  $out .= '<span class="label label-primary" data-toggle="tooltip" title="Fighting Power">'.$player->fighting_power.' FP</span>';
+  $out .= '</span>';
+  $out .= '</h4>';
   $out .= '</div>';
   $out .= '<div class="panel-body">';
-  $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" title="This analyser is here to help you organize better. Feel free to go directly to the Training Zone or to the Fighting Zone to do more work :)"></span>';
+  $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" title="This analyser is here to help you organize."></span>';
   $out .= '<span class="label label-primary">';
   $helmet = $pages->get("name=memory-helmet");
   if ($helmet->image) {
@@ -1079,19 +1105,40 @@ function pma($player) {
   }
   $out .= '</p>';
   $out .= '</div>';
+  // Personal advice
   $out .= '<div class="panel-footer">';
   $lowTeamMembers = $pages->find("template=player, team=$player->team, HP<10");
   if ($lowTeamMembers->count() > 0) {
-    $out .= '<p><span class="label label-danger">Low HP in your team <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Maybe you can help them?"></span>: </span>';
+    $out .= '<p><span class="label label-danger">Low HP in your team <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Maybe you can help them (donation, encouraging in class...)?"></span>: </span>';
     foreach($lowTeamMembers as $p) {
       $out .= ''.$p->title.' ';
     }
     $out .= '</p>';
   }
-  if ($player->GC > 100) {
-    $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> You have '.$player->GC.' GC ! You should use it to increase your karma :)</p>';
-  
+  $helmet = $player->equipment->get("name=memory-helmet");
+  if (!$helmet->id) {
+    $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> Think as a team : 1 member of your group should buy the Memory Helmet to give access to the group to the Underground Training Zone ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Agissez en équipe : 1 membre du groupe devrait débloquer le Memory Helmet pour donner l\'accès au groupe à la Underground Training Zone !"></span></p>';
   }
+  if ($player->GC > 100) {
+    $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> You have '.$player->GC.' GC ! You should use it to increase your karma  (buy equipment, free elements, donate...) :) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Tu as beaucoup de pièces d\'or ! Tu devrais les utiliser pour augmenter ton Karma (acheter de l\'équipement, libérer quelque chose, faire un don...)"></span></p>';
+  }
+  $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");
+  $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
+  $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
+  // Possible places
+  $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
+  $possibleElements = $possiblePlaces->count();
+  if ($player->team->rank->name == '4emes' || $player->team->rank->name == '3emes') {
+    $allPeople = $pages->find("template=people, name!=people, sort=title");
+    // Possible people
+    $possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name");
+    $possibleElements += $possiblePeople->count();
+  }
+  if ($possibleEquipment->count() > 0 || $possibleElements > 0) {
+    $marketPlace = $pages->get("name=shop_generator")->url.$player->id;
+    $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> New elements are available for you at <a href="'.$marketPlace.'">the Marketplace</a> ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="De nouveaux éléments sont accessibles pour toi dans la Marketplace !"></span></p>';
+  }
+  $out .= '</div>';
   $out .= '</div>';
   $out .= '</div>';
   $out .= '</div>';
