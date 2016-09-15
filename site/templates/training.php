@@ -21,25 +21,20 @@
         } else {
           $allMonsters = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
         }
-
-        $out .= '<div class="row">';
-          $out .= '<div class="col-sm-12 text-center">';
-          $out .= '<h2><span class="label label-default">Underground Training Zone</span></h2>';
-          $out .= '</div>';
-        $out .= '</div>';
-
+        $out .= '<br />';
         $out .= '<div class="well">';
-        $out .= $page->summary;
-        $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->frenchSummary.'"></span>';
-        $out .= '</div>';
-
-        $out .= '<div class="well">';
-        $out .= '<h3 class="text-center">';
+        $out .= '<h2 class="text-center">Underground Training Zone';
         if ($helmet->image) {
-          $out .= '<img width="50" src="'.$helmet->image->url.'" alt="Helmet" />';
+          $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
         }
-        $out .= ' Memory Helmet <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Vocabulary Revisions"></span>';
-        $out .= '</h3>';
+        $out .= '</h2>';
+        $out .= '<p class="text-center">'.$page->summary;
+        $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->frenchSummary.'"></span>';
+        $out .= '</p>';
+
+        $out .= '<h4 class="text-center">';
+        $out .= 'There are currently '.$allMonsters->count().' monsters in the list.';
+        $out .= '</h4>';
         $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
           $out .= '<thead>';
           $out .= '<tr>';
