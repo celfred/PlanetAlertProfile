@@ -32,7 +32,7 @@ $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=
 $possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name");
 
 $out .= '<section class="row">';
-$out .= "<ul class='itemList col-md-6'>";
+$out .= "<ul class='itemList col-md-4'>";
 if ( $possibleEquipment->count() > 0) {
   foreach($possibleEquipment as $item) {
     // List items by category
@@ -70,7 +70,7 @@ $out .= "</ul>";
 
 
 if ( $possiblePlaces->count() > 0) {
-  $out .= "<ul class='itemList col-md-6'>";
+  $out .= "<ul class='itemList col-md-4'>";
   $out .= '<li class="label label-primary">Possible Places</li>';
   foreach($possiblePlaces as $item) {
     $out .= '<li>';
@@ -78,13 +78,13 @@ if ( $possiblePlaces->count() > 0) {
   }
   $out .= "</ul>";
 } else {
-  $out .= "<ul class='itemList col-md-6'>";
+  $out .= "<ul class='itemList col-md-4'>";
   $out .= "<li><h3>No possible place !</h3></li>";
   $out .= "</ul>";
 }
 if ($player->rank->name == '4emes' || $player->rank->name == '3emes') {
   if ( $possiblePeople->count() > 0) {
-    $out .= "<ul class='itemList col-md-6'>";
+    $out .= "<ul class='itemList col-md-4'>";
     $out .= "<li class='label label-primary'>Possible People</li>";
     foreach($possiblePeople as $item) {
       $out .= '<li>';
@@ -95,7 +95,7 @@ if ($player->rank->name == '4emes' || $player->rank->name == '3emes') {
     }
     $out .= "</ul>";
   } else {
-      $out .= "<ul class='itemList col-md-6'>";
+      $out .= "<ul class='itemList col-md-4'>";
       $out .= "<li><h3>No possible people !</h3></li>";
       $out .= "</ul>";
   }
