@@ -220,8 +220,13 @@
               echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'><span class='glyphicon glyphicon-shopping-cart'></span> - Go to the Marketplace</a></li>";
               $class = $page->name == 'makedonation' ? " class='selected-left'" : "";
               echo "<li><a$class href='{$pages->get('name=makeDonation')->url}'><span class='glyphicon glyphicon-heart'></span> - Make a donation</a></li>";
-              $class = $page->name == 'quiz' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('name=quiz')->url}'><span class='glyphicon glyphicon-star'></span> - Prepare my defense</a></li>";
+              // Check if player can face Monster Invasions
+							if ($player->places->count >= 3 || $player->people->count >= 3) {
+								$class = $page->name == 'quiz' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=quiz')->url}'><span class='glyphicon glyphicon-star'></span> - Prepare my defense</a></li>";
+							} else {
+								echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span></span> Prepare my defense</li>";
+							}
               $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
               // Check if memory helmet accessible in player's group
               if ($player->equipment->get("name=memory-helmet")) {
@@ -229,8 +234,8 @@
 								$class = $page->name == 'fighting-zone' ? " class='selected-left'" : "";
                 echo "<li><a$class href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - Fight a monster</a></li>";
               } else {
-                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span><span class='glyphicon glyphicon-headphones'></span> - Use the Memory helmet</li>";
-                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span><span class='glyphicon glyphicon-flash'></span> - Fight a monster</li>";
+                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Use the Memory helmet</li>";
+                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Fight a monster</li>";
               }
               ?>
             </ul>
