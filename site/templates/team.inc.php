@@ -152,7 +152,8 @@
       $tooltipPlaces = '';
     }
     // People list
-    $listPeople .= '<ul>';
+    $tooltipPeople = '';
+    $listPeople = '<ul>';
     foreach ($player->people as $people) {
       $listPeople .= '<li>'.$people->title.'</li>';
     }

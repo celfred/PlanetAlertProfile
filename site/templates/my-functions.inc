@@ -615,7 +615,12 @@ function teamFreeworld($team) {
   }
   // Test if teamRate is reached
   foreach( $allElements as $el) {
-    $teamOwners = $allPlayers->find("places=$el|people=$el");
+    if ($el->template == 'place') {
+      $teamOwners = $allPlayers->find("places=$el");
+    }
+    if ($el->template == 'people') {
+      $teamOwners = $allPlayers->find("people=$el");
+    }
     if ($teamOwners->count() >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'almost'; }
     if ($teamOwners->count() >= $teamRate) { $el->completed = 1; $el->cssClass = 'completed'; }
     if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = ''; }
