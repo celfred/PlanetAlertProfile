@@ -12,7 +12,8 @@
   
   // Display Personal Analyzer if user is logged in
   if ($user->isLoggedin() && $user->isSuperuser()==false) {
-    echo pma($pages->get("login=$user->name"));
+    $player = $pages->get("login=$user->name");
+    echo pma($player);
   }
 
 ?>
@@ -179,7 +180,17 @@
       }
 
       // Admin news
-      $newsAdmin = $pages->get('/newsboard')->children('publish=1')->sort('-date');
+      if ($user->isLoggedin()) {
+        if ($user->isSuperuser()) {
+          // Admin gets all published news
+          $newsAdmin = $pages->get("/newsboard")->children("publish=1")->sort("-date");
+        } else {
+          // User gets public and ranked news
+          $newsAdmin = $pages->get("/newsboard")->children("publish=1, public=0|1, ranks=''|$player->rank")->sort("-date");
+        }
+      } else { // Guests get public news only
+        $newsAdmin = $pages->get("/newsboard")->children("publish=1, public=1")->sort("-date");
+      }
       if ($newsAdmin->count() > 0) {
         foreach($newsAdmin as $n) {
         ?>
@@ -192,6 +203,7 @@
               echo date("F d, Y", $n->created);
               echo ' - ';
               echo 'Official Announcement : '.$n->title;
+              echo 'rank:'.$n->rank->name;
              ?>
                <button type="button" class="close" data-id="<?php echo '#'.$n->id; ?>" aria-label="Close"><span aria-hidden="true">&times;</span></button>
            </h4>

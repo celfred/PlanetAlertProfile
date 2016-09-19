@@ -3,7 +3,17 @@
   include("./head.inc"); 
 
   // Admin news
-  $newsAdmin = $pages->get('/newsboard')->children("limit=5")->sort('-created');
+  if ($user->isLoggedin()) {
+    if ($user->isSuperuser()) {
+      // Admin gets all news
+      $newsAdmin = $pages->get("/newsboard")->children("limit=5")->sort("-created");
+    } else {
+      // User gets public and ranked news
+      $newsAdmin = $pages->get("/newsboard")->children("limit=5, public=0|1, ranks=''|$player->rank")->sort("-created");
+    }
+  } else { // Guests get public news only
+    $newsAdmin = $pages->get("/newsboard")->children("limit=5, public=1")->sort("-created");
+  }
   if ($newsAdmin->count() > 0) {
 
     // Pagination
