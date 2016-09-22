@@ -22,13 +22,17 @@ $query = $database->prepare("SELECT count(username) FROM process_login_history W
 $query->execute();
 $totalNbVisitors7Days = $query->fetchColumn();
 // Get total # of unique logged players during the current school year
-$query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+$query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp > FROM_UNIXTIME(".$period->dateStart.")");   
 $query->execute();
 $totalNbUniqueVisitors = $query->fetchColumn();
 // Get total # of logged players during the current school year
-$query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+$query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp > FROM_UNIXTIME(".$period->dateStart.")");   
 $query->execute();
 $totalNbVisitors = $query->fetchColumn();
+// Get total # of unique logged players since the very beginning
+$query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1");   
+$query->execute();
+$grandTotalNbUniqueVisitors = $query->fetchColumn();
 
 $stats = '<div id="" class="news panel panel-primary">';
 $stats .= '<div class="panel-heading">';
@@ -44,6 +48,8 @@ $stats .= '&nbsp;&nbsp;&nbsp';
 $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">Last 7 days : '.$totalNbUniqueVisitors7Days.'/'.$totalNbVisitors7Days.'</span>';
 $stats .= '&nbsp;&nbsp;&nbsp';
 $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors.'</span>';
+$stats .= '&nbsp;&nbsp;&nbsp';
+$stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">All times : '.$grandTotalNbUniqueVisitors.'</span>';
 $stats .= '&nbsp;&nbsp;&nbsp';
 $stats .= '</p>';
 // Admin is logged in, show names
