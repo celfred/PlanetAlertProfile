@@ -68,7 +68,7 @@
         if ($impossibleFights->count() > 0) {
           $out .= '<br /><br />';
           $utZone = $pages->get("name=underground-training")->url;
-          $out .= '<h4><span class="glyphicon glyphicon-thumbs-down"></span> Out of reach monsters ! (You can\'t fight them, you must do <a href="'.$utZone.'">underground training</a> first)</h4>';
+          $out .= '<h4><span class="glyphicon glyphicon-thumbs-down"></span> Out of reach monsters ! (You can\'t fight them, you must do <a href="'.$utZone.'">underground training</a> first and get at least +20UT)</h4>';
           $out .= '<ul class="list list-inline">';
           foreach($impossibleFights as $m) {
             $out .= '<li><span class="">['.$m->title.' '.$m->utGain.'UT]</span></li>';
