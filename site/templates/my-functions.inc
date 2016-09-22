@@ -832,7 +832,7 @@ function groupScoreBoard($limit) {
         }
         $outGroups .= '<li>';
         $outGroups .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
-        $outGroups .= $group->title.' ['.$group->team.']</span> <span class="badge">'.$group->karma.'</span>';
+        $outGroups .= $group->title.' ['.$group->team->title.']</span> <span class="badge">'.$group->karma.'</span>';
         // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
         $starsGroups = floor($group->nbBonus/5);
         if ( $starsGroups < 1) {
