@@ -112,9 +112,12 @@
     $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getThumb('thumbnail').'" alt="Antenna" />';
   }
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}HP</span>';
+  if ($page->type->name == 'image-map') {
+    $out .= '<div class="pull-right"><img class="imageMap longBlink" src="'.$page->imageMap->url.'" width="400" alt="Image" /></div>';
+  }
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
   $out .= '<h3 class="inline" ng-bind-html="word"></h3>&nbsp;';
-  $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span></h2>  ';
+  $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span><span>{{feedBack}}</span></h2>  ';
   $out .= '</div>';
   $out .= '</div>';
   $out .= '<div class="text-right">';

@@ -129,6 +129,23 @@ if ($user->isSuperuser()) {
           }
         }
         break;
+      case 'image-map' :
+        $out .= count($allLines).' words';
+        if (count($allLines)>15) {
+          $listWords = '<strong>15 first words :</strong><br />';
+          for($i=0; $i<15; $i++) {
+            list($left, $right) = preg_split('/::/', $allLines[$i]);
+            $listWords .= '- '.$right.'<br />';
+          }
+          $listWords .= '[...]';
+        } else {
+          $listWords = '';
+          foreach($allLines as $line) {
+            list($left, $right) = preg_split('/::/', $line);
+            $listWords .= '- '.$right.'<br />';
+          }
+        }
+        break;
       default :
         $listWords = '';
         break;

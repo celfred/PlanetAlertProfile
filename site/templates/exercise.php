@@ -6,9 +6,11 @@
     // Get player's equipment to set scores alternatives
     $weaponRatio = 0;
     $protectionRatio = 0;
-    $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+    if (!$user->isSuperuser()) {
+      $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+      $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
+    }
     if ($bestWeapon->id) { $weaponRatio = $bestWeapon->XP; }
-    $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
     if ($bestProtection->id) { $protectionRatio = $bestProtection->HP; }
 
     // Get exercise type

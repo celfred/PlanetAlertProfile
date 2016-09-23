@@ -314,6 +314,17 @@ img.superpose {
   from { transform: scale(1);}
   to {transform: scale(2);}
 }
+@keyframes spin {
+  0% { transform: rotate(0deg) scale(1); }
+	50% { transform: rotate(180deg) scale(0.8); }
+  100% {transform: rotate(360deg) scale(1); }
+}
+.spin {
+  animation-duration: 7s;
+  animation-name: spin;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
 @keyframes explode {
   from { transform: rotate(0deg) scale(1); opacity: 1; left: 0%;}
   to {transform: rotate(-90deg) scale(2); opacity: 0; left: -50%;}
@@ -323,6 +334,17 @@ img.superpose {
   animation-name: explode;
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
+}
+.longBlink {
+  animation-duration: 3s;
+  animation-name: blink;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+@keyframes longBlink {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 .blink {
   animation-duration: 0.3s;

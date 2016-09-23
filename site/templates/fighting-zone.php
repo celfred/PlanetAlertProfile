@@ -10,17 +10,23 @@
       echo '<p class="alert alert-warning">Sorry, but the administrator has disabled this option for the moment.</p> ';
     } else {
       // Display Personal Mission Analyzer
-      $helmet = $player->equipment->get("name=memory-helmet");
-      if ($helmet->id) {
-        // Display Personal Mission Analyzer
+      if (!$user->isSuperuser()) {
         echo pma($player);
       }
 
-      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
+      if (!$user->isSuperuser()) {
+        $allMonsters = $pages->find("template=exercise, type.name=translate|quiz|image-map, sort=level, sort=name");
+      } else {
+        $allMonsters = $pages->find("template=exercise, type.name=translate|quiz|image-map, sort=level, sort=name, include=all");
+      }
       foreach($allMonsters as $m) {
         $m = isFightAllowed($player, $m);
       }
-      $availableFights = $allMonsters->find("isFightable=1");
+      if (!$user->isSuperuser()) {
+        $availableFights = $allMonsters->find("isFightable=1");
+      } else {
+        $availableFights = $allMonsters;
+      }
       $waitingFights = $allMonsters->find("isFightable=0, interval!=-1, sort=spaced, sort=allFightsNb");
       $impossibleFights = $allMonsters->find("isFightable=0, interval=-1")->sort("title");
 

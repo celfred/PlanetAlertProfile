@@ -44,7 +44,8 @@ exerciseApp.service('myData', function($http) {
 			// %name% : Full name (female or male)
 			// %age% : Age
 			// %nationality% : Nationality
-			// (...) : Displayed text but optional in answers
+			// (...) : Displayed text but optional in answers (see parseCorrections())
+			// $...$ : Information displayed as feedback
 			var nationality = ['French', 'English', 'Scottish', 'Welsh', 'American', 'Australian', 'Canadian', 'Irish', 'German', 'Spanish', 'Italian', 'Swedish', 'Brazilian', 'Greek', 'Turkish', 'Russian', 'Chinese', 'Belgian'];
 			for (var i=0; i<allLines.length; i++) {
 				var str = allLines[i];
@@ -112,7 +113,7 @@ exerciseApp.service('myData', function($http) {
 				// Pick target language (right)
 				var randNum = 1;
 				var randOpp = 0;
-			} else {
+			} else { // Training
 				// Pick random target or source target language
 				var randNum = Math.round(Math.random());
 				if (randNum == 1) {
@@ -142,14 +143,28 @@ exerciseApp.service('myData', function($http) {
 					var allCorrections = quiz[1].split("|");
 					question['allCorrections'] = this.parseCorrections(allCorrections);
 					break;
+				case 'image-map' : // Works like Quiz
+					// Question will be allWords[0]
+					var quiz = randLine.split("::");
+					var allWords = quiz[0].split("|");
+					// Test for multiple possible answers
+					var allCorrections = quiz[1].split("|");
+					question['allCorrections'] = this.parseCorrections(allCorrections);
+					break;
 				default: 
-					// console.log('Unknown exType');
+					console.log('Unknown exType');
 			}
 			// Pick 1 random word from possible words
 			if (allWords.length > 1) {
 				question['word'] = chance.pick(allWords);
+				if (exerciseData['exType'] == 'image-map') {
+					question['word'] = 'What\'s number '+question['word']+' ?';
+				}
 			} else {
 				question['word'] = allWords[0];
+				if (exerciseData['exType'] == 'image-map') {
+					question['word'] = 'What\'s number '+question['word']+' ?';
+				}
 			}
 			// Add word to history
 			history.push(question['word']);
@@ -162,7 +177,15 @@ exerciseApp.service('myData', function($http) {
 		parseCorrections : function(allCorrections) {
 			var newCorrections = [];
 			var tempCorrections = [];
+			var feedBack = '';
 			for (i=0; i<allCorrections.length; i++) {
+				// Get rid of feedback
+				var pattern = /\$(.*?)\$/i;
+				var str = allCorrections[i];
+				if (str.search(pattern) != -1 ) {
+					allCorrections[i] = str.replace(pattern, "");
+					feedBack = str.match(pattern, "$1")[1];
+				}
 				// Trim extra spaces
 				allCorrections[i] = allCorrections[i].trim();
 				// Add optional text functionality : (...)
@@ -183,6 +206,8 @@ exerciseApp.service('myData', function($http) {
 				allCorrections.push(newCorrections[j]);
 			}
 			newCorrections = [];
+			
+			allCorrections['feedBack'] = feedBack;
 
 			return allCorrections;
 		},
@@ -500,6 +525,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		$scope.word = $scope.question['word'];
 		$scope.mixedWord = $scope.question['mixedWord'];
 		$scope.allCorrections = $scope.question['allCorrections'];
+		$scope.feedBack = '['+$scope.allCorrections['feedBack']+']';
 		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
@@ -529,6 +555,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
     } else { // Wrong answer
+			// Show correction
+			$scope.showCorrection = $scope.allCorrections.join(', ');
       $scope.wrong = true;
     }
   }

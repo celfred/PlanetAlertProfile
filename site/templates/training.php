@@ -13,13 +13,15 @@
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
         // Display Personal Mission Analyzer
-        echo pma($player);
+        if (!$user->isSuperuser()) {
+          echo pma($player);
+        }
 
-        // Translate / Quiz types only (for the moment)
+        // Translate / Quiz / Image-map types only (for the moment)
         if ($user->isSuperuser()) {
-          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=all');
+          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz|image-map, sort=name, include=all');
         } else {
-          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
+          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz|image-map, sort=name');
         }
         $out .= '<br />';
         $out .= '<div class="well">';
@@ -124,6 +126,23 @@
                 }
               }
               break;
+            case 'image-map' :
+              $out .= count($allLines).' words';
+              if (count($allLines)>15) {
+                $listWords = '<strong>15 first questions :</strong><br />';
+                for($i=0; $i<15; $i++) {
+                  list($left, $right) = preg_split('/::/', $allLines[$i]);
+                  $listWords .= '- '.$right.'<br />';
+                }
+                $listWords .= '[...]';
+              } else {
+                $listWords = '';
+                foreach($allLines as $line) {
+                  list($left, $right) = preg_split('/::/', $line);
+                  $listWords .= '- '.$right.'<br />';
+                }
+              }
+              break;
             default :
               $listWords = '';
               break;
@@ -202,7 +221,7 @@
           $out .= '<div ng-app="exerciseApp">';
           $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
           if ($monster->id) { // Training session starts
-            $out .= '<h1>Memory helmet programmed : '. $monster->summary.'</h1> ';
+            $out .= '<h3>Memory helmet programmed : '. $monster->summary.'</h3> ';
 
             $out .= '<div class="col-sm-3">';
             $out .= '<h3><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Training session <span class="blink">started</span></span></h3>';
@@ -231,12 +250,15 @@
             $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
             $out .= '</div>';
             $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
+            if ($monster->type->name == 'image-map') {
+              $out .= '<div class=""><img src="'.$monster->imageMap->url.'" width="400" alt="Image" /></div>';
+            }
             $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
             $out .= '<div class="bubble-right">';
             $out .= '<div class="text-center">';
             $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
             $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
-            $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{allCorrections[0]}}</span></h3> ';
+            $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
             $out .= '</div>';
             $out .= '<br />';
             $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
