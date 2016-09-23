@@ -929,17 +929,9 @@ function isFightAllowed($player, $monster) {
       if ($interval->days < $spaced) {
         $monster->isFightable = 0;
       } else {
-        if ($spaced == 0 && $interval->days == 0) {
-          $monster->isFightable = 0;
-        } else {
-          $monster->isFightable = 1;
-        }
+        $monster->isFightable = 1;
       }
-      if ($spaced == 0) {
-        $monster->spaced = 1;
-      } else {
-        $monster->spaced = $spaced-$interval->days;
-      }
+      $monster->spaced = $spaced-$interval->days;
     } else { // Never fought
       $monster->isFightable = 1;
       $monster->lastFightDate = 0;

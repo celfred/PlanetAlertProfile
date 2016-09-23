@@ -77,7 +77,7 @@
         $taskComment = $monster->title.' ['.$result.']';
         // test if fight is possible
         $monster = isFightAllowed($player, $monster);
-        if ($monster->isFightable == 0 || $monster->spaced != 0) {
+        if ($monster->isFightable == 0) {
           // Record to log file
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality.' - Fight not allowed!';
           $log->save('monster-fights', $logText);
@@ -96,7 +96,7 @@
           $msg .= "Result : ". $result;
           if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
             mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
-        }
+          }
         }
       }
     }
