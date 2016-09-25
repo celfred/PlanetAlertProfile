@@ -391,6 +391,21 @@ $(document).ready(function() {
 			return false;
 		}
   });
+  $('a.pickAmbassador').on('click', function() {
+		var list = $(this).attr("data-list");
+		$('#pickedAmbassador').addClass('blink');
+		$('#pickedAmbassador').html('...');
+		setTimeout( function() { pickFromList(list, 'pickedAmbassador');  }, 1000);
+		// window.alert(picked);
+	});
+
+	var pickFromList = function(list, el) {
+		var items = list.split(',');
+		var picked = chance.pick(items);
+		$('#'+el).html(picked);
+		$('#'+el).removeClass('blink');
+		return picked;
+	}
 
   $('#startFight').on('click', function() {
     // TODO : Move function into exercise.js?

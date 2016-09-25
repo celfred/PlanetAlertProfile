@@ -261,6 +261,22 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
       if ($newNbEl != $oldNbEl) {
         updateTeamScores($player->team);
       }
+
+      // Set Ambassador skill if necessary
+      $last10 = $player->get("name=history")->find("template=event, sort=-date, limit=10")->not("task.name=donated|donation|absent");
+      $ambassador = $pages->get("name=ambassador");
+      $streak = 1;
+      // Test the last 10 events
+      foreach ($last10 as $e) {
+        if ($e->task->HP < 0) { // A negative action within last 10 events
+          $streak = 0;
+        } 
+      }
+      if ($streak == 1) {
+        $player->skills->add($ambassador);
+      } else {
+        $player->skills->remove($ambassador);
+      }
     }
   } else { // Player died
     if ($player->level > 1) { // Lose 1 level

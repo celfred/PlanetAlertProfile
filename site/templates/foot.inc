@@ -15,6 +15,13 @@
 
 	<?php 
 
+
+
+
+
+
+
+
   if ($user->isSuperuser()) {
     echo '<span class="backendLink">';
     echo '<a href="'.$config->urls->admin.'">[Backend]</a>';
@@ -32,6 +39,8 @@
   <?php } ?>
   <?php if ($page->template == 'quiz') { ?>
 		<script src="<?php echo $config->urls->templates?>bower_components/svg-pan-zoom/dist/svg-pan-zoom.min.js"></script>
+    <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/chance/dist/chance.min.js'></script>
+
   <?php } ?>
   <?php if ($page->template == 'exercise' || $page->name == 'underground-training') { ?>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular/angular.min.js'></script>

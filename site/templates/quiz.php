@@ -36,9 +36,12 @@ if ($user->isSuperuser()) {
   $rank = $allPlayers->first()->rank->name;
   if ( $rank == '4emes' || $rank == '3emes' ) {
     $allConcerned = $allPlayers->find("places.count|people.count>=3"); // Find players having at least 3 places
+    $notConcerned = $allPlayers->find("places.count|people.count<3")->implode(', ', '{title}');
   } else {
     $allConcerned = $allPlayers->find("places.count>=3"); // Find players having at least 3 places
+    $notConcerned = $allPlayers->find("places.count<3")->implode(', ', '{title}');
   }
+  $ambassadors = $allPlayers->find("skills.count>0, skills.name=ambassador")->implode(', ', '{title}');
 
   if ( count($selectedIds) > 0 ) { // Players have been checked
     // Pick one
@@ -114,7 +117,7 @@ if ($user->isSuperuser()) {
 
     // Players list display
     $out .= '<section class="well">';
-    $out .= '<button id="toggle" class="btn btn-default">See list</button>';
+    $out .= '<button id="toggle" class="btn btn-default">Toggle list</button>';
     $out .= '<div id="quizMenu" class="'.$display.'">';
     $out .= '<p>You need at least 3 free elements to appear in the list.</p>';
     $out .= '<ul class="list-group">';
@@ -131,18 +134,11 @@ if ($user->isSuperuser()) {
       $out .= '<button id="tickAll" class="btn btn-success btn-sm">Tick all</button>';
       $out .= '<button id="untickAll" class="btn btn-danger btn-sm">Untick all</button>';
     $out .= '</ul>';
-    $out .= '<p>(Not concerned : ';
-      $notConcerned = '';
-      foreach($allPlayers as $p) {
-        if (!($allConcerned->get($p))) {
-          $notConcerned .= $p->title.', ';
-        }
-      }
-      $notConcerned = trim($notConcerned, ', ').')';
-      $out .= $notConcerned;
-    $out .= '</p>';
-    // TODO : Build Ambassadors list
-    /* $out .= '<a class="btn btn-info pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a>'; */
+    // Ambassadors
+    $out .= '<p>Ambassadors : '.$ambassadors.' <a class="btn btn-info btn-sm pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a></p>';
+    $out .= '<h3 class="text-center"><span id="pickedAmbassador" class="label label-primary"></span></h3>';
+    // Not concerned
+    $out .= '<p>(Not concerned : '.$notConcerned.')</p>';
     $out .= '</div>';
     $out .= '</section>';
     $out .= '<input type="hidden" name="quizFormSubmit" value="Save" />';
