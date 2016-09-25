@@ -154,7 +154,8 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
               }
               break;
             case 'group-items' : // Make item available to each group member
-              $members = $pages->find("template=player, team=$player->team, group=$player->group");
+              $player->equipment->add($refPage);
+              $members = $pages->find("template=player, team=$player->team, group=$player->group, name!=$player->name");
               foreach ($members as $p) {
                 $bought = $pages->get("name=bought");
                 $comment = $refPage->title." [unlocked]";
@@ -263,20 +264,13 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
       }
 
       // Set Ambassador skill if necessary
-      $last10 = $player->get("name=history")->find("template=event, sort=-date, limit=10")->not("task.name=donated|donation|absent");
       $ambassador = $pages->get("name=ambassador");
-      $streak = 1;
-      // Test the last 10 events
-      foreach ($last10 as $e) {
-        if ($e->task->HP < 0) { // A negative action within last 10 events
-          $streak = 0;
-        } 
-      }
-      if ($streak == 1) {
+      if (checkStreak($player) == 10) {
         $player->skills->add($ambassador);
       } else {
         $player->skills->remove($ambassador);
       }
+      $player->save();
     }
   } else { // Player died
     if ($player->level > 1) { // Lose 1 level
@@ -336,6 +330,20 @@ function checkDeath($player, $real=true) {
       $task = $pages->get("name=death");
       updateScore($player, $task, $comment, '', '', true);
   }
+}
+
+function checkStreak($player) {
+  // Set Ambassador skill if necessary
+  $streak = 0;
+  $lastEvents = $player->get("name=history")->find("template=event, sort=-date")->not("task.name=donated|donation|absent, limit=10");
+  foreach ($lastEvents as $e) {
+    if ($e->task->HP >= 0) {
+      $streak++;
+    } else {
+      break;
+    }
+  }
+  return $streak;
 }
 
 function checkLevel($player) {

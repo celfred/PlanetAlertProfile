@@ -32,16 +32,21 @@ if ($user->isSuperuser()) {
 
   $selectedTeam = $input->urlSegment1;
   $selectedIds = $input->post->selected; // Checked players
-  $allPlayers = $pages->find("template='player', team.name=$selectedTeam, sort='name'");
-  $rank = $allPlayers->first()->rank->name;
+  $rank = $pages->get("template=team, name=$selectedTeam")->rank;
   if ( $rank == '4emes' || $rank == '3emes' ) {
-    $allConcerned = $allPlayers->find("places.count|people.count>=3"); // Find players having at least 3 places
-    $notConcerned = $allPlayers->find("places.count|people.count<3")->implode(', ', '{title}');
+    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count>3), (people.count>=3)"); // Find players having at least 3 places OR 3 people
+    $notConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count<3), (people.count<3)")->implode(', ', '{title}');
   } else {
-    $allConcerned = $allPlayers->find("places.count>=3"); // Find players having at least 3 places
-    $notConcerned = $allPlayers->find("places.count<3")->implode(', ', '{title}');
+    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>3"); // Find players having at least 3 places
+    $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');
   }
-  $ambassadors = $allPlayers->find("skills.count>0, skills.name=ambassador")->implode(', ', '{title}');
+  $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador")->implode(', ', '{title}');
+  if ( strlen($ambassadors) == 0 ) { 
+    $ambassadors = 'Nobody.';
+    $ambButton = '';
+  } else {
+    $ambassadorsButton = ' <a class="btn btn-info btn-sm pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a>';
+  }
 
   if ( count($selectedIds) > 0 ) { // Players have been checked
     // Pick one
@@ -135,7 +140,9 @@ if ($user->isSuperuser()) {
       $out .= '<button id="untickAll" class="btn btn-danger btn-sm">Untick all</button>';
     $out .= '</ul>';
     // Ambassadors
-    $out .= '<p>Ambassadors : '.$ambassadors.' <a class="btn btn-info btn-sm pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a></p>';
+    $out .= '<p>Ambassadors : '.$ambassadors;
+    $out .= $ambassadorsButton;
+    $out .= '</p>';
     $out .= '<h3 class="text-center"><span id="pickedAmbassador" class="label label-primary"></span></h3>';
     // Not concerned
     $out .= '<p>(Not concerned : '.$notConcerned.')</p>';

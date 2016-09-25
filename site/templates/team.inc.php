@@ -82,6 +82,7 @@
   $out .= '<th data-toggle="tooltip" title="Player"><span class="glyphicon glyphicon-user"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Karma">K&nbsp;&nbsp;</td>';
   $out .= '<td data-toggle="tooltip" title="What happened on the last date?"><span class="glyphicon glyphicon-th-list"></span></td>';
+  $out .= '<th data-toggle="tooltip" title="Special skills">S.</th>';
   $out .= '<th data-toggle="tooltip" title="Gold coins"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></th>';
   $out .= '<th data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span></th>';
   $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="" /> HP</th>';
@@ -92,7 +93,6 @@
   $out .= '<td data-toggle="tooltip" title="Donation"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></td>';
   $out .= '<th data-toggle="tooltip" title="Underground training">U.T.</th>';
   $out .= '<th data-toggle="tooltip" title="Fighting Power">F.P.</th>';
-  $out .= '<th data-toggle="tooltip" title="Special skill">S.</th>';
   $out .= '</tr>';
   $out .= '</thead>';
   $out .= '<tbody>';
@@ -188,6 +188,14 @@
     $out .= '<td><a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount.'</td>';
     $out .= '<td>'. $player->karma .'</td>';
     $out .= '<td><span class="trend">'.$trend.'</span></td>';
+    if ($player->skills->count() > 0) {
+      $skills = $player->skills->implode(', ', '{title}');
+      $showSkills = '<span class="label label-success"><span class="glyphicon glyphicon-star-empty"></span></span>';
+    } else {
+      $skills = '';
+      $showSkills = '<span class="label label-info">'.checkStreak($player).'</span>';
+    }
+    $out .= '<td data-toggle="tooltip" data-html="true" title="'.$skills.'">'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';
     $out .= '<td>'. $player->level .'</td>';
     $out .= '<td data-order="'.$player->HP.'" data-toggle="tooltip" title="'.$player->HP.'/50" data-placement="top">';
@@ -206,14 +214,6 @@
     $out .= '<td>'. $player->donation .'</td>';
     $out .= '<td>'. $player->underground_training .'</td>';
     $out .= '<td>'. $player->fighting_power .'</td>';
-    if ($player->skills->count() > 0) {
-      $skills = $player->skills->implode(', ', '{title}');
-      $showSkills = '<span class="glyphicon glyphicon-star-empty"></span>';
-    } else {
-      $skills = '';
-      $showSkills = '';
-    }
-    $out .= '<td data-toggle="tooltip" title="'.$skills.'">'.$showSkills.'</td>';
     $out .= '</tr>';
   }
   $out .= '</tbody>';
