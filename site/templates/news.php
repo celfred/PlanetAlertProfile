@@ -202,8 +202,16 @@
               echo '<img src="'.$logo->url.'" alt="" /> ';
               echo date("F d, Y", $n->created);
               echo ' - ';
-              echo 'Official Announcement : '.$n->title;
-              echo 'rank:'.$n->rank->name;
+              echo $n->title;
+              if ($n->public == 0) {
+                if ($n->ranks) {
+                  foreach ($n->ranks as $r) {
+                    echo ' <span class="label label-default">'.$r->title.'</span>';
+                  }
+                }
+              } else {
+                echo ' <span class="label label-default">Public News</span>';
+              }
              ?>
                <button type="button" class="close" data-id="<?php echo '#'.$n->id; ?>" aria-label="Close"><span aria-hidden="true">&times;</span></button>
            </h4>
