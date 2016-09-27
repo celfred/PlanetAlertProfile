@@ -189,8 +189,12 @@
     $out .= '<td>'. $player->karma .'</td>';
     $out .= '<td><span class="trend">'.$trend.'</span></td>';
     if ($player->skills->count() > 0) {
-      $skills = $player->skills->implode(', ', '{title}');
-      $showSkills = '<span class="label label-success"><span class="glyphicon glyphicon-star-empty"></span></span>';
+      $skills = $player->skills->implode('<br />', '{title}');
+      $showSkills = '<span class="label label-success">';
+      foreach($player->skills as $s) {
+        $showSkills .= strtoupper($s->title[0]);
+      }
+      $showSkills .= '</span>';
     } else {
       $skills = '';
       $showSkills = '<span class="label label-info">'.checkStreak($player).'</span>';
