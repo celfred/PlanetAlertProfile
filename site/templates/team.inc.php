@@ -4,7 +4,7 @@
 
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
-  $team = $pages->find("name=$input->urlSegment1");
+  $team = $pages->get("template=team, name=$input->urlSegment1");
   $allPlayers = $pages->find("template=player, team=$team, sort=group");
   $allGroups = $pages->get("/groups")->children('sort=title');
   $outGroups = '';
@@ -88,7 +88,9 @@
   $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="" /> HP</th>';
   $out .= '<th><img src="'.$config->urls->templates.'img/star.png" alt="" /> XP</th>';
   $out .= '<th data-toggle="tooltip" title="Places"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
-  $out .= '<th data-toggle="tooltip" title="People"><span class="glyphicon glyphicon-user"></span></th>';
+  if ($team->rank->is("name!=6emes|5emes")) {
+    $out .= '<th data-toggle="tooltip" title="People"><span class="glyphicon glyphicon-user"></span></th>';
+  }
   $out .= '<th data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Donation"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></td>';
   $out .= '<th data-toggle="tooltip" title="Underground training">U.T.</th>';
@@ -152,17 +154,19 @@
     } else {
       $tooltipPlaces = '';
     }
-    // People list
-    $tooltipPeople = '';
-    $listPeople = '<ul>';
-    foreach ($player->people as $people) {
-      $listPeople .= '<li>'.$people->title.'</li>';
-    }
-    $listPeople .= '</ul>';
-    if ($player->people->count() > 0) {
-      $tooltipPeople =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listPeople.'"';
-    } else {
+    if ($team->rank->is("name!=6emes|5emes")) {
+      // People list
       $tooltipPeople = '';
+      $listPeople = '<ul>';
+      foreach ($player->people as $people) {
+        $listPeople .= '<li>'.$people->title.'</li>';
+      }
+      $listPeople .= '</ul>';
+      if ($player->people->count() > 0) {
+        $tooltipPeople =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listPeople.'"';
+      } else {
+        $tooltipPeople = '';
+      }
     }
     // Equipment list
     $tooltipEquipment = '';
@@ -213,7 +217,9 @@
     $out .= '</div>';
     $out .= '</td>';
     $out .= '<td '.$tooltipPlaces.'>'. $player->places->count() .'</td>';
-    $out .= '<td '.$tooltipPeople.'>'. $player->people->count() .'</td>';
+    if ($team->rank->is("name!=6emes|5emes")) {
+      $out .= '<td '.$tooltipPeople.'>'. $player->people->count() .'</td>';
+    }
     $out .= '<td '.$tooltipEquipment.'>'. $player->equipment->count() .'</td>';
     $out .= '<td>'. $player->donation .'</td>';
     $out .= '<td>'. $player->underground_training .'</td>';

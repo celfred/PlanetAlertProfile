@@ -675,9 +675,15 @@ function updateTeamScores($team) {
 function showScores($allTeams) {
   echo '<h4 class="text-center scores">';
   echo '<ul class="list-inline">';
-  foreach($allTeams as $t) {
-    if ($t->name != 'no-team') {
-      echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t->title.':'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
+  if ($allTeams->count() > 1) {
+    foreach($allTeams as $t) {
+      if ($t->name != 'no-team') {
+        echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t->title.':'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
+      }
+    }
+  } else {
+    if ($allTeams->name != 'no-team') {
+      echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$allTeams->title.':'.$allTeams->freeActs.'</strong> ('.$allTeams->freeworld.'%)</strong></h4></li>';
     }
   }
   echo '</ul>';
