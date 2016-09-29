@@ -4,7 +4,8 @@
   // Test player login
   if ($player && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
-    if ($user->isSuperuser()) {
+    // or if admin has forced it in Team options
+    if ($user->isSuperuser() || $player->team->forceHelmet == 1) {
       $helmet = $pages->get("name=memory-helmet");
     } else {
       $helmet = $player->equipment->get('memory-helmet');
