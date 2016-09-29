@@ -26,7 +26,8 @@
     "jquery": "~2.1.1",
     "DataTables": "~1.10.5",
     "datatables-plugins-bootstrap3": "~0.1.7",
-    "font-awesome": "~4.3.0"
+    "font-awesome": "~4.3.0",
+    "masonry": "^4.1.1"
   },
   "resolutions": {
     "datatables": ">=1.7.0",

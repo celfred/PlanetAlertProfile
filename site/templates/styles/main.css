@@ -814,6 +814,18 @@ header {
 	padding: 2px 5px;
 	background: #313131;
 }
+.playerDiv {
+	border: 1px solid #000;
+	margin: 3px;
+	padding: 5px;
+	border-radius: 5px;
+	background: #313131;
+	float: left;
+	text-align: center;
+}
+ .masonryContainer {
+	width : 100%;
+ }
 
 /* Large desktop */
 @media (min-width: 1200px) { 

@@ -457,6 +457,12 @@ $(document).ready(function() {
     return false; 
 	}
 
+	$container = $(".masonryContainer");
+	$container.imagesLoaded( function(){
+		$container.masonry({
+			itemSelector : '.masonryImage'
+		});
+	});
 }); 
 
 // Hide rows functions
