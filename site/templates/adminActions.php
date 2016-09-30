@@ -180,7 +180,7 @@
     } else {
       $endDate = $endDate.' 23:59:59';
     }
-    if ($action == 'toggle-lock' || $action == 'archive') {
+    if ($action == 'toggle-lock' || $action == 'archive' || $action == 'forceHelmet') {
       $type = 'team';
     }
 
@@ -688,6 +688,17 @@
         }
         $team->save();
         break;
+      case 'forceHelmet':
+        $team = $pages->get("$selectedTeam");
+        $team->of(false);
+        if ($team->forceHelmet == 1) {
+          // Remove lock
+          $team->forceHelmet = 0;
+        } else {
+          $team->forceHelmet = 1;
+        }
+        $team->save();
+        break;
       case 'archive':
         $allPlayers = $pages->find("template=player, team=$selectedTeam");
         foreach($allPlayers as $p) {
@@ -818,15 +829,24 @@
         if ($selectedTeam && $selectedTeam != '-1') {
           $out .= '</div>';
           $out .= '<h4 class="text-center">';
-          $out .=   'Team options for '.$selectedTeam;
+          $out .=   'Team options for '.$selectedTeam->title;
           $out .= '</h4>';
+          $out .= '<ul>';
+          $lock = $pages->get("$selectedTeam")->forceHelmet;
+          if ($lock == 1) {
+            $status = 'checked="checked"';
+          } else {
+            $status = '';
+          }
+          $out .= '<li><label for="forceHelmet"><input type="checkbox" id="forceHelmet" '.$status.'> Force Memory Helmet</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceHelmet/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
           $lock = $pages->get("$selectedTeam")->lockFights;
           if ($lock == 1) {
             $status = 'checked="checked"';
           } else {
             $status = '';
           }
-          $out .= '<ul>';
           $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
