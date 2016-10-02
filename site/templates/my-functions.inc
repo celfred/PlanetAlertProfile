@@ -236,7 +236,8 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
       $newLinkedId = saveHistory($player, $task, $comment, $newsBoard, $refPage, $eDate, $linkedId);
 
       // Extra action?
-      if (checkHk($player) >= 3) { // Record a Hk penalty
+      setHomework($player);
+      if ($player->hkPb >= 3) { // Record a Hk penalty
         $penalty = $pages->get("template=task, name=penalty"); 
         $comment = 'Automatic homework penalty';
         updateScore($player, $penalty, $comment, '', $newLinkedId, true);
@@ -705,42 +706,34 @@ function taskCount($taskName, $allEvents) {
   return $all->count();
 }
 
-function checkHk($player) {
+function setHomework($player, $dateStart='', $dateEnd='') {
   $pages = wire('pages');
   // Get official period
   $period = $pages->get("name=admin-actions")->periods;
+  if ($dateStart == '') { $dateStart = $period->dateStart; }
+  if ($dateEnd == '') { $dateEnd = $period->dateEnd; }
   // Select homework tasks over the period
-  $allHk = $player->find("template=event, task.category.name=homework, date>=$period->dateStart, date<=$period->dateEnd");
-  $count = 0;
-  // Check last penalty's date
-  $penalty = $allHk->find("task.name=penalty");
-  if ($penalty->count() != 0) {
-    // Count all negative homework tasks since then
-    $lastDate = $penalty->last()->date;
-    $negHk = $allHk->find("task.HP<0, task.name!=penalty, date>=$lastDate");
-    if ($negHk->count() > 0) {
-      foreach ($negHk as $event) {
-        if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
-          $count = $count + 0.5;
-        } else {
-          $count++;
-        }
-      }
-    }
-  } else { // No previous penalty
-    // Count all negative homework tasks
-    $negHk = $allHk->find("task.name!=penalty, task.HP<0");
-    if ($negHk->count() > 0) {
-      foreach ($negHk as $event) {
-        if (in_array($event->task->name, ['signature', 'homework-half-done'])) {
-          $count = $count + 0.5;
-        } else {
-          $count++;
-        }
-      }
-    }
-  }
-  return $count;
+  $allHk = $player->find("template=event, task.category.name=homework, date>=$dateStart, date<=$dateEnd");
+  $player->initiative = $player->find("task.name=personal-initiative, date>=$dateStart, date<=$dateEnd");
+  $player->ut = $player->find("task.name=ut-action-v|ut-action-vv, date>=$dateStart, date<=$dateEnd");
+  $player->noHk = $allHk->find("task.name=no-homework");
+  $player->halfHk = $allHk->find("task.name=homework-half-done");
+  $player->extraHk = $allHk->find("task.name=extra-homework");
+  $player->veryExtraHk = $allHk->find("task.name=very-extra-homework");
+  $player->notSigned = $allHk->find("task.name=signature");
+  $player->noMaterial = $allHk->find("task.name=material");
+  $player->penalty = $allHk->find("task.name=penalty");
+  // Stats over the period
+  $pb = (($player->halfHk->count()+$player->notSigned->count())*0.5) + ($player->noHk->count()+$player->noMaterial->count());
+  if ($pb >= 3 | $player->penalty->count() >= 1) { $player->homework = 'RR'; }
+  if ($pb > 1 && $pb < 3) { $player->homework = 'R'; }
+  if ($pb > 0 && $pb <= 1) { $player->homework = 'V'; }
+  if ($pb == 0) { $player->homework = 'VV'; }
+  $player->hkPb = $pb;
+  $nbBonus = $player->initiative->count() + $player->extraHk->count() + $player->veryExtraHk->count();
+  if ($nbBonus >= 8 || $player->ut->count() >= 50) { $player->motivation = 'VV'; }
+  if (($nbBonus >= 3 && $nbBonus < 8) || ($player->ut->count() >= 20 && $player->ut->count() < 50)) { $player->motivation = 'V'; }
+  if ($nbBonus < 3) { $player->motivation = 'No bonus for the moment'; }
 }
 
 function getPosition($player, $field) {
@@ -1181,5 +1174,45 @@ function pma($player) {
   $out .= '</div>';
 
   return $out;
+}
+
+function setParticipation($player, $dateStart='', $dateEnd='') {
+  $pages = wire('pages');
+  // Get official period
+  $period = $pages->get("name=admin-actions")->periods;
+  if ($dateStart == '') { $dateStart = $period->dateStart; }
+  if ($dateEnd == '') { $dateEnd = $period->dateEnd; }
+  $pages = wire('pages');
+  $allEvents = $player->find("template=event, task.category='participation', date>=$period->dateStart, date<=$period->dateEnd, sort=-date")->reverse();
+  $nbPart = $allEvents->count();
+  $absent = $allEvents->find("task.name=abs|absent");
+  $vvEvents = $allEvents->find("task.name=communication-vv");
+  $vEvents = $allEvents->find("task.name=communication-v");
+  $rEvents = $allEvents->find("task.name=communication-r");
+  $rrEvents = $allEvents->find("task.name=communication-rr");
+  $player->absent = $absent;
+  if ($nbPart > 0) {
+    $percentpresent = (int) round((100*($nbPart-$absent->count())/$nbPart));
+    if ($percentpresent >= 40) {
+      // Participation quality formula
+      $ratio = (int) round(((($vvEvents->count()*2+$vEvents->count()*1.6)-$rrEvents->count())*100)/(($nbPart-$absent->count())*2));
+      if ($ratio < 0) { $ratio = 0; }
+      if ($ratio >= 80) { $player->participation = 'VV'; }
+      if ($ratio < 80 && $ratio >= 55) { $player->participation = 'V'; }
+      if ($ratio < 55 && $ratio >= 35) { $player->participation = 'R'; }
+      if ($ratio < 35 && $ratio >= 0) { $player->participation = 'RR'; }
+    } else {
+      $player->participation = 'NN';
+      $ratio = 'abs';
+    }
+    $player->partRatio = $ratio;
+    $player->partPositive = $vEvents->count() + $vvEvents->count();
+    $player->partNegative = $rEvents->count() + $rrEvents->count();
+  } else {
+    $player->participation = 'NN';
+    $player->partRatio = '-';
+    $player->partPositive = '-';
+    $player->partNegative = '-';
+  }
 }
 ?>

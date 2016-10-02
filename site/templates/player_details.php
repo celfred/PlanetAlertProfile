@@ -24,7 +24,8 @@
   }
   // Set no hk counter
   if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
-    $hkCount = '<span class="label label-danger" data-toggle="tooltip" title="No hk counter">'.checkHk($playerPage).'</span>';
+    setHomework($playerPage);
+    $hkCount = '<span class="label label-danger" data-toggle="tooltip" title="No hk counter">'.$playerPage->hkPb.'</span>';
   } else {
     $hkCount = '<span class="label label-danger">Private!</span>';
   }

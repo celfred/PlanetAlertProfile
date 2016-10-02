@@ -88,7 +88,7 @@
   $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="" /> HP</th>';
   $out .= '<th><img src="'.$config->urls->templates.'img/star.png" alt="" /> XP</th>';
   $out .= '<th data-toggle="tooltip" title="Places"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
-  if ($team->rank->is("name!=6emes|5emes")) {
+  if ($team->rank && $team->rank->is("name!=6emes|5emes")) {
     $out .= '<th data-toggle="tooltip" title="People"><span class="glyphicon glyphicon-user"></span></th>';
   }
   $out .= '<th data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span></th>';
@@ -129,9 +129,9 @@
     }
     // Set hk counter
     if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $player->login)) { // Admin is logged or user
-      $count = checkHk($player);
-      if ($count > 0) {
-        $hkCount = '&nbsp;<span class="label label-danger">'.checkHk($player).'</span>';
+      setHomework($player);
+      if ($player->hkPb > 0) {
+        $hkCount = '&nbsp;<span class="label label-danger">'.$player->hkPb.'</span>';
       } else {
         $hkCount = '';
       }
@@ -154,7 +154,7 @@
     } else {
       $tooltipPlaces = '';
     }
-    if ($team->rank->is("name!=6emes|5emes")) {
+    if ($team->rank && $team->rank->is("name!=6emes|5emes")) {
       // People list
       $tooltipPeople = '';
       $listPeople = '<ul>';
@@ -217,7 +217,7 @@
     $out .= '</div>';
     $out .= '</td>';
     $out .= '<td '.$tooltipPlaces.'>'. $player->places->count() .'</td>';
-    if ($team->rank->is("name!=6emes|5emes")) {
+    if ($team->rank && $team->rank->is("name!=6emes|5emes")) {
       $out .= '<td '.$tooltipPeople.'>'. $player->people->count() .'</td>';
     }
     $out .= '<td '.$tooltipEquipment.'>'. $player->equipment->count() .'</td>';

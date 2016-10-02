@@ -30,6 +30,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
     $reportTitle .= ' for '.$selected->title.' '.$selected->lastName.' ('.$selected->team->title.')'; 
     $reportTitle .= '<br />';
     $reportTitle .= 'Period : '.$period->title;
+    $reportTitle .= ' ('.date("d/m", $period->dateStart).' → '.date("d/m", $period->dateEnd).')';
   } else { // Team's report
     $global = true;
     $selected = strtoupper($input->urlSegment2);
@@ -48,6 +49,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
     $reportTitle .= ' ('.$selected.' team)'; 
     $reportTitle .= '<br />';
     $reportTitle .= 'Period : '.$period->title;
+    $reportTitle .= ' ('.date("d/m", $period->dateStart).' → '.date("d/m", $period->dateEnd).')';
   }
    
   // PDF Download link

@@ -457,7 +457,7 @@ $(document).ready(function() {
     return false; 
 	}
 
-	$('.grid').masonry();
+	if ($('.grid')) { $('.grid').masonry(); }
 }); 
 
 // Hide rows functions

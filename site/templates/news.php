@@ -314,186 +314,109 @@
           <div class="panel-body">
             <?php
             // Participation
-            $vv = 0;
-            $v = 0;
-            $r = 0;
-            $rr = 0;
-            $abs = 0;
             $out = '';
             $allParticipation = $allEvents->find("task.category.name=participation");
-            $nbPart = $allParticipation->count();
-            $rr = taskCount('communication-rr', $allEvents);
+            setParticipation($player, $allParticipation);
             echo '<p>';
-            echo '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe"></span> Communication : ';
-            foreach($allParticipation as $index=>$e) {
-              switch ($e->task->name) {
-                case 'communication-rr' :
-                  $out .= '<span class="participation label label-danger" data-toggle="tooltip" title="'.strftime("%d/%m", $e->date).'">RR</span>';
-                  $rr += 1;
-                  break;
-                case 'communication-r' :
-                  $out .= '<span class="participation label label-danger" data-toggle="tooltip" title="'.strftime("%d/%m", $e->date).'">R</span>';
-                  $r += 1;
-                  break;
-                case 'communication-v' : 
-                  $out .= '<span class="participation label label-success" data-toggle="tooltip" title="'.strftime("%d/%m", $e->date).'">V</span>';
-                  $v += 1;
-                  break;
-                case 'communication-vv' :
-                  $out .= '<span class="participation label label-success" data-toggle="tooltip" title="'.strftime("%d/%m", $e->date).'">VV</span>';
-                  $vv += 1;
-                  break;
-                case 'abs' : 
-                  $out .= '<span class="participation label label-info" data-toggle="tooltip" title="'.strftime("%d/%m", $e->date).'">-</span>';
-                  $abs += 1;
-                  $nbPart -= 1;
-                  $listAbsent .= '- '.strftime("%d/%m", $e->date).'<br />';
-                  break;
-                case 'absent' : 
-                  $out .= '<span class="participation label label-info" data-toggle="tooltip" title="'.strftime("%d/%m", $e->date).'">-</span>';
-                  $abs += 1;
-                  $nbPart -= 1;
-                  $listAbsent .= '- '.strftime("%d/%m", $e->date).'<br />';
-                  break;
-                default: break;
-              }
-              if (in_array($index, [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200])) $out .= '<br />';
-            }
-            // Player's average and stats
-            $percentPresent = (int) round((100*$nbPart)/$allParticipation->count());
-            if ($percentPresent >= 30) {
-              // Participation quality formula
-              $ratio = (int) round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
-              if ( $ratio < 0) { $ratio = 0; }
-            } else {
-              $ratio = 'absent';
-            }
-            echo $out;
+            echo '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe"></span> Communication ';
             echo ' ⇒ ';
-          if (is_int($ratio)) {
-            if ($ratio >= 80) {
-              echo '<span data-toggle="tooltip" title="Moyenne sur la période" class="label label-success">VV</span>';
+            switch ($player->participation) {
+              case 'NN' : $class='primary';
+                break;
+              case 'VV' : $class='success';
+                break;
+              case 'V' : $class='success';
+                break;
+              case 'R' : $class='danger';
+                break;
+              case 'RR' : $class='danger';
+                break;
+              default: $class = '';
             }
-            if ($ratio < 80 && $ratio >= 55) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je participe régulièrement." class="label label-success">V</span>';
-            }
-            if ($ratio < 55 && $ratio >= 35) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je participe régulièrement." class="label label-danger">R</span>';
-            }
-            if ($ratio < 35 && $ratio >= 0) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je participe régulièrement." class="label label-danger">RR</span>';
-            }
-          } else {
-            if ($ratio === 'absent') {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je participe régulièrement." class="label label-default">NN</span>';
-            }
-          }
-          echo ' [<span data-toggle="tooltip" title="Participation positive">'.($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.($r+$rr).' <i class="glyphicon glyphicon-thumbs-down"></i></span>]';
-            // Homework stats
-            $noHomework = $allEvents->find("task.name=no-homework, sort=-date");
-            $halfHomework = $allEvents->find("task.name=homework-half-done, sort=-date");
-            $noSignature = $allEvents->find("task.name=signature, sort=-date");
-            $pb = $noHomework->count()+(($halfHomework->count+$noSignature->count())*0.5);
-            if ($noHomework->count()>0) {
-              $out = '<ul>';
-              foreach($noHomework as $index=>$e) {
-                $out .= '<li>'.strftime("%d/%m", $e->date).' : '.$e->summary.'</li>';
-              }
-              $out .= '</ul>';
-            } else { $out='';}
-            if ($halfHomework->count()>0) {
-              $out02 = '<ul>';
-              foreach($halfHomework as $index=>$e) {
-                $out02 .= '<li>'.strftime("%d/%m", $e->date).' : '.$e->summary.'</li>';
-              }
-              $out02 .= '</ul>';
-            } else { $out02='';}
-            if ($noSignature->count()>0) {
-              $out03 = '<ul>';
-              foreach($noSignature as $index=>$e) {
-                $out03 .= '<li>'.strftime("%d/%m", $e->date).' : '.$e->summary.'</li>';
-              }
-              $out03 .= '</ul>';
-            } else { $out03='';}
-            echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Exercices non faits ou à moitié faits"></span> Training problems :';
-            echo ' <span class="">'.$pb.'</span>';
-            echo ' [<span data-toggle="tooltip" data-html="true" title="'.$out.'">'.$noHomework->count().' Hk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$halfHomework->count().' HalfHk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out03.'">'.$noSignature->count().' notSigned</span>]';
-            echo ' ⇒ ';
-            if ($pb >= 3) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-danger">RR</span>';
-            }
-            if ($pb < 3 && $pb>1) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-danger">R</span>';
-            }
-            if ($pb > 0 && $pb<1) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-success">V</span>';
-            }
-            if ($pb == 0) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-success">VV</span>';
-            }
-            echo '</p>';
-            // Forgotten material
-            $noMaterial = $allEvents->find("task.name=material, sort=-date");
-            if ($noMaterial->count()>0) {
-              $out = '<ul>';
-              foreach($noMaterial as $index=>$e) {
-                $out .= '<li>'.strftime("%d/%m", $e->date).'</li>';
-              }
-              $out .= '</ul>';
-            } else { $out='';}
-            echo '<p>';
-            echo '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Affaires oubliées"></span> Forgotten material : ';
-            echo '<span data-toggle="tooltip" data-html="true" title="'.$out.'">'.$noMaterial->count().'</span>';
-            echo ' ⇒ ';
-            if ($pb >= 3) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-danger">RR</span>';
-            }
-            if ($pb < 3 && $pb>1) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-danger">R</span>';
-            }
-            if ($pb > 0 && $pb<1) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">V</span>';
-            }
-            if ($pb == 0) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">VV</span>';
-            }
-            echo '</p>';
+            echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
 
-            // Extra-hk
-            $extra = $allEvents->find("task.name=extra-homework|very-extra-homework|personal-initiative");
-            $initiative = $allEvents->find("task.name=personal-initiative");
-            $ut = $allEvents->find("task.name=ut-action-v|ut-action-vv");
-            $all = $extra->count()+$initiative->count()+$ut->count();
-            if ($extra->count()>0) {
-              $out = '<ul>';
-              foreach($extra as $index=>$e) {
-                $out .= '<li>'.strftime("%d/%m", $e->date).' : '.$e->summary.'</li>';
+            if ($player->partRatio != '-') {
+              echo '<span data-toggle="tooltip" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+            }
+            // Homework stats
+            setHomework($player);
+            if ($player->noHk->count() > 0) {
+              $out = '';
+              foreach($player->noHk as $index=>$e) {
+                $out .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
               }
-              $out .= '</ul>';
+            } else { $out='';}
+            if ($player->halfHk->count()>0) {
+              $out02 = '';
+              foreach($player->halfHk as $index=>$e) {
+                $out02 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+              }
+            } else { $out02='';}
+            if ($player->notSigned->count()>0) {
+              $out03 = '';
+              foreach($player->notSigned as $index=>$e) {
+                $out03 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+              }
+            } else { $out03 = '';}
+            echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Exercices non faits ou à moitié faits"></span> Training problems :';
+            echo ' <span class="">'.$player->hkPb.'</span>';
+            echo ' [<span data-toggle="tooltip" data-html="true" title="'.$out.'">'.$player->noHk->count().' Hk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$player->halfHk->count().' HalfHk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out03.'">'.$player->notSigned->count().' notSigned</span>]';
+            echo ' ⇒ ';
+            switch ($player->homework) {
+              case 'NN' : $class='primary'; break;
+              case 'VV' : $class='success'; break;
+              case 'V' : $class='success'; break;
+              case 'R' : $class='danger'; break;
+              case 'RR' : $class='danger'; break;
+              default: $class = '';
+            }
+            echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-'.$class.'">'.$player->homework.'</span> ';
+            // Forgotten material
+            if ($player->noMaterial->count() > 0) {
+              $out04 = '';
+              foreach($player->noMaterial as $index=>$e) {
+                $out04 .= '- '.strftime("%d/%m", $e->date).'<br />';
+              }
+            } else { $out04 = '';}
+            echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Affaires oubliées"></span> Forgotten material : ';
+            echo '<span data-toggle="tooltip" data-html="true" title="'.$out04.'">'.$player->noMaterial->count().'</span>';
+            echo ' ⇒ ';
+            if ($player->noMaterial->count() == 0) {
+              echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">VV</span>';
+            }
+            if ($player->noMaterial->count() == 1) {
+              echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">V</span>';
+            }
+            if ($player->noMaterial->count() == 2) {
+              echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">R</span>';
+            }
+            if ($player->noMaterial->count() > 2) {
+              echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">RR</span>';
+            }
+            echo '</p>';
+            // Extra-hk
+            if ($player->extraHk->count()>0) {
+              $out = '';
+              foreach($player->extraHk as $index=>$e) {
+                $out .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+              }
             } else {
               $out = '';
             }
-            if ($initiative->count()>0) {
-              $out02 = '<ul>';
-              foreach($initiative as $index=>$e) {
-                $out02 .= '<li>'.strftime("%d/%m", $e->date).' : '.$e->summary.'</li>';
+            if ($player->initiative->count()>0) {
+              $out02 = '';
+              foreach($player->initiative as $index=>$e) {
+                $out02 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
               }
-              $out02 .= '</ul>';
             } else {
               $out02 = '';
             }
             echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Travail supplémentaire : extra-homework, personal initiative, underground training..."></span> Personal motivation :';
-            echo ' <span data-toggle="tooltip" data-html="true" title="'.$out.'"> ['.$extra->count().' extra - </span>';
-            echo ' <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$initiative->count().' initiative - </span>';
-            echo ' <span class="">'.$ut->count().' UT session(s)]</span>';
+            echo ' <span data-toggle="tooltip" data-html="true" title="'.$out.'"> ['.$player->extraHk->count().' extra - </span>';
+            echo ' <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$player->initiative->count().' initiatives - </span>';
+            echo ' <span class="">'.$player->ut->count().' UT session]</span>';
             echo ' ⇒ ';
-            if ($all-$ut->count()>=8 || $ut->count()>=50) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je prends une initiative particulière." class="label label-success">VV</span>';
-            } if ($all-$ut->count()>=3 || $ut->count()>=20 && $ut->count()<50) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : Je prends une initiative particulière." class="label label-success">V</span>';
-            } if ($all-$ut->count()<3 && $ut->count()<20) {
-              echo '<soan data-toggle="tooltip" title="Compétence SACoche : Je prends une initiative particulière.">No bonus for the moment.</span>';
-            }
+            echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je prend une initiative particulière." class="label label-'.$class.'">'.$player->motivation.'</span> ';
             echo '</p>';
             
             // Attitude

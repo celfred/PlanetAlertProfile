@@ -40,6 +40,7 @@
     $teamPart = array();
 
     foreach($allPlayers as $player) {
+			setHomework($player,$period->dateStart, $period->dateEnd);
       echo '<tr>';
       echo '<th>';
       if (!$input->get['pages2pdf']) {
@@ -53,17 +54,11 @@
         // Find events within the selected period
         $events = $player->find("template=event, task.category=$category, date>=$period->dateStart, date<=$period->dateEnd");
         if ( $category->name == 'participation') {
-          $posPart = $events->count();
-          $nbPart = $events->count();
-          $nbAbsent = 0;
+					setParticipation($player, $events);
         } else {
           $posItems = $events->count();
           $nbItems = $events->count();
         }
-        $vv = 0;
-        $v = 0;
-        $r = 0;
-        $rr = 0;
         $list = '';
         $listForgotStuff = '';
         $listForgotSigned = '';
@@ -83,20 +78,10 @@
           foreach ($events as $event) {
             if ($event->task->HP < 0) {
               $className = 'negative';
-              // Participation stat
-              if ($category->name == 'participation') {
-                $posPart = $posPart-1;
-              }
               $posItems = $posItems-1;
               $sign = '-';
             } else {
-              if ($event->task->name == 'abs' || $event->task->name == 'absent') {
-                $nbPart = $nbPart-1;
-                $nbAbsent = $nbAbsent+1;
-                $posPart = $posPart-1;
-              } else {
-                $className = 'positive';
-              }
+							$className = 'positive';
               $sign = '+';
             }
             if (strlen(trim($event->summary)) > 0) {
@@ -146,53 +131,36 @@
                 default : break;
               }
             }
-            if ($category->name == 'participation') {
-                switch ($event->task->name) {
-                  case 'communication-rr' :
-                    $rr += 1;
-                    break;
-                  case 'communication-r' :
-                    $r += 1;
-                    break;
-                  case 'communication-v' : 
-                    $v += 1;
-                    break;
-                  case 'communication-vv' :
-                    $vv += 1;
-                    break;
-                  case 'absent' : 
-                    $abs += 1;
-                    $nbPart -= 1;
-                    break;
-                  default: break;
-                }
-            }
           }
           if ($category->name == 'participation') {
-            $ratio = round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
-            if ( $ratio < 0) { $ratio = 0; }
-
-            if ($nbPart != 0) {
-              echo '<span data-toggle="tooltip" title="% Participation positive sur '.$nbPart.' cours">'.$ratio.'%</span>&nbsp;';
-              if ($ratio >= 80) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-success">VV</span>';
-              }
-              if ($ratio < 80 && $ratio >= 55) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-success">V</span>';
-              }
-              if ($ratio < 55 && $ratio >= 35) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-danger">R</span>';
-              }
-              if ($ratio < 35 && $ratio >= 0) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-danger">RR</span>';
-              }
-            }
-            if ($nbAbsent != 0) {
-              echo ' <span data-toggle="tooltip" data-html="true" title="'.$listAbsent.'" class="absent">['.$nbAbsent.' abs.]</span>';
-            }
-            array_push($teamPart, $ratio);
+						switch ($player->participation) {
+							case 'NN' : $class='primary'; break;
+							case 'VV' : $class='success'; break;
+							case 'V' : $class='success'; break;
+							case 'R' : $class='danger'; break;
+							case 'RR' : $class='danger'; break;
+							default: $class = '';
+						}
+						echo  '<span data-toggle="tooltip" title="Moyenne sur la période ('.$events->count().' cours)" class="label label-'.$class.'">'.$player->participation.'</span>';
+						if ($player->absent->count() > 0) {
+							$listAbsent = '';
+							foreach ($player->absent as $abs) {
+								$listAbsent .= '- '.strftime("%d/%m", $abs->date).'<br />';
+							}
+						}
+						echo  '<span data-toggle="tooltip" data-html="true" title="'.$listAbsent.'"> '.$player->absent->count().'</span> / <span data-toggle="tooltip" title="Abs / # de cours">'.$events->count().'</span>';
+            array_push($teamPart, $player->partRatio);
           }
           if ($category->name == 'homework') {
+						switch ($player->homework) {
+							case 'NN' : $class='primary'; break;
+							case 'VV' : $class='success'; break;
+							case 'V' : $class='success'; break;
+							case 'R' : $class='danger'; break;
+							case 'RR' : $class='danger'; break;
+							default: $class = '';
+						}
+						echo  '<span data-toggle="tooltip" title="Moyenne sur la période ('.$events->count().' éléments)" class="label label-'.$class.'">'.$player->homework.'</span> ';
             if (!$input->get['pages2pdf']) {
               if ($nbNoHk > 0) {
                 echo  '<span data-toggle="tooltip" data-html="true" title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
