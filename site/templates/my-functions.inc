@@ -697,7 +697,7 @@ function calculate_average($arr) {
   foreach ($arr as $value) {
       $total = $total + $value; // total value of array numbers
   }
-  $average = round($total/$count); // get average value
+  $average = round($total/$count, 1); // get average value
   return $average;
 }
 
@@ -716,24 +716,42 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $allHk = $player->find("template=event, task.category.name=homework, date>=$dateStart, date<=$dateEnd");
   $player->initiative = $player->find("task.name=personal-initiative, date>=$dateStart, date<=$dateEnd");
   $player->ut = $player->find("task.name=ut-action-v|ut-action-vv, date>=$dateStart, date<=$dateEnd");
+  $player->nbHk = $allHk->count();
   $player->noHk = $allHk->find("task.name=no-homework");
   $player->halfHk = $allHk->find("task.name=homework-half-done");
   $player->extraHk = $allHk->find("task.name=extra-homework");
   $player->veryExtraHk = $allHk->find("task.name=very-extra-homework");
   $player->notSigned = $allHk->find("task.name=signature");
   $player->noMaterial = $allHk->find("task.name=material");
+  if ($player->noMaterial->count() == 0) { $player->materialLabel = 'VV'; }
+  if ($player->noMaterial->count() == 1) { $player->materialLabel = 'V'; }
+  if ($player->noMaterial->count() == 2) { $player->materialLabel = 'R'; }
+  if ($player->noMaterial->count() > 2) { $player->materialLabel = 'RR'; }
   $player->penalty = $allHk->find("task.name=penalty");
   // Stats over the period
-  $pb = (($player->halfHk->count()+$player->notSigned->count())*0.5) + ($player->noHk->count()+$player->noMaterial->count());
-  if ($pb >= 3 | $player->penalty->count() >= 1) { $player->homework = 'RR'; }
-  if ($pb > 1 && $pb < 3) { $player->homework = 'R'; }
-  if ($pb > 0 && $pb <= 1) { $player->homework = 'V'; }
-  if ($pb == 0) { $player->homework = 'VV'; }
+  $pb = ((($player->halfHk->count()+$player->notSigned->count())*0.5) + $player->noHk->count())-($player->penalty->count()*3);
+  if ($pb >= 0 && $pb < 1) { $player->homework = 'VV'; }
+  if ($pb >= 1 && $pb < 2) { $player->homework = 'V'; }
+  if ($pb >= 2 && $pb < 3) { $player->homework = 'R'; }
+  if ($pb >= 3 || $player->penalty->count() >= 1) { $player->homework = 'RR'; }
   $player->hkPb = $pb;
   $nbBonus = $player->initiative->count() + $player->extraHk->count() + $player->veryExtraHk->count();
   if ($nbBonus >= 8 || $player->ut->count() >= 50) { $player->motivation = 'VV'; }
   if (($nbBonus >= 3 && $nbBonus < 8) || ($player->ut->count() >= 20 && $player->ut->count() < 50)) { $player->motivation = 'V'; }
   if ($nbBonus < 3) { $player->motivation = 'No bonus for the moment'; }
+}
+
+function setAttitude($player, $dateStart='', $dateEnd='') {
+  $pages = wire('pages');
+  // Get official period
+  $period = $pages->get("name=admin-actions")->periods;
+  if ($dateStart == '') { $dateStart = $period->dateStart; }
+  if ($dateEnd == '') { $dateEnd = $period->dateEnd; }
+  // Select events over the period
+  $allEvents = $player->find("template=event, task.category.name=attitude, date>=$dateStart, date<=$dateEnd");
+  $player->negAttitude = $allEvents->find("task.HP<0");
+  $player->posAttitude = $allEvents->find("task.name=civil-achievement|personal-initiative");
+  $player->nbAmbush = $allEvents->find("task.name=ambush")->count();
 }
 
 function getPosition($player, $field) {
@@ -1183,33 +1201,26 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
   if ($dateStart == '') { $dateStart = $period->dateStart; }
   if ($dateEnd == '') { $dateEnd = $period->dateEnd; }
   $pages = wire('pages');
-  $allEvents = $player->find("template=event, task.category='participation', date>=$period->dateStart, date<=$period->dateEnd, sort=-date")->reverse();
-  $nbPart = $allEvents->count();
+  $allEvents = $player->find("template=event, task.category='participation', date>=$dateStart, date<=$dateEnd, sort=-date")->reverse();
+  $player->nbPart = $allEvents->find("task.name!=abs|absent")->count();
   $absent = $allEvents->find("task.name=abs|absent");
   $vvEvents = $allEvents->find("task.name=communication-vv");
   $vEvents = $allEvents->find("task.name=communication-v");
   $rEvents = $allEvents->find("task.name=communication-r");
   $rrEvents = $allEvents->find("task.name=communication-rr");
   $player->absent = $absent;
-  if ($nbPart > 0) {
-    $percentpresent = (int) round((100*($nbPart-$absent->count())/$nbPart));
-    if ($percentpresent >= 40) {
-      // Participation quality formula
-      $ratio = (int) round(((($vvEvents->count()*2+$vEvents->count()*1.6)-$rrEvents->count())*100)/(($nbPart-$absent->count())*2));
-      if ($ratio < 0) { $ratio = 0; }
-      if ($ratio >= 80) { $player->participation = 'VV'; }
-      if ($ratio < 80 && $ratio >= 55) { $player->participation = 'V'; }
-      if ($ratio < 55 && $ratio >= 35) { $player->participation = 'R'; }
-      if ($ratio < 35 && $ratio >= 0) { $player->participation = 'RR'; }
-    } else {
-      $player->participation = 'NN';
-      $ratio = 'abs';
-    }
+  if ($player->nbPart > 0) {
+    $ratio = round(($vvEvents->count()*2+$vEvents->count()-$rEvents-$rrEvents->count()*2)/$player->nbPart, 1);
+    if ($ratio >= 1.5) { $player->participation = 'VV'; }
+    if ($ratio < 1.5 && $ratio >= 0.5) { $player->participation = 'V'; }
+    if ($ratio < 0.5 && $ratio >= -0.5) { $player->participation = 'R'; }
+    if ($ratio < 0.5) { $player->participation = 'RR'; }
     $player->partRatio = $ratio;
     $player->partPositive = $vEvents->count() + $vvEvents->count();
     $player->partNegative = $rEvents->count() + $rrEvents->count();
   } else {
     $player->participation = 'NN';
+    $ratio = 'abs';
     $player->partRatio = '-';
     $player->partPositive = '-';
     $player->partNegative = '-';

@@ -94,7 +94,6 @@
                     echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team->name)}'>{$team->title} marketplace</a></li>";
                     echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team->name)}'>{$team->title} adminTable</a></li>";
                     echo "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team->name)}'>{$team->title} monster invasions</a></li>";
-                    echo "<li><a href='{$homepage->url}reports/{$sanitizer->pageName($team->name)}'>{$team->title} reports</a></li>";
                     echo "</ul>";
                     echo "</li>";
                   } else {
@@ -150,6 +149,8 @@
 								<?php
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'team-options' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/team-options/'>Team options</a></li>";
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/reports/'>Reports</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut-stats/'>UT Stats</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'task-report' ? " class='selected-left'" : "";

@@ -65,6 +65,19 @@
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="task-report">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
+      case 'reports' :
+        $out .= '<section class="well">';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</section>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="reports">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
       case 'recalculate' :
         $out .= '<section class="well">';
         $out .= '<div>';
@@ -142,24 +155,13 @@
         $out .= '<section id="ajaxViewport" class="well"></section>';
 ?>
   <div>
-  <!-- 
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="refPage">Set refPage</button>
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="helmet">Check Memory helmet</button>
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="ut">Check UT scoreboard</button>
-  -->
-  <!-- <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="clean-history">Clean history</button> -->
-  <!-- <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="recalculate">Recalculate scores</button>
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="ut-stats">UT Stats</button> -->
-  <!--
-  <button class="adminAction btn btn-default" data-href="<?php echo $page->url; ?>" data-action="script">Script</button>
-  -->
 <?php
     }
-    } else {
-      $out .= 'Admin only.';
-    }
-    echo $out;
-    include("./foot.inc"); 
+  } else { // End if admin
+    $out .= 'Admin only.';
+  }
+  echo $out;
+  include("./foot.inc"); 
   } else { // Ajax call, display requested information
     include("./my-functions.inc"); 
     $allPlayers = $pages->find("template=player")->sort("team.name, title");
@@ -249,6 +251,47 @@
         }
         $out .= '</ul>';
         $out .= '<p>'.$counter.'</p>';
+        break;
+      case 'reports' :
+        $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
+        if ($selectedTeam && $selectedTeam != '-1') {
+          $allPeriods = $pages->get("name=periods")->children();
+          $allPlayers = $allPlayers->find("team.name=$selectedTeam->name");
+          $out .= '<section class="well">';
+          $out .= '<div>';
+          $out .= '<span>Report category : </span>';
+          $out .= '<label for="allCat"><input type="radio" value="all" id="allCat" name="reportCat" checked="checked" class="reportCat"> All</input></label> &nbsp;&nbsp;';
+          $out .= '<label for="participation"><input type="radio" value="participation" id="participation" name="reportCat" class="reportCat"> Participation</input></label> &nbsp;&nbsp;';
+          $out .= '<label for="planetAlert"><input type="radio" value="planetAlert" id="planetAlert" name="reportCat" class="reportCat"> Planet Alert</input></label> &nbsp;&nbsp;';
+          $out .= '</div>';
+          $out .= '<div>';
+          $out .= '<span>Ordering by : </span>';
+          $out .= '<label for="firstName"><input type="radio" class="reportSort" id="firstName" name="order" checked="checked" value="title"> First name</input></label> &nbsp;&nbsp;';
+          $out .= '<label for="lastName"><input type="radio" class="reportSort" id="lastName" name="order" value="lastName"> Last name</input></label>';
+          $out .= '</div>';
+          $out .= '<div>';
+          $out .= '<span>Period : </span>';
+          $out .= '<select id="periodId">';
+          foreach($allPeriods as $period) {
+            $out .= '<option value="'.$period->id.'">'.$period->title.'</option>';
+          }
+          $out .= '</select>';
+          $out .= '</div>';
+          $out .= '<div>';
+          $out .= '<span>Select a player : </span>';
+          $out .= '<select id="reportPlayer">';
+          $out .= '<option value="'.$selectedTeam->name.'">The whole team</option>';
+          foreach($allPlayers as $player) {
+            $out .= '<option value="'.$player->name.'">'.$player->title.'</option>';
+          }
+          $out .= '</select>';
+          // reportUrl is based on url segments : all|category/team|player/periodId?sort=title|lastName
+          $out .= '<p class="text-center"><a id="reportUrl_button" class="btn btn-primary" href="'. $pages->get('/report_generator')->url .'" data-reportUrl="'. $pages->get('/report_generator')->url .'" target="_blank">Generate report</a></p>';
+          $out .= '</div>';
+          $out .= '</section>';
+        } else {
+          $out .= 'You need to select a team.';
+        }
         break;
       case 'refPage' :
         $out .= 'Total # of players : '.$allPlayers->count();
@@ -805,7 +848,7 @@
         $taskCount = 0;
         if ($selectedTeam && $selectedTeam != '-1' && $taskId!= -1) {
           $out .= '<h3 class="text-center">';
-          $out .= '['.$task->title.'] report for '.$selectedTeam .'   ';
+          $out .= '['.$task->title.'] report for '.$selectedTeam->title .'   ';
           $out .= 'from '.$startDate.' ';
           $out .= 'to '.$endDate;
           $out .= '</h3>';

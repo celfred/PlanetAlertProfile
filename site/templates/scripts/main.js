@@ -99,7 +99,7 @@ $(document).ready(function() {
     reportUrl += $('.reportCat:checked').val()+'/';
     // Add report team or player
     if ($('#reportPlayer').val() == '') { // No single player selected
-      reportUrl += $('.reportTeam:checked').val()+'/';
+				reportUrl += $('.reportTeam:checked').val()+'/';
     } else {
       reportUrl += $('#reportPlayer').val()+'/';
     }

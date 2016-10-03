@@ -12,7 +12,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
   $period = $pages->get("$input->urlSegment3");
   $sort = $input->get['sort'];
 
-  $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat|oublis");
+  $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat|oublis|group-items");
 
   if ($selected->template == 'player') { // Player's report
     $player = $selected;

@@ -9,7 +9,7 @@
       $events = $player->find("template=event, task.category='participation', date>=$period->dateStart, date<=$period->dateEnd, sort=-date")->reverse();
       echo '<tr>';
       echo '<th>'.$player->title.'</th>';
-      setParticipation($player, $events);
+      setParticipation($player, $period->dateStart, $period->dateEnd);
       echo '<td class="text-left">';
       switch ($player->participation) {
         case 'NN' : $class='primary';
@@ -28,7 +28,7 @@
       echo '</td>';
       if ($events->count > 0) {
         echo '<td class="text-left">';
-          echo  '<span data-toggle="tooltip" title="% participation positive">'.$player->partRatio.'%</span>';
+          echo  '<span data-toggle="tooltip" title="Quality ratio">'.$player->partRatio.'</span>';
         echo '</td>';
         echo '<td class="text-left">';
         echo '<span data-toggle="tooltip" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
