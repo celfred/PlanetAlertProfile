@@ -185,14 +185,16 @@ exerciseApp.service('myData', function($http) {
 				if (str.search(pattern) != -1 ) {
 					allCorrections[i] = str.replace(pattern, "");
 					feedBack = str.match(pattern, "$1")[1];
+				} else {
+					feedBack = '';
 				}
 				// Trim extra spaces
 				allCorrections[i] = allCorrections[i].trim();
-				// Add optional text functionality : (...)
+				// Add optional text functionality : (...) only 1/line for the moment
 				var pattern = /\((.*?)\)/i;
 				var str = allCorrections[i];
 				if (str.search(pattern) != -1 ) {
-					tempCorrections.push(str.replace(pattern, ""));
+					allCorrections[i] = allCorrections[i].replace(pattern, "");
 					tempCorrections.push(str.replace(pattern, "$1"));
 				}
 				// Add to newCorrections
@@ -525,7 +527,9 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		$scope.word = $scope.question['word'];
 		$scope.mixedWord = $scope.question['mixedWord'];
 		$scope.allCorrections = $scope.question['allCorrections'];
-		$scope.feedBack = '['+$scope.allCorrections['feedBack']+']';
+		if ($scope.allCorrections['feedback'] == '') {
+			$scope.feedBack = '['+$scope.allCorrections['feedBack']+']';
+		}
 		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
