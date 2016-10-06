@@ -2,8 +2,8 @@
 
   include("./head.inc"); 
 
-  $totalPlaces = $pages->find("template=place, name!=places");
-  $allPlayers = $pages->find("template=player, name!=test");
+  /* $totalPlaces = $pages->find("template=place, name!=places"); */
+  /* $allPlayers = $pages->find("template=player, name!=test"); */
 
   // Display team scores
   echo '<div class="row">';
@@ -298,7 +298,7 @@
         }
       }
 
-      // User is logged in, show personal news
+      // User is logged in, show personal history
       if ($user->isLoggedin() && $user->isSuperuser() == false) {
         // Get current period statistics
         $officialPeriod = $pages->get("name=admin-actions")->periods;
@@ -315,8 +315,7 @@
             <?php
             // Participation
             $out = '';
-            $allParticipation = $allEvents->find("task.category.name=participation");
-            setParticipation($player, $allParticipation);
+            setParticipation($player);
             echo '<p>';
             echo '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe"></span> Communication ';
             echo ' ⇒ ';
@@ -502,11 +501,10 @@
 
 
       // Last 15 public news
-      $excluded = $pages->find("name=test|admin");
-      $included = $pages->find("name=history");
+      $excluded = $pages->find("template=player, name=test");
       // Find current school year date
       $schoolYear = $pages->get("template=period, name=school-year");
-      $news = $pages->find("template=event, date>= $schoolYear->dateStart, sort=-date, limit=15, task=free|buy|ut-action-v|ut-action-vv, has_parent=$included, has_parent!=$excluded");
+      $news = $pages->find("template=event, date>=$schoolYear->dateStart, sort=-date, limit=15, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
       if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">
