@@ -176,6 +176,8 @@
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/team-options/'>Team options</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/reports/'>Reports</a></li>";
+								$class = $page->name == 'statistics' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=statistics')->url}'>Statistics</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut-stats/'>UT Stats</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'task-report' ? " class='selected-left'" : "";
