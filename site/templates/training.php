@@ -38,6 +38,15 @@
         $out .= '<h4 class="text-center">';
         $out .= 'There are currently '.$allMonsters->count().' monsters in the list.';
         $out .= '</h4>';
+
+        $allCategories = $pages->find("parent.name=topics, sort=name");
+        $out .= '<div id="Filters" data-fcolindex="1" class="text-center">';
+        $out .= '  <ul class="list-inline well">';
+        foreach ($allCategories as $category) {
+          $out .= '<li><label for="'.$category->name.'" class="btn btn-primary btn-xs">'.$category->title.' <input type="checkbox" value="'.$category->title.'" class="categoryFilter" name="categoryFilter" id="'.$category->name.'"></label></li>';
+        }
+        $out .= '</ul>';
+        $out .= '</div>';
         $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
           $out .= '<thead>';
           $out .= '<tr>';
@@ -69,9 +78,7 @@
           }
           $out .= '</td>';
           $out .= '<td>';
-          foreach ($m->topic as $t) {
-            $out .= '<span class="label label-primary">'.$t->title.'</span> ';
-          }
+          $out .= '<span class="label label-default">'.$m->topic->implode(', ', '{title}').'</span>';
           $out .= '</td>';
           $out .= '<td>';
           $out .= $m->level;
