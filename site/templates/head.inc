@@ -173,17 +173,18 @@
 							<ul class="dropdown-menu">
 								<?php
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'team-options' ? " class='selected-left'" : "";
-								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/team-options/'>Team options</a></li>";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/team-options/'><span class='glyphicon glyphicon-cog'></span> - Team options</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
-								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/reports/'>Reports</a></li>";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/reports/'><span class='glyphicon glyphicon-file'></span> - Reports</a></li>";
 								$class = $page->name == 'statistics' ? " class='selected-left'" : "";
-								echo "<li><a$class href='{$pages->get('name=statistics')->url}'>Statistics</a></li>";
+								echo "<li><a$class href='{$pages->get('name=statistics')->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'recalculate' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/recalculate'><span class='glyphicon glyphicon-pencil'></span> - Edit history (and scores)</a></li>";
+								echo "<li role='separator' class='divider'></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut-stats/'>UT Stats</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'task-report' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/task-report/'>Task report</a></li>";
-								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'recalculate' ? " class='selected-left'" : "";
-								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/recalculate'>Edit history (and scores)</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut/'>UT Hall of fame</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setScores' ? " class='selected-left'" : "";
@@ -307,7 +308,7 @@
             <ul class="dropdown-menu">
 							<li class="dropdown-submenu">
 								<?php $class = $page->is("name=shop|places|people|actions|monsters|hall-of-fame") ? "selected-left" : ""; ?>
-								<a class="<?php echo $class; ?>" href="">The World</a>
+								<a class="<?php echo $class; ?>" href=""><span class='glyphicon glyphicon-globe'></span> - The World</a>
 								<ul class="dropdown-menu">
 									<?php
 									$class = $page->name == 'shop' ? " class='selected-left'" : "";
