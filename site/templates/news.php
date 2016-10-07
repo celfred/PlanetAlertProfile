@@ -26,7 +26,7 @@
       <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
       </div>
       <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="karma">
-        Loading...
+        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
       </div>
     </div>
 
@@ -36,7 +36,7 @@
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Places</h4>
       </div>
       <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="places">
-        Loading...
+        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
       </div>
     </div>
 
@@ -46,7 +46,7 @@
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of People</h4>
       </div>
       <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="people">
-        Loading...
+        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
       </div>
     </div>
 
@@ -56,7 +56,7 @@
         <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> Best warriors</h4>
       </div>
       <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="fighting_power">
-        Loading...
+        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
       </div>
     </div>
 
@@ -66,7 +66,7 @@
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> Best donators</h4>
       </div>
       <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="donation">
-        Loading...
+        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
       </div>
     </div>
 
@@ -76,7 +76,7 @@
         <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
       </div>
       <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="underground_training">
-        Loading...
+        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
       </div>
     </div>
 
@@ -418,16 +418,16 @@
       <?php 
       }
 
-      // Last 15 public news
+      // Last public news
       ?>
         <div id="" class="news panel panel-primary">
           <div class="panel-heading">
             <h4 class="panel-title">
-              Last 15 public events in Planet Alert
+              Last public events in Planet Alert
             </h4>
           </div>
-          <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="last15">
-            Loading...
+          <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="lastEvents">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
           </div>
         </div>
   </div>

@@ -2,12 +2,13 @@
   if ($config->ajax) {
     $out = '';
     switch ($input->get('id')) {
-      case 'last15' :
-        // Last 15 public news
+      case 'lastEvents' :
+        // Last public news
         $excluded = $pages->find("template=player, name=test");
         // Find current school year date
         $schoolYear = $pages->get("template=period, name=school-year");
-        $news = $pages->find("template=event, date>=$schoolYear->dateStart, sort=-date, limit=15, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+        // Find last events
+        $news = $pages->find("template=event, date>=$schoolYear->dateStart, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
         if ($news->count() > 0) {
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {
