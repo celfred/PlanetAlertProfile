@@ -440,19 +440,20 @@ $(document).ready(function() {
 		// return confirm("Click OK to continue?");
 	})
 
-	if ($('div.ajaxScore')) {
+	if ($('div.ajaxContent')) {
 		var timer = 500;
-		$('div.ajaxScore').each( function() {
-			var type = $(this).attr('data-ajax');
+		$('div.ajaxContent').each( function() {
+			var el = $(this);
 			var url = $(this).attr('data-href');
-			setTimeout( function() { getFromAjax(url, type); }, timer);
+			setTimeout( function() { getContentFromAjax(url, el); }, timer);
 			timer += 500;
 		});
 	}
-	function getFromAjax(url, type) {
-    $.get(url+'?type='+type, function(data) { 
-        $("#"+type).html(data); 
-				$("#"+type+' [data-toggle="tooltip"]').tooltip();
+	function getContentFromAjax(url, el) {
+		var id = el.attr('data-id');
+    $.get(url+'?id='+id, function(data) { 
+        el.html(data); 
+				el.children('[data-toggle="tooltip"]').tooltip();
     }); 
     return false; 
 	}

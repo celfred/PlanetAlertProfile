@@ -135,7 +135,7 @@
     include("./foot.inc"); 
 
   } else {
-    $type = $input->get('type');
+    $type = $input->get('id');
 
     switch($type) {
       case 'karma':

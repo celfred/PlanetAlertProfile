@@ -25,7 +25,7 @@
       <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
       <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
       </div>
-      <div id="karma" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="karma">
+      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="karma">
         Loading...
       </div>
     </div>
@@ -35,7 +35,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Places</h4>
       </div>
-      <div id="places" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="places">
+      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="places">
         Loading...
       </div>
     </div>
@@ -45,7 +45,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of People</h4>
       </div>
-      <div id="people" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="people">
+      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="people">
         Loading...
       </div>
     </div>
@@ -55,7 +55,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> Best warriors</h4>
       </div>
-      <div id="fighting_power" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="fighting_power">
+      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="fighting_power">
         Loading...
       </div>
     </div>
@@ -65,7 +65,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> Best donators</h4>
       </div>
-      <div id="donation" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="donation">
+      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="donation">
         Loading...
       </div>
     </div>
@@ -75,7 +75,7 @@
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
       </div>
-      <div id="underground_training" class="panel-body ajaxScore" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-ajax="underground_training">
+      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="underground_training">
         Loading...
       </div>
     </div>
@@ -418,13 +418,7 @@
       <?php 
       }
 
-
       // Last 15 public news
-      $excluded = $pages->find("template=player, name=test");
-      // Find current school year date
-      $schoolYear = $pages->get("template=period, name=school-year");
-      $news = $pages->find("template=event, date>=$schoolYear->dateStart, sort=-date, limit=15, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
-      if ($news->count() > 0) {
       ?>
         <div id="" class="news panel panel-primary">
           <div class="panel-heading">
@@ -432,52 +426,10 @@
               Last 15 public events in Planet Alert
             </h4>
           </div>
-          <div class="panel-body">
-            <ul class="list-unstyled">
-            <?php
-            foreach($news as $n) {
-              $currentPlayer = $n->parent('template=player');
-              if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
-              if ($currentPlayer->avatar) {
-                $thumb = $currentPlayer->avatar->size(20,20);
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
-              } else {
-                $mini = '';
-              }
-              echo '<li>';
-              echo $mini;
-              echo date("F j (l)", $n->date).' : ';
-              echo '<span>';
-              switch ($n->task->category->name) {
-              case 'place' : 
-                if ($n->refPage->template == 'place') {
-                  echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                }
-                if ($n->refPage->template == 'people') {
-                  echo '<span class="">New people for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                }
-                break;
-              case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                break;
-              case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.'] : '.html_entity_decode($n->summary).'</span>';
-              case 'individual-work' : echo '<span class="">Underground Training for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                break;
-              default : echo 'todo : ';
-                break;
-              }
-              //echo $n->task->title. ' : ' . $n->summary;
-              echo '</span>';
-              echo '</li>';
-            }
-            ?>
-          </ul>
+          <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="last15">
+            Loading...
+          </div>
         </div>
-      </div>
-      <?php
-      } else {
-        echo '<h4 class="well">No public news... :(</h4>';
-      }
-    ?>
   </div>
 
 </div>
