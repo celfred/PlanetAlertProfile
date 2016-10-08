@@ -79,11 +79,11 @@ if ($user->isSuperuser()) {
 }
 
 // Training sessions stats
-$today = mktime(date("m/d/Y").' 0:0:0');
-$totalTrainingSessions = $pages->find('template=event, task=ut-action-v|ut-action-vv');
+$today = mktime(date("d/m/Y").' 0:0:0');
+$totalTrainingSessions = $pages->find("template=event, task.name=ut-action-v|ut-action-vv");
 $todayTrainingSessions = $totalTrainingSessions->find("date>=$today");
+$totalUt = 0;
 $todayTrainedPlayers = [];
-/* $todayTrainedPlayers = $todayTrainingSessions->unique()->parent("template=player"); */
 foreach( $todayTrainingSessions as $t) {
   $pl = $t->parent("template=player");
   if (!in_array($pl->id, $todayTrainedPlayers)) {
@@ -91,11 +91,15 @@ foreach( $todayTrainingSessions as $t) {
   }
 }
 $trainedPlayers = $pages->find('template=player, underground_training>0');
+foreach ($allPlayers as $p) {
+  $totalUt += $p->underground_training;
+}
 $stats .= '<h3><span class="label label-default">Today Training sessions : ';
-$stats .= $todayTrainingSessions->count.' with '.count($todayTrainedPlayers).' different player(s).';
+$stats .= $todayTrainingSessions->count().' with '.count($todayTrainedPlayers).' different player(s).';
 $stats .= '</span></h3>';
 $stats .= '<h3><span class="label label-default">Total Training sessions : ';
 $stats .= $totalTrainingSessions->count.' with '.$trainedPlayers->count.' player(s).';
+$stats .= ' ['.$totalUt.' UT points = '.($totalUt*10).' words, '.round(($totalUt/$totalTrainingSessions->count())*10).' words/session]';
 $stats .= '</span></h3>';
 
 // Last connected users (and dates)
