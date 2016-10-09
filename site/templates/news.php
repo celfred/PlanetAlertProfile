@@ -2,9 +2,6 @@
 
   include("./head.inc"); 
 
-  /* $totalPlaces = $pages->find("template=place, name!=places"); */
-  /* $allPlayers = $pages->find("template=player, name!=test"); */
-
   // Display team scores
   echo '<div class="row">';
     showScores($allTeams);
@@ -166,55 +163,16 @@
 
       // Admin NewsBoard (to prepare in-class papers to be given to the students)
       if ($user->isSuperuser()) {
-        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy|penalty");
-        if ($news->count() > 0) {
-        ?>
-          <div id="" class="news panel panel-primary">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                Admin's work (papers to be given to players)
-              </h4>
-            </div>
-            <div class="panel-body">
-              <ul class="list-unstyled">
-              <?php
-              foreach($news as $n) {
-                $currentPlayer = $n->parent('template=player');
-                if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
-                echo '<li class="">';
-                echo date("F j (l)", $n->date).' : ';
-                echo '<span>';
-
-                switch ($n->task->category->name) {
-                case 'place' :
-                if ($n->refPage->template == 'place') {
-                  echo '<span class="">New place for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                }
-                if ($n->refPage->template == 'people') {
-                  echo '<span class="">New people for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                }
-                  break;
-                case 'shop' : echo '<span class="">New equipment for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                  break;
-                case 'attitude' : echo '<span class="">Generous attitude from <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                  break;
-                case 'homework' : echo '<span class="">Penalty for <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                  break;
-                default : echo 'todo : ';
-                  break;
-                }
-                echo '</span>';
-                echo ' <label for="unpublish_'.$n->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> Unpublish<span id="feedback"></span></label>';
-                echo '</li>';
-              }
-              ?>
-            </ul>
-          </div>
+      ?>
+      <div id="" class="news panel panel-primary">
+        <div class="panel-heading">
+          <h4 class="panel-title">Admin's work (papers to be given to players)</h4>
         </div>
-        <?php
-        } else {
-          echo '<span>Nothing to prepare.</span>';
-        }
+        <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="admin-work">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
+      </div>
+      <?php
       }
 
       // User is logged in, show personal history
@@ -426,7 +384,7 @@
               Last public events in Planet Alert
             </h4>
           </div>
-          <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="lastEvents">
+          <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="lastEvents">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
           </div>
         </div>

@@ -441,12 +441,18 @@ $(document).ready(function() {
 	})
 
 	if ($('div.ajaxContent')) {
-		var timer = 500;
+		var timerFast = 0;
+		var timerSlow = 1000;
 		$('div.ajaxContent').each( function() {
 			var el = $(this);
 			var url = $(this).attr('data-href');
-			setTimeout( function() { getContentFromAjax(url, el); }, timer);
-			timer += 500;
+			if (el.attr('data-priority') == '1') {
+				setTimeout( function() { getContentFromAjax(url, el); }, timerFast);
+			} else {
+				setTimeout( function() { getContentFromAjax(url, el); }, timerSlow);
+			}
+			timerFast += 200; 
+			timerSlow += 500;
 		});
 	}
 	function getContentFromAjax(url, el) {
