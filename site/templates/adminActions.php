@@ -25,7 +25,7 @@
         $out .= '</select>';
         $out .= '</div>';
         $out .= '<section class="well">';
-        $out .= '<p>Select limiting dates if needed (start empty = 01/01/20000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
+        $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
         $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
         $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
         $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
@@ -33,6 +33,28 @@
         $out .= '</section>';
         $out .= '</section>';
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut-stats">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
+      case 'fights-stats' :
+        $out .= '<section class="well">';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<section class="well">';
+        $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
+        $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
+        $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
+        $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
+        $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
+        $out .= '</section>';
+        $out .= '</section>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="fights-stats">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
       case 'task-report' :
@@ -55,7 +77,7 @@
         $out .= '</select>';
         $out .= '</div>';
         $out .= '<section class="well">';
-        $out .= '<p>Select limiting dates if needed (start empty = 01/01/20000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
+        $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
         $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
         $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
         $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
@@ -836,6 +858,52 @@
           $out .= '</ul>';
         } else {
           $out .= 'You need to select 1 player or 1 team.';
+        }
+        break;
+      case 'fights-stats' :
+        if ($selectedTeam && $selectedTeam != '-1') {
+          $out .= '<h3 class="text-center">';
+          $out .= 'Fights Stats for '.$selectedTeam->title .'   ';
+          $out .= 'from '.$startDate.' ';
+          $out .= 'to '.$endDate;
+          $out .= '</h3>';
+          $allPlayers = $allPlayers->find("team=$selectedTeam");
+          $out .= '<ul>';
+          foreach($allPlayers as $p) {
+            $allTests = $p->find("template=event, task.name=test-vv|test-v|test-r|test-rr, refPage!='', date>=$startDate, date<=$endDate, sort=refPage, sort=date");
+            if ($allTests->count() > 0) {
+              $out_03 = '<ul>';
+              $prevDate = '';
+              $prevName = '';
+              foreach($allTests as $t) {
+                switch ($t->task->name) {
+                  case 'test-vv' : $class="success"; $result="VV";
+                    break;
+                  case 'test-v' : $class="success"; $result="V";
+                    break;
+                  case 'test-r' : $class="danger"; $result="R";
+                    break;
+                  case 'test-rr' : $class="danger"; $result="RR";
+                    break;
+                  default: $class = ""; $result = "";
+                }
+                if ( $prevDate == date('Y-m-d', $t->date) && $prevName == $t->refPage->name) {
+                  $error = 'Error detected ?';
+                } else {
+                  $error = '';
+                }
+                $out_03 .= '<li>'.date('d/m', $t->date).' → '.$t->refPage->title.' [lvl '.$t->refPage->level.'] <span class="label label-'.$class.'">'.$result.'</span> <span class="label label-danger">'.$error.'</span></li>';
+                $prevDate = date('Y-m-d', $t->date);
+                $prevName = $t->refPage->name;
+              }
+              $out_03 .= '</ul>';
+              $out_02 = '<li><strong>'.$p->title.'</strong> → <span class="label label-success">'.$allTests->count().' fights</span></li>';
+              $out .= $out_02.$out_03;
+            }
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= 'You need to select 1 team.';
         }
         break;
       case 'task-report' :
