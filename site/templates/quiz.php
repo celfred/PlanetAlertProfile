@@ -34,10 +34,10 @@ if ($user->isSuperuser()) {
   $selectedIds = $input->post->selected; // Checked players
   $rank = $pages->get("template=team, name=$selectedTeam")->rank;
   if ( $rank == '4emes' || $rank == '3emes' ) {
-    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count>3), (people.count>=3)"); // Find players having at least 3 places OR 3 people
+    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count>=3), (people.count>=3)"); // Find players having at least 3 places OR 3 people
     $notConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count<3), (people.count<3)")->implode(', ', '{title}');
   } else {
-    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>3"); // Find players having at least 3 places
+    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
     $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');
   }
   $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador")->implode(', ', '{title}');
