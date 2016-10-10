@@ -618,7 +618,7 @@ function nbFreedomActs($team, $startDate='', $endDate='') {
   if ($startDate == '') { $startDate = $schoolYear->dateStart; }
   if ($endDate == '') { $endDate = $schoolYear->dateEnd; }
   $players = $pages->find("template=player, team=$team");
-  $free = $pplayers->find("template=event, task.name=free, date>=$startDate, date<=$endDate")->count();
+  $free = $pages->find("has_parent=$players, template=event, task.name=free, date>=$startDate, date<=$endDate")->count();
   return $free;
 }
 

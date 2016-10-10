@@ -49,14 +49,14 @@ $(document).ready(function() {
     return false; 
   }); 
 
-  $(".ajaxUnpublish").click(function() {
+  $(document).on('click', '.ajaxUnpublish', (function() {
     //$("#feedback").html("<p>Loading...</p>"); 
     $(this).parents('li').toggleClass('strikeText');
     var $this = $(this);
     $.get($(this).val(), function(data) { 
         //$("#feedback").html(''); 
     }); 
-  }); 
+  })); 
 
   $('#shopSelect').change( function() {
     var url = $('#shopSelect').val();
