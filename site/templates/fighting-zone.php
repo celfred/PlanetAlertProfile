@@ -17,7 +17,7 @@
       if (!$user->isSuperuser()) {
         $allMonsters = $pages->find("template=exercise, type.name=translate|quiz|image-map, sort=level, sort=name");
       } else {
-        $allMonsters = $pages->find("template=exercise, type.name=translate|quiz|image-map, sort=level, sort=name, include=all");
+        $allMonsters = $pages->find("template=exercise, sort=level, sort=name, include=all");
       }
       foreach($allMonsters as $m) {
         $m = isFightAllowed($player, $m);
