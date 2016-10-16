@@ -82,7 +82,6 @@ if ($user->isSuperuser()) {
 $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
 $totalTrainingSessions = $pages->find("template=event, task.name=ut-action-v|ut-action-vv");
 $todayTrainingSessions = $totalTrainingSessions->find("date>=$today");
-echo '-'.date("d/m/Y H:i:s", $totalTrainingSessions->last()->date);
 $totalUt = 0;
 $todayTrainedPlayers = [];
 foreach( $todayTrainingSessions as $t) {
