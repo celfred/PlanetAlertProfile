@@ -337,6 +337,7 @@ $(document).ready(function() {
     taskTable.draw();
     historyTable.draw();
     monstersTable.draw();
+    trainingTable.draw();
   });		    
     
   $('a.toggle-vis').on( 'click', function (e) {
