@@ -17,30 +17,54 @@ $exData = $m->exData;
 $allLines = preg_split('/$\r|\n/', $exData);
 shuffle($allLines);
 $listWords = [];
-if ($m->type->name == 'translate') {
-  foreach($allLines as $l) {
-    list($left, $right) = preg_split('/,/', $l);
-    $words = explode('|', $right);
-    if ($words[0] != '') {
-      array_push($listWords, $words[0]);
+switch ($m->type->name) {
+  case 'translate' :
+    foreach($allLines as $l) {
+      $l = preg_replace('/{\d+}/', "", $l);
+      list($left, $right) = preg_split('/,/', $l);
+      $words = explode('|', $right);
+      if ($words[0] != '') {
+        array_push($listWords, $words[0]);
+      }
     }
-  }
-} else { // Quiz type
-  foreach($allLines as $l) {
-    list($left, $right) = preg_split('/::/', $l);
-    $left = str_replace("(separated by 1 space)", " ", $left);
-    if ($left != '') {
-      // Basic marker replacements
-      // TODO : Add random choice from list
-      $left = str_replace("%fname%", "Mike", $left);
-      $left = str_replace("%fnamef%", "Sarah", $left);
-      $left = str_replace("%fnamem%", "John", $left);
-      $left = str_replace("%name%", "Simon Keats", $left);
-      $left = str_replace("%age%", "13", $left);
-      $left = str_replace("%nationality%", "American", $left);
-      array_push($listWords, $left);
+    break;
+  case 'quiz' :
+    foreach($allLines as $l) {
+      $l = preg_replace('/{\d+}/', "", $l);
+      list($left, $right) = preg_split('/::/', $l);
+      $left = str_replace("(separated by 1 space)", " ", $left);
+      if ($left != '') {
+        // Basic marker replacements
+        // TODO : Add random choice from list
+        $left = str_replace("%fname%", "Mike", $left);
+        $left = str_replace("%fnamef%", "Sarah", $left);
+        $left = str_replace("%fnamem%", "John", $left);
+        $left = str_replace("%name%", "Simon Keats", $left);
+        $left = str_replace("%age%", "13", $left);
+        $left = str_replace("%nationality%", "American", $left);
+        array_push($listWords, $left);
+      }
     }
-  }
+    break;
+  case 'jumble' :
+    foreach($allLines as $l) {
+      $l = preg_replace('/{\d+}/', "", $l);
+      $l = str_replace("%fname%", "Mike", $l);
+      $l = str_replace("%fnamef%", "Sarah", $l);
+      $l = str_replace("%fnamem%", "John", $l);
+      $l = str_replace("%name%", "Simon Keats", $l);
+      $l = str_replace("%age%", "13", $l);
+      $l = str_replace("%nationality%", "American", $l);
+      // Split chunks
+      $allWords = explode('|', $l);
+      // Jumble words
+      shuffle($allWords);
+      $mixedSentence = join(' / ', $allWords);
+      array_push($listWords, $mixedSentence);
+    }
+    break;
+  default :
+    array_push($listWords, 'TODO');
 }
 
 $out = '';
@@ -59,7 +83,7 @@ $out .= '<table class="table">';
 for($i=0; $i<=$nb; $i++) {
   if (trim($listWords[$i]) != '') {
     $lenght = strlen($listWords[$i]);
-    if ($lenght < 70) {
+    if ($length < 70) {
       $fontSize = '14pt';
       $wrap = 'white-space:nowrap;';
     } else {
@@ -93,4 +117,3 @@ if (count($allLines) < 11) {
 echo $out;
 
 ?>
-
