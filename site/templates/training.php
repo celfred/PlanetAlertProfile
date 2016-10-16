@@ -156,15 +156,19 @@
               if (count($allLines)>15) {
                 $listWords = '<strong>15 first sentences :</strong><br />';
                 for($i=0; $i<15; $i++) {
-                  $sentence = str_replace("|", "", $allLines[$i]);
-                  $listWords .= '- '.$sentence.'<br />';
+                  $pattern = '/\$.*?\$/';
+                  preg_match($pattern, $allLines[$i], $matches);
+                  $help = preg_replace('/\$/', '', $matches[0]);
+                  $listWords .= '- '.$help.'<br />';
                 }
                 $listWords .= '[...]';
               } else {
                 $listWords = '';
                 foreach($allLines as $line) {
-                  $sentence = str_replace("|", "", $line);
-                  $listWords .= '- '.$sentence.'<br />';
+                  $pattern = '/\$.*?\$/';
+                  preg_match($pattern, $line, $matches);
+                  $help = preg_replace('/\$/', '', $matches[0]);
+                  $listWords .= '- '.$help.'<br />';
                 }
               }
               break;
