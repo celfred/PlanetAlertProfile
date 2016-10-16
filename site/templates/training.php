@@ -151,9 +151,25 @@
                 }
               }
               break;
+            case 'jumble' :
+              $out .= count($allLines).' sentences';
+              if (count($allLines)>15) {
+                $listWords = '<strong>15 first sentences :</strong><br />';
+                for($i=0; $i<15; $i++) {
+                  $sentence = str_replace("|", "", $allLines[$i]);
+                  $listWords .= '- '.$sentence.'<br />';
+                }
+                $listWords .= '[...]';
+              } else {
+                $listWords = '';
+                foreach($allLines as $line) {
+                  $sentence = str_replace("|", "", $line);
+                  $listWords .= '- '.$sentence.'<br />';
+                }
+              }
+              break;
             default :
               $listWords = '';
-              break;
           }
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
