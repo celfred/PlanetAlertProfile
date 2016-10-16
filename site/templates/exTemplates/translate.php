@@ -146,6 +146,7 @@
   $out .= '</span>';
   $out .='</div>';
   $out .= '</div>';
+  $out .= '</div>';
 
   echo $out;
 ?>

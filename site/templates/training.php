@@ -20,7 +20,7 @@
 
         // Translate / Quiz / Image-map types only (for the moment)
         if ($user->isSuperuser()) {
-          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz|image-map, sort=name, include=all');
+          $allMonsters = $pages->find('template=exercise, sort=name, include=all');
         } else {
           $allMonsters = $pages->find('template=exercise, type.name=translate|quiz|image-map, sort=name');
         }
@@ -254,15 +254,31 @@
             if ($monster->type->name == 'image-map') {
               $out .= '<div class=""><img src="'.$monster->imageMap->url.'" width="400" alt="Image" /></div>';
             }
-            $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+            if ($monster->type->name == 'jumble') {
+              $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Click on the words to build a correct sentence. If you make a mistake, use the \'Try again\' button. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+            } else {
+              $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+            }
             $out .= '<div class="bubble-right">';
-            $out .= '<div class="text-center">';
-            $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
-            $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
-            $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
-            $out .= '</div>';
-            $out .= '<br />';
-            $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
+            if ($monster->type->name == 'jumble') {
+              $out .= '<div class="text-center">';
+              $out .= '<h2 class="jumbleW inline" ng-repeat="w in word track by $index">';
+              $out .= '<span ng-class="{\'label\':true, \'label-primary\':selectedItems.indexOf($index) === -1, \'label-warning\':selectedItems.indexOf($index) !== -1}" ng-click="pickWord(w, $index)">{{w}}</span>';
+              $out .= '</h2>';
+              $out .= '</div>';
+              $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
+              $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">Try again</button>';
+              $out .= '<br /><br />';
+              $out .= '<h3 id="" ng-bind="playerAnswer"></h3>';
+            } else {
+              $out .= '<div class="text-center">';
+              $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
+              $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
+              $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
+              $out .= '</div>';
+              $out .= '<br />';
+              $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
+            }
             $out .= '<br />';
             $out .= '<button ng-click="attack()" class="btn btn-success">Stimulate!</button>';
             $out .= '<span class="pull-right">';

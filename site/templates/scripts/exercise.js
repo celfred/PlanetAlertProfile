@@ -37,6 +37,10 @@ exerciseApp.service('myData', function($http) {
 					}
 				}
 			}
+			// Add new lines
+			for (var i=0; i<newLines.length; i++) {
+				allLines.push(newLines[i]);
+			}
 			// Manage special variables
 			// %fname% : First name (female or male)
 			// %fnamef% : First name female
@@ -85,10 +89,6 @@ exerciseApp.service('myData', function($http) {
 					allLines[i] = str.replace(pattern, sub);
 					str = allLines[i];
 				}
-			}
-			// Add new lines
-			for (var i=0; i<newLines.length; i++) {
-				allLines.push(newLines[i]);
 			}
 
 			// console.log(allLines);
@@ -151,6 +151,22 @@ exerciseApp.service('myData', function($http) {
 					var allCorrections = quiz[1].split("|");
 					question['allCorrections'] = this.parseCorrections(allCorrections);
 					break;
+				case 'jumble' :
+					// Split chunks
+					var allWords = '';
+					var chunks = randLine.split("|");
+					var correction = new Array();
+					correction[0] = '';
+					for(var i=0; i<chunks.length; i++) {
+						if (i>0) {
+							chunks[i] = ' '+$.trim(chunks[i]);
+						} else {
+							chunks[i] = $.trim(chunks[i]);
+						}
+						correction[0] += chunks[i];
+					}
+					question['allCorrections'] = this.parseCorrections(correction);
+					break;
 				default: 
 					console.log('Unknown exType');
 			}
@@ -165,11 +181,23 @@ exerciseApp.service('myData', function($http) {
 				if (exerciseData['exType'] == 'image-map') {
 					question['word'] = 'What\'s number '+question['word']+' ?';
 				}
+				if (exerciseData['exType'] == 'jumble') {
+					this.shuffleArray(chunks);
+					question['word'] = chunks;
+				}
 			}
 			// Add word to history
-			history.push(question['word']);
+			if (exerciseData['exType'] == 'jumble') {
+				history.push(question['allCorrections']);
+			} else {
+				history.push(question['word']);
+			}
 			// Help with 1st mixed answers
-			question['mixedWord'] = this.shuffle(question['allCorrections'][0]);
+			if (exerciseData['exType'] == 'jumble') {
+				question['mixedWord'] = '';
+			} else {
+				question['mixedWord'] = this.shuffle(question['allCorrections'][0]);
+			}
 
 			return question;
 		},
@@ -224,6 +252,16 @@ exerciseApp.service('myData', function($http) {
           a[j] = tmp;
       }
       return a.join("");
+		},
+
+		shuffleArray : function(a) {
+			var j, x, i;
+			for (i = a.length; i; i--) {
+					j = Math.floor(Math.random() * i);
+					x = a[i - 1];
+					a[i - 1] = a[j];
+					a[j] = x;
+			}
 		}
 	}
 });
@@ -241,6 +279,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 	$scope.monsterDamage = 0;
 	$scope.hideMonsterDamage = true;
 	$scope.question = [];
+	$scope.playerAnswer = '';
   $scope.correct = false;
   $scope.wrong = false;
 	$scope.shownWords = 0;
@@ -297,11 +336,15 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		$scope.nbAttacks += 1;
 		// Reset counter
 		$scope.counter = 0;
+		// No selected words (if jumble)
+		$scope.selectedItems = [];
 	}
 
   $scope.throwQuestion = function() {
-    // Set focus on input field
-    $timeout($scope.focusInput, 300);
+		if ($scope.exType != 'jumble') {
+			// Set focus on input field
+			$timeout($scope.focusInput, 300);
+		}
     // Player loses 1HP every second
     if ($scope.runningInterval == false ) {
       $scope.promise = $interval($scope.loseHP, 1000);
@@ -397,6 +440,26 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
     }
   }
 
+	$scope.pickWord = function(w, i){
+		if(!$scope.selectedItems){
+       $scope.selectedItems = [];
+    }
+
+    var index = $scope.selectedItems.indexOf(i);
+
+    if(index === -1) {   // not selected already and add
+       $scope.selectedItems.push(i);
+       $scope.playerAnswer += w;
+    } else {   // selected already and remove
+       $scope.selectedItems.splice(index, 1);
+       $scope.playerAnswer = $scope.playerAnswer.replace(w, "");
+    }
+	}
+
+	$scope.clear = function(){
+		$scope.playerAnswer = '';
+	}
+
   $scope.winFight = function () {
     // Stop HP loss
     $interval.cancel($scope.promise);
@@ -480,6 +543,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.waitForStart = true;
   $scope.result = 0;
 	$scope.question = [];
+	$scope.playerAnswer = '';
 	$scope.newCorrections = new Array();
   $scope.counter = 0; // #
   $scope.exType = '';
@@ -517,6 +581,27 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     $scope.submitUrl = submitUrl;
   }
 
+	$scope.pickWord = function(w, i){
+		if(!$scope.selectedItems){
+       $scope.selectedItems = [];
+    }
+
+    var index = $scope.selectedItems.indexOf(i);
+
+    if(index === -1) {   // not selected already and add
+       $scope.selectedItems.push(i);
+       $scope.playerAnswer += w;
+    } else {   // selected already and remove
+       $scope.selectedItems.splice(index, 1);
+       $scope.playerAnswer = $scope.playerAnswer.replace(w, "");
+    }
+	}
+
+	$scope.clear = function(){
+		$scope.playerAnswer = '';
+		$scope.selectedItems = [];
+	}
+
   $scope.attack = function() {
     if ($scope.playerAnswer) {
       $scope.checkAnswer($scope.playerAnswer);
@@ -533,8 +618,13 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
-    // Set focus on input field
-    $timeout($scope.focusInput, 300);
+		if ($scope.exType != 'jumble') {
+			// Set focus on input field
+			$timeout($scope.focusInput, 300);
+		} else {
+			// Deselect all words
+			$scope.selectedItems = [];
+		}
 	}
 
   $scope.checkAnswer = function(submitted) {
