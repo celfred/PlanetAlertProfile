@@ -291,6 +291,7 @@
               $out .= '</div>';
               $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
               $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">Try again</button>';
+              $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}" onmouseenter="$(this).tooltip(\'show\')"></span></h3> ';
               $out .= '<br /><br />';
               $out .= '<h3 id="" ng-bind="playerAnswer"></h3>';
             } else {

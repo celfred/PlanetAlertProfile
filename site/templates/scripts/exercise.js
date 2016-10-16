@@ -154,6 +154,14 @@ exerciseApp.service('myData', function($http) {
 				case 'jumble' :
 					// Split chunks
 					var allWords = '';
+					var help = '';
+					// Check for help (translation between $...$
+					var pattern = /\$.*?\$/i;
+					if (randLine.search(pattern) != -1 ) {
+						help = randLine.match(pattern)[0];
+						help = help.replace(/\$/g, '');
+						randLine = randLine.replace(pattern, "");
+					}
 					var chunks = randLine.split("|");
 					var correction = new Array();
 					correction[0] = '';
@@ -194,7 +202,7 @@ exerciseApp.service('myData', function($http) {
 			}
 			// Help with 1st mixed answers
 			if (exerciseData['exType'] == 'jumble') {
-				question['mixedWord'] = '';
+				question['mixedWord'] = help;
 			} else {
 				question['mixedWord'] = this.shuffle(question['allCorrections'][0]);
 			}

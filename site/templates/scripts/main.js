@@ -270,7 +270,14 @@ $(document).ready(function() {
 		$(this).hide();
 	})
 
-  $('[data-toggle="tooltip"]').tooltip({ container: 'body'});
+	$('[data-toggle=tooltip]').hover(function(){
+			// on mouseenter
+			$(this).tooltip({container : 'body'});
+			$(this).tooltip('show');
+	}, function(){
+			// on mouseleave
+			$(this).tooltip('hide');
+	});
 
   $('#mapTable').DataTable({
     dom: 'ft',
