@@ -47,7 +47,7 @@
             } else {
               $mini = '';
             }
-            $out .= '<li><a href="'.$m->url.'" data-toggle="tooltip" data-html="true" title="'.$m->summary.'" class="btn btn-lg btn-primary"><span class="">'.$mini.' '.$m->title.'</span></a></li>';
+            $out .= '<li><a href="'.$m->url.'" data-toggle="tooltip" data-html="true" title="'.$m->summary.' [Level '.$m->level.']" class="btn btn-lg btn-primary"><span class="">'.$mini.' '.$m->title.'</span></a></li>';
           }
           $out .= '</ul>';
         }

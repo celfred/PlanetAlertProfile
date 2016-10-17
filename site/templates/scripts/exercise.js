@@ -352,11 +352,16 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		if ($scope.exType != 'jumble') {
 			// Set focus on input field
 			$timeout($scope.focusInput, 300);
+			// Player loses 1HP every second
+			if ($scope.runningInterval == false ) {
+				$scope.promise = $interval($scope.loseHP, 1000);
+			}
+		} else {
+			// Player loses 1HP every 2 seconds
+			if ($scope.runningInterval == false ) {
+				$scope.promise = $interval($scope.loseHP, 2000);
+			}
 		}
-    // Player loses 1HP every second
-    if ($scope.runningInterval == false ) {
-      $scope.promise = $interval($scope.loseHP, 1000);
-    }
   }
 
   $scope.attack = function() {
