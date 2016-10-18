@@ -471,6 +471,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 
 	$scope.clear = function(){
 		$scope.playerAnswer = '';
+		$scope.selectedItems = [];
 	}
 
   $scope.winFight = function () {
