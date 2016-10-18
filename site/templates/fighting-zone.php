@@ -14,8 +14,9 @@
         echo pma($player);
       }
 
+      // Set all available monsters
       if (!$user->isSuperuser()) {
-        $allMonsters = $pages->find("template=exercise, type.name=translate|quiz|image-map, sort=level, sort=name");
+        $allMonsters = $pages->find("template=exercise, sort=level, sort=name");
       } else {
         $allMonsters = $pages->find("template=exercise, sort=level, sort=name, include=all");
       }

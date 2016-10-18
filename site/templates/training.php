@@ -18,11 +18,11 @@
           echo pma($player);
         }
 
-        // Translate / Quiz / Image-map types only (for the moment)
+        // Set all available monsters
         if ($user->isSuperuser()) {
           $allMonsters = $pages->find('template=exercise, sort=name, include=all');
         } else {
-          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz|image-map, sort=name');
+          $allMonsters = $pages->find('template=exercise, sort=name');
         }
         $out .= '<br />';
         $out .= '<div class="well">';
