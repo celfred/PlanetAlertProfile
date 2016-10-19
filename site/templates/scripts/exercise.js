@@ -378,6 +378,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
   }
 
   $scope.dodge = function() {
+		$scope.isFocused = false;
 		// Show correction
     $scope.showCorrection = $scope.allCorrections.join(', ');
     // Player admits "I don't know" : reduced loss
@@ -387,6 +388,8 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		$timeout(function() { $scope.hidePlayerDamage = true; }, 1500);
     $scope.counter = 10;
 		$scope.shownWords += 1;
+		// Set focus on input field
+		$timeout($scope.focusInput, 300);
   }
 
   $scope.checkAnswer = function(submitted) {
