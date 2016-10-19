@@ -180,6 +180,8 @@
 								echo "<li><a$class href='{$pages->get('name=statistics')->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'recalculate' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/recalculate'><span class='glyphicon glyphicon-pencil'></span> - Edit history (and scores)</a></li>";
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/users'><span class='glyphicon glyphicon-user'></span> - Users</a></li>";
 								echo "<li role='separator' class='divider'></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut-stats/'>UT Stats</a></li>";

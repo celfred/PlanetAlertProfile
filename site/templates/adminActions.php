@@ -172,6 +172,34 @@
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setScores">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
+      case 'users' :
+        $allPlayers = $pages->find("template=player")->sort("title");
+        $out .= '<section class="well">';
+        $out .= '<p><span class="glyphicon glyphicon-alert"></span> 1 player / line → Name [,lastName] [,rank =6emes,5emes,4emes,3emes)] [,team]</p>';
+        $out .= '<textarea id="newPlayers" name="newPlayers" rows="5" cols="50"></textarea>';
+        $out .= '<button class="addUsers btn btn-primary btn-block" data-href="'.$page->url.'" data-action="addUsers">Add new players</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        $out .= '<p>There are currently '.$allPlayers->count().' players.</p>';
+        $out .= '<table class="table table-condensed table-hover">';
+        $out .= '<th>Player</th>';
+        $out .= '<th>Team</th>';
+        $out .= '<th>User</th>';
+        $out .= '<th>Edit</th>';
+        $out .= '<th>Delete</th>';
+        $allUsers = $users->find("name!=admin|guest");
+        foreach ($allPlayers as $p) {
+          $u = $users->get("name=$p->login");
+          $out .= '<tr>';
+          $out .= '<td>'.$p->title.'</td>';
+          $out .= '<td>'.$p->team->title.'</td>';
+          $out .= '<td>'.$u->name.'</td>';
+          $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</td>';
+          $out .= '<td><button class="removeUser btn btn-xs btn-danger" data-href="'.$page->url.'" data-action="removeUser" data-playerId="'.$p->id.'">Delete Player/User</button></td>';
+          $out .= '</tr>';
+        }
+        $out .= '</table>';
+        $out .= '<div>';
+        break;
       default :
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
@@ -182,8 +210,13 @@
   } else { // End if admin
     $out .= 'Admin only.';
   }
+  $out .= '</div>';
   echo $out;
   include("./foot.inc"); 
+  echo '<script>';
+  echo '$(".addUsers").click( function() { var myData = $(\'#newPlayers\').val(); var action=$(this).attr("data-action"); var href=$(this).attr("data-href")+action; var that=$(this); if (confirm("Proceed?")) {$.post(href, {newPlayers:myData}, function(data) { $("#ajaxViewport").html(data); }) };});';
+  echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
+  echo '</script>';
   } else { // Ajax call, display requested information
     include("./my-functions.inc"); 
     $allPlayers = $pages->find("template=player")->sort("team.name, title");
@@ -804,6 +837,12 @@
           }
         }
         break;
+      case 'removeUser' :
+        $playerPage = $pages->get("id=$playerId");
+        $u = $users->get("name=$playerPage->login");
+        $users->delete($u);
+        $pages->trash($playerPage);
+        break;
       case 'ut-stats' :
         if ($selectedPlayer) {
           $out .= '<h3>';
@@ -964,6 +1003,70 @@
           $out .= '</ul>';
         } else {
           $out .= '<p>You need to select a team for more options.</p>';
+        }
+        break;
+      case 'addUsers' :
+        $newPlayers = $input->post->newPlayers;
+        $newUserLines = preg_split("/[r\n]+/", $newPlayers, -1, PREG_SPLIT_NO_EMPTY);
+        $out = '';
+        foreach($newUserLines as $l) {
+          $newUser = array_map('trim', explode(',', $l));
+          list($title, $lastName, $rank, $team) = $newUser;
+          if ($title && $title != '') {
+            // Generate a random password
+            $pass = '';
+            $chars = 'abcdefghjkmnopqrstuvwxyz23456789'; // add more as you see fit
+            $length = mt_rand(8,8); // 9,12 = password between 9 and 12 characters
+            for($n = 0; $n < $length; $n++) $pass .= $chars[mt_rand(0, strlen($chars)-1)];
+            // Create player
+            $p = new Page();
+            $p->template = 'player';
+            $p->parent = $pages->get('name=players');
+            $p->title = $title;
+            $p->lastName = $lastName;
+            if ($rank && $rank != '') {
+              $r = $pages->get("parent.name=ranks, name=$rank");
+              if ($r->id) {
+                $p->rank = $r;
+              }
+            }
+            if ($team && $team != '') {
+              $t = $pages->get("template=team, name=$team");
+              if ($t->id) {
+                $p->team = $t;
+              } else { // Create new team
+                $newTeam = new Page();
+                $newTeam->template = team;
+                $newTeam->parent = $pages->get("name=teams");
+                $newTeam->title = strtoupper($team);
+                if ($p->rank) { $newTeam->rank = $p->rank; }
+                $newTeam->save();
+                $p->team= $newTeam;
+              }
+            } else {
+              $t = $pages->get("template=team, name=no-team");
+              $p->team = $t;
+            }
+            initPlayer($p);
+            $p->save();
+            $p->login = $p->name;
+            $p->save(login);
+            // Create user (if he doesn't exit)
+            $u = $users->get($p->login);
+            if ($u == '') { // User does not exist
+              $u = $wire->users->add($p->login); // Add new user
+              $u->pass = $pass;
+              $u->addRole('guest');
+              $u->save();
+            } else {
+              $out .= $title.' : <span class="label label-danger">Error</span>';
+            }
+          }
+          // Display login/passwords pairs (for admin recup)
+          $out .= '<p>Planet Alert login for <b>'.$p->title.'</b> ['.$p->team->title.'] :</p>';
+          $out .= 'Username : '.$p->login.'</p>';
+          $out .= 'Password : '. $pass.'</p>';
+          $out .= '<br />';
         }
         break;
       default :
