@@ -27,10 +27,12 @@
     "DataTables": "~1.10.5",
     "datatables-plugins-bootstrap3": "~0.1.7",
     "font-awesome": "~4.3.0",
-    "masonry": "^4.1.1"
+    "masonry": "^4.1.1",
+    "chance": "^1.0.4"
   },
   "resolutions": {
     "datatables": ">=1.7.0",
-    "font-awesome": "~4.3.0"
+    "font-awesome": "~4.3.0",
+    "jquery": "^3.1.1"
   }
 }
