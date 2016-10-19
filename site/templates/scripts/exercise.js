@@ -224,18 +224,22 @@ exerciseApp.service('myData', function($http) {
 				} else {
 					feedBack = '';
 				}
-				// Trim extra spaces
-				allCorrections[i] = allCorrections[i].trim();
 				// Add optional text functionality : (...) only 1/line for the moment
-				var pattern = /\((.*?)\)/i;
-				var str = allCorrections[i];
+				pattern = /\((.*?)\)/i;
+				str = $.trim(allCorrections[i]);
 				if (str.search(pattern) != -1 ) {
-					allCorrections[i] = allCorrections[i].replace(pattern, "");
+					allCorrections[i] = str.replace(pattern, "");
+					allCorrections[i] = $.trim(allCorrections[i]);
+					tempCorrections.push(str);
 					tempCorrections.push(str.replace(pattern, "$1"));
+				} else {
+					// Trim extra spaces
+					allCorrections[i] = $.trim(allCorrections[i]);
 				}
 				// Add to newCorrections
 				for (var j=0; j<tempCorrections.length; j++) {
-					newCorrections.push(tempCorrections[j].trim());
+					tempCorrections[j] = $.trim(tempCorrections[j]);
+					newCorrections.push(tempCorrections[j]);
 				}
 				tempCorrections = [];
 			}
@@ -245,6 +249,7 @@ exerciseApp.service('myData', function($http) {
 			}
 			newCorrections = [];
 			
+			console.log(allCorrections);
 			allCorrections['feedBack'] = feedBack;
 
 			return allCorrections;
