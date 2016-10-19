@@ -249,7 +249,6 @@ exerciseApp.service('myData', function($http) {
 			}
 			newCorrections = [];
 			
-			console.log(allCorrections);
 			allCorrections['feedBack'] = feedBack;
 
 			return allCorrections;
@@ -626,6 +625,14 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       $scope.checkAnswer($scope.playerAnswer);
     }
   }
+  $scope.dodge = function() { // Show correction
+		$scope.isFocused = false;
+    $scope.showCorrection = $scope.allCorrections.join(', ');
+		$scope.wrong = true;
+		// Set focus on input field
+		$timeout($scope.focusInput, 300);
+  }
+
 
 	$scope.initQuestion = function() {
 		$scope.word = $scope.question['word'];
@@ -767,6 +774,16 @@ exerciseApp.directive('syncFocusWith', function($timeout, $rootScope) {
 					$element[0].blur();
 				}
 			})
+		}
+	}
+});
+
+exerciseApp.filter('underline', function () {
+	return function(input) {
+		if (input) {
+			var allAnswers = input.split(',');
+			allAnswers[0] = '<u>'+allAnswers[0]+'</u>';
+			return allAnswers.join(', ');
 		}
 	}
 });
