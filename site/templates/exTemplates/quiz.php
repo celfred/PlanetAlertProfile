@@ -132,7 +132,6 @@
   } else {
     $out .= '<Avatar>';
   }
-  $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
   if ($bestWeapon->id && $bestWeapon->image) {
     $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getThumb("small").'" alt="'.$bestWeapon->title.'" />';
   }
