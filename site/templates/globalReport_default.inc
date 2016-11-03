@@ -38,10 +38,10 @@
 			$nbHalfHk = $player->halfHk->count();
 			$nbHk = $player->nbHk;
 			$nbExtraHk = $player->extraHk->count() + $player->veryExtraHk->count();
-			$death = $player->find("task.name=death, dateStart>=$period->dateStart, dateEnd<=$period->dateEnd");
-			$utSessions = $player->find("template=event, task.name=ut-action-v|ut-action-vv, dateStart>=$period->dateStart, dateEnd<=$period->dateEnd");
-			$posTests = $player->find("template=event, task.category.name=test, task.HP=0, dateStart>=$period->dateStart, dateEnd<=$period->dateEnd");
-			$negTests = $player->find("template=event, task.category.name=test, task.HP<0, dateStart>=$period->dateStart, dateEnd<=$period->dateEnd");
+			$death = $player->find("task.name=death, date>=$period->dateStart, date<=$period->dateEnd");
+			$utSessions = $player->find("template=event, task.name=ut-action-v|ut-action-vv, date>=$period->dateStart, date<=$period->dateEnd");
+			$posTests = $player->find("template=event, task.category.name=test, task.HP=0, date>=$period->dateStart, date<=$period->dateEnd");
+			$negTests = $player->find("template=event, task.category.name=test, task.HP<0, date>=$period->dateStart, date<=$period->dateEnd");
 			// Team stats
 			$teamNoHk += $nbNoHk;
 			$teamHalfHk += $nbHalfHk;
@@ -138,8 +138,8 @@
       echo '</td>';
 			// Absent
       echo '<td>';
+			$listAbsent = '';
 			if ($player->absent->count() > 0) {
-				$listAbsent = '';
 				foreach ($player->absent as $abs) {
 					$listAbsent .= '- '.strftime("%d/%m", $abs->date).'<br />';
 				}
@@ -148,14 +148,14 @@
       echo '</td>';
 			// Attitude
       echo '<td>';
+			$listPosAttitude = '';
 			if ($player->posAttitude->count() > 0) {
-				$listPosAttitude = '';
 				foreach ($player->posAttitude as $e) {
-					$listNegAttitude .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+					$listPosAttitude .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
 				}
 			}
+			$listNegAttitude = '';
 			if ($player->negAttitude->count() > 0) {
-				$listNegAttitude = '';
 				foreach ($player->negAttitude as $e) {
 					$listNegAttitude .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
 				}
@@ -165,14 +165,14 @@
       echo '</td>';
 			// Tests
       echo '<td>';
+			$listPosTests = '';
 			if ($posTests->count() > 0) {
-				$listPosTests = '';
 				foreach ($posTests as $e) {
 					$listPosTests .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
 				}
 			}
+			$listNegTests = '';
 			if ($negTests->count() > 0) {
-				$listNegTests = '';
 				foreach ($negTests as $e) {
 					$listNegTests .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
 				}
@@ -183,16 +183,16 @@
       echo '</td>';
 			// Solo missions
       echo '<td>';
-			$posSolo = $player->find("template=event, task.category.name=individual-work, task.HP=0")->not('task.name=ut-action-v|ut-action-vv');
-			$negSolo = $player->find("template=event, task.category.name=individual-work, task.HP<0");
+			$posSolo = $player->find("template=event, task.category.name=individual-work, task.HP=0, date>=$period->dateStart, date<=$period->dateEnd")->not('task.name=ut-action-v|ut-action-vv');
+			$negSolo = $player->find("template=event, task.category.name=individual-work, task.HP<0, date>=$period->dateStart, date<=$period->dateEnd");
+			$listPosSolo = '';
 			if ($posSolo->count() > 0) {
-				$listPosSolo = '';
 				foreach ($posSolo as $e) {
 					$listPosSolo .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
 				}
 			}
+			$listNegSolo = '';
 			if ($negSolo->count() > 0) {
-				$listNegSolo = '';
 				foreach ($negSolo as $e) {
 					$listNegSolo .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
 				}
@@ -203,16 +203,16 @@
       echo '</td>';
 			// Group missions
       echo '<td>';
-			$pos = $player->find("template=event, task.category.name=groupwork, task.HP=0")->not('task.name=ut-training-v|ut-training-vv');
-			$neg = $player->find("template=event, task.category.name=groupwork, task.HP<0");
+			$pos = $player->find("template=event, task.category.name=groupwork, task.HP=0, date>=$period->dateStart, date<=$period->dateEnd")->not('task.name=ut-training-v|ut-training-vv');
+			$neg = $player->find("template=event, task.category.name=groupwork, task.HP<0, date>=$period->dateStart, date<=$period->dateEnd");
+			$listPos = '';
 			if ($pos->count() > 0) {
-				$listPos = '';
 				foreach ($pos as $e) {
 					$listPos .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
 				}
 			}
+			$listNeg = '';
 			if ($neg->count() > 0) {
-				$listNeg = '';
 				foreach ($neg as $e) {
 					$listNeg .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
 				}
@@ -223,8 +223,8 @@
       echo '</td>';
 			// Underground Training
       echo '<td>';
+			$listUt = '';
 			if ($utSessions->count() > 0) {
-				$listUt = '';
 				foreach ($utSessions as $e) {
 					$listUt .= '- '.strftime("%d/%m", $e->date).': '.$e->summary.'<br />';
 				}
