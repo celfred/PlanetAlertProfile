@@ -141,7 +141,13 @@
     // Set HP progressbar
     $HPwidth = 150*$player->HP/50;
     // Set XP progressbar
-    $XPwidth = 150*$player->XP/($player->level*10+90);
+    if ($player->level <= 4) {
+      $delta = 40+($player->level*10);
+    } else {
+      $delta = 90;
+    }
+    $threshold = ($player->level*10)+$delta;
+    $XPwidth = 150*$player->XP/($threshold);
     // Places list
     $tooltipPlaces = '';
     $listPlaces = '<ul>';
@@ -211,7 +217,7 @@
     $out .= '<div class="progress-bar progress-bar-danger" role="progressbar" style="width: '.$HPwidth.'px;"></div>';
     $out .= '</div>';
     $out .= '</td>';
-    $out .= '<td data-order="'.$player->XP.'" data-toggle="tooltip" title="'.$player->XP.'/'.($player->level*10+90).'" data-placement="top">';
+    $out .= '<td data-order="'.$player->XP.'" data-toggle="tooltip" title="'.$player->XP.'/'.($threshold).'" data-placement="top">';
     $out .= '<div class="progress progress-striped progress-mini">';
     $out .= '<div class="progress-bar progress-bar-success" role="progressbar" style="width: '.$XPwidth.'px;"></div>';
     $out .= '</div>';

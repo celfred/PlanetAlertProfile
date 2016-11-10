@@ -70,11 +70,19 @@
             </div>
           </div>
           <div class="col-sm-2 text-right">
-            <span class="badge" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)"><img src="<?php  echo $config->urls->templates?>img/star.png" alt="Experience" /> <?php echo $playerPage->XP; ?>/<?php echo $playerPage->level*10+90; ?></span>
+            <?php
+            if ($playerPage->level <= 4) {
+              $delta = 40+($playerPage->level*10);
+            } else {
+              $delta = 90;
+            }
+            $threshold = ($playerPage->level*10)+$delta;
+            ?>
+            <span class="badge" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)"><img src="<?php  echo $config->urls->templates?>img/star.png" alt="Experience" /> <?php echo $playerPage->XP; ?>/<?php echo $threshold; ?></span>
           </div>
           <div class="col-sm-10">
             <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)">
-              <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo (100*$playerPage->XP)/($playerPage->level*10+90); ?>%">
+              <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo (100*$playerPage->XP)/$threshold; ?>%">
               </div>
             </div>
           </div>

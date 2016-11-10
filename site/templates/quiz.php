@@ -32,10 +32,21 @@ if ($user->isSuperuser()) {
 
   $selectedTeam = $input->urlSegment1;
   $selectedIds = $input->post->selected; // Checked players
-  $rank = $pages->get("template=team, name=$selectedTeam")->rank;
+  $rank = $pages->get("template=team, name=$selectedTeam")->rank->name;
   if ( $rank == '4emes' || $rank == '3emes' ) {
-    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count>=3), (people.count>=3)"); // Find players having at least 3 places OR 3 people
-    $notConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count<3), (people.count<3)")->implode(', ', '{title}');
+    $allPlayers = $pages->find("template=player, team.name=$selectedTeam");
+    $allConcerned = new pageArray();
+    $notConcerned = new pageArray();
+    foreach($allPlayers as $p) { // Find players having at least 3 free elements
+      if ($p->places->count()+$p->people->count() >= 3) {
+        $allConcerned->add($p);
+      } else {
+        $notConcerned->add($p);
+      }
+    }
+    $notConcerned = $notConcerned->implode(', ', '{title}');
+    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (people.count+places.count>=3)"); // Find players having at least 3 places OR 3 people
+    /* $notConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count<3), (people.count<3)")->implode(', ', '{title}'); */
   } else {
     $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
     $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');

@@ -349,7 +349,12 @@ function checkStreak($player) {
 
 function checkLevel($player) {
   // Check new level
-  $threshold = ($player->level*10)+90;
+  if ($player->level <= 4) {
+    $delta = 40+($player->level*10);
+  } else {
+    $delta = 90;
+  }
+  $threshold = ($player->level*10)+$delta;
   if ($player->XP >= $threshold) {
     $player->level = $player->level + 1;
     $player->XP = $player->XP - $threshold;
