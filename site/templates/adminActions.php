@@ -399,20 +399,18 @@
             $d->save();
           }
           // Each team member suffers from player's death
-          if ($deathDate > mktime(date('04/10/2016 00:00:00'))) {
-            $teamDeath = $pages->get("name=team-death");
-            $teamPlayers = $pages->find("template=player, team=$selectedPlayer->team")->not("group=$selectedPlayer->group");
-            foreach($teamPlayers as $p) {
-              $comment = 'Team member died!';
-              saveHistory($p, $teamDeath, $comment, 0, '', $deathDate, $linkedId);
-            }
-            // Each group member suffers from player's death
-            $groupMembers = $pages->find("template=player, team=$selectedPlayer->team, group=$selectedPlayer->group")->not("$selectedPlayer");
-            $groupDeath = $pages->get("name=group-death");
-            foreach($groupMembers as $p) {
-              $comment = 'Group member died!';
-              saveHistory($p, $groupDeath, $comment, 0, '', $deathDate, $linkedId);
-            }
+          $teamDeath = $pages->get("name=team-death");
+          $teamPlayers = $pages->find("template=player, team=$selectedPlayer->team")->not("group=$selectedPlayer->group");
+          foreach($teamPlayers as $p) {
+            $comment = 'Team member died! ['.$selectedPlayer->title.']';
+            saveHistory($p, $teamDeath, $comment, 0, '', $deathDate, $linkedId);
+          }
+          // Each group member suffers from player's death
+          $groupMembers = $pages->find("template=player, team=$selectedPlayer->team, group=$selectedPlayer->group")->not("$selectedPlayer");
+          $groupDeath = $pages->get("name=group-death");
+          foreach($groupMembers as $p) {
+            $comment = 'Group member died!';
+            saveHistory($p, $groupDeath, $comment, 0, '', $deathDate, $linkedId);
           }
         }
         break;
