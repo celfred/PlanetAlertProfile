@@ -38,14 +38,15 @@ if ($user->isSuperuser()) {
     $allConcerned = new pageArray();
     $notConcerned = new pageArray();
     foreach($allPlayers as $p) { // Find players having at least 3 free elements
-      if ($p->places->count()+$p->people->count() >= 3) {
+      $nbEl = $p->places->count()+$p->people->count();
+      if ( $nbEl >= 3) {
         $allConcerned->add($p);
       } else {
         $notConcerned->add($p);
       }
     }
     $notConcerned = $notConcerned->implode(', ', '{title}');
-    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (people.count+places.count>=3)"); // Find players having at least 3 places OR 3 people
+    /* $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (people.count+places.count>=3)"); // Find players having at least 3 places OR 3 people */
     /* $notConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count<3), (people.count<3)")->implode(', ', '{title}'); */
   } else {
     $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
