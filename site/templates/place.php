@@ -26,6 +26,7 @@ include("./head.inc");
     }
   }
 
+  echo '<h4 class="text-center"><a href="'.$pages->get("name=places")->photo->eq(0)->url.'" target="_blank" data-toggle="tooltip" title="Write the corresponding number on your places in your copybook.">See the map with numbers</a></h4>';
 if ($page->name != 'places') { // Single place view
   if ($user->isSuperuser()) {
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
