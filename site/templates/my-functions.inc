@@ -1217,9 +1217,9 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
   if ($player->nbPart > 0) {
     $ratio = round(($vvEvents->count()*2+$vEvents->count()-$rEvents-$rrEvents->count()*2)/$player->nbPart, 1);
     if ($ratio >= 1.5) { $player->participation = 'VV'; }
-    if ($ratio < 1.5 && $ratio >= 0.3) { $player->participation = 'V'; }
-    if ($ratio < 0.3 && $ratio >= -0.5) { $player->participation = 'R'; }
-    if ($ratio < -0.5) { $player->participation = 'RR'; }
+    if ($ratio < 1.5 && $ratio > 0.3) { $player->participation = 'V'; }
+    if ($ratio <= 0.3 && $ratio > -0.4) { $player->participation = 'R'; }
+    if ($ratio <= -0.4) { $player->participation = 'RR'; }
     $player->partRatio = $ratio;
     $player->partPositive = $vEvents->count() + $vvEvents->count();
     $player->partNegative = $rEvents->count() + $rrEvents->count();
