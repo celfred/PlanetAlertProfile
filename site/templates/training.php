@@ -279,7 +279,7 @@
             $out .= '</div>';
             $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
             if ($monster->type->name == 'image-map') {
-              $out .= '<div class=""><img src="'.$monster->imageMap->url.'" width="400" alt="Image" /></div>';
+              $out .= '<div class=""><img src="'.$monster->imageMap->url.'" max-width="400" alt="Image" /></div>';
             }
             if ($monster->type->name == 'jumble') {
               $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Click on the words to build a correct sentence. If you make a mistake, use the \'Try again\' button. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';

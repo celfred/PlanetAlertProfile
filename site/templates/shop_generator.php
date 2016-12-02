@@ -11,7 +11,6 @@ $allPeople = $pages->find("template=people, name!=people, sort=title");
 
 $playerId = $input->urlSegment1;
 $player = $pages->get($playerId);
-$allPlayers = $pages->find("template='player', team=$player->team");
 
 $out = '';
 
@@ -24,7 +23,26 @@ $out .= '<form id="marketPlaceForm" name="marketPlaceForm" action="'.$pages->get
 $out .= '<input type="hidden" name="player" value="'.$player->id.'" />';
 // Possible equipment
 $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
+// Get rid of potions bought within the last 15 days TODO
+$today= mktime('23:59:59 Y-m-d');
+$limitDate = mktime()-15*3600*24;
+$boughtPotions = $player->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=healing-potion");
+$out .= $boughtPotions->count();
 $possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level, parent.name=potions, sort=name");
+foreach ( $boughtPotions as $b) {
+  foreach ($possiblePotions as $p) {
+    if ($b->refPage->id == $p->id) {
+      $date1 = new DateTime(date('Y-m-d H:i:s', $today));
+      $date2 = new DateTime(date('Y-m-d H:i:s', $b->date));
+      $interval = $date1->diff($date2)->format("%a");
+      if ($interval == 0) {
+        $p->locked = 'Unlocked tomorrow !';
+      } else {
+        $p->locked = 'Unlocked in '.($interval+1).' days';
+      }
+    }
+  }
+}
 
 // Possible places
 $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
@@ -56,15 +74,27 @@ if ( $possibleEquipment->count() > 0) {
 // Add potions
 $out .= '<li class="label label-primary">Potions</li>';
 foreach($possiblePotions as $item) {
-  $out .= '<li>';
-  $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
-  if ($item->image) {
-    $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+  if (!$item->locked) {
+    $out .= '<li>';
+    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+    if ($item->image) {
+      $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+    }
+    $out .= $item->title.' ['.$item->GC.'GC]';
+    $out .= '</label>';
+    $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+    $out .= '</li>';
+  } else {
+    $out .= '<li>';
+    $out .= '<label> ';
+    if ($item->image) {
+      $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+    }
+    $out .= $item->title;
+    $out .= ' <span class="badge badge-danger">'.$item->locked.'</span>';
+    $out .= '</label>';
+    $out .= '</li>';
   }
-  $out .= $item->title.' ['.$item->GC.'GC]';
-  $out .= '</label>';
-  $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
-  $out .= '</li>';
 }
 $out .= "</ul>";
 
