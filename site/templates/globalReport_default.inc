@@ -1,13 +1,21 @@
 <table class="table table-condensed table-hover">
   <tr>
     <td></td>
-    <th colspan="<?php echo $categories->count; ?>"><h3><?php echo $reportTitle; ?></th>
+    <th colspan="11"><h3><?php echo $reportTitle; ?></th>
   </tr>
   <tr>
-		<td></td>
-		<th><i class="glyphicon glyphicon-pencil" data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail à la maison."></i></th>
-		<th><i class="glyphicon glyphicon-file" data-toggle="tooltip" title="Compétence SACoche : J'ai mon matériel."></i></th>
-		<th><i class="glyphicon glyphicon-comment" data-toggle="tooltip" title="Compétence SACoche : Je participe en classe."></i></th>
+		<td><?php echo $allPlayers->count().' pupils'; ?></td>
+		<?php
+			if (!$input->get['pages2pdf']) {
+				echo '<th><i class="glyphicon glyphicon-pencil" data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail à la maison."></i></th>';
+				echo '<th><i class="glyphicon glyphicon-file" data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel."></i></th>';
+				echo '<th><i class="glyphicon glyphicon-comment" data-toggle="tooltip" title="Compétence SACoche : Je participe en classe."></i></th>';
+			} else {
+				echo '<th>Hk</th>';
+				echo '<th>Mat.</th>';
+				echo '<th>Part.</th>';
+			}
+		?>
 		<th>Abs.</th>
 		<th><span data-toggle="tooltip" title="Compétence SACoche : J'adopte une attitude d'élève en classe.">Attitude</span></th>
 		<th>Tests</th>
@@ -93,11 +101,11 @@
 				}
 			} else {
 				if ($nbNoHk > 0) {
-					echo  '<span>'.$nbNoHk.' NoHk</span>';
+					echo  '<span>'.$nbNoHk.' No</span>';
 					echo '&nbsp;&nbsp;';
 				}
 				if ($nbHalfHk > 0) {
-					echo  '<span>'.$nbHalfHk.' HfHk</span>';
+					echo  '<span>'.$nbHalfHk.' Mid</span>';
 					echo '&nbsp;&nbsp;';
 				}
 				if ($nbForgotSigned > 0) {
@@ -106,7 +114,7 @@
 				}
 				echo '&nbsp;&nbsp;&nbsp;';
 				if ($nbExtraHk > 0) {
-					echo  '<span>'.$nbExtraHk.' XtHk</span>';
+					echo  '<span>'.$nbExtraHk.' Xt</span>';
 				}
 			}
       echo '</td>';
@@ -121,6 +129,9 @@
 				default: $class = '';
 			}
 			echo  '<span data-toggle="tooltip" title="Nb d\'oublis : '.$nbForgotStuff.'" class="label label-'.$class.'">'.$player->materialLabel.'</span>';
+      if ($input->get['pages2pdf']) {
+				echo ' ('.$nbForgotStuff.')';
+			}
       echo '</td>';
 			// Participation
       echo '<td>';
@@ -135,6 +146,9 @@
 			echo  '<span data-toggle="tooltip" data-html="true" title="Nb de cours évalués : '.$player->nbPart.'<br/>Qualité : '.$player->partRatio.'" class="label label-'.$class.'">'.$player->participation.'</span>';
 			if ($player->nbPart <= 4) { echo ' <span class="label label-danger" data-toggle="tooltip" title="Peu de résultats !">!</span>'; }
 			array_push($teamPart, $player->partRatio);
+      if ($input->get['pages2pdf']) {
+				echo ' ('.$player->nbPart.' c., '.$player->partRatio.' q.';
+			}
       echo '</td>';
 			// Absent
       echo '<td>';
@@ -161,7 +175,13 @@
 				}
 			}
 			echo '<span data-toggle="tooltip" data-html="true" title="'.$listPosAttitude.'">'.$player->posAttitude->count().' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" data-html="true" title="'.$listNegAttitude.'">'.$player->negAttitude->count().' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
-			if ($player->nbAmbush > 0 ) { echo ' <span class="label label-danger" data-toggle="tooltip" title="\'Ambush\' dans l\'attitude !">!</span>'; }
+			if ($player->nbAmbush > 0 ) { 
+				if (!$input->get['pages2pdf']) {
+					echo ' <span class="label label-danger" data-toggle="tooltip" title="\'Ambush\' dans l\'attitude !">!</span>';
+				} else {
+					echo ' <span class="label label-danger">A!</span>';
+				}
+			}
       echo '</td>';
 			// Tests
       echo '<td>';
@@ -261,11 +281,11 @@
 			echo '&nbsp;&nbsp;&nbsp;';
 			echo  '<span data-toggle="tooltip" title="Oubli signature"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span>'.$teamForgotSigned.'</span></span> ';
 		} else {
-			echo  '<span>'.$teamNoHk.' NoHk</span>';
+			echo  '<span>'.$teamNoHk.' No</span>';
 			echo '&nbsp;&nbsp;&nbsp;';
-			echo  '<span>'.$teamHalfHk.' HfHk</span>';
+			echo  '<span>'.$teamHalfHk.' Mid</span>';
 			echo '&nbsp;&nbsp;&nbsp;';
-			echo  '<span>'.$teamExtraHk.' XtHk</span>';
+			echo  '<span>'.$teamExtraHk.' Xt</span>';
 			echo '&nbsp;&nbsp;&nbsp;';
 			echo  '<span>'.$teamForgotSigned.' Sign.</span>';
 		}

@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <?php
-    //include("./my-functions.inc"); // Planet Alert PHP functions
     $whitelist = array('127.0.0.1');
     if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
       // Remote server
@@ -32,15 +31,26 @@
 	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/ie.css" />
 	<![endif]-->	
 
-  <?php include('./my-functions.inc'); // Planet Alert PHP functions ?>
+  <?php 
+		// Planet Alert PHP functions
+		if (!$input->get['pages2pdf'] && $user->isSuperuser()) {
+			include('./my-functions.inc');
+		} else {
+			include('../my-functions.inc');
+		}
+	?>
 </head>
 
 <body>
   <div id="wrap">
 
+	<?php
+		if (!$input->get['pages2pdf'] && $user->isSuperuser()) {
+	?>
     <div id="masthead" class="masthead">
       <span id="bgtitle">Planet Alert</span>
     </div> <!-- /#masthead -->
+	<?php } ?>
 
   <div class="container">
     <div class="row">

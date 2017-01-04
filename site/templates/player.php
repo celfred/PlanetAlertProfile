@@ -5,8 +5,8 @@ $pdf = $input->get("pages2pdf");
 
 if ($pdf != "1") {
   // Redirect to player_details
-  if ($page->playerTeam) {
-    $team = $page->playerTeam;
+  if ($page->team) {
+    $team = $page->team->name;
   } else {
     $team = 'no-team';
   }
