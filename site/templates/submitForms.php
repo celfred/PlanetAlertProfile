@@ -44,7 +44,7 @@
         updateScore($player, $task, $taskComment, $newItem, '', true);
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
-        $msg .= "Team : ". $player->playerTeam."\r\n";
+        $msg .= "Team : ". $player->team->title."\r\n";
         $msg .= "Item : ". $newItem->title;
         if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
           mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
@@ -73,7 +73,7 @@
 
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
-          $msg .= "Team : ". $player->playerTeam."\r\n";
+          $msg .= "Team : ". $player->team->title."\r\n";
           $msg .= "Item : ". $newItem->title;
           if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
             mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
@@ -95,13 +95,13 @@
         if ($player && $receiverId && $amount != 0 && $amount <= $player->GC) {
           // Modify player's page
           $task = $pages->get("template='task', name='donation'");
-          $taskComment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->playerTeam.']';
+          $taskComment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->team->title.']';
           updateScore($player, $task, $taskComment, $receiver, '', true);
 
           // Notify admin
-          $msg = "Player : ". $player->title." [".$player->playerTeam."]\r\n";
+          $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
           $msg .= "Donation amount : ". $amount."\r\n";
-          $msg .= "Donated to : ". $receiver->title." [".$receiver->playerTeam."]";
+          $msg .= "Donated to : ". $receiver->title." [".$receiver->team->title."]";
           if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
             mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
           }
@@ -110,7 +110,7 @@
     }
 
     // Redirect to player's profile
-    $session->redirect($pages->get('/players')->url.$player->playerTeam.'/'.$player->name);
+    $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name);
   }
 
   if ($user->isSuperuser()) { // Admin front-end
@@ -146,8 +146,6 @@
         $task = $pages->get($taskId); 
         $taskComment = trim($input->post->$comment);
         updateScore($player, $task, $taskComment, '', '', true);
-
-        $team = $player->playerTeam;
       }
       // Check death for each player
       for ($i=0; $i<count($checked); $i++) {
@@ -156,7 +154,7 @@
         checkDeath($player, true);
       }
       // Redirect to team page
-      $session->redirect($pages->get('/players')->url.$team);
+      $session->redirect($pages->get('/players')->url.$player->team->name);
     }
 
     if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
@@ -183,8 +181,7 @@
 
       }
       // Redirect to marketPlace
-      $team = $player->playerTeam;
-      $session->redirect($pages->get('/shop')->url.$team);
+      $session->redirect($pages->get('/shop')->url.$player->team->name);
     }
   } // End if superUser
 

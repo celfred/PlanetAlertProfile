@@ -114,7 +114,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
           <td><?php
           switch ($item->stat) {
           case 0 : echo '<span>Out of reach</span>'; break;
-          case 1 : echo '<a class="buyButton label label-primary" href="'.$page->url.$player->playerTeam.'/'.$item->id.'">Buy</a>'; break;
+          case 1 : echo '<a class="buyButton label label-primary" href="'.$page->url.$player->team->name.'/'.$item->id.'">Buy</a>'; break;
           case 2 : echo '<span class="label label-success">Owned</span>'; break;
           default : echo 'Out of reach';
           } 
@@ -172,12 +172,8 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
           include("./tabList.inc"); 
 
           $out = '';
-          $team = $input->urlSegment1;
-          if ($team != 'no-team') {
-            $allPlayers = $pages->find("template='player', playerTeam=$team, sort='title'");
-          } else {
-            $allPlayers = $pages->find("template='player', playerTeam='', sort='title'");
-          }
+          $team = $pages->find("name=$input->urlSegment1");
+          $allPlayers = $pages->find("template='player', team=$team, sort='title'");
           // Select form
           $out .= '<select class="" id="shopSelect" name="shopSelect">';
             $out .= '<option value="">Select a player</option>';

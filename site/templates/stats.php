@@ -22,13 +22,17 @@ $query = $database->prepare("SELECT count(username) FROM process_login_history W
 $query->execute();
 $totalNbVisitors7Days = $query->fetchColumn();
 // Get total # of unique logged players during the current school year
-$query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+$query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp > FROM_UNIXTIME(".$period->dateStart.")");   
 $query->execute();
 $totalNbUniqueVisitors = $query->fetchColumn();
 // Get total # of logged players during the current school year
-$query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp BETWEEN ".$period->dateStart." AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)");   
+$query = $database->prepare("SELECT count(username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1 AND login_timestamp > FROM_UNIXTIME(".$period->dateStart.")");   
 $query->execute();
 $totalNbVisitors = $query->fetchColumn();
+// Get total # of unique logged players since the very beginning
+$query = $database->prepare("SELECT count(DISTINCT username) FROM process_login_history WHERE username != 'admin' AND username != 'test' AND login_was_successful=1");   
+$query->execute();
+$grandTotalNbUniqueVisitors = $query->fetchColumn();
 
 $stats = '<div id="" class="news panel panel-primary">';
 $stats .= '<div class="panel-heading">';
@@ -45,6 +49,8 @@ $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" cla
 $stats .= '&nbsp;&nbsp;&nbsp';
 $stats .= '<span data-html="true" data-toggle="tooltip" title="unique/total" class="label label-success">School Year : '.$totalNbUniqueVisitors.'/'.$totalNbVisitors.'</span>';
 $stats .= '&nbsp;&nbsp;&nbsp';
+$stats .= '<span data-html="true" data-toggle="tooltip" title="unique" class="label label-success">All times : '.$grandTotalNbUniqueVisitors.'</span>';
+$stats .= '&nbsp;&nbsp;&nbsp';
 $stats .= '</p>';
 // Admin is logged in, show names
 if ($user->isSuperuser()) {
@@ -55,7 +61,7 @@ if ($user->isSuperuser()) {
       // Get player's name
       $login = $r['username'];
       $player = $pages->get("template='player', login=$login");
-      $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+      $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->team->title.']</li>';
     }
     $stats .= '</ul>';
   }
@@ -66,18 +72,18 @@ if ($user->isSuperuser()) {
       // Get player's name
       $login = $r['username'];
       $player = $pages->get("template='player', login=$login");
-      $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->playerTeam.']</li>';
+      $stats .= '<li><a href="'.$player->url.'">'.$player->title.'</a> ['.$player->team->title.']</li>';
     }
     $stats .= '</ul>';
   }
 }
 
 // Training sessions stats
-$today = mktime(date("m/d/Y").' 0:0:0');
-$totalTrainingSessions = $pages->find('template=event, task=ut-action-v|ut-action-vv');
+$today = mktime(0,0,0, date("m"), date("d"), date("Y"));
+$totalTrainingSessions = $pages->find("template=event, task.name=ut-action-v|ut-action-vv");
 $todayTrainingSessions = $totalTrainingSessions->find("date>=$today");
+$totalUt = 0;
 $todayTrainedPlayers = [];
-/* $todayTrainedPlayers = $todayTrainingSessions->unique()->parent("template=player"); */
 foreach( $todayTrainingSessions as $t) {
   $pl = $t->parent("template=player");
   if (!in_array($pl->id, $todayTrainedPlayers)) {
@@ -85,11 +91,15 @@ foreach( $todayTrainingSessions as $t) {
   }
 }
 $trainedPlayers = $pages->find('template=player, underground_training>0');
+foreach ($allPlayers as $p) {
+  $totalUt += $p->underground_training;
+}
 $stats .= '<h3><span class="label label-default">Today Training sessions : ';
-$stats .= $todayTrainingSessions->count.' with '.count($todayTrainedPlayers).' different player(s).';
+$stats .= $todayTrainingSessions->count().' with '.count($todayTrainedPlayers).' different player(s).';
 $stats .= '</span></h3>';
 $stats .= '<h3><span class="label label-default">Total Training sessions : ';
 $stats .= $totalTrainingSessions->count.' with '.$trainedPlayers->count.' player(s).';
+$stats .= ' ['.$totalUt.' UT points = '.($totalUt*10).' words, '.round(($totalUt/$totalTrainingSessions->count())*10).' words/session]';
 $stats .= '</span></h3>';
 
 // Last connected users (and dates)
@@ -106,7 +116,7 @@ foreach ($allPlayers as $p) {
   $query = $database->prepare("SELECT login_timestamp FROM process_login_history WHERE username = :username AND login_was_successful=1 ORDER BY login_timestamp DESC LIMIT 1");   
   $query->execute(array(':username' => $p->name));
   $lastvisit = $query->fetchColumn();
-  $stats .= '<tr><td>'.$p->title.' ['.$p->playerTeam.']</td><td>'. $lastvisit .'</td></tr>';
+  $stats .= '<tr><td>'.$p->title.' ['.$p->team->title.']</td><td>'. $lastvisit .'</td></tr>';
 }
 $stats .= '</tbody>';
 $stats .= '</table>';

@@ -21,26 +21,34 @@
 
       if ($monster->id && $player->id && $task->id) {
         $taskComment = $monster->title.' [+'.$result.'U.T.]';
-        updateScore($player, $task, $taskComment, $monster, '', true);
-        // Check if new record
-        $utGain = utGain($monster, $player);
-        if ($utGain > $monster->best) {
-          setBestPlayer($monster, $player, $utGain);
-          echo '1';
-        }
-        
-        // Record to log file
-        $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result;
-        $log->save('underground-training', $logText);
+        // test if training is possible
+        $monster = isTrainingAllowed($player, $monster);
+        if ($monster->isTrainable == 0 || $monster->spaced != 0) {
+          // Record to log file
+          $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result. ' - Training not allowed!';
+          $log->save('underground-training', $logText);
+        } else {
+          updateScore($player, $task, $taskComment, $monster, '', true);
+          // Check if new record
+          $utGain = utGain($monster, $player);
+          if ($utGain > $monster->best) {
+            setBestPlayer($monster, $player, $utGain);
+            echo '1';
+          }
+          
+          // Record to log file
+          $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result;
+          $log->save('underground-training', $logText);
 
-        // Notify admin
-        $msg = "Player : ". $player->title."\r\n";
-        $msg .= "Team : ". $player->playerTeam."\r\n";
-        $msg .= "Training : ". $monster->title."\r\n";
-        $msg .= "Result : ". $result;
+          // Notify admin
+          $msg = "Player : ". $player->title."\r\n";
+          $msg .= "Team : ". $player->team->title."\r\n";
+          $msg .= "Training : ". $monster->title."\r\n";
+          $msg .= "Result : ". $result;
 
-        if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-          mail("planetalert@tuxfamily.org", "submitTraining", $msg, "From: planetalert@tuxfamily.org");
+          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+            mail("planetalert@tuxfamily.org", "submitTraining", $msg, "From: planetalert@tuxfamily.org");
+          }
         }
       }
     } else { // Monster fight
@@ -67,21 +75,28 @@
       if ($monster->id && $player->id && $task->id) {
         // Update player's scores
         $taskComment = $monster->title.' ['.$result.']';
-        updateScore($player, $task, $taskComment, $monster, '', true);
-        checkDeath($player, true);
-        echo 'Saving';
+        // test if fight is possible
+        $monster = isFightAllowed($player, $monster);
+        if ($monster->isFightable == 0) {
+          // Record to log file
+          $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality.' - Fight not allowed!';
+          $log->save('monster-fights', $logText);
+        } else {
+          updateScore($player, $task, $taskComment, $monster, '', true);
+          checkDeath($player, true);
 
-        // Record to log file
-        $logText = $player->id.' ('.$player->title.' ['.$player->playerTeam.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
-        $log->save('monster-fights', $logText);
+          // Record to log file
+          $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
+          $log->save('monster-fights', $logText);
 
-        // Notify admin
-        $msg = "Player : ". $player->title."\r\n";
-        $msg .= "Team : ". $player->playerTeam."\r\n";
-        $msg .= "Fight : ". $monster->title."\r\n";
-        $msg .= "Result : ". $result;
-        if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-          mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
+          // Notify admin
+          $msg = "Player : ". $player->title."\r\n";
+          $msg .= "Team : ". $player->team->title."\r\n";
+          $msg .= "Fight : ". $monster->title."\r\n";
+          $msg .= "Result : ". $result;
+          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+            mail("planetalert@tuxfamily.org", "submitFight", $msg, "From: planetalert@tuxfamily.org");
+          }
         }
       }
     }

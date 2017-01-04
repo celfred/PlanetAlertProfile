@@ -37,6 +37,10 @@ exerciseApp.service('myData', function($http) {
 					}
 				}
 			}
+			// Add new lines
+			for (var i=0; i<newLines.length; i++) {
+				allLines.push(newLines[i]);
+			}
 			// Manage special variables
 			// %fname% : First name (female or male)
 			// %fnamef% : First name female
@@ -44,7 +48,8 @@ exerciseApp.service('myData', function($http) {
 			// %name% : Full name (female or male)
 			// %age% : Age
 			// %nationality% : Nationality
-			// (...) : Displayed text but optional in answers
+			// (...) : Displayed text but optional in answers (see parseCorrections())
+			// $...$ : Information displayed as feedback
 			var nationality = ['French', 'English', 'Scottish', 'Welsh', 'American', 'Australian', 'Canadian', 'Irish', 'German', 'Spanish', 'Italian', 'Swedish', 'Brazilian', 'Greek', 'Turkish', 'Russian', 'Chinese', 'Belgian'];
 			for (var i=0; i<allLines.length; i++) {
 				var str = allLines[i];
@@ -85,12 +90,8 @@ exerciseApp.service('myData', function($http) {
 					str = allLines[i];
 				}
 			}
-			// Add new lines
-			for (var i=0; i<newLines.length; i++) {
-				allLines.push(newLines[i]);
-			}
 
-			console.log(allLines);
+			// console.log(allLines);
 			// return allLines;
 		},
 
@@ -105,14 +106,14 @@ exerciseApp.service('myData', function($http) {
 				}
 			}
 			lineHistory.push(randNum);
-			console.log(type);
+			// console.log(type);
 			var randLine = allLines[randNum];
 			// Test if training or fight
 			if (type == 'fight') {
 				// Pick target language (right)
 				var randNum = 1;
 				var randOpp = 0;
-			} else {
+			} else { // Training
 				// Pick random target or source target language
 				var randNum = Math.round(Math.random());
 				if (randNum == 1) {
@@ -121,7 +122,7 @@ exerciseApp.service('myData', function($http) {
 					var randOpp = 1;
 				}
 			}
-			console.log(randNum);
+			// console.log(randNum);
 			switch(exerciseData['exType']) {
 				case 'translate' :
 					var randWords = randLine.split(",");
@@ -142,19 +143,69 @@ exerciseApp.service('myData', function($http) {
 					var allCorrections = quiz[1].split("|");
 					question['allCorrections'] = this.parseCorrections(allCorrections);
 					break;
+				case 'image-map' : // Works like Quiz
+					// Question will be allWords[0]
+					var quiz = randLine.split("::");
+					var allWords = quiz[0].split("|");
+					// Test for multiple possible answers
+					var allCorrections = quiz[1].split("|");
+					question['allCorrections'] = this.parseCorrections(allCorrections);
+					break;
+				case 'jumble' :
+					// Split chunks
+					var allWords = '';
+					var help = '';
+					// Check for help (translation between $...$
+					var pattern = /\$.*?\$/i;
+					if (randLine.search(pattern) != -1 ) {
+						help = randLine.match(pattern)[0];
+						help = help.replace(/\$/g, '');
+						randLine = randLine.replace(pattern, "");
+					}
+					var chunks = randLine.split("|");
+					var correction = new Array();
+					correction[0] = '';
+					for(var i=0; i<chunks.length; i++) {
+						if (i>0) {
+							chunks[i] = ' '+$.trim(chunks[i]);
+						} else {
+							chunks[i] = $.trim(chunks[i]);
+						}
+						correction[0] += chunks[i];
+					}
+					question['allCorrections'] = this.parseCorrections(correction);
+					break;
 				default: 
 					console.log('Unknown exType');
 			}
 			// Pick 1 random word from possible words
 			if (allWords.length > 1) {
 				question['word'] = chance.pick(allWords);
+				if (exerciseData['exType'] == 'image-map') {
+					question['word'] = 'What\'s number '+question['word']+' ?';
+				}
 			} else {
 				question['word'] = allWords[0];
+				if (exerciseData['exType'] == 'image-map') {
+					question['word'] = 'What\'s number '+question['word']+' ?';
+				}
+				if (exerciseData['exType'] == 'jumble') {
+					this.shuffleArray(chunks);
+					question['word'] = chunks;
+				}
 			}
 			// Add word to history
-			history.push(question['word']);
+			if (exerciseData['exType'] == 'jumble') {
+				history.push(question['allCorrections']);
+			} else {
+				history.push(question['word']);
+			}
 			// Help with 1st mixed answers
-			question['mixedWord'] = this.shuffle(question['allCorrections'][0]);
+			if (exerciseData['exType'] == 'jumble') {
+				question['mixedWord'] = help;
+			} else {
+				question['mixedWord'] = this.shuffle(question['allCorrections'][0]);
+			}
 
 			return question;
 		},
@@ -162,19 +213,33 @@ exerciseApp.service('myData', function($http) {
 		parseCorrections : function(allCorrections) {
 			var newCorrections = [];
 			var tempCorrections = [];
+			var feedBack = '';
 			for (i=0; i<allCorrections.length; i++) {
-				// Trim extra spaces
-				allCorrections[i] = allCorrections[i].trim();
-				// Add optional text functionality : (...)
-				var pattern = /\((.*?)\)/i;
+				// Get rid of feedback
+				var pattern = /\$(.*?)\$/i;
 				var str = allCorrections[i];
 				if (str.search(pattern) != -1 ) {
-					tempCorrections.push(str.replace(pattern, ""));
+					allCorrections[i] = str.replace(pattern, "");
+					feedBack = str.match(pattern, "$1")[1];
+				} else {
+					feedBack = '';
+				}
+				// Add optional text functionality : (...) only 1/line for the moment
+				pattern = /\((.*?)\)/i;
+				str = $.trim(allCorrections[i]);
+				if (str.search(pattern) != -1 ) {
+					allCorrections[i] = str.replace(pattern, "");
+					allCorrections[i] = $.trim(allCorrections[i]);
+					tempCorrections.push(str);
 					tempCorrections.push(str.replace(pattern, "$1"));
+				} else {
+					// Trim extra spaces
+					allCorrections[i] = $.trim(allCorrections[i]);
 				}
 				// Add to newCorrections
 				for (var j=0; j<tempCorrections.length; j++) {
-					newCorrections.push(tempCorrections[j].trim());
+					tempCorrections[j] = $.trim(tempCorrections[j]);
+					newCorrections.push(tempCorrections[j]);
 				}
 				tempCorrections = [];
 			}
@@ -183,6 +248,8 @@ exerciseApp.service('myData', function($http) {
 				allCorrections.push(newCorrections[j]);
 			}
 			newCorrections = [];
+			
+			allCorrections['feedBack'] = feedBack;
 
 			return allCorrections;
 		},
@@ -197,6 +264,16 @@ exerciseApp.service('myData', function($http) {
           a[j] = tmp;
       }
       return a.join("");
+		},
+
+		shuffleArray : function(a) {
+			var j, x, i;
+			for (i = a.length; i; i--) {
+					j = Math.floor(Math.random() * i);
+					x = a[i - 1];
+					a[i - 1] = a[j];
+					a[j] = x;
+			}
 		}
 	}
 });
@@ -214,6 +291,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 	$scope.monsterDamage = 0;
 	$scope.hideMonsterDamage = true;
 	$scope.question = [];
+	$scope.playerAnswer = '';
   $scope.correct = false;
   $scope.wrong = false;
 	$scope.shownWords = 0;
@@ -270,15 +348,24 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		$scope.nbAttacks += 1;
 		// Reset counter
 		$scope.counter = 0;
+		// No selected words (if jumble)
+		$scope.selectedItems = [];
 	}
 
   $scope.throwQuestion = function() {
-    // Set focus on input field
-    $timeout($scope.focusInput, 300);
-    // Player loses 1HP every second
-    if ($scope.runningInterval == false ) {
-      $scope.promise = $interval($scope.loseHP, 1000);
-    }
+		if ($scope.exType != 'jumble') {
+			// Set focus on input field
+			$timeout($scope.focusInput, 300);
+			// Player loses 1HP every second
+			if ($scope.runningInterval == false ) {
+				$scope.promise = $interval($scope.loseHP, 1000);
+			}
+		} else {
+			// Player loses 1HP every 2 seconds
+			if ($scope.runningInterval == false ) {
+				$scope.promise = $interval($scope.loseHP, 2000);
+			}
+		}
   }
 
   $scope.attack = function() {
@@ -291,6 +378,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
   }
 
   $scope.dodge = function() {
+		$scope.isFocused = false;
 		// Show correction
     $scope.showCorrection = $scope.allCorrections.join(', ');
     // Player admits "I don't know" : reduced loss
@@ -300,6 +388,8 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		$timeout(function() { $scope.hidePlayerDamage = true; }, 1500);
     $scope.counter = 10;
 		$scope.shownWords += 1;
+		// Set focus on input field
+		$timeout($scope.focusInput, 300);
   }
 
   $scope.checkAnswer = function(submitted) {
@@ -370,6 +460,27 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
     }
   }
 
+	$scope.pickWord = function(w, i){
+		if(!$scope.selectedItems){
+       $scope.selectedItems = [];
+    }
+
+    var index = $scope.selectedItems.indexOf(i);
+
+    if(index === -1) {   // not selected already and add
+       $scope.selectedItems.push(i);
+       $scope.playerAnswer += w;
+    } else {   // selected already and remove
+       $scope.selectedItems.splice(index, 1);
+       $scope.playerAnswer = $scope.playerAnswer.replace(w, "");
+    }
+	}
+
+	$scope.clear = function(){
+		$scope.playerAnswer = '';
+		$scope.selectedItems = [];
+	}
+
   $scope.winFight = function () {
     // Stop HP loss
     $interval.cancel($scope.promise);
@@ -393,7 +504,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
       type: "success",
       confirmButtonText: "Cool ! Let's see my updated profile !"
     }, function() {
-      $window.location.href = $scope.redirectUrl;
+			$timeout($scope.redirect($scope.redirectUrl), 200);
     });;
   }
 
@@ -418,7 +529,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
       type: "error",
       confirmButtonText: "Ok, I'll do better next time..."
     }, function() {
-      $window.location.href = $scope.redirectUrl;
+			$timeout($scope.redirect($scope.redirectUrl), 200);
     });
   }
 
@@ -440,6 +551,10 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
     })
   }
 
+	$scope.redirect = function(url) {
+		$window.location.href = url;
+	}
+
   $scope.focusInput = function() {
     $scope.isFocused = !$scope.isFocused;
   }
@@ -449,6 +564,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.waitForStart = true;
   $scope.result = 0;
 	$scope.question = [];
+	$scope.playerAnswer = '';
 	$scope.newCorrections = new Array();
   $scope.counter = 0; // #
   $scope.exType = '';
@@ -486,21 +602,58 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     $scope.submitUrl = submitUrl;
   }
 
+	$scope.pickWord = function(w, i){
+		if(!$scope.selectedItems){
+       $scope.selectedItems = [];
+    }
+
+    var index = $scope.selectedItems.indexOf(i);
+
+    if(index === -1) {   // not selected already and add
+       $scope.selectedItems.push(i);
+       $scope.playerAnswer += w;
+    } else {   // selected already and remove
+       $scope.selectedItems.splice(index, 1);
+       $scope.playerAnswer = $scope.playerAnswer.replace(w, "");
+    }
+	}
+
+	$scope.clear = function(){
+		$scope.playerAnswer = '';
+		$scope.selectedItems = [];
+	}
+
   $scope.attack = function() {
     if ($scope.playerAnswer) {
       $scope.checkAnswer($scope.playerAnswer);
     }
   }
+  $scope.dodge = function() { // Show correction
+		$scope.isFocused = false;
+    $scope.showCorrection = $scope.allCorrections.join(', ');
+		$scope.wrong = true;
+		// Set focus on input field
+		$timeout($scope.focusInput, 300);
+  }
+
 
 	$scope.initQuestion = function() {
 		$scope.word = $scope.question['word'];
 		$scope.mixedWord = $scope.question['mixedWord'];
 		$scope.allCorrections = $scope.question['allCorrections'];
+		if ($scope.allCorrections['feedback'] == '') {
+			$scope.feedBack = '['+$scope.allCorrections['feedBack']+']';
+		}
 		// Init new question
     $scope.wrong = false;
     $scope.showCorrection = '';
-    // Set focus on input field
-    $timeout($scope.focusInput, 300);
+		if ($scope.exType != 'jumble') {
+			// Set focus on input field
+			$timeout($scope.focusInput, 300);
+		} else {
+			// Deselect all words
+			$scope.selectedItems = [];
+		}
 	}
 
   $scope.checkAnswer = function(submitted) {
@@ -525,6 +678,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
     } else { // Wrong answer
+			// Show correction
+			$scope.showCorrection = $scope.allCorrections.join(', ');
       $scope.wrong = true;
     }
   }
@@ -558,7 +713,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         confirmButtonText: "Take the helmet off (Stop training)"
       }, function() {
         // DO not save, but redirect
-        $window.location.href = $scope.redirectUrl;
+				$timeout($scope.redirect($scope.redirectUrl), 200);
       });;
     }
   }
@@ -585,12 +740,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 					timer: 2000
 				}, function() {
 					if (redirect === true) {
-						$window.location.href = $scope.redirectUrl;
+						$timeout($scope.redirect($scope.redirectUrl), 200);
 					}
 				});
 			} else {
 				if (redirect === true) {
-					$window.location.href = $scope.redirectUrl;
+					$timeout($scope.redirect($scope.redirectUrl), 200);
 				}
 			}
     }, function(data, status, headers, config) {
@@ -598,6 +753,10 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       $scope.saved = 'Error! Please contact the administrator.';
     })
   }
+
+	$scope.redirect = function(url) {
+		$window.location.href = url;
+	}
 
   $scope.focusInput = function() {
     $scope.isFocused = !$scope.isFocused;
@@ -618,6 +777,16 @@ exerciseApp.directive('syncFocusWith', function($timeout, $rootScope) {
 					$element[0].blur();
 				}
 			})
+		}
+	}
+});
+
+exerciseApp.filter('underline', function () {
+	return function(input) {
+		if (input) {
+			var allAnswers = input.split(',');
+			allAnswers[0] = '<u>'+allAnswers[0]+'</u>';
+			return allAnswers.join(', ');
 		}
 	}
 });

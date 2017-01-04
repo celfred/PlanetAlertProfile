@@ -111,7 +111,7 @@
                 } else {
                   $focus = "";
                 }
-                if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
+                if ($player->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$player->team->title.']';}
                 echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$indicator.' '.$tag.' </span></li>';
               }
             } else {
@@ -135,7 +135,7 @@
     include("./foot.inc"); 
 
   } else {
-    $type = $input->get('type');
+    $type = $input->get('id');
 
     switch($type) {
       case 'karma':
@@ -174,7 +174,7 @@
         } else {
           $focus = "";
         }
-        if ($player->playerTeam == '') {$team = '';} else {$team = ' ['.$player->playerTeam.']';}
+        if ($player->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$player->team->title.']';}
         switch($type) {
           case 'karma':
             $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$player->karma.' karma</span></li>';

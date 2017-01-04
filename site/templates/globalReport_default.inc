@@ -2,30 +2,19 @@
   <tr>
     <td></td>
     <th colspan="<?php echo $categories->count; ?>"><h3><?php echo $reportTitle; ?></th>
-  <!--  <td colspan="4"><h3>Planet Alert</h3></td> -->
   </tr>
   <tr>
-  <td></td>
-  <?php // Build all categories columns
-  foreach ($categories as $category) {
-    echo '<th>';
-    if (!$input->get['pages2pdf']) {
-      switch ($category->name) {
-        case 'participation' : echo '<i class="glyphicon glyphicon-comment" data-toggle="tooltip" title="'. $category->title.'"></i> '; break;
-        case 'homework' : echo '<i class="glyphicon glyphicon-pencil" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
-        case 'groupwork' : echo '<i class="glyphicon glyphicon-user" data-toggle="tooltip" title="'. $category->title.'"></i><i class="glyphicon glyphicon-user" title="'. $category->title.'"></i>'; break;
-        case 'travail-individuel' : echo '<i class="glyphicon glyphicon-user" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
-        case 'manual-cat' : echo '<i class="glyphicon glyphicon-cog" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
-        case 'test' : echo '<i class="glyphicon glyphicon-ok" data-toggle="tooltip" title="'. $category->title.'"></i>'; break;
-        /* case 'oublis' : echo '<i class="glyphicon glyphicon-cloud" data-toggle="tooltip" title="'. $category->title.'"></i>'; break; */
-        default : echo $category->title;
-      }
-    } else {
-      echo $category->title;
-    }
-    echo '</th>';
-  }
-  ?>
+		<td></td>
+		<th><i class="glyphicon glyphicon-pencil" data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail à la maison."></i></th>
+		<th><i class="glyphicon glyphicon-file" data-toggle="tooltip" title="Compétence SACoche : J'ai mon matériel."></i></th>
+		<th><i class="glyphicon glyphicon-comment" data-toggle="tooltip" title="Compétence SACoche : Je participe en classe."></i></th>
+		<th>Abs.</th>
+		<th><span data-toggle="tooltip" title="Compétence SACoche : J'adopte une attitude d'élève en classe.">Attitude</span></th>
+		<th>Tests</th>
+		<th><span data-toggle="tooltip" title="Solo missions" class="glyphicon glyphicon-user"></span></th>
+		<th><span data-toggle="tooltip" title="Group missions"><span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></span></th>
+		<th>UT</th>
+		<th>Planet Alert</th>
   </tr>
   <?php
     $teamPlaces = 0;
@@ -40,6 +29,35 @@
     $teamPart = array();
 
     foreach($allPlayers as $player) {
+			setHomework($player,$period->dateStart, $period->dateEnd);
+			setParticipation($player, $period->dateStart, $period->dateEnd);
+			setAttitude($player,$period->dateStart, $period->dateEnd);
+			$nbForgotSigned = $player->notSigned->count();
+			$nbForgotStuff = $player->noMaterial->count();
+			$nbNoHk = $player->noHk->count();
+			$nbHalfHk = $player->halfHk->count();
+			$nbHk = $player->nbHk;
+			$nbExtraHk = $player->extraHk->count() + $player->veryExtraHk->count();
+			$death = $player->find("task.name=death, date>=$period->dateStart, date<=$period->dateEnd");
+			$utSessions = $player->find("template=event, task.name=ut-action-v|ut-action-vv, date>=$period->dateStart, date<=$period->dateEnd");
+			$posTests = $player->find("template=event, task.category.name=test, task.HP=0, date>=$period->dateStart, date<=$period->dateEnd");
+			$negTests = $player->find("template=event, task.category.name=test, task.HP<0, date>=$period->dateStart, date<=$period->dateEnd");
+			// Team stats
+			$teamNoHk += $nbNoHk;
+			$teamHalfHk += $nbHalfHk;
+			$teamExtraHk += $nbExtraHk;
+			$teamAbsent += $player->absent->count();
+			$teamForgotSigned += $nbForgotSigned;
+			$teamForgotStuff += $nbForgotStuff;
+			$teamNegAttitude += $player->negAttitude->count();
+			$teamPosAttitude += $player->posAttitude->count();
+			$teamEl += $player->places->count()+$player->people->count();
+			$teamEq += $player->equipment->count();
+			$teamDeath += $death->count();
+			$teamUt += $utSessions->count();
+			$teamPosTests += $posTests->count();
+			$teamNegTests += $negTests->count();
+
       echo '<tr>';
       echo '<th>';
       if (!$input->get['pages2pdf']) {
@@ -48,204 +66,182 @@
         echo $player->title.' '.$player->lastName;
       }
       echo '</th>';
-      foreach ($categories as $category) {
-        echo '<td>';
-        // Find events within the selected period
-        $events = $player->find("template=event, task.category=$category, date>=$period->dateStart, date<=$period->dateEnd");
-        if ( $category->name == 'participation') {
-          $posPart = $events->count();
-          $nbPart = $events->count();
-          $nbAbsent = 0;
-        } else {
-          $posItems = $events->count();
-          $nbItems = $events->count();
-        }
-        $vv = 0;
-        $v = 0;
-        $r = 0;
-        $rr = 0;
-        $list = '';
-        $listForgotStuff = '';
-        $listForgotSigned = '';
-        $listAbsent = '';
-        $listNoHk = '';
-        $listHk = '';
-        $listHalfHk = '';
-        $listExtraHk = '';
-        $nbForgotSigned = 0;
-        $nbForgotStuff = 0;
-        $nbNoHk = 0;
-        $nbHalfHk = 0;
-        $nbHk = 0;
-        $nbExtraHk = 0;
-        // Is $player concerned with this category?
-        if ($events->count() > 0) {
-          foreach ($events as $event) {
-            if ($event->task->HP < 0) {
-              $className = 'negative';
-              // Participation stat
-              if ($category->name == 'participation') {
-                $posPart = $posPart-1;
-              }
-              $posItems = $posItems-1;
-              $sign = '-';
-            } else {
-              if ($event->task->name == 'abs' || $event->task->name == 'absent') {
-                $nbPart = $nbPart-1;
-                $nbAbsent = $nbAbsent+1;
-                $posPart = $posPart-1;
-              } else {
-                $className = 'positive';
-              }
-              $sign = '+';
-            }
-            if (strlen(trim($event->summary)) > 0) {
-              $list .= $sign.' '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
-            } else {
-              $list .= $sign.' '.strftime("%d/%m", $event->date).' '.$event->title."<br />";
-            }
-            if ($event->task->name == 'abs' || $event->task->name == 'absent') {
-              $listAbsent .= strftime("%d/%m", $event->date).'<br />';
-              $teamAbsent += 1;
-            }
-            if ($category->name == 'homework') {
-              switch ($event->task->name) {
-                case 'no-homework' :
-                  $nbNoHk += 1;
-                  $listNoHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
-                  $teamNoHk += 1;
-                  break;
-                case 'homework' : // Don't display regular homework
-                  $nbHk += 1;
-                  $listHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
-                  break;
-                case 'homework-half-done' :
-                  $nbHalfHk += 1;
-                  $teamHalfHk += 1;
-                  $listHalfHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary."<br />";
-                  break;
-                case 'extra-homework' :
-                  $nbExtraHk += 1;
-                  $teamExtraHk += 1;
-                  $listExtraHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
-                  break;
-                case 'very-extra-homework' :
-                  $nbExtraHk += 1;
-                  $listExtraHk .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
-                  break;
-                case 'material' :
-                  $nbForgotStuff += 1;
-                  $listForgotStuff .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
-                  $teamForgotStuff += 1;
-                  break;
-                case 'signature' :
-                  $nbForgotSigned += 1;
-                  $listForgotSigned .= '- '.strftime("%d/%m", $event->date).' '.$event->summary.'<br />';
-                  $teamForgotSigned += 1;
-                  break;
-                default : break;
-              }
-            }
-            if ($category->name == 'participation') {
-                switch ($event->task->name) {
-                  case 'communication-rr' :
-                    $rr += 1;
-                    break;
-                  case 'communication-r' :
-                    $r += 1;
-                    break;
-                  case 'communication-v' : 
-                    $v += 1;
-                    break;
-                  case 'communication-vv' :
-                    $vv += 1;
-                    break;
-                  case 'absent' : 
-                    $abs += 1;
-                    $nbPart -= 1;
-                    break;
-                  default: break;
-                }
-            }
-          }
-          if ($category->name == 'participation') {
-            $ratio = round(((($vv*2)+($v*1.6)-$rr)*100)/($nbPart*2));
-            if ( $ratio < 0) { $ratio = 0; }
-
-            if ($nbPart != 0) {
-              echo '<span data-toggle="tooltip" title="% Participation positive sur '.$nbPart.' cours">'.$ratio.'%</span>&nbsp;';
-              if ($ratio >= 80) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-success">VV</span>';
-              }
-              if ($ratio < 80 && $ratio >= 55) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-success">V</span>';
-              }
-              if ($ratio < 55 && $ratio >= 35) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-danger">R</span>';
-              }
-              if ($ratio < 35 && $ratio >= 0) {
-                echo '<span data-toggle="tooltip" title="Moyenne sur '.$nbPart.' cours" class="label label-danger">RR</span>';
-              }
-            }
-            if ($nbAbsent != 0) {
-              echo ' <span data-toggle="tooltip" data-html="true" title="'.$listAbsent.'" class="absent">['.$nbAbsent.' abs.]</span>';
-            }
-            array_push($teamPart, $ratio);
-          }
-          if ($category->name == 'homework') {
-            if (!$input->get['pages2pdf']) {
-              if ($nbNoHk > 0) {
-                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
-                echo '&nbsp;&nbsp;&nbsp;';
-              }
-              if ($nbHalfHk > 0) {
-                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
-                echo '&nbsp;&nbsp;&nbsp;';
-              }
-              if ($nbExtraHk > 0) {
-                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
-              }
-            } else {
-              if ($nbNoHk > 0) {
-                echo  '<span>'.$nbNoHk.' NoHk</span>';
-                echo '&nbsp;&nbsp;';
-              }
-              if ($nbHalfHk > 0) {
-                echo  '<span>'.$nbHalfHk.' HfHk</span>';
-                echo '&nbsp;&nbsp;';
-              }
-              if ($nbExtraHk > 0) {
-                echo  '<span>'.$nbExtraHk.' XtHk</span>';
-              }
-            }
-          }
-          if ($category->name == 'homework' && ($nbForgotSigned != 0 || $nbForgotStuff != 00)) {
-            if (!$input->get['pages2pdf']) {
-              if ($nbForgotStuff > 0) {
-                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotStuff .'"><i class="glyphicon glyphicon-file"></i>&nbsp;<span class="">'.$nbForgotStuff.'</span></span>';
-                echo '&nbsp;&nbsp;&nbsp;';
-              }
-              if ($nbForgotSigned > 0) {
-                echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="">'.$nbForgotSigned.'</span></span> ';
-              }
-            } else {
-              echo  '<span>'.$nbForgotStuff.' Mat.</span>';
-              echo '&nbsp;&nbsp;&nbsp;';
-              echo  '<span>'.$nbForgotSigned.' Sign.</span>';
-            }
-          }
-          if ($category->name != 'participation' && $category->name != 'homework' && $category->name != 'oublis') {
-            $ratio = round(($posItems*100)/$nbItems);
-            echo '<p>';
-            echo '<span data-toggle="tooltip" title="% positif">'.$ratio.'%</span>';
-            echo '&nbsp;<span data-toggle="tooltip" data-html="true" title="'.$list.'">('.$posItems.'/'.$nbItems.')</span>';
-            echo '</p>';
-          }
-        } else {
-          echo '-';
-        }
-        echo '</td>';
-      }
+      echo '<td>';
+			switch ($player->homework) {
+				case 'NN' : $class='primary'; break;
+				case 'VV' : $class='success'; break;
+				case 'V' : $class='success'; break;
+				case 'R' : $class='danger'; break;
+				case 'RR' : $class='danger'; break;
+				default: $class = '';
+			}
+			echo  '<span data-toggle="tooltip" title="Éléments évalués : '.$player->nbHk.'" class="label label-'.$class.'">'.$player->homework.'</span> ';
+			if (!$input->get['pages2pdf']) {
+				if ($nbNoHk > 0) {
+					echo  '<span data-toggle="tooltip" data-html="true" title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
+					echo '&nbsp;&nbsp;&nbsp;';
+				}
+				if ($nbHalfHk > 0) {
+					echo  '<span data-toggle="tooltip" data-html="true" title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
+					echo '&nbsp;&nbsp;&nbsp;';
+				}
+				if ($nbForgotSigned > 0) {
+					echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="">'.$nbForgotSigned.'</span></span> ';
+				}
+				if ($nbExtraHk > 0) {
+					echo  '<span data-toggle="tooltip" data-html="true" title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
+				}
+			} else {
+				if ($nbNoHk > 0) {
+					echo  '<span>'.$nbNoHk.' NoHk</span>';
+					echo '&nbsp;&nbsp;';
+				}
+				if ($nbHalfHk > 0) {
+					echo  '<span>'.$nbHalfHk.' HfHk</span>';
+					echo '&nbsp;&nbsp;';
+				}
+				if ($nbForgotSigned > 0) {
+					echo  '<span>'.$nbForgotSigned.' Sign.</span>';
+					echo '&nbsp;&nbsp;&nbsp;';
+				}
+				echo '&nbsp;&nbsp;&nbsp;';
+				if ($nbExtraHk > 0) {
+					echo  '<span>'.$nbExtraHk.' XtHk</span>';
+				}
+			}
+      echo '</td>';
+			// Material
+      echo '<td>';
+			switch ($player->materialLabel) {
+				case 'NN' : $class='primary'; break;
+				case 'VV' : $class='success'; break;
+				case 'V' : $class='success'; break;
+				case 'R' : $class='danger'; break;
+				case 'RR' : $class='danger'; break;
+				default: $class = '';
+			}
+			echo  '<span data-toggle="tooltip" title="Nb d\'oublis : '.$nbForgotStuff.'" class="label label-'.$class.'">'.$player->materialLabel.'</span>';
+      echo '</td>';
+			// Participation
+      echo '<td>';
+			switch ($player->participation) {
+				case 'NN' : $class='primary'; break;
+				case 'VV' : $class='success'; break;
+				case 'V' : $class='success'; break;
+				case 'R' : $class='danger'; break;
+				case 'RR' : $class='danger'; break;
+				default: $class = '';
+			}
+			echo  '<span data-toggle="tooltip" data-html="true" title="Nb de cours évalués : '.$player->nbPart.'<br/>Qualité : '.$player->partRatio.'" class="label label-'.$class.'">'.$player->participation.'</span>';
+			if ($player->nbPart <= 4) { echo ' <span class="label label-danger" data-toggle="tooltip" title="Peu de résultats !">!</span>'; }
+			array_push($teamPart, $player->partRatio);
+      echo '</td>';
+			// Absent
+      echo '<td>';
+			$listAbsent = '';
+			if ($player->absent->count() > 0) {
+				foreach ($player->absent as $abs) {
+					$listAbsent .= '- '.strftime("%d/%m", $abs->date).'<br />';
+				}
+				echo  ' <span data-toggle="tooltip" data-html="true" title="'.$listAbsent.'">['.$player->absent->count().' abs.]</span>';
+			}
+      echo '</td>';
+			// Attitude
+      echo '<td>';
+			$listPosAttitude = '';
+			if ($player->posAttitude->count() > 0) {
+				foreach ($player->posAttitude as $e) {
+					$listPosAttitude .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+				}
+			}
+			$listNegAttitude = '';
+			if ($player->negAttitude->count() > 0) {
+				foreach ($player->negAttitude as $e) {
+					$listNegAttitude .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+				}
+			}
+			echo '<span data-toggle="tooltip" data-html="true" title="'.$listPosAttitude.'">'.$player->posAttitude->count().' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" data-html="true" title="'.$listNegAttitude.'">'.$player->negAttitude->count().' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+			if ($player->nbAmbush > 0 ) { echo ' <span class="label label-danger" data-toggle="tooltip" title="\'Ambush\' dans l\'attitude !">!</span>'; }
+      echo '</td>';
+			// Tests
+      echo '<td>';
+			$listPosTests = '';
+			if ($posTests->count() > 0) {
+				foreach ($posTests as $e) {
+					$listPosTests .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+				}
+			}
+			$listNegTests = '';
+			if ($negTests->count() > 0) {
+				foreach ($negTests as $e) {
+					$listNegTests .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+				}
+			}
+			echo '<span data-toggle="tooltip" data-html="true" title="'.$listPosTests.'">'.$posTests->count().' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
+			echo '&nbsp;';
+			echo '<span data-toggle="tooltip" data-html="true" title="'.$listNegTests.'">'.$negTests->count().' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+      echo '</td>';
+			// Solo missions
+      echo '<td>';
+			$posSolo = $player->find("template=event, task.category.name=individual-work, task.HP=0, date>=$period->dateStart, date<=$period->dateEnd")->not('task.name=ut-action-v|ut-action-vv');
+			$negSolo = $player->find("template=event, task.category.name=individual-work, task.HP<0, date>=$period->dateStart, date<=$period->dateEnd");
+			$listPosSolo = '';
+			if ($posSolo->count() > 0) {
+				foreach ($posSolo as $e) {
+					$listPosSolo .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+				}
+			}
+			$listNegSolo = '';
+			if ($negSolo->count() > 0) {
+				foreach ($negSolo as $e) {
+					$listNegSolo .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+				}
+			}
+			echo '<span data-toggle="tooltip" data-html="true" title="'.$listPosSolo.'">'.$posSolo->count().' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
+			echo '&nbsp;';
+			echo '<span data-toggle="tooltip" data-html="true" title="'.$listNegSolo.'">'.$negSolo->count().' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+      echo '</td>';
+			// Group missions
+      echo '<td>';
+			$pos = $player->find("template=event, task.category.name=groupwork, task.HP=0, date>=$period->dateStart, date<=$period->dateEnd")->not('task.name=ut-training-v|ut-training-vv');
+			$neg = $player->find("template=event, task.category.name=groupwork, task.HP<0, date>=$period->dateStart, date<=$period->dateEnd");
+			$listPos = '';
+			if ($pos->count() > 0) {
+				foreach ($pos as $e) {
+					$listPos .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+				}
+			}
+			$listNeg = '';
+			if ($neg->count() > 0) {
+				foreach ($neg as $e) {
+					$listNeg .= '- '.strftime("%d/%m", $e->date).': ['.$e->task->title.'] '.$e->summary.'<br />';
+				}
+			}
+			echo '<span data-toggle="tooltip" data-html="true" title="'.$listPos.'">'.$pos->count().' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
+			echo '&nbsp;';
+			echo '<span data-toggle="tooltip" data-html="true" title="'.$listNeg.'">'.$neg->count().' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+      echo '</td>';
+			// Underground Training
+      echo '<td>';
+			$listUt = '';
+			if ($utSessions->count() > 0) {
+				foreach ($utSessions as $e) {
+					$listUt .= '- '.strftime("%d/%m", $e->date).': '.$e->summary.'<br />';
+				}
+			}
+			echo '<span data-toggle="tooltip" data-html="true" title="'.$listUt.'">'.$utSessions->count().'</span>';
+      echo '</td>';
+			// Planet Alert
+      echo '<td>';
+			echo $player->places->count()+$player->people->count().' El.';
+			echo ' - '.$player->equipment->count().' Eq.';
+			echo ' - Lvl '.$player->level;
+			if ($death->count() > 0) {
+				foreach ($death as $d) {
+					echo ' <span data-toggle="tooltip" title="'.strftime("%d/%m", $d->date).'" class="label label-danger">D</span>';
+				}
+			}
+      echo '</td>';
       echo '</tr>';
     }
     
@@ -254,41 +250,69 @@
     echo '<th>';
     echo 'Totaux et moyennes';
     echo '</th>';
-    foreach ($categories as $category) {
-      echo '<th>';
-      if ($category->name == 'participation') {
-        echo '<span data-toggle="tooltip" title="Participation moyenne">'.calculate_average($teamPart).'%';
-        echo '&nbsp;&nbsp;&nbsp;';
-        echo '['.$teamAbsent.' abs.]</span>';
-      }
-      if ($category->name == 'homework') {
-        if (!$input->get['pages2pdf']) {
-          echo  '<span data-toggle="tooltip" title="No hk"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$teamNoHk.'</span></span>';
-          echo '&nbsp;&nbsp;&nbsp;';
-          echo  '<span data-toggle="tooltip" title="Half-hk"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$teamHalfHk.'</span></span>';
-          echo '&nbsp;&nbsp;&nbsp;';
-          echo  '<span data-toggle="tooltip" title="Extra-hk"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$teamExtraHk.'</span></span>';
-        } else {
-          echo  '<span>'.$teamNoHk.' NoHk</span>';
-          echo '&nbsp;&nbsp;&nbsp;';
-          echo  '<span>'.$teamHalfHk.' HfHk</span>';
-          echo '&nbsp;&nbsp;&nbsp;';
-          echo  '<span>'.$teamExtraHk.' XtHk</span>';
-          echo '&nbsp;&nbsp;&nbsp;';
-        }
-        if (!$input->get['pages2pdf']) {
-          echo '&nbsp;&nbsp;&nbsp;';
-          echo  '<span data-toggle="tooltip" title="Oubli matériel"><i class="glyphicon glyphicon-file"></i>&nbsp;<span>'.$teamForgotStuff.'</span></span>';
-          echo '&nbsp;&nbsp;&nbsp;';
-          echo  '<span data-toggle="tooltip" title="Oubli signature"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span>'.$teamForgotSigned.'</span></span> ';
-        } else {
-          echo  '<span>'.$teamForgotStuff.' Mat.</span>';
-          echo '&nbsp;&nbsp;&nbsp;';
-          echo  '<span>'.$teamForgotSigned.' Sign.</span>';
-        }
-      }
-      echo '</th>';
-    }
+		// Homework
+    echo '<th>';
+		if (!$input->get['pages2pdf']) {
+			echo  '<span data-toggle="tooltip" title="No hk"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$teamNoHk.'</span></span>';
+			echo '&nbsp;&nbsp;&nbsp;';
+			echo  '<span data-toggle="tooltip" title="Half-hk"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$teamHalfHk.'</span></span>';
+			echo '&nbsp;&nbsp;&nbsp;';
+			echo  '<span data-toggle="tooltip" title="Extra-hk"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$teamExtraHk.'</span></span>';
+			echo '&nbsp;&nbsp;&nbsp;';
+			echo  '<span data-toggle="tooltip" title="Oubli signature"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span>'.$teamForgotSigned.'</span></span> ';
+		} else {
+			echo  '<span>'.$teamNoHk.' NoHk</span>';
+			echo '&nbsp;&nbsp;&nbsp;';
+			echo  '<span>'.$teamHalfHk.' HfHk</span>';
+			echo '&nbsp;&nbsp;&nbsp;';
+			echo  '<span>'.$teamExtraHk.' XtHk</span>';
+			echo '&nbsp;&nbsp;&nbsp;';
+			echo  '<span>'.$teamForgotSigned.' Sign.</span>';
+		}
+    echo '</th>';
+		// Material
+    echo '<th>';
+		if (!$input->get['pages2pdf']) {
+			echo '&nbsp;&nbsp;&nbsp;';
+			echo  '<span data-toggle="tooltip" title="Oubli matériel"><i class="glyphicon glyphicon-file"></i>&nbsp;<span>'.$teamForgotStuff.'</span></span>';
+		} else {
+			echo '&nbsp;&nbsp;&nbsp;';
+			echo  '<span>'.$teamForgotStuff.' Mat.</span>';
+		}
+    echo '</th>';
+		// Participation
+    echo '<th>';
+		echo '<span data-toggle="tooltip" data-html="true" title="Qualité moyenne<br />(VV = 2 / V = 1 / R = -1 / RR = -2)">'.calculate_average($teamPart);
+    echo '</th>';
+		// Absent
+    echo '<th>';
+		echo '['.$teamAbsent.' abs.]</span>';
+    echo '</th>';
+		// Attitude
+    echo '<th>';
+		echo $teamPosAttitude.' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
+		echo '&nbsp;&nbsp;&nbsp;';
+		echo $teamNegAttitude.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+    echo '</th>';
+		// Tests
+    echo '<th>';
+		$teamTestRatio = round(($teamPosTests*100)/($teamPosTests+$teamNegTests));
+		echo $teamTestRatio.'%';
+    echo '</th>';
+		// Solo missions
+    echo '<th>';
+    echo '</th>';
+		// Groupwork
+    echo '<th>';
+    echo '</th>';
+		// UT
+    echo '<th>';
+		echo $teamUt.' UT';
+    echo '</th>';
+		// Planet ALert
+    echo '<th>';
+		echo $teamEl.' El. - '. $teamEq.' Eq. - D:'.$teamDeath;
+    echo '</th>';
     echo '</tr>';
 ?>
 </table>

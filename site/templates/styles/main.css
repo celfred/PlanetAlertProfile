@@ -11,6 +11,17 @@ body {
 }
 */
 
+.loginForm {
+	border: 2px solid #000;
+	border-radius: 20px;
+	padding: 20px;
+	margin: 20px;
+	background-color: #5A5A5A;
+	color: #FFF;
+}
+.loginForm .btn {
+	color: #000;
+}
 #wrap {
   min-height: 100%;
   height: auto !important;
@@ -303,6 +314,17 @@ img.superpose {
   from { transform: scale(1);}
   to {transform: scale(2);}
 }
+@keyframes spin {
+  0% { transform: rotate(0deg) scale(1); }
+	50% { transform: rotate(180deg) scale(0.8); }
+  100% {transform: rotate(360deg) scale(1); }
+}
+.spin {
+  animation-duration: 7s;
+  animation-name: spin;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
 @keyframes explode {
   from { transform: rotate(0deg) scale(1); opacity: 1; left: 0%;}
   to {transform: rotate(-90deg) scale(2); opacity: 0; left: -50%;}
@@ -312,6 +334,17 @@ img.superpose {
   animation-name: explode;
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
+}
+.longBlink {
+  animation-duration: 3s;
+  animation-name: blink;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+@keyframes longBlink {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 .blink {
   animation-duration: 0.3s;
@@ -781,7 +814,46 @@ header {
 	padding: 2px 5px;
 	background: #313131;
 }
+.playerDiv {
+	border: 1px solid #000;
+	margin: 2px;
+	padding: 3px;
+	border-radius: 5px;
+	background: #313131;
+}
+.grid {
+	width : 100%;
+}
+.grid-item {
+	float: left;
+	width: 40px;
+	height: 36px;
+}
+.grid-item--width2 {
+	float: left;
+	width: 80px;
+	height: 72px;
+}
+.grid-item--width3 {
+	float: left;
+	width: 120px;
+	height: 108px;
+}
+.grid-item--width4 {
+	float: left;
+	width: 160px;
+	height: 142px;
+}
+.grid-item--width5 {
+	float: left;
+	width: 200px;
+	height: 178px;
+}
 
+.jumbleW {
+	cursor: pointer;
+	margin: 0px 5px;
+}
 /* Large desktop */
 @media (min-width: 1200px) { 
 }

@@ -32,12 +32,32 @@ if ($user->isSuperuser()) {
 
   $selectedTeam = $input->urlSegment1;
   $selectedIds = $input->post->selected; // Checked players
-  $allPlayers = $pages->find("template='player', playerTeam=$selectedTeam, sort='name'");
-  $rank = $allPlayers->first()->rank->name;
+  $rank = $pages->get("template=team, name=$selectedTeam")->rank->name;
   if ( $rank == '4emes' || $rank == '3emes' ) {
-    $allConcerned = $allPlayers->find("places.count|people.count>=3"); // Find players having at least 3 places
+    $allPlayers = $pages->find("template=player, team.name=$selectedTeam");
+    $allConcerned = new pageArray();
+    $notConcerned = new pageArray();
+    foreach($allPlayers as $p) { // Find players having at least 3 free elements
+      $nbEl = $p->places->count()+$p->people->count();
+      if ( $nbEl >= 3) {
+        $allConcerned->add($p);
+      } else {
+        $notConcerned->add($p);
+      }
+    }
+    $notConcerned = $notConcerned->implode(', ', '{title}');
+    /* $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (people.count+places.count>=3)"); // Find players having at least 3 places OR 3 people */
+    /* $notConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count<3), (people.count<3)")->implode(', ', '{title}'); */
   } else {
-    $allConcerned = $allPlayers->find("places.count>=3"); // Find players having at least 3 places
+    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
+    $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');
+  }
+  $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador")->implode(', ', '{title}');
+  if ( strlen($ambassadors) == 0 ) { 
+    $ambassadors = 'Nobody.';
+    $ambButton = '';
+  } else {
+    $ambassadorsButton = ' <a class="btn btn-info btn-sm pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a>';
   }
 
   if ( count($selectedIds) > 0 ) { // Players have been checked
@@ -76,7 +96,7 @@ if ($user->isSuperuser()) {
         $out .= '<img class="monster" src="'.$logo.'" />';
         $out .= '<img class="avatar" src="'.$player->avatar->url.'" />';
         $out .= '<h1 class="playerName">'.$player->title.'</h1>';
-        $out .= '<h3>Monster invasion ! Team '.$player->playerTeam.' has to react!</h3>';
+        $out .= '<h3>Monster invasion ! Team '.$player->team->title.' has to react!</h3>';
         $out .= '<h2 class="alert alert-danger text-center">';
         $out .= $quiz['question'].'&nbsp;&nbsp;';
         $out .= '</h2>';
@@ -114,7 +134,7 @@ if ($user->isSuperuser()) {
 
     // Players list display
     $out .= '<section class="well">';
-    $out .= '<button id="toggle" class="btn btn-default">See list</button>';
+    $out .= '<button id="toggle" class="btn btn-default">Toggle list</button>';
     $out .= '<div id="quizMenu" class="'.$display.'">';
     $out .= '<p>You need at least 3 free elements to appear in the list.</p>';
     $out .= '<ul class="list-group">';
@@ -131,18 +151,13 @@ if ($user->isSuperuser()) {
       $out .= '<button id="tickAll" class="btn btn-success btn-sm">Tick all</button>';
       $out .= '<button id="untickAll" class="btn btn-danger btn-sm">Untick all</button>';
     $out .= '</ul>';
-    $out .= '<p>(Not concerned : ';
-      $notConcerned = '';
-      foreach($allPlayers as $p) {
-        if (!($allConcerned->get($p))) {
-          $notConcerned .= $p->title.', ';
-        }
-      }
-      $notConcerned = trim($notConcerned, ', ').')';
-      $out .= $notConcerned;
+    // Ambassadors
+    $out .= '<p>Ambassadors : '.$ambassadors;
+    $out .= $ambassadorsButton;
     $out .= '</p>';
-    // TODO : Build Ambassadors list
-    /* $out .= '<a class="btn btn-info pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a>'; */
+    $out .= '<h3 class="text-center"><span id="pickedAmbassador" class="label label-primary"></span></h3>';
+    // Not concerned
+    $out .= '<p>(Not concerned : '.$notConcerned.')</p>';
     $out .= '</div>';
     $out .= '</section>';
     $out .= '<input type="hidden" name="quizFormSubmit" value="Save" />';

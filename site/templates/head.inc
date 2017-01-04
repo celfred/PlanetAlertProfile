@@ -49,22 +49,8 @@
 <body>
   <?php
     $homepage = $pages->get("/"); 
-    $allPlayers = $pages->find("template=player")->sort("playerTeam, title");
-    $allTeams = [];
-    foreach ($allPlayers as $player) {
-      if (!in_array($player->playerTeam, $allTeams)) {
-        if ($player->playerTeam == '' && !in_array('No team', $allTeams)) {
-          array_push($allTeams, 'No team'); 
-        } else {
-          /* if ($player->playerTeam != '' && $player->playerTeam != 'testTeam') { */
-          if ($player->playerTeam != '') {
-            array_push($allTeams, $player->playerTeam); 
-          }
-        }
-      }
-    }
-    arsort($allTeams);
-
+    $allPlayers = $pages->find("template=player")->sort("team->name, title");
+		$allTeams = $pages->find("template=team")->sort("title");
   ?>
           
   <div id="wrap">
@@ -89,69 +75,91 @@
             <ul class="dropdown-menu">
               <?php
                 foreach($allTeams as $team) {
-                  $class = $team == $input->urlSegment1 ? " class='selected-left'" : "";
+                  $class = $team->name == $input->urlSegment1 ? " class='selected-left'" : "";
                   if ($user->isSuperuser()) { // Display direct access via submenu only for admin
+										$teamPlayers = $allPlayers->find("team=$team");
                     echo "<li class='dropdown-submenu'>";
-                    echo "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a>";
+                    echo "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/'>{$team->title}</a>";
                     echo "<ul class='dropdown-menu'>";
-                    echo "<li class='dropdown-submenu'><a href='{$homepage->url}players/{$sanitizer->pageName($team)}'>{$team} team</a>";
+                    echo "<li class='dropdown-submenu'><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} team</a>";
                     echo "<ul class='dropdown-menu'>";
-										foreach ($allPlayers as $player) {
-											if ($player->playerTeam == $team) {
-												echo "<li><a href='{$homepage->url}players/{$sanitizer->pageName($player->playerTeam)}/{$player->name}'>{$player->title}</a></li>";
-											}
-											if ($player->playerTeam == '' && $team == 'No team') {
-												echo "<li><a href='{$homepage->url}players/no-team/{$player->name}'>{$player->title}</a></li>";
-											}
+										foreach ($teamPlayers as $p) {
+											echo "<li><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/{$p->name}'>{$p->title}</a></li>";
 										}
                     echo "</ul>";
                     echo "</li>";
-										if ($player->playerTeam != '') {
-											echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team)}'>{$team} world</a></li>";
+										if ($player->team != '') {
+											echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team->name)}'>{$team->title} world</a></li>";
 										}
-                    echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team)}'>{$team} marketplace</a></li>";
-                    echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team)}'>{$team} adminTable</a></li>";
-                    echo "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team)}'>{$team} monster invasions</a></li>";
-                    echo "<li><a href='{$homepage->url}reports/{$sanitizer->pageName($team)}'>{$team} reports</a></li>";
+                    echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team->name)}'>{$team->title} marketplace</a></li>";
+                    echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team->name)}'>{$team->title} adminTable</a></li>";
+                    echo "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team->name)}'>{$team->title} monster invasions</a></li>";
                     echo "</ul>";
                     echo "</li>";
                   } else {
-                      echo "<li><a$class href='{$homepage->url}players/{$sanitizer->pageName($team)}/'>{$team}</a></li>";
+                      echo "<li><a$class href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/'>{$team->title}</a></li>";
                   }
                 }
               ?>
             </ul>
           </div>
-          <div class="btn-group">
-            <?php $class = $page->is("name=shop|places|tasks|task") ? "on" : ""; ?>
+
+					<?php if (!$user->isSuperuser()) { // Display Admin specific menu ?>
+					<div class="btn-group">
+						<?php $class = $page->is("name=shop|places|people|actions|monsters|hall-of-fame") ? "selected-left" : ""; ?>
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The World <span class="caret"> </span></button>
-            <ul class="dropdown-menu">
-              <?php
-              $class = $page->name == 'shop' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
-              $class = $page->name == 'places' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
-              $class = $page->name == 'people' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/people')->url}'>The People</a></li>";
-              $class = ($page->name == 'tasks' || $page->template == 'task') ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
-              $class = $page->name == 'monsters' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
-              ?>
-            </ul>
-          </div>
+						<ul class="dropdown-menu">
+							<?php
+							$class = $page->name == 'shop' ? " class='selected-left'" : "";
+							echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
+							$class = $page->name == 'places' ? " class='selected-left'" : "";
+							echo "<li><a$class href='{$pages->get('/places')->url}'>The Places</a></li>";
+							$class = $page->name == 'people' ? " class='selected-left'" : "";
+							echo "<li><a$class href='{$pages->get('/people')->url}'>The People</a></li>";
+							$class = $page->name == 'tasks' ? " class='selected-left'" : "";
+							echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
+							$class = $page->name == 'monsters' ? " class='selected-left'" : "";
+							echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
+							$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
+							echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
+							?>
+						</ul>
+					</div>
+					<?php } ?>
+
           <div class="btn-group">
           <?php
             $class = $page->is("name=blog|documentation|contact") ? "on" : ""; ?>
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>
             <ul class="dropdown-menu">
-							<?php
+							<?php if ($user->isSuperuser()) { ?>
+								<li class="dropdown-submenu">
+									<?php $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : ""; ?>
+									<a class="<?php echo $class; ?>" href=""><span class='glyphicon glyphicon-globe'></span> - Discover Planet Alert World</a>
+									<ul class="dropdown-menu">
+										<?php
+										$class = $page->name == 'shop' ? " class='selected-left'" : "";
+										echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
+										$class = $page->name == 'places' ? " class='selected-left'" : "";
+										echo "<li><a$class href='{$pages->get('/places')->url}'>The Places</a></li>";
+										$class = $page->name == 'people' ? " class='selected-left'" : "";
+										echo "<li><a$class href='{$pages->get('/people')->url}'>The People</a></li>";
+										$class = $page->name == 'tasks' ? " class='selected-left'" : "";
+										echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
+										$class = $page->name == 'monsters' ? " class='selected-left'" : "";
+										echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
+										$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
+										echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
+										?>
+									</ul>
+								</li>
+							<?php }
 							$class = $page->name == 'contact' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('name=contact')->url}'>Contact</a></li>";
+              echo "<li><a$class href='{$pages->get('name=contact')->url}'><span class='glyphicon glyphicon-envelope'></span> - Contact</a></li>";
 							$class = $page->name == 'blog' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('name=blog')->url}'>Newsboard Archives</a></li>";
+              echo "<li><a$class href='{$pages->get('name=blog')->url}'><span class='glyphicon glyphicon-hand-up'></span> - Admin Announcements</a></li>";
 							$class = $page->name == 'documentation' ? " class='selected-left'" : "";
-              echo "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'>Documentation</a></li>";
+              echo "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - Documentation</a></li>";
               ?>
             </ul>
           </div>
@@ -165,15 +173,26 @@
 							<ul class="dropdown-menu">
 								<?php
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'team-options' ? " class='selected-left'" : "";
-								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/team-options/'>Team options</a></li>";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/team-options/'><span class='glyphicon glyphicon-cog'></span> - Team options</a></li>";
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/reports/'><span class='glyphicon glyphicon-file'></span> - Reports</a></li>";
+								$class = $page->name == 'statistics' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=statistics')->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'recalculate' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/recalculate'><span class='glyphicon glyphicon-pencil'></span> - Edit history (and scores)</a></li>";
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/users'><span class='glyphicon glyphicon-user'></span> - Users</a></li>";
+								echo "<li role='separator' class='divider'></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut-stats/'>UT Stats</a></li>";
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'fights-stats' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/fights-stats/'>Fights Stats</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'task-report' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/task-report/'>Task report</a></li>";
-								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'recalculate' ? " class='selected-left'" : "";
-								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/recalculate'>Edit history (and scores)</a></li>";
 								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut/'>UT Hall of fame</a></li>";
+								$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setScores' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/setScores/'>Set scores</a></li>";
 								$class = $page->name == 'script' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
 								echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/script/'>Script</a></li>";
 								?>
@@ -219,11 +238,11 @@
           <?php
             $class = $page->name == 'newsboard' ? "on" : "";
             echo "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
-            $class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
-            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}/{$player->name}'>My Profile</a>";
-						if ($player->playerTeam != '') {
-							$class = ($player->playerTeam == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
-							echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->playerTeam}'>My Team</a>";
+            $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
+            echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}/{$player->name}'>My Profile</a>";
+						if ($player->team != '') {
+							$class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
+							echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}'>My Team</a>";
 						}
           ?>
 
@@ -233,41 +252,56 @@
             <ul class="dropdown-menu">
               <?php
 							$class = $page->is("name=shop_generator") ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'>Go to the Marketplace</a></li>";
+              echo "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'><span class='glyphicon glyphicon-shopping-cart'></span> - Go to the Marketplace</a></li>";
               $class = $page->name == 'makedonation' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('name=makeDonation')->url}'>Make a donation</a></li>";
-              $class = $page->name == 'quiz' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('name=quiz')->url}'>Prepare my defense</a></li>";
-              $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=makeDonation')->url}'><span class='glyphicon glyphicon-heart'></span> - Make a donation</a></li>";
+              // Check if player can face Monster Invasions
+							if ($player->places->count >= 3 || $player->people->count >= 3) {
+								$class = $page->name == 'quiz' ? " class='selected-left'" : "";
+								echo "<li><a$class href='{$pages->get('name=quiz')->url}'><span class='glyphicon glyphicon-star'></span> - Prepare my defense</a></li>";
+							} else {
+								echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span></span> Prepare my defense</li>";
+							}
               // Check if memory helmet accessible in player's group
-              if ($player->equipment->get("name=memory-helmet")) {
-                echo "<li><a$class href='{$pages->get('name=underground-training')->url}'>Use the memory helmet</a></li>";
-								$class = $page->name == 'fighting-zone' ? " class='selected-left'" : "";
-                echo "<li><a$class href='{$pages->get('name=fighting-zone')->url}'>Fight a monster</a></li>";
+              if ($player->team->forceHelmet == 1 || $player->equipment->get("name=memory-helmet")) {
+								if ($player->team->forceHelmet == 1) {
+									$class = $page->name == 'underground-training' ? " class='selected-left'" : "";
+									echo "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=underground-training')->url}'><span class='glyphicon glyphicon-headphones'></span> - Use the memory helmet</a></li>";
+									$class = $page->name == 'fighting-zone' ? " class='selected-left'" : "";
+									echo "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - Fight a monster</a></li>";
+								} else {
+									$class = $page->name == 'underground-training' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('name=underground-training')->url}'><span class='glyphicon glyphicon-headphones'></span> - Use the memory helmet</a></li>";
+									$class = $page->name == 'fighting-zone' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - Fight a monster</a></li>";
+								}
               } else {
                 echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Use the Memory helmet</li>";
                 echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Fight a monster</li>";
               }
-              ?>
-            </ul>
-          </div>
-
-          <div class="btn-group">
-            <?php $class = $page->is("name=shop|places|tasks|task") ? "on" : ""; ?>
-            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The World <span class="caret"> </span></button>
-            <ul class="dropdown-menu">
-              <?php
-              $class = $page->name == 'shop' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
-              $class = $page->name == 'places' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/places')->url}'>The Map</a></li>";
-              $class = $page->name == 'people' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/people')->url}'>The People</a></li>";
-              $class = $page->name == 'tasks' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
-              $class = $page->name == 'monsters' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
-              ?>
+							$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
+							echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'><span class='glyphicon glyphicon-eye-open'></span> - Visit the Hall of Fame</a></li>";
+							?>
+							<li class="dropdown-submenu">
+								<?php $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : ""; ?>
+								<a class="<?php echo $class; ?>" href=""><span class='glyphicon glyphicon-globe'></span> - Discover Planet Alert World</a>
+								<ul class="dropdown-menu">
+									<?php
+									$class = $page->name == 'shop' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
+									$class = $page->name == 'places' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/places')->url}'>The Places</a></li>";
+									$class = $page->name == 'people' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/people')->url}'>The People</a></li>";
+									$class = $page->name == 'tasks' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
+									$class = $page->name == 'monsters' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
+									$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
+									?>
+								</ul>
+							</li>
             </ul>
           </div>
 
@@ -276,13 +310,33 @@
             $class = $page->is("name=blog|documentation|contact") ? "on" : ""; ?>
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>
             <ul class="dropdown-menu">
+							<li class="dropdown-submenu">
+								<?php $class = $page->is("name=shop|places|people|actions|monsters|hall-of-fame") ? "selected-left" : ""; ?>
+								<a class="<?php echo $class; ?>" href=""><span class='glyphicon glyphicon-globe'></span> - The World</a>
+								<ul class="dropdown-menu">
+									<?php
+									$class = $page->name == 'shop' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/shop')->url}'>The Shop</a></li>";
+									$class = $page->name == 'places' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/places')->url}'>The Places</a></li>";
+									$class = $page->name == 'people' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/people')->url}'>The People</a></li>";
+									$class = $page->name == 'tasks' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
+									$class = $page->name == 'monsters' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
+									$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
+									?>
+								</ul>
+							</li>
 							<?php
 							$class = $page->name == 'contact' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('name=contact')->url}'>Contact</a></li>";
+              echo "<li><a$class href='{$pages->get('name=contact')->url}'><span class='glyphicon glyphicon-envelope'></span> - Contact</a></li>";
 							$class = $page->name == 'blog' ? " class='selected-left'" : "";
-              echo "<li><a$class href='{$pages->get('name=blog')->url}'>Newsboard Archives</a></li>";
+              echo "<li><a$class href='{$pages->get('name=blog')->url}'><span class='glyphicon glyphicon-hand-up'></span> - Admin Announcements</a></li>";
 							$class = $page->name == 'documentation' ? " class='selected-left'" : "";
-              echo "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'>Documentation</a></li>";
+              echo "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - Documentation</a></li>";
               ?>
             </ul>
           </div>

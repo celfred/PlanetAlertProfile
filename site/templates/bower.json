@@ -1,5 +1,5 @@
 {
-  "name": "PlanetAlert",
+  "name": "planetalert",
   "version": "0.0.0",
   "authors": [
     "Fred Lieutaud <flieutaud@gmail.com>"
@@ -26,10 +26,18 @@
     "jquery": "~2.1.1",
     "DataTables": "~1.10.5",
     "datatables-plugins-bootstrap3": "~0.1.7",
-    "font-awesome": "~4.3.0"
+    "font-awesome": "~4.3.0",
+    "masonry": "^4.1.1",
+<<<<<<< HEAD
+    "chance": "^1.0.4"
+=======
+    "chance": "^1.0.4",
+    "svg-pan-zoom": "^3.3.0"
+>>>>>>> update-libraries
   },
   "resolutions": {
     "datatables": ">=1.7.0",
-    "font-awesome": "~4.3.0"
+    "font-awesome": "~4.3.0",
+    "jquery": "^3.1.1"
   }
 }

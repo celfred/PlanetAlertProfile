@@ -1,6 +1,6 @@
 <?php
   $playerPage = $pages->get("template=player,name=".$input->urlSegment2);
-  $playersTotalNb = $pages->count("template=player,playerTeam=$playerPage->playerTeam");
+  $playersTotalNb = $pages->count("template=player,team=$playerPage->team");
   $playerPlacesNb = $playerPage->places->count();
   $playerPeopleNb = $playerPage->people->count();
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
@@ -18,13 +18,14 @@
   if (!$karma) $karma = 0;
   if ($karma > 0) { // Team Position
     // Number of players having a better karma than current player
-    $playerPos = $pages->count("template=player,playerTeam=$playerPage->playerTeam,karma>$karma") + 1;
+    $playerPos = $pages->count("template=player,team=$playerPage->team,karma>$karma") + 1;
   } else {
     $playerPos = $playersTotalNb;
   }
   // Set no hk counter
   if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
-    $hkCount = '<span class="label label-danger" data-toggle="tooltip" title="No hk counter">'.checkHk($playerPage).'</span>';
+    setHomework($playerPage);
+    $hkCount = '<span class="label label-danger" data-toggle="tooltip" title="No hk counter">'.$playerPage->hkPb.'</span>';
   } else {
     $hkCount = '<span class="label label-danger">Private!</span>';
   }
@@ -53,8 +54,8 @@
           </div>
           <div class="col-sm-6">
             <ul class="player-details">
-            <li>Karma : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->playerTeam != '') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
-            <li>Level : <?php echo $player->level; ?></li>
+            <li>Karma : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
+            <li>Level : <?php echo $playerPage->level; ?></li>
             <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></li>
             <li><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></li>
             </ul>
@@ -70,11 +71,19 @@
             </div>
           </div>
           <div class="col-sm-2 text-right">
-            <span class="badge" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)"><img src="<?php  echo $config->urls->templates?>img/star.png" alt="Experience" /> <?php echo $playerPage->XP; ?>/<?php echo $playerPage->level*10+90; ?></span>
+            <?php
+            if ($playerPage->level <= 4) {
+              $delta = 40+($playerPage->level*10);
+            } else {
+              $delta = 90;
+            }
+            $threshold = ($playerPage->level*10)+$delta;
+            ?>
+            <span class="badge" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)"><img src="<?php  echo $config->urls->templates?>img/star.png" alt="Experience" /> <?php echo $playerPage->XP; ?>/<?php echo $threshold; ?></span>
           </div>
           <div class="col-sm-10">
             <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)">
-              <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo (100*$playerPage->XP)/($playerPage->level*10+90); ?>%">
+              <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo (100*$playerPage->XP)/$threshold; ?>%">
               </div>
             </div>
           </div>

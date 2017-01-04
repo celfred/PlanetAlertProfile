@@ -12,7 +12,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
   $period = $pages->get("$input->urlSegment3");
   $sort = $input->get['sort'];
 
-  $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat|oublis");
+  $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat|oublis|group-items");
 
   if ($selected->template == 'player') { // Player's report
     $player = $selected;
@@ -27,13 +27,14 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
         default: break;
       }
     }
-    $reportTitle .= ' for '.$selected->title.' '.$selected->lastName.' ('.$selected->playerTeam.')'; 
+    $reportTitle .= ' for '.$selected->title.' '.$selected->lastName.' ('.$selected->team->title.')'; 
     $reportTitle .= '<br />';
     $reportTitle .= 'Period : '.$period->title;
+    $reportTitle .= ' ('.date("d/m", $period->dateStart).' → '.date("d/m", $period->dateEnd).')';
   } else { // Team's report
     $global = true;
     $selected = strtoupper($input->urlSegment2);
-    $allPlayers = $pages->find("playerTeam=$selected, template=player, sort=$sort");
+    $allPlayers = $pages->find("team.name=$selected, template=player, sort=$sort");
     $reportTitle = '';
     if ($category == 'all') { // Global report
       $reportTitle .= 'Global report';
@@ -48,6 +49,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
     $reportTitle .= ' ('.$selected.' team)'; 
     $reportTitle .= '<br />';
     $reportTitle .= 'Period : '.$period->title;
+    $reportTitle .= ' ('.date("d/m", $period->dateStart).' → '.date("d/m", $period->dateEnd).')';
   }
    
   // PDF Download link

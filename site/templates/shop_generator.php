@@ -11,11 +11,10 @@ $allPeople = $pages->find("template=people, name!=people, sort=title");
 
 $playerId = $input->urlSegment1;
 $player = $pages->get($playerId);
-$allPlayers = $pages->find("template='player', playerTeam=$player->playerTeam");
 
 $out = '';
 
-$out .= "<h2 class='well text-center'>Marketplace for {$player->title} ({$player->playerTeam})</h2>";
+$out .= "<h2 class='well text-center'>Marketplace for {$player->title} ({$player->team->title})</h2>";
 $out .= "<h3 class='text-center well'>";
 $out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='' />&nbsp;<span id='remainingGC'>{$player->GC}</span> GC available.";
 $out .= "</h3>";
@@ -24,7 +23,26 @@ $out .= '<form id="marketPlaceForm" name="marketPlaceForm" action="'.$pages->get
 $out .= '<input type="hidden" name="player" value="'.$player->id.'" />';
 // Possible equipment
 $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
+// Get rid of potions bought within the last 15 days TODO
+$today= mktime('23:59:59 Y-m-d');
+$limitDate = mktime()-15*3600*24;
+$boughtPotions = $player->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=healing-potion");
+$out .= $boughtPotions->count();
 $possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level, parent.name=potions, sort=name");
+foreach ( $boughtPotions as $b) {
+  foreach ($possiblePotions as $p) {
+    if ($b->refPage->id == $p->id) {
+      $date1 = new DateTime(date('Y-m-d H:i:s', $today));
+      $date2 = new DateTime(date('Y-m-d H:i:s', $b->date));
+      $interval = $date1->diff($date2)->format("%a");
+      if ($interval == 0) {
+        $p->locked = 'Unlocked tomorrow !';
+      } else {
+        $p->locked = 'Unlocked in '.($interval+1).' days';
+      }
+    }
+  }
+}
 
 // Possible places
 $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
@@ -32,7 +50,7 @@ $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=
 $possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name");
 
 $out .= '<section class="row">';
-$out .= "<ul class='itemList col-md-6'>";
+$out .= "<ul class='itemList col-md-4'>";
 if ( $possibleEquipment->count() > 0) {
   foreach($possibleEquipment as $item) {
     // List items by category
@@ -56,21 +74,33 @@ if ( $possibleEquipment->count() > 0) {
 // Add potions
 $out .= '<li class="label label-primary">Potions</li>';
 foreach($possiblePotions as $item) {
-  $out .= '<li>';
-  $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
-  if ($item->image) {
-    $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+  if (!$item->locked) {
+    $out .= '<li>';
+    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+    if ($item->image) {
+      $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+    }
+    $out .= $item->title.' ['.$item->GC.'GC]';
+    $out .= '</label>';
+    $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+    $out .= '</li>';
+  } else {
+    $out .= '<li>';
+    $out .= '<label> ';
+    if ($item->image) {
+      $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+    }
+    $out .= $item->title;
+    $out .= ' <span class="badge badge-danger">'.$item->locked.'</span>';
+    $out .= '</label>';
+    $out .= '</li>';
   }
-  $out .= $item->title.' ['.$item->GC.'GC]';
-  $out .= '</label>';
-  $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
-  $out .= '</li>';
 }
 $out .= "</ul>";
 
 
 if ( $possiblePlaces->count() > 0) {
-  $out .= "<ul class='itemList col-md-6'>";
+  $out .= "<ul class='itemList col-md-4'>";
   $out .= '<li class="label label-primary">Possible Places</li>';
   foreach($possiblePlaces as $item) {
     $out .= '<li>';
@@ -78,13 +108,13 @@ if ( $possiblePlaces->count() > 0) {
   }
   $out .= "</ul>";
 } else {
-  $out .= "<ul class='itemList col-md-6'>";
+  $out .= "<ul class='itemList col-md-4'>";
   $out .= "<li><h3>No possible place !</h3></li>";
   $out .= "</ul>";
 }
 if ($player->rank->name == '4emes' || $player->rank->name == '3emes') {
   if ( $possiblePeople->count() > 0) {
-    $out .= "<ul class='itemList col-md-6'>";
+    $out .= "<ul class='itemList col-md-4'>";
     $out .= "<li class='label label-primary'>Possible People</li>";
     foreach($possiblePeople as $item) {
       $out .= '<li>';
@@ -95,7 +125,7 @@ if ($player->rank->name == '4emes' || $player->rank->name == '3emes') {
     }
     $out .= "</ul>";
   } else {
-      $out .= "<ul class='itemList col-md-6'>";
+      $out .= "<ul class='itemList col-md-4'>";
       $out .= "<li><h3>No possible people !</h3></li>";
       $out .= "</ul>";
   }
@@ -109,7 +139,7 @@ $out .= '</section>';
 
 if ( $possibleEquipment->count() > 0 || $possiblePlaces->count() > 0 || $possiblePotions->count() > 0 ) {
   $out .= '<input type="submit" name="marketPlaceSubmit" value="Yes, buy the selected items!" class="btn btn-block btn-primary" disabled="disabled" />';
-  $out .= '<a href="'.$homepage->url.'players/'.$player->playerTeam.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
+  $out .= '<a href="'.$homepage->url.'players/'.$player->team->name.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
 }
 
 $out .= '</form>';

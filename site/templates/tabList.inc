@@ -14,6 +14,5 @@
     <li class="<?php if ($page->name=='shop') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'shop/'.$input->urlSegment1; ?>">The marketplace</a></li>
     <li class="<?php if ($page->name=='quiz') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'quiz/'.$input->urlSegment1; ?>">Monster invasions</a></li>
     <li><a target="_blank" href="<?php echo $homepage->url.'report_generator/participation/'.$input->urlSegment1.'/'.$currentPeriod->id.'?sort=title'; ?>">Current period participation</a></li>
-    <li class="<?php if ($page->name=='reports') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'reports/'.$input->urlSegment1; ?>">Reports</a></li>
   <?php } ?>
 </ul>

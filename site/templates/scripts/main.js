@@ -49,14 +49,14 @@ $(document).ready(function() {
     return false; 
   }); 
 
-  $(".ajaxUnpublish").click(function() {
+  $(document).on('click', '.ajaxUnpublish', (function() {
     //$("#feedback").html("<p>Loading...</p>"); 
     $(this).parents('li').toggleClass('strikeText');
     var $this = $(this);
     $.get($(this).val(), function(data) { 
         //$("#feedback").html(''); 
     }); 
-  }); 
+  })); 
 
   $('#shopSelect').change( function() {
     var url = $('#shopSelect').val();
@@ -99,7 +99,7 @@ $(document).ready(function() {
     reportUrl += $('.reportCat:checked').val()+'/';
     // Add report team or player
     if ($('#reportPlayer').val() == '') { // No single player selected
-      reportUrl += $('.reportTeam:checked').val()+'/';
+				reportUrl += $('.reportTeam:checked').val()+'/';
     } else {
       reportUrl += $('#reportPlayer').val()+'/';
     }
@@ -270,7 +270,14 @@ $(document).ready(function() {
 		$(this).hide();
 	})
 
-  $('[data-toggle="tooltip"]').tooltip({ container: 'body'});
+	$('[data-toggle=tooltip]').hover(function(){
+			// on mouseenter
+			$(this).tooltip({container : 'body'});
+			$(this).tooltip('show');
+	}, function(){
+			// on mouseleave
+			$(this).tooltip('hide');
+	});
 
   $('#mapTable').DataTable({
     dom: 'ft',
@@ -337,6 +344,7 @@ $(document).ready(function() {
     taskTable.draw();
     historyTable.draw();
     monstersTable.draw();
+    trainingTable.draw();
   });		    
     
   $('a.toggle-vis').on( 'click', function (e) {
@@ -391,6 +399,21 @@ $(document).ready(function() {
 			return false;
 		}
   });
+  $('a.pickAmbassador').on('click', function() {
+		var list = $(this).attr("data-list");
+		$('#pickedAmbassador').addClass('blink');
+		$('#pickedAmbassador').html('...');
+		setTimeout( function() { pickFromList(list, 'pickedAmbassador');  }, 1000);
+		// window.alert(picked);
+	});
+
+	var pickFromList = function(list, el) {
+		var items = list.split(',');
+		var picked = chance.pick(items);
+		$('#'+el).html(picked);
+		$('#'+el).removeClass('blink');
+		return picked;
+	}
 
   $('#startFight').on('click', function() {
     // TODO : Move function into exercise.js?
@@ -425,23 +448,31 @@ $(document).ready(function() {
 		// return confirm("Click OK to continue?");
 	})
 
-	if ($('div.ajaxScore')) {
-		var timer = 500;
-		$('div.ajaxScore').each( function() {
-			var type = $(this).attr('data-ajax');
+	if ($('div.ajaxContent')) {
+		var timerFast = 0;
+		var timerSlow = 1000;
+		$('div.ajaxContent').each( function() {
+			var el = $(this);
 			var url = $(this).attr('data-href');
-			setTimeout( function() { getFromAjax(url, type); }, timer);
-			timer += 500;
+			if (el.attr('data-priority') == '1') {
+				setTimeout( function() { getContentFromAjax(url, el); }, timerFast);
+			} else {
+				setTimeout( function() { getContentFromAjax(url, el); }, timerSlow);
+			}
+			timerFast += 200; 
+			timerSlow += 500;
 		});
 	}
-	function getFromAjax(url, type) {
-    $.get(url+'?type='+type, function(data) { 
-        $("#"+type).html(data); 
-				$("#"+type+' [data-toggle="tooltip"]').tooltip();
+	function getContentFromAjax(url, el) {
+		var id = el.attr('data-id');
+    $.get(url+'?id='+id, function(data) { 
+        el.html(data); 
+				el.children('[data-toggle="tooltip"]').tooltip();
     }); 
     return false; 
 	}
 
+	if ($('.grid').length > 0) { $('.grid').masonry(); }
 }); 
 
 // Hide rows functions

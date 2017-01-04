@@ -4,7 +4,8 @@
   // Test player login
   if ($player && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
-    if ($user->isSuperuser()) {
+    // or if admin has forced it in Team options
+    if ($user->isSuperuser() || $player->team->forceHelmet == 1) {
       $helmet = $pages->get("name=memory-helmet");
     } else {
       $helmet = $player->equipment->get('memory-helmet');
@@ -13,33 +14,39 @@
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
         // Display Personal Mission Analyzer
-        echo pma($player);
+        if (!$user->isSuperuser()) {
+          echo pma($player);
+        }
 
-        // Translate / Quiz types only (for the moment)
+        // Set all available monsters
         if ($user->isSuperuser()) {
-          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz, sort=name, include=all');
+          $allMonsters = $pages->find('template=exercise, sort=name, include=all');
         } else {
-          $allMonsters = $pages->find('template=exercise, type.name=translate|quiz, sort=name');
+          $allMonsters = $pages->find('template=exercise, sort=name');
         }
-
-        $out .= '<div class="row">';
-          $out .= '<div class="col-sm-12 text-center">';
-          $out .= '<h2><span class="label label-default">Underground Training Zone</span></h2>';
-          $out .= '</div>';
-        $out .= '</div>';
-
+        $out .= '<br />';
         $out .= '<div class="well">';
-        $out .= $page->summary;
-        $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->frenchSummary.'"></span>';
-        $out .= '</div>';
-
-        $out .= '<div class="well">';
-        $out .= '<h3 class="text-center">';
+        $out .= '<h2 class="text-center">Underground Training Zone';
         if ($helmet->image) {
-          $out .= '<img width="50" src="'.$helmet->image->url.'" alt="Helmet" />';
+          $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
         }
-        $out .= ' Memory Helmet <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Vocabulary Revisions"></span>';
-        $out .= '</h3>';
+        $out .= '</h2>';
+        $out .= '<p class="text-center">'.$page->summary;
+        $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->frenchSummary.'"></span>';
+        $out .= '</p>';
+
+        $out .= '<h4 class="text-center">';
+        $out .= 'There are currently '.$allMonsters->count().' monsters in the list.';
+        $out .= '</h4>';
+
+        $allCategories = $pages->find("parent.name=topics, sort=name");
+        $out .= '<div id="Filters" data-fcolindex="1" class="text-center">';
+        $out .= '  <ul class="list-inline well">';
+        foreach ($allCategories as $category) {
+          $out .= '<li><label for="'.$category->name.'" class="btn btn-primary btn-xs">'.$category->title.' <input type="checkbox" value="'.$category->title.'" class="categoryFilter" name="categoryFilter" id="'.$category->name.'"></label></li>';
+        }
+        $out .= '</ul>';
+        $out .= '</div>';
         $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
           $out .= '<thead>';
           $out .= '<tr>';
@@ -71,9 +78,7 @@
           }
           $out .= '</td>';
           $out .= '<td>';
-          foreach ($m->topic as $t) {
-            $out .= '<span class="label label-primary">'.$t->title.'</span> ';
-          }
+          $out .= '<span class="label label-default">'.$m->topic->implode(', ', '{title}').'</span>';
           $out .= '</td>';
           $out .= '<td>';
           $out .= $m->level;
@@ -129,9 +134,46 @@
                 }
               }
               break;
+            case 'image-map' :
+              $out .= count($allLines).' words';
+              if (count($allLines)>15) {
+                $listWords = '<strong>15 first questions :</strong><br />';
+                for($i=0; $i<15; $i++) {
+                  list($left, $right) = preg_split('/::/', $allLines[$i]);
+                  $listWords .= '- '.$right.'<br />';
+                }
+                $listWords .= '[...]';
+              } else {
+                $listWords = '';
+                foreach($allLines as $line) {
+                  list($left, $right) = preg_split('/::/', $line);
+                  $listWords .= '- '.$right.'<br />';
+                }
+              }
+              break;
+            case 'jumble' :
+              $out .= count($allLines).' sentences';
+              if (count($allLines)>15) {
+                $listWords = '<strong>15 first sentences :</strong><br />';
+                for($i=0; $i<15; $i++) {
+                  $pattern = '/\$.*?\$/';
+                  preg_match($pattern, $allLines[$i], $matches);
+                  $help = preg_replace('/\$/', '', $matches[0]);
+                  $listWords .= '- '.$help.'<br />';
+                }
+                $listWords .= '[...]';
+              } else {
+                $listWords = '';
+                foreach($allLines as $line) {
+                  $pattern = '/\$.*?\$/';
+                  preg_match($pattern, $line, $matches);
+                  $help = preg_replace('/\$/', '', $matches[0]);
+                  $listWords .= '- '.$help.'<br />';
+                }
+              }
+              break;
             default :
               $listWords = '';
-              break;
           }
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
@@ -185,7 +227,7 @@
           }
           $out .= '<td data-sort="'.$m->best.'">';
           if ($m->mostTrained) {
-            $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->playerTeam.']</span>';
+            $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
           } else {
             $out .= '<span>No record yet.</span>';
           }
@@ -207,11 +249,12 @@
           $out .= '<div ng-app="exerciseApp">';
           $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
           if ($monster->id) { // Training session starts
-            $out .= '<h1>Memory helmet programmed : '. $monster->summary.'</h1> ';
+            $out .= '<h3>Memory helmet programmed : '. $monster->summary.'</h3> ';
 
             $out .= '<div class="col-sm-3">';
             $out .= '<h3><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Training session <span class="blink">started</span></span></h3>';
             $out .= '<h2><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Word count: {{counter}}</span></h2>';
+            $out .= '<h2><span class="label label-primary">+{{result}} U.T.</span></h2>';
             $out .= '<br /><br />';
             $out .= '<div class="panel panel-success">';
             $out .= '<div class="panel-heading">';
@@ -219,7 +262,7 @@
             $out .= '</div>';
             $out .= '<div class="panel-body">';
             if ($monster->mostTrained->id) {
-              $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->playerTeam.']</h4>';
+              $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->team->title.']</h4>';
             } else {
               $out .= '<h4 class="text-center">No record yet.</h4>';
             }
@@ -228,7 +271,6 @@
             $out .= '<p>Your global UT for this monster: '.utGain($monster, $player).'</p>';
             $out .= '</div>';
             $out .= '</div>';
-            /* $out .= '<h1 ng-class="{zoom:utPoint}"><span class="label label-primary">+{{result}} U.T.</span></h1>'; */
             /* $out .= '<h1><span class="glyphicon glyphicon-warning-sign"></span> Don\'t forget to save your result!</h1>'; */
             $out .= '</div>';
 
@@ -236,17 +278,39 @@
             $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
             $out .= '</div>';
             $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
-            $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+            if ($monster->type->name == 'image-map') {
+              $out .= '<div class=""><img src="'.$monster->imageMap->url.'" max-width="400" alt="Image" /></div>';
+            }
+            if ($monster->type->name == 'jumble') {
+              $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Click on the words to build a correct sentence. If you make a mistake, use the \'Try again\' button. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+            } else {
+              $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+            }
             $out .= '<div class="bubble-right">';
-            $out .= '<div class="text-center">';
-            $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
-            $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
-            $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{allCorrections[0]}}</span></h3> ';
-            $out .= '</div>';
-            $out .= '<br />';
-            $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
+            if ($monster->type->name == 'jumble') {
+              $out .= '<div class="text-center">';
+              $out .= '<h2 class="jumbleW inline" ng-repeat="w in word track by $index">';
+              $out .= '<span ng-class="{\'label\':true, \'label-primary\':selectedItems.indexOf($index) === -1, \'label-warning\':selectedItems.indexOf($index) !== -1}" ng-click="pickWord(w, $index)">{{w}}</span>';
+              $out .= '</h2>';
+              $out .= '</div>';
+              $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
+              $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">Try again</button>';
+              $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}" onmouseenter="$(this).tooltip(\'show\')"></span></h3> ';
+              $out .= '<br /><br />';
+              $out .= '<h3 id="" ng-bind="playerAnswer"></h3>';
+            } else {
+              $out .= '<div class="text-center">';
+              $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
+              $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
+              $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> <span ng-bind-html="showCorrection|underline"></span> {{feedBack}}</span></h3> ';
+              $out .= '</div>';
+              $out .= '<br />';
+              $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
+            }
             $out .= '<br />';
             $out .= '<button ng-click="attack()" class="btn btn-success">Stimulate!</button>';
+            $out .= '&nbsp;&nbsp;';
+            $out .= '<button ng-click="dodge()" class="btn btn-danger">I don\'t know</button>';
             $out .= '<span class="pull-right">';
             $out .= '<span class="avatarContainer">';
             if ($player->avatar) {

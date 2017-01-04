@@ -6,7 +6,7 @@
     if ($input->urlSegment2) { // Player detail
       include("./player_details.php");
     } else { // Team list
-      include("./team.php");
+      include("./team.inc.php");
     }
   //} elseif ($page->children->get("template=country")) { // All places View
   } elseif ($page->name == 'places') { // All places View

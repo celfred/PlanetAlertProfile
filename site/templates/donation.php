@@ -26,7 +26,8 @@ if ($user->isLoggedin() || $user->isSuperuser()) {
     $out .= '<option value="0">Select a player</option>';
     foreach ($globalPlayers as $plyr) {
       if ($plyr->id != $player->id) {
-        $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' ['.$plyr->playerTeam.'] '.$plyr->GC.' GC</option>';
+        if ($plyr->team->name != 'no-team') { $team = ' ['.$plyr->team->title.']'; } else { $team = ''; }
+        $out .= '<option value="'.$plyr->id.'">'.$plyr->title.$team.' ('.$plyr->GC.' GC)</option>';
       }
     }
   $out .= '</select>';

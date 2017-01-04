@@ -26,6 +26,7 @@ include("./head.inc");
     }
   }
 
+  echo '<h4 class="text-center"><a href="'.$pages->get("name=places")->photo->eq(0)->url.'" target="_blank" data-toggle="tooltip" title="Write the corresponding number on your places in your copybook.">See the map with numbers</a></h4>';
 if ($page->name != 'places') { // Single place view
   if ($user->isSuperuser()) {
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
@@ -83,9 +84,9 @@ if ($page->name != 'places') { // Single place view
             echo "<small><span class='glyphicon glyphicon-user'></span> This place has been freed by {$totalOwners} player(s) : ";
             foreach ($owners as $owner) {
               if ($owner == $owners->last()) {
-                echo "{$owner->title} [{$owner->playerTeam->title}]";
+                echo "{$owner->title} [{$owner->team->title}]";
               } else {
-                echo "{$owner->title} [{$owner->playerTeam->title}], ";
+                echo "{$owner->title} [{$owner->team->title}], ";
               }
             }
           echo "</small>";
