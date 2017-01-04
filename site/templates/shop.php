@@ -53,7 +53,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
     }
     ?>
    
-    <div id="Filters" class="text-center" data-fcolindex="6">
+    <div id="Filters" class="text-center" data-fcolindex="7">
       <ul class="list-inline well">
         <?php foreach ($allCategories as $category) { ?>
           <li><label for="<?php echo $category->name; ?>" class="btn btn-primary btn-xs"><?php echo $category->title; ?> <input type="checkbox" value="<?php echo $category->title; ?>" class="categoryFilter" name="categoryFilter" id="<?php echo $category->name; ?>"></label></li>
@@ -65,7 +65,8 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
         <tr>
           <th>Item</th>
           <th></th>
-          <th><span class="glyphicon glyphicon-signal"></span> Minimum level</th>
+          <th><span class="glyphicon glyphicon-signal"></span> Min level</th>
+          <th><img src="<?php  echo $config->urls->templates?>img/globe.png" alt="" /> Min # of Free Acts</th>
           <th><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="" /> HP</th>
           <th><img src="<?php  echo $config->urls->templates?>img/star.png" alt="" /> XP</th>
           <th><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="" /> GC</th>
@@ -107,6 +108,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
             <?php echo $mini; ?>
           </td>
           <td><?php echo $item->level; ?></td>
+          <td><?php echo $item->freeActs ? $item->freeActs : '0'; ?></td>
           <td><?php echo $item->HP; ?></td>
           <td><?php echo $item->XP; ?></td>
           <td><?php echo $item->GC; ?></td>

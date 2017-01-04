@@ -22,13 +22,13 @@ $out .= "</h3>";
 $out .= '<form id="marketPlaceForm" name="marketPlaceForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="" role="form">';
 $out .= '<input type="hidden" name="player" value="'.$player->id.'" />';
 // Possible equipment
-$possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
-// Get rid of potions bought within the last 15 days TODO
+$nbEl = $player->places->count()+$player->people->count();
+$possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
+// Get rid of potions bought within the last 15 days
 $today= mktime('23:59:59 Y-m-d');
 $limitDate = mktime()-15*3600*24;
 $boughtPotions = $player->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=healing-potion");
-$out .= $boughtPotions->count();
-$possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level, parent.name=potions, sort=name");
+$possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, parent.name=potions, sort=name");
 foreach ( $boughtPotions as $b) {
   foreach ($possiblePotions as $p) {
     if ($b->refPage->id == $p->id) {
