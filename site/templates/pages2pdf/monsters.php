@@ -49,6 +49,10 @@ switch ($m->type->name) {
   case 'jumble' :
     foreach($allLines as $l) {
       $l = preg_replace('/{\d+}/', "", $l);
+      // Get rid of $...$
+      $l = preg_replace('/\$.+?\$/', "", $l);
+      // Replace %...% with data
+      // TODO : Random data from a list
       $l = str_replace("%fname%", "Mike", $l);
       $l = str_replace("%fnamef%", "Sarah", $l);
       $l = str_replace("%fnamem%", "John", $l);
