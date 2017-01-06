@@ -279,6 +279,14 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
       $player->HP = 50;
       // Lose all Gold Coins
       $player->GC = 0;
+      // Set XP just below new level threshold
+      if ($player->level <= 4) {
+        $delta = 40+($player->level*10);
+      } else {
+        $delta = 90;
+      }
+      $threshold = ($player->level*10)+$delta;
+      $player->XP = $threshold-5;
     } else { // Init player scores for a new start
       $player->level = 1;
       $player->HP = 50;
