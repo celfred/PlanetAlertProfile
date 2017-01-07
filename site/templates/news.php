@@ -380,9 +380,7 @@
       ?>
         <div id="" class="news panel panel-primary">
           <div class="panel-heading">
-            <h4 class="panel-title">
-              Last public events in Planet Alert
-            </h4>
+            <h4 class="panel-title">Recent Activity</h4>
           </div>
           <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="lastEvents">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>

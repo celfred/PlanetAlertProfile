@@ -3,6 +3,44 @@
     $out = '';
     switch ($input->get('id')) {
       case 'lastEvents' :
+        // Last 3 published monsters
+        $out .= '<p>';
+        $out .= '<span class="label label-success">New monsters !</span>';
+        $lastMonsters = $pages->find("template=exercise, sort=-published, limit=3");
+        foreach($lastMonsters as $m) {
+          $out .= '  <span>'.$m->title.'</span>  ';
+        }
+        if ($user->isLoggedin()) {
+          if ($user->isSuperuser() == false) {
+            $currentPlayer = $pages->get("template=player, login=$user->name");
+            $helmet = $currentPlayer->equipment->get("name=memory-helmet");
+          }
+          if ($helmet || $user->isSuperuser()) {
+            $out .= '<br />→ <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a>';
+          }
+        }
+        $out .= '</p>';
+        // Last admin announcements
+        if ($user->isLoggedin()) {
+          if ($user->isSuperuser()) {
+            // Admin gets all news
+            $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=5")->sort("-date");
+          } else {
+            // User gets public and ranked news
+            $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$player->rank, limit=5")->sort("-date");
+          }
+        } else { // Guests get public news only
+          $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=5")->sort("-date");
+        }
+        $out .= '<p>';
+        $out .= '<span class="label label-success">Last official announcements !</span>';
+        $out .= '<ul class="">';
+        $blogUrl = $pages->get("name=blog")->url;
+        foreach($newsAdmin as $n) {
+          $out .= '<li>'.date("F d, Y", $n->created).' : <a href="'.$blogUrl.'">'.$n->title.'</a></li>';
+        }
+        $out .= '</ul>';
+        $out .= '</p>';
         // Last public news
         $excluded = $pages->find("template=player, name=test");
         // Find current school year date
@@ -10,6 +48,7 @@
         // Find last events
         $news = $pages->find("template=event, date>=$schoolYear->dateStart, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
         if ($news->count() > 0) {
+          $out .= '<h4 class="label label-success">New public activity !</h4>';
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {
             $currentPlayer = $n->parent('template=player');
