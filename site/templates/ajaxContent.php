@@ -51,7 +51,7 @@
         }
         break;
       case 'admin-work' :
-        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy|penalty");
+        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy|penalty|remove");
         if ($news->count() > 0) {
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {

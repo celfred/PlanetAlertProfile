@@ -61,6 +61,7 @@
             </ul>
           </div>
           </div>
+          <?php if ($playerPage->coma == 0) { ?>
           <div class="col-sm-2 text-right">
             <span class="badge" tooltip="Points de santé"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="Santé" /> <?php echo $playerPage->HP; ?>/50</span>
           </div>
@@ -87,6 +88,9 @@
               </div>
             </div>
           </div>
+          <?php } else { ?>
+            <h4 class="text-center"><span class="label label-danger">You're in a COMA !</span></h4><h4 class="text-center"><span>Buy a healing potion to go back to normal state !</span></h4>
+          <?php } ?>
       </div>
 
       <div id="" class="col-sm-5 panel panel-success">

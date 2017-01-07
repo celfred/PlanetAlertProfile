@@ -212,10 +212,15 @@
     $out .= '<td data-toggle="tooltip" data-html="true" title="'.$skills.'">'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';
     $out .= '<td>'. $player->level .'</td>';
+    if ($player->coma == true) { $player->HP = 0; }
     $out .= '<td data-order="'.$player->HP.'" data-toggle="tooltip" title="'.$player->HP.'/50" data-placement="top">';
-    $out .= '<div class="progress progress-striped progress-mini">';
-    $out .= '<div class="progress-bar progress-bar-danger" role="progressbar" style="width: '.$HPwidth.'px;"></div>';
-    $out .= '</div>';
+    if ($player->coma == false) {
+      $out .= '<div class="progress progress-striped progress-mini">';
+      $out .= '<div class="progress-bar progress-bar-danger" role="progressbar" style="width: '.$HPwidth.'px;"></div>';
+      $out .= '</div>';
+    } else {
+      $out .= '<span class="badge badge-danger">Coma !</span>';
+    }
     $out .= '</td>';
     $out .= '<td data-order="'.$player->XP.'" data-toggle="tooltip" title="'.$player->XP.'/'.($threshold).'" data-placement="top">';
     $out .= '<div class="progress progress-striped progress-mini">';

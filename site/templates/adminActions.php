@@ -596,7 +596,12 @@
             // Keep previous values to check evolution
             $oldPlayer = clone $selectedPlayer;
             $out .= '<tbody>';
-            $out .= '<tr><td class="text-left">';
+            if ($selectedPlayer->coma == 1) {
+              $comaClass = 'bg-warning';
+            } else {
+              $comaClass = '';
+            }
+            $out .= '<tr><td class="text-left '.$comaClass.'">';
             $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
             $out .= $e->title;
             $comment = trim($e->summary);
@@ -668,6 +673,18 @@
                       }
                       $out .= '</ul>';
                   }
+
+                  if ($newItem->name == 'health-potion' && $selectedPlayer->coma == 1) {
+                    $selectedPlayer->coma = 0;
+                    $out .= '<li><span class="label label-success">Leaving COMA STATE !</span></li>';
+                  }
+                }
+              }
+              if ($e->task->is("name=death")) {
+                // Death recorded but HP>0
+                if ($selectedPlayer->HP > 0 && $selectedPlayer->coma == 0) {
+                  $out .= ' <span class="label label-danger">Error → HP>0 ?</span>';
+                  $dirty = true;
                 }
               }
               if ($e->task->is("name=team-death|group-death")) {
@@ -681,9 +698,23 @@
               updateScore($selectedPlayer, $e->task, $comment, $e->refPage, '', false);
               // Test if player died
               if ($selectedPlayer->HP == 0) {
+                if ($lastDeath->id) {
+                  $out .= '<span class="label label-danger">PREVIOUS DEATH, level '.$previousLevel.'</span>';
+                  if ($previousLevel == 1) { // 2nd level 1 death in a row > Coma state
+                    $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
+                    $selectedPlayer->coma = true;
+                    $selectedPlayer->level = 1;
+                    $selectedPlayer->HP = 50;
+                    $selectedPlayer->GC = 0;
+                    $selectedPlayer->XP = 0;
+                  }
+                }
                 $died = true;
                 if ($allEvents->getNext($e)->task->name == 'death') {
                   $out .= '<span class="label label-success">Death OK</span>';
+                  $lastDeath = $allEvents->getNext($e);
+                  preg_match("/\d+/", $lastDeath->summary, $matches);
+                  $previousLevel = (int) $matches[0];
                 } else {
                   $dirty = true;
                   // Ask only for the first Death
