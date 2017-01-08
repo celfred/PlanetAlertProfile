@@ -1123,11 +1123,15 @@ function pma($player) {
   $out .= '<span class="pull-right">';
   $out .= '<span class="label label-success">Your Karma : '.$player->karma.'</span>';
   $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
-  $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
-  $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+  if ($player->coma == 0) {
+    $out .= '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
+    $out .= '&nbsp;&nbsp;';
+    $out .= '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
+    $out .= '&nbsp;&nbsp;';
+    $out .= '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+  } else {
+    $out .= '<span class="label label-danger">Coma !</span>';
+  }
   $out .= '&nbsp;&nbsp;';
   $out .= '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
   $out .= '&nbsp;&nbsp;';

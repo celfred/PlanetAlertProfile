@@ -4,11 +4,16 @@
     switch ($input->get('id')) {
       case 'lastEvents' :
         // Last 3 published monsters
-        $out .= '<p>';
-        $out .= '<span class="label label-success">New monsters !</span>';
+        $out .= '<ul class="list-inline">&nbsp;';
+        $out .= '<li class="label label-success"><span class="glyphicon glyphicon-headphones"></span> New monsters !</li>';
         $lastMonsters = $pages->find("template=exercise, sort=-published, limit=3");
         foreach($lastMonsters as $m) {
-          $out .= '  <span>'.$m->title.'</span>  ';
+          if ($m->image) {
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+          } else {
+            $mini = '';
+          }
+          $out .= '  <li data-toggle="tooltip" title="'.$m->summary.'">'.$mini.' '.$m->title.'</li>  ';
         }
         if ($user->isLoggedin()) {
           if ($user->isSuperuser() == false) {
@@ -16,10 +21,12 @@
             $helmet = $currentPlayer->equipment->get("name=memory-helmet");
           }
           if ($helmet || $user->isSuperuser()) {
-            $out .= '<br />→ <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a>';
+            $out .= '<li>→ <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a></li>';
+          } else {
+            $out .= '<li>→ You need to buy the Memory Helmet to fight monsters !</a></li>';
           }
         }
-        $out .= '</p>';
+        $out .= '</ul>';
         // Last admin announcements
         if ($user->isLoggedin()) {
           if ($user->isSuperuser()) {
@@ -33,7 +40,7 @@
           $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=5")->sort("-date");
         }
         $out .= '<p>';
-        $out .= '<span class="label label-success">Last official announcements !</span>';
+        $out .= '<span class="label label-success"><span class="glyphicon glyphicon-hand-up"></span> Last official announcements !</span>';
         $out .= '<ul class="">';
         $blogUrl = $pages->get("name=blog")->url;
         foreach($newsAdmin as $n) {
@@ -48,7 +55,7 @@
         // Find last events
         $news = $pages->find("template=event, date>=$schoolYear->dateStart, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
         if ($news->count() > 0) {
-          $out .= '<h4 class="label label-success">New public activity !</h4>';
+          $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> New public activity !</h4>';
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {
             $currentPlayer = $n->parent('template=player');
