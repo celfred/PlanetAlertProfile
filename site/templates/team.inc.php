@@ -28,12 +28,10 @@
 
     // Add individual karmas
     foreach( $players as $player) {
-      $karma = getKarma($player);
-      $player->karma = $karma;
       // Karma is divided by number of players in the group to be fair with smaller groups
-      $groupKarma = round($karma/$players->count);
+      $groupKarma = round($player->karma/$players->count);
       (int) $group->karma = $group->karma + $groupKarma;
-      $group->details .= $player->title." (".$karma.' ('.$groupKarma.') - '.$player->places->count.') ';
+      $group->details .= $player->title." (".$player->karma.' ('.$groupKarma.') - '.$player->places->count.') ';
     }
     $index++;
   }
@@ -223,9 +221,13 @@
     }
     $out .= '</td>';
     $out .= '<td data-order="'.$player->XP.'" data-toggle="tooltip" title="'.$player->XP.'/'.($threshold).'" data-placement="top">';
-    $out .= '<div class="progress progress-striped progress-mini">';
-    $out .= '<div class="progress-bar progress-bar-success" role="progressbar" style="width: '.$XPwidth.'px;"></div>';
-    $out .= '</div>';
+    if ($player->coma == false) {
+      $out .= '<div class="progress progress-striped progress-mini">';
+      $out .= '<div class="progress-bar progress-bar-success" role="progressbar" style="width: '.$XPwidth.'px;"></div>';
+      $out .= '</div>';
+    } else {
+      $out .= '<span class="badge badge-danger">Coma !</span>';
+    }
     $out .= '</td>';
     $out .= '<td '.$tooltipPlaces.'>'. $player->places->count() .'</td>';
     if ($team->rank && $team->rank->is("name!=6emes|5emes")) {

@@ -311,10 +311,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
         $player->HP = 50;
         $player->GC = 0;
         $player->XP = 0;
-        if ($real == true) {
-          $prevDeath->summary = $prevDeath->summary.' [Enter Coma state]';
-          $prevDeath->save();
-        }
+        $player->karma = 0;
       } else {
         $player->level = 1;
         $player->HP = 50;
@@ -331,6 +328,7 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     if ($real == true) { // Save player's death if necessary
       $eDate = date('m/d/Y H:i:s', time()+60);
       $task = $pages->get("name=death");
+      if ($player->coma == 1) { $comment .= ' [Enter Coma state]'; }
       $newLinkedId = saveHistory($player, $task, $comment, '', $refPage, $eDate, '');
       $player->of(false);
       $player->save();
@@ -473,8 +471,7 @@ function getKarma($player) {
   } else {
     $karma = ($player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
   }
-  if ($karma < 0) { $karma = 0; }
-  //echo $player->title.':'.$karma.'-';
+  if ($karma < 0 || $player->coma == 1) { $karma = 0; }
   return $karma;
 }
 
@@ -890,10 +887,8 @@ function groupScoreBoard($limit) {
 
     // Add individual karmas
     foreach( $players as $player) {
-      $karma = getKarma($player);
-      $player->karma = $karma;
       // Karma is divided by number of players in the group to be fair with smaller groups
-      $groupKarma = round($karma/$players->count);
+      $groupKarma = round($player->karma/$players->count);
       (int) $group->karma = $group->karma + $groupKarma;
       $group->details .= $player->title.'<br />';
       $group->team = $player->team;
