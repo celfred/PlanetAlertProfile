@@ -792,33 +792,32 @@ function setAttitude($player, $dateStart='', $dateEnd='') {
   $player->nbAmbush = $allEvents->find("task.name=ambush")->count();
 }
 
-function getPosition($player, $field) {
+function getScoreboard($player, $field, $limit=5) {
   $pages = wire('pages');
-  $pos = 1;
   switch ($field) {
     case 'karma' :
-      $allPlayers = $pages->find("template=player, sort=karma, karma>0");
+      $allPlayers = $pages->find("template=player, name!=test, sort=-karma, karma>0");
       break;
     case 'places' :
-      $allPlayers = $pages->find("template=player, sort=-places.count, sort=-karma, places.count>0");
+      $allPlayers = $pages->find("template=player, name!=test, sort=-places.count, sort=-karma, places.count>0");
       break;
     case 'people' :
-      $allPlayers = $pages->find("template=player, sort=-people.count, sort=-karma, people.count>0");
+      $allPlayers = $pages->find("template=player, name!=test, sort=-people.count, sort=-karma, people.count>0");
       break;
     case 'fighting_power' :
-      $allPlayers = $pages->find('template=player, sort=-fighting_power, sort=-karma, fighting_power>0');
+      $allPlayers = $pages->find('template=player, name!=test, sort=-fighting_power, sort=-karma, fighting_power>0');
       break;
     case 'equipment' :
-      $allPlayers = $pages->find('template=player, sort=-equipment.count, sort=-karma, equipment.count>0');
+      $allPlayers = $pages->find('template=player, name!=test, sort=-equipment.count, sort=-karma, equipment.count>0');
       break;
     case 'donation' :
-      $allPlayers = $pages->find('template=player, sort=-donation, sort=-karma, donation>0');
+      $allPlayers = $pages->find('template=player, name!=test, sort=-donation, sort=-karma, donation>0');
       break;
     case 'underground_training' :
-      $allPlayers = $pages->find('template=player, sort=-underground_training, sort=-karma, underground_training>0');
+      $allPlayers = $pages->find('template=player, name!=test, sort=-underground_training, sort=-karma, underground_training>0');
       break;
     case 'group' :
-      $allPlayers = $pages->find('template=player');
+      $allPlayers = $pages->find('template=player, name!=test, ');
       $allGroups = $pages->get('/groups')->children;
       $index = 0;
       foreach( $allGroups as $group) {
@@ -828,115 +827,66 @@ function getPosition($player, $field) {
         if ($players->count == 0) {
           unset($allGroups[$index]);
         }
+        // Check for group bonus
+        $group->nbBonus = groupBonus($players);
+        $group->karma = $group->nbBonus*30;
+
+        // Add individual karmas
+        foreach( $players as $p) {
+          // Karma is divided by number of players in the group to be fair with smaller groups
+          $groupKarma = round($p->karma/$players->count);
+          (int) $group->karma = $group->karma + $groupKarma;
+          $group->details .= $p->title.' - ';
+          $group->team = $p->team;
+        }
         $index++;
       }
-      $allPlayers = $allGroups;
+      $allPlayers = $allGroups->sort('-karma');
       break;
     default : 
       $allPlayers = '';
   }
-  foreach($allPlayers as $p) {
-    if ($field != 'group') {
-      if ($p->id === $player->id) {
-        $playerPos = $pos;
-      }
+  if ($field != 'group') {
+    if ($allPlayers->getItemKey($player) != 0) {
+      $playerPos = $allPlayers->getItemKey($player)+1;
     } else {
-      if ($p->id === $player->group->id) {
+      $playerPos = false;
+    }
+  } else {
+    if ($allPlayers->getItemKey($player->group) != 0) {
+      $playerPos = $allPlayers->getItemKey($player->group);
+    } else {
+      $playerPos = false;
+    }
+    $pos = 1;
+    foreach($allGroups as $g) {
+      if ($g == $player->group) {
         $playerPos = $pos;
-      }
-    }
-    $pos++;
-  }
-  if ($playerPos) {
-    return array($playerPos, $allPlayers->count);
-  } else {
-    return false;
-  }
-}
-
-function groupScoreBoard($limit) {
-  $pages = wire('pages');
-  $allPlayers = $pages->find("template=player");
-  $allGroups = $pages->get("/groups")->children('sort=title');
-  $outGroups = '';
-  if (wire('user')->isLoggedin()) {
-    $login = wire('user')->name;
-    $loggedGroup = $pages->get("template=player, login=$login")->group->name;
-  } else {
-    $loggedGroup = "";
-  }
-  // Calculate groups Karma
-  $index = 0;
-  foreach( $allGroups as $group) {
-    $group->karma = 0;
-    $group->nbBonus = 0;
-    
-    // Find selected players
-    $players = $allPlayers->find("group=$group");
-    
-    // Get rid of unused groups
-    if ($players->count == 0) {
-      unset($allGroups[$index]);
-    }
-    // Check for group bonus
-    $group->nbBonus = groupBonus($players);
-    $group->karma = $group->nbBonus*30;
-
-    // Add individual karmas
-    foreach( $players as $player) {
-      // Karma is divided by number of players in the group to be fair with smaller groups
-      $groupKarma = round($player->karma/$players->count);
-      (int) $group->karma = $group->karma + $groupKarma;
-      $group->details .= $player->title.'<br />';
-      $group->team = $player->team;
-    }
-    $index++;
-  }
-
-  // Prepare group display
-  $allGroups->sort('-karma');
-  if (!isset($limit) || $limit === 0) {
-    $limit = $allGroups->count();
-  }
-  $index = 0;
-  if ($allGroups->count() > 0) {
-    foreach( $allGroups as $group) {
-      if ($index < $limit) {
-        if ($loggedGroup == $group->name) {
-          $focus = "class='focus'";
-        } else {
-          $focus = "";
-        }
-        $outGroups .= '<li>';
-        $outGroups .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
-        $outGroups .= $group->title.' ['.$group->team->title.']</span> <span class="badge">'.$group->karma.'</span>';
-        // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
-        $starsGroups = floor($group->nbBonus/5);
-        if ( $starsGroups < 1) {
-          for ($i=0; $i<$group->nbBonus; $i++) {
-            $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-          }
-        } else {
-          for ($i=0; $i<$starsGroups; $i++) {
-            $outGroups .= ' <span class="glyphicon glyphicon-star"></span>';
-          }
-          $group->nbBonus = $group->nbBonus - $starsGroups*5;
-          for ($i=0; $i<$group->nbBonus; $i++) {
-            $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-          }
-        }
-        $outGroups .= '</p>';
-        $outGroups .= '</li>';
-        $index++;
+        $g->focus = 1;
       } else {
-        return $outGroups;
+        $g->focus = 0;
+        $pos++;
       }
     }
-  } else {
-    $outGroups .= '<li>No groups yet.</li>';
   }
-
-  return $outGroups;
+  if ($playerPos && $limit != -1) { // Player is in the charts
+    if ($playerPos <= 8) { // Good position, get Top 10
+      $topPlayers = $allPlayers->slice(0, 10);
+      $prevPlayers = false;
+    } else {
+      $topPlayers = $allPlayers->slice(0, 3); // Get top 3 players
+      $prevIndex = $playerPos-round($limit/2);
+      $prevPlayers = $allPlayers->slice($prevIndex, $limit);
+    }
+  } else { // No ranking (or complete scoreboard)
+    if ($limit == -1) {
+      $topPlayers = $allPlayers; // Complete scoreboard
+    } else {
+      $topPlayers = $allPlayers->slice(0, 10); // Get Top 10
+    }
+    $prevPlayers = false;
+  }
+  return array($topPlayers, $prevPlayers, $playerPos, $allPlayers->count);
 }
 
 function isTrainingAllowed($player, $monster) {

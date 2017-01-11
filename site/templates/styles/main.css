@@ -495,7 +495,7 @@ span.glyphicon {
 tr.selected {
   background-color: #FFF;
 }
-.focus {
+.focus, .focus a {
   background-color: #3175AF;
   color: #FFF;
   padding: 2px;
