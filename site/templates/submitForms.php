@@ -4,7 +4,8 @@
       '::1'
   );
 
-  include("./my-functions.inc");
+  include("./head.inc");
+  /* include("./my-functions.inc"); */
 
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
     $playerId = $input->post->player;
@@ -130,12 +131,15 @@
     }
 
     if($input->post->adminTableSubmit) { // adminTableForm submitted
+      
+
       // Consider checked players only
       $checkedPlayers = $input->post->player;
       $checked = array_keys($checkedPlayers);
       /* foreach($checkedPlayers as $plyr_task=>$state) { */
         /* list($playerId, $taskId) = explode('_', $plyr_task); */
       // Record checked task for each player
+      $current = 0;
       for ($i=0; $i<count($checked); $i++) {
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $comment = 'comment_'.$playerId.'_'.$taskId;
@@ -146,15 +150,22 @@
         $task = $pages->get($taskId); 
         $taskComment = trim($input->post->$comment);
         updateScore($player, $task, $taskComment, '', '', true);
+        $current++;
+        outputProgress($current, count($checked), 'Please wait while saving adminTable');
       }
+      $current = 0;
       // Check death for each player
       for ($i=0; $i<count($checked); $i++) {
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $player = $pages->get($playerId);
         checkDeath($player, true);
+        $current++;
+        outputProgress($current, count($checked), 'Analysing Deaths');
       }
-      // Redirect to team page
-      $session->redirect($pages->get('/players')->url.$player->team->name);
+      // Redirect to team page // PHP redirection no longer runs because of outputProgress()
+      /* $session->redirect($pages->get('/players')->url.$player->team->name); */
+      // Use JS redirection instead
+      js_redirect($pages->get('/players')->url.$player->team->name);
     }
 
     if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
@@ -185,4 +196,5 @@
     }
   } // End if superUser
 
+  include("./foot.inc");
 ?>

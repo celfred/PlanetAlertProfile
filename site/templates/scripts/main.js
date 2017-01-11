@@ -313,6 +313,7 @@ $(document).ready(function() {
   });
   $('#teamTable').DataTable({
     paging: false,
+    searching: false,
     columnDefs: [{ "orderable": false, "targets": 1 },
       { "orderable": false, "targets": 4}],
     order: [[ 3, "desc" ]]
@@ -445,7 +446,6 @@ $(document).ready(function() {
 				return false;
 			}
 		});
-		// return confirm("Click OK to continue?");
 	})
 
 	if ($('div.ajaxContent')) {

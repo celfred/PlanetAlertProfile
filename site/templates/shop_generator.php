@@ -1,8 +1,6 @@
 <?php
 if (!$config->ajax) {
   include("./head.inc"); 
-} else {
-  include("./my-functions.inc"); 
 }
 
 $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");

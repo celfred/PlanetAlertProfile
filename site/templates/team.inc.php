@@ -5,23 +5,33 @@
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
   $team = $pages->get("template=team, name=$input->urlSegment1");
+  $rank = $team->rank->name;
   $allPlayers = $pages->find("template=player, team=$team, sort=group");
-  $allGroups = $pages->get("/groups")->children('sort=title');
+  // Build allGroups
+  $allGroups = new PageArray();
+  foreach( $allPlayers as $p) {
+    $nbEl = 0;
+    if (!in_array($p->group, $allGroups)) {
+      $allGroups->add($p->group);
+    }
+    if ( $rank == '4emes' || $rank == '3emes' ) {
+      $nbEl = $p->places->count()+$p->people->count();
+    } else {
+      $nbEl = $p->places->count();
+    }
+    $p->nbEl = $nbEl;
+  }
   $outGroups = '';
 
   // Calculate groups Karma
   $index = 0;
-  foreach( $allGroups as $group) {
+  foreach($allGroups as $group) {
     $group->karma = 0;
     $group->nbBonus = 0;
     
     // Find selected players
     $players = $allPlayers->find("group=$group");
     
-    // Get rid of unused groups
-    if ($players->count == 0) {
-      unset($allGroups[$index]);
-    }
     // Check for group bonus
     $group->nbBonus = groupBonus($players);
     $group->karma = $group->nbBonus*30;
@@ -30,20 +40,20 @@
     foreach( $players as $player) {
       // Karma is divided by number of players in the group to be fair with smaller groups
       $groupKarma = round($player->karma/$players->count);
-      (int) $group->karma = $group->karma + $groupKarma;
-      $group->details .= $player->title." (".$player->karma.' ('.$groupKarma.') - '.$player->places->count.') ';
+      (int) $group->karma += $groupKarma;
+      $group->details .= '- '.$player->title.' ('.$groupKarma.'k - '.$player->nbEl.'el)<br />';
     }
     $index++;
   }
 
   // Prepare group display
   $allGroups->sort('-karma');
-  $outGroups .= '<ul class="list-inline lead">';
+  $outGroups .= '<ul class="list-inline">';
   foreach( $allGroups as $group) {
     $outGroups .= '<li>';
-    $outGroups .= '<p class="label label-default" title="'.$group->details.'">';
+    $outGroups .= '<p class="label label-default" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
     $outGroups .= $group->title.' <span class="bg-primary">'.$group->karma.'</span>';
-    // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
+    // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member)
     $starsGroups = floor($group->nbBonus/5);
     if ( $starsGroups < 1) {
       for ($i=0; $i<$group->nbBonus; $i++) {
@@ -148,12 +158,12 @@
     $XPwidth = 150*$player->XP/($threshold);
     // Places list
     $tooltipPlaces = '';
-    $listPlaces = '<ul>';
-    foreach ($player->places as $place) {
-      $listPlaces .= '<li>'.$place->title.'</li>';
-    }
-    $listPlaces .= '</ul>';
     if ($player->places->count() > 0) {
+      $listPlaces = '<ul>';
+      foreach ($player->places as $place) {
+        $listPlaces .= '<li>'.$place->title.'</li>';
+      }
+      $listPlaces .= '</ul>';
       $tooltipPlaces =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listPlaces.'"';
     } else {
       $tooltipPlaces = '';
@@ -161,12 +171,12 @@
     if ($team->rank && $team->rank->is("name!=6emes|5emes")) {
       // People list
       $tooltipPeople = '';
-      $listPeople = '<ul>';
-      foreach ($player->people as $people) {
-        $listPeople .= '<li>'.$people->title.'</li>';
-      }
-      $listPeople .= '</ul>';
       if ($player->people->count() > 0) {
+        $listPeople = '<ul>';
+        foreach ($player->people as $people) {
+          $listPeople .= '<li>'.$people->title.'</li>';
+        }
+        $listPeople .= '</ul>';
         $tooltipPeople =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listPeople.'"';
       } else {
         $tooltipPeople = '';
@@ -174,12 +184,12 @@
     }
     // Equipment list
     $tooltipEquipment = '';
-    $listEquipment = '<ul>';
-    foreach ($player->equipment as $equipment) {
-      $listEquipment .= '<li>'.$equipment->title.'</li>';
-    }
-    $listEquipment .= '</ul>';
     if ($player->equipment->count() > 0) {
+      $listEquipment = '<ul>';
+      foreach ($player->equipment as $equipment) {
+        $listEquipment .= '<li>'.$equipment->title.'</li>';
+      }
+      $listEquipment .= '</ul>';
       $tooltipEquipment =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listEquipment.'"';
     } else {
       $tooltipEquipment = '';

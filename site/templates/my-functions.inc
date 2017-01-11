@@ -27,7 +27,6 @@ function getMultiDimensional($values, $prefix) {
 }
 
 function initPlayer($player) {
-  $pages = wire('pages');
   // Get previous score from last archived page
   $prevScores = $player->find("template=archive, name!=history")->sort("date")->last();
   if ($prevScores->id) {
@@ -57,16 +56,14 @@ function initPlayer($player) {
   return $player;
 }
 
-function updateScore($player, $task, $comment = '', $refPage = '', $linkedId ='', $real = true) {
+function updateScore($player, $task, $comment = '', $refPage = false, $linkedId ='', $real = true) {
   $pages = wire('pages');
-  $player = $pages->get($player->id);
   $oldNbEl = $player->places->count()+$player->people->count();
-  $task = $pages->get($task->id);
-  if ($refPage) {
-    $refPage = $pages->get($refPage->id);
-  } else {
-    $refPage = false;
-  }
+  /* if ($refPage) { */
+  /*   $refPage = $pages->get($refPage->id); */
+  /* } else { */
+  /*   $refPage = false; */
+  /* } */
   if ($task->is("name!=death")) {
     // Task details to calculate new score
     $tXP = $task->XP;
@@ -203,13 +200,15 @@ function updateScore($player, $task, $comment = '', $refPage = '', $linkedId =''
     }
     if ($player->fighting_power < 0) { $player->fighting_power = 0; }
 
-    if ($task->is("name=remove") && $refPage != '') { // Remove element
+    if ($task->is("name=remove") && $refPage != false) { // Remove element
       if ($refPage->template == 'place') {
         $player->places->remove($refPage);
       }
       if ($refPage->template == 'people') {
         $player->people->remove($refPage);
       }
+      // Update Team score
+      updateTeamScores($player->team);
     }
 
     // Check GC, HP...
@@ -665,7 +664,6 @@ function nbFreedomActs($team, $startDate='', $endDate='') {
 
 function teamFreeworld($team) {
   $pages = wire('pages');
-  $team = $pages->get("$team");
   $allPlayers = $pages->find("template=player, team=$team->name");
   $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
   // Get all possible elements
@@ -697,10 +695,9 @@ function teamFreeworld($team) {
 }
 
 function updateTeamScores($team) {
-  $pages = wire('pages');
-  $team = $pages->get("$team");
   $team->freeActs = nbFreedomActs($team);
   if ($team->name != 'no-name') {
+    // TODO : Optimize by testing only new elements ?
     $team->freeelements->removeAll();
     $allElements = teamFreeworld($team);
     $completed = $allElements->find("completed=1");
@@ -1027,8 +1024,6 @@ function isFightAllowed($player, $monster) {
 function utGain($monsterId, $player, $startDate='', $endDate='') {
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
-  $pages = wire('pages');
-  $player = $pages->get($player->id);
   $prevUt = $player->find("template=event,refPage=$monsterId, date>$startDate, date<$endDate, sort=-date");
   if ($prevUt->count() > 0) {
     foreach($prevUt as $p) {
@@ -1048,7 +1043,6 @@ function utGain($monsterId, $player, $startDate='', $endDate='') {
 
 function setBestPlayer($monster, $player, $utGain) {
   $pages = wire('pages');
-  $player = $pages->get($player->id);
   $monster = $pages->get($monster->id);
   $monster->of(false);
   $monster->mostTrained = $player;
@@ -1060,7 +1054,6 @@ function pma($player) {
   $out = '';
   $pages = wire('pages');
   $config = wire('config');
-  $player = $pages->get($player->id);
   switch ($player->rank->name) {
     case '6emes':
       /* $levels = '1|2'; */
@@ -1269,4 +1262,44 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
     $player->partNegative = '-';
   }
 }
+
+/**
+ * Output span with progress.
+ *
+ * @param $current integer Current progress out of total
+ * @param $total   integer Total steps required to complete
+ * @param $message   string Message to display
+ */
+function outputProgress($current, $total, $message='Please wait') {
+  echo '<div class="well text-center" style="position: absolute; width:100%; z-index:$current;">';
+  echo '<span>'.$message.'</span>';
+  echo '&nbsp;<span>('.round($current / $total * 100).'%)</span>';
+  echo '</div>';
+  myFlush();
+  /* sleep(1); */
+}
+
+/**
+ * Flush output buffer
+ */
+function myFlush() {
+  echo(str_repeat(' ', 256));
+  if (@ob_get_contents()) {
+    @ob_end_flush();
+  }
+  flush();
+}
+
+function js_redirect($url, $seconds=1) {
+  // Uncomment to make use of a timer
+  echo '<script language="javascript">';
+  /* echo 'function redirect() {'; */
+  echo 'window.location = "' . $url . '";';
+  /* echo '}'; */
+  /* echo 'timer = setTimeout("redirect()", "' . ($seconds*1000) . '");'; */
+  echo '</script>';
+  return true;
+}
+
+
 ?>
