@@ -112,6 +112,9 @@
         }
         $out .= '</select>';
         $out .= '</div>';
+        $out .= '<div class="text-right">';
+        $out .= '<button id="backendEditable" data-href="'.$config->urls->admin.'page/edit/?id=" data-id="-1">Edit player in backend</button>';
+        $out .= '</div>';
         $out .= '</section>';
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="recalculate">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';

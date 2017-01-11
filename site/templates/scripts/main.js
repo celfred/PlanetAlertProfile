@@ -39,6 +39,18 @@ $(document).ready(function() {
     return false; 
   }); 
 
+	$('#playerId').on('change', function() {
+		var pageId = $(this).val();
+		$('#backendEditable').attr('data-id', pageId); 
+	});
+	$('#backendEditable').on('click', function() {
+		var pageId = $(this).attr('data-id');
+		if ( pageId != '-1' && pageId != 'all') {
+			var url = $(this).attr('data-href')+pageId;
+			window.location.href = url;
+		}
+	})
+
   $(".ajax").click(function() {
     $("#reportDiv").html("<p>Loading...</p>"); 
     
