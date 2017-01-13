@@ -440,6 +440,7 @@ $(document).ready(function() {
 
 	$('#adminTableForm :submit').on('click', function(e){
 		var $this = $(this).parents("form");
+		var $redirectUrl = '';
 		e.preventDefault();
 		swal({
 			html: true,
@@ -448,12 +449,52 @@ $(document).ready(function() {
 			showCancelButton : true,
 			allowOutsideClick : true,
 			cancelButtonText: "No, let me check again...",
-			confirmButtonText: "Yes, save it!"
+			confirmButtonText: "Yes, save it!",
+			closeOnConfirm: false
 		}, function(isConfirm) {
-			if (isConfirm) { // Send adminTableForm
-				$this.submit();
+			if (isConfirm) { // Send adminTableForm (via Ajax)
 				$("#adminTableForm :submit").prop('disabled', true);
-				// return true;
+				var $checked = $this.find(' :checkbox:checked').not('.selectAll');
+				var $toSave = 'adminTableSubmit=Save&';
+				var $formUrl = $this.attr('action');
+				for (var i=0; i<$checked.length; i++) {
+					var $customId = $checked.eq(i).attr('data-customId');
+					var $comment = $("input:text[name*="+$customId+"]");
+					$toSave += $checked.eq(i).attr('name')+'=on&'+$comment.attr('name')+'='+$comment.val()+'&';
+					if ($checked.length-i > 5) {
+						if (i>0 && i % 5 == 0) {
+							$.post($formUrl, $toSave, function(data) {
+								data = JSON.parse(data);
+								$alreadySaved = parseInt($('#progress').text());
+								$('#progress').text($alreadySaved + data.saved+' saved.');
+							}).fail( function() {
+								$('#progress').text('ERROR !!!');
+							});
+							$toSave = 'adminTableSubmit=Save&';
+						}
+					} else { // In the 5 last
+						if (i == $checked.length-1) {
+							$.post($formUrl, $toSave, function(data) {
+								data = JSON.parse(data);
+								$alreadySaved = parseInt($('#progress').text());
+								$('#progress').text($alreadySaved + data.saved +' saved.');
+								$redirectUrl = data.url;
+							}).fail( function() {
+								$('#progress').text('ERROR !!!');
+							});
+						}
+					}
+				}
+				$(document).ajaxStop(function() {
+					$('#progress').text('Redirecting...');
+					window.location.href = $redirectUrl;
+				})
+				swal({
+					title: '<span id="progress">0 saved.</span>',
+					text: "<p>Saving form, please wait...</p><p>("+$checked.length+" items to save.)</p>",
+					html: true,
+					showConfirmButton: false
+				});
 			} else { // Don't send adminTableForm
 				return false;
 			}

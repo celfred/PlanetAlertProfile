@@ -1,11 +1,5 @@
 <?php
-  $whitelist = array(
-      '127.0.0.1',
-      '::1'
-  );
-
-  include("./head.inc");
-  /* include("./my-functions.inc"); */
+  include("./my-functions.inc");
 
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
     $playerId = $input->post->player;
@@ -139,7 +133,6 @@
       /* foreach($checkedPlayers as $plyr_task=>$state) { */
         /* list($playerId, $taskId) = explode('_', $plyr_task); */
       // Record checked task for each player
-      $current = 0;
       for ($i=0; $i<count($checked); $i++) {
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $comment = 'comment_'.$playerId.'_'.$taskId;
@@ -150,22 +143,17 @@
         $task = $pages->get($taskId); 
         $taskComment = trim($input->post->$comment);
         updateScore($player, $task, $taskComment, '', '', true);
-        $current++;
-        outputProgress($current, count($checked), 'Please wait while saving adminTable');
       }
-      $current = 0;
       // Check death for each player
       for ($i=0; $i<count($checked); $i++) {
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $player = $pages->get($playerId);
         checkDeath($player, true);
-        $current++;
-        outputProgress($current, count($checked), 'Analysing Deaths');
       }
-      // Redirect to team page // PHP redirection no longer runs because of outputProgress()
+      // Redirect to team page
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
-      // Use JS redirection instead
-      js_redirect($pages->get('/players')->url.$player->team->name);
+      $url = $pages->get('/players')->url.$player->team->name;
+      echo json_encode(array("sender"=>"adminTable", "saved"=>count($checked), "url"=>$url));
     }
 
     if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
@@ -195,6 +183,4 @@
       $session->redirect($pages->get('/shop')->url.$player->team->name);
     }
   } // End if superUser
-
-  include("./foot.inc");
 ?>

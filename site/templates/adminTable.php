@@ -54,7 +54,7 @@ $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
   <tr>
     <td colspan="2">Select all</td>
     <?php foreach ($allTasks as $task) { ?>
-      <td data-toggle="tooltip" title="Select all"><input type="checkbox" id="csat_<?php echo $task->id; ?>" onclick="selectAll(<?php echo $task->id; ?>)" /></td>
+      <td data-toggle="tooltip" title="Select all"><input type="checkbox" id="csat_<?php echo $task->id; ?>" class="selectAll" onclick="selectAll(<?php echo $task->id; ?>)" /></td>
     <?php } ?>
   </tr>
   </thead>
@@ -70,8 +70,8 @@ $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
       $taskId = $task->id;
     ?>
     <td data-toggle="tooltip" title="<?php echo $player->title.' - '.$task->title; ?>">
-    <input type="checkbox" class="ctPlayer ct_<?php echo $taskId; ?>" id="" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $taskId; ?>)" />
-    <input style="display: none;" type="text" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="Comment" />
+    <input type="checkbox" class="ctPlayer ct_<?php echo $taskId; ?>" id="" data-customId="<?php echo $id.'_'.$taskId; ?>" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $taskId; ?>)" />
+    <input style="display: none;" type="text" data-customId="<?php echo $id.'_'.$taskId; ?>" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="Comment" />
     </td>
     <?php
       $colIndex = $colIndex+1;

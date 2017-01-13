@@ -1213,43 +1213,4 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
   }
 }
 
-/**
- * Output span with progress.
- *
- * @param $current integer Current progress out of total
- * @param $total   integer Total steps required to complete
- * @param $message   string Message to display
- */
-function outputProgress($current, $total, $message='Please wait') {
-  echo '<div class="well text-center" style="position: absolute; width:100%; z-index:$current;">';
-  echo '<span>'.$message.'</span>';
-  echo '&nbsp;<span>('.round($current / $total * 100).'%)</span>';
-  echo '</div>';
-  myFlush();
-  /* sleep(1); */
-}
-
-/**
- * Flush output buffer
- */
-function myFlush() {
-  echo(str_repeat(' ', 256));
-  if (@ob_get_contents()) {
-    @ob_end_flush();
-  }
-  flush();
-}
-
-function js_redirect($url, $seconds=1) {
-  // Uncomment to make use of a timer
-  echo '<script language="javascript">';
-  /* echo 'function redirect() {'; */
-  echo 'window.location = "' . $url . '";';
-  /* echo '}'; */
-  /* echo 'timer = setTimeout("redirect()", "' . ($seconds*1000) . '");'; */
-  echo '</script>';
-  return true;
-}
-
-
 ?>
