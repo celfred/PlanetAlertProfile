@@ -28,6 +28,11 @@ if ($user->isSuperuser()) {
     $refPage = $pages->get($input->post->quizId);
     updateScore($player, $task, $taskComment, $refPage, '', true);
     checkDeath($player, true);
+
+    // Redirect if last question
+    if ($input->post->lastQuestion) {
+      $session->redirect($pages->get('/players')->url.$player->team->name);
+    }
   }
 
   $selectedTeam = $input->urlSegment1;
@@ -127,6 +132,7 @@ if ($user->isSuperuser()) {
         $out .= '<button class="btn btn-success generateQuiz" type="submit" name="RightButton" value="right"><span class="glyphicon glyphicon-ok"></span> Right</button>';
         $out .= '&nbsp;&nbsp;';
         $out .= '<button class="btn btn-danger generateQuiz" type="submit" name="WrongButton" value="wrong"><span class="glyphicon glyphicon-remove"></span> Wrong</button>';
+        $out .= ' <label for="lastQuestion"><input type="checkbox" id="lastQuestion" name="lastQuestion" /> Last question</label>';
         $out .= '</p>';
 
       $out .= '</div>';
