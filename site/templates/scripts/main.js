@@ -454,7 +454,7 @@ $(document).ready(function() {
 		}, function(isConfirm) {
 			if (isConfirm) { // Send adminTableForm (via Ajax)
 				$("#adminTableForm :submit").prop('disabled', true);
-				var $checked = $this.find(' :checkbox:checked').not('.selectAll');
+				var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment');
 				var $toSave = 'adminTableSubmit=Save&';
 				var $formUrl = $this.attr('action');
 				for (var i=0; i<$checked.length; i++) {
@@ -486,8 +486,8 @@ $(document).ready(function() {
 					}
 				}
 				$(document).ajaxStop(function() {
-					$('#progress').text('Redirecting...');
 					window.location.href = $redirectUrl;
+					setTimeout( function(){ $('#progress').text('Redirecting...'); }, 1500);
 				})
 				swal({
 					title: '<span id="progress">0 saved.</span>',

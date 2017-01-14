@@ -385,13 +385,9 @@
         break;
       case 'add-death' :
         if ($selectedPlayer) {
-          $allEvents = $selectedPlayer->get("name=history")->children()->sort("date");
-          $death = $pages->get("name=death");
-          $comment = 'Player died.';
           $eventId = $confirm; // urlSegment3 used for eventId
+          $allEvents = $selectedPlayer->get("name=history")->children()->sort("date");
           $e = $pages->get("id=$eventId");
-          $deathDate = date($e->date+1);
-          $linkedId = saveHistory($selectedPlayer, $death, $comment, 0, '', $deathDate, '');
           // Move all day events a few seconds later
           $dayEvents = $allEvents->find("date=$e->date")->not($e);
           $seconds = 5;
@@ -401,19 +397,30 @@
             $d->of(false);
             $d->save();
           }
+          $task = $pages->get("name=death");
+          $task->comment = 'Player died.';
+          $task->eDate = date($e->date+1);
+          $task->linkedId = false;
+          $linkedId = saveHistory($selectedPlayer, $task, 0);
           // Each team member suffers from player's death
           $teamDeath = $pages->get("name=team-death");
+          $teamDeath->comment = 'Team member died! ['.$selectedPlayer->title.']';
+          $teamDeath->eDate = $task->eDate;
+          $teamDeath->refPage = false;
+          $teamDeath->linkedId = $linkedId;
           $teamPlayers = $pages->find("template=player, team=$selectedPlayer->team")->not("group=$selectedPlayer->group");
           foreach($teamPlayers as $p) {
-            $comment = 'Team member died! ['.$selectedPlayer->title.']';
-            saveHistory($p, $teamDeath, $comment, 0, '', $deathDate, $linkedId);
+            saveHistory($p, $teamDeath, 0);
           }
           // Each group member suffers from player's death
           $groupMembers = $pages->find("template=player, team=$selectedPlayer->team, group=$selectedPlayer->group")->not("$selectedPlayer");
           $groupDeath = $pages->get("name=group-death");
+          $groupDeath->comment = 'Group member died!';
+          $groupDeath->refPage = false;
+          $groupDeath->eDate = $task->eDate;
+          $groupDeath->linkedId = $linkedId;
           foreach($groupMembers as $p) {
-            $comment = 'Group member died!';
-            saveHistory($p, $groupDeath, $comment, 0, '', $deathDate, $linkedId);
+            saveHistory($p, $groupDeath, 0);
           }
         }
         break;
@@ -468,13 +475,15 @@
                 }
                 // Copy the event on the same date
                 if ($source->id) {
-                  $buy = $pages->get("template=task, name=buy");
-                  $eDate = $source->date;
-                  $comment = "Memory helmet [unlocked]";
+                  $task = $pages->get("template=task, name=buy");
+                  $task->comment = "Memory helmet [unlocked]";
+                  $task->refPage = $helmet;
+                  $task->linkedId = false;
+                  $task->eDate = $source->date;
                   foreach($members as $m) {
                     $boughtHelmet = $m->get("name=history")->child("template=event, task.name=buy, refPage.name=memory-helmet");
                     if ($boughtHelmet->id == '') {
-                      saveHistory($m, $buy, $comment, 0, $helmet, $eDate, '');
+                      saveHistory($m, $task, 0);
                     }
 
                   }
@@ -698,7 +707,9 @@
                   $out .= ' ['.$dead->title.']';
                 }
               }
-              updateScore($selectedPlayer, $e->task, $comment, $e->refPage, '', false);
+              $e->task->comment = $comment;
+              $e->task->refPage = $e->refPage; // Just take refPage for scores calculation (no linkedId, no comment because complete history is not re-written
+              updateScore($selectedPlayer, $e->task, false);
               // Test if player died
               if ($selectedPlayer->HP == 0) {
                 if ($lastDeath->id) {

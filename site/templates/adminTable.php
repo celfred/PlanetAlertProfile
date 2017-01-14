@@ -46,7 +46,7 @@ $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
     <td colspan="2">Display comments</td>
     <?php foreach ($allTasks as $task) { ?>
     <td data-toggle="tooltip" title="Display comments">
-    <input type="checkbox" id="cc_<?php echo $task->id; ?>" onclick="showComment(<?php echo $task->id; ?>)" />
+    <input type="checkbox" id="cc_<?php echo $task->id; ?>" class="commonComment" onclick="showComment(<?php echo $task->id; ?>)" />
     <input style="display: none;" type="text" id="commonComment_<?php echo $task->id; ?>" name="commonComment[<?php echo $task->id; ?>]" value="" placeholder="Common comment" onKeyUp="setCommonComment(<?php echo $task->id; ?>, $(this))" />
     </td>
     <?php } ?>

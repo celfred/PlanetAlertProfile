@@ -24,9 +24,10 @@ if ($user->isSuperuser()) {
     }
    
     // Update player's scores
-    $taskComment = $input->post->question.' ['.$input->post->answer.']';
-    $refPage = $pages->get($input->post->quizId);
-    updateScore($player, $task, $taskComment, $refPage, '', true);
+    $task->comment = $input->post->question.' ['.$input->post->answer.']';
+    $task->refPage = $pages->get($input->post->quizId);
+    $task->linkedId = false;
+    updateScore($player, $task, true);
     checkDeath($player, true);
 
     // Redirect if last question

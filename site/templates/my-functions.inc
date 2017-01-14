@@ -56,14 +56,39 @@ function initPlayer($player) {
   return $player;
 }
 
-function updateScore($player, $task, $comment = '', $refPage = false, $linkedId ='', $real = true) {
+function resetPlayer($player, $previousLevel) {
+  $player->HP = 50; // Full HP
+  $player->GC = 0; // Lose all Gold Coins
+  if ($player->level > 1) {
+    $player->level = $player->level - 1; // Lose 1 level
+    $threshold = getLevelThreshold($player->level);
+    $player->XP = $threshold-5; // Set XP just below previous level
+  } else { // Player is already on level 1
+    $player->level = 1; // Stay on level 1
+    if ($previousLevel == 1) { // 2nd death at level 1, set Coma state !
+      $player->coma = 1;
+      $player->XP = 0;
+      $player->karma = 0;
+    } else {
+      $player->XP = round($player->XP/2); // Cut previous XP
+    }
+  }
+  // Lose all equipment but group-items
+  foreach($player->equipment as $e) {
+    if ($e->category->name != 'group-items') {
+      $player->equipment->remove($e);
+    }
+  }
+}
+
+function formerValues($player) {
+  $player->oldNbEl = $player->places->count()+$player->people->count();
+  $player->oldHP = $player->HP; // Record previous HP for checkDeath function
+}
+
+function updateScore($player, $task, $real = true) {
   $pages = wire('pages');
-  $oldNbEl = $player->places->count()+$player->people->count();
-  /* if ($refPage) { */
-  /*   $refPage = $pages->get($refPage->id); */
-  /* } else { */
-  /*   $refPage = false; */
-  /* } */
+  formerValues($player); // Store old values for later use
   if ($task->is("name!=death")) {
     // Task details to calculate new score
     $tXP = $task->XP;
@@ -71,37 +96,11 @@ function updateScore($player, $task, $comment = '', $refPage = false, $linkedId 
     $tGC = $task->GC;
     
     // Ponderate task's impact according to player's equipment
-    // Except for training (core values are used)
-    $deltaXP = 0;
-    $deltaHP = 0;
-    if ($task->is("name!=ut-action-v|ut-action-vv")) {
-      if ($player->equipment) {
-        // Limit to the 2 best weapons
-        $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
-        foreach ($concerned_weapons as $item) {
-          $deltaXP = $deltaXP + $item->XP;
-        }
-        // Limit to 1 best protection
-        $concerned_protection = $player->equipment->find("category.name=protections, sort=-HP, limit=1");
-        foreach ($concerned_protection as $item) {
-          $deltaHP = $deltaHP + $item->HP;
-        }
-        if ($tHP < 0) { // Negative task
-          // Loss of 1 minimum whatever the equipment
-          if ( $tHP + $deltaHP >= 0 ) {
-            $deltaHP = abs($tHP) - 1;
-          }
-          // Get rid of weapons' bonus
-          $deltaXP = 0;
-        } else { // Positive task
-          $deltaHP = 0;
-        }
-        if ($tXP == 0) { // Task provides no XP gain, disable weapons
-          $deltaXP = 0;
-        }
-      }
-    } else {
-      preg_match("/\[\+([\d]+)U\.T\.\]/", $comment, $matches);
+    setDelta($player, $task);
+
+    // Calculate UT
+    if ($task->is("name=ut-action-v|ut-action-vv")) {
+      preg_match("/\[\+([\d]+)U\.T\.\]/", $task->comment, $matches);
       if ($matches[0]) {
         $player->underground_training = (int) $player->underground_training + $matches[1];
       } else {
@@ -110,123 +109,26 @@ function updateScore($player, $task, $comment = '', $refPage = false, $linkedId 
     }
 
     // Calculate player's new score
-    // Minus GC (0 if positive, costless, or needing extra action tasks, so no problem
     $player->GC = (int) $player->GC + $tGC;
     if ($player->coma == false) {
-      $player->oldHP = $player->HP; // Record previous HP for checkDeath function
-      $player->HP = (int) $player->HP + $tHP + $deltaHP;
-      $player->XP = (int) $player->XP + $tXP + $deltaXP;
+      $player->HP = (int) $player->HP + $tHP + $player->deltaHP;
+      $player->XP = (int) $player->XP + $tXP + $player->deltaXP;
     }
 
-    // Extra action?
-    if ($task->is("name=penalty")) { // Half GC if penalty
-      $player->GC = (int) round($player->GC/2);
-    }
-    if ($task->is("name=donation")) {
-      preg_match("/\d+/", $comment, $matches);
-      $player->GC = (int) $player->GC - $matches[0];
-      $amount = $matches[0];
-      $player->donation = (int) $player->donation + $amount;
-    }
-    if ($task->is("name=donated")) {
-      preg_match("/\d+/", $comment, $matches);
-      $player->GC = (int) $player->GC + $matches[0];
-    }
-    if ($task->is("name=fake-donator")) {
-      $player->donation = 0; // Reset donation indicator
-    }
-    if ($task->is("name=bought")) {
-      if ($refPage) {
-        $player->equipment->add($refPage);
-      }
-    }
-    if ($task->is("name=buy|free")) {
-      if ($refPage) {
-        $player->GC = (int) $player->GC-$refPage->GC;
-        // Add item if needed
-        if ($refPage->is("template=equipment|item")) {
-          switch($refPage->parent->name) {
-            case 'potions' : // instant use potions?
-              $player->HP = $player->HP + $refPage->HP;
-              if ($player->HP > 50) {
-                $player->HP = 50;
-              }
-              if ($refPage->name == 'health-potion' && $player->coma == 1) {
-                $player->coma = 0;
-              }
-              break;
-            case 'group-items' : // Make item available to each group member
-              $player->equipment->add($refPage);
-              $members = $pages->find("template=player, team=$player->team, group=$player->group, name!=$player->name");
-              foreach ($members as $p) {
-                $bought = $pages->get("name=bought");
-                $comment = $refPage->title." [unlocked]";
-                updateScore($p, $bought, $comment, $refPage, $linkedId, $real);
-              }
-              break;
-            default:
-              $player->equipment->add($refPage);
-              break;
-          }
-        }
-        // Add place if needed
-        if ($refPage->is("template=place")) {
-          $player->places->add($refPage);
-        }
-        // Add people if needed
-        if ($refPage->is("template=people")) {
-          $player->people->add($refPage);
-        }
-      }
-    }
-    if ($task->is("name=group-death|team-death")) { // No death because of others
-      if ($player->coma == false) {
-        if ($player->oldHP > 0 && $player->HP<=0) { $player->HP = 1; }
-      }
-    }
-    // Set fighting power
-    if ($player->fighting_power == '') {$player->fighting_power = 0; }
-    if ($task->is("name=test-rr")) {
-      $player->fighting_power = $player->fighting_power-2;
-    }
-    if ($task->is("name=test-r|wrong-invasion")) {
-      $player->fighting_power = $player->fighting_power-1;
-    }
-    if ($task->is("name=test-v|right-invasion")) {
-      $player->fighting_power = $player->fighting_power+1;
-    }
-    if ($task->is("name=test-vv")) {
-      $player->fighting_power = $player->fighting_power+2;
-    }
-    if ($player->fighting_power < 0) { $player->fighting_power = 0; }
-
-    if ($task->is("name=remove") && $refPage != false) { // Remove element
-      if ($refPage->template == 'place') {
-        $player->places->remove($refPage);
-      }
-      if ($refPage->template == 'people') {
-        $player->people->remove($refPage);
-      }
-      // Update Team score
-      updateTeamScores($player->team);
-    }
-
+    taskExtraAction($player, $task); // Extra action required according to the task
+    
     // Check GC, HP...
     if ($player->GC < 0) { $player->GC = 0; }
     if ($player->HP < 0) { $player->HP = 0; }
     if ($player->HP >= 50) { $player->HP = 50; }
+    if ($player->fighting_power < 0) { $player->fighting_power = 0; }
 
-    if ($player->coma == false) {
-      checkLevel($player);
-      
-      // Set karma
-      $player->karma = getKarma($player);
+    if ($player->coma == 0) {
+      setLevel($player); // Check if new level
+      $player->karma = setKarma($player); // Set karma (and store for cache)
     }
 
     if ($real == true) { // Save player's new scores if necessary
-      $player->of(false);
-      $player->save();
-
       // Publish on Newsboard?
       if ($task->is("name=penalty|buy|free|ut-action-v|ut-action-vv|bought|remove")) {
         $newsBoard = 1;
@@ -235,138 +137,262 @@ function updateScore($player, $task, $comment = '', $refPage = false, $linkedId 
       }
 
       // Set date for correct sorting
-      if ($task->is("name!=penalty|team-death|group-death")) {
-        $eDate = date('m/d/Y H:i:s', time());
-      } else {
-        $eDate = date('m/d/Y H:i:s', time()+1);
-      }
+      setEventDate($task);
+      
       // Save history
-      $newLinkedId = saveHistory($player, $task, $comment, $newsBoard, $refPage, $eDate, $linkedId);
+      $newLinkedId = saveHistory($player, $task, $newsBoard);
 
-      // Extra action?
-      setHomework($player);
-      if ($player->hkPb >= 3) { // Record a Hk penalty
-        $penalty = $pages->get("template=task, name=penalty"); 
-        $comment = 'Automatic homework penalty';
-        updateScore($player, $penalty, $comment, '', $newLinkedId, true);
-      }
-
-      if ($task->is("name=donation")) { // Donation, record the linked donated event
-        $comment = $amount. ' GC received from '.$player->title.' ['.$player->team->title.']';
-        $task = $pages->get("name=donated");
-        updateScore($refPage, $task, $comment, '', $newLinkedId, true);
-      }
-
-      if ($task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
-        $prevInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$refPage, sort=-date");
-        if ($prevInvasions->count() >= 2) {
-          $remove = $pages->get("template=task, name=remove");
-          $removeComment = '3rd wrong invasions on '.$refPage->title;
-          updateScore($player, $remove, $removeComment, $refPage, '', $real);
-        }
-      }
-
-      // Save new team scores (for cache) if necessary
-      $newNbEl = $player->places->count()+$player->people->count();
-      if ($newNbEl != $oldNbEl) {
-        updateTeamScores($player->team);
-      }
-
-      // Set Ambassador skill if necessary
-      if ($player->coma == false) {
-        $ambassador = $pages->get("name=ambassador");
-        if (checkStreak($player) == 10) {
-          $player->skills->add($ambassador);
-        } else {
-          $player->skills->remove($ambassador);
-        }
-      }
+      $player->of(false);
       $player->save();
     }
   } else { // Player died
-    if ($player->level > 1) { // Lose 1 level
-      $player->level = $player->level - 1;
-      $player->HP = 50;
-      // Lose all Gold Coins
-      $player->GC = 0;
-      // Set XP just below new level threshold
-      if ($player->level <= 4) {
-        $delta = 40+($player->level*10);
-      } else {
-        $delta = 90;
-      }
-      $threshold = ($player->level*10)+$delta;
-      $player->XP = $threshold-5;
-    } else { // Init player scores for a new start or set Coma state
-      if ($real == true) { // Avoid messing up with adminAction's recalculate
-        $prevDeath = $player->get("name=history")->get("template=event, sort=-date, task.name=death, limit=1");
-        $prevDeath->of(false);
-        preg_match("/\d+/", $prevDeath->summary, $matches);
-        $previousLevel = (int) $matches[0];
-      }
-      if ($previousLevel == 1) { // 2nd level 1 death in a row > Coma state
-        $player->coma = true;
-        $player->level = 1;
-        $player->HP = 50;
-        $player->GC = 0;
-        $player->XP = 0;
-        $player->karma = 0;
-      } else {
-        $player->level = 1;
-        $player->HP = 50;
-        $player->GC = 0;
-        $player->XP = round($player->XP/2);
-      }
+    // Check if previous death on level 1
+    if ($player->level == 1 && $real == true) { // Avoid messing up with adminAction's recalculate which manually sets previousLevel (hence the use of $real)
+      $prevDeath = $player->get("name=history")->get("template=event, sort=-date, task.name=death, limit=1");
+      $prevDeath->of(false);
+      preg_match("/\d+/", $prevDeath->summary, $matches);
+      $previousLevel = (int) $matches[0];
     }
-    // Lose all equipment but group-items
-    foreach($player->equipment as $e) {
-      if ($e->category->name != 'group-items') {
-        $player->equipment->remove($e);
-      }
-    }
+    resetPlayer($player, $previousLevel);
+
     if ($real == true) { // Save player's death if necessary
-      $eDate = date('m/d/Y H:i:s', time()+60);
-      $task = $pages->get("name=death");
-      if ($player->coma == 1) { $comment .= ' [Enter Coma state]'; }
-      $newLinkedId = saveHistory($player, $task, $comment, '', $refPage, $eDate, '');
+      $task->eDate = date('m/d/Y H:i:s', time()+60);
+      if ($player->coma == 1) { $task->comment .= ' [Enter Coma state]'; }
+      $newLinkedId = saveHistory($player, $task, 1);
       $player->of(false);
       $player->save();
-      // Team and group loss because of player's death if player is NOT in a coma state
-      if ($player->coma == false) {
-        $teamPlayers = $pages->find("template=player, team=$player->team")->not("$player->id");
-        $groupMembers = $teamPlayers->find("group=$player->group")->not("$player->id");
-        // Each group member suffers
-        foreach($groupMembers as $p) {
-          $groupDeath = $pages->get("name=group-death");
-          $comment = 'Group member died! ['.$player->title.']';
-          // Applies after the indicated date
-          if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
-            updateScore($p, $groupDeath, $comment, '', $newLinkedId, true);
-          }
-        }
-        // Each team member suffers
-        $teamMembers = $teamPlayers->find("group!=$player->group");
-        foreach($teamMembers as $p) {
-          $teamDeath = $pages->get("name=team-death");
-          $comment = 'Team member died! ['.$player->title.']';
-          // Applies after the indicated date
-          if (mktime(strftime("%H,%M,%S,%m,%d,%Y", $eDate)) > mktime(0,0,0,4,10,2016)) {
-            updateScore($p, $teamDeath, $comment, '', $newLinkedId, true);
-          }
-        }
+      if ($player->coma == 0) { // Team and group loss because of player's death if player is NOT in a coma state
+        updateTeamDeath($player, $newLinkedId, $eDate);
       }
     }
   }
   return $newLinkedId;
 }
 
+function setEventDate($task) { // Set date for correct sorting
+  if ($task->is("name!=penalty|team-death|group-death")) {
+    $task->eDate = date('m/d/Y H:i:s', time());
+  } else {
+    $task->eDate = date('m/d/Y H:i:s', time()+1);
+  }
+}
+
+function setDelta($player, $task) { // Ponderate task's impact according to player's equipment
+  $player->deltaXP = 0;
+  $player->deltaHP = 0;
+  // Except for training (core values are used)
+  if ($task->is("name!=ut-action-v|ut-action-vv")) {
+    if ($player->equipment) {
+      // Limit to the 2 best weapons
+      $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
+      foreach ($concerned_weapons as $item) {
+        $player->deltaXP = $player->deltaXP + $item->XP;
+      }
+      // Limit to 1 best protection
+      $concerned_protection = $player->equipment->find("category.name=protections, sort=-HP, limit=1");
+      foreach ($concerned_protection as $item) {
+        $player->deltaHP = $player->deltaHP + $item->HP;
+      }
+      if ($task->HP < 0) { // Negative task, loss of 1 minimum whatever the equipment
+        if ( $task->HP + $player->deltaHP >= 0 ) {
+          $player->deltaHP = abs($task->HP) - 1;
+        }
+        // Get rid of weapons' bonus
+        $player->deltaXP = 0;
+      } else { // Positive task
+        $player->deltaHP = 0;
+      }
+      if ($task->XP == 0) { // Task provides no XP gain, disable weapons
+        $player->deltaXP = 0;
+      }
+    }
+  }
+}
+
+function taskExtraAction($player, $task) {
+  if ($task->is("name=penalty")) { // Half GC if penalty
+    $player->GC = (int) round($player->GC/2);
+  }
+  if ($task->is("name=donation")) {
+    preg_match("/\d+/", $task->comment, $matches);
+    $player->GC = (int) $player->GC - $matches[0];
+    $task->amount = $matches[0];
+    $player->donation = (int) $player->donation + $task->amount;
+  }
+  if ($task->is("name=donated")) {
+    preg_match("/\d+/", $task->comment, $matches);
+    $player->GC = (int) $player->GC + $matches[0];
+  }
+  if ($task->is("name=fake-donator")) { // Reset donation indicator
+    $player->donation = 0;
+  }
+  if ($task->is("name=bought")) { // Add equipment
+    if ($task->refPage) {
+      $player->equipment->add($task->refPage);
+    }
+  }
+  if ($task->is("name=group-death|team-death")) { // No death because of others
+    if ($player->oldHP > 0 && $player->HP<=0) { $player->HP = 1; }
+  }
+  if ($task->is("name=test-rr")) {
+    $player->fighting_power = $player->fighting_power-2;
+  }
+  if ($task->is("name=test-r|wrong-invasion")) {
+    $player->fighting_power = $player->fighting_power-1;
+  }
+  if ($task->is("name=test-v|right-invasion")) {
+    $player->fighting_power = $player->fighting_power+1;
+  }
+  if ($task->is("name=test-vv")) {
+    $player->fighting_power = $player->fighting_power+2;
+  }
+  if ($task->is("name=remove")) { // Remove element
+    if ($task->refPage != false && $task->refPage->template == 'place') {
+      $player->places->remove($task->refPage);
+    }
+    if ($task->refPage != false && $task->refPage->template == 'people') {
+      $player->people->remove($task->refPage);
+    }
+    // Update Team score
+    updateTeamScores($player->team);
+  }
+  if ($task->is("name=free")) { // Add element
+    if ($task->refPage) {
+      $player->GC = (int) $player->GC-$task->refPage->GC;
+      // Add place if needed
+      if ($task->refPage->is("template=place")) {
+        $player->places->add($task->refPage);
+      }
+      // Add people if needed
+      if ($task->refPage->is("template=people")) {
+        $player->people->add($task->refPage);
+      }
+    }
+  } 
+  if ($task->is("name=buy")) { // Add equipment
+    if ($task->refPage) {
+      $player->GC = (int) $player->GC-$task->refPage->GC;
+      // Add item if needed
+      if ($task->refPage->is("template=equipment|item")) {
+        switch($task->refPage->parent->name) {
+          case 'potions' : // instant use potions?
+            $player->HP = $player->HP + $task->refPage->HP;
+            if ($player->HP > 50) {
+              $player->HP = 50;
+            }
+            if ($task->refPage->is("name=health-potion") && $player->coma == 1) {
+              $player->coma = 0;
+            }
+            break;
+          case 'group-items' : // Make item available to each group member
+            $player->equipment->add($task->refPage);
+            $members = $pages->find("template=player, team=$player->team, group=$player->group, name!=$player->name");
+            foreach ($members as $p) {
+              $task = $pages->get("name=bought");
+              $task->comment = $task->refPage->title." [unlocked]";
+              $task->linkedId = $linkedId;
+              updateScore($p, $task, $real);
+            }
+            break;
+          default:
+            $player->equipment->add($task->refPage);
+            break;
+        }
+      }
+    }
+  }
+}
+
+function extraActionAfterSave($player, $historyPage) {
+  $pages = wire('pages');
+  setHomework($player); // Set hk counter over the official period
+  if ($player->hkPb >= 3) { // Record a Hk penalty
+    $task = $pages->get("template=task, name=penalty"); 
+    $task->comment = 'Automatic homework penalty';
+    $task->refPage = false;
+    $task->linkedId = $historyPage->id;
+    updateScore($player, $task, true);
+  }
+
+  if ($historyPage->task->is("name=donation")) {  // Donation, record the linked donated event
+    $task = $pages->get("name=donated");
+    preg_match("/\d+/", $historyPage->comment, $matches);
+    $amount = $matches[0];
+    $task->comment = $amount. ' GC received from '.$player->title.' ['.$player->team->title.']';
+    $task->refPage = $historyPage->refPage;
+    $task->linkedId = $historyPage->id;
+    updateScore($player, $task, true);
+  }
+
+  if ($historyPage->task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
+    $prevInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date"); // TODO : Limit to official period?
+    if ($prevInvasions->count() >= 2) {
+      $task = $pages->get("template=task, name=remove");
+      $task->comment = '3rd wrong invasions on '.$historyPage->refPage->title;
+      $task->refPage = $historyPage->refPage;
+      $task->linkedId = false;
+      updateScore($player, $task, $real);
+    }
+  }
+  
+  // Save new team scores (for cache) if necessary
+  $newNbEl = $player->places->count()+$player->people->count();
+  if ($newNbEl != $player->oldNbEl) {
+    updateTeamScores($player->team);
+  }
+
+  // Set Ambassador skill if necessary
+  if ($player->coma == false) {
+    $role = $pages->get("name=ambassador");
+    if (checkStreak($player) == 10) {
+      $player->skills->add($role);
+    } else {
+      $player->skills->remove($role);
+    }
+  }
+}
+
 function checkDeath($player, $real=true) {
   $pages = wire('pages');
   if ($player->HP <= 0) {
-    $comment = 'Player died. [old level:'.$player->level.']';
     $task = $pages->get("name=death");
-    updateScore($player, $task, $comment, '', '', true);
+    $task->comment = 'Player died. [old level:'.$player->level.']';
+    $task->refPage = false;
+    $task->linkedId = false;
+    updateScore($player, $task, true);
   }
+}
+
+function updateTeamDeath($player, $linkedId, $eDate) {
+  $pages = wire('pages');
+  $teamPlayers = $pages->find("template=player, team=$player->team")->not("$player->id");
+  $teamDeath = $pages->get("name=team-death");
+  $teamDeath->comment = 'Team member died! ['.$player->title.']';
+  $teamDeath->linkedId = $linkedId;
+  $groupMembers = $teamPlayers->find("group=$player->group");
+  $groupDeath = $pages->get("name=group-death");
+  $groupDeath->comment = 'Group member died! ['.$player->title.']';
+  $groupDeath->linkedId = $linkedId;
+  // Each group member suffers
+  foreach($groupMembers as $p) {
+    updateScore($p, $groupDeath, true);
+    // No need to checkDeath because dying because of others is impossible
+  }
+  // Each team member suffers
+  $teamMembers = $teamPlayers->find("group!=$player->group");
+  foreach($teamMembers as $p) {
+    updateScore($p, $teamDeath, true);
+    // No need to checkDeath because dying because of others is impossible
+  }
+}
+function getLevelThreshold($level) {
+  if ($level <= 4) {
+    $delta = 40+($level*10);
+  } else {
+    $delta = 90;
+  }
+  $threshold = ($level*10)+$delta;
+  return $threshold;
 }
 
 function checkStreak($player) {
@@ -383,14 +409,9 @@ function checkStreak($player) {
   return $streak;
 }
 
-function checkLevel($player) {
+function setLevel($player) {
   // Check new level
-  if ($player->level <= 4) {
-    $delta = 40+($player->level*10);
-  } else {
-    $delta = 90;
-  }
-  $threshold = ($player->level*10)+$delta;
+  $threshold = getLevelThreshold($player->level);
   if ($player->XP >= $threshold) {
     $player->level = $player->level + 1;
     $player->XP = $player->XP - $threshold;
@@ -460,7 +481,7 @@ function displayPlayerScores($player, $type='new') {
   return $out;
 }
 
-function getKarma($player) {
+function setKarma($player) {
   // Karma calculated from all values (except GC and Donations)
   if ($player->level > 1) {
     for ($i=1; $i<=$player->level; $i++) {
@@ -492,24 +513,13 @@ function groupBonus($players) {
     }
   }
   return $nbBonus;
-  /*
-  foreach( $players as $player) {
-    array_push($nbPlaces, $player->places->count); 
-  }
-  // All players have the same number of places, then +30 bonus
-  $same = array_count_values($nbPlaces);
-  print_r($same);
-  if ( count(array_unique($nbPlaces)) == 1) {
-    return 30;
-  }
-  */
 }
 
-function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $eDate = 'unset', $linkedId = '') {
+function saveHistory($player, $task, $newsBoard = 0) {
   $p = new Page();
   $p->template = 'event';
   $history = $player->child("name=history");
-  if (!$history->id) { // Creation of history page if doesn't exist
+  if (!$history->id) { // Creation of history page if it doesn't exist
     $history = new Page();
     $history->parent = $player;
     $history->template = 'archive';
@@ -518,19 +528,17 @@ function saveHistory($player, $task, $comment, $newsBoard = 0, $refPage = '', $e
     $history->save();
   }
   $p->parent = $history;
-  // Get today's date by default, changeable in backend if needed)
-  if ($eDate == 'unset') {
-    date_default_timezone_set('Paris/France');
-    $eDate = date('m/d/Y H:i:s', time());
-  }
-  $p->date = $eDate;
+  $p->date = $task->eDate;
   $p->title = str_replace('&#039;', '\'', $task->title);
   $p->task = $task;
-  if ($refPage) { $p->refPage = $refPage; }
-  $p->summary = $comment;
+  if ($task->refPage) { $p->refPage = $task->refPage; }
+  $p->summary = $task->comment;
   $p->publish = $newsBoard;
-  $p->linkedId = $linkedId;
+  $p->linkedId = $task->linkedId;
   $p->save(); 
+
+  // Extra action ?
+  extraActionAfterSave($player, $p);
 
   return $p->id;
 }
