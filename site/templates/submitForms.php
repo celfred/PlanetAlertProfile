@@ -35,8 +35,10 @@
       if($input->post->buyFormSubmit) { // buyForm submitted
         $player = $pages->get($playerId);
         $task = $pages->get("name='buy'");
-        $taskComment = $newItem->title;
-        updateScore($player, $task, $taskComment, $newItem, '', true);
+        $task->comment = $newItem->title;
+        $task->refPage = $newItem;
+        $task->linkedId = false;
+        updateScore($player, $task, true);
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->team->title."\r\n";
@@ -63,8 +65,10 @@
           }
 
           // Update player's scores and save
-          $taskComment = $newItem->title;
-          updateScore($player, $task, $taskComment, $newItem, '', true);
+          $task->comment = $newItem->title;
+          $task->refPage = $newItem;
+          $task->linkedId = false;
+          updateScore($player, $task, true);
 
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
@@ -90,8 +94,10 @@
         if ($player && $receiverId && $amount != 0 && $amount <= $player->GC) {
           // Modify player's page
           $task = $pages->get("template='task', name='donation'");
-          $taskComment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->team->title.']';
-          updateScore($player, $task, $taskComment, $receiver, '', true);
+          $task->comment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->team->title.']';
+          $task->refPage = $receiver;
+          $task->linkedId = false;
+          updateScore($player, $task, true);
 
           // Notify admin
           $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
@@ -141,8 +147,10 @@
 
         // Update player's scores and save
         $task = $pages->get($taskId); 
-        $taskComment = trim($input->post->$comment);
-        updateScore($player, $task, $taskComment, '', '', true);
+        $task->comment = trim($input->post->$comment);
+        $task->refPage = false;
+        $task->linkedId = false;
+        updateScore($player, $task, true);
       }
       // Check death for each player
       for ($i=0; $i<count($checked); $i++) {
@@ -173,9 +181,11 @@
         if ($refPage->is("template=equipment|item")) {
           $task = $pages->get("name=buy");
         }
-        $taskComment = $refPage->title;
+        $task->comment = $refPage->title;
+        $task->refPage = $refPage;
+        $task->linkedId = false;
         if ($task->id) {
-          updateScore($player, $task, $taskComment, $refPage, '', true);
+          updateScore($player, $task, true);
         }
 
       }

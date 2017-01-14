@@ -20,7 +20,9 @@
       }
 
       if ($monster->id && $player->id && $task->id) {
-        $taskComment = $monster->title.' [+'.$result.'U.T.]';
+        $task->comment = $monster->title.' [+'.$result.'U.T.]';
+        $task->refPage = $monster;
+        $task->linkedId = false;
         // test if training is possible
         $monster = isTrainingAllowed($player, $monster);
         if ($monster->isTrainable == 0 || $monster->spaced != 0) {
@@ -28,7 +30,7 @@
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result. ' - Training not allowed!';
           $log->save('underground-training', $logText);
         } else {
-          updateScore($player, $task, $taskComment, $monster, '', true);
+          updateScore($player, $task, true);
           // Check if new record
           $utGain = utGain($monster, $player);
           if ($utGain > $monster->best) {
@@ -74,7 +76,9 @@
       echo 'Before Saving';
       if ($monster->id && $player->id && $task->id) {
         // Update player's scores
-        $taskComment = $monster->title.' ['.$result.']';
+        $task->comment = $monster->title.' ['.$result.']';
+        $task->refPage = $monster;
+        $task->linkedId = false;
         // test if fight is possible
         $monster = isFightAllowed($player, $monster);
         if ($monster->isFightable == 0) {
@@ -82,7 +86,7 @@
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality.' - Fight not allowed!';
           $log->save('monster-fights', $logText);
         } else {
-          updateScore($player, $task, $taskComment, $monster, '', true);
+          updateScore($player, $task, true);
           checkDeath($player, true);
 
           // Record to log file
