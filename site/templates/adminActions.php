@@ -707,6 +707,7 @@
                   $out .= ' ['.$dead->title.']';
                 }
               }
+              $e->task->comment = $comment;
               $e->task->refPage = $e->refPage; // Just take refPage for scores calculation (no linkedId, no comment because complete history is not re-written
               updateScore($selectedPlayer, $e->task, false);
               // Test if player died
