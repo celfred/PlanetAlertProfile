@@ -139,25 +139,26 @@
       /* foreach($checkedPlayers as $plyr_task=>$state) { */
         /* list($playerId, $taskId) = explode('_', $plyr_task); */
       // Record checked task for each player
+      $allCheckedPlayers = new pageArray();
       for ($i=0; $i<count($checked); $i++) {
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $comment = 'comment_'.$playerId.'_'.$taskId;
 
         $player = $pages->get($playerId);
+        $allCheckedPlayers->add($player);
 
         // Update player's scores and save
         $task = $pages->get($taskId); 
         $task->comment = trim($input->post->$comment);
         $task->refPage = false;
         $task->linkedId = false;
-        updateScore($player, $task, true);
+        updateScore($player, $task, false);
       }
       // Check death for each player
-      for ($i=0; $i<count($checked); $i++) {
-        list($playerId, $taskId) = explode('_', $checked[$i]);
-        $player = $pages->get($playerId);
-        checkDeath($player, true);
+      foreach($allCheckedPlayers as $p) {
+        checkDeath($player, false);
       }
+
       // Redirect to team page
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
       $url = $pages->get('/players')->url.$player->team->name;
