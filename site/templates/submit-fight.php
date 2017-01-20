@@ -31,6 +31,7 @@
           $log->save('underground-training', $logText);
         } else {
           updateScore($player, $task, true);
+          // No need to checkDeath, Underground Training can't cause death
           // Check if new record
           $utGain = utGain($monster, $player);
           if ($utGain > $monster->best) {

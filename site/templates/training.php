@@ -2,7 +2,7 @@
   include("./head.inc"); 
 
   // Test player login
-  if ($player && $user->isLoggedin() || $user->isSuperuser()) {
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $player->team->forceHelmet == 1) {
@@ -63,9 +63,14 @@
           $out .= '</thead>';
           $out .= '<tbody>';
         foreach($allMonsters as $m) {
-          $m = isTrainingAllowed($player, $m);
-          // Get previous player's statistics
-          $prevUt = $player->find('template=event,refPage='.$result->id.', sort=-date');
+          if (!$user->isSuperuser()) {
+            $m = isTrainingAllowed($player, $m);
+          } else { // Never trained (for admin)
+            $m->isTrainable = 1;
+            $m->lastTrainingDate = 0;
+            $m->interval = -1;
+            $m->spaced = 0;
+          }
           $out .= '<tr>';
           $out .= '<td>';
           $out .= $m->title;
@@ -212,14 +217,10 @@
               $out .= 'Come back in '.$m->spaced.' days ;)';
             }
           }
-          // Admin access
-          if ($user->isSuperuser()) {
-            $out .= ' <a class="label label-sm label-success" href="'.$page->url.'?id='.$m->id.'">Put the helmet on!</a>';
-          }
           $out .= '</td>';
           // Find best trained player on this monster
           if ($m->mostTrained) {
-            if ($m->mostTrained == $player) {
+            if (isset($player) && $m->mostTrained == $player) {
               $class = 'success';
             } else {
               $class = 'primary';
@@ -241,13 +242,24 @@
         $monster = $pages->get($input->get->id);
         $redirectUrl = $pages->get('name=underground-training')->url;
 
-        $monster = isTrainingAllowed($player, $monster);
+        if (!$user->isSuperuser()) {
+          $monster = isTrainingAllowed($player, $monster);
+        } else { // Never trained (for admin)
+          $monster->isTrainable = 1;
+          $monster->lastTrainingDate = 0;
+          $monster->interval = -1;
+          $monster->spaced = 0;
+        }
         if ($monster->isTrainable == 0) { // Not allowed because of spaced repetition.
           // Redirect to training page
           $session->redirect($redirectUrl);
         } else { // Ok, let's start the training session !
           $out .= '<div ng-app="exerciseApp">';
-          $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
+          if (isset($player)) {
+            $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
+          } else {
+            $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$monster.'\', \''.$redirectUrl.'\', \'0\', \''.$pages->get("name=submit-fight")->url.'\')">';
+          }
           if ($monster->id) { // Training session starts
             $out .= '<h3>Memory helmet programmed : '. $monster->summary.'</h3> ';
 
@@ -268,7 +280,9 @@
             }
             $out .= '</div>';
             $out .= '<div class="panel-footer">';
-            $out .= '<p>Your global UT for this monster: '.utGain($monster, $player).'</p>';
+            if (!$user->isSuperuser()) {
+              $out .= '<p>Your global UT for this monster: '.utGain($monster, $player).'</p>';
+            }
             $out .= '</div>';
             $out .= '</div>';
             /* $out .= '<h1><span class="glyphicon glyphicon-warning-sign"></span> Don\'t forget to save your result!</h1>'; */
@@ -313,7 +327,7 @@
             $out .= '<button ng-click="dodge()" class="btn btn-danger">I don\'t know</button>';
             $out .= '<span class="pull-right">';
             $out .= '<span class="avatarContainer">';
-            if ($player->avatar) {
+            if (isset($player) && $player->avatar) {
               $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
             }
             if ($helmet->image) {

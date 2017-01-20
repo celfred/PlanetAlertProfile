@@ -28,7 +28,7 @@ function getMultiDimensional($values, $prefix) {
 
 function initPlayer($player) {
   // Get previous score from last archived page
-  $prevScores = $player->find("template=archive, name!=history")->sort("date")->last();
+  $prevScores = $player->get("template=archive, name!=history, sort=-date");
   if ($prevScores->id) {
     $player->karma = $prevScores->karma;
     $player->HP = 50;
@@ -40,6 +40,8 @@ function initPlayer($player) {
     $player->donation = $prevScores->donation;
     $player->underground_training = $prevScores->underground_training;
     $player->fighting_power = $prevScores->fighting_power;
+    $player->hkcount = $prevScores->hkcount;
+    $player->coma = 0;
   } else {
     $player->karma = 0;
     $player->HP = 50;
@@ -49,9 +51,11 @@ function initPlayer($player) {
     $player->donation = 0;
     $player->underground_training = 0;
     $player->fighting_power = 0;
+    $player->hkcount = 0;
     $player->equipment->removeAll();
     $player->places->removeAll();
     $player->people->removeAll();
+    $player->coma = 0;
   }
   return $player;
 }
@@ -115,7 +119,7 @@ function updateScore($player, $task, $real = true) {
       $player->XP = (int) $player->XP + $tXP + $player->deltaXP;
     }
 
-    taskExtraAction($player, $task); // Extra action required according to the task
+    taskExtraAction($player, $task); // Before saving extra action required according to the task
     
     // Check GC, HP...
     if ($player->GC < 0) { $player->GC = 0; }
@@ -135,38 +139,38 @@ function updateScore($player, $task, $real = true) {
       } else {
         $newsBoard = 0;
       }
-
       // Set date for correct sorting
       setEventDate($task);
-      
       // Save history
-      $newLinkedId = saveHistory($player, $task, $newsBoard);
-
+      $historyPage = saveHistory($player, $task, $newsBoard);
       $player->of(false);
       $player->save();
+    } else {
+      $historyPage = '';
     }
   } else { // Player died
-    // Check if previous death on level 1
-    if ($player->level == 1 && $real == true) { // Avoid messing up with adminAction's recalculate which manually sets previousLevel (hence the use of $real)
-      $prevDeath = $player->get("name=history")->get("template=event, sort=-date, task.name=death, limit=1");
-      $prevDeath->of(false);
-      preg_match("/\d+/", $prevDeath->summary, $matches);
-      $previousLevel = (int) $matches[0];
-    }
-    resetPlayer($player, $previousLevel);
-
     if ($real == true) { // Save player's death if necessary
+      // Check if previous death on level 1
+      if ($player->level == 1) {
+        $prevDeath = $player->get("name=history")->get("template=event, sort=-date, task.name=death, limit=1");
+        $prevDeath->of(false);
+        preg_match("/\d+/", $prevDeath->summary, $matches);
+        $previousLevel = (int) $matches[0];
+      }
+      resetPlayer($player, $previousLevel);
       $task->eDate = date('m/d/Y H:i:s', time()+60);
       if ($player->coma == 1) { $task->comment .= ' [Enter Coma state]'; }
-      $newLinkedId = saveHistory($player, $task, 1);
+      $historyPage = saveHistory($player, $task, 1);
       $player->of(false);
       $player->save();
-      if ($player->coma == 0) { // Team and group loss because of player's death if player is NOT in a coma state
-        updateTeamDeath($player, $newLinkedId, $eDate);
-      }
+    } else {
+      $historyPage = '';
     }
   }
-  return $newLinkedId;
+  if ($historyPage) {
+    extraActionAfterSave($player, $historyPage);
+    return $historyPage->id;
+  }
 }
 
 function setEventDate($task) { // Set date for correct sorting
@@ -210,8 +214,10 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
 }
 
 function taskExtraAction($player, $task) {
-  if ($task->is("name=penalty")) { // Half GC if penalty
-    $player->GC = (int) round($player->GC/2);
+  $pages = wire('pages');
+  if ($task->is("name=penalty")) {
+    $player->GC = (int) round($player->GC/2); // Half GC if penalty
+    $player->hkcount = 0; // Reset current hkcount
   }
   if ($task->is("name=donation")) {
     preg_match("/\d+/", $task->comment, $matches);
@@ -245,6 +251,12 @@ function taskExtraAction($player, $task) {
   }
   if ($task->is("name=test-vv")) {
     $player->fighting_power = $player->fighting_power+2;
+  }
+  if ($task->is("name=no-homework|material")) {
+    $player->hkcount++;
+  }
+  if ($task->is("name=homework-half-done|signature")) {
+    $player->hkcount += 0.5;
   }
   if ($task->is("name=remove")) { // Remove element
     if ($task->refPage != false && $task->refPage->template == 'place') {
@@ -305,23 +317,25 @@ function taskExtraAction($player, $task) {
 
 function extraActionAfterSave($player, $historyPage) {
   $pages = wire('pages');
-  setHomework($player); // Set hk counter over the official period
-  if ($player->hkPb >= 3) { // Record a Hk penalty
-    $task = $pages->get("template=task, name=penalty"); 
-    $task->comment = 'Automatic homework penalty';
-    $task->refPage = false;
-    $task->linkedId = $historyPage->id;
-    updateScore($player, $task, true);
+  if ($historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Hk problem, check for a Automatic Penalty
+    if ($player->hkcount >= 3) { // Record a Hk penalty
+      $task = $pages->get("template=task, name=penalty"); 
+      $task->comment = 'Automatic homework penalty';
+      $task->refPage = false;
+      $task->linkedId = $historyPage->id;
+      updateScore($player, $task, true);
+    }
   }
 
   if ($historyPage->task->is("name=donation")) {  // Donation, record the linked donated event
     $task = $pages->get("name=donated");
-    preg_match("/\d+/", $historyPage->comment, $matches);
+    preg_match("/\d+/", $historyPage->summary, $matches);
     $amount = $matches[0];
     $task->comment = $amount. ' GC received from '.$player->title.' ['.$player->team->title.']';
-    $task->refPage = $historyPage->refPage;
+    $task->refPage = $player;
+    $receiverPlayer = $historyPage->refPage;
     $task->linkedId = $historyPage->id;
-    updateScore($player, $task, true);
+    updateScore($receiverPlayer, $task, true);
   }
 
   if ($historyPage->task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
@@ -331,7 +345,17 @@ function extraActionAfterSave($player, $historyPage) {
       $task->comment = '3rd wrong invasions on '.$historyPage->refPage->title;
       $task->refPage = $historyPage->refPage;
       $task->linkedId = false;
-      updateScore($player, $task, $real);
+      updateScore($player, $task, true);
+    }
+  }
+  
+  if ($player->coma == 0) {
+    // Set Ambassador skill if necessary
+    $role = $pages->get("name=ambassador");
+    if (checkStreak($player) == 10) {
+      $player->skills->add($role);
+    } else {
+      $player->skills->remove($role);
     }
   }
   
@@ -339,16 +363,6 @@ function extraActionAfterSave($player, $historyPage) {
   $newNbEl = $player->places->count()+$player->people->count();
   if ($newNbEl != $player->oldNbEl) {
     updateTeamScores($player->team);
-  }
-
-  // Set Ambassador skill if necessary
-  if ($player->coma == false) {
-    $role = $pages->get("name=ambassador");
-    if (checkStreak($player) == 10) {
-      $player->skills->add($role);
-    } else {
-      $player->skills->remove($role);
-    }
   }
 }
 
@@ -359,13 +373,16 @@ function checkDeath($player, $real=true) {
     $task->comment = 'Player died. [old level:'.$player->level.']';
     $task->refPage = false;
     $task->linkedId = false;
-    updateScore($player, $task, true);
+    $historyPageId = updateScore($player, $task, true);
+    if ($player->coma == 0 && $historyPageId != 0) { // Player died and not in coma
+      updateTeamDeath($player, $historyPageId); // Record death for others
+    }
   }
 }
 
-function updateTeamDeath($player, $linkedId, $eDate) {
+function updateTeamDeath($player, $linkedId) {
   $pages = wire('pages');
-  $teamPlayers = $pages->find("template=player, team=$player->team")->not("$player->id");
+  $teamPlayers = $pages->find("template=player, team=$player->team, id!=$player->id");
   $teamDeath = $pages->get("name=team-death");
   $teamDeath->comment = 'Team member died! ['.$player->title.']';
   $teamDeath->linkedId = $linkedId;
@@ -398,7 +415,7 @@ function getLevelThreshold($level) {
 function checkStreak($player) {
   // Set Ambassador skill if necessary
   $streak = 0;
-  $lastEvents = $player->get("name=history")->find("template=event, sort=-date")->not("task.name=donated|donation|absent, limit=10");
+  $lastEvents = $player->get("name=history")->find("template=event, sort=-date, limit=10, task.name!=donated|donation|absent");
   foreach ($lastEvents as $e) {
     if ($e->task->HP >= 0) {
       $streak++;
@@ -483,9 +500,10 @@ function displayPlayerScores($player, $type='new') {
 
 function setKarma($player) {
   // Karma calculated from all values (except GC and Donations)
+  $levelKarma = 0;
   if ($player->level > 1) {
     for ($i=1; $i<=$player->level; $i++) {
-      $levelKarma = $levelKarma + (($i*10)+90);
+      $levelKarma = ($i*10)+90;
     }
     $karma = $levelKarma + $player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
   } else {
@@ -516,8 +534,6 @@ function groupBonus($players) {
 }
 
 function saveHistory($player, $task, $newsBoard = 0) {
-  $p = new Page();
-  $p->template = 'event';
   $history = $player->child("name=history");
   if (!$history->id) { // Creation of history page if it doesn't exist
     $history = new Page();
@@ -527,6 +543,9 @@ function saveHistory($player, $task, $newsBoard = 0) {
     $history->title = 'history';
     $history->save();
   }
+  $p = new Page();
+  $p->of(false);
+  $p->template = 'event';
   $p->parent = $history;
   $p->date = $task->eDate;
   $p->title = str_replace('&#039;', '\'', $task->title);
@@ -536,11 +555,7 @@ function saveHistory($player, $task, $newsBoard = 0) {
   $p->publish = $newsBoard;
   $p->linkedId = $task->linkedId;
   $p->save(); 
-
-  // Extra action ?
-  extraActionAfterSave($player, $p);
-
-  return $p->id;
+  return $p;
 }
 
 function pick_question($player) {
@@ -785,6 +800,8 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   if ($nbBonus >= 8 || $player->ut->count() >= 50) { $player->motivation = 'VV'; }
   if (($nbBonus >= 3 && $nbBonus < 8) || ($player->ut->count() >= 20 && $player->ut->count() < 50)) { $player->motivation = 'V'; }
   if ($nbBonus < 3) { $player->motivation = 'No bonus for the moment'; }
+
+  return $pb;
 }
 
 function setAttitude($player, $dateStart='', $dateEnd='') {
@@ -825,16 +842,20 @@ function getScoreboard($player, $field, $limit=5) {
       $allPlayers = $pages->find('template=player, name!=test, sort=-underground_training, sort=-karma, underground_training>0');
       break;
     case 'group' :
-      $allPlayers = $pages->find('template=player, name!=test, ');
-      $allGroups = $pages->get('/groups')->children;
+      $allPlayers = $pages->find('template=player, name!=test');
+      $allGroups = $pages->get('/groups')->children();
       $index = 0;
       foreach( $allGroups as $group) {
         // Find selected players
         $players = $allPlayers->find("group=$group");
         // Get rid of unused groups
-        if ($players->count == 0) {
+        if ($players->count() == 0) {
           unset($allGroups[$index]);
         }
+        $index++;
+      }
+      foreach( $allGroups as $group) {
+        $players = $allPlayers->find("group=$group");
         // Check for group bonus
         $group->nbBonus = groupBonus($players);
         $group->karma = $group->nbBonus*30;
@@ -847,7 +868,6 @@ function getScoreboard($player, $field, $limit=5) {
           $group->details .= $p->title.' - ';
           $group->team = $p->team;
         }
-        $index++;
       }
       $allPlayers = $allGroups->sort('-karma');
       break;
@@ -953,7 +973,7 @@ function isFightAllowed($player, $monster) {
     // Check last fight interval
     $allFights = $player->find("template=event, task.name=test-vv|test-v|test-r|test-rr, refPage=$monster, sort=-date");
     $lastFight = $allFights->first();
-    if ($lastFight->id) {
+    if ($lastFight) {
       $monster->allFightsNb = $allFights->count();
       // Find # of days compared to today
       $date1 = new DateTime("today");
@@ -980,6 +1000,7 @@ function isFightAllowed($player, $monster) {
 }
 
 function utGain($monsterId, $player, $startDate='', $endDate='') {
+  $utGain = 0;
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
   $prevUt = $player->find("template=event,refPage=$monsterId, date>$startDate, date<$endDate, sort=-date");
@@ -1204,7 +1225,7 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
   $rrEvents = $allEvents->find("task.name=communication-rr");
   $player->absent = $absent;
   if ($player->nbPart > 0) {
-    $ratio = round(($vvEvents->count()*2+$vEvents->count()-$rEvents-$rrEvents->count()*2)/$player->nbPart, 1);
+    $ratio = round(($vvEvents->count()*2+$vEvents->count()-$rEvents->count()-$rrEvents->count()*2)/$player->nbPart, 1);
     if ($ratio >= 1.5) { $player->participation = 'VV'; }
     if ($ratio < 1.5 && $ratio > 0.3) { $player->participation = 'V'; }
     if ($ratio <= 0.3 && $ratio > -0.4) { $player->participation = 'R'; }

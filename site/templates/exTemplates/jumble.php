@@ -7,7 +7,7 @@
   }
 
   $redirectUrl = $pages->get("name=fighting-zone")->url;
-  $out = '<div ng-controller="FightCtrl" ng-init="init(\''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
+  $out = '<div ng-controller="FightCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
 
   $out .= '<h2 class="row well text-center">';
   $out .= '<span class="label label-default">Monster fight</span>';

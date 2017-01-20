@@ -310,10 +310,11 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		}
 	});
 
-  $scope.init = function(exerciseId, redirectUrl, playerId, weaponRatio, protectionRatio, submitUrl) {
+  $scope.init = function(service, exerciseId, redirectUrl, playerId, weaponRatio, protectionRatio, submitUrl) {
     $scope.playerPower += parseInt(weaponRatio);
     $scope.monsterPower -= parseInt(protectionRatio);
-		var url = 'service-pages/?template=exercise&id='+exerciseId;
+		// var url = '/service-pages/?template=exercise&id='+exerciseId;
+		var url = service+'?template=exercise&id='+exerciseId;
 		myData.getData(url).then( function(exerciseData) {
 			$scope.exType = exerciseData['exType'];
 			myData.parseData();
@@ -585,8 +586,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		}
 	});
 
-  $scope.init = function(exerciseId, redirectUrl, playerId, submitUrl) {
-		var url = 'service-pages/?template=exercise&id='+exerciseId;
+  $scope.init = function(service, exerciseId, redirectUrl, playerId, submitUrl) {
+		var url = service+'?template=exercise&id='+exerciseId;
 		myData.getData(url).then( function(exerciseData) {
 			$scope.exType = exerciseData['exType'];
 			myData.parseData();

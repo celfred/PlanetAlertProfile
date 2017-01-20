@@ -4,14 +4,18 @@
 
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
-  $team = $pages->get("template=team, name=$input->urlSegment1");
+  $team = $allTeams->get("name=$input->urlSegment1");
   $rank = $team->rank->name;
-  $allPlayers = $pages->find("template=player, team=$team, sort=group");
+  if ($input->urlSegment1 != 'no-team') {
+    $allPlayers = $allPlayers->find("team=$team, sort=group"); // Limit to team players
+  } else {
+    $allPlayers = $pages->find("template=player, team.name=no-team");
+  }
   // Build allGroups
   $allGroups = new PageArray();
-  foreach( $allPlayers as $p) {
+  foreach($allPlayers as $p) {
     $nbEl = 0;
-    if (!in_array($p->group, $allGroups)) {
+    if (!in_array($p->group, $allGroups->getArray())) {
       $allGroups->add($p->group);
     }
     if ( $rank == '4emes' || $rank == '3emes' ) {
@@ -81,8 +85,8 @@
   echo $outGroups;
 
   // New PHP table
-  $out = '<table id="teamTable" class="table table-hover table-condensed teamView">';
   $allPlayers->sort('-karma, -XP');
+  $out = '<table id="teamTable" class="table table-hover table-condensed teamView">';
   $out .= '<thead>';
   $out .= '<tr>';
   $out .= '<th data-toggle="tooltip" title="Group"><span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></th>';
@@ -114,9 +118,8 @@
     }
     // Get last recorded events
     // Get last event date
-    $lastEvent = $player->child("name='history'")->children("sort=-date")->first();
-    // Get all events on same day
-    $prevDay = date("m/d/Y", $lastEvent->date);
+    $lastEvent = $player->child("name=history")->child("sort=-date");
+    $prevDay = date("m/d/Y", $lastEvent->date); // Get all events on same day
     $prevDate = $prevDay.' 0:0:0'; // Select events for the whole day
     $prevEvents = $player->child("name='history'")->children("date>=$prevDate");
     $trend = '';
@@ -137,9 +140,8 @@
     }
     // Set hk counter
     if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $player->login)) { // Admin is logged or user
-      setHomework($player);
-      if ($player->hkPb > 0) {
-        $hkCount = '&nbsp;<span class="label label-danger">'.$player->hkPb.'</span>';
+      if ($player->hkcount > 0) {
+        $hkCount = '&nbsp;<span class="label label-danger">'.$player->hkcount.'</span>';
       } else {
         $hkCount = '';
       }
@@ -255,4 +257,4 @@
   echo $out;
 ?>
 
-</div> <!-- /teamCtrl -->
+</div>

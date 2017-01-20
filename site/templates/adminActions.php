@@ -1,8 +1,8 @@
 <?php /* adminActions template */
+  $out = '';
   if (!$config->ajax) {
     include("./head.inc"); 
     $allTeams = $pages->find("template=team")->sort("title");
-    $out = '';
     if ($user->isSuperuser()) {
       $action = $input->urlSegment1;
       $allPlayers->sort("team.name, title");
@@ -739,6 +739,7 @@
                     $unique = false;
                   } else {
                     $out .= '<span class="label label-danger">Previous Death?</span>';
+                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'">Add death here?</button>';
                   }
                 }
               }
@@ -785,6 +786,16 @@
         $page->of(false);
         $page->periods = $periodId;
         $page->save();
+        $allPlayers = $pages->find("template=player");
+        foreach($allPlayers as $p) {
+          $newCount = setHomework($p);
+          bd($newCount.'-'.$p->name);
+          if ($newCount != $p->hkcount) {
+            $p->hkcount = $newCount;
+            $p->of(false);
+            $p->save();
+          }
+        }
         break;
       case 'setScores':
         $out = '';

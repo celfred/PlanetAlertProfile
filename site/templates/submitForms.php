@@ -39,11 +39,12 @@
         $task->refPage = $newItem;
         $task->linkedId = false;
         updateScore($player, $task, true);
+        // No need to checkDeath, Buyform can't cause death
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->team->title."\r\n";
         $msg .= "Item : ". $newItem->title;
-        if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+        if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
           mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
@@ -69,12 +70,13 @@
           $task->refPage = $newItem;
           $task->linkedId = false;
           updateScore($player, $task, true);
+          // No need to checkDeath, MarketPlace can't cause death
 
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
           $msg .= "Team : ". $player->team->title."\r\n";
           $msg .= "Item : ". $newItem->title;
-          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+          if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
             mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
           }
         }
@@ -98,12 +100,12 @@
           $task->refPage = $receiver;
           $task->linkedId = false;
           updateScore($player, $task, true);
-
+          // No need to checkDeath, Donation can't cause death
           // Notify admin
           $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
           $msg .= "Donation amount : ". $amount."\r\n";
           $msg .= "Donated to : ". $receiver->title." [".$receiver->team->title."]";
-          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+          if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
             mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
           }
         }
@@ -116,7 +118,7 @@
 
   if ($user->isSuperuser()) { // Admin front-end
     // TODO : Give superUser possibility to record a donation?
-    if ($input->get->form && $input->get->form == 'unpublish' && $input->get->newsId != '') {
+    if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
       $n->of(false);
       if ($n->publish == 0) {
@@ -131,32 +133,29 @@
     }
 
     if($input->post->adminTableSubmit) { // adminTableForm submitted
-      
-
       // Consider checked players only
       $checkedPlayers = $input->post->player;
       $checked = array_keys($checkedPlayers);
-      /* foreach($checkedPlayers as $plyr_task=>$state) { */
-        /* list($playerId, $taskId) = explode('_', $plyr_task); */
+      $allNegPlayers = new pageArray();
       // Record checked task for each player
-      $allCheckedPlayers = new pageArray();
       for ($i=0; $i<count($checked); $i++) {
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $comment = 'comment_'.$playerId.'_'.$taskId;
 
         $player = $pages->get($playerId);
-        $allCheckedPlayers->add($player);
-
-        // Update player's scores and save
         $task = $pages->get($taskId); 
         $task->comment = trim($input->post->$comment);
         $task->refPage = false;
         $task->linkedId = false;
-        updateScore($player, $task, false);
+        if ($task->HP < 0) { // Negative action, keep concerned players to check death later
+          $allNegPlayers->add($player); 
+        }
+        // Update player's scores and save
+        updateScore($player, $task, true);
       }
-      // Check death for each player
-      foreach($allCheckedPlayers as $p) {
-        checkDeath($player, false);
+      // Check death for each players having a negative action
+      foreach($allNegPlayers as $p) {
+        checkDeath($p, true);
       }
 
       // Redirect to team page
@@ -187,10 +186,10 @@
         $task->linkedId = false;
         if ($task->id) {
           updateScore($player, $task, true);
+          // No need to checkDeath, Marketplace can't cause death
         }
-
       }
-      // Redirect to marketPlace
+      // Redirect to MarketPlace
       $session->redirect($pages->get('/shop')->url.$player->team->name);
     }
   } // End if superUser
