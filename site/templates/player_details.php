@@ -24,8 +24,7 @@
   }
   // Set no hk counter
   if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
-    setHomework($playerPage);
-    $hkCount = '<span class="label label-danger" data-toggle="tooltip" title="No hk counter">'.$playerPage->hkPb.'</span>';
+    $hkCount = '<span class="label label-danger" data-toggle="tooltip" title="No hk counter">'.$playerPage->hkcount.'</span>';
   } else {
     $hkCount = '<span class="label label-danger">Private!</span>';
   }
@@ -178,7 +177,7 @@
           <ul>
           <?php 
             // Most influential (karma)
-            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, 'karma');
+            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'karma');
             if ($playerPos) {
               if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
               echo '<li>';
@@ -192,7 +191,7 @@
               echo 'Most influential : No ranking.</p></li>';
             }
             // Greatest # of places (places)
-            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, 'places');
+            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'places');
             if ($playerPos) {
               if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
               echo '<li>';
@@ -206,7 +205,7 @@
               echo 'Greatest # of places : No ranking.</p></li>';
             }
             // Greatest # of people (people)
-            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, 'people');
+            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'people');
             if ($playerPos) {
               if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
               echo '<li>';
@@ -220,7 +219,7 @@
               echo 'Greatest # of people : No ranking.</p></li>';
             }
             // Best warrior (fighting_power)
-            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, 'fighting_power');
+            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'fighting_power');
             if ($playerPos) {
               if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
               echo '<li>';
@@ -234,7 +233,7 @@
               echo 'Best warriors : No ranking.</p></li>';
             }
             // Best donators (donation)
-            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, 'donation');
+            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'donation');
             if ($playerPos) {
               if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
               echo '<li>';
@@ -249,7 +248,7 @@
             }
             // Most trained (underground_training)
             if ($playerPage->underground_training) {
-              list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, 'underground_training');
+              list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'underground_training');
               if ($playerPos) {
                 if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
                 echo '<li>';
@@ -267,7 +266,7 @@
             }
 
             // Most active groups
-            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, 'group');
+            list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'group');
             if ($playerPos) {
               if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
               echo '<li>';
@@ -370,7 +369,7 @@
                   }
                   echo "<tr>";
                   echo "<td data-order='{$event->date}'>";
-                  echo strftime("%d/%m", $event->date);
+                  echo date('d/m', $event->date);
                   echo "</td>";
                   echo "<td>";
                   echo $class;

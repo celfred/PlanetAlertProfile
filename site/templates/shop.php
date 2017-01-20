@@ -82,21 +82,23 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
             $mini = '';
           }
           // Check item's availability for logged-in player
-          if ( in_array($item->id, $playerEquipment) ) {
-            if ($item->category->name !== 'potions') {
-              $item->stat = 2;
+          if ($user->isLoggedin() && !$user->isSuperuser()) {
+            if (in_array($item->id, $playerEquipment) ) {
+              if ($item->category->name !== 'potions') {
+                $item->stat = 2;
+              } else {
+                if ($item->level <= $player->level && $item->GC <= $player->GC ) {
+                  $item->stat = 1;
+                } else {
+                  $item->stat = 0;
+                }
+              }
             } else {
               if ($item->level <= $player->level && $item->GC <= $player->GC ) {
                 $item->stat = 1;
               } else {
                 $item->stat = 0;
               }
-            }
-          } else {
-            if ($item->level <= $player->level && $item->GC <= $player->GC ) {
-              $item->stat = 1;
-            } else {
-              $item->stat = 0;
             }
           }
         ?>
@@ -125,7 +127,11 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
         <?php } ?>
       </tbody>
     </table>
-    <?php echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>'; ?>
+    <?php 
+      if ($user->isLoggedin() && !$user->isSuperuser()) {
+        echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
+      }
+    ?>
 <?php 
   }
 } else { 

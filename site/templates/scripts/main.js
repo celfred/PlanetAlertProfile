@@ -487,7 +487,7 @@ $(document).ready(function() {
 				}
 				$(document).ajaxStop(function() {
 					window.location.href = $redirectUrl;
-					setTimeout( function(){ $('#progress').text('Redirecting...'); }, 1500);
+					setTimeout( function(){ $('#progress').text('Redirecting...'); }, 1000);
 				})
 				swal({
 					title: '<span id="progress">0 saved.</span>',

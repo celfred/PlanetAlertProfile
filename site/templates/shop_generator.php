@@ -24,8 +24,8 @@ if ($player->coma == false) {
   $nbEl = $player->places->count()+$player->people->count();
   $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
   // Get rid of potions bought within the last 15 days
-  $today= mktime('23:59:59 Y-m-d');
-  $limitDate = mktime()-15*3600*24;
+  $today = mktime("23:59:59 Y-m-d");
+  $limitDate = time()-15*3600*24;
   $boughtPotions = $player->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=health-potion");
   $possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, parent.name=potions, sort=name");
   foreach ( $boughtPotions as $b) {
@@ -60,6 +60,7 @@ if ($player->coma == 1) {
 }
 $out .= "<ul class='itemList col-md-4'>";
 if ( $possibleEquipment->count() > 0) {
+  $lastCat = '';
   foreach($possibleEquipment as $item) {
     // List items by category
     if ($item->parent->name !== $lastCat) {
@@ -157,7 +158,7 @@ $out .= '</section>';
 
 if ( $possibleEquipment->count() > 0 || $possiblePlaces->count() > 0 || $possiblePotions->count() > 0 ) {
   $out .= '<input type="submit" name="marketPlaceSubmit" value="Yes, buy the selected items!" class="btn btn-block btn-primary" disabled="disabled" />';
-  $out .= '<a href="'.$homepage->url.'players/'.$player->team->name.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
+  $out .= '<a href="'.$pages->get('/')->url.'players/'.$player->team->name.'" class="btn btn-block btn-danger">No, go back to team\'s page.</a>';
 }
 
 $out .= '</form>';

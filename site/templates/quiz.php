@@ -61,7 +61,7 @@ if ($user->isSuperuser()) {
   $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador")->implode(', ', '{title}');
   if ( strlen($ambassadors) == 0 ) { 
     $ambassadors = 'Nobody.';
-    $ambButton = '';
+    $ambassadorsButton = '';
   } else {
     $ambassadorsButton = ' <a class="btn btn-info btn-sm pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a>';
   }
@@ -80,7 +80,7 @@ if ($user->isSuperuser()) {
   // Set nbInvasion foreach players
   foreach($allConcerned as $p) {
     $p->nbInvasions = $p->find("template=event, task.name=right-invasion|wrong-invasion")->count();
-    if (in_array($p, $selectedIds)) { // Keep checked players
+    if ($selectedIds && in_array($p, $selectedIds)) { // Keep checked players
       $p->checked = "checked='checked'";
     } else {
       if ( $quizzing == true ) { // Quiz has already started
@@ -94,7 +94,7 @@ if ($user->isSuperuser()) {
   if ($selectedTeam) {
     $out .= '<form id="quizForm" name="quizForm" action="'.$page->url.$input->urlSegment1.'" method="post" role="form">';
     // A player is selected : Quiz display
-    if ($selectedPlayer) {
+    if (isset($selectedPlayer)) {
       $player = $pages->get($selectedPlayer);
       $quiz = pick_question($player);
       $out .= '<div class="well quiz">';

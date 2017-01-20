@@ -19,7 +19,7 @@ if ($user->isSuperuser()) {
 $allCategories = $pages->find("parent.name=topics, sort=name");
 
   // Test player login
-  if ($player && $user->isLoggedin() || $user->isSuperuser()) {
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     if ($user->isSuperuser()) {
       $helmet = $pages->get("name=memory-helmet");
@@ -185,7 +185,7 @@ $allCategories = $pages->find("parent.name=topics, sort=name");
         $out .= '</td>';
         // Find best trained player on this monster
         if ($m->mostTrained) {
-          if ($m->mostTrained == $player) {
+          if (isset($player) && $m->mostTrained == $player) {
             $class = 'success';
           } else {
             $class = 'primary';
