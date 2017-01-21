@@ -86,12 +86,11 @@ function resetPlayer($player, $previousLevel) {
 }
 
 function formerValues($player) {
-  $player->oldNbEl = $player->places->count()+$player->people->count();
+  /* $player->oldNbEl = $player->places->count()+$player->people->count(); */
   $player->oldHP = $player->HP; // Record previous HP for checkDeath function
 }
 
 function updateScore($player, $task, $real = true) {
-  $pages = wire('pages');
   formerValues($player); // Store old values for later use
   if ($task->is("name!=death")) {
     // Task details to calculate new score
@@ -168,7 +167,7 @@ function updateScore($player, $task, $real = true) {
     }
   }
   if ($historyPage) {
-    extraActionAfterSave($player, $historyPage);
+    extraActionAfterSave($player, $historyPage, $real);
     return $historyPage->id;
   }
 }
@@ -190,12 +189,12 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
       // Limit to the 2 best weapons
       $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
       foreach ($concerned_weapons as $item) {
-        $player->deltaXP = $player->deltaXP + $item->XP;
+        $player->deltaXP += $item->XP;
       }
       // Limit to 1 best protection
       $concerned_protection = $player->equipment->find("category.name=protections, sort=-HP, limit=1");
       foreach ($concerned_protection as $item) {
-        $player->deltaHP = $player->deltaHP + $item->HP;
+        $player->deltaHP += $item->HP;
       }
       if ($task->HP < 0) { // Negative task, loss of 1 minimum whatever the equipment
         if ( $task->HP + $player->deltaHP >= 0 ) {
@@ -203,7 +202,7 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
         }
         // Get rid of weapons' bonus
         $player->deltaXP = 0;
-      } else { // Positive task
+      } else { // Positive task, get rid of protections' bonus
         $player->deltaHP = 0;
       }
       if ($task->XP == 0) { // Task provides no XP gain, disable weapons
@@ -222,8 +221,7 @@ function taskExtraAction($player, $task) {
   if ($task->is("name=donation")) {
     preg_match("/\d+/", $task->comment, $matches);
     $player->GC = (int) $player->GC - $matches[0];
-    $task->amount = $matches[0];
-    $player->donation = (int) $player->donation + $task->amount;
+    $player->donation = (int) $player->donation + $matches[0];
   }
   if ($task->is("name=donated")) {
     preg_match("/\d+/", $task->comment, $matches);
@@ -296,16 +294,6 @@ function taskExtraAction($player, $task) {
               $player->coma = 0;
             }
             break;
-          case 'group-items' : // Make item available to each group member
-            $player->equipment->add($task->refPage);
-            $members = $pages->find("template=player, team=$player->team, group=$player->group, name!=$player->name");
-            foreach ($members as $p) {
-              $task = $pages->get("name=bought");
-              $task->comment = $task->refPage->title." [unlocked]";
-              $task->linkedId = $linkedId;
-              updateScore($p, $task, $real);
-            }
-            break;
           default:
             $player->equipment->add($task->refPage);
             break;
@@ -315,19 +303,30 @@ function taskExtraAction($player, $task) {
   }
 }
 
-function extraActionAfterSave($player, $historyPage) {
+function addGroupItem($player, $historyPage, $real) {
   $pages = wire('pages');
-  if ($historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Hk problem, check for a Automatic Penalty
-    if ($player->hkcount >= 3) { // Record a Hk penalty
+  $player->equipment->add($historyPage->refPage);
+  $members = $pages->find("team=$player->team, group=$player->group, id!=$player->id");
+  foreach ($members as $m) {
+    $task = $pages->get("name=bought");
+    $task->comment = $historyPage->refPage->title." [unlocked]";
+    $task->refPage = $historyPage->refPage;
+    $task->linkedId = $historyPage->id;
+    updateScore($m, $task, $real);
+  }
+}
+
+function extraActionAfterSave($player, $historyPage, $real) {
+  $pages = wire('pages');
+  if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
       $task = $pages->get("template=task, name=penalty"); 
       $task->comment = 'Automatic homework penalty';
       $task->refPage = false;
       $task->linkedId = $historyPage->id;
-      updateScore($player, $task, true);
-    }
+      updateScore($player, $task, $real);
   }
 
-  if ($historyPage->task->is("name=donation")) {  // Donation, record the linked donated event
+  if ($historyPage->task->is("name=donation")) {  // Record the linked 'Donated' event
     $task = $pages->get("name=donated");
     preg_match("/\d+/", $historyPage->summary, $matches);
     $amount = $matches[0];
@@ -335,7 +334,7 @@ function extraActionAfterSave($player, $historyPage) {
     $task->refPage = $player;
     $receiverPlayer = $historyPage->refPage;
     $task->linkedId = $historyPage->id;
-    updateScore($receiverPlayer, $task, true);
+    updateScore($receiverPlayer, $task, $real);
   }
 
   if ($historyPage->task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
@@ -345,10 +344,14 @@ function extraActionAfterSave($player, $historyPage) {
       $task->comment = '3rd wrong invasions on '.$historyPage->refPage->title;
       $task->refPage = $historyPage->refPage;
       $task->linkedId = false;
-      updateScore($player, $task, true);
+      updateScore($player, $task, $real);
     }
   }
   
+  if ($historyPage->task->is("name=buy") && $historyPage->refPage->parent->is("name=group-items")) { // Save group items for all group members
+    addGroupItem($player, $historyPage, $real);
+  }
+
   if ($player->coma == 0) {
     // Set Ambassador skill if necessary
     $role = $pages->get("name=ambassador");
@@ -360,9 +363,10 @@ function extraActionAfterSave($player, $historyPage) {
   }
   
   // Save new team scores (for cache) if necessary
-  $newNbEl = $player->places->count()+$player->people->count();
-  if ($newNbEl != $player->oldNbEl) {
-    updateTeamScores($player->team);
+  if ($real == true) {
+    if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
+      updateTeamScores($player->team);
+    }
   }
 }
 

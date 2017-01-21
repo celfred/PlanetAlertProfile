@@ -642,48 +642,48 @@
                 }
               }
               if ($e->task->is("name=buy|free|bought")) { // New equipment, place, people or potion, add it accordingly
-                if ($e->refPage->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
-                  $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
-                  $dirty = true;
-                }
-                if ($e->refPage->level > $selectedPlayer->level) { // Check for Buy/Free bug (if a Death occurred, for example)
-                  $out .= ' <span class="label label-danger">Error : Wrong level.</span>';
-                  $dirty = true;
-                }
-                // Get item's data
-                if ($e->refPage) {
+                if ($e->refPage != false) {
+                  // Get item's data
                   $newItem = $pages->get("$e->refPage");
+                  if ($newItem->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
+                    $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
+                    $dirty = true;
+                  }
+                  if ($newItem->level > $selectedPlayer->level) { // Check for Buy/Free bug (if a Death occurred, for example)
+                    $out .= ' <span class="label label-danger">Error : Wrong level.</span>';
+                    $dirty = true;
+                  }
                   if ($newItem->parent->is("name=group-items")) {
-                      // Check if group members have [unlocked] item
-                      $members = $allPlayers->find("team=$selectedPlayer->team, group=$selectedPlayer->group");
-                      $out .= '<ul class="list-inline">';
-                      $out .= '<li>Group item status → </li>';
-                      $boughtNb = 0;
-                      foreach ($members as $p) {
-                        $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
-                        if ($bought->id) {
-                          $boughtNb++;
-                          $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
-                        } else {
-                          $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
-                        }
+                    // Check if group members have [unlocked] item
+                    $members = $allPlayers->find("team=$selectedPlayer->team, group=$selectedPlayer->group");
+                    $out .= '<ul class="list-inline">';
+                    $out .= '<li>Group item status → </li>';
+                    $boughtNb = 0;
+                    foreach ($members as $p) {
+                      $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
+                      if ($bought->id) {
+                        $boughtNb++;
+                        $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
+                      } else {
+                        $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
                       }
-                      if ($boughtNb != $members->count-1) {
-                        $dirty = true;
-                        $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
-                      }
-                      // [unlocked] or [bought] ?
-                      // task page should be set accordingly but prevention here for backward compatibility
-                      preg_match("/\[unlocked\]/", $comment, $matches);
-                      if ($matches[0] && $e->task->is("name=buy")) {
-                        $dirty = true;
-                        $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
-                      }
-                      if (!$matches[0] && $e->task->is("name=bought")) {
-                        $dirty = true;
-                        $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
-                      }
-                      $out .= '</ul>';
+                    }
+                    if ($boughtNb != $members->count-1) {
+                      $dirty = true;
+                      $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
+                    }
+                    // [unlocked] or [bought] ?
+                    // task page should be set accordingly but prevention here for backward compatibility
+                    preg_match("/\[unlocked\]/", $comment, $matches);
+                    if ($matches[0] && $e->task->is("name=buy")) {
+                      $dirty = true;
+                      $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
+                    }
+                    if (!$matches[0] && $e->task->is("name=bought")) {
+                      $dirty = true;
+                      $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
+                    }
+                    $out .= '</ul>';
                   }
 
                   if ($newItem->name == 'health-potion' && $selectedPlayer->coma == 1) {
@@ -712,7 +712,7 @@
               updateScore($selectedPlayer, $e->task, false);
               // Test if player died
               if ($selectedPlayer->HP == 0) {
-                if ($lastDeath->id) {
+                if (isset($lastDeath)) {
                   $out .= '<span class="label label-danger">PREVIOUS DEATH, level '.$previousLevel.'</span>';
                   if ($previousLevel == 1) { // 2nd level 1 death in a row > Coma state
                     $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
