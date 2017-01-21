@@ -45,7 +45,6 @@
 		});
 		// Cache allPlayers for faster access
 		$template = $templates->get("player");
-		/* $cache->delete('allPlayers'); */
 		$allPlayers = $cache->get("allPlayers", $template, function($pages) {
 			return $pages->find("template=player, team.name!=no-team")->sort("team->name, title");
 		});
