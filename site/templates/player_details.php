@@ -304,7 +304,7 @@
             </ul>
 
             <?php
-              if ($playerPage->rank->name == '4emes' || $playerPage->rank->name == '3emes') {
+              if ($playerPage->rank && $playerPage->rank->is("name=4emes|3emes")) {
             ?>
             <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free people </span></h4>
             <ul class="playerPlaces list-inline">
@@ -369,7 +369,11 @@
                   }
                   echo "<tr>";
                   echo "<td data-order='{$event->date}'>";
-                  echo date('d/m', $event->date);
+                  if ($event->date != '') {
+                    echo date('d/m', $event->date);
+                  } else {
+                    echo 'Date error!';
+                  }
                   echo "</td>";
                   echo "<td>";
                   echo $class;
