@@ -614,7 +614,12 @@
               $comaClass = '';
             }
             $out .= '<tr><td class="text-left '.$comaClass.'">';
-            $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
+            if ($e->date != '') {
+              $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
+            } else {
+              $out .= '▶ <span class="label label-danger">Date error!</span> - ';
+              $dirty = true;
+            }
             $out .= $e->title;
             $comment = trim($e->summary);
             if ($comment) {
@@ -675,11 +680,11 @@
                     // [unlocked] or [bought] ?
                     // task page should be set accordingly but prevention here for backward compatibility
                     preg_match("/\[unlocked\]/", $comment, $matches);
-                    if ($matches[0] && $e->task->is("name=buy")) {
+                    if (isset($matches[0]) && $e->task->is("name=buy")) {
                       $dirty = true;
                       $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
                     }
-                    if (!$matches[0] && $e->task->is("name=bought")) {
+                    if (!isset($matches[0]) && $e->task->is("name=bought")) {
                       $dirty = true;
                       $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
                     }
@@ -724,7 +729,7 @@
                   }
                 }
                 $died = true;
-                if ($allEvents->getNext($e)->task->name == 'death') {
+                if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'death') {
                   $out .= '<span class="label label-success">Death OK</span>';
                   $lastDeath = $allEvents->getNext($e);
                   preg_match("/\d+/", $lastDeath->summary, $matches);
