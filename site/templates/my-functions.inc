@@ -507,7 +507,7 @@ function setKarma($player) {
   $levelKarma = 0;
   if ($player->level > 1) {
     for ($i=1; $i<=$player->level; $i++) {
-      $levelKarma = ($i*10)+90;
+      $levelKarma = $levelKarma + ($i*10)+90;
     }
     $karma = $levelKarma + $player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
   } else {

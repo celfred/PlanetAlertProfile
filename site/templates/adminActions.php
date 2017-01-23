@@ -158,6 +158,23 @@
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="team-options">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
+      case 'setKarma' :
+        $out .= '<section class="well">';
+        $out .= '<h3 class="text-center">';
+        $out .=   'Set scores';
+        $out .= '</h3>';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setKarma">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
       case 'setScores' :
         $out .= '<section class="well">';
         $out .= '<h3 class="text-center">';
@@ -802,6 +819,24 @@
           }
         }
         break;
+      case 'setKarma':
+        if ($selectedTeam && $selectedTeam != '-1') {
+          $allPlayers = $allPlayers->find("team=$selectedTeam");
+          $out .= '</div>';
+          $out .= '<h4 class="text-center">';
+          $out .=   'Set Karma for '.$selectedTeam->title;
+          $out .= '</h4>';
+          $out .= '<section>';
+          $out .= '<ul><span class="label label-default">Actual karmas</span>';
+          foreach($allPlayers as $p) {
+            $newKarma = setKarma($p);
+            $out .= '<li>'.$p->title.' : '.$p->karma.' → '.$newKarma.'</li>';
+          }
+          $out .= '</ul>';
+          $out .= '</section>';
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveKarma/'.$selectedTeam->id.'/1">Save new karmas</button>';
+        }
+        break;
       case 'setScores':
         $out = '';
         if ($selectedTeam && $selectedTeam != '-1') {
@@ -824,6 +859,15 @@
           $out .= '<li>'.$free.' free acts</li>';
           $out .= '</section>';
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveScores/'.$selectedTeam->id.'/1">Save new scores</button>';
+        }
+        break;
+      case 'saveKarma':
+        $selectedTeam = $pages->get("$input->urlSegment2");
+        $allPlayers = $allPlayers->find("team=$selectedTeam");
+        foreach($allPlayers as $p) {
+          $p->karma = setKarma($p);
+          $p->of(false);
+          $p->save();
         }
         break;
       case 'saveScores':

@@ -151,6 +151,8 @@
 									echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/ut/'>UT Hall of fame</a></li>";
 									$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setScores' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/setScores/'>Set scores</a></li>";
+									$class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setKarma' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/setKarma/'>Set karmas</a></li>";
 									$class = $page->name == 'script' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/script/'>Script</a></li>";
 								echo '</ul>';
