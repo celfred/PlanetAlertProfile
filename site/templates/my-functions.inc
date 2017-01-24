@@ -149,12 +149,13 @@ function updateScore($player, $task, $real = true) {
     }
   } else { // Player died
     if ($real == true) { // Save player's death if necessary
-      // Check if previous death on level 1
-      if ($player->level == 1) {
+      if ($player->level == 1) { // Check if 2nd death in a row on level 1
         $prevDeath = $player->get("name=history")->get("template=event, sort=-date, task.name=death, limit=1");
         $prevDeath->of(false);
         preg_match("/\d+/", $prevDeath->summary, $matches);
         $previousLevel = (int) $matches[0];
+      } else {
+        $previousLevel = $player->level;
       }
       resetPlayer($player, $previousLevel);
       $task->eDate = date('m/d/Y H:i:s', time()+60);
@@ -374,12 +375,14 @@ function checkDeath($player, $real=true) {
   $pages = wire('pages');
   if ($player->HP <= 0) {
     $task = $pages->get("name=death");
-    $task->comment = 'Player died. [old level:'.$player->level.']';
+    $task->comment = 'Player died. [former level:'.$player->level.']';
     $task->refPage = false;
     $task->linkedId = false;
-    $historyPageId = updateScore($player, $task, true);
-    if ($player->coma == 0 && $historyPageId != 0) { // Player died and not in coma
-      updateTeamDeath($player, $historyPageId); // Record death for others
+    $historyPageId = updateScore($player, $task, $real);
+    if ($real == true) {
+      if ($player->coma == 0 && $historyPageId != 0) { // Player died and not in coma
+        updateTeamDeath($player, $historyPageId); // Record death for others
+      }
     }
   }
 }
@@ -389,10 +392,12 @@ function updateTeamDeath($player, $linkedId) {
   $teamPlayers = $pages->find("template=player, team=$player->team, id!=$player->id");
   $teamDeath = $pages->get("name=team-death");
   $teamDeath->comment = 'Team member died! ['.$player->title.']';
+  $teamDeath->refPage = $player;
   $teamDeath->linkedId = $linkedId;
   $groupMembers = $teamPlayers->find("group=$player->group");
   $groupDeath = $pages->get("name=group-death");
   $groupDeath->comment = 'Group member died! ['.$player->title.']';
+  $groupDeath->refPage = $player;
   $groupDeath->linkedId = $linkedId;
   // Each group member suffers
   foreach($groupMembers as $p) {

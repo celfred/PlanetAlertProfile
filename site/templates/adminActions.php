@@ -113,7 +113,7 @@
         $out .= '</select>';
         $out .= '</div>';
         $out .= '<div class="text-right">';
-        $out .= '<button id="backendEditable" data-href="'.$config->urls->admin.'page/edit/?id=" data-id="-1">Edit player in backend</button>';
+        $out .= '<a id="backendEditable" class="btn btn-success" href="'.$config->urls->admin.'page/edit/?id=" data-id="-1">Edit player in backend</a>';
         $out .= '</div>';
         $out .= '</section>';
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="recalculate">Generate</button>';
@@ -403,10 +403,11 @@
       case 'add-death' :
         if ($selectedPlayer) {
           $eventId = $confirm; // urlSegment3 used for eventId
+          $currentLevel = $input->urlSegment4;
           $allEvents = $selectedPlayer->get("name=history")->children()->sort("date");
           $e = $pages->get("id=$eventId");
           // Move all day events a few seconds later
-          $dayEvents = $allEvents->find("date=$e->date")->not($e);
+          $dayEvents = $allEvents->find("date=$e->date, id!=$e->id");
           $seconds = 5;
           foreach($dayEvents as $d) {
             $d->date = date($e->date + $seconds); 
@@ -415,29 +416,39 @@
             $d->save();
           }
           $task = $pages->get("name=death");
-          $task->comment = 'Player died.';
+          $task->comment = 'Player died. [former level:'.$currentLevel.']';
           $task->eDate = date($e->date+1);
           $task->linkedId = false;
-          $linkedId = saveHistory($selectedPlayer, $task, 0);
-          // Each team member suffers from player's death
-          $teamDeath = $pages->get("name=team-death");
-          $teamDeath->comment = 'Team member died! ['.$selectedPlayer->title.']';
-          $teamDeath->eDate = $task->eDate;
-          $teamDeath->refPage = false;
-          $teamDeath->linkedId = $linkedId;
-          $teamPlayers = $pages->find("template=player, team=$selectedPlayer->team")->not("group=$selectedPlayer->group");
-          foreach($teamPlayers as $p) {
-            saveHistory($p, $teamDeath, 0);
-          }
-          // Each group member suffers from player's death
-          $groupMembers = $pages->find("template=player, team=$selectedPlayer->team, group=$selectedPlayer->group")->not("$selectedPlayer");
-          $groupDeath = $pages->get("name=group-death");
-          $groupDeath->comment = 'Group member died!';
-          $groupDeath->refPage = false;
-          $groupDeath->eDate = $task->eDate;
-          $groupDeath->linkedId = $linkedId;
-          foreach($groupMembers as $p) {
-            saveHistory($p, $groupDeath, 0);
+          $linkedId = saveHistory($selectedPlayer, $task, 1);
+          // DO NOT use updateScore(...,true), it would touch the equipment for real !!!
+          // Find previous death, check former level and act accordingly
+          $prevDeath = $allEvents->sort("-date")->get("task.name=death, limit=1");
+          preg_match("/\d+/", $prevDeath->summary, $matches);
+          $previousLevel = (int) $matches[0];
+          if ($previousLevel == 1 && $currentLevel == 1) { // 2nd death in a row on Level 1 > Enter coma state
+            // Disabled on Edit history
+            /* $selectedPlayer->coma = 1; */
+          } else {
+            // Each team member suffers from player's death
+            $teamDeath = $pages->get("name=team-death");
+            $teamDeath->comment = 'Team member died! ['.$selectedPlayer->title.']';
+            $teamDeath->eDate = $task->eDate;
+            $teamDeath->refPage = $selectedPlayer;
+            $teamDeath->linkedId = $linkedId;
+            $teamPlayers = $pages->find("template=player, team=$selectedPlayer->team, group!=$selectedPlayer->group");
+            foreach($teamPlayers as $p) {
+              saveHistory($p, $teamDeath, 0);
+            }
+            // Each group member suffers from player's death
+            $groupMembers = $pages->find("template=player, team=$selectedPlayer->team, group=$selectedPlayer->group, id!=$selectedPlayer->id");
+            $groupDeath = $pages->get("name=group-death");
+            $groupDeath->comment = 'Group member died! ['.$selectedPlayer->title.']';
+            $teamDeath->refPage = $selectedPlayer;
+            $groupDeath->eDate = $task->eDate;
+            $groupDeath->linkedId = $linkedId;
+            foreach($groupMembers as $p) {
+              saveHistory($p, $groupDeath, 0);
+            }
           }
         }
         break;
@@ -715,8 +726,21 @@
                 }
               }
               if ($e->task->is("name=death")) {
+                $lastDeath = $e;
+                // Set previousLevel
+                preg_match("/\d+/", $e->summary, $matches);
+                $previousLevel = (int) $matches[0];
+                if ($previousLevel == 0) {
+                  if ($selectedPlayer->level>1) {
+                    $previousLevel = $selectedPlayer->level;
+                  } else {
+                    $previousLevel = 0;
+                  }
+                  $out .= ' <span class="label label-danger">Error : No former level, set to '.$previousLevel.'</span>';
+                  $dirty = true;
+                }
                 // Death recorded but HP>0
-                if ($selectedPlayer->HP > 0 && $selectedPlayer->coma == 0) {
+                if ($selectedPlayer->HP > 0) {
                   $out .= ' <span class="label label-danger">Error → HP>0 ?</span>';
                   $dirty = true;
                 }
@@ -732,39 +756,6 @@
               $e->task->comment = $comment;
               $e->task->refPage = $e->refPage; // Just take refPage for scores calculation (no linkedId, no comment because complete history is not re-written
               updateScore($selectedPlayer, $e->task, false);
-              // Test if player died
-              if ($selectedPlayer->HP == 0) {
-                if (isset($lastDeath)) {
-                  $out .= '<span class="label label-danger">PREVIOUS DEATH, level '.$previousLevel.'</span>';
-                  if ($previousLevel == 1) { // 2nd level 1 death in a row > Coma state
-                    $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
-                    $selectedPlayer->coma = true;
-                    $selectedPlayer->level = 1;
-                    $selectedPlayer->HP = 50;
-                    $selectedPlayer->GC = 0;
-                    $selectedPlayer->XP = 0;
-                  }
-                }
-                $died = true;
-                if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'death') {
-                  $out .= '<span class="label label-success">Death OK</span>';
-                  $lastDeath = $allEvents->getNext($e);
-                  preg_match("/\d+/", $lastDeath->summary, $matches);
-                  $previousLevel = (int) $matches[0];
-                } else {
-                  $dirty = true;
-                  // Ask only for the first Death
-                  if ($unique == true) {
-                    $out .= '<span class="label label-danger">Error : Death</span>  ';
-                    // Button Add death here
-                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'">Add death here?</button>';
-                    $unique = false;
-                  } else {
-                    $out .= '<span class="label label-danger">Previous Death?</span>';
-                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'">Add death here?</button>';
-                  }
-                }
-              }
               $out .= '<br />';
               $out .= displayTrendScores($selectedPlayer, $oldPlayer);
               $out .= displayPlayerScores($selectedPlayer);
@@ -773,6 +764,42 @@
               $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
               // Delete event link
               $out .= '  <button class="delete btn btn-xs btn-danger" data-href="'.$page->url.'" data-playerId="'.$selectedPlayer->id.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
+              // Test if player died
+              if ($selectedPlayer->HP == 0 && $e->task->is("name!=death")) {
+                if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'death') {
+                  $out .= '<span class="label label-success">Death OK</span>';
+                } else {
+                  $dirty = true;
+                  // Ask only for the first Death
+                  if ($unique == true) {
+                    $out .= '<span class="label label-danger">Error : No Death after?</span>  ';
+                    // Button Add death here
+                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">Add death here?</button>';
+                    $unique = false;
+                  } else {
+                    $out .= '<span class="label label-danger">Previous Death?</span>';
+                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">Add death here?</button>';
+                  }
+                }
+              }
+              if ($e->task->is("name=death")) {
+                $selectedPlayer->HP = 50;
+                $selectedPlayer->GC = 0;
+                $selectedPlayer->XP = 0;
+                if ($previousLevel == 1 && $selectedPlayer->level == 1) { // 2nd death in a row on Level 1 > Coma state
+                  $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
+                  $selectedPlayer->coma = true;
+                  $selectedPlayer->level = 1;
+                } 
+                // Remove equipment but group-items
+                foreach($selectedPlayer->equipment as $eq) {
+                  if ($eq->parent->is("name=group-items")) {
+                    $selectedPlayer->equipment->remove($eq);
+                  }
+                }
+                $selectedPlayer->level = $selectedPlayer->level-1;
+                if ($selectedPlayer->level < 1) { $selectedPlayer->level = 1; }
+              }
             }
             $out .='</td></tr>';
           }
