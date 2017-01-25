@@ -98,6 +98,8 @@ function updateScore($player, $task, $real = true) {
     $tHP = $task->HP;
     $tGC = $task->GC;
     
+    setStreak($player, $task);
+
     // Ponderate task's impact according to player's equipment
     setDelta($player, $task);
 
@@ -353,16 +355,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
     addGroupItem($player, $historyPage, $real);
   }
 
-  if ($player->coma == 0) {
-    // Set Ambassador skill if necessary
-    $role = $pages->get("name=ambassador");
-    if (checkStreak($player) == 10) {
-      $player->skills->add($role);
-    } else {
-      $player->skills->remove($role);
-    }
-  }
-  
   // Save new team scores (for cache) if necessary
   if ($real == true) {
     if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
@@ -421,19 +413,39 @@ function getLevelThreshold($level) {
   return $threshold;
 }
 
-function checkStreak($player) {
-  // Set Ambassador skill if necessary
-  $streak = 0;
-  $lastEvents = $player->get("name=history")->find("template=event, sort=-date, limit=10, task.name!=donated|donation|absent");
-  foreach ($lastEvents as $e) {
-    if ($e->task->HP >= 0) {
-      $streak++;
+function setStreak($player, $task) {
+  $pages = wire('pages');
+  if ($task->is("name!=donation|donated|absent")) {
+    if ($task->HP>=0) {
+      $player->streak++;
     } else {
-      break;
+      $player->streak = 0;
     }
   }
-  return $streak;
+  if ($player->coma == 0) {
+    // Set Ambassador skill if necessary
+    $role = $pages->get("name=ambassador");
+    if ($player->streak >= 10) {
+      $player->skills->add($role);
+    } else {
+      $player->skills->remove($role);
+    }
+  }
 }
+
+/* function checkStreak($player) { */
+/*   // Set Ambassador skill if necessary */
+/*   $streak = 0; */
+/*   $lastEvents = $player->get("name=history")->find("template=event, sort=-date, limit=10, task.name!=donated|donation|absent"); */
+/*   foreach ($lastEvents as $e) { */
+/*     if ($e->task->HP >= 0) { */
+/*       $streak++; */
+/*     } else { */
+/*       break; */
+/*     } */
+/*   } */
+/*   return $streak; */
+/* } */
 
 function setLevel($player) {
   // Check new level
