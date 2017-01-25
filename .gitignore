@@ -8,3 +8,4 @@
 /site/templates/bower_components/*
 /site/templates/Session.vim
 /site/modules/*
+/site/config.php

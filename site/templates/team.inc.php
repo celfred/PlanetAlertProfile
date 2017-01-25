@@ -217,7 +217,19 @@
       $showSkills .= '</span>';
     } else {
       $skills = '';
-      $showSkills = '<span class="label label-info">'.checkStreak($player).'</span>';
+      $streak = 0;
+      foreach ($prevEvents as $event) { // Loop over already loaded prevEvents
+        if ($event->task->HP >= 0 ) {
+          $streak++;
+        } else {
+          break ;
+        }
+      }
+      if ($streak == $prevEvents->count()) {
+        $showSkills = '<span class="label label-info">'.checkStreak($player).'</span>';
+      } else {
+        $showSkills = '<span class="label label-info">'.$streak.'</span>';
+      }
     }
     $out .= '<td data-toggle="tooltip" data-html="true" title="'.$skills.'">'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';
