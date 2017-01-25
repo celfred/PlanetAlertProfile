@@ -208,28 +208,19 @@
     $out .= '<td><a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount.'</td>';
     $out .= '<td>'. $player->karma .'</td>';
     $out .= '<td><span class="trend">'.$trend.'</span></td>';
-    if ($player->skills->count() > 0) {
-      $skills = $player->skills->implode('<br />', '{title}');
-      $showSkills = '<span class="label label-success">';
-      foreach($player->skills as $s) {
-        $showSkills .= strtoupper($s->title[0]);
-      }
-      $showSkills .= '</span>';
+    /* if ($player->skills->count() > 0) { // For later use, when more roles? */
+    /*   $skills = $player->skills->implode('<br />', '{title}'); */
+    /*   $showSkills = '<span class="label label-success">'; */
+    /*   foreach($player->skills as $s) { */
+    /*     $showSkills .= strtoupper($s->title[0]); */
+    /*   } */
+    /*   $showSkills .= '</span>'; */
+    if ($player->skills->has("name=ambassador")) {
+      $skills = 'Ambassador';
+      $showSkills = '<span class="label label-success">A</span>';
     } else {
       $skills = '';
-      $streak = 0;
-      foreach ($prevEvents as $event) { // Loop over already loaded prevEvents
-        if ($event->task->HP >= 0 ) {
-          $streak++;
-        } else {
-          break ;
-        }
-      }
-      if ($streak == $prevEvents->count()) {
-        $showSkills = '<span class="label label-info">'.checkStreak($player).'</span>';
-      } else {
-        $showSkills = '<span class="label label-info">'.$streak.'</span>';
-      }
+      $showSkills = '<span class="label label-info">'.$player->streak.'</span>';
     }
     $out .= '<td data-toggle="tooltip" data-html="true" title="'.$skills.'">'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';

@@ -282,46 +282,16 @@
     switch ($action) {
       case 'script' :
         $allPlayers = $pages->find("template=player");
-        $allUsers = $pages->find("template=user")->not("name=guest|admin");
-        $counter = 0;
-        $out .= '<ul>';
-        foreach($allUsers as $u) {
-          $u->of(false);
-          if ($allPlayers->get("login=$u->name")) {
-            $out .= '<li>'.$u->name.' : OK</li>';
-          } else {
-            $out .= '<li>'.$u->name.' : Not OK</li>';
-            /* $users->delete($u); */
+        $ambassador = $pages->get("name=ambassador");
+        foreach($allPlayers as $p) {
+          $p->streak = 0;
+          $allEvents = $p->get("name=history")->children("template=event, task.name!=donation|donated|absent, sort=-date, limit=10")->sort('date');
+          foreach($allEvents as $e) {
+            setStreak($p, $e->task);
           }
-          $counter++;
-          /* $allEvents = $p->get("name=history")->children("task.name=test-rr|test-r|test-v|test-vv|right-invasion|wrong-invasion"); */
-          /* $fighting_power = 0; */
-          /* foreach($allEvents as $e) { */
-          /*   switch ($e->task->name) { */
-          /*     case 'test-rr' : $fighting_power -= 2; */
-          /*       break; */
-          /*     case 'test-r' : $fighting_power -= 1; */
-          /*       break; */
-          /*     case 'wrong-invasion' : $fighting_power -= 1; */
-          /*       break; */
-          /*     case 'test-v' : $fighting_power += 1; */
-          /*       break; */
-          /*     case 'right-invasion' : $fighting_power += 1; */
-          /*       break; */
-          /*     case 'test-vv' : $fighting_power += 2; */
-          /*       break; */
-          /*     default: $fighting_power += 1; */
-          /*   } */
-
-          /* } */
-          /* $out .= '<li>'.$p->title. '['.$p->team->title.'] → '.$fighting_power.'</li>'; */
-          /* if ($fighting_power < 0) { $fighting_power = 0; } */
-          /* $p->fighting_power = $fighting_power; */
-          /* $p->of(false); */
-          /* $p->save(); */
+          $p->of(false);
+          $p->save();
         }
-        $out .= '</ul>';
-        $out .= '<p>'.$counter.'</p>';
         break;
       case 'reports' :
         $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
