@@ -40,7 +40,7 @@
   <?php if ($page->template == 'hall-of-fame') { ?>
 		<script src="<?php echo $config->urls->templates?>bower_components/masonry/dist/masonry.pkgd.min.js"></script>
   <?php } ?>
-  <?php if ($page->template == 'quiz') { ?>
+  <?php if ($page->is("template=quiz|main-office")) { ?>
 		<script src="<?php echo $config->urls->templates?>bower_components/svg-pan-zoom/dist/svg-pan-zoom.min.js"></script>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/chance/dist/chance.min.js'></script>
 

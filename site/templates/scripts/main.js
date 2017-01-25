@@ -420,13 +420,25 @@ $(document).ready(function() {
 		setTimeout( function() { pickFromList(list, 'pickedAmbassador');  }, 1000);
 		// window.alert(picked);
 	});
+  $('a.pickFromList').on('click', function() {
+		var list = $(this).attr("data-list");
+		var $el = $('#honored');
+		$el.addClass('blink');
+		$el.html('...');
+		$('#decisions').hide('');
+		setTimeout( function() { pickFromList(list, $el);  }, 1000);
+	});
 
 	var pickFromList = function(list, el) {
 		var items = list.split(',');
 		var picked = chance.pick(items);
-		$('#'+el).html(picked);
-		$('#'+el).removeClass('blink');
+		el.html('Decision time for : '+picked+' !');
+		el.removeClass('blink');
+		setTimeout( function() { showDecisions();  }, 500);
 		return picked;
+	}
+	var showDecisions = function() {
+		$('#decisions').show('');
 	}
 
   $('#startFight').on('click', function() {

@@ -63,7 +63,7 @@ if ($user->isSuperuser()) {
     $ambassadors = 'Nobody.';
     $ambassadorsButton = '';
   } else {
-    $ambassadorsButton = ' <a class="btn btn-info btn-sm pickAmbassador" data-list="'.$ambassadors.'">Pick an Ambassador</a>';
+    $ambassadorsButton = ' <a class="btn btn-info btn-sm pickFromList" data-list="'.$ambassadors.'">Pick a player</a>';
   }
 
   if ( count($selectedIds) > 0 ) { // Players have been checked
@@ -162,7 +162,7 @@ if ($user->isSuperuser()) {
     $out .= '<p>Ambassadors : '.$ambassadors;
     $out .= $ambassadorsButton;
     $out .= '</p>';
-    $out .= '<h3 class="text-center"><span id="pickedAmbassador" class="label label-primary"></span></h3>';
+    $out .= '<h3 class="text-center"><span id="honored" class="label label-primary"></span></h3>';
     // Not concerned
     $out .= '<p>(Not concerned : '.$notConcerned.')</p>';
     $out .= '</div>';

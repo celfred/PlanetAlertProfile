@@ -4,6 +4,7 @@
   $currentPeriod = $pages->get("name=admin-actions")->periods;
 ?>
 <ul class="tabList list-inline">
+  <li class="<?php if ($page->template=='main-office') { echo 'active'; } ?>"><a href="<?php echo $team->child("template=main-office")->url; ?>">Main Office</a></li>
   <li class="<?php if ($page->name=='players') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'players/'.$input->urlSegment1; ?>">The team</a></li>
   <li class="<?php if ($page->name=='world') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'world/'.$input->urlSegment1; ?>">The world</a></li>
   <?php if ($user->isLoggedin() && $user->isSuperuser() === false) { ?>
