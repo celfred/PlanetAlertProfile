@@ -85,13 +85,7 @@ function resetPlayer($player, $previousLevel) {
   }
 }
 
-function formerValues($player) {
-  /* $player->oldNbEl = $player->places->count()+$player->people->count(); */
-  $player->oldHP = $player->HP; // Record previous HP for checkDeath function
-}
-
 function updateScore($player, $task, $real = true) {
-  formerValues($player); // Store old values for later use
   if ($task->is("name!=death")) {
     // Task details to calculate new score
     $tXP = $task->XP;
@@ -239,7 +233,7 @@ function taskExtraAction($player, $task) {
     }
   }
   if ($task->is("name=group-death|team-death")) { // No death because of others
-    if ($player->oldHP > 0 && $player->HP<=0) { $player->HP = 1; }
+    if ($player->HP<=0) { $player->HP = 1; }
   }
   if ($task->is("name=test-rr")) {
     $player->fighting_power = $player->fighting_power-2;
@@ -253,7 +247,7 @@ function taskExtraAction($player, $task) {
   if ($task->is("name=test-vv")) {
     $player->fighting_power = $player->fighting_power+2;
   }
-  if ($task->is("name=no-homework|material")) {
+  if ($task->is("name=no-homework")) {
     $player->hkcount++;
   }
   if ($task->is("name=homework-half-done|signature")) {

@@ -389,17 +389,19 @@
           $task->comment = 'Player died. [former level:'.$currentLevel.']';
           $task->eDate = date($e->date+1);
           $task->linkedId = false;
-          $linkedId = saveHistory($selectedPlayer, $task, 1);
+          $historyPage = saveHistory($selectedPlayer, $task, 1);
+          $linkedId = $historyPage->id;
           // DO NOT use updateScore(...,true), it would touch the equipment for real !!!
           // Find previous death, check former level and act accordingly
           $prevDeath = $allEvents->sort("-date")->get("task.name=death, limit=1");
           preg_match("/\d+/", $prevDeath->summary, $matches);
           $previousLevel = (int) $matches[0];
           if ($previousLevel == 1 && $currentLevel == 1) { // 2nd death in a row on Level 1 > Enter coma state
-            // Disabled on Edit history
+            // Disabled on Edit history but no effect on other players
             /* $selectedPlayer->coma = 1; */
           } else {
             // Each team member suffers from player's death
+            // Disable to avoid recalculation nightmare ???
             $teamDeath = $pages->get("name=team-death");
             $teamDeath->comment = 'Team member died! ['.$selectedPlayer->title.']';
             $teamDeath->eDate = $task->eDate;
@@ -715,17 +717,39 @@
                   $dirty = true;
                 }
               }
-              if ($e->task->is("name=team-death|group-death")) {
-                // Find who died
+              if ($e->task->is("name=team-death|group-death|death")) {
                 if ($e->linkedId) {
-                  $linkedId = $pages->get("$e->linkedId");
-                  $dead = $linkedId->parent("template=player");
-                  $out .= ' ['.$dead->title.']';
+                  $out .= ' ['.$e->linkedId.']';
                 }
               }
               $e->task->comment = $comment;
               $e->task->refPage = $e->refPage; // Just take refPage for scores calculation (no linkedId, no comment because complete history is not re-written
               updateScore($selectedPlayer, $e->task, false);
+              if ($e->task->is("name=death")) {
+                $prevDeath = $allEvents->find('task.name=death')->getPrev($e);
+                if (isset($prevDeath)) {
+                  // Set prevDeathLevel
+                  preg_match("/\d+/", $prevDeath->summary, $matches);
+                  $prevDeathLevel = (int) $matches[0];
+                  $out .= 'PrevDeath:'.$prevDeathLevel;
+                }
+                $selectedPlayer->HP = 50;
+                $selectedPlayer->GC = 0;
+                $selectedPlayer->XP = 0;
+                if ($prevDeathLevel == 1 && $selectedPlayer->level == 1) { // 2nd death in a row on Level 1 > Coma state
+                  $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
+                  $selectedPlayer->coma = true;
+                  $selectedPlayer->level = 1;
+                } 
+                // Remove equipment but group-items
+                foreach($selectedPlayer->equipment as $eq) {
+                  if ($eq->parent->is("name!=group-items")) {
+                    $selectedPlayer->equipment->remove($eq);
+                  }
+                }
+                $selectedPlayer->level = $selectedPlayer->level-1;
+                if ($selectedPlayer->level < 1) { $selectedPlayer->level = 1; }
+              }
               $out .= '<br />';
               $out .= displayTrendScores($selectedPlayer, $oldPlayer);
               $out .= displayPlayerScores($selectedPlayer);
@@ -752,24 +776,6 @@
                   }
                 }
               }
-              if ($e->task->is("name=death")) {
-                $selectedPlayer->HP = 50;
-                $selectedPlayer->GC = 0;
-                $selectedPlayer->XP = 0;
-                if ($previousLevel == 1 && $selectedPlayer->level == 1) { // 2nd death in a row on Level 1 > Coma state
-                  $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
-                  $selectedPlayer->coma = true;
-                  $selectedPlayer->level = 1;
-                } 
-                // Remove equipment but group-items
-                foreach($selectedPlayer->equipment as $eq) {
-                  if ($eq->parent->is("name=group-items")) {
-                    $selectedPlayer->equipment->remove($eq);
-                  }
-                }
-                $selectedPlayer->level = $selectedPlayer->level-1;
-                if ($selectedPlayer->level < 1) { $selectedPlayer->level = 1; }
-              }
             }
             $out .='</td></tr>';
           }
@@ -783,6 +789,13 @@
             $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
           }
           if ($input->urlSegment3 && $input->urlSegment3 == 1) {
+            $officialPeriod = $pages->get("name=admin-actions")->periods;
+            $newCount = setHomework($selectedPlayer, $officialPeriod->dateStart, $officialPeriod->dateEnd);
+            $lastPenalty = $allEvents->find("task.category.name=homework, date>=$officialPeriod->dateStart, date<=$officialPeriod->dateEnd")->sort("-date")->first(); // Get last Hk pb
+            if ($lastPenalty->task->is("name=penalty")) {
+              $newCount = 0;
+            }
+            $selectedPlayer->hkcount = $newCount;
             $selectedPlayer->of(false);
             $selectedPlayer->save();
             /* $out .= '<div class="well">New scores saved !</div>'; */
@@ -801,14 +814,14 @@
         $player->save();
         break;
       case 'save-options':
-        $periodId = $input->get['periodId'];
-        $page->of(false);
-        $page->periods = $periodId;
-        $page->save();
         $allPlayers = $pages->find("template=player");
+        $id = $input->get['periodId'];
+        $officialPeriod = $pages->get("id=$id");
+        $page->of(false);
+        $page->periods = $officialPeriod;
+        $page->save();
         foreach($allPlayers as $p) {
-          $newCount = setHomework($p);
-          bd($newCount.'-'.$p->name);
+          $newCount = setHomework($p, $officialPeriod->dateStart, $officialPeriod->dateEnd);
           if ($newCount != $p->hkcount) {
             $p->hkcount = $newCount;
             $p->of(false);

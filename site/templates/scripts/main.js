@@ -41,14 +41,12 @@ $(document).ready(function() {
 
 	$('#playerId').on('change', function() {
 		var pageId = $(this).val();
-		$('#backendEditable').attr('data-id', pageId); 
+		var oldHref = $('#backendEditable').attr('href');
+		$('#backendEditable').attr('href', oldHref+pageId); 
 	});
 	$('#backendEditable').on('click', function() {
-		var pageId = $(this).attr('data-id');
-		if ( pageId != '-1' && pageId != 'all') {
-			var url = $(this).attr('href')+pageId;
-			window.location.href = url;
-		}
+		var url = $(this).attr('href')+pageId;
+		window.location.href = url;
 		return false;
 	})
 

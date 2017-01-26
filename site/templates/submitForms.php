@@ -154,6 +154,7 @@
         updateScore($player, $task, true);
       }
       // Check death for each players having a negative action
+      $allNegPlayers = $allNegPlayers->unique();
       foreach($allNegPlayers as $p) {
         checkDeath($p, true);
       }
