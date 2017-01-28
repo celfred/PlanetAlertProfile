@@ -232,6 +232,10 @@ $(document).ready(function() {
     }
   });
   var submitDonation = function() {
+    if ($('#player').val() == 0 ) {
+      alert('Donator error?');
+      return false;
+    }
     if ($('#receiver').val() == 0 ) {
       alert('You must select a player!');
       return false;
@@ -266,6 +270,17 @@ $(document).ready(function() {
   $('#amount').on('keyup', function() {
 		checkAmount($(this).val());
   });
+	$('#donator').on('change', function() {
+		if ($(this).val() != 0) {
+			$(this).next('.form-control-feedback').hide();
+			if (checkAmount($('#amount').val())) {
+				$('#donateFormSubmit').prop('disabled', false);
+			}
+		} else {
+			$(this).next('.form-control-feedback').show();
+			$('#donateFormSubmit').prop('disabled', true);
+		}
+	});
 	$('#receiver').on('change', function() {
 		if ($(this).val() != 0) {
 			$(this).next('.form-control-feedback').hide();
@@ -411,33 +426,38 @@ $(document).ready(function() {
 			return false;
 		}
   });
-  $('a.pickAmbassador').on('click', function() {
-		var list = $(this).attr("data-list");
-		$('#pickedAmbassador').addClass('blink');
-		$('#pickedAmbassador').html('...');
-		setTimeout( function() { pickFromList(list, 'pickedAmbassador');  }, 1000);
-		// window.alert(picked);
-	});
   $('a.pickFromList').on('click', function() {
-		var list = $(this).attr("data-list");
-		var $el = $('#honored');
-		$el.addClass('blink');
-		$el.html('...');
-		$('#decisions').hide('');
-		setTimeout( function() { pickFromList(list, $el);  }, 1000);
+		var $this = $(this);
+		var list = $this.attr("data-list");
+		var items = list.split(',');
+		var $pageId = chance.pick(items);
+		var $url = $('#ajaxDecision').attr('data-href') + '?id=' + $('#ajaxDecision').attr('data-id')+'&pageId='+$pageId;
+		swal('','',''); // Workaround to empty previous alert ?
+		swal({
+			html: true,
+			title: 'Decision time for...',
+			text: '<span class="label label-danger blink">...</span>',
+			timer: 2000,
+			showConfirmButton: false,
+			closeOnConfirm: false
+		}, function() {
+			$.get($url, function(data) { 
+				var $myContent = data;
+				swal({
+					html: true,
+					title: '<h4>Decision time for...</h4>',
+					text: $myContent,
+					showConfirmButton: false,
+					showCancelButton: true,
+					allowOutsideClick: true,
+				});
+			});
+		});
 	});
 
-	var pickFromList = function(list, el) {
-		var items = list.split(',');
-		var picked = chance.pick(items);
-		el.html('Decision time for : '+picked+' !');
-		el.removeClass('blink');
-		setTimeout( function() { showDecisions();  }, 500);
-		return picked;
-	}
-	var showDecisions = function() {
-		$('#decisions').show('');
-	}
+	$(document).on('click', '.toggleStrike', function() {
+		$(this).toggleClass('strikeText');
+	});
 
   $('#startFight').on('click', function() {
     // TODO : Move function into exercise.js?

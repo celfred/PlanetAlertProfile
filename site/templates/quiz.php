@@ -5,6 +5,7 @@ include("./head.inc");
 $out = '';
 if ($user->isSuperuser()) {
   // Nav tabs
+  $team = $pages->get("template=team, name=$input->urlSegment1");;
   include("./tabList.inc"); 
   
   if ($input->post->quizFormSubmit) {

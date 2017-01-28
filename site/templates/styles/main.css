@@ -504,14 +504,32 @@ tr.selected {
   margin: 20px 0px;
   border-radius: 10px;
 }
-#decisions {
-	display: none;
-}
 .panel-heading {
   border-radius: 10px 10px 0px 0px;
 }
 .panel-footer {
   border-radius: 0px 0px 10px 10px;
+}
+.board {
+  margin: 10px 0px;
+  border-radius: 10px;
+	font-size: 0.8em;
+}
+.board .panel-heading h4 {
+	margin: 0px;
+	padding: 0px;
+}
+#decisions {
+	display: none;
+}
+.fame {
+	float: left;
+}
+.fame > span:first-of-type {
+  transform: rotate(-8deg);
+}
+.fame > span ~ span {
+	transform: rotate(0deg);
 }
 .scores ul li {
   margin : 0px 5px;
@@ -615,6 +633,14 @@ table.adminTable > thead > tr > th {
   border: 1px solid #000;
   background-color: #313131;
   color: #FFF;
+}
+.contrast {
+	/* background-color: #333; */
+	/* border-radius: 20px 20px 0px 0px; */
+	color: #000;
+}
+.contrast a {
+	color: #000;
 }
 .vertical-text {
 	display: inline-block;

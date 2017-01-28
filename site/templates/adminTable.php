@@ -4,6 +4,7 @@
 include("./head.inc"); 
 
 // Nav tabs
+$team = $pages->get("template=team, name=$input->urlSegment1");;
 include("./tabList.inc"); 
 
 $team = $input->urlSegment1;

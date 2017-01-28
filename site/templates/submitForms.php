@@ -193,5 +193,30 @@
       // Redirect to MarketPlace
       $session->redirect($pages->get('/shop')->url.$player->team->name);
     }
+
+    if($input->post->donateFormSubmit) { // donateForm submitted
+      $playerId = $input->post->player;
+      $player = $pages->get($playerId);
+      $player->of(false);
+      $amount = (integer) $input->post->amount;
+      $receiverId = $input->post->receiver;
+      $receiver = $pages->get($receiverId);
+      $receiver->of(false);
+      
+      // Save donation
+      // If valid amount
+      if ($player && $receiverId && $amount != 0 && $amount <= $player->GC) {
+        // Modify player's page
+        $task = $pages->get("template='task', name='donation'");
+        $task->comment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->team->title.']';
+        $task->refPage = $receiver;
+        $task->linkedId = false;
+        updateScore($player, $task, true);
+        // No need to checkDeath, Donation can't cause death
+
+        // Redirection to Team page
+        $session->redirect($pages->get("name=players")->url.$player->team->name);
+      }
+    }
   } // End if superUser
 ?>

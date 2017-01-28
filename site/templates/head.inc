@@ -69,7 +69,7 @@
 							$class = $page->name == 'newsboard' ? "on" : "";
 							echo "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
 							echo '<div class="btn-group" role="group">';
-								$class = $page->name == 'players' || $page->name == "world" ? "on" : "";
+								$class = $page->name == 'players' || $page->name == "world" || $page->template == 'main-office' ? "on" : "";
 								echo '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The Teams <span class="caret"></span></button>';
 								echo '<ul class="dropdown-menu">';
 								foreach($allTeams as $team) {
@@ -78,6 +78,7 @@
 									echo "<li class='dropdown-submenu'>";
 									echo "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/'>{$team->title}</a>";
 									echo "<ul class='dropdown-menu'>";
+									echo  "<li class='dropdown-submenu'><a href='{$homepage->url}main-office/{$team->name}'>{$team->title} main office</a>";
 									echo  "<li class='dropdown-submenu'><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} team</a>";
 									echo "<ul class='dropdown-menu'>";
 									foreach ($teamPlayers as $p) {

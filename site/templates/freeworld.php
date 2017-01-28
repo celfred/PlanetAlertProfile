@@ -16,6 +16,7 @@
   $teamRate = round(($allPlayers->count()*20)/100);
 
   // Nav tabs
+  $team = $pages->get("template=team, name=$input->urlSegment1");;
   include("./tabList.inc"); 
 
   showScores($team);

@@ -177,6 +177,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       if ($input->urlSegment2 == '') { // A class is selected, display possible items
         if ($user->isSuperuser() ) {
           // Nav tabs
+          $team = $pages->get("template=team, name=$input->urlSegment1");;
           include("./tabList.inc"); 
 
           $out = '';

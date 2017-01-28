@@ -1,5 +1,6 @@
 <?php
   if ($config->ajax) {
+    include("./my-functions.inc");
     $out = '';
     switch ($input->get('id')) {
       case 'lastEvents' :
@@ -133,6 +134,83 @@
         } else {
           $out .= '<p>Nothing to do.</p>';
         }
+        break;
+      case 'decision' :
+        $pageId = $input->get('pageId');
+        $p = $pages->get("id=$pageId");
+        if ($p->is("template=player")) {
+          $donatorId = $p->id;
+          if ($p->avatar) { $mini = '<img src="'.$p->avatar->getThumb('thumbnail').'" alt="avatar" />'; }
+          $out .= '<div class="row">';
+          $out .= '<div class="col-sm-6 text-center">';
+          $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
+          $out .= '</div>';
+          $out .= '<div class="col-sm-6 text-left">';
+          $out .= '<ul class="list-unstyled">';
+          if ($p->coma == 0) {
+            $out .= '<li><span class="label label-success">Karma : '.$p->karma.'</span></li>';
+            $out .= '<li><span class="label label-default"><span class="glyphicon glyphicon-signal"></span> '.$p->level.'</span>';
+            $threshold = getLevelThreshold($p->level);
+            $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$p->XP.'/'.$threshold.'</span></li>';
+            $nbFreeEl = $p->places->count();
+            if ($p->team->rank->is('name=4emes|3emes')) {
+              $nbFreeEl += $p->people->count();
+            }
+            $out .= '<li><span class="label label-default"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
+            $out .= ' <span class="label label-default"><span class="glyphicon glyphicon-wrench"></span> '.$p->equipment->count().'</span></li>';
+            $out .= '<li><span class="label label-default">'.$p->underground_training.' UT</span>';
+            $out .= ' <span class="label label-default">'.$p->fighting_power.' FP</span>';
+            $out .= '</li>';
+            $out .= '<li><span class="label label-default"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> '.$p->HP.'</span>';
+            $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$p->GC.'</span></li>';
+          } else {
+            $out .= '<li class="label label-danger">Coma !</li>';
+          }
+          $out .= '</ul>';
+          $out .= '</div>';
+          $out .= '</div>';
+        }
+        if ($p->is("parent.name=groups")) {
+          // Get group members
+          $groupPlayers = $pages->find("template=player, group=$pageId, sort=-karma");
+          $out .= '<div class="row">';
+            $out .= '<ul class="list-unstyled list-inline text-left">';
+            $donatorId = $groupPlayers->sort('-GC')->first()->id;
+            foreach($groupPlayers as $p) {
+              $nbFreeEl = $p->places->count();
+              if ($p->team->rank->is('name=4emes|3emes')) {
+                $nbFreeEl += $p->people->count();
+              }
+              if ($p->avatar) { $mini = '<img src="'.$p->avatar->getThumb('thumbnail').'" alt="avatar" width="50" />'; }
+            $out .= '<li>';
+            $out .= $mini;
+            $out .= '<span>';
+            $out .= $p->title;
+            if ($p->coma == 0) {
+              $out .= ' <span class="badge">'.$p->karma.'K.</span>';
+              $out .= ' <span class="badge"><span class="glyphicon glyphicon-wrench"></span>'.$p->equipment->count().'</span>';
+              $out .= ' <span class="badge"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
+              $out .= ' <span class="badge">'.$p->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+              $out .= ' <span class="badge">'.$p->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></span>';
+            } else {
+              $out .= '<span class="label label-danger">Coma !</span>';
+            }
+            $out .= '</span>';
+            $out .= '</li>';
+            }
+            $out .= '</ul>';
+          $out .= '</div>';
+        }
+        $out .= '<div class="contrast">';
+        $out .= '<h4>What do you want to do ?</h4>';
+        $out .= '<ul class="text-left">';
+        $out .= '<li class="toggleStrike strikeText"><a href="'.$pages->get("name=shop")->url.$p->team->name.'">Go to the Marketplace</a>.</li>';
+        $out .= '<li class="toggleStrike strikeText"><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">Repell a Monster Invasions</a></li>';
+        $out .= '<li class="toggleStrike strikeText"><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">Help another player (make a donation)</a></li>';
+        $out .= '<li class="toggleStrike strikeText">Pick another group/player/ambassador</li>';
+        $out .= '<li class="toggleStrike strikeText">Pick a random mission</li>';
+        $out .= '</ul>';
+        $out .= '</div>';
         break;
       default :
         $out = 'Todo...';
