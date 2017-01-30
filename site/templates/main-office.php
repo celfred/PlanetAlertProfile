@@ -124,17 +124,43 @@
     // Top players
     $topPlayers = new PageArray();
     $fpPlayer = $allPlayers->sort('-fighting_power, karma')->first();
-    $topPlayers->add($fpPlayer);
+    if ($fpPlayer->fighting_power == 0) {
+      $fpPlayer->delete(true);
+    } else {
+      $topPlayers->add($fpPlayer);
+    }
     $donPlayer = $allPlayers->sort('-donation, karma')->first();
-    $topPlayers->add($donPlayer);
+    if ($donPlayer->donation == 0) {
+      $donPlayer->delete(true);
+    } else {
+      $topPlayers->add($donPlayer);
+    }
     $utPlayer = $allPlayers->sort('-underground_training, karma')->first();
-    $topPlayers->add($utPlayer);
+    if ($utPlayer->underground_training == 0) {
+      $utPlayer->delete(true);
+    } else {
+      $topPlayers->add($utPlayer);
+    }
     $eqPlayer = $allPlayers->sort('-equipment.count, karma')->first();
-    $topPlayers->add($eqPlayer);
+    if ($eqPlayer->equipment->count() == 0) {
+      $eqPlayer->delete(true);
+    } else {
+      $topPlayers->add($eqPlayer);
+    }
     $plaPlayer = $allPlayers->sort('-places.count, karma')->first();
-    $topPlayers->add($plaPlayer);
-    $peoPlayer = $allPlayers->sort('-places.count, karma')->first();
-    $topPlayers->add($peoPlayer);
+    if ($plaPlayer->places->count() == 0) {
+      $plaPlayer->delete(true);
+    } else {
+      $topPlayers->add($plaPlayer);
+    }
+    if ($rank == '4emes' || $rank == '3emes') {
+      $peoPlayer = $allPlayers->sort('-people.count, karma')->first();
+      if ($peoPlayer->people->count() == 0) {
+        $peoPlayer->delete(true);
+      } else {
+        $topPlayers->add($peoPlayer);
+      }
+    }
     $topPlayersList = $topPlayers->implode(', ', '{id}');
     if ($user->isSuperuser()) {
       if ($topPlayers->count() == 0) { 
@@ -170,17 +196,21 @@
         if ($eqPlayer->avatar) { $out .= '<img class="" src="'.$eqPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
         $out .= '<div class="caption text-center">'.$eqPlayer->title.' <span class="badge">'.$eqPlayer->equipment->count().'eq.</span></div>';
       $out .= '</div>';
-      $out .= '<div class="fame thumbnail">'; // Greatest # of Places
-        $out .= '<span class="badge">Greatest # of Places !</span>';
-        if ($plaPlayer->avatar) { $out .= '<img class="" src="'.$plaPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
-        $out .= '<div class="caption text-center">'.$plaPlayer->title.' <span class="badge">'.$plaPlayer->places->count().'pla.</span></div>';
-      $out .= '</div>';
-      if ($rank == '4emes' || $rank == '3emes') {
-        $out .= '<div class="fame thumbnail">'; // Greatest # of people
-          $out .= '<span class="badge">Greatest # of People !</span>';
-          if ($peoPlayer->avatar) { $out .= '<img class="" src="'.$peoPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
-          $out .= '<div class="caption text-center">'.$peoPlayer->title.' <span class="badge">'.$peoPlayer->people->count().'peo.</span></div>';
+      if (isset($plaPlayer)) {
+        $out .= '<div class="fame thumbnail">'; // Greatest # of Places
+          $out .= '<span class="badge">Greatest # of Places !</span>';
+          if ($plaPlayer->avatar) { $out .= '<img class="" src="'.$plaPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          $out .= '<div class="caption text-center">'.$plaPlayer->title.' <span class="badge">'.$plaPlayer->places->count().'pla.</span></div>';
         $out .= '</div>';
+      }
+      if ($rank == '4emes' || $rank == '3emes') {
+        if (isset($peoPlayer)) {
+          $out .= '<div class="fame thumbnail">'; // Greatest # of people
+            $out .= '<span class="badge">Greatest # of People !</span>';
+            if ($peoPlayer->avatar) { $out .= '<img class="" src="'.$peoPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+            $out .= '<div class="caption text-center">'.$peoPlayer->title.' <span class="badge">'.$peoPlayer->people->count().'peo.</span></div>';
+          $out .= '</div>';
+        }
       }
     $out .= '</div>';
     $out .= '<div class="panel-footer">';
