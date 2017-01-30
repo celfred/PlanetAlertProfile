@@ -426,7 +426,7 @@ $(document).ready(function() {
 			return false;
 		}
   });
-  $('a.pickFromList').on('click', function() {
+  $('.pickFromList').on('click', function() {
 		var $this = $(this);
 		var list = $this.attr("data-list");
 		var items = list.split(',');
@@ -437,7 +437,7 @@ $(document).ready(function() {
 			html: true,
 			title: 'Decision time for...',
 			text: '<span class="label label-danger blink">...</span>',
-			timer: 2000,
+			timer: 1000,
 			showConfirmButton: false,
 			closeOnConfirm: false
 		}, function() {
@@ -456,7 +456,8 @@ $(document).ready(function() {
 	});
 
 	$(document).on('click', '.toggleStrike', function() {
-		$(this).toggleClass('strikeText');
+		$(this).toggleClass('label-danger label-success');
+		$(this).next('span').toggleClass('strikeText');
 	});
 
   $('#startFight').on('click', function() {

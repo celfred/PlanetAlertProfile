@@ -1314,7 +1314,7 @@ function displayGroups($allPlayers, $button = 0) {
   $outGroups .= '<ol class="">';
   foreach( $allGroups as $group) {
     $outGroups .= '<li>';
-    $outGroups .= '<p class="" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+    $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
     $outGroups .= $group->title;
     $outGroups .= ' <span class="badge">'.$group->karma.'</span>';
     $outGroups .= '</p>';
@@ -1336,6 +1336,12 @@ function displayGroups($allPlayers, $button = 0) {
     $outGroups .= '</li>';
   }
   $outGroups .= '</ol>';
+  $outGroups .= '</div>';
+  $outGroups .= '<div class="panel-footer text-center">';
+  $teamPlayers = $allPlayers->find("coma!=1");
+  $teamPlayersList = $teamPlayers->implode(', ', '{id}');
+  $pickButton = ' <a class="btn btn-danger btn-xs pickFromList" data-list="'.$teamPlayersList.'">Pick a player in the whole team !</a>';
+  $outGroups .= $pickButton;
   $outGroups .= '</div>';
   $outGroups .= '</div>';
   return $outGroups;

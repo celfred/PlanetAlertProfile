@@ -174,6 +174,7 @@
           // Get group members
           $groupPlayers = $pages->find("template=player, group=$pageId, sort=-karma");
           $out .= '<div class="row">';
+            $out .= '<p class="text-center"><span class="label label-primary">'.$p->title.'</span></p>';
             $out .= '<ul class="list-unstyled list-inline text-left">';
             $donatorId = $groupPlayers->sort('-GC')->first()->id;
             foreach($groupPlayers as $p) {
@@ -202,13 +203,13 @@
           $out .= '</div>';
         }
         $out .= '<div class="contrast">';
-        $out .= '<h4>What do you want to do ?</h4>';
-        $out .= '<ul class="text-left">';
-        $out .= '<li class="toggleStrike strikeText"><a href="'.$pages->get("name=shop")->url.$p->team->name.'">Go to the Marketplace</a>.</li>';
-        $out .= '<li class="toggleStrike strikeText"><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">Repell a Monster Invasions</a></li>';
-        $out .= '<li class="toggleStrike strikeText"><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">Help another player (make a donation)</a></li>';
-        $out .= '<li class="toggleStrike strikeText">Pick another group/player/ambassador</li>';
-        $out .= '<li class="toggleStrike strikeText">Pick a random mission</li>';
+        $out .= '<h4>What do you want to do ? [I want to...]</h4>';
+        $out .= '<ul class="text-left list-unstyled">';
+        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText"><a href="'.$pages->get("name=shop")->url.$p->team->name.'">Go to the Marketplace.</a>.</span></li>';
+        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText"><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">Make a donation (help another player).</a></span></li>';
+        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText"><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">Repell a monster invasion.</a></span></li>';
+        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText">Pick another group/player/ambassador...</span></li>';
+        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText">Pick a random mission.</span></li>';
         $out .= '</ul>';
         $out .= '</div>';
         break;

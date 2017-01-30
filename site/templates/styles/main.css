@@ -634,9 +634,10 @@ table.adminTable > thead > tr > th {
   background-color: #313131;
   color: #FFF;
 }
+.toggleStrike, .pickFromList {
+	cursor: pointer;
+}
 .contrast {
-	/* background-color: #333; */
-	/* border-radius: 20px 20px 0px 0px; */
 	color: #000;
 }
 .contrast a {
