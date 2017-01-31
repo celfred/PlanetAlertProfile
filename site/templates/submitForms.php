@@ -117,7 +117,6 @@
   }
 
   if ($user->isSuperuser()) { // Admin front-end
-    // TODO : Give superUser possibility to record a donation?
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
       $n->of(false);
@@ -130,6 +129,16 @@
         $n->save();
         //echo 'News will disappear on reload.';
       }
+    }
+
+    if (isset($input->get->form) && $input->get->form == 'heal' && $input->get->playerId != '') {
+      $player = $pages->get($input->get->playerId);
+      $item = $pages->get("name=health-potion");
+      $task = $pages->get("name='buy'");
+      $task->comment = $item->title;
+      $task->refPage = $item;
+      $task->linkedId = false;
+      updateScore($player, $task, true);
     }
 
     if($input->post->adminTableSubmit) { // adminTableForm submitted

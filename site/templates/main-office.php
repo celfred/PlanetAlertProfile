@@ -25,10 +25,11 @@
     $out .= '<div class="panel-heading">';
       $dangerPlayers = $allPlayers->find('coma=1');
       $dangerPlayers->add($allPlayers->find("HP<=10"))->sort("coma, HP");
-      $out .= '<p class="panel-title">Help needed!</span>';
+      $out .= '<p class="panel-title">Help needed!</p>';
     $out .= '</div>';
     $out .= '<div class="panel-body">';
       if ($dangerPlayers->count() != 0) {
+        $healingPotion = $pages->get("name=health-potion");
         $out .= '<ul class="list list-unstyled list-inline text-center">';
         foreach($dangerPlayers as $p) {
           if ($p->coma == 1) {
@@ -43,13 +44,28 @@
           } else {
             $out .= '<Avatar>';
           }
-          $out .= '<caption class="text-center">'.$p->title.' <span class="badge">'.$label.'</span></caption>';
+
+          $out .= '<caption class="text-center">';
+          $out .= $p->title;
+          $out .= ' <span class="badge">'.$label.'</span><br />';
+          if ($user->isSuperuser()) {
+            $out .= '<span class="badge">'.$p->GC.'GC</span>';
+            if ($p->GC >= $healingPotion->GC) {
+              $out .= ' <a href="#" class="btn btn-xs btn-link healingBtn" data-url="'.$pages->get('name=submitforms')->url.'?form=heal&playerId='.$p->id.'&itemId='.$healingPotion->id.'" data-GC="'.$p->GC.'" data-healing-price="'.$healingPotion->GC.'">→ Heal?</a>';
+            }
+          }
+          $out .= '</caption>';
           $out .= '</div>';
           $out .= '</li>';
         }
         $out .= '<ul>';
       } else {
         $out .= '<p>Congratulations ! No player with HP<10 !</p>';
+      }
+    $out .= '</div>';
+    $out .= '<div class="panel-footer text-right">';
+      if ($healingPotion->id) {
+        $out .= 'Healing potion costs '.$healingPotion->GC.'GC';
       }
     $out .= '</div>';
     $out .= '</div>';
@@ -114,7 +130,7 @@
       } else {
         $out .= '<Avatar>';
       }
-      $out .= '<caption class="text-center">'.$p->title.' <span class="badge">'.$p->karma.'</span></caption>';
+      $out .= '<caption class="text-center">'.$p->title.' <span class="badge">'.$p->karma.'K</span></caption>';
       $out .= '</div>';
       $out .= '</li>';
     }
