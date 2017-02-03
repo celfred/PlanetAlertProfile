@@ -733,22 +733,10 @@
                   $prevDeathLevel = (int) $matches[0];
                   $out .= 'PrevDeath:'.$prevDeathLevel;
                 }
-                $selectedPlayer->HP = 50;
-                $selectedPlayer->GC = 0;
-                $selectedPlayer->XP = 0;
-                if ($prevDeathLevel == 1 && $selectedPlayer->level == 1) { // 2nd death in a row on Level 1 > Coma state
+                resetPlayer($selectedPlayer, $prevDeathLevel);
+                if ($selectedPlayer->coma == 1) {
                   $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
-                  $selectedPlayer->coma = true;
-                  $selectedPlayer->level = 1;
                 } 
-                // Remove equipment but group-items
-                foreach($selectedPlayer->equipment as $eq) {
-                  if ($eq->parent->is("name!=group-items")) {
-                    $selectedPlayer->equipment->remove($eq);
-                  }
-                }
-                $selectedPlayer->level = $selectedPlayer->level-1;
-                if ($selectedPlayer->level < 1) { $selectedPlayer->level = 1; }
               }
               $out .= '<br />';
               $out .= displayTrendScores($selectedPlayer, $oldPlayer);
