@@ -139,7 +139,8 @@
           $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.'</option>';
         }
         $out .= ' </select>';
-        $out .= '<button class="adminAction btn btn-block btn-primary" data-href="'.$page->url.'" data-action="save-options">Save</button>';
+        $out .= '<button class="proceed btn btn-block btn-primary" data-href="'.$page->url.'" data-action="save-options">Save</button>';
+        $out .= '<div class="proceedFeedback"></div>';
         $out .= '</div>';
         $out .= '</section>';
         $out .= '<section class="well">';
@@ -803,11 +804,17 @@
         break;
       case 'save-options':
         $allPlayers = $pages->find("template=player");
-        $id = $input->get['periodId'];
+        $id = $input->urlSegment2;
         $officialPeriod = $pages->get("id=$id");
         $page->of(false);
         $page->periods = $officialPeriod;
         $page->save();
+        $session->officialPeriod = $officialPeriod;
+        $now = time();
+        if ($now < $session->officialPeriod->dateStart || $now > $session->officialPeriod->dateEnd) {
+          echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
+        }
+        // TODO : Might be too long to recalculate hkcount over a long period with many events...
         foreach($allPlayers as $p) {
           $newCount = setHomework($p, $officialPeriod->dateStart, $officialPeriod->dateEnd);
           if ($newCount != $p->hkcount) {

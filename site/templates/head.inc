@@ -54,6 +54,15 @@
 				$bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
 				$bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
 			} else { // Admin is logged in
+				// Check official period dates vs today's date
+				$now = time();
+				if (!$session->officialPeriod) {
+					$officialPeriod = $pages->get("name=admin-actions")->periods;
+					$session->officialPeriod = $officialPeriod;
+				}
+				if ($now < $session->officialPeriod->dateStart || $now > $session->officialPeriod->dateEnd) {
+					echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
+				}
 			}
 		}
 	?>

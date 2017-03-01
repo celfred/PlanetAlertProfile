@@ -39,6 +39,33 @@ $(document).ready(function() {
     return false; 
   }); 
 
+	$('.proceed').on('click', function() {
+		$this = $(this);
+		swal({
+			html: true,
+			title: "Are you sure?",
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes!"
+		}, function(isConfirm) {
+			if (isConfirm) {
+				var href = $this.attr('data-href') + "/save-options/" + $('#periodId').val() + "/1";
+				$this.next('.proceedFeedback').html("Saving...");
+				$('.notification').remove();
+				$.get(href, function(data) { 
+					$this.next('.proceedFeedback').html("Saved!");
+					$('#wrap').prepend(data);
+					setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
+				}); 
+			} else {
+				return false;
+			}
+		});
+
+	});
+
 	$('#playerId').on('change', function() {
 		var pageId = $(this).val();
 		var oldHref = $('#backendEditable').attr('href');
