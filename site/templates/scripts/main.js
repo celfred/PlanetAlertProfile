@@ -259,7 +259,7 @@ $(document).ready(function() {
     }
   });
   var submitDonation = function() {
-    if ($('#player').val() == 0 ) {
+    if ($('#donator').val() == 0 ) {
       alert('Donator error?');
       return false;
     }
@@ -318,9 +318,6 @@ $(document).ready(function() {
 			$(this).next('.form-control-feedback').show();
 			$('#donateFormSubmit').prop('disabled', true);
 		}
-	})
-	$('#donateFormSubmit').on('click', function() {
-		$(this).hide();
 	})
 
 	$('[data-toggle=tooltip]').hover(function(){
