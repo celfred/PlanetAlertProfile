@@ -212,6 +212,23 @@
         $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText">Pick another group/player/ambassador...</span></li>';
         $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText">Pick a random mission.</span></li>';
         $out .= '</ul>';
+        // TODO : Check available potions/places/people (with a discount)
+        // TODO : Pick 1 random ?
+        // TODO : Random discount ?
+        // Pb : How to record in player's history ? When recalculating...
+        // > use $refPage->linkedId ? Have discount pages in backend ?
+        // Possible places
+        $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
+        $allPeople = $pages->find("template=people, name!=people, sort=title");
+        $possiblePlaces = $allPlaces->find("GC<=$p->GC, level<=$p->level, id!=$p->places,sort=name");
+        // Possible people
+        $possiblePeople = $allPeople->find("GC<=$p->GC, level<=$p->level, id!=$p->people,sort=name");
+        if ($possiblePlaces->count() > 0 || $possiblePeople->count() > 0 ) {
+          $out .= '<ul>';
+            $out .= '<span class="badge">Special offers : 50% discount !</span>';
+            $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText"><a href="'.$pages->get("name=shop")->url.$p->team->name.'">Go to the Marketplace.</a>.</span></li>';
+          $out .= '</ul>';
+        }
         $out .= '</div>';
         break;
       default :
