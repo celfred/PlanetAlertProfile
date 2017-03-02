@@ -214,6 +214,12 @@
         $out .= '</ul>';
         $out .= '</div>';
         break;
+      case 'ambassador' :
+        $pageId = $input->get('pageId');
+        $p = $pages->get("title=$pageId");
+        if ($p->avatar) { $mini = '<img src="'.$p->avatar->getThumb('thumbnail').'" alt="avatar" />'; }
+        $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
+        break;
       default :
         $out = 'Todo...';
     }

@@ -67,6 +67,8 @@ if ($user->isSuperuser()) {
     $ambassadorsButton = ' <a class="btn btn-info btn-sm pickFromList" data-list="'.$ambassadors.'">Pick a player</a>';
   }
 
+  $out .= '<div id="ajaxDecision" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="ambassador"></div>';
+
   if ( count($selectedIds) > 0 ) { // Players have been checked
     // Pick one
     shuffle($selectedIds);
