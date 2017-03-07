@@ -83,7 +83,7 @@
       }
 
       if($input->post->donateFormSubmit) { // donateForm submitted
-        $playerId = $input->post->player;
+        $playerId = $input->post->donator;
         $player = $pages->get($playerId);
         $player->of(false);
         $amount = (integer) $input->post->amount;
