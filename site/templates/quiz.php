@@ -53,8 +53,6 @@ if ($user->isSuperuser()) {
       }
     }
     $notConcerned = $notConcerned->implode(', ', '{title}');
-    /* $allConcerned = $pages->find("template=player, team.name=$selectedTeam, (people.count+places.count>=3)"); // Find players having at least 3 places OR 3 people */
-    /* $notConcerned = $pages->find("template=player, team.name=$selectedTeam, (places.count<3), (people.count<3)")->implode(', ', '{title}'); */
   } else {
     $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
     $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');
@@ -81,6 +79,7 @@ if ($user->isSuperuser()) {
   }
 
   // Set nbInvasion foreach players
+  $allConcerned->sort("name");
   foreach($allConcerned as $p) {
     $p->nbInvasions = $p->find("template=event, task.name=right-invasion|wrong-invasion")->count();
     if ($selectedIds && in_array($p, $selectedIds)) { // Keep checked players
