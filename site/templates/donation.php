@@ -64,6 +64,8 @@ if ($user->isLoggedin() || $user->isSuperuser()) {
     $out .= '<span class="glyphicon glyphicon-warning-sign form-control-feedback '.$hidden.'" aria-hidden="true"></span>';
     $out .= '</div>';
     $out .= '</div>';
+  } else {
+    $out .= '<input type="hidden" id="donator" name="donator" value="'.$playerId.'" />';
   }
   $out .= '<div class="form-group has-warning has-feedback">';
   $out .= '<label for="receiver" class="col-sm-5 control-label">Donate to : </label>';
@@ -81,7 +83,6 @@ if ($user->isLoggedin() || $user->isSuperuser()) {
   $out .= '</div>';
   $out .= '</div>';
   $out .= ' <input id="donateFormSubmit" name="donateFormSubmit" type="submit" class="form-control btn btn-primary btn-sm" value="Donate !" disabled="true" />';
-  $out .= '<input type="hidden" id="player" name="player" value="'.$playerId.'" />';
   $out .= '</form>';
   $out .= '</section>';
 
