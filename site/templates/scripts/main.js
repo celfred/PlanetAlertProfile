@@ -469,9 +469,10 @@ $(document).ready(function() {
 				var $myContent = data;
 				swal({
 					html: true,
-					title: '<h4>Decision time for...</h4>',
+					title: '<h4>What do you want to do ? [I want to...]</h4>',
 					text: $myContent,
 					showConfirmButton: false,
+					cancelButtonText : 'Do nothing',
 					showCancelButton: true,
 					allowOutsideClick: true,
 				});
@@ -484,10 +485,8 @@ $(document).ready(function() {
 		$(this).next('span').toggleClass('strikeText');
 	});
 
-	$(document).on('click', '.healingBtn', function() {
+	$(document).on('click', '.buyBtn', function() {
 		var $this = $(this);
-		var $playerGC = $this.attr('data-GC');
-		var $healingPotionPrice = $this.attr('data-healing-price');
 		swal({
 			html: true,
 			title: "Are you sure?",
@@ -495,7 +494,7 @@ $(document).ready(function() {
 			showCancelButton : true,
 			allowOutsideClick : true,
 			cancelButtonText: "No",
-			confirmButtonText: "Yes, buy a healing potion !"
+			confirmButtonText: "Yes"
 		}, function(isConfirm) {
 			if (isConfirm) {
 				var $url = $this.attr('data-url');
@@ -506,6 +505,29 @@ $(document).ready(function() {
 		});
 		return false;
 	});
+
+	// $(document).on('click', '.healingBtn', function() {
+	// 	var $this = $(this);
+	// 	var $playerGC = $this.attr('data-GC');
+	// 	var $healingPotionPrice = $this.attr('data-healing-price');
+	// 	swal({
+	// 		html: true,
+	// 		title: "Are you sure?",
+	// 		type: "warning",
+	// 		showCancelButton : true,
+	// 		allowOutsideClick : true,
+	// 		cancelButtonText: "No",
+	// 		confirmButtonText: "Yes, buy a healing potion !"
+	// 	}, function(isConfirm) {
+	// 		if (isConfirm) {
+	// 			var $url = $this.attr('data-url');
+	// 			$.get($url, function(data) { 
+	// 				$this.parents("div.thumbnail").remove();
+	// 			});
+	// 		}
+	// 	});
+	// 	return false;
+	// });
 
   $('#startFight').on('click', function() {
     // TODO : Move function into exercise.js?

@@ -131,13 +131,21 @@
       }
     }
 
-    if (isset($input->get->form) && $input->get->form == 'heal' && $input->get->playerId != '') {
+    if (isset($input->get->form) && $input->get->form == 'buyForm' && $input->get->playerId != '') {
       $player = $pages->get($input->get->playerId);
-      $item = $pages->get("name=health-potion");
-      $task = $pages->get("name='buy'");
+      $item = $pages->get($input->get->itemId);
+      if ($item->is("template=place|people")) {
+        $task = $pages->get("name='free'");
+      } else {
+        $task = $pages->get("name='buy'");
+      }
       $task->comment = $item->title;
       $task->refPage = $item;
-      $task->linkedId = false;
+      if ($input->get->discount && $input->get->discount != '') {
+        $task->linkedId = $input->get->discount;
+      } else {
+        $task->linkedId = false;
+      }
       updateScore($player, $task, true);
     }
 

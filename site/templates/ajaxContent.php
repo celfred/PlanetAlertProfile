@@ -139,6 +139,28 @@
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
         if ($p->is("template=player")) {
+          // Possible places
+          if ($player->coma == false) {
+            $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
+            $allPeople = $pages->find("template=people, name!=people, sort=title");
+            $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");
+            $possiblePlaces = $allPlaces->find("GC<=$p->GC, level<=$p->level, id!=$p->places,sort=name");
+            // Possible people
+            $possiblePeople = $allPeople->find("GC<=$p->GC, level<=$p->level, id!=$p->people,sort=name");
+            // Possible equipments
+            $nbEl = $p->places->count()+$p->people->count();
+            $possibleEquipment = $allEquipments->find("GC<=$p->GC, level<=$p->level, freeActs<=$nbEl, id!=$p->equipment, parent.name!=potions, sort=-parent.name, sort=name");
+            // Get rid of potions bought within the last 15 days
+            $today = mktime("23:59:59 Y-m-d");
+            $limitDate = time()-15*3600*24;
+            $boughtPotions = $p->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=health-potion");
+            $possiblePotions = $allEquipments->find("GC<=$p->GC, level<=$p->level, freeActs<=$nbEl, parent.name=potions, sort=name");
+            $possibleItems = new pageArray();
+            $possibleItems->add($possiblePlaces);
+            $possibleItems->add($possiblePeople);
+            $possibleItems->add($possibleEquipment);
+            $possibleItems->add($possiblePotions);
+          }
           $donatorId = $p->id;
           if ($p->avatar) { $mini = '<img src="'.$p->avatar->getThumb('thumbnail').'" alt="avatar" />'; }
           $out .= '<div class="row">';
@@ -178,22 +200,22 @@
             $out .= '<ul class="list-unstyled list-inline text-left">';
             $donatorId = $groupPlayers->sort('-GC')->first()->id;
             $groupPlayers->sort('-karma');
-            foreach($groupPlayers as $p) {
-              $nbFreeEl = $p->places->count();
-              if ($p->team->rank->is('name=4emes|3emes')) {
-                $nbFreeEl += $p->people->count();
+            foreach($groupPlayers as $gp) {
+              $nbFreeEl = $gp->places->count();
+              if ($gp->team->rank->is('name=4emes|3emes')) {
+                $nbFreeEl += $gp->people->count();
               }
-              if ($p->avatar) { $mini = '<img src="'.$p->avatar->getThumb('thumbnail').'" alt="avatar" width="50" />'; }
+              if ($gp->avatar) { $mini = '<img src="'.$gp->avatar->getThumb('thumbnail').'" alt="avatar" width="50" />'; }
             $out .= '<li>';
             $out .= $mini;
             $out .= '<span>';
-            $out .= $p->title;
-            if ($p->coma == 0) {
-              $out .= ' <span class="badge">'.$p->karma.'K.</span>';
-              $out .= ' <span class="badge"><span class="glyphicon glyphicon-wrench"></span>'.$p->equipment->count().'</span>';
+            $out .= $gp->title;
+            if ($gp->coma == 0) {
+              $out .= ' <span class="badge">'.$gp->karma.'K.</span>';
+              $out .= ' <span class="badge"><span class="glyphicon glyphicon-wrench"></span>'.$gp->equipment->count().'</span>';
               $out .= ' <span class="badge"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
-              $out .= ' <span class="badge">'.$p->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
-              $out .= ' <span class="badge">'.$p->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></span>';
+              $out .= ' <span class="badge">'.$gp->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
+              $out .= ' <span class="badge">'.$gp->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></span>';
             } else {
               $out .= '<span class="label label-danger">Coma !</span>';
             }
@@ -204,31 +226,45 @@
           $out .= '</div>';
         }
         $out .= '<div class="contrast">';
-        $out .= '<h4>What do you want to do ? [I want to...]</h4>';
         $out .= '<ul class="text-left list-unstyled">';
-        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText"><a href="'.$pages->get("name=shop")->url.$p->team->name.'">Go to the Marketplace.</a>.</span></li>';
-        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText"><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">Make a donation (help another player).</a></span></li>';
-        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText"><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">Repell a monster invasion.</a></span></li>';
-        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText">Pick another group/player/ambassador...</span></li>';
-        $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText">Pick a random mission.</span></li>';
-        $out .= '</ul>';
-        // TODO : Check available potions/places/people (with a discount)
-        // TODO : Pick 1 random ?
-        // TODO : Random discount ?
-        // Pb : How to record in player's history ? When recalculating...
-        // > use $refPage->linkedId ? Have discount pages in backend ?
-        // Possible places
-        $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
-        $allPeople = $pages->find("template=people, name!=people, sort=title");
-        $possiblePlaces = $allPlaces->find("GC<=$p->GC, level<=$p->level, id!=$p->places,sort=name");
-        // Possible people
-        $possiblePeople = $allPeople->find("GC<=$p->GC, level<=$p->level, id!=$p->people,sort=name");
-        if ($possiblePlaces->count() > 0 || $possiblePeople->count() > 0 ) {
-          $out .= '<ul>';
-            $out .= '<span class="badge">Special offers : 50% discount !</span>';
-            $out .= '<li><span class="toggleStrike label label-danger">✓/✗</span> <span class="strikeText"><a href="'.$pages->get("name=shop")->url.$p->team->name.'">Go to the Marketplace.</a>.</span></li>';
-          $out .= '</ul>';
+        if ($p->GC > 5 || $p->is("parent.name=groups")) {
+          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
         }
+        $out .= '<li><span><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">→ Organize team defense.</a></span></li>';
+        if ($p->is("parent.name!=groups")) {
+          if (rand(0,1)) { // Random special discount
+            if ($possibleItems->count() > 0 ) {
+              // Pick a random item
+              $selectedItem = $possibleItems->getRandom();
+              $details = ' ('.$selectedItem->category->title.')';
+              if ($selectedItem->is("has_parent.name=places|people")) { $details = ' in '.$selectedItem->city->title.' ('.$selectedItem->country->title.')'; }
+              // Pick a random discount
+              $discount = $pages->find("parent=/specials")->getRandom();
+              $newPrice = round($selectedItem->GC-($selectedItem->GC*($discount->name/100))).'GC';
+              if ($newPrice == 0) { $newPrice = 'Free'; }
+              $out .= '<li>';
+                $out .= '<a href="#"></a>';
+                $out .= ' <a href="#" class="btn btn-xs btn-link buyBtn" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$selectedItem->id.'&discount='.$discount->id.'" data-GC="'.$p->GC.'" data-item-price="'.$selectedItem->GC.'">→ Get <span class="label label-danger">'.$discount->title.'%</span> discount on <span class="label label-primary">'.$selectedItem->title.'</span> '.$details.' !</a>';
+                $out .= '<div class="row">';
+                $out .= '<div class="col-sm-6 text-right">';
+                  $out .= '<h4><span class="strikeText">'.$selectedItem->GC.'GC</span> → <span class="label label-success">'.$newPrice.'</span></h4>';
+                $out .= '</div>';
+                $out .= '<div class="col-sm-6 text-left">';
+                if ($selectedItem->photo) {
+                  $out .= '<img class="img-thumbnail" src="'.$selectedItem->photo->eq(0)->getThumb('thumbnail').'" /> ';
+                }
+                if ($selectedItem->image) {
+                  $out .= '<img class="img-thumbnail" src="'.$selectedItem->image->getThumb('thumbnail').'" /> ';
+                }
+                $out .= '</div>';
+              $out .= '</div>';
+              $out .= '</li>';
+            }
+          } else {
+            $out .= '<li><span class="strikeText">No special offer today...</span></li>';
+          }
+        }
+        $out .= '</ul>';
         $out .= '</div>';
         break;
       case 'ambassador' :

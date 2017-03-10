@@ -265,7 +265,14 @@ function taskExtraAction($player, $task) {
   }
   if ($task->is("name=free")) { // Add element
     if ($task->refPage) {
-      $player->GC = (int) $player->GC-$task->refPage->GC;
+      // Check for a discount
+      if ($task->linkedId) {
+        $discount = $pages->get($task->linkedId)->name;
+        $newPrice = round($task->refPage->GC-($task->refPage->GC*($discount/100)));
+      } else {
+        $newPrice = $task->refPage->GC;
+      }
+      $player->GC = (int) $player->GC-$newPrice;
       // Add place if needed
       if ($task->refPage->is("template=place")) {
         $player->places->add($task->refPage);
@@ -278,7 +285,14 @@ function taskExtraAction($player, $task) {
   } 
   if ($task->is("name=buy")) { // Add equipment
     if ($task->refPage) {
-      $player->GC = (int) $player->GC-$task->refPage->GC;
+      // Check for a discount
+      if ($task->linkedId) {
+        $discount = $pages->get($task->linkedId)->name;
+        $newPrice = round($task->refPage->GC-($task->refPage->GC*($discount/100)));
+      } else {
+        $newPrice = $task->refPage->GC;
+      }
+      $player->GC = (int) $player->GC-$newPrice;
       // Add item if needed
       if ($task->refPage->is("template=equipment|item")) {
         switch($task->refPage->parent->name) {
@@ -1314,7 +1328,11 @@ function displayGroups($allPlayers, $button = 0) {
   $outGroups .= '<ol class="">';
   foreach( $allGroups as $group) {
     $outGroups .= '<li>';
-    $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+    if ($button == 1) {
+      $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+    } else {
+      $outGroups .= '<p data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+    }
     $outGroups .= $group->title;
     $outGroups .= ' <span class="badge">'.$group->karma.'</span>';
     $outGroups .= '</p>';
@@ -1340,7 +1358,11 @@ function displayGroups($allPlayers, $button = 0) {
   $outGroups .= '<div class="panel-footer text-center">';
   $teamPlayers = $allPlayers->find("coma!=1");
   $teamPlayersList = $teamPlayers->implode(', ', '{id}');
-  $pickButton = ' <a class="btn btn-danger btn-xs pickFromList" data-list="'.$teamPlayersList.'">Pick a player in the whole team !</a>';
+  if ($button == 1) {
+    $pickButton = ' <a class="btn btn-danger btn-xs pickFromList" data-list="'.$teamPlayersList.'">Pick a player in the whole team !</a>';
+  } else {
+    $pickButton = '';
+  }
   $outGroups .= $pickButton;
   $outGroups .= '</div>';
   $outGroups .= '</div>';

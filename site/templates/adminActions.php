@@ -624,10 +624,13 @@
             $out .= $e->title;
             $comment = trim($e->summary);
             if ($comment) {
-              $out .= ' ['.$comment.']';
+              $out .= ' [comment:'.$comment.']';
             }
             if ($e->refPage) {
-              $out .= ' ['.$e->refPage->title.']';
+              $out .= ' [refPage:'.$e->refPage->title.']';
+            }
+            if ($e->linkedId) {
+              $out .= ' [linkedId:'.$e->linkedId.']';
             }
             if ($e->task) {
               if ($e->task->is("name=donation")) { // Player gave GC, increase his Donation
@@ -697,6 +700,10 @@
                     $out .= '<li><span class="label label-success">Leaving COMA STATE !</span></li>';
                   }
                 }
+                if ($e->linkedId) {
+                  $discount = $pages->get("$e->linkedId");
+                  $out .= ' ['.$discount->title.'% discount]';
+                }
               }
               if ($e->task->is("name=death")) {
                 $lastDeath = $e;
@@ -724,7 +731,8 @@
                 }
               }
               $e->task->comment = $comment;
-              $e->task->refPage = $e->refPage; // Just take refPage for scores calculation (no linkedId, no comment because complete history is not re-written
+              $e->task->refPage = $e->refPage;
+              $e->task->linkedId = $e->linkedId;
               updateScore($selectedPlayer, $e->task, false);
               if ($e->task->is("name=death")) {
                 $prevDeath = $allEvents->find('task.name=death')->getPrev($e);
