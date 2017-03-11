@@ -498,36 +498,22 @@ $(document).ready(function() {
 		}, function(isConfirm) {
 			if (isConfirm) {
 				var $url = $this.attr('data-url');
-				$.get($url, function(data) { 
+				var $type = $this.attr('data-type');
+				if ($type == 'heal') {
 					$this.parents("div.thumbnail").remove();
+				}
+				$.get($url, function(data) { 
+					swal({
+						title: "Saved !",
+						text: "Thanks for your participation in Planet Alert !",
+						timer: 1000,
+						showConfirmButton: false
+					});
 				});
 			}
 		});
 		return false;
 	});
-
-	// $(document).on('click', '.healingBtn', function() {
-	// 	var $this = $(this);
-	// 	var $playerGC = $this.attr('data-GC');
-	// 	var $healingPotionPrice = $this.attr('data-healing-price');
-	// 	swal({
-	// 		html: true,
-	// 		title: "Are you sure?",
-	// 		type: "warning",
-	// 		showCancelButton : true,
-	// 		allowOutsideClick : true,
-	// 		cancelButtonText: "No",
-	// 		confirmButtonText: "Yes, buy a healing potion !"
-	// 	}, function(isConfirm) {
-	// 		if (isConfirm) {
-	// 			var $url = $this.attr('data-url');
-	// 			$.get($url, function(data) { 
-	// 				$this.parents("div.thumbnail").remove();
-	// 			});
-	// 		}
-	// 	});
-	// 	return false;
-	// });
 
   $('#startFight').on('click', function() {
     // TODO : Move function into exercise.js?

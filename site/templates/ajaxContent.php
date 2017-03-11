@@ -243,9 +243,8 @@
               $newPrice = round($selectedItem->GC-($selectedItem->GC*($discount->name/100))).'GC';
               if ($newPrice == 0) { $newPrice = 'Free'; }
               $out .= '<li>';
-                $out .= '<a href="#"></a>';
-                $out .= ' <a href="#" class="btn btn-xs btn-link buyBtn" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$selectedItem->id.'&discount='.$discount->id.'" data-GC="'.$p->GC.'" data-item-price="'.$selectedItem->GC.'">→ Get <span class="label label-danger">'.$discount->title.'%</span> discount on <span class="label label-primary">'.$selectedItem->title.'</span> '.$details.' !</a>';
-                $out .= '<div class="row">';
+                $out .= ' <span><a href="#" class="buyBtn" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$selectedItem->id.'&discount='.$discount->id.'" data-GC="'.$p->GC.'" data-item-price="'.$selectedItem->GC.'">→ Get <span class="label label-danger">'.$discount->title.'%</span> discount on <span class="label label-primary">'.$selectedItem->title.'</span> '.$details.' !</a></span>';
+              $out .= '<div class="row">';
                 $out .= '<div class="col-sm-6 text-right">';
                   $out .= '<h4><span class="strikeText">'.$selectedItem->GC.'GC</span> → <span class="label label-success">'.$newPrice.'</span></h4>';
                 $out .= '</div>';

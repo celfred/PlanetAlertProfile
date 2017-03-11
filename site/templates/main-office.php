@@ -51,7 +51,7 @@
           if ($user->isSuperuser()) {
             $out .= '<span class="badge">'.$p->GC.'GC</span>';
             if ($p->GC >= $healingPotion->GC) {
-              $out .= ' <a href="#" class="btn btn-xs btn-link buyBtn" data-url="'.$pages->get('name=submitforms')->url.'?form=heal&playerId='.$p->id.'&itemId='.$healingPotion->id.'">→ Heal?</a>';
+              $out .= ' <a href="#" class="btn btn-xs btn-link buyBtn" data-type="heal" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$healingPotion->id.'">→ Heal?</a>';
             }
           }
           $out .= '</caption>';
