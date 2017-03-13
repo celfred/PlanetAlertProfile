@@ -154,7 +154,8 @@
             $today = mktime("23:59:59 Y-m-d");
             $limitDate = time()-15*3600*24;
             $boughtPotions = $p->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=health-potion");
-            $possiblePotions = $allEquipments->find("GC<=$p->GC, level<=$p->level, freeActs<=$nbEl, parent.name=potions, sort=name");
+            $possiblePotions = $allEquipments->find("GC<=$p->GC, level<=$p->level, freeActs<=$nbEl, parent.name=potions, sort=name")->not($boughtPotions);
+            if ($p->HP == 50) { $possiblePotions->remove("name=health-potion"); }
             $possibleItems = new pageArray();
             $possibleItems->add($possiblePlaces);
             $possibleItems->add($possiblePeople);
