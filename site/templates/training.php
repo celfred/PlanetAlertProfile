@@ -265,8 +265,9 @@
 
             $out .= '<div class="col-sm-3">';
             $out .= '<h3><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Training session <span class="blink">started</span></span></h3>';
-            $out .= '<h2><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Word count: {{counter}}</span></h2>';
-            $out .= '<h2><span class="label label-primary">+{{result}} U.T.</span></h2>';
+            $out .= '<br />';
+            $out .= '<h4><span ng-class="{label:true, \'label-primary\':true, blink:correct}">Current counter: {{counter}}</span> → <span class="label label-primary">+{{result}}UT</span></h4>';
+            $out .= '<span class="label label-danger">[10 words/sentences = +1UT]</span>';
             $out .= '<br /><br />';
             $out .= '<div class="panel panel-success">';
             $out .= '<div class="panel-heading">';
