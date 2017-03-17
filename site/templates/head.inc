@@ -87,7 +87,7 @@
 									echo "<li class='dropdown-submenu'>";
 									echo "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/'>{$team->title}</a>";
 									echo "<ul class='dropdown-menu'>";
-									echo  "<li class='dropdown-submenu'><a href='{$homepage->url}main-office/{$team->name}'>{$team->title} main office</a>";
+									echo  "<li><a href='{$homepage->url}main-office/{$team->name}'>{$team->title} main office</a>";
 									echo  "<li class='dropdown-submenu'><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} team</a>";
 									echo "<ul class='dropdown-menu'>";
 									foreach ($teamPlayers as $p) {

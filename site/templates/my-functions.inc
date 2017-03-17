@@ -1082,9 +1082,6 @@ function pma($player) {
     default:
       $levels = '1|2|3|4|5';
       $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
-    default:
-      $levels = '1|2|3|4|5';
-      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
   }
   if ($player->equipment->has('name=memory-helmet')) {
     foreach($allMonsters as $m) {
