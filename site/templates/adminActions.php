@@ -250,10 +250,15 @@
     $endDate = $input->get["endDate"]; 
     if ($startDate == '') {
       $startDate = date('2000-01-01 00:00:00');
-    }
+    } else {
+      $startDate = $startDate.' 00:00:00';
+    };
     if ($endDate == '') {
       $endDate = date('Y-m-d 23:59:59');
+    } else {
+      $endDate = $endDate.' 23:59:59';
     }
+
     if ($action == 'toggle-lock' || $action == 'archive' || $action == 'forceHelmet') {
       $type = 'team';
     }
