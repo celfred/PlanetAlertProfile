@@ -70,9 +70,13 @@ if ($user->isSuperuser()) {
   if ( count($selectedIds) > 0 ) { // Players have been checked
     // Pick one
     shuffle($selectedIds);
-    $selectedPlayer = $selectedIds[0];
-    // Get rid of it
-    array_splice($selectedIds, 0, 1);
+    if ($input->post->reloadButton) {
+      $selectedPlayer = $input->post->playerId;
+    } else {
+      $selectedPlayer = $selectedIds[0];
+      // Get rid of it
+      array_splice($selectedIds, 0, 1);
+    }
     $display = 'hidden'; // Hide players list
   } else {
     $display = 'shown'; // Show players list
@@ -132,14 +136,18 @@ if ($user->isSuperuser()) {
         $out .= '<input type="hidden" name="question" value="'.$sanitizer->text($quiz['question']).'" />';
         $out .= '<input type="hidden" name="answer" value="'.$sanitizer->text($quiz['answer']).'" />';
         $out .= '<p class="text-center">';
+        $out .= '<button class="btn btn-info generateQuiz" type="submit" name="reloadButton" value="update" title="Re-generate"><span class="glyphicon glyphicon-refresh"></span></button>';
+        $out .= '&nbsp;&nbsp;';
         $out .= '<button class="btn btn-success generateQuiz" type="submit" name="RightButton" value="right"><span class="glyphicon glyphicon-ok"></span> Right</button>';
         $out .= '&nbsp;&nbsp;';
         $out .= '<button class="btn btn-danger generateQuiz" type="submit" name="WrongButton" value="wrong"><span class="glyphicon glyphicon-remove"></span> Wrong</button>';
-        $out .= ' <label for="lastQuestion"><input type="checkbox" id="lastQuestion" name="lastQuestion" /> Last question</label>';
+        $out .= '&nbsp;&nbsp;';
+        $out .= '<label for="lastQuestion"><input type="checkbox" id="lastQuestion" name="lastQuestion" /> Last question</label>';
         $out .= '</p>';
 
       $out .= '</div>';
     }
+    $out .= '<button type="submit" name="quizFormSubmitButton" class="btn btn-info btn-block generateQuiz">Generate</button>';
 
     // Players list display
     $out .= '<section class="well">';
@@ -170,7 +178,6 @@ if ($user->isSuperuser()) {
     $out .= '</div>';
     $out .= '</section>';
     $out .= '<input type="hidden" name="quizFormSubmit" value="Save" />';
-    $out .= '<button type="submit" name="quizFormSubmitButton" class="btn btn-info btn-block generateQuiz">Generate</button>';
     $out .= '</form>';
     
   }
