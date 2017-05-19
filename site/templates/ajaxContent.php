@@ -158,7 +158,9 @@
             if ($p->HP == 50) { $possiblePotions->remove("name=health-potion"); }
             $possibleItems = new pageArray();
             $possibleItems->add($possiblePlaces);
-            $possibleItems->add($possiblePeople);
+            if ($p->team->rank->is('name=4emes|3emes')) { // Add people ONLY for 4emes/3emes
+              $possibleItems->add($possiblePeople);
+            }
             $possibleItems->add($possibleEquipment);
             $possibleItems->add($possiblePotions);
           }
