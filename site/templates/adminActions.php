@@ -794,7 +794,7 @@
             $officialPeriod = $pages->get("name=admin-actions")->periods;
             $newCount = setHomework($selectedPlayer, $officialPeriod->dateStart, $officialPeriod->dateEnd);
             $lastPenalty = $allEvents->find("task.category.name=homework, date>=$officialPeriod->dateStart, date<=$officialPeriod->dateEnd")->sort("-date")->first(); // Get last Hk pb
-            if ($lastPenalty->task->is("name=penalty")) {
+            if ($lastPenalty && $lastPenalty->task->is("name=penalty")) {
               $newCount = 0;
             }
             $selectedPlayer->hkcount = $newCount;
@@ -1076,6 +1076,7 @@
           $out .= 'from '.$startDate.' ';
           $out .= 'to '.$endDate;
           $out .= '</h3>';
+          # TODO : Select a period
           $allPlayers = $allPlayers->find("team=$selectedTeam");
           $out .= '<ul>';
           foreach($allPlayers as $p) {
@@ -1083,6 +1084,12 @@
             if ($prevTask->count() > 0) {
               $taskCount += $prevTask->count();
               $out .= '<li>'.$p->title. ': Task found '.$prevTask->count().' time(s).</li>';
+              $out .= '<ul>';
+              foreach($prevTask as $t) {
+                $tDate = strftime("%d/%m/%y", $t->date).' - ';
+                $out .= '<li>'.$tDate. $t->summary.'</li>';
+              }
+              $out .= '</ul>';
             }
           }
           $out .= '</ul>';
