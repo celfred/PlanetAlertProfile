@@ -665,36 +665,54 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 				// Trigger animation
 				$scope.correct = true;
 				$scope.counter++;
+				// Get number of words
+				if (Math.floor($scope.counter/10) < $scope.result+1) {
+					swal({
+						html: true,
+						title: "Correct !",
+						text: "+1 word !",
+						type: "success",
+						showConfirmButton: false,
+						timer: 1000
+					});
+				} else { // Calculate result
+					$scope.result++;
+					$scope.utPoint = true;
+					$timeout(function() { $scope.utPoint = false; }, 1000);
+					$scope.stopSession(); // Alert +1 U.T. : Stop or continue?
+				}
 			}
-      // Get number of words and calculate result
-      if ($scope.counter >= 10) {
-        if (Math.floor($scope.counter/10) > $scope.result) {
-          $scope.result++;
-          $scope.utPoint = true;
-          $timeout(function() { $scope.utPoint = false; }, 1000);
-          $scope.stopSession(); // Alert +1 U.T. : Stop or continue?
-        }
-      }
       // Pick another question
 			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
     } else { // Wrong answer
+			swal({
+				html: true,
+				title: "Wrong !",
+				text: "Copy the correction !",
+				type: "error",
+				showConfirmButton: false,
+				timer: 1000
+			});
 			// Show correction
 			$scope.showCorrection = $scope.allCorrections.join(', ');
       $scope.wrong = true;
     }
   }
 
+	$scope.correctMessage = function() {
+	}
+
   $scope.stopSession = function() {
     if ($scope.result >= 1) {
       swal({
         html: true,
         title: "Stop training?",
-        text: "Good job! You've set a number of <span class='label label-success'>"+$scope.counter+" words</span> in your brain. This will credit you of <span class='label label-success'>+"+$scope.result+" U.T.</span>",
+        text: "Good job! You've set <span class='label label-success'>"+$scope.counter+" words</span> in your brain. This will credit you of <span class='label label-success'>+"+$scope.result+" U.T.</span>",
         type: "success",
         showCancelButton : true,
-        cancelButtonText: "Keep the helmet on (Continue training)",
-        confirmButtonText: "Take the helmet off (Stop training & Save results)"
+        cancelButtonText: "Continue training",
+        confirmButtonText: "Stop training & Save results"
       }, function(isConfirm) {
         if (isConfirm) { // Save and redirect
           $scope.saveData(true);
