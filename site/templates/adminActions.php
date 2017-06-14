@@ -376,6 +376,32 @@
         }
         $out .= '</ul>';
         break;
+      case 'add-remove' :
+        if ($selectedPlayer) {
+          $eventId = $confirm; // urlSegment3 used for eventId
+          $elementId = $input->urlSegment4; // urlSegment4 used for element id
+          $allEvents = $selectedPlayer->get("name=history")->children()->sort("date");
+          $e = $pages->get("id=$eventId");
+          // Move all day events a few seconds later
+          $dayEvents = $allEvents->find("date=$e->date, id!=$e->id");
+          $seconds = 5;
+          foreach($dayEvents as $d) {
+            $d->date = date($e->date + $seconds); 
+            $seconds = $seconds + 1;
+            $d->of(false);
+            $d->save();
+          }
+          $task = $pages->get("name=remove");
+          $element = $pages->get("id=$elementId");
+          $task->comment = '3rd wrong invasions on '.$element->title;
+          $task->eDate = date($e->date+1);
+          $task->linkedId = false;
+          $task->refPage = $element;
+          $historyPage = saveHistory($selectedPlayer, $task, 1);
+          $linkedId = $historyPage->id;
+          // DO NOT use updateScore(...,true), it would touch the equipment for real !!!
+        }
+        break;
       case 'add-death' :
         if ($selectedPlayer) {
           $eventId = $confirm; // urlSegment3 used for eventId
@@ -653,6 +679,29 @@
                   /*   $e->of(false); */
                   /*   $e->save(); */
                   /* } */
+                }
+              }
+              if ($e->task->is("name=wrong-invasion")) { // 3rd wrong invasion ?
+                $wrongInvasions = $allEvents->find("task.name=wrong-invasion, refPage=$e->refPage, date<=$e->date, sort=-date");
+                // Limit to events AFTER the last 'Free' action on the oarticular element
+                $lastFree = $allEvents->get("task.name=free, refPage=$e->refPage, sort=-date");
+                if ($lastFree->id) {
+                  $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
+                }
+                if ($wrongInvasions->count() >= 3) {
+                  if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
+                    $out .= '<span class="label label-success">Remove OK</span>';
+                  } else {
+                    $dirty = true;
+                    $out .= '<span class="label label-danger">Remove Error (3rd wrong invasion)</span>';
+                    // Button Add Remove action here
+                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-remove/'.$playerId.'/'.$e->id.'/'.$e->refPage->id.'">Add Remove action here?</button>';
+                  }
+                } else {
+                  if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
+                    $dirty = true;
+                    $out .= '<span class="label label-danger">Error : Remove found but not 3 wrong invasion(s) before ? ('.$wrongInvasions->count().'?)</span>';
+                  }
                 }
               }
               if ($e->task->is("name=buy|free|bought")) { // New equipment, place, people or potion, add it accordingly

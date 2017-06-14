@@ -349,11 +349,17 @@ function extraActionAfterSave($player, $historyPage, $real) {
   }
 
   if ($historyPage->task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
-    $prevInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date"); // TODO : Limit to official period?
-    if ($prevInvasions->count() >= 2) {
+    $wrongInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date");
+    // Limit to events AFTER the last 'Free' action on the oarticular element
+    $lastFree = $player->get("name=history")->get("task.name=free, refPage=$historyPage->refPage, sort=-date");
+    if ($lastFree->id) {
+      $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
+    }
+    if ($wrongInvasions->count() >= 3) {
       $task = $pages->get("template=task, name=remove");
       $task->comment = '3rd wrong invasions on '.$historyPage->refPage->title;
       $task->refPage = $historyPage->refPage;
+      $task->eDate = date('m/d/Y H:i:s', time()+60);
       $task->linkedId = false;
       updateScore($player, $task, $real);
     }
@@ -710,8 +716,9 @@ function nbFreedomActs($team, $startDate='', $endDate='') {
   if ($startDate == '') { $startDate = $schoolYear->dateStart; }
   if ($endDate == '') { $endDate = $schoolYear->dateEnd; }
   $players = $pages->find("template=player, team=$team");
-  $free = $pages->find("has_parent=$players, template=event, task.name=free, date>=$startDate, date<=$endDate")->count();
-  return $free;
+  $nbFree = $pages->find("has_parent=$players, template=event, task.name=free, date>=$startDate, date<=$endDate")->count();
+  $nbRemove = $pages->find("has_parent=$players, template=event, task.name=remove, date>=$startDate, date<=$endDate")->count();
+  return $nbFree-$nbRemove;
 }
 
 function teamFreeworld($team) {

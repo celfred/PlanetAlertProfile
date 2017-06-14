@@ -67,7 +67,7 @@ if ($user->isSuperuser()) {
 
   $out .= '<div id="ajaxDecision" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="ambassador"></div>';
 
-  if ( count($selectedIds) > 0 ) { // Players have been checked
+  if ( count($selectedIds) > 0 || $input->post->playerId ) { // Players have been checked
     // Pick one
     shuffle($selectedIds);
     if ($input->post->reloadButton) {
@@ -79,7 +79,7 @@ if ($user->isSuperuser()) {
     }
     $display = 'hidden'; // Hide players list
   } else {
-    $display = 'shown'; // Show players list
+    $display = 'shown'; // Show players list on first load
   }
 
   // Set nbInvasion foreach players
