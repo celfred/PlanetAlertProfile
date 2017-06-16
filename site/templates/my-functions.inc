@@ -447,19 +447,18 @@ function setStreak($player, $task) {
   }
 }
 
-/* function checkStreak($player) { */
-/*   // Set Ambassador skill if necessary */
-/*   $streak = 0; */
-/*   $lastEvents = $player->get("name=history")->find("template=event, sort=-date, limit=10, task.name!=donated|donation|absent"); */
-/*   foreach ($lastEvents as $e) { */
-/*     if ($e->task->HP >= 0) { */
-/*       $streak++; */
-/*     } else { */
-/*       break; */
-/*     } */
-/*   } */
-/*   return $streak; */
-/* } */
+function checkStreak($player) {
+  $streak = 0;
+  $lastEvents = $player->get("name=history")->find("template=event, sort=-date, limit=10, task.name!=donated|donation|absent");
+  foreach ($lastEvents as $e) {
+    if ($e->task->HP >= 0) {
+      $streak++;
+    } else {
+      break;
+    }
+  }
+  return $streak;
+}
 
 function setLevel($player) {
   // Check new level

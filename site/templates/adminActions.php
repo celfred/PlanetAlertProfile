@@ -259,7 +259,8 @@
       $endDate = $endDate.' 23:59:59';
     }
 
-    if ($action == 'toggle-lock' || $action == 'archive' || $action == 'forceHelmet') {
+    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'reset-streaks'];
+    if (in_array($action, $teamActions)) {
       $type = 'team';
     }
 
@@ -402,8 +403,24 @@
           // DO NOT use updateScore(...,true), it would touch the equipment for real !!!
         }
         break;
+      case 'reset-streaks' :
+        $allPlayers = $pages->find("template=player, team=$selectedTeam");
+        $role = $pages->get("name=ambassador");
+        foreach($allPlayers as $p) {
+          $streak = checkStreak($p);
+          $p->streak = $streak;
+          if ($streak >= 10) {
+            $p->skills->add($role);
+          } else {
+            $p->skills->remove($role);
+          }
+          $p->of(false);
+          $p->save();
+        }
+        break;
       case 'add-death' :
         if ($selectedPlayer) {
+          $allPlayers = $pages->find("template=player, team=$selectedPlayer->team");
           $eventId = $confirm; // urlSegment3 used for eventId
           $currentLevel = $input->urlSegment4;
           $allEvents = $selectedPlayer->get("name=history")->children()->sort("date");
@@ -439,12 +456,12 @@
             $teamDeath->eDate = $task->eDate;
             $teamDeath->refPage = $selectedPlayer;
             $teamDeath->linkedId = $linkedId;
-            $teamPlayers = $pages->find("template=player, team=$selectedPlayer->team, group!=$selectedPlayer->group");
+            $teamPlayers = $allPlayers->find("group!=$selectedPlayer->group");
             foreach($teamPlayers as $p) {
               saveHistory($p, $teamDeath, 0);
             }
             // Each group member suffers from player's death
-            $groupMembers = $pages->find("template=player, team=$selectedPlayer->team, group=$selectedPlayer->group, id!=$selectedPlayer->id");
+            $groupMembers = $allPlayers->find("group=$selectedPlayer->group, id!=$selectedPlayer->id");
             $groupDeath = $pages->get("name=group-death");
             $groupDeath->comment = 'Group member died! ['.$selectedPlayer->title.']';
             $teamDeath->refPage = $selectedPlayer;
@@ -453,6 +470,12 @@
             foreach($groupMembers as $p) {
               saveHistory($p, $groupDeath, 0);
             }
+          }
+          // Reset streak for all players
+          foreach ($allPlayers as $p) {
+            $p->of(false);
+            $p->streak = 0;
+            $p->save();
           }
         }
         break;
@@ -1176,6 +1199,9 @@
 
           $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> Archive</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
+          $out .= '<li><label for="resetStreaks"><input type="checkbox" id="reset-streaks"> Reset streaks</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'reset-streaks/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
           $out .= '</ul>';
         } else {
