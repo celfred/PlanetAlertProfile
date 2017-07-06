@@ -68,9 +68,10 @@ $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
   <td><?php echo $player->group->title; ?></td>
   <th><?php echo $player->title; ?></th>
     <?php foreach ($allTasks as $task) {
+      if ($task->HP < 0) { $type = 'negative'; } else { $type=''; }
       $taskId = $task->id;
     ?>
-    <td data-toggle="tooltip" title="<?php echo $player->title.' - '.$task->title; ?>">
+    <td class="<?php echo $type; ?>" data-toggle="tooltip" title="<?php echo $player->title.' - '.$task->title; ?>">
     <input type="checkbox" class="ctPlayer ct_<?php echo $taskId; ?>" id="" data-customId="<?php echo $id.'_'.$taskId; ?>" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $taskId; ?>)" />
     <input style="display: none;" type="text" data-customId="<?php echo $id.'_'.$taskId; ?>" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="Comment" />
     </td>

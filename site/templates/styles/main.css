@@ -637,6 +637,9 @@ table.adminTable > thead > tr > th {
   background-color: #313131;
   color: #FFF;
 }
+.adminTable td.negative {
+	background-color: #898989;
+}
 .toggleStrike, .pickFromList {
 	cursor: pointer;
 }
