@@ -159,6 +159,23 @@
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="team-options">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
+      case 'setCaptains' :
+        $out .= '<section class="well">';
+        $out .= '<h3 class="text-center">';
+        $out .=   'Set Captains';
+        $out .= '</h3>';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setCaptains">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
       case 'setKarma' :
         $out .= '<section class="well">';
         $out .= '<h3 class="text-center">';
@@ -909,6 +926,22 @@
           }
         }
         break;
+      case 'setCaptains':
+        if ($selectedTeam && $selectedTeam != '-1') {
+          $oldCaptains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
+          $out .= '</div>';
+          $out .= '<h4 class="text-center">';
+          $out .=   'Set Captains for '.$selectedTeam->title;
+          $out .= '</h4>';
+          $out .= '<section>';
+          $out .= '<p> Old captains : '.$oldCaptains.'</p>';
+          setCaptains($selectedTeam, false);
+          $newCaptains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
+          $out .= '<p> New captains : '.$newCaptains.'</p>';
+          $out .= '</section>';
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveCaptains/'.$selectedTeam->id.'/1">Save new captains</button>';
+        }
+        break;
       case 'setKarma':
         if ($selectedTeam && $selectedTeam != '-1') {
           $allPlayers = $allPlayers->find("team=$selectedTeam");
@@ -950,6 +983,11 @@
           $out .= '</section>';
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveScores/'.$selectedTeam->id.'/1">Save new scores</button>';
         }
+        break;
+      case 'saveCaptains':
+        $selectedTeam = $pages->get("$input->urlSegment2");
+        $allPlayers = $allPlayers->find("team=$selectedTeam");
+        setCaptains($selectedTeam, true);
         break;
       case 'saveKarma':
         $selectedTeam = $pages->get("$input->urlSegment2");

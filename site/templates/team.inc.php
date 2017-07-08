@@ -27,7 +27,7 @@
   }
   $outGroups = '';
 
-  // Calculate groups Karma
+  // Calculate groups Karma & Set Captain
   $index = 0;
   foreach($allGroups as $group) {
     $group->karma = 0;
@@ -83,7 +83,14 @@
 
   showScores($team);
 
-  echo $outGroups;
+  $captains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
+  if ( strlen($captains) == 0 ) { 
+    $captains = 'Nobody.';
+  } else {
+  }
+  echo '<p class="text-center"><span class="label label-primary"><span class="glyphicon glyphicon-star"></span> Group Captains</span> '.$captains.'</p>';
+
+  // echo $outGroups;
 
   // New PHP table
   $allPlayers->sort('-karma, -XP');
@@ -206,22 +213,19 @@
     $out .= '<tr '. $class.'>';
     $out .= '<td>'. $player->group->title .'</td>';
     $out .= '<td>'. $mini .'</td>';
-    $out .= '<td><a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount.'</td>';
+    $out .= '<td>';
+    $out .='<a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount.'</td>';
     $out .= '<td>'. $player->karma .'</td>';
     $out .= '<td><span class="trend">'.$trend.'</span></td>';
-    /* if ($player->skills->count() > 0) { // For later use, when more roles? */
-    /*   $skills = $player->skills->implode('<br />', '{title}'); */
-    /*   $showSkills = '<span class="label label-success">'; */
-    /*   foreach($player->skills as $s) { */
-    /*     $showSkills .= strtoupper($s->title[0]); */
-    /*   } */
-    /*   $showSkills .= '</span>'; */
-    if ($player->skills->has("name=ambassador")) {
-      $skills = 'Ambassador';
-      $showSkills = '<span class="label label-success">A</span>';
+    if ($player->skills->has("name=captain")) {
+      $showSkills = '<span class="label label-primary" data-toggle="tooltip" title="Captain">C</span>';
     } else {
-      $skills = '';
-      $showSkills = '<span class="label label-info">'.$player->streak.'</span>';
+      $showSkills = '';
+    }
+    if ($player->skills->has("name=ambassador")) {
+      $showSkills .= '<span class="label label-success" data-toggle="tooltip" title="Ambassador">A</span>';
+    } else {
+      $showSkills .= '<span class="label label-info">'.$player->streak.'</span>';
     }
     $out .= '<td data-toggle="tooltip" data-html="true" title="'.$skills.'">'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';

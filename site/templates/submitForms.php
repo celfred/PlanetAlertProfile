@@ -112,6 +112,9 @@
       }
     }
 
+    // Set group captains
+    setCaptains($player->team);
+
     // Redirect to player's profile
     $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name);
   }
@@ -147,6 +150,8 @@
         $task->linkedId = false;
       }
       updateScore($player, $task, true);
+      // Set group captains
+      setCaptains($player->team);
     }
 
     if($input->post->adminTableSubmit) { // adminTableForm submitted
@@ -175,8 +180,10 @@
       foreach($allNegPlayers as $p) {
         checkDeath($p, true);
       }
+      // Set group captains
+      setCaptains($player->team);
 
-      // Redirect to team page
+      // Redirect to team page (in main.js)
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
       $url = $pages->get('/players')->url.$player->team->name;
       echo json_encode(array("sender"=>"adminTable", "saved"=>count($checked), "url"=>$url));
@@ -207,6 +214,8 @@
           // No need to checkDeath, Marketplace can't cause death
         }
       }
+      // Set group captains
+      setCaptains($player->team);
       // Redirect to MarketPlace
       $session->redirect($pages->get('/shop')->url.$player->team->name);
     }
@@ -230,6 +239,9 @@
         $task->linkedId = false;
         updateScore($player, $task, true);
         // No need to checkDeath, Donation can't cause death
+
+        // Set group captains
+        setCaptains($player->team);
 
         // Redirection to Team page
         $session->redirect($pages->get("name=players")->url.$player->team->name);

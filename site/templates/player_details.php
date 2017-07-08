@@ -45,6 +45,17 @@
           <div class="panel-heading">
             <h1 class="panel-title">
               <span class=""><?php echo $playerPage->title; ?></span>
+              <?php 
+                if ($playerPage->skills->has("name=captain")) {
+                  $showSkills = '<span class="label label-primary">Captain</span>';
+                } else {
+                  $showSkills = '';
+                }
+                if ($playerPage->skills->has("name=ambassador")) {
+                  $showSkills .= '<span class="label label-success">Ambassador</span>';
+                }
+                echo $showSkills;
+              ?>
             </h1>
           </div>
           <div class="panel-body row">

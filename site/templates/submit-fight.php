@@ -32,6 +32,8 @@
         } else {
           updateScore($player, $task, true);
           // No need to checkDeath, Underground Training can't cause death
+          // Set group captains
+          setCaptains($player->team);
           // Check if new record
           $utGain = utGain($monster, $player);
           if ($utGain > $monster->best) {
@@ -89,7 +91,8 @@
         } else {
           updateScore($player, $task, true);
           checkDeath($player, true);
-
+          // Set group captains
+          setCaptains($player->team);
           // Record to log file
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
           $log->save('monster-fights', $logText);

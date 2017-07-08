@@ -532,6 +532,36 @@ function displayPlayerScores($player, $type='new') {
   return $out;
 }
 
+function setCaptains($team, $real = true) {
+  $pages = wire('pages');
+  $players = $pages->find("template=player, team=$team");
+  // Remove old captains
+  $role = $pages->get("name=captain");
+  foreach($players as $p) {
+    $p->of(false);
+    $p->skills->remove($role);
+    if ($real == true) {
+      $p->save();
+    }
+  }
+  $allGroups = $pages->get('/groups')->children();
+  foreach($allGroups as $group) {
+    // Find group captain
+    $members = $players->find("group=$group, sort=-karma");
+    $captain = $members->first();
+    if ($captain->id) {
+      // No captain if same karma
+      $next = $members->getNext($captain);
+      if ($next->karma < $captain->karma) {
+        $captain->skills->add($role);
+        if ($real == true) {
+          $captain->save();
+        }
+      }
+    }
+  }
+}
+
 function setKarma($player) {
   // Karma calculated from all values (except GC and Donations)
   $levelKarma = 0;
