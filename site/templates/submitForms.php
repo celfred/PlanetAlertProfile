@@ -120,18 +120,31 @@
   }
 
   if ($user->isSuperuser()) { // Admin front-end
+    // Unpublish News from Newsboard
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
       $n->of(false);
-      if ($n->publish == 0) {
+      if ($n->publish == 0) { // Unpublish
         $n->publish = 1;
         $n->save();
-        //echo 'Unpublish from Newsboard.';
-      } else {
+      } else { // News will disappear on reload
         $n->publish = 0;
         $n->save();
-        //echo 'News will disappear on reload.';
       }
+    }
+    // Use item
+    if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->usedItemHistoryPageId != '') {
+      $historyPage = $pages->get($input->get->usedItemHistoryPageId);
+      $player = $historyPage->parent("template=player");
+      $usedItem = $historyPage->refPage;
+      // Remove item from player's usabledItems list
+      $player->of(false);
+      $player->usabledItems->remove($usedItem);
+      $player->save();
+      // Remove linkedId from historyPage
+      $historyPage->of(false);
+      $historyPage->linkedId = '';
+      $historyPage->save();
     }
 
     if (isset($input->get->form) && $input->get->form == 'buyForm' && $input->get->playerId != '') {

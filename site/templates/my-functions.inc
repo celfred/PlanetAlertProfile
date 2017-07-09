@@ -304,6 +304,9 @@ function taskExtraAction($player, $task) {
             if ($task->refPage->is("name=health-potion") && $player->coma == 1) {
               $player->coma = 0;
             }
+            if ($task->refPage->is("name!=health-potion")) {
+              $task->linkedId = 0; // Use 0 id to show unused potions
+            }
             break;
           default:
             $player->equipment->add($task->refPage);
@@ -311,6 +314,14 @@ function taskExtraAction($player, $task) {
         }
       }
     }
+  }
+}
+
+function addUsable($player, $historyPage, $real) {
+  $player->of(false);
+  if ($real == true) {
+    $player->usabledItems->add($historyPage->refPage->id);
+    $player->save();
   }
 }
 
@@ -365,8 +376,14 @@ function extraActionAfterSave($player, $historyPage, $real) {
     }
   }
   
-  if ($historyPage->task->is("name=buy") && $historyPage->refPage->parent->is("name=group-items")) { // Save group items for all group members
-    addGroupItem($player, $historyPage, $real);
+  if ($historyPage->task->is("name=buy")) {
+    if ($historyPage->refPage->parent->is("name=group-items")) { // Save group items for all group members 
+      addGroupItem($player, $historyPage, $real);
+    }
+    if ($historyPage->refPage->parent->is("name=potions") && $historyPage->refPage->is("name!=health-potion")) {
+      // Add item to player's usabledItems
+      addUsable($player, $historyPage, $real);
+    }
   }
 
   // Save new team scores (for cache) if necessary
