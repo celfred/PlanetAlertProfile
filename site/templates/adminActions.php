@@ -179,7 +179,7 @@
       case 'setKarma' :
         $out .= '<section class="well">';
         $out .= '<h3 class="text-center">';
-        $out .=   'Set scores';
+        $out .=   'Set karma';
         $out .= '</h3>';
         $out .= '<div>';
         $out .= '<span>Select a team : </span>';
