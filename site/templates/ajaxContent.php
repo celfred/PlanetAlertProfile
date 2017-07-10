@@ -150,7 +150,7 @@
                 if ($interval->days > 21) {
                   $out .= ' <span class="badge">!</span> ';
                 }
-                $out .= $p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' ago)';
+                $out .= $p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)';
                 $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> Used today<span id="feedback"></span></label>';
                 $out .= '</li>';
               }
