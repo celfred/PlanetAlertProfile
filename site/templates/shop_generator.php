@@ -28,9 +28,19 @@ if ($player->coma == false) {
   $limitDate = time()-15*3600*24;
   $boughtPotions = $player->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=health-potion");
   $possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, parent.name=potions, sort=name");
+  // Get rid of unused potions
+  if ($player->usabledItems->count() > 0) {
+    foreach ( $player->usabledItems as $u) {
+      foreach ($possiblePotions as $p) {
+        if ($u->id == $p->id) {
+          $p->locked = 'Waiting to be used !';
+        }
+      }
+    }
+  }
   foreach ( $boughtPotions as $b) {
     foreach ($possiblePotions as $p) {
-      if ($b->refPage->id == $p->id) {
+      if ($b->refPage->id == $p->id && $p->locked == '') {
         $date1 = new DateTime(date('Y-m-d H:i:s', $today));
         $date2 = new DateTime(date('Y-m-d H:i:s', $b->date));
         $interval = $date1->diff($date2)->format("%a");
