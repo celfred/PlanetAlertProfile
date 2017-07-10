@@ -299,6 +299,15 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
   
+	// Disable selection
+	if (typeof document.body.onselectstart !== "undefined") { //IE 
+		document.body.onselectstart = function(){ return false; };
+	} else if (typeof document.body.style.MozUserSelect !== "undefined") { //Firefox
+		document.body.style.MozUserSelect = "none";
+	} else { //All other ie: Opera
+		document.body.onmousedown = function(){ return false; };
+	}
+
 	$window.addEventListener("beforeunload", function (e) {
 		if (!$scope.waitForStart) {
 			var confirmationMessage = "Do you really want to quit the page?";
@@ -574,6 +583,15 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.utPoint = false;
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
+
+	// Disable selection
+	if (typeof document.body.onselectstart !== "undefined") { //IE 
+		document.body.onselectstart = function(){ return false; };
+	} else if (typeof document.body.style.MozUserSelect !== "undefined") { //Firefox
+		document.body.style.MozUserSelect = "none";
+	} else { //All other ie: Opera
+		document.body.onmousedown = function(){ return false; };
+	}
 
 	$window.addEventListener("beforeunload", function (e) {
 		if (!$scope.waitForStart) {
