@@ -1027,6 +1027,7 @@
       case 'archive':
         $allPlayers = $pages->find("template=player, team=$selectedTeam");
         $noteam = $pages->get("template=team, name=no-team");
+        // Archive player's history
         foreach($allPlayers as $p) {
           $currentHistory = $p->children()->get("name=history");
           $counter = $p->children()->count();
@@ -1059,6 +1060,16 @@
           $p->rank = '';
           $p->save();
         }
+        // Archive team scores and delete team
+        $teamScores = $pages->get("name=teams");
+        $teamScores->of(false);
+        $newScore = $teamScores->teamScore->getNew();
+        $newScore->title = $selectedTeam->title;
+        $newScore->freeActs = $selectedTeam->freeActs;
+        $newScore->freeworld = $selectedTeam->freeworld;
+        $newScore->summary = date("Y", strtotime("-1 year")).'/'.date("Y");
+        $teamScores->save();
+        $pages->trash($selectedTeam);
         break;
       case 'trash' :
         $event = $pages->get($confirm); // urlSegment3 used for eventId
