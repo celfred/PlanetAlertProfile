@@ -1026,6 +1026,7 @@
         break;
       case 'archive':
         $allPlayers = $pages->find("template=player, team=$selectedTeam");
+        $noteam = $pages->get("template=team, name=no-team");
         foreach($allPlayers as $p) {
           $currentHistory = $p->children()->get("name=history");
           $counter = $p->children()->count();
@@ -1046,12 +1047,14 @@
             $currentHistory->donation = $p->donation;
             $currentHistory->equipment = $p->equipment;
             $currentHistory->places = $p->places;
+            $currentHistory->coma = $p->coma;
             $currentHistory->save();
           }
           // 'Init' player
           $p->of(false);
           $p->HP = 50;
-          $p->team = '';
+          $p->coma = 0;
+          $p->team = $noteam;
           $p->group = '';
           $p->rank = '';
           $p->save();
