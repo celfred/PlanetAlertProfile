@@ -3,6 +3,9 @@
 
 include("./head.inc"); 
 
+// Override allplayers for stats
+$allPlayers = $pages->find("template=player")->sort("title");
+
 // Get current school year dates
 $period = $pages->get("template='period', name='school-year'");
 // Get today's unique logged players' names
