@@ -1262,7 +1262,7 @@
         break;
       case 'addUsers' :
         $newPlayers = $input->post->newPlayers;
-        $newUserLines = preg_split("/[r\n]+/", $newPlayers, -1, PREG_SPLIT_NO_EMPTY);
+        $newUserLines = preg_split("/[\r\n]+/", $newPlayers, -1, PREG_SPLIT_NO_EMPTY);
         $out = '';
         foreach($newUserLines as $l) {
           $newUser = array_map('trim', explode(',', $l));
