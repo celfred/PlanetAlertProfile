@@ -223,6 +223,7 @@
         $out .= '<th>Team</th>';
         $out .= '<th>User</th>';
         $out .= '<th>Edit</th>';
+        $out .= '<th>Archive</th>';
         $out .= '<th>Delete</th>';
         $allUsers = $users->find("name!=admin|guest");
         foreach ($allPlayers as $p) {
@@ -232,6 +233,12 @@
           $out .= '<td>'.$p->team->title.'</td>';
           $out .= '<td>'.$u->name.'</td>';
           $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</td>';
+          $history = $p->child("name=history");
+          if ($history->id) {
+            $out .= '<td><button class="confirm btn btn-xs btn-danger" data-href="'.$page->url.'archivePlayer/'.$p->id.'/1">Archive Player</button></td>';
+          } else {
+            $out .= '<td>Nothing to archive.</td>';
+          }
           $out .= '<td><button class="removeUser btn btn-xs btn-danger" data-href="'.$page->url.'" data-action="removeUser" data-playerId="'.$p->id.'">Delete Player/User</button></td>';
           $out .= '</tr>';
         }
@@ -251,10 +258,13 @@
   $out .= '</div>';
   echo $out;
   include("./foot.inc"); 
-  echo '<script>';
-  echo '$(".addUsers").click( function() { var myData = $(\'#newPlayers\').val(); var action=$(this).attr("data-action"); var href=$(this).attr("data-href")+action; var that=$(this); if (confirm("Proceed?")) {$.post(href, {newPlayers:myData}, function(data) { $("#ajaxViewport").html(data); }) };});';
-  echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
-  echo '</script>';
+  if ($user->isSuperuser()) {
+    echo '<script>';
+    echo '$(".addUsers").click( function() { var myData = $(\'#newPlayers\').val(); var action=$(this).attr("data-action"); var href=$(this).attr("data-href")+action; var that=$(this); if (confirm("Proceed?")) {$.post(href, {newPlayers:myData}, function(data) { $("#ajaxViewport").html(data); }) };});';
+    echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
+    echo '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); }) };});';
+    echo '</script>';
+  }
   } else { // Ajax call, display requested information
     include("./my-functions.inc"); 
     $allPlayers = $pages->find("template=player")->sort("team.name, title");
@@ -1024,6 +1034,45 @@
         }
         $team->save();
         break;
+      case 'archivePlayer':
+        $p = $selectedPlayer;
+        $noteam = $pages->get("template=team, name=no-team");
+        $currentHistory = $p->children()->get("name=history");
+        $counter = $p->children()->count();
+        if ($counter > 0 && $currentHistory) {
+          $currentHistory->of(false);
+          // Save scores
+          $currentHistory->name = 'history-'.$counter;
+          $currentHistory->title = 'history-'.$counter;
+          $currentHistory->team = $p->team;
+          $currentHistory->rank = $p->rank;
+          $currentHistory->karma = $p->karma;
+          $currentHistory->level = $p->level;
+          $currentHistory->HP = $p->HP;
+          $currentHistory->XP = $p->XP;
+          $currentHistory->GC = $p->GC;
+          $currentHistory->underground_training = $p->underground_training;
+          $currentHistory->fighting_power = $p->fighting_power;
+          $currentHistory->donation = $p->donation;
+          $currentHistory->equipment = $p->equipment;
+          $currentHistory->places = $p->places;
+          $currentHistory->coma = $p->coma;
+          $currentHistory->save();
+        }
+        // 'Init' player
+        $p->of(false);
+        $p->HP = 50;
+        $p->coma = 0;
+        $p->team = $noteam;
+        $p->group = '';
+        switch ($p->rank->name) {
+          case '6emes' : $p->rank = $pages->get("name=ranks")->child("name=5emes"); break;
+          case '5emes' : $p->rank = $pages->get("name=ranks")->child("name=4emes"); break;
+          case '4emes' : $p->rank = $pages->get("name=ranks")->child("name=3emes"); break;
+          case '3emes' : break;
+          default : $p->rank = '';
+        }
+        $p->save();
       case 'archive':
         $allPlayers = $pages->find("template=player, team=$selectedTeam");
         $noteam = $pages->get("template=team, name=no-team");
@@ -1057,7 +1106,12 @@
           $p->coma = 0;
           $p->team = $noteam;
           $p->group = '';
-          $p->rank = '';
+          switch ($p->rank) {
+            case '6emes' : $p->rank = '5emes'; break;
+            case '5emes' : $p->rank = '4emes'; break;
+            case '4emes' : $p->rank = '3emes'; break;
+            default : $p->rank = '';
+          }
           $p->save();
         }
         // Archive team scores and delete team
