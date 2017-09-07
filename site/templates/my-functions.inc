@@ -37,6 +37,7 @@ function initPlayer($player) {
     $player->level = $prevScores->level;
     $player->places = $prevScores->places;
     $player->people = $prevScores->people;
+    $player->equipment = $prevScores->equipment;
     $player->donation = $prevScores->donation;
     $player->underground_training = $prevScores->underground_training;
     $player->fighting_power = $prevScores->fighting_power;

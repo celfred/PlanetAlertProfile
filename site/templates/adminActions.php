@@ -5,6 +5,7 @@
     $allTeams = $pages->find("template=team")->sort("title");
     if ($user->isSuperuser()) {
       $action = $input->urlSegment1;
+      $allPlayers = $pages->find("template=player");
       $allPlayers->sort("team.name, title");
       $out .= '<div class="alert alert-warning text-center">Admin Actions : Be careful !</div>';
       switch ($action) {
