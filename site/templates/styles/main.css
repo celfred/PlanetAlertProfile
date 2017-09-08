@@ -610,6 +610,9 @@ img.align_right {
   background: red;
   color: #FFF;
 }
+.negative input {
+	color: #000;
+}
 .negative a {
   color: #FFF;
 }
