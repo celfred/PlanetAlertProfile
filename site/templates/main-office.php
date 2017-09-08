@@ -64,7 +64,7 @@
       }
     $out .= '</div>';
     $out .= '<div class="panel-footer text-right">';
-      if ($healingPotion->id) {
+      if ($dangerPlayers->count() != 0 && $healingPotion->id) {
         $out .= 'Healing potion costs '.$healingPotion->GC.'GC';
       }
     $out .= '</div>';
