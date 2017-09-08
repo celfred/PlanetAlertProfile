@@ -166,7 +166,7 @@
         $p = $pages->get("id=$pageId");
         if ($p->is("template=player")) {
           // Possible places
-          if ($player->coma == false) {
+          if ($p->coma == false) {
             $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
             $allPeople = $pages->find("template=people, name!=people, sort=title");
             $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");

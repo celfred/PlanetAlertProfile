@@ -215,7 +215,9 @@
       $mini = '';
     }
     $out .= '<tr '. $class.'>';
-    $out .= '<td>'. $player->group->title .'</td>';
+    $out .= '<td>';
+    if ($player->group) { $out .= $player->group->title; };
+    $out .= '</td>';
     $out .= '<td>'. $mini .'</td>';
     $out .= '<td>';
     $out .='<a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount.'</td>';
@@ -231,7 +233,7 @@
     } else {
       $showSkills .= '<span class="label label-info">'.$player->streak.'</span>';
     }
-    $out .= '<td data-toggle="tooltip" data-html="true" title="'.$skills.'">'.$showSkills.'</td>';
+    $out .= '<td>'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';
     $out .= '<td>'. $player->level .'</td>';
     if ($player->coma == true) { $player->HP = 0; }
