@@ -110,69 +110,71 @@
     $out .= '</div>';
     
     // Most influential players
-    $top = $allPlayers->find("limit=5");
-    $topList = $top->implode(', ', '{id}');
-    if ($user->isSuperuser()) {
-      $pickButton = ' <a class="btn btn-danger btn-xs '.$pickFromList.' pull-right" data-list="'.$topList.'">Pick 1!</a>';
-    } else {
-      $pickButton = '';
-    }
-    $out .= '<div id="" class="board panel panel-primary">';
-    $out .= '<div class="panel-heading">';
-    $out .= '<h4><span class="label label-primary">Most influential players !</span>'.$pickButton.'</h4>';
-    $out .= '</div>';
-    $out .= '<ul class="list list-unstyled list-inline text-center">';
-    foreach ($top as $p) {
-      $out .= '<li>';
-      $out .= '<div class="thumbnail text-center">';
-      if ($p->avatar) {
-        $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+    $top = $allPlayers->find("limit=5, karma>0");
+    if ($top->count() != 0) {
+      $topList = $top->implode(', ', '{id}');
+      if ($user->isSuperuser()) {
+        $pickButton = ' <a class="btn btn-danger btn-xs '.$pickFromList.' pull-right" data-list="'.$topList.'">Pick 1!</a>';
       } else {
-        $out .= '<Avatar>';
+        $pickButton = '';
       }
-      $out .= '<caption class="text-center">'.$p->title.' <span class="badge">'.$p->karma.'K</span></caption>';
+      $out .= '<div id="" class="board panel panel-primary">';
+      $out .= '<div class="panel-heading">';
+      $out .= '<h4><span class="label label-primary">Most influential players !</span>'.$pickButton.'</h4>';
       $out .= '</div>';
-      $out .= '</li>';
+      $out .= '<ul class="list list-unstyled list-inline text-center">';
+      foreach ($top as $p) {
+        $out .= '<li>';
+        $out .= '<div class="thumbnail text-center">';
+        if ($p->avatar) {
+          $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+        } else {
+          $out .= '<Avatar>';
+        }
+        $out .= '<caption class="text-center">'.$p->title.' <span class="badge">'.$p->karma.'K</span></caption>';
+        $out .= '</div>';
+        $out .= '</li>';
+      }
+      $out .= '</ul>';
+      $out .= '</div>';
     }
-    $out .= '</ul>';
-    $out .= '</div>';
 
     // Top players
     $topPlayers = new PageArray();
     $fpPlayer = $allPlayers->sort('-fighting_power, karma')->first();
     if ($fpPlayer->fighting_power == 0) {
-      $fpPlayer->delete(true);
+      unset($fpPlayer);
     } else {
       $topPlayers->add($fpPlayer);
     }
     $donPlayer = $allPlayers->sort('-donation, karma')->first();
     if ($donPlayer->donation == 0) {
-      $donPlayer->delete(true);
+      unset($donPlayer);
     } else {
       $topPlayers->add($donPlayer);
     }
     $utPlayer = $allPlayers->sort('-underground_training, karma')->first();
     if ($utPlayer->underground_training == 0) {
-      $utPlayer->delete(true);
+      unset($utPlayer);
     } else {
       $topPlayers->add($utPlayer);
     }
     $eqPlayer = $allPlayers->sort('-equipment.count, karma')->first();
     if ($eqPlayer->equipment->count() == 0) {
-      $eqPlayer->delete(true);
+      unset($eqPlayer);
     } else {
       $topPlayers->add($eqPlayer);
     }
     $plaPlayer = $allPlayers->sort('-places.count, karma')->first();
     if ($plaPlayer->places->count() == 0) {
-      $plaPlayer->delete(true);
+      unset($plaPlayer);
     } else {
       $topPlayers->add($plaPlayer);
     }
     if ($rank == '4emes' || $rank == '3emes') {
       $peoPlayer = $allPlayers->sort('-people.count, karma')->first();
       if ($peoPlayer->people->count() == 0) {
-        $peoPlayer->delete(true);
+        unset($peoPlayer);
       } else {
         $topPlayers->add($peoPlayer);
       }
@@ -192,26 +194,34 @@
       $out .= '<p class="panel-title">Top players !'.$pickButton.'</p>';
     $out .= '</div>';
     $out .= '<div class="panel-body">';
-      $out .= '<div class="fame thumbnail">'; // Best warrior
-        $out .= '<span class="badge">Best warrior !</span>';
-        if ($fpPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$fpPlayer->id.'" src="'.$fpPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
-        $out .= '<div class="caption text-center">'.$fpPlayer->title.' <span class="badge">'.$fpPlayer->fighting_power.'FP</span></div>';
-      $out .= '</div>';
-      $out .= '<div class="fame thumbnail">'; // Best donator
-        $out .= '<span class="badge">Best donator !</span>';
-        if ($donPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$donPlayer->id.'" src="'.$donPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
-        $out .= '<div class="caption text-center">'.$donPlayer->title.' <span class="badge">'.$donPlayer->donation.'Don.</span></div>';
-      $out .= '</div>';
-      $out .= '<div class="fame thumbnail">'; // Most trained
-        $out .= '<span class="badge">Most trained !</span>';
-        if ($utPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$utPlayer->id.'" src="'.$utPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
-        $out .= '<div class="caption text-center">'.$utPlayer->title.' <span class="badge">'.$utPlayer->underground_training.'UT</span></div>';
-      $out .= '</div>';
-      $out .= '<div class="fame thumbnail">'; // Most equipped
-        $out .= '<span class="badge">Most equipped !</span>';
-        if ($eqPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$eqPlayer->id.'" src="'.$eqPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
-        $out .= '<div class="caption text-center">'.$eqPlayer->title.' <span class="badge">'.$eqPlayer->equipment->count().'eq.</span></div>';
-      $out .= '</div>';
+      if (isset($fpPlayer)) {
+        $out .= '<div class="fame thumbnail">'; // Best warrior
+          $out .= '<span class="badge">Best warrior !</span>';
+          if ($fpPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$fpPlayer->id.'" src="'.$fpPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          $out .= '<div class="caption text-center">'.$fpPlayer->title.' <span class="badge">'.$fpPlayer->fighting_power.'FP</span></div>';
+        $out .= '</div>';
+      }
+      if (isset($donPlayer)) {
+        $out .= '<div class="fame thumbnail">'; // Best donator
+          $out .= '<span class="badge">Best donator !</span>';
+          if ($donPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$donPlayer->id.'" src="'.$donPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          $out .= '<div class="caption text-center">'.$donPlayer->title.' <span class="badge">'.$donPlayer->donation.'Don.</span></div>';
+        $out .= '</div>';
+      }
+      if (isset($utPlayer)) {
+        $out .= '<div class="fame thumbnail">'; // Most trained
+          $out .= '<span class="badge">Most trained !</span>';
+          if ($utPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$utPlayer->id.'" src="'.$utPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          $out .= '<div class="caption text-center">'.$utPlayer->title.' <span class="badge">'.$utPlayer->underground_training.'UT</span></div>';
+        $out .= '</div>';
+      }
+      if (isset($eqPlayer)) {
+        $out .= '<div class="fame thumbnail">'; // Most equipped
+          $out .= '<span class="badge">Most equipped !</span>';
+          if ($eqPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$eqPlayer->id.'" src="'.$eqPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          $out .= '<div class="caption text-center">'.$eqPlayer->title.' <span class="badge">'.$eqPlayer->equipment->count().'eq.</span></div>';
+        $out .= '</div>';
+      }
       if (isset($plaPlayer)) {
         $out .= '<div class="fame thumbnail">'; // Greatest # of Places
           $out .= '<span class="badge">Greatest # of Places !</span>';
