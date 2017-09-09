@@ -73,7 +73,7 @@ if ($user->isLoggedin() || $user->isSuperuser()) {
   $out .= '<select class="form-control" id="receiver" name="receiver">';
     $out .= '<option value="0">Select a player</option>';
     foreach ($globalPlayers as $plyr) {
-      if ($plyr->id != $player->id) {
+      if ($plyr->id != $playerId) {
         if ($plyr->team->name != 'no-team') { $team = ' ['.$plyr->team->title.']'; } else { $team = ''; }
         $out .= '<option value="'.$plyr->id.'">'.$plyr->title.$team.' ('.$plyr->GC.' GC)</option>';
       }

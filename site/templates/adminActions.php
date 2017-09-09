@@ -887,7 +887,7 @@
           $out .= '<br />';
           $out .= displayPlayerScores($selectedPlayer);
           $out .= '<br /><br />';
-          if ($dirty) {
+          if (isset($dirty)) {
             $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
           }
           if ($input->urlSegment3 && $input->urlSegment3 == 1) {
