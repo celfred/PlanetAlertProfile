@@ -14,7 +14,7 @@ $out = '';
 
 $out .= "<h2 class='well text-center'>Marketplace for {$player->title} ({$player->team->title})</h2>";
 $out .= "<h3 class='text-center well'>";
-$out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='' />&nbsp;<span id='remainingGC'>{$player->GC}</span> GC available.";
+$out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='' />&nbsp;<span id='remainingGC'>{$player->GC}</span> GC available. (<span id='nbChecked'>0</span> checked) <span class='badge badge-warning'>3 items per day limit !</span>";
 $out .= "</h3>";
 
 $out .= '<form id="marketPlaceForm" name="marketPlaceForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="" role="form">';
@@ -77,7 +77,7 @@ if ( $possibleEquipment->count() > 0) {
       $out .= '<li class="label label-primary">'.$item->parent->title.'</li>';
     }
     $out .= '<li>';
-    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
     if ($item->image) {
       $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
     }
@@ -98,7 +98,7 @@ if ($possiblePotions->count() > 0) {
   foreach($possiblePotions as $item) {
     if (!$item->locked) {
       $out .= '<li>';
-      $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+      $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
       if ($item->image) {
         $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
       }
@@ -129,7 +129,7 @@ if ( $possiblePlaces->count() > 0) {
   $out .= '<li class="label label-primary">Possible Places</li>';
   foreach($possiblePlaces as $item) {
     $out .= '<li>';
-    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->country->title.'] ['.$item->GC.'GC]</label></li>';
+    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->country->title.'] ['.$item->GC.'GC]</label></li>';
   }
   $out .= "</ul>";
 } else {
@@ -145,7 +145,7 @@ if ($player->rank->name == '4emes' || $player->rank->name == '3emes') {
     $out .= "<li class='label label-primary'>Possible People</li>";
     foreach($possiblePeople as $item) {
       $out .= '<li>';
-      $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->GC.'GC]</label></li>';
+      $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->GC.'GC]</label></li>';
       /* if ($item->photo) { */
       /*   $out .= ' <img src="'.$item->photo->eq(0)->getThumb('mini').'" alt="Image" /> '; */
       /* } */

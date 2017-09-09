@@ -38,12 +38,17 @@
         $task->comment = $newItem->title;
         $task->refPage = $newItem;
         $task->linkedId = false;
-        updateScore($player, $task, true);
-        // No need to checkDeath, Buyform can't cause death
+        if ($newItem->GC <= $player->GC) { // Final 'security' check
+          updateScore($player, $task, true);
+          // No need to checkDeath, Buyform can't cause death
+          $error = '';
+        } else {
+          $error = ' !!ERROR!!';
+        }
         // Notify admin
         $msg = "Player : ". $player->title."\r\n";
         $msg .= "Team : ". $player->team->title."\r\n";
-        $msg .= "Item : ". $newItem->title;
+        $msg .= "Item : ". $newItem->title.$error;
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
           mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
         }
@@ -57,25 +62,27 @@
         foreach($checkedItems as $item=>$state) {
           // Get item's data
           $newItem = $pages->get($item);
-         
           if ($newItem->template == 'equipment' || $newItem->template == 'item') {
             $task = $pages->get("name='buy'");
           }
           if ($newItem->template == 'place' || $newItem->template == 'people') {
             $task = $pages->get("name='free'");
           }
-
-          // Update player's scores and save
-          $task->comment = $newItem->title;
-          $task->refPage = $newItem;
-          $task->linkedId = false;
-          updateScore($player, $task, true);
-          // No need to checkDeath, MarketPlace can't cause death
-
+          if ($newItem->GC <= $player->GC) { // Final 'security' check
+            // Update player's scores and save
+            $task->comment = $newItem->title;
+            $task->refPage = $newItem;
+            $task->linkedId = false;
+            updateScore($player, $task, true);
+            // No need to checkDeath, MarketPlace can't cause death
+            $error = '';
+          } else {
+            $error = ' !!ERROR!!';
+          }
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
           $msg .= "Team : ". $player->team->title."\r\n";
-          $msg .= "Item : ". $newItem->title;
+          $msg .= "Item : ". $newItem->title.$error;
           if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
             mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
           }

@@ -703,21 +703,36 @@ var onCheck = function(taskId) {
 // shopAdminTable functions
 var shopCheck = function(obj, remainingGC, itemGC) {
   //alert(remainingGC+'-'+itemGC);
+	var nbChecked = parseInt($('#nbChecked').text());
   if ( $(obj).prop('checked') === true) {
     var newGC = remainingGC - itemGC;
     $('#remainingGC').text(newGC);
-    // Disable impossible items left
-    $('ul.itemList li input[type=checkbox]').not($(obj)).each(function() {
-      if ($(this).attr('data-gc') > newGC && $(this).prop('checked') === false) {
-        $(this).prop('disabled', true);
-        $(this).parent('label').css('text-decoration', 'line-through');
-      }
-    });
-    // Enable save buttons
-    $("#marketPlaceForm :submit").prop('disabled', false);
+		nbChecked++;
+		$('#nbChecked').text(nbChecked);
+		if (nbChecked >= 3) {
+			// Disable all items left
+			$('ul.itemList li input[type=checkbox]').not($(obj)).each(function() {
+				if ($(this).prop('checked') === false) {
+					$(this).prop('disabled', true);
+					$(this).parent('label').css('text-decoration', 'line-through');
+				}
+			});
+		} else {
+			// Disable impossible items left
+			$('ul.itemList li input[type=checkbox]').not($(obj)).each(function() {
+				if ($(this).attr('data-gc') > newGC && $(this).prop('checked') === false) {
+					$(this).prop('disabled', true);
+					$(this).parent('label').css('text-decoration', 'line-through');
+				}
+			});
+			// Enable save buttons
+			$("#marketPlaceForm :submit").prop('disabled', false);
+		}
   } else {
     var newGC = parseInt(remainingGC) + parseInt(itemGC);
     $('#remainingGC').text(newGC);
+		nbChecked--;
+		$('#nbChecked').text(nbChecked);
     $('ul.itemList li input[type=checkbox]').each(function() {
       if ($(this).attr('data-gc') > newGC) {
         $(this).prop('disabled', true);
@@ -735,7 +750,9 @@ var shopCheck = function(obj, remainingGC, itemGC) {
       }
     });
     if (anyChecked === true) {
-      $("#marketPlaceForm :submit").prop('disabled', false);
+			if (nbChecked > 0 && nbChecked <= 3) {
+				$("#marketPlaceForm :submit").prop('disabled', false);
+			}
     } else {
       $("#marketPlaceForm :submit").prop('disabled', true);
     }
