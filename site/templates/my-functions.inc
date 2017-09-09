@@ -567,7 +567,7 @@ function setCaptains($team, $real = true) {
     // Find group captain
     $members = $players->find("group=$group, sort=-karma");
     $captain = $members->first();
-    if ($captain->id) {
+    if (isset($captain->id)) {
       // No captain if same karma
       $next = $members->getNext($captain);
       if ($next->karma < $captain->karma) {

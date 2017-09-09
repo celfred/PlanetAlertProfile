@@ -5,23 +5,14 @@
 </div><!--/wrap-->
 
   <footer class="text-center">
-      <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS - &copy; <?php echo date("Y"); ?> F.L. 
+      <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS (v.<?php echo $config->version; ?>)- &copy; <?php echo date("Y"); ?> F.L. 
         <a href="about/">[About]</a>
         &nbsp;
         <a href="https://github.com/celfred/PlanetAlertProfile">[Github repository]</a>
       </p>
 	</footer>
 
-
 	<?php 
-
-
-
-
-
-
-
-
   if ($user->isSuperuser()) {
     echo '<span class="backendLink">';
     echo '<a href="'.$config->urls->admin.'">[Backend]</a>';

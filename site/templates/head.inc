@@ -56,11 +56,8 @@
 			} else { // Admin is logged in
 				// Check official period dates vs today's date
 				$now = time();
-				if (!$session->officialPeriod) {
-					$officialPeriod = $pages->get("name=admin-actions")->periods;
-					$session->officialPeriod = $officialPeriod;
-				}
-				if ($now < $session->officialPeriod->dateStart || $now > $session->officialPeriod->dateEnd) {
+        $officialPeriod = $pages->get("name=admin-actions")->periods;
+				if ($now < $officialPeriod->dateStart || $now > $officialPeriod->dateEnd) {
 					echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
 				}
 			}

@@ -65,7 +65,7 @@ $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
     $id = $player->id; 
   ?>
   <tr>
-  <td><?php echo $player->group->title; ?></td>
+  <td><?php if (isset($player->group->id)) { echo $player->group->title; } ?></td>
   <th><?php echo $player->title; ?></th>
     <?php foreach ($allTasks as $task) {
       if ($task->HP < 0) { $type = 'negative'; } else { $type=''; }
