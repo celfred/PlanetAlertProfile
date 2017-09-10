@@ -1,4 +1,5 @@
 <?php
+namespace ProcessWire;
   // TODO : Add comments for each news?
   include("./head.inc"); 
 

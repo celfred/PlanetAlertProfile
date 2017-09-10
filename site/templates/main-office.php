@@ -1,4 +1,4 @@
-<?php /* main-office template */
+<?php namespace ProcessWire; /* main-office template */
   include("./head.inc"); 
 
   $out = '';

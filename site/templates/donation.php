@@ -1,4 +1,5 @@
 <?php 
+namespace ProcessWire;
 /* Donation template */
 
 include("./head.inc"); 

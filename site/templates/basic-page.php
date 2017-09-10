@@ -1,9 +1,4 @@
-<?php 
-
-/**
- * Page template
- *
- */
+<?php namespace ProcessWire;
 
 include("./head.inc"); 
 

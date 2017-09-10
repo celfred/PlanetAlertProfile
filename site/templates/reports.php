@@ -1,4 +1,4 @@
-<?php // Team report template
+<?php namespace ProcessWire; // Team report template
 
 include("./head.inc"); 
 

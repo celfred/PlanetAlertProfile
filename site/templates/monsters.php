@@ -1,9 +1,7 @@
 <?php
-
-$out = '';
-
 include("./head.inc"); 
 
+$out = '';
 $out .= '<div>';
 
 echo '<div class="well">';

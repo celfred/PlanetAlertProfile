@@ -1,4 +1,5 @@
 <?php
+// FileCompiler=0
 
 /**
  * ProcessWire template file installed by the ServicePages module

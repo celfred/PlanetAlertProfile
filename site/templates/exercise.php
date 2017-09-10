@@ -1,4 +1,5 @@
 <?php
+namespace ProcessWire;
   include("./head.inc"); 
 
   if ($user->isLoggedin() || $user->isSuperuser()) {

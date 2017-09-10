@@ -1,4 +1,5 @@
 <?php /* adminActions template */
+namespace ProcessWire;
   $out = '';
   if (!$config->ajax) {
     include("./head.inc"); 

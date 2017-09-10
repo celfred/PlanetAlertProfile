@@ -35,6 +35,15 @@
     $teamExtraHk = 0;
     $teamAbsent = 0;
     $teamPart = array();
+		$teamNegAttitude = 0;
+		$teamPosAttitude = 0;
+		$teamEl = 0;
+		$teamEq = 0;
+		$teamDeath = 0;
+		$teamUt = 0;
+		$teamPosTests = 0;
+		$teamNegTests = 0;
+		$listExtraHk = '';
 
     foreach($allPlayers as $player) {
 			setHomework($player,$period->dateStart, $period->dateEnd);

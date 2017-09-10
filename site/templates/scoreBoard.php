@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
 
   if (!$config->ajax) {
     include("./head.inc"); 

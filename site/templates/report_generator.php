@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 if ($user->isSuperuser() || $user->isLoggedin() ) {
 
@@ -18,6 +18,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
     $player = $selected;
     $global = false;
     $reportTitle = '';
+    $reportType = '';
     if ($category == 'all') { // Global report
     } else { // Category report
       $reportTitle .= "'".$category."' report.";
@@ -36,6 +37,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
     $selected = strtoupper($input->urlSegment2);
     $allPlayers = $pages->find("team.name=$selected, template=player, sort=$sort");
     $reportTitle = '';
+    $reportType = '';
     if ($category == 'all') { // Global report
       $reportTitle .= 'Global report';
     } else { // Category report

@@ -1,4 +1,4 @@
-<?php 
+<?php namespace ProcessWire;
 /* adminTable template */
 
 include("./head.inc"); 

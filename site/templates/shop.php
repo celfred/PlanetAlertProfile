@@ -1,4 +1,4 @@
-<?php 
+<?php namespace ProcessWire;
 /* Shop template */
 
 include("./head.inc"); 
@@ -16,10 +16,9 @@ foreach ($allEquipments as $equipment) {
 <div>
 <?php
 
+$out = '';
 if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
- 
   // All shop catalogue
-  $out = '';
   if ($page->name == 'shop') {
     // Test if a player is connected
     if ($user->isLoggedin()) {

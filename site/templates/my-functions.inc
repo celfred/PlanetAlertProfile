@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
 
 function getMultiDimensional($values, $prefix) {
   // Validate the arguments

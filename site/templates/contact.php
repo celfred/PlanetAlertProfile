@@ -1,4 +1,5 @@
 <?php
+namespace ProcessWire;
 
 $sent = false;
 $error = '';

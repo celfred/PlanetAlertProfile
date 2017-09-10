@@ -1,4 +1,4 @@
-<?php // Quiz template
+<?php namespace ProcessWire; // Quiz template
 
 include("./head.inc"); 
 

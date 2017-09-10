@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
   include("./my-functions.inc");
 
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
