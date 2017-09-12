@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
   include("./head.inc"); 
 
   // Test player login
@@ -75,8 +75,8 @@
           $out .= '<td>';
           $out .= $m->title;
           // Find # of days compared to today to set 'New' indicator
-          $date1 = new DateTime("today");
-          $date2 = new DateTime(date("Y-m-d", $m->published));
+          $date1 = new \DateTime("today");
+          $date2 = new \DateTime(date("Y-m-d", $m->published));
           $interval = $date1->diff($date2);
           if ($interval->days < 7) {
             $out .= ' <span class="badge">New</span>';
@@ -127,14 +127,14 @@
               if (count($allLines)>15) {
                 $listWords = '<strong>15 first questions :</strong><br />';
                 for($i=0; $i<15; $i++) {
-                  list($left, $right) = preg_split('/\?/', $allLines[$i]);
+                  list($left, $right) = preg_split('/::/', $allLines[$i]);
                   $listWords .= '- '.$left.'<br />';
                 }
                 $listWords .= '[...]';
               } else {
                 $listWords = '';
                 foreach($allLines as $line) {
-                  list($left, $right) = preg_split('/\?/', $line);
+                  list($left, $right) = preg_split('/::/', $line);
                   $listWords .= '- '.$left.'<br />';
                 }
               }
@@ -163,7 +163,9 @@
                 for($i=0; $i<15; $i++) {
                   $pattern = '/\$.*?\$/';
                   preg_match($pattern, $allLines[$i], $matches);
-                  $help = preg_replace('/\$/', '', $matches[0]);
+                  if ($matches) {
+                    $help = preg_replace('/\$/', '', $matches[0]);
+                  }
                   $listWords .= '- '.$help.'<br />';
                 }
                 $listWords .= '[...]';

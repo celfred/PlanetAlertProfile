@@ -20,20 +20,20 @@
   $out .= '<span class="pull-right">';
   $out .= '<span class="avatarContainer">';
   if ($player->avatar) {
-    $out .= '<img ng-class="{hidden:started}" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+    $out .= '<img ng-class="{hidden:started}" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
   } else {
     $out .= '<Avatar>';
   }
   if ($weaponRatio > 0) { // Player has weapons
     $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
     if ($bestWeapon->id && $bestWeapon->image) {
-        $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct, hidden:started}" src="'.$bestWeapon->image->getThumb("small").'" alt="'.$bestWeapon->title.'" />';
+        $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct, hidden:started}" src="'.$bestWeapon->image->getCrop("small")->url.'" alt="'.$bestWeapon->title.'" />';
     }
   }
   if ($protectionRatio > 0) { // Player has protections
     $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
     if ($bestProtection->id && $bestProtection->image) {
-        $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong, hidden:started}" src="'.$bestProtection->image->getThumb("small").'" alt="'.$bestProtection->title.'" />';
+        $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong, hidden:started}" src="'.$bestProtection->image->getCrop("small")->url.'" alt="'.$bestProtection->title.'" />';
     }
   }
   $out .= '</span>';
@@ -49,7 +49,7 @@
   $out .= '<div class="row text-center">';
   $out .= '<div class="col-sm-3">';
   if ($page->image) {
-    $out .= '<img class="pull-right" src="'.$page->image->getThumb("mini").'" alt="Avatar" />';
+    $out .= '<img class="pull-right" src="'.$page->image->getCrop("mini")->url.'" alt="Avatar" />';
   }
   $out .= '</div>';
   $out .= '<div class="col-sm-6">';
@@ -65,7 +65,7 @@
   $out .= '<div class="row text-center">';
   $out .= '<div class="col-sm-3">';
   if ($player->avatar) {
-    $out .= '<img class="pull-right" src="'.$player->avatar->getThumb("mini").'" alt="Avatar" />';
+    $out .= '<img class="pull-right" src="'.$player->avatar->getCrop("mini")->url.'" alt="Avatar" />';
   } else {
     $out .= '<Avatar>';
   }
@@ -91,8 +91,8 @@
   $out .= '<strong><span class="glyphicon glyphicon-hand-up"></span> '.$indications.'</strong>';
   $out .= '<span class="glyphicon glyphicon-question-sign pull-right" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
   $out .= '<br /><br />';
-  $out .= '<a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$n->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
-  $out .= '<div class="collapse" id="collapseDiv'.$n->id.'"><div class="well">';
+  $out .= '<a role="button" class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
+  $out .= '<div class="collapse" id="collapseDiv"><div class="well">';
   if ($page->type->frenchSummary != '') {
     $out .= $page->type->frenchSummary;
   } else {
@@ -135,15 +135,15 @@
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hidePlayerDamage}">- {{playerDamage}}HP</span>';
   $out .= '<span class="avatarContainer">';
   if ($player->avatar) {
-    $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+    $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
   } else {
     $out .= '<Avatar>';
   }
   if ($bestWeapon->id && $bestWeapon->image) {
-    $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getThumb("small").'" alt="'.$bestWeapon->title.'" />';
+    $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getCrop("small")->url.'" alt="'.$bestWeapon->title.'" />';
   }
   if ($bestProtection->id && $bestProtection->image) {
-    $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong}" src="'.$bestProtection->image->getThumb("small").'" alt="'.$bestProtection->title.'" />';
+    $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong}" src="'.$bestProtection->image->getCrop("small")->url.'" alt="'.$bestProtection->title.'" />';
   }
   $out .= '</span>';
   $out .= '</span>';

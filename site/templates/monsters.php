@@ -126,14 +126,14 @@ $allCategories = $pages->find("parent.name=topics, sort=name");
             if (count($allLines)>15) {
               $listWords = '<strong>15 first questions :</strong><br />';
               for($i=0; $i<15; $i++) {
-                list($left, $right) = preg_split('/\?/', $allLines[$i]);
+                list($left, $right) = preg_split('/::/', $allLines[$i]);
                 $listWords .= '- '.$left.'<br />';
               }
               $listWords .= '[...]';
             } else {
               $listWords = '';
               foreach($allLines as $line) {
-                list($left, $right) = preg_split('/\?/', $line);
+                list($left, $right) = preg_split('/::/', $line);
                 $listWords .= '- '.$left.'<br />';
               }
             }
@@ -162,7 +162,9 @@ $allCategories = $pages->find("parent.name=topics, sort=name");
               for($i=0; $i<15; $i++) {
                 $pattern = '/\$.*?\$/';
                 preg_match($pattern, $allLines[$i], $matches);
-                $help = preg_replace('/\$/', '', $matches[0]);
+                if ($matches) {
+                  $help = preg_replace('/\$/', '', $matches[0]);
+                }
                 $listWords .= '- '.$help.'<br />';
               }
               $listWords .= '[...]';

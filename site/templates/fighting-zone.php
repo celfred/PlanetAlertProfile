@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
   include("./head.inc"); 
 
   $out = '';
@@ -44,7 +44,7 @@
           $out .= '<ul class="list list-inline">';
           foreach($availableFights as $m) {
             if ($m->image) {
-              $mini = "<img class='' src='".$m->image->getThumb('mini')."' alt='image' />";
+              $mini = "<img class='' src='".$m->image->getCrop('mini')->url."' alt='image' />";
             } else {
               $mini = '';
             }
@@ -59,7 +59,7 @@
           $out .= '<ul class="list">';
           foreach($waitingFights as $m) {
             if ($m->image) {
-              $mini = "<img class='' src='".$m->image->getThumb('mini')."' alt='image' />";
+              $mini = "<img class='' src='".$m->image->getCrop('mini')->url."' alt='image' />";
             } else {
               $mini = '';
             }
