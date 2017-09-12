@@ -1006,8 +1006,8 @@ function isTrainingAllowed($player, $monster) {
   if ($utGain > 0) { // Already trained
     $lastTraining = $prevTrainings->first();
     // Find # of days compared to today
-    $date1 = new DateTime("today");
-    $date2 = new DateTime(date("Y-m-d", $lastTraining->date));
+    $date1 = new \DateTime("today");
+    $date2 = new \DateTime(date("Y-m-d", $lastTraining->date));
     $interval = $date1->diff($date2);
     // Set spaced repetition according to monster's level?
     if ($monster->level >= 1 ) { // For the moment, all levels
@@ -1059,8 +1059,8 @@ function isFightAllowed($player, $monster) {
     if ($lastFight) {
       $monster->allFightsNb = $allFights->count();
       // Find # of days compared to today
-      $date1 = new DateTime("today");
-      $date2 = new DateTime(date("Y-m-d", $lastFight->date));
+      $date1 = new \DateTime("today");
+      $date2 = new \DateTime(date("Y-m-d", $lastFight->date));
       $interval = $date1->diff($date2);
       $monster->lastFightDate = $lastFight->date;
       $monster->interval = $interval->days;
@@ -1271,7 +1271,7 @@ function pma($player) {
   // Possible places
   $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
   $possibleElements = $possiblePlaces->count();
-  if ($player->team->rank->name == '4emes' || $player->team->rank->name == '3emes') {
+  if ($player->rank->name == '4emes|3emes' || $player->team->rank->name == '4emes|3emes') {
     $allPeople = $pages->find("template=people, name!=people, sort=title");
     // Possible people
     $possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name");
