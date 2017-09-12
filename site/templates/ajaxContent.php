@@ -35,7 +35,7 @@
             $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=5")->sort("-date");
           } else {
             // User gets public and ranked news
-            $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$player->rank, limit=5")->sort("-date");
+            $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$currentPlayer->rank, limit=5")->sort("-date");
           }
         } else { // Guests get public news only
           $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=5")->sort("-date");
