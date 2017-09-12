@@ -211,7 +211,7 @@
               echo '<span data-toggle="tooltip" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
             }
             // Homework stats
-            setHomework($player, $period->dateStart, $period->dateEnd);
+            setHomework($player, $officialPeriod->dateStart, $officialPeriod->dateEnd);
             if ($player->noHk->count() > 0) {
               $out = '';
               foreach($player->noHk as $index=>$e) {
