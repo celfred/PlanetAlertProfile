@@ -98,7 +98,7 @@
                   $title = 'Error';
               }
               if ($player->avatar) {
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$player->avatar->getThumb('mini')."' alt='avatar' />";
+                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$player->avatar->getCrop('mini')->url."' alt='avatar' />";
               } else {
                 $mini = '';
               }
@@ -134,7 +134,7 @@
       if ($topPlayers->count() > 0) {
         foreach ($topPlayers as $p) {
           if ($p->avatar) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$p->avatar->getThumb('mini')."' alt='avatar' />";
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
           } else {
             $mini = '';
           }
@@ -181,7 +181,7 @@
         if ($prevPlayers->count() > 0) {
         foreach ($prevPlayers as $p) {
           if ($p->avatar) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$p->avatar->getThumb('mini')."' alt='avatar' />";
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
           } else {
             $mini = '';
           }
@@ -226,7 +226,7 @@
       $out .= '<ol>';
       foreach ($topPlayers as $p) {
         if ($p->avatar) {
-          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$p->avatar->getThumb('mini')."' alt='avatar' />";
+          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
         } else {
           $mini = '';
         }

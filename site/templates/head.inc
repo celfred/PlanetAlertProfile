@@ -229,15 +229,15 @@
         <?php
 					echo '<span class="avatarContainer">';
 					if ($player->avatar) {
-						echo '<img class="avatar superpose" src="'.$player->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />';
+						echo '<img class="avatar superpose" src="'.$player->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
 					} else {
 						echo '<Avatar>';
 					}
 					if ($bestWeapon->id && $bestWeapon->image) {
-						echo '<img class="weapon mini superpose" src="'.$bestWeapon->image->getThumb("mini").'" alt="'.$bestWeapon->title.'" />';
+						echo '<img class="weapon mini superpose" src="'.$bestWeapon->image->getCrop("mini")->url.'" alt="'.$bestWeapon->title.'" />';
 					}
 					if ($bestProtection->id && $bestProtection->image) {
-						echo '<img class="protection mini superpose" src="'.$bestProtection->image->getThumb("mini").'" alt="'.$bestProtection->title.'" />';
+						echo '<img class="protection mini superpose" src="'.$bestProtection->image->getCrop("mini")->url.'" alt="'.$bestProtection->title.'" />';
 					}
 					echo '</span>';
         ?>

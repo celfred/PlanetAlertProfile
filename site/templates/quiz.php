@@ -104,8 +104,8 @@ if ($user->isSuperuser()) {
       $player = $pages->get($selectedPlayer);
       $quiz = pick_question($player);
       $out .= '<div class="well quiz">';
-        $logo = $homepage->photo->eq(0)->getThumb('thumbnail');
-        $out .= '<img class="monster" src="'.$logo.'" />';
+        $logo = $homepage->photo->eq(0)->getCrop('thumbnail');
+        $out .= '<img class="monster" src="'.$logo->url.'" />';
         $out .= '<img class="avatar" src="'.$player->avatar->url.'" />';
         $out .= '<h1 class="playerName">'.$player->title.'</h1>';
         $out .= '<h3>Monster invasion ! Team '.$player->team->title.' has to react!</h3>';
@@ -188,8 +188,8 @@ if ($user->isSuperuser()) {
 
     $quiz = pick_question($player);
     $out .= '<div class="well quiz">';
-      $logo = $homepage->photo->eq(0)->getThumb('thumbnail');
-      $out .= '<img class="monster" src="'.$logo.'" />';
+      $logo = $homepage->photo->eq(0)->getCrop('thumbnail');
+      $out .= '<img class="monster" src="'.$logo->url.'" />';
       $out .= '<h3>Defensive preparation ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="This is a simple practice area. Click on \'Check answer\' below to see the solution. Then you can click on \'Next question\'. Stop the session when you\'re tired :)"></span></h3>';
       $out .= '<h2 class="alert alert-danger text-center">';
       $out .= $quiz['question'].'&nbsp;&nbsp;';

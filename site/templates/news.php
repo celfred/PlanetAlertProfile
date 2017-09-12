@@ -180,7 +180,7 @@
         <div id="" class="news panel panel-primary">
           <div class="panel-heading">
             <h4 class="panel-title">
-              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getThumb('mini').'" alt="avatar" />'; } ?>
+              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
               Work statistics on current period (<?php echo $officialPeriod->title; ?>) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n'est pas terminée, tu peux encore améliorer tes résultats !"></span>
             </h4>
           </div>
@@ -327,7 +327,7 @@
         <div id="" class="news panel panel-primary">
           <div class="panel-heading">
             <h4 class="panel-title">
-              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getThumb('mini').'" alt="avatar" />'; } ?>
+              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
               Last 10 events in your personal history
             </h4>
           </div>

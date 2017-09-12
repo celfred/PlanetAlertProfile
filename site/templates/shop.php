@@ -76,7 +76,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       <tbody>
         <?php foreach ($allEquipments as $item) {
           if ($item->image) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$item->image->url."\" alt=\"avatar\" />' src='".$item->image->getThumb('mini')."' alt='avatar' />";
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$item->image->url."\" alt=\"avatar\" />' src='".$item->image->getCrop('mini')->url."' alt='avatar' />";
           } else {
             $mini = '';
           }

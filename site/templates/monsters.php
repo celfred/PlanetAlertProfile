@@ -74,7 +74,7 @@ $allCategories = $pages->find("parent.name=topics, sort=name");
       foreach ($allMonsters as $m) {
         $out .= '<tr>';
         if ($m->image) {
-          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
         } else {
           $mini = '';
         }

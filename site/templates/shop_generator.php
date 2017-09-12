@@ -79,7 +79,7 @@ if ( $possibleEquipment->count() > 0) {
     $out .= '<li>';
     $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
     if ($item->image) {
-      $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+      $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
     }
     $out .= $item->title.' ['.$item->GC.'GC]';
     $out .= '</label>';
@@ -100,7 +100,7 @@ if ($possiblePotions->count() > 0) {
       $out .= '<li>';
       $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
       if ($item->image) {
-        $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+        $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
       }
       $out .= $item->title.' ['.$item->GC.'GC]';
       $out .= '</label>';
@@ -110,7 +110,7 @@ if ($possiblePotions->count() > 0) {
       $out .= '<li>';
       $out .= '<label> ';
       if ($item->image) {
-        $out .= ' <img src="'.$item->image->getThumb('mini').'" alt="Image" /> ';
+        $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
       }
       $out .= $item->title;
       $out .= ' <span class="badge badge-danger">'.$item->locked.'</span>';
@@ -147,7 +147,7 @@ if ($player->rank->name == '4emes' || $player->rank->name == '3emes') {
       $out .= '<li>';
       $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->GC.'GC]</label></li>';
       /* if ($item->photo) { */
-      /*   $out .= ' <img src="'.$item->photo->eq(0)->getThumb('mini').'" alt="Image" /> '; */
+      /*   $out .= ' <img src="'.$item->photo->eq(0)->getCrop('mini')->url.'" alt="Image" /> '; */
       /* } */
     }
     $out .= "</ul>";

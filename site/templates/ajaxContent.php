@@ -10,7 +10,7 @@
         $lastMonsters = $pages->find("template=exercise, sort=-published, limit=3");
         foreach($lastMonsters as $m) {
           if ($m->image) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
           } else {
             $mini = '';
           }
@@ -63,7 +63,7 @@
             if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
             if ($currentPlayer->avatar) {
               $thumb = $currentPlayer->avatar->size(20,20);
-              $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getThumb('thumbnail')."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
+              $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
             } else {
               $mini = '';
             }
@@ -191,7 +191,7 @@
             $possibleItems->add($possiblePotions);
           }
           $donatorId = $p->id;
-          if ($p->avatar) { $mini = '<img src="'.$p->avatar->getThumb('thumbnail').'" alt="avatar" />'; }
+          if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
           $out .= '<div class="row">';
           $out .= '<div class="col-sm-6 text-center">';
           $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
@@ -234,7 +234,7 @@
               if ($gp->team->rank->is('name=4emes|3emes')) {
                 $nbFreeEl += $gp->people->count();
               }
-              if ($gp->avatar) { $mini = '<img src="'.$gp->avatar->getThumb('thumbnail').'" alt="avatar" width="50" />'; }
+              if ($gp->avatar) { $mini = '<img src="'.$gp->avatar->getCrop('thumbnail')->url.'" alt="avatar" width="50" />'; }
             $out .= '<li>';
             $out .= $mini;
             $out .= '<span>';
@@ -279,10 +279,10 @@
                 $out .= '</div>';
                 $out .= '<div class="col-sm-6 text-left">';
                 if ($selectedItem->photo) {
-                  $out .= '<img class="img-thumbnail" src="'.$selectedItem->photo->eq(0)->getThumb('thumbnail').'" /> ';
+                  $out .= '<img class="img-thumbnail" src="'.$selectedItem->photo->eq(0)->getCrop('thumbnail')->url.'" /> ';
                 }
                 if ($selectedItem->image) {
-                  $out .= '<img class="img-thumbnail" src="'.$selectedItem->image->getThumb('thumbnail').'" /> ';
+                  $out .= '<img class="img-thumbnail" src="'.$selectedItem->image->getCrop('thumbnail')->url.'" /> ';
                 }
                 $out .= '</div>';
               $out .= '</div>';
@@ -298,7 +298,7 @@
       case 'ambassador' :
         $pageId = $input->get('pageId');
         $p = $pages->get("title=$pageId");
-        if ($p->avatar) { $mini = '<img src="'.$p->avatar->getThumb('thumbnail').'" alt="avatar" />'; }
+        if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
         $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
         break;
       default :

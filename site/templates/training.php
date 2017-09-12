@@ -329,7 +329,7 @@
             $out .= '<span class="pull-right">';
             $out .= '<span class="avatarContainer">';
             if (isset($player) && $player->avatar) {
-              $out .= '<img class="" src="'.$player->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+              $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
             }
             if ($helmet->image) {
               $out .= '<img class="helmet superpose squeeze" src="'.$helmet->image->url.'" alt="image" />';

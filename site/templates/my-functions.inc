@@ -1207,7 +1207,7 @@ function pma($player) {
   if ($suggestedTrainings->count() > 0) {
     foreach($suggestedTrainings as $m) {
       if ($m->image) {
-        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
       } else {
         $mini = '';
       }
@@ -1231,7 +1231,7 @@ function pma($player) {
     if ($suggestedFights->count() > 0) {
       foreach($suggestedFights as $m) {
         if ($m->image) {
-          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getThumb('thumbnail')."\" alt=\"image\" />' src='".$m->image->getThumb('mini')."' alt='image' />";
+          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
         } else {
           $mini = '';
         }

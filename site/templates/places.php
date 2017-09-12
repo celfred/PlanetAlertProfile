@@ -80,10 +80,10 @@
     <ul class="list-inline placesList">
       <?php
         foreach($selectedPlaces as $place) {
-          $thumbImage = $place->photo->eq(0)->getThumb('thumbnail');
+          $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
           $city = $place->parent->title;
           $country = $place->parent->parent->title;
-          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='<h4>$place->title</h4> <h5>{$city},{$country}</h5> <strong>Coût: {$place->GC} or, Niveau {$place->level}</strong>' dta-placement='bottom' /></a></li>";
+          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage->url}' alt='' data-toggle='tooltip' data-html='true' title='<h4>$place->title</h4> <h5>{$city},{$country}</h5> <strong>Coût: {$place->GC} or, Niveau {$place->level}</strong>' dta-placement='bottom' /></a></li>";
         }
       ?>
     </ul>
@@ -107,7 +107,7 @@
       <tr>
         <td>
           <?php echo $place->title; ?>
-          <img src="<?php echo $place->photo->eq(0)->getThumb('mini'); ?>" />
+          <img src="<?php echo $place->photo->eq(0)->getCrop('mini')->url; ?>" />
         </td>
         <td><?php echo $place->country->title; ?></td>
         <td><?php echo $place->city->title; ?></td>

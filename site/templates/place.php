@@ -15,7 +15,7 @@ include("./head.inc");
         $playerPlaces = [];
         foreach ($player->places as $place) {
           array_push($playerPlaces, $place->id);
-          $mini = "<img class='img-thumbnail' data-toggle='tooltip' data-html='true' data-original-title='".$place->title."' src='".$place->photo->eq(0)->getThumb('thumbnail')."' alt='Photo' />";
+          $mini = "<img class='img-thumbnail' data-toggle='tooltip' data-html='true' data-original-title='".$place->title."' src='".$place->photo->eq(0)->getCrop('thumbnail')->url."' alt='Photo' />";
           echo $mini;
         }
       } else {
@@ -32,7 +32,6 @@ include("./head.inc");
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
   }
 
-  //$thumbImage = $page->photo->eq(0)->getThumb('thumbnail');
   $imageHeight = $page->photo->eq(0)->height;
   $imageWidth = $page->photo->eq(0)->width;
   if ($imageWidth > $imageHeight) { // Landscape

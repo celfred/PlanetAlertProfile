@@ -313,7 +313,7 @@
             <ul class="playerPlaces list-inline">
             <?php
               foreach($playerPage->places as $place) {
-                $thumbImage = $place->photo->eq(0)->getThumb('thumbnail');
+                $thumbImage = $place->photo->eq(0)->getCrop('thumbnail')->url;
                 echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$place->title<br />$place->summary<br />[{$place->parent->title},{$place->parent->parent->title}]' /></a></li>";
               }
             ?>
@@ -326,7 +326,7 @@
             <ul class="playerPlaces list-inline">
             <?php
               foreach($playerPage->people as $p) {
-                $thumbImage = $p->photo->eq(0)->getThumb('thumbnail');
+                $thumbImage = $p->photo->eq(0)->getCrop('thumbnail')->url;
                 echo "<li><a href='{$p->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$p->title<br />$p->summary' /></a></li>";
               }
             ?>

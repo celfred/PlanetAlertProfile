@@ -40,7 +40,7 @@
           $out .= '<li>';
           $out .= '<div class="thumbnail text-center">';
           if ($p->avatar) {
-            $out .= '<img class="" src="'.$p->avatar->getThumb("thumbnail").'" width="50" alt="Avatar" />';
+            $out .= '<img class="" src="'.$p->avatar->getCrop("thumbnail")->url.'" width="50" alt="Avatar" />';
           } else {
             $out .= '<Avatar>';
           }
@@ -94,7 +94,7 @@
       $out .= '<li>';
       $out .= '<div class="thumbnail text-center">';
       if ($p->avatar) {
-        $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />';
+        $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
       } else {
         $out .= '<Avatar>';
       }
@@ -127,7 +127,7 @@
         $out .= '<li>';
         $out .= '<div class="thumbnail text-center">';
         if ($p->avatar) {
-          $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getThumb("thumbnail").'" alt="Avatar" />';
+          $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
         } else {
           $out .= '<Avatar>';
         }
@@ -197,35 +197,35 @@
       if (isset($fpPlayer)) {
         $out .= '<div class="fame thumbnail">'; // Best warrior
           $out .= '<span class="badge">Best warrior !</span>';
-          if ($fpPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$fpPlayer->id.'" src="'.$fpPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          if ($fpPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$fpPlayer->id.'" src="'.$fpPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
           $out .= '<div class="caption text-center">'.$fpPlayer->title.' <span class="badge">'.$fpPlayer->fighting_power.'FP</span></div>';
         $out .= '</div>';
       }
       if (isset($donPlayer)) {
         $out .= '<div class="fame thumbnail">'; // Best donator
           $out .= '<span class="badge">Best donator !</span>';
-          if ($donPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$donPlayer->id.'" src="'.$donPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          if ($donPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$donPlayer->id.'" src="'.$donPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
           $out .= '<div class="caption text-center">'.$donPlayer->title.' <span class="badge">'.$donPlayer->donation.'Don.</span></div>';
         $out .= '</div>';
       }
       if (isset($utPlayer)) {
         $out .= '<div class="fame thumbnail">'; // Most trained
           $out .= '<span class="badge">Most trained !</span>';
-          if ($utPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$utPlayer->id.'" src="'.$utPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          if ($utPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$utPlayer->id.'" src="'.$utPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
           $out .= '<div class="caption text-center">'.$utPlayer->title.' <span class="badge">'.$utPlayer->underground_training.'UT</span></div>';
         $out .= '</div>';
       }
       if (isset($eqPlayer)) {
         $out .= '<div class="fame thumbnail">'; // Most equipped
           $out .= '<span class="badge">Most equipped !</span>';
-          if ($eqPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$eqPlayer->id.'" src="'.$eqPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          if ($eqPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$eqPlayer->id.'" src="'.$eqPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
           $out .= '<div class="caption text-center">'.$eqPlayer->title.' <span class="badge">'.$eqPlayer->equipment->count().'eq.</span></div>';
         $out .= '</div>';
       }
       if (isset($plaPlayer)) {
         $out .= '<div class="fame thumbnail">'; // Greatest # of Places
           $out .= '<span class="badge">Greatest # of Places !</span>';
-          if ($plaPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$plaPlayer.'" src="'.$plaPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+          if ($plaPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$plaPlayer.'" src="'.$plaPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
           $out .= '<div class="caption text-center">'.$plaPlayer->title.' <span class="badge">'.$plaPlayer->places->count().'pla.</span></div>';
         $out .= '</div>';
       }
@@ -233,7 +233,7 @@
         if (isset($peoPlayer)) {
           $out .= '<div class="fame thumbnail">'; // Greatest # of people
             $out .= '<span class="badge">Greatest # of People !</span>';
-            if ($peoPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$peoPlayer->id.'" src="'.$peoPlayer->avatar->getThumb("thumbnail").'" width="80" alt="Avatar" />'; }
+            if ($peoPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$peoPlayer->id.'" src="'.$peoPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
             $out .= '<div class="caption text-center">'.$peoPlayer->title.' <span class="badge">'.$peoPlayer->people->count().'peo.</span></div>';
           $out .= '</div>';
         }
