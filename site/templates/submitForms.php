@@ -3,124 +3,137 @@
 
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
     $playerId = $input->post->player;
-    $itemId = $input->post->item;
-    if ($itemId) {
-      // Get item's data
-      $newItem = $pages->get($itemId);
-    }
 
-    // Check if equipment, place or people not already there
-    // Except 'Potions'
-    $already = false;
-    $player = $pages->get($playerId);
-    foreach ($player->equipment as $eq) {
-      if ($eq->id == $itemId) {
-        if($newItem->parent->name !== 'potions') {
+    if($input->post->buyFormSubmit) { // buyForm submitted
+      $player = $pages->get($playerId);
+      $task = $pages->get("name='buy'");
+      $itemId = $input->post->item;
+      $newItem = $pages->get($itemId);
+      // Check if item is not already there
+      $already = false;
+      foreach ($player->equipment as $eq) {
+        if ($eq->id == $newItem->id) {
+          if($newItem->parent->name !== 'potions') {
+            $already = true;
+          }
+        }
+      }
+      foreach ($player->places as $pl) {
+        if ($pl->id == $newItem->id) {
           $already = true;
         }
       }
-    }
-    foreach ($player->places as $pl) {
-      if ($pl->id == $itemId) {
-        $already = true;
-      }
-    }
-    foreach ($player->people as $pl) {
-      if ($pl->id == $itemId) {
-        $already = true;
-      }
-    }
-
-    if ($already == false) {
-      if($input->post->buyFormSubmit) { // buyForm submitted
-        $player = $pages->get($playerId);
-        $task = $pages->get("name='buy'");
-        $task->comment = $newItem->title;
-        $task->refPage = $newItem;
-        $task->linkedId = false;
-        if ($newItem->GC <= $player->GC) { // Final 'security' check
-          updateScore($player, $task, true);
-          // No need to checkDeath, Buyform can't cause death
-          $error = '';
-        } else {
-          $error = ' !!ERROR!!';
-        }
-        // Notify admin
-        $msg = "Player : ". $player->title."\r\n";
-        $msg .= "Team : ". $player->team->title."\r\n";
-        $msg .= "Item : ". $newItem->title.$error;
-        if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-          mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+      foreach ($player->people as $pl) {
+        if ($pl->id == $newItem->id) {
+          $already = true;
         }
       }
+      // Check if item's GC is not out of reach
+      if ($newItem->GC > $player->GC) {
+        $already = true;
+      }
+      $task->comment = $newItem->title;
+      $task->refPage = $newItem;
+      $task->linkedId = false;
+      if ($newItem->GC <= $player->GC) { // Final 'security' check
+        updateScore($player, $task, true);
+        // No need to checkDeath, Buyform can't cause death
+      }
+      // Notify admin
+      $msg = "Player : ". $player->title."\r\n";
+      $msg .= "Team : ". $player->team->title."\r\n";
+      $msg .= "Item : ". $newItem->title;
+      if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+        mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+      }
+    }
 
-      if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
-        $checkedItems = $input->post->item;
-        $playerId = $input->post->player;
-        $player = $pages->get($playerId);
+    if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
+      $checkedItems = $input->post->item; // Array
+      $player = $pages->get($playerId);
 
-        foreach($checkedItems as $item=>$state) {
+      foreach($checkedItems as $item=>$state) {
+        $newItem = $pages->get($item);
+        // Check if item is not already there
+        $already = false;
+        foreach ($player->equipment as $eq) {
+          if ($eq->id == $newItem->id) {
+            if($newItem->parent->name !== 'potions') {
+              $already = true;
+            }
+          }
+        }
+        foreach ($player->places as $pl) {
+          if ($pl->id == $newItem->id) {
+            $already = true;
+          }
+        }
+        foreach ($player->people as $pl) {
+          if ($pl->id == $newItem->id) {
+            $already = true;
+          }
+        }
+        // Check if item's GC is not out of reach
+        if ($newItem->GC > $player->GC) {
+          $already = true;
+        }
+
+        if ($already == false) {
           // Get item's data
-          $newItem = $pages->get($item);
           if ($newItem->template == 'equipment' || $newItem->template == 'item') {
             $task = $pages->get("name='buy'");
           }
           if ($newItem->template == 'place' || $newItem->template == 'people') {
             $task = $pages->get("name='free'");
           }
-          if ($newItem->GC <= $player->GC) { // Final 'security' check
-            // Update player's scores and save
-            $task->comment = $newItem->title;
-            $task->refPage = $newItem;
-            $task->linkedId = false;
-            updateScore($player, $task, true);
-            // No need to checkDeath, MarketPlace can't cause death
-            $error = '';
-          } else {
-            $error = ' !!ERROR!!';
-          }
+          // Update player's scores and save
+          $task->comment = $newItem->title;
+          $task->refPage = $newItem;
+          $task->linkedId = false;
+          updateScore($player, $task, true);
+          // No need to checkDeath, MarketPlace can't cause death
           // Notify admin
           $msg = "Player : ". $player->title."\r\n";
           $msg .= "Team : ". $player->team->title."\r\n";
-          $msg .= "Item : ". $newItem->title.$error;
+          $msg .= "Item : ". $newItem->title;
+          /* $msg .= "Item : ". $newItem->title.$error; */
           if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
             mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
           }
         }
       }
+    }
 
-      if($input->post->donateFormSubmit) { // donateForm submitted
-        $playerId = $input->post->donator;
-        $player = $pages->get($playerId);
-        $player->of(false);
-        $amount = (integer) $input->post->amount;
-        $receiverId = $input->post->receiver;
-        $receiver = $pages->get($receiverId);
-        $receiver->of(false);
-        
-        // Save donation
-        // If valid amount
-        if ($player && $receiverId && $amount != 0 && $amount <= $player->GC) {
-          // Modify player's page
-          $task = $pages->get("template='task', name='donation'");
-          $task->comment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->team->title.']';
-          $task->refPage = $receiver;
-          $task->linkedId = false;
-          updateScore($player, $task, true);
-          // No need to checkDeath, Donation can't cause death
-          // Notify admin
-          $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
-          $msg .= "Donation amount : ". $amount."\r\n";
-          $msg .= "Donated to : ". $receiver->title." [".$receiver->team->title."]";
-          if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-            mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
-          }
+    if($input->post->donateFormSubmit) { // donateForm submitted
+      $playerId = $input->post->donator;
+      $player = $pages->get($playerId);
+      $player->of(false);
+      $amount = (integer) $input->post->amount;
+      $receiverId = $input->post->receiver;
+      $receiver = $pages->get($receiverId);
+      $receiver->of(false);
+      
+      // Save donation
+      // If valid amount
+      if ($player && $receiverId && $amount != 0 && $amount <= $player->GC) {
+        // Modify player's page
+        $task = $pages->get("template='task', name='donation'");
+        $task->comment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->team->title.']';
+        $task->refPage = $receiver;
+        $task->linkedId = false;
+        updateScore($player, $task, true);
+        // No need to checkDeath, Donation can't cause death
+        // Notify admin
+        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
+        $msg .= "Donation amount : ". $amount."\r\n";
+        $msg .= "Donated to : ". $receiver->title." [".$receiver->team->title."]";
+        if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+          mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
     }
-
     // Set group captains
-    setCaptains($player->team);
+    setCaptains($player->team, true);
 
     // Redirect to player's profile
     $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name);

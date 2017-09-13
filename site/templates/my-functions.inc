@@ -115,7 +115,7 @@ function updateScore($player, $task, $real = true) {
       $player->XP = (int) $player->XP + $tXP + $player->deltaXP;
     }
 
-    taskExtraAction($player, $task); // Before saving extra action required according to the task
+    taskExtraAction($player, $task, $real); // Before saving extra action required according to the task
     
     // Check GC, HP...
     if ($player->GC < 0) { $player->GC = 0; }
@@ -164,7 +164,7 @@ function updateScore($player, $task, $real = true) {
       $historyPage = '';
     }
   }
-  if ($historyPage) {
+  if ($historyPage != '') {
     extraActionAfterSave($player, $historyPage, $real);
     return $historyPage->id;
   }
@@ -210,7 +210,7 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
   }
 }
 
-function taskExtraAction($player, $task) {
+function taskExtraAction($player, $task, $real) {
   $pages = wire('pages');
   if ($task->is("name=penalty")) {
     $player->GC = (int) round($player->GC/2); // Half GC if penalty
@@ -228,7 +228,7 @@ function taskExtraAction($player, $task) {
   if ($task->is("name=fake-donator")) { // Reset donation indicator
     $player->donation = 0;
   }
-  if ($task->is("name=bought")) { // Add equipment
+  if ($task->is("name=bought") && $real == true) { // Add equipment
     if ($task->refPage) {
       $player->equipment->add($task->refPage);
     }
@@ -254,7 +254,7 @@ function taskExtraAction($player, $task) {
   if ($task->is("name=homework-half-done|signature")) {
     $player->hkcount += 0.5;
   }
-  if ($task->is("name=remove")) { // Remove element
+  if ($task->is("name=remove") && $real == true) { // Remove element
     if ($task->refPage != false && $task->refPage->template == 'place') {
       $player->places->remove($task->refPage);
     }
@@ -264,7 +264,7 @@ function taskExtraAction($player, $task) {
     // Update Team score
     updateTeamScores($player->team);
   }
-  if ($task->is("name=free")) { // Add element
+  if ($task->is("name=free") && $real == true) { // Add element
     if ($task->refPage) {
       // Check for a discount
       if ($task->linkedId) {
@@ -284,7 +284,7 @@ function taskExtraAction($player, $task) {
       }
     }
   } 
-  if ($task->is("name=buy")) { // Add equipment
+  if ($task->is("name=buy") && $real == true) { // Add equipment
     if ($task->refPage) {
       // Check for a discount
       if ($task->linkedId) {
