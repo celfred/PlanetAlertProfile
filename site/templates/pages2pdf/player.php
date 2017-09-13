@@ -1,6 +1,6 @@
 <?php 
 
-$logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
+$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
 
 $player = $pages->get("name=$page->name");
 if ($player->avatar) {
@@ -19,7 +19,7 @@ $out .= 'Player\'s profile page for '.$player->title;
 $out .= '</h1>';
 $out .= '</td>';
 $out .= '<td rowspan="2" style="background-color: #C366FF; border-left: 0px; padding: 0px;">';
-$out .= '<img src="'.$logo.'" width="100" height="100" /> ';
+$out .= '<img src="'.$logo->url.'" width="100" height="100" /> ';
 $out .= '</td>';
 $out .= '</tr>>';
 $out .= '<tr><td>';
@@ -67,8 +67,8 @@ for ($i=0; $i<$allElements->count(); $i+=2) {
   }
   $e = $allElements->eq($i);
   $nextEl = $allElements->eq($i+1);
-  if ($e) { $thumbImage = $e->photo->eq(0)->getThumb("thumbnail"); }
-  if ($nextEl) { $nextThumbImage = $nextEl->photo->eq(0)->getThumb("thumbnail"); }
+  if ($e) { $thumbImage = $e->photo->eq(0)->getCrop("thumbnail"); }
+  if ($nextEl) { $nextThumbImage = $nextEl->photo->eq(0)->getCrop("thumbnail"); }
 
   $out .= '<table class="miniTable">';
   $out .= '<tr>';
@@ -127,7 +127,7 @@ for ($i=0; $i<$allElements->count(); $i+=2) {
 
 
   $out .= '<tr>';
-  $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
+  $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
   $textLength = strlen($e->summary);
   $fontSize = '10px;';
   if ($textLength >= 600) { $fontSize = '8px'; }
@@ -140,7 +140,7 @@ for ($i=0; $i<$allElements->count(); $i+=2) {
 
   if ($nextEl) {
     $out .= '<td class="empty" style="width:0.5cm;">&nbsp;</td>';
-    $out .= '<td colspan="8" style="width:2cm;"><img style="border: 2px solid #000;" src="'.$nextThumbImage.'" /></td>';
+    $out .= '<td colspan="8" style="width:2cm;"><img style="border: 2px solid #000;" src="'.$nextThumbImage->url.'" /></td>';
     $textLength = strlen($nextEl->summary);
     $fontSize = '10px;';
     if ($textLength >= 600) { $fontSize = '8px'; }

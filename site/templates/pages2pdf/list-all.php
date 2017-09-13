@@ -1,7 +1,7 @@
 <?php 
 // NO more in use?
 
-$logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
+$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
 
 $places = $pages->find("template='place',sort='level'")->not("name=places");
 $players = $pages->find("template='player', team=$input->urlSegment1");
@@ -39,7 +39,7 @@ $freedomRate = round(($totalOwned*100)/$nbPlaces);
 $out .= '<table class="big">';
 $out .= '<tr>';
 $out .= '<td>';
-$out .= '<img style="" src="'.$logo.'" />';
+$out .= '<img style="" src="'.$logo->url.'" />';
 $out .= '</td>';
 $out .= '<td colspan="3">';
 $out .= '<h1 style="text-align: center; text-decoration : underline;">Free Places (Team:'.strtoupper($input->urlSegment1).')</h1>';

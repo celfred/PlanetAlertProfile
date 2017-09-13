@@ -1,6 +1,6 @@
 <?php 
 
-$logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
+$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
 $largeLogo = $pages->get('/')->photo->eq(0)->url;
 
 $out = '';
@@ -70,8 +70,8 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= $place->summary;
     $out .= '</td>';
     $out .= '<td>';
-    $thumbImage = $place->photo->eq(0)->getThumb('thumbnail');
-    $out .= '<img style="border: 2px solid #000;" src="'.$thumbImage.'" />';
+    $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
+    $out .= '<img style="border: 2px solid #000;" src="'.$thumbImage->url.'" />';
     //$out .= $thumbImage;
     $out .= '</td>';
     $out .= '</tr>';
@@ -80,7 +80,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
   $out .= '</table>';
 } else { // 1 place PDF
   $place = $pages->get("template='place', name='$page->name'");
-  $thumbImage = $place->photo->eq(0)->getThumb('thumbnail');
+  $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
 
   for ($i=0; $i<5; $i++) {
     $out .= '<table class="miniTable">';
@@ -133,7 +133,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '</tr>';
 
     $out .= '<tr>';
-    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
+    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
     $textLength = strlen($page->summary);
     $fontSize = '10px;';
     if ($textLength >= 600) { $fontSize = '8px'; }
@@ -146,7 +146,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
 
     $out .= '<td class="empty" style="width:0.5cm;">&nbsp;</td>';
 
-    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
+    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
     $textLength = strlen($page->summary);
     $fontSize = '10px;';
     if ($textLength >= 600) { $fontSize = '8px'; }

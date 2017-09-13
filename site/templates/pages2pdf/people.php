@@ -4,7 +4,7 @@ $out = '';
 
 $id = $input->get->id;
 $people = $pages->get("template=people, id=$id");
-$thumbImage = $people->photo->eq(0)->getThumb('thumbnail');
+$thumbImage = $people->photo->eq(0)->getCrop('thumbnail');
 for ($i=0; $i<5; $i++) {
   $out .= '<table class="miniTable">';
   $out .= '<tr>';
@@ -54,7 +54,7 @@ for ($i=0; $i<5; $i++) {
   $out .= '</tr>';
 
   $out .= '<tr>';
-  $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
+  $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
   $textLength = strlen($people->summary);
   $fontSize = '10px;';
   if ($textLength >= 600) { $fontSize = '8px'; }
@@ -67,7 +67,7 @@ for ($i=0; $i<5; $i++) {
 
   $out .= '<td class="empty" style="width:0.5cm;">&nbsp;</td>';
 
-  $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage.'" /></td>';
+  $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
   $textLength = strlen($people->summary);
   $fontSize = '10px;';
   if ($textLength >= 600) { $fontSize = '8px'; }

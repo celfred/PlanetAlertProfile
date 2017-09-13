@@ -1,6 +1,6 @@
 <?php 
 
-$logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
+$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
 $monsterId = $input->get("id");
 $m = $pages->get("id=$monsterId");
 if ($m->image) {
@@ -72,7 +72,7 @@ switch ($m->type->name) {
 }
 
 $out = '';
-$out .= '<img style="float: left;" src="'.$logo.'" width="45" />';
+$out .= '<img style="float: left;" src="'.$logo->url.'" width="45" />';
 $out .= $mini;
 $out .= '<h2 style="text-align: center;">Monster Fight vs '.$m->title.'</h2>';
 $out .= '<h5 class="text-left;">Name (Class) : _______________________________________ &nbsp;&nbsp;&nbsp; Date : ___________________________________</h5>';

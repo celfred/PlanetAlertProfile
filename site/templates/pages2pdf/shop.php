@@ -1,6 +1,6 @@
 <?php 
 
-$logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
+$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
 
 $weapons = $pages->find("template='equipment', category='weapons', sort='level'");
 $protections = $pages->find("template='equipment',category='protections', sort='level'");
@@ -21,12 +21,12 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
   $index = 0;
   foreach($items as $item) {
     if ($input->urlSegment2 != 'items') {
-      $thumbImage = $item->image->url;
+      $thumbImage = $item->image;
       $out .= '<table>';
       for ($i=0; $i<8; $i++) {
         $out .= '<tr>';
         for ($j=0; $j<5; $j++) {
-          $out .= '<td style="border: 5px solid #000;"><img style="float: left;" src="'.$thumbImage.'" /></td>';
+          $out .= '<td style="border: 5px solid #000;"><img style="float: left;" src="'.$thumbImage->url.'" /></td>';
         }
         $out .= '</tr>';
       }
@@ -41,7 +41,7 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
   if ($input->urlSegment2 === 'items') {
       /*
       $out .= '<tr>';
-      $out .= '<td><img style="" src="'.$logo.'" /></td>';
+      $out .= '<td><img style="" src="'.$logo->url.'" /></td>';
       $out .= '<td colspan="2"><h1>'.$item->title.'</h1></td>';
       $out .= '<td style="border: 0">&nbsp;</td>';
       $out .= '</tr>';
@@ -55,8 +55,8 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $out .= '<img src="'.$image.'" />';
     }
 } else {
-  $out .= '<img style="float: left;" src="'.$logo.'" />';
-  $out .= '<img style="float: right;" src="'.$logo.'" />';
+  $out .= '<img style="float: left;" src="'.$logo->url.'" />';
+  $out .= '<img style="float: right;" src="'.$logo->url.'" />';
   $out .= '<h1 style="text-align: center; text-decoration : underline;">The Shop</h1>';
 
   $out .= '<table class="">';
@@ -73,13 +73,13 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
   $out .= '<th colspan="2">Summary</th>';
   $out .= '</tr>';
   foreach($weapons as $weapon) {
-    $thumbImage = $weapon->image->getThumb('mini');
+    $thumbImage = $weapon->image->getCrop('mini');
     $out .= '<tr>';
     $out .= '<td>'.$weapon->level.'</td>';
     $out .= '<td>'.$weapon->GC.'</td>';
     $out .= '<td>+'.$weapon->XP.'</td>';
     $out .= '<td>'.$weapon->title.'</td>';
-    $out .= '<td><img src="'.$thumbImage.'" /></td>';
+    $out .= '<td><img src="'.$thumbImage->url.'" /></td>';
     $out .= '<td colspan="2">'.$weapon->summary.'</td>';
     $out .= '</tr>';
   }
@@ -96,7 +96,7 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
   $out .= '<th colspan="2">Summary</th>';
   $out .= '</tr>';
   foreach($protections as $protection) {
-    $thumbImage = $protection->image->getThumb('mini');
+    $thumbImage = $protection->image->getCrop('mini');
     $out .= '<tr>';
     $out .= '<td>'.$protection->level.'</td>';
     $out .= '<td>'.$protection->GC.'</td>';
@@ -120,7 +120,7 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
   $out .= '<th>Summary</th>';
   $out .= '</tr>';
   foreach($items as $item) {
-    $thumbImage = $item->image->getThumb('mini');
+    $thumbImage = $item->image->getCrop('mini');
     $out .= '<tr>';
     $out .= '<td>'.$item->level.'</td>';
     $out .= '<td>'.$item->GC.'</td>';
@@ -135,7 +135,7 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $out .= '<td>-</td>';
     }
     $out .= '<td>'.$item->title.'</td>';
-    $out .= '<td><img src="'.$thumbImage.'" /></td>';
+    $out .= '<td><img src="'.$thumbImage->url.'" /></td>';
     $out .= '<td>'.$item->summary.'</td>';
     $out .= '</tr>';
   }

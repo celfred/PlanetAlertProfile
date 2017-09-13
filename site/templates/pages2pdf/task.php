@@ -1,6 +1,6 @@
 <?php 
 
-$logo = $pages->get('/')->photo->eq(0)->getThumb('thumbnail');
+$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
 
 $tasks = $pages->find("template='task', name!='tasks', sort='category'");
 
@@ -8,9 +8,9 @@ $out = '';
 
 $out .= '<table>';
 $out .= '<tr>';
-$out .= '<td><img style="" src="'.$logo.'" /></td>';
+$out .= '<td><img style="" src="'.$logo->url.'" /></td>';
 $out .= '<td colspan="5"><h1>Planet Alert : The Actions</h1></td>';
-$out .= '<td><img style="" src="'.$logo.'" /></td>';
+$out .= '<td><img style="" src="'.$logo->url.'" /></td>';
 $out .= '</tr>';
 $out .= '<tr>';
 $out .= '<th>Category</th>';
