@@ -28,6 +28,8 @@
   } else {
     $hkCount = '<span class="label label-danger">Private!</span>';
   }
+  // Get last activity # of days
+  $lastActivityCount = lastActivity($playerPage);
 ?>
 
 <?php
@@ -67,6 +69,13 @@
             <li>Level : <?php echo $playerPage->level; ?></li>
             <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></li>
             <li><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></li>
+            <?php
+              if ($lastActivityCount < 20) {
+                echo '<li><span class="glyphicon glyphicon-thumbs-up"></span> Active player !</li>';
+              } else {
+                echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' days of inactivity.</li>';
+              }
+            ?>
             </ul>
           </div>
           </div>

@@ -478,6 +478,21 @@ function checkStreak($player) {
   return $streak;
 }
 
+function lastActivity($player) {
+  $historyPage = $player->children()->sort("-date")->first();
+  $lastEvent = $historyPage->find("template=event, sort=-date")->first();
+  if ($lastEvent->id) {
+    // Find # of days compared to today
+    $date1 = new \DateTime("today");
+    $date2 = new \DateTime(date("Y-m-d", $lastEvent->created));
+    $interval = $date1->diff($date2);
+
+    return $interval->days;
+  } else {
+    return '-1';
+  }
+}
+
 function setLevel($player) {
   // Check new level
   $threshold = getLevelThreshold($player->level);
