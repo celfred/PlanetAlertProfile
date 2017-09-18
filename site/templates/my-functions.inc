@@ -821,6 +821,7 @@ function showScores($allTeams) {
   echo '<h4 class="text-center scores">';
   echo '<ul class="list-inline">';
   if ($allTeams->count() > 1) {
+    $allTeams->sort("-title");
     foreach($allTeams as $t) {
       if ($t->name != 'no-team') {
         echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t->title.':'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
