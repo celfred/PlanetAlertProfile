@@ -70,10 +70,15 @@
             <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></li>
             <li><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></li>
             <?php
-              if ($lastActivityCount < 20) {
+              if ($lastActivityCount < 30) { // Active players
                 echo '<li><span class="glyphicon glyphicon-thumbs-up"></span> Active player !</li>';
-              } else {
-                echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' days of inactivity.</li>';
+              } else { // 30 days of inactivity > lose all GC
+                if ($lastActivityCount >= 20 && $lastActivityCount <= 30) { // Warning 10 days before losing GC
+                  $delay = 31-$lastActivityCount;
+                  echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' days of inactivity. ('.$delay.' day(s) before losing all GC !)</li>';
+                } else {
+                  echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' days of inactivity. (All GC have been lost !)</li>';
+                }
               }
             ?>
             </ul>

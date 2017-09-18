@@ -130,7 +130,7 @@ function updateScore($player, $task, $real = true) {
 
     if ($real == true) { // Save player's new scores if necessary
       // Publish on Newsboard?
-      if ($task->is("name=penalty|buy|free|ut-action-v|ut-action-vv|bought|remove")) {
+      if ($task->is("name=inactivity|penalty|buy|free|ut-action-v|ut-action-vv|bought|remove")) {
         $newsBoard = 1;
       } else {
         $newsBoard = 0;
@@ -215,6 +215,9 @@ function taskExtraAction($player, $task, $real) {
   if ($task->is("name=penalty")) {
     $player->GC = (int) round($player->GC/2); // Half GC if penalty
     $player->hkcount = 0; // Reset current hkcount
+  }
+  if ($task->is("name=inactivity")) { // Lose all GC
+    $player->GC = 0;
   }
   if ($task->is("name=donation")) {
     preg_match("/\d+/", $task->comment, $matches);
@@ -478,15 +481,35 @@ function checkStreak($player) {
   return $streak;
 }
 
+function checkActivity(HookEvent $e) {
+  $pages = wire('pages');
+  $allPlayers = $pages->find("template=player");
+  foreach ($allPlayers as $player) {
+    $lastActivityCount = lastActivity($player);
+    if ($lastActivityCount > 30) { // 30 days of inactivity
+      if ($lastActivityCount >= 20 && $lastActivityCount <= 30) { // Warning 10 days before losing GC
+        $delay = 31-$lastActivityCount;
+        return $delay;
+      } else { // Lose all GC
+        $task = $pages->get("name=inactivity");
+        $task->comment = $lastActivityCount.' days of inactivity.';
+        $task->refPage = $refPage;
+        $task->linkedId = false;
+        updateScore($player, $task, true);
+        // No need to checkDeath, inactivity can't cause death
+      }
+    }
+  }
+}
+
 function lastActivity($player) {
-  $historyPage = $player->children()->sort("-date")->first();
+  $historyPage = $player->children("sort=-created")->first();
   $lastEvent = $historyPage->find("template=event, sort=-date")->first();
   if ($lastEvent->id) {
     // Find # of days compared to today
     $date1 = new \DateTime("today");
     $date2 = new \DateTime(date("Y-m-d", $lastEvent->created));
     $interval = $date1->diff($date2);
-
     return $interval->days;
   } else {
     return '-1';
