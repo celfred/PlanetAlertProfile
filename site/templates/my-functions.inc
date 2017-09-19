@@ -485,12 +485,9 @@ function checkActivity(HookEvent $e) {
   $pages = wire('pages');
   $allPlayers = $pages->find("template=player, team.name=no-team"); // Limit to no-team players
   foreach ($allPlayers as $player) {
-    $lastActivityCount = lastActivity($player);
-    if ($lastActivityCount > 30) { // 30 days of inactivity
-      if ($lastActivityCount >= 20 && $lastActivityCount <= 30) { // Warning 10 days before losing GC
-        $delay = 31-$lastActivityCount;
-        return $delay;
-      } else { // Lose all GC
+    if ($player->GC > 0) { // Only players having GC
+      $lastActivityCount = lastActivity($player);
+      if ($lastActivityCount > 30) { // 30 days of inactivity
         $task = $pages->get("name=inactivity");
         $task->comment = $lastActivityCount.' days of inactivity.';
         $task->refPage = $refPage;
