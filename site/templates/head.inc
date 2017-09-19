@@ -36,7 +36,6 @@
 
 <body>
 	<?php
-    $homepage = $pages->get("/"); 
 		$newsboardPage = $pages->get("/newsboard");
 		// Cache allTeams for faster access
 		$template = $templates->get("team");
