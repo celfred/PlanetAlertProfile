@@ -41,7 +41,7 @@ if ($page->name == 'tasks') {
     </thead>
     <tbody>
       <?php foreach ($allTasks as $task) {
-        if ($task->HP < 0) {
+        if ($task->HP < 0 || $task->XP < 0 || $task->GC < 0) {
           $task->type = 'negative';
         } else { 
           $task->type = 'positive';
