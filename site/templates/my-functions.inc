@@ -483,7 +483,7 @@ function checkStreak($player) {
 
 function checkActivity(HookEvent $e) {
   $pages = wire('pages');
-  $allPlayers = $pages->find("template=player");
+  $allPlayers = $pages->find("template=player, team.name=no-team"); // Limit to no-team players
   foreach ($allPlayers as $player) {
     $lastActivityCount = lastActivity($player);
     if ($lastActivityCount > 30) { // 30 days of inactivity

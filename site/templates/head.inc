@@ -36,9 +36,6 @@
 
 <body>
 	<?php
-		$wire->addHook('LazyCron::everyDay', null, 'checkActivity'); // Check all players activity once a day
-
-    $homepage = $pages->get("/"); 
 		$newsboardPage = $pages->get("/newsboard");
 		// Cache allTeams for faster access
 		$template = $templates->get("team");
