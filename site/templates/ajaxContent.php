@@ -144,8 +144,8 @@
               if ($historyPage->id) {
                 $out .= '<li class="">';
                 // Find # of days compared to today to set 'New' indicator
-                $date1 = new DateTime("today");
-                $date2 = new DateTime(date("Y-m-d", $historyPage->date));
+                $date1 = new \DateTime("today");
+                $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
                 $interval = $date1->diff($date2);
                 if ($interval->days > 21) {
                   $out .= ' <span class="badge">!</span> ';
