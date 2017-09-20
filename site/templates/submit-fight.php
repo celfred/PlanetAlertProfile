@@ -4,8 +4,6 @@
       '::1'
   );
 
-  include("./my-functions.inc");
-
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
     $player = $pages->get("template=player, login=$user->name");
     $monster = $pages->get($input->post->exerciseId);

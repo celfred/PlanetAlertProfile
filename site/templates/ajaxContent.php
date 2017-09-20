@@ -1,6 +1,5 @@
 <?php namespace ProcessWire;
   if ($config->ajax) {
-    include("./my-functions.inc");
     $out = '';
     switch ($input->get('id')) {
       case 'lastEvents' :

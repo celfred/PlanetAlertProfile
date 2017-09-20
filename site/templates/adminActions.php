@@ -268,7 +268,6 @@ namespace ProcessWire;
     echo '</script>';
   }
   } else { // Ajax call, display requested information
-    include("./my-functions.inc"); 
     $allPlayers = $pages->find("template=player")->sort("team.name, title");
     $action = $input->urlSegment1;
     $playerId = $input->urlSegment2;

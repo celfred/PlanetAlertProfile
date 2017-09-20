@@ -3,7 +3,6 @@
 <head>
   <?php
 		date_default_timezone_set('Europe/Paris');
-    include('./my-functions.inc'); // Planet Alert PHP functions
 
     if ($input->get->logout == 1) {
       $session->logout();

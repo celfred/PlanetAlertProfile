@@ -123,7 +123,6 @@
     include("./foot.inc"); 
 
   } else {
-    include('./my-functions.inc');
     $out = '';
     $field = $input->get('id');
     $player = $pages->get("login=$user->name");
