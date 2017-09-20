@@ -8,7 +8,7 @@ $team = $pages->get("template=team, name=$input->urlSegment1");;
 include("./tabList.inc"); 
 
 $team = $input->urlSegment1;
-$allCategories = $pages->get('/categories/')->children("name!=potions|place|shop|protections|weapons|manual-cat");
+$allCategories = $pages->get('/categories/')->children("name!=potions|place|shop|protections|weapons|manual-cat|planet-alert|group-items");
 $allTasks = $pages->get('/tasks/')->children();
 $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
 
