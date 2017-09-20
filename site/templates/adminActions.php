@@ -195,6 +195,23 @@ namespace ProcessWire;
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setKarma">Generate</button>';
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
+      case 'setYearlyKarma' :
+        $out .= '<section class="well">';
+        $out .= '<h3 class="text-center">';
+        $out .=   'Set yearly karma';
+        $out .= '</h3>';
+        $out .= '<div>';
+        $out .= '<span>Select a team : </span>';
+        $out .= '<select id="teamId">';
+        $out .= '<option value="-1">Select a team</option>';
+        foreach($allTeams as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</div>';
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setYearlyKarma">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        break;
       case 'setScores' :
         $out .= '<section class="well">';
         $out .= '<h3 class="text-center">';
@@ -971,6 +988,24 @@ namespace ProcessWire;
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveKarma/'.$selectedTeam->id.'/1">Save new karmas</button>';
         }
         break;
+      case 'setYearlyKarma':
+        if ($selectedTeam && $selectedTeam != '-1') {
+          $allPlayers = $allPlayers->find("team=$selectedTeam");
+          $out .= '</div>';
+          $out .= '<h4 class="text-center">';
+          $out .=   'Set yearly Karma for '.$selectedTeam->title;
+          $out .= '</h4>';
+          $out .= '<section>';
+          $out .= '<ul><span class="label label-default">Actual yearly karmas</span>';
+          foreach($allPlayers as $p) {
+            $newKarma = setYearlyKarma($p);
+            $out .= '<li>'.$p->title.' : '.$p->yearlyKarma.' → '.$newKarma.'</li>';
+          }
+          $out .= '</ul>';
+          $out .= '</section>';
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveYearlyKarma/'.$selectedTeam->id.'/1">Save new yearly karmas</button>';
+        }
+        break;
       case 'setScores':
         $out = '';
         if ($selectedTeam && $selectedTeam != '-1') {
@@ -1005,6 +1040,15 @@ namespace ProcessWire;
         $allPlayers = $allPlayers->find("team=$selectedTeam");
         foreach($allPlayers as $p) {
           $p->karma = setKarma($p);
+          $p->of(false);
+          $p->save();
+        }
+        break;
+      case 'saveYearlyKarma':
+        $selectedTeam = $pages->get("$input->urlSegment2");
+        $allPlayers = $allPlayers->find("team=$selectedTeam");
+        foreach($allPlayers as $p) {
+          $p->yearlyKarma = setYearlyKarma($p);
           $p->of(false);
           $p->save();
         }

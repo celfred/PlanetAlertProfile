@@ -31,6 +31,7 @@ function initPlayer($player) {
   $prevScores = $player->get("template=archive, name!=history, sort=-date");
   if ($prevScores->id) {
     $player->karma = $prevScores->karma;
+    $player->yearlyKarma = $prevScores->yearlyKarma;
     $player->HP = 50;
     $player->GC = $prevScores->GC;
     $player->XP = $prevScores->XP;
@@ -45,6 +46,7 @@ function initPlayer($player) {
     $player->coma = 0;
   } else {
     $player->karma = 0;
+    $player->yearlyKarma = 0;
     $player->HP = 50;
     $player->GC = 0;
     $player->XP = 0;
@@ -74,6 +76,7 @@ function resetPlayer($player, $previousLevel) {
       $player->coma = 1;
       $player->XP = 0;
       $player->karma = 0;
+      $player->yearlyKarma = 0;
     } else {
       $player->XP = round($player->XP/2); // Cut previous XP
     }
@@ -127,6 +130,8 @@ function updateScore($player, $task, $real = true) {
       setLevel($player); // Check if new level
       $player->karma = setKarma($player); // Set karma (and store for cache)
     }
+
+    updateYearlyKarma($player, $task);
 
     if ($real == true) { // Save player's new scores if necessary
       // Publish on Newsboard?
@@ -600,12 +605,12 @@ function setCaptains($team, $real = true) {
   $allGroups = $pages->get('/groups')->children();
   foreach($allGroups as $group) {
     // Find group captain
-    $members = $players->find("group=$group, sort=-karma");
+    $members = $players->find("group=$group, sort=-yearlyKarma");
     $captain = $members->first();
     if (isset($captain->id)) {
       // No captain if same karma
       $next = $members->getNext($captain);
-      if ($next->karma < $captain->karma) {
+      if ($next->yearlyKarma < $captain->yearlyKarma) {
         $captain->skills->add($role);
         if ($real == true) {
           $captain->save();
@@ -628,6 +633,37 @@ function setKarma($player) {
   }
   if ($karma < 0 || $player->coma == 1) { $karma = 0; }
   return $karma;
+}
+
+function setYearlyKarma($player) {
+  // Yearly Karma calculated from current history
+  $levelKarma = 0;
+  $history = $player->child("name=history");
+  $nbFree = $history->children("task.name=free")->count(); // 20pts for each free action
+  $nbBuy = $history->children("task.name=buy")->count(); // 10pts for each buying action
+  $nbPos = $history->children("task.name!=buy|free, (task.HP>0), (task.GC>0), (task.XP>0)")->count(); // 5pts for each positive action
+  $nbNeg = $history->children("(task.HP<0), (task.GC<0), (task.XP<0)")->count(); // -5pts for each negative action
+  $karma = ($nbFree*20 + $nbBuy*10 + $nbPos*5) - $nbNeg*5;
+  if ($karma < 0 || $player->coma == 1) { $karma = 0; }
+  return $karma;
+}
+
+function updateYearlyKarma($player, $task) {
+  if ($task->is("name!=free|buy")) {
+    if ($task->HP>0 || $task->GC>0 || $task->XP>0) { // +5 for a positive action 
+      $player->yearlyKarma = $player->yearlyKarma+5;
+    } else { // -5 for a negative action
+      $player->yearlyKarma = $player->yearlyKarma-5;
+    }
+  } else {
+     if ($task->is("name=buy")) { // +10 for a buying action
+      $player->yearlyKarma = $player->yearlyKarma+10;
+     }
+     if ($task->is("name=free")) { // +20 for a free action
+      $player->yearlyKarma = $player->yearlyKarma+20;
+     }
+  }
+  if ($player->yearlyKarma < 0) { $player->yearlyKarma = 0; }
 }
 
 function groupBonus($players) {

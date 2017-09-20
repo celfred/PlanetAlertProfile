@@ -97,7 +97,7 @@
   // echo $outGroups;
 
   // Players table
-  $allPlayers->sort('-karma, -XP');
+  $allPlayers->sort('-yearlyKarma, -XP');
   $out = '<table id="teamTable" class="table table-hover table-condensed teamView">';
   $out .= '<thead>';
   $out .= '<tr>';
@@ -105,6 +105,7 @@
   $out .= '<td></td>';
   $out .= '<th data-toggle="tooltip" title="Player"><span class="glyphicon glyphicon-user"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Karma">K&nbsp;&nbsp;</td>';
+  $out .= '<td data-toggle="tooltip" title="yearly Karma">yK&nbsp;&nbsp;</td>';
   $out .= '<td data-toggle="tooltip" title="What happened on the last date?"><span class="glyphicon glyphicon-th-list"></span></td>';
   $out .= '<th data-toggle="tooltip" title="Special skills">S.</th>';
   $out .= '<th data-toggle="tooltip" title="Gold coins"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></th>';
@@ -222,6 +223,7 @@
     $out .= '<td>';
     $out .='<a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount.'</td>';
     $out .= '<td>'. $player->karma .'</td>';
+    $out .= '<td>'. $player->yearlyKarma .'</td>';
     $out .= '<td><span class="trend">'.$trend.'</span></td>';
     if ($player->skills->has("name=captain")) {
       $showSkills = '<span class="label label-primary" data-toggle="tooltip" title="Captain">C</span>';
