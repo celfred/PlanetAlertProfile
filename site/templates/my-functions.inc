@@ -1259,7 +1259,9 @@ function pma($player) {
   $out .= '<div class="panel-heading">';
   $out .= '<h4><span class="glyphicon glyphicon-calendar"></span> Personal Analyzer';
   $out .= '<span class="pull-right">';
-  $out .= '<span class="label label-success">Your Karma : '.$player->karma.'</span>';
+  $out .= '<span class="label label-success">Karma : '.$player->yearlyKarma.'</span>';
+  $out .= '&nbsp;&nbsp;';
+  $out .= '<span class="label label-success">Reputation : '.$player->karma.'</span>';
   $out .= '&nbsp;&nbsp;';
   if ($player->coma == 0) {
     $out .= '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';

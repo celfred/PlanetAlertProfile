@@ -14,11 +14,11 @@
     }
   }
 
-  $karma = $playerPage->karma;
+  $karma = $playerPage->yearlyKarma;
   if (!$karma) $karma = 0;
-  if ($karma > 0) { // Team Position
+  if ($karma > 0 && $playerPage->team->name != 'no-team') { // Team Position
     // Number of players having a better karma than current player
-    $playerPos = $pages->count("template=player,team=$playerPage->team,karma>$karma") + 1;
+    $playerPos = $pages->count("template=player,team=$playerPage->team,yearlyKarma>$karma") + 1;
   } else {
     $playerPos = $playersTotalNb;
   }
@@ -66,6 +66,7 @@
           <div class="col-sm-6">
             <ul class="player-details">
             <li>Karma : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
+            <li>Reputation : <span class="label label-default"><?php echo $playerPage->karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
             <li>Level : <?php echo $playerPage->level; ?></li>
             <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></li>
             <li><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></li>
