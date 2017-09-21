@@ -97,7 +97,7 @@
   // echo $outGroups;
 
   // Players table
-  $allPlayers->sort('-yearlyKarma, -XP');
+  $allPlayers->sort('-yearlyKarma, -level, -XP');
   $out = '<table id="teamTable" class="table table-hover table-condensed teamView">';
   $out .= '<thead>';
   $out .= '<tr>';
@@ -105,11 +105,11 @@
   $out .= '<td></td>';
   $out .= '<th data-toggle="tooltip" title="Player"><span class="glyphicon glyphicon-user"></span></th>';
   $out .= '<td data-toggle="tooltip" title="Karma">K&nbsp;&nbsp;</td>';
-  $out .= '<td data-toggle="tooltip" title="yearly Karma">yK&nbsp;&nbsp;</td>';
   $out .= '<td data-toggle="tooltip" title="What happened on the last date?"><span class="glyphicon glyphicon-th-list"></span></td>';
   $out .= '<th data-toggle="tooltip" title="Special skills">S.</th>';
   $out .= '<th data-toggle="tooltip" title="Gold coins"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></th>';
   $out .= '<th data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span></th>';
+  $out .= '<td data-toggle="tooltip" title="Reputation">R&nbsp;&nbsp;</td>';
   $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="" /> HP</th>';
   $out .= '<th><img src="'.$config->urls->templates.'img/star.png" alt="" /> XP</th>';
   $out .= '<th data-toggle="tooltip" title="Places"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
@@ -222,7 +222,6 @@
     $out .= '<td>'. $mini .'</td>';
     $out .= '<td>';
     $out .='<a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount.'</td>';
-    $out .= '<td>'. $player->karma .'</td>';
     $out .= '<td>'. $player->yearlyKarma .'</td>';
     $out .= '<td><span class="trend">'.$trend.'</span></td>';
     if ($player->skills->has("name=captain")) {
@@ -238,6 +237,7 @@
     $out .= '<td>'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';
     $out .= '<td>'. $player->level .'</td>';
+    $out .= '<td>'. $player->karma .'</td>';
     if ($player->coma == true) { $player->HP = 0; }
     $out .= '<td data-order="'.$player->HP.'" data-toggle="tooltip" title="'.$player->HP.'/50" data-placement="top">';
     if ($player->coma == false) {

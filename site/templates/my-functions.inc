@@ -129,9 +129,14 @@ function updateScore($player, $task, $real = true) {
     if ($player->coma == 0) {
       setLevel($player); // Check if new level
       $player->karma = setKarma($player); // Set karma (and store for cache)
+      if (!isset($tmpEvent)) { // Make a temporary event page to calculate new yearly Karma
+        $tmpEvent = new Page();
+        $tmpEvent->template = 'event';
+      }
+      $tmpEvent->task = $task;
+      if ($task->refPage) { $tmpEvent->refPage = $task->refPage; };
+      $player->yearlyKarma += eventKarma($tmpEvent);
     }
-
-    updateYearlyKarma($player, $task);
 
     if ($real == true) { // Save player's new scores if necessary
       // Publish on Newsboard?
@@ -272,7 +277,7 @@ function taskExtraAction($player, $task, $real) {
     // Update Team score
     updateTeamScores($player->team);
   }
-  if ($task->is("name=free") && $real == true) { // Add element
+  if ($task->is("name=free")) { // Add element
     if ($task->refPage) {
       // Check for a discount
       if ($task->linkedId) {
@@ -292,7 +297,7 @@ function taskExtraAction($player, $task, $real) {
       }
     }
   } 
-  if ($task->is("name=buy") && $real == true) { // Add equipment
+  if ($task->is("name=buy")) { // Add equipment
     if ($task->refPage) {
       // Check for a discount
       if ($task->linkedId) {
@@ -349,6 +354,7 @@ function addGroupItem($player, $historyPage, $real) {
 
 function extraActionAfterSave($player, $historyPage, $real) {
   $pages = wire('pages');
+
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
       $task = $pages->get("template=task, name=penalty"); 
       $task->comment = 'Automatic homework penalty';
@@ -530,15 +536,18 @@ function setLevel($player) {
 
 function displayTrendScores($player, $old) {
   $out = '<ul class="list list-inline label label-default">';
-  $trendKarma = $player->karma-$old->karma;
-  if ($trendKarma > 0) { $out .= '<li>+'.$trendKarma.'K.→'.$player->karma.'</li>'; }
-  if ($trendKarma < 0) { $out .= '<li>'.$trendKarma.'K.→'.$player->karma.'</li>'; }
+  $trendYearlyKarma = $player->yearlyKarma-$old->yearlyKarma;
+  if ($trendYearlyKarma > 0) { $out .= '<li>+'.$trendYearlyKarma.'K.→'.$player->yearlyKarma.'</li>'; }
+  if ($trendYearlyKarma < 0) { $out .= '<li>'.$trendYearlyKarma.'K.→'.$player->yearlyKarma.'</li>'; }
   $trendGC = $player->GC-$old->GC;
   if ($trendGC > 0) { $out .= '<li>+'.$trendGC.'GC→'.$player->GC.'</li>'; }
   if ($trendGC < 0) { $out .= '<li>'.$trendGC.'GC→'.$player->GC.'</li>'; }
   $trendLevel = $player->level-$old->level;
   if ($trendLevel > 0) { $out .= '<li>+'.$trendLevel.'lvl→'.$player->level.'</li>'; }
   if ($trendLevel < 0) { $out .= '<li>'.$trendLevel.'lvl→'.$player->level.'</li>'; }
+  $trendKarma = $player->karma-$old->karma;
+  if ($trendKarma > 0) { $out .= '<li>+'.$trendKarma.'R.→'.$player->karma.'</li>'; }
+  if ($trendKarma < 0) { $out .= '<li>'.$trendKarma.'R.→'.$player->karma.'</li>'; }
   $trendHP = $player->HP-$old->HP;
   if ($trendHP > 0) { $out .= '<li>+'.$trendHP.'HP→'.$player->HP.'</li>'; }
   if ($trendHP < 0) { $out .= '<li>'.$trendHP.'HP→'.$player->HP.'</li>'; }
@@ -574,9 +583,10 @@ function displayPlayerScores($player, $type='new') {
   } else {
     $out = '<ul class="list list-inline label label-warning"> Previous scores : ';
   }
-  $out .= '<li>'.$player->karma.'K.</li>';
+  $out .= '<li>'.$player->yearlyKarma.'K.</li>';
   $out .= '<li>'.$player->GC.'GC</li>';
   $out .= '<li>'.$player->level.'lvl</li>';
+  $out .= '<li>'.$player->karma.'R.</li>';
   $out .= '<li>'.$player->HP.'HP</li>';
   $out .= '<li>'.$player->XP.'XP</li>';
   $out .= '<li>'.$player->places->count.'Pl.</li>';
@@ -637,33 +647,42 @@ function setKarma($player) {
 
 function setYearlyKarma($player) {
   // Yearly Karma calculated from current history
-  $levelKarma = 0;
   $history = $player->child("name=history");
-  $nbFree = $history->children("task.name=free")->count(); // 20pts for each free action
-  $nbBuy = $history->children("task.name=buy")->count(); // 10pts for each buying action
-  $nbPos = $history->children("task.name!=buy|free, (task.HP>0), (task.GC>0), (task.XP>0)")->count(); // 5pts for each positive action
-  $nbNeg = $history->children("(task.HP<0), (task.GC<0), (task.XP<0)")->count(); // -5pts for each negative action
-  $karma = ($nbFree*20 + $nbBuy*10 + $nbPos*5) - $nbNeg*5;
+  $karma = 0;
+  foreach ($history->children() as $e) {
+    $karma += eventKarma($e);
+  }
   if ($karma < 0 || $player->coma == 1) { $karma = 0; }
   return $karma;
 }
 
-function updateYearlyKarma($player, $task) {
-  if ($task->is("name!=free|buy")) {
-    if ($task->HP>0 || $task->GC>0 || $task->XP>0) { // +5 for a positive action 
-      $player->yearlyKarma = $player->yearlyKarma+5;
-    } else { // -5 for a negative action
-      $player->yearlyKarma = $player->yearlyKarma-5;
-    }
-  } else {
-     if ($task->is("name=buy")) { // +10 for a buying action
-      $player->yearlyKarma = $player->yearlyKarma+10;
-     }
-     if ($task->is("name=free")) { // +20 for a free action
-      $player->yearlyKarma = $player->yearlyKarma+20;
-     }
+function eventKarma($e) {
+  $karma = 0;
+  if ($e->task->is("name=free")) { // Free action
+    $karma += 8;
+    $karma += $e->refPage->level;
   }
-  if ($player->yearlyKarma < 0) { $player->yearlyKarma = 0; }
+  if ($e->task->is("name=buy")) { // Buy action
+    $karma += 4;
+    $karma += $e->refPage->level;
+  }
+  if ($e->task->is("name!=buy|free") && $e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
+    $karma += 2;
+    if ($e->task->HP>=5 || $e->task->GC>=5 || $e->task->XP>=5) {
+      $karma += 2;
+    } else {
+      $karma += 0;
+    }
+  }
+  if ($e->task->is("name!=buy|free") && $e->task->HP<0 || $e->task->GC<0 || $e->task->XP<0) { // Negative action
+    $karma -= 2;
+    if ($e->task->HP<=-5 || $e->task->GC<=-5 || $e->task->XP<=-5) {
+      $karma -= 2;
+    } else {
+      $karma -= 0;
+    }
+  }
+  return $karma;
 }
 
 function groupBonus($players) {
