@@ -64,7 +64,7 @@
               switch ($field) {
                 case 'karma' :
                   $indicator = $player->karma;
-                  $tag = 'karma';
+                  $tag = 'reputation';
                   break;
                 case 'places' :
                   $indicator = $player->places->count;
@@ -92,7 +92,7 @@
                   break;
                 case 'group' :
                   $indicator = $player->karma;
-                  $tag = 'karma';
+                  $tag = 'reputation';
                   break;
                 default : 
                   $title = 'Error';
@@ -145,7 +145,7 @@
           if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
           switch($field) {
             case 'karma':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' karma</span></li>';
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' reputation</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
@@ -167,7 +167,7 @@
               $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' UT</span></li>';
               break;
             case 'group':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' karma</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' reputation</span></li>';
               break;
             default: $out .= 'Error.';
           }
@@ -192,7 +192,7 @@
           if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
           switch($field) {
             case 'karma':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' karma</span></li>';
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' reputation</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
@@ -214,7 +214,7 @@
               $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' UT</span></li>';
               break;
             case 'group':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' karma</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' reputation</span></li>';
               break;
             default: $out .= 'Error.';
           }
@@ -237,7 +237,7 @@
         if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
         switch($field) {
           case 'karma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' karma</span></li>';
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' reputation</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {
