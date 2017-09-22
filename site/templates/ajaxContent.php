@@ -183,7 +183,7 @@
             if ($p->HP == 50) { $possiblePotions->remove("name=health-potion"); }
             $possibleItems = new pageArray();
             $possibleItems->add($possiblePlaces);
-            if ($p->team->rank->is('name=4emes|3emes')) { // Add people ONLY for 4emes/3emes
+            if ($p->team->rank && $p->team->rank->is('name=4emes|3emes')) { // Add people ONLY for 4emes/3emes
               $possibleItems->add($possiblePeople);
             }
             $possibleItems->add($possibleEquipment);
@@ -198,12 +198,13 @@
           $out .= '<div class="col-sm-6 text-left">';
           $out .= '<ul class="list-unstyled">';
           if ($p->coma == 0) {
-            $out .= '<li><span class="label label-success">Karma : '.$p->karma.'</span></li>';
+            $out .= '<li><span class="label label-success">Karma : '.$p->yearlyKarma.'</span></li>';
+            $out .= '<li><span class="label label-success">Reputation : '.$p->karma.'</span></li>';
             $out .= '<li><span class="label label-default"><span class="glyphicon glyphicon-signal"></span> '.$p->level.'</span>';
             $threshold = getLevelThreshold($p->level);
             $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$p->XP.'/'.$threshold.'</span></li>';
             $nbFreeEl = $p->places->count();
-            if ($p->team->rank->is('name=4emes|3emes')) {
+            if ($p->team->rank && $p->team->rank->is('name=4emes|3emes')) {
               $nbFreeEl += $p->people->count();
             }
             $out .= '<li><span class="label label-default"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
@@ -230,7 +231,7 @@
             $groupPlayers->sort('-karma');
             foreach($groupPlayers as $gp) {
               $nbFreeEl = $gp->places->count();
-              if ($gp->team->rank->is('name=4emes|3emes')) {
+              if ($gp->team->rank && $gp->team->rank->is('name=4emes|3emes')) {
                 $nbFreeEl += $gp->people->count();
               }
               if ($gp->avatar) { $mini = '<img src="'.$gp->avatar->getCrop('thumbnail')->url.'" alt="avatar" width="50" />'; }
@@ -259,6 +260,11 @@
           $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
         }
         $out .= '<li><span><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">→ Organize team defense.</a></span></li>';
+        if ($input->get->news && $input->get->news>0) {
+          $out .= '<li><span><a href="#" onclick="swal.close();">→ Read about Team News.</a></span></li>';
+        } else {
+          $out .= '<li><span class="strikeText">No team news today...</span></li>';
+        }
         if ($p->is("parent.name!=groups")) {
           if (rand(0,1)) { // Random special discount
             if ($possibleItems->count() > 0 ) {
@@ -299,6 +305,26 @@
         $p = $pages->get("title=$pageId");
         if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
         $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
+        break;
+      case 'showInfo' :
+        $pageId = $input->get('pageId');
+        $p = $pages->get("id=$pageId");
+        if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('thumbnail')->url.'" alt="Photo" />'; }
+        if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="Photo" />'; }
+        $out .= '<h3><span class="label label-primary">'.$p->title.'</span></h3>';
+        if ($p->is("template=place|people")) {
+          $out .= '<h4>(in '.$p->city->title.', '.$p->country->title.')</h3>';
+        }
+        $out .= '<div class="row">';
+        $out .= '<div class="col-sm-4 text-center">';
+          $out .= '<h3 class="thumbnail">';
+          $out .= $mini;
+          $out .= '</h3>';
+        $out .= '</div>';
+        $out .= '<div class="col-sm-8 text-center">';
+          $out .= '<p>'.$p->summary.'</p>';
+        $out .= '</div>';
+        $out .= '</div>';
         break;
       default :
         $out = 'Todo...';

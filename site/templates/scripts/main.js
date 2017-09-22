@@ -450,12 +450,42 @@ $(document).ready(function() {
 			return false;
 		}
   });
+
+  $('.showInfo').on('click', function() {
+		var $this = $(this);
+		var $itemId = $this.attr("data-id");
+		var $url = $('#showInfo').attr('data-href') + '?id=showInfo&pageId=' + $itemId;
+		swal('','',''); // Workaround to empty previous alert ?
+		swal({
+			html: true,
+			title: 'Loading info...',
+			text: '<span class="label label-danger blink">...</span>',
+			timer: 1000,
+			showConfirmButton: false,
+			closeOnConfirm: false
+		}, function() {
+			$.get($url, function(data) { 
+				var $myContent = data;
+				swal({
+					html: true,
+					title: '<h4>Read about...</h4>',
+					text: $myContent,
+					showConfirmButton: false,
+					cancelButtonText : 'Close',
+					showCancelButton: true,
+					allowOutsideClick: true,
+				});
+			});
+		});
+	});
+
   $('.pickFromList').on('click', function() {
 		var $this = $(this);
 		var list = $this.attr("data-list");
 		var items = list.split(',');
 		var $pageId = chance.pick(items);
-		var $url = $('#ajaxDecision').attr('data-href') + '?id=' + $('#ajaxDecision').attr('data-id')+'&pageId='+$pageId;
+		var $news = $('#newsList li').length;
+		var $url = $('#ajaxDecision').attr('data-href') + '?id=' + $('#ajaxDecision').attr('data-id')+'&pageId='+$pageId+'&news='+$news;
 		swal('','',''); // Workaround to empty previous alert ?
 		swal({
 			html: true,
