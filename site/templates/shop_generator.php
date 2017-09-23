@@ -24,8 +24,9 @@ if ($player->coma == false) {
   $nbEl = $player->places->count()+$player->people->count();
   $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
   // Get rid of potions bought within the last 15 days
-  $today = mktime("23:59:59 Y-m-d");
-  $limitDate = time()-15*3600*24;
+  $today = new \DateTime("today");
+  $interval = new \DateInterval('P15D');
+  $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
   $boughtPotions = $player->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=health-potion");
   $possiblePotions = $allEquipments->find("GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, parent.name=potions, sort=name");
   // Get rid of unused potions

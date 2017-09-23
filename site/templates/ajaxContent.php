@@ -176,11 +176,13 @@
             $nbEl = $p->places->count()+$p->people->count();
             $possibleEquipment = $allEquipments->find("GC<=$p->GC, level<=$p->level, freeActs<=$nbEl, id!=$p->equipment, parent.name!=potions, sort=-parent.name, sort=name");
             // Get rid of potions bought within the last 15 days
-            $today = mktime("23:59:59 Y-m-d");
-            $limitDate = time()-15*3600*24;
+            $today = new \DateTime("today");
+            $interval = new \DateInterval('P15D');
+            $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
             $boughtPotions = $p->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=health-potion");
             $possiblePotions = $allEquipments->find("GC<=$p->GC, level<=$p->level, freeActs<=$nbEl, parent.name=potions, sort=name")->not($boughtPotions);
-            if ($p->HP == 50) { $possiblePotions->remove("name=health-potion"); }
+            $healthPotion = $allEquipments->get("name=health-potion");
+            if ($p->HP == 50) { $possiblePotions->remove($healthPotion); }
             $possibleItems = new pageArray();
             $possibleItems->add($possiblePlaces);
             if ($p->team->rank->is('name=4emes|3emes')) { // Add people ONLY for 4emes/3emes
@@ -264,8 +266,11 @@
             if ($possibleItems->count() > 0 ) {
               // Pick a random item
               $selectedItem = $possibleItems->getRandom();
-              $details = ' ('.$selectedItem->category->title.')';
-              if ($selectedItem->is("has_parent.name=places|people")) { $details = ' in '.$selectedItem->city->title.' ('.$selectedItem->country->title.')'; }
+              if ($selectedItem->is("has_parent.name=places|people")) {
+                $details = ' in '.$selectedItem->city->title.' ('.$selectedItem->country->title.')';
+              } else {
+                $details = ' ('.$selectedItem->category->title.')';
+              }
               // Pick a random discount
               $discount = $pages->find("parent=/specials")->getRandom();
               $newPrice = round($selectedItem->GC-($selectedItem->GC*($discount->name/100))).'GC';
