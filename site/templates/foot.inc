@@ -4,6 +4,13 @@
   </div><!-- /.container -->
 </div><!--/wrap-->
 
+	<?php if ($user->isSuperuser()) { ?>
+		<section class="navigate">
+			<a href="#" id="scrollUp"><span class="glyphicon glyphicon-triangle-top"></span></a>
+			<a href="#" id="scrollDown"><span class="glyphicon glyphicon-triangle-bottom"></span></a>
+		</section>
+	<?php } ?>
+
   <footer class="text-center">
       <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS (v.<?php echo $config->version; ?>)- &copy; <?php echo date("Y"); ?> F.L. 
         <a href="about/">[About]</a>

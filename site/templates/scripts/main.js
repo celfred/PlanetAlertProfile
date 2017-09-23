@@ -1,5 +1,14 @@
 $(document).ready(function() {
 
+	$('#scrollDown').on('click', function(e) {
+		e.preventDefault();
+		window.scrollBy(0,350);
+	});
+	$('#scrollUp').on('click', function(e) {
+		e.preventDefault();
+		window.scrollBy(0,-350);
+	});
+
   $('.close').on('click', function () {
     var id = $(this).attr('data-id');
     $(id).hide();
