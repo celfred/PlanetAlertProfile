@@ -272,8 +272,10 @@
             if ($possibleItems->count() > 0 ) {
               // Pick a random item
               $selectedItem = $possibleItems->getRandom();
-              if ($selectedItem->is("has_parent.name=places|people")) {
+              if ($selectedItem->is("has_parent.name=places")) {
                 $details = ' in '.$selectedItem->city->title.' ('.$selectedItem->country->title.')';
+              } else if ($selectedItem->is("has_parent.name=people")) {
+                $details = ' from '.$selectedItem->country->title;
               } else {
                 $details = ' ('.$selectedItem->category->title.')';
               }
@@ -317,8 +319,12 @@
         if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('thumbnail')->url.'" alt="Photo" />'; }
         if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="Photo" />'; }
         $out .= '<h3><span class="label label-primary">'.$p->title.'</span></h3>';
-        if ($p->is("template=place|people")) {
+        if ($p->is("template=place")) {
           $out .= '<h4>(in '.$p->city->title.', '.$p->country->title.')</h3>';
+        } else if ($p->is("template=people")) {
+          $out .= '<h4>(from '.$p->country->title.')</h3>';
+        } else {
+          $out .= '<h4>('.$p->category->title.')</h3>';
         }
         $out .= '<div class="row">';
         $out .= '<div class="col-sm-4 text-center">';
