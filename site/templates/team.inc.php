@@ -84,7 +84,9 @@
   include("./tabList.inc"); 
 
   if ($input->urlSegment1 != 'no-team') {
-    showScores($team);
+    if ($user->isLoggedin() && !$user->isSuperuser()) {
+      showScores($team);
+    }
 
     $captains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
     if ( strlen($captains) == 0 ) { 
