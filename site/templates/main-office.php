@@ -11,9 +11,17 @@
   }
   include("./tabList.inc");
 
+  if ($user->isSuperuser()) {
+    $pickFromList = 'pickFromList';
+  } else {
+    $pickFromList = '';
+  }
+
   // Decisions menu (via ajax)
   $out .= '<div id="ajaxDecision" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="decision"></div>';
   $out .= '<div id="showInfo" data-href="'.$pages->get('name=ajax-content')->url.'"></div>';
+
+  showScores($team);
 
   $out .= '<div class="col-sm-4">';
     // Help needed
@@ -98,10 +106,8 @@
 
     // Groups
     if ($user->isSuperuser()) {
-      $pickFromList = 'pickFromList';
       $out .= displayGroups($allPlayers, 1);
     } else {
-      $pickFromList = '';
       $out .= displayGroups($allPlayers, 0);
     }
 
