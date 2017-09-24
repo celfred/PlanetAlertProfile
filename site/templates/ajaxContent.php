@@ -260,16 +260,26 @@
         $out .= '<ul class="text-left list-unstyled">';
         if ($p->GC > 5 || $p->is("parent.name=groups")) {
           $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
+        } else {
+          $out .= '<li><span class="strikeText">Not enough GC to make a donation.</span></li>';
         }
-        $out .= '<li><span><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">→ Organize team defense.</a></span></li>';
+        $nbConcerned = possibleDefense($p->team);
+        if ($nbConcerned > 0) {
+          $out .= '<li><span><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">→ Organize team defense ('.$nbConcerned.' players concerned).</a></span></li>';
+        } else {
+          $out .= '<li><span class="strikeText">No team defense.</span></li>';
+        }
         if ($input->get->news && $input->get->news>0) {
-          $out .= '<li><span><a href="#" onclick="swal.close();">→ Read about Team News.</a></span></li>';
+          $out .= '<li><span><a href="#" data-type="teamNews" class="ajaxBtn">→ Read about Team News.</a></span></li>';
         } else {
           $out .= '<li><span class="strikeText">No team news today...</span></li>';
         }
+        $task = $pages->get("name=personal-initiative");
+        $out .= '<li><span><a hreh="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a></span></li>';
+        $out .= '<li><span><a href="#" onclick="swal.close();">→ Choose another player.</a></span></li>';
         if ($p->is("parent.name!=groups")) {
-          if (rand(0,1)) { // Random special discount
-            if ($possibleItems->count() > 0 ) {
+          if ($possibleItems->count() > 0) {
+            if (rand(0,1)) { // Random special discount
               // Pick a random item
               $selectedItem = $possibleItems->getRandom();
               if ($selectedItem->is("has_parent.name=places")) {
@@ -299,9 +309,11 @@
                 $out .= '</div>';
               $out .= '</div>';
               $out .= '</li>';
+            } else {
+              $out .= '<li><span class="strikeText">No special offer today...</span></li>';
             }
           } else {
-            $out .= '<li><span class="strikeText">No special offer today...</span></li>';
+            $out .= '<li><span class="strikeText">No possible item (not enough GC ?).</span></li>';
           }
         }
         $out .= '</ul>';

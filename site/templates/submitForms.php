@@ -166,7 +166,20 @@
       $historyPage->save();
     }
 
-    if (isset($input->get->form) && $input->get->form == 'buyForm' && $input->get->playerId != '') {
+    if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, for example
+      $player = $pages->get($input->get->playerId);
+      $task = $pages->get($input->get->taskId);
+      if ($task->name == 'personal-initiative') {
+        $task->comment = "Well done 'Talk about [...]'";
+        $task->refPage = '';
+        $task->linkedId = false;
+        updateScore($player, $task, true);
+        // Set group captains
+        setCaptains($player->team);
+      }
+    }
+
+    if (isset($input->get->form) && $input->get->form == 'buyForm' && $input->get->playerId != '') { // Healing potion in Main Office, Discount in Decision...
       $player = $pages->get($input->get->playerId);
       $item = $pages->get($input->get->itemId);
       if ($item->is("template=place|people")) {

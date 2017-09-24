@@ -926,6 +926,26 @@ function showScores($allTeams) {
   echo '</h4>';
 }
 
+function possibleDefense($team) {
+  $pages = wire('pages');
+  $nbConcerned = 0;
+  $allPlayers = $pages->find("template=player, team=$team");
+  if ( $team->rank->name == '4emes' || $team->rank->name == '3emes' ) {
+    foreach($allPlayers as $p) { // Find players having at least 3 free elements
+      $nbEl = $p->places->count()+$p->people->count();
+      if ( $nbEl >= 3) {
+        $nbConcerned++;
+      }
+    }
+  } else {
+    $allConcerned = $pages->find("template=player, team.name=$team, places.count>=3"); // Find players having at least 3 places
+    if ($allConcerned->count() > 0) {
+      $nbConcerned++;
+    }
+  }
+  return $nbConcerned;
+}
+
 function calculate_average($arr) {
   $total = 0;
   $count = count($arr); //total numbers in array
@@ -1449,7 +1469,7 @@ function displayGroups($allPlayers, $button = 0) {
     // Add individual karmas
     foreach( $players as $player) {
       // Karma is divided by number of players in the group to be fair with smaller groups
-      $groupKarma = round($player->karma/$players->count);
+      $groupKarma = round($player->yearlyKarma/$players->count);
       (int) $group->karma += $groupKarma;
       /* $group->details .= '- '.$player->title.' ('.$groupKarma.'k - '.$player->nbEl.'el)<br />'; */
     }
@@ -1459,7 +1479,7 @@ function displayGroups($allPlayers, $button = 0) {
   // Prepare group display
   $allGroups->sort('-karma');
   $groupList = $allGroups->implode(', ', '{id}');
-  if ($button == 1) {
+  if ($groupList && $button == 1) {
     $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'">Pick 1!</a>';
   } else {
     $pickButton = '';
@@ -1469,35 +1489,39 @@ function displayGroups($allPlayers, $button = 0) {
   $outGroups .= '<h4><span class="label label-primary">Most influential groups</span>'.$pickButton.'</h4>';
   $outGroups .= '</div>';
   $outGroups .= '<div class="panel-body">';
-  $outGroups .= '<ol class="">';
-  foreach( $allGroups as $group) {
-    $outGroups .= '<li>';
-    if ($button == 1) {
-      $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
-    } else {
-      $outGroups .= '<p data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+  if ($groupList) {
+    $outGroups .= '<ol class="">';
+    foreach( $allGroups as $group) {
+      $outGroups .= '<li>';
+      if ($button == 1) {
+        $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+      } else {
+        $outGroups .= '<p data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+      }
+      $outGroups .= $group->title;
+      $outGroups .= ' <span class="badge">'.$group->karma.'</span>';
+      $outGroups .= '</p>';
+      /* // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member) */
+      /* $starsGroups = floor($group->nbBonus/5); */
+      /* if ( $starsGroups < 1) { */
+      /*   for ($i=0; $i<$group->nbBonus; $i++) { */
+      /*     $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>'; */
+      /*   } */
+      /* } else { */
+      /*   for ($i=0; $i<$starsGroups; $i++) { */
+      /*     $outGroups .= ' <span class="glyphicon glyphicon-star"></span>'; */
+      /*   } */
+      /*   $group->nbBonus = $group->nbBonus - $starsGroups*5; */
+      /*   for ($i=0; $i<$group->nbBonus; $i++) { */
+      /*     $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>'; */
+      /*   } */
+      /* } */
+      $outGroups .= '</li>';
     }
-    $outGroups .= $group->title;
-    $outGroups .= ' <span class="badge">'.$group->karma.'</span>';
-    $outGroups .= '</p>';
-    /* // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member) */
-    /* $starsGroups = floor($group->nbBonus/5); */
-    /* if ( $starsGroups < 1) { */
-    /*   for ($i=0; $i<$group->nbBonus; $i++) { */
-    /*     $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>'; */
-    /*   } */
-    /* } else { */
-    /*   for ($i=0; $i<$starsGroups; $i++) { */
-    /*     $outGroups .= ' <span class="glyphicon glyphicon-star"></span>'; */
-    /*   } */
-    /*   $group->nbBonus = $group->nbBonus - $starsGroups*5; */
-    /*   for ($i=0; $i<$group->nbBonus; $i++) { */
-    /*     $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>'; */
-    /*   } */
-    /* } */
-    $outGroups .= '</li>';
+    $outGroups .= '</ol>';
+  } else {
+    $outGroups .= '<p>The groups aren\'t ready yet.</p>';
   }
-  $outGroups .= '</ol>';
   $outGroups .= '</div>';
   $outGroups .= '<div class="panel-footer text-center">';
   $teamPlayers = $allPlayers->find("coma!=1");

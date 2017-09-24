@@ -524,6 +524,46 @@ $(document).ready(function() {
 		$(this).next('span').toggleClass('strikeText');
 	});
 
+	$(document).on('click', '.ajaxBtn', function() {
+		var $this = $(this);
+		var $type = $this.attr("data-type");
+		if ($type == 'initiative') {
+			swal({
+				html: true,
+				title: "Let me tell you about [...]",
+				type: "info",
+				text: "<ul class='list-unstyled'><li>About 2 minutes</li><li>Others may ask questions</li></ul>",
+				showCancelButton : true,
+				allowOutsideClick : false,
+				cancelButtonText: "Not enough",
+				confirmButtonText: "Good job !"
+			}, function(isConfirm) {
+				if (isConfirm) {
+					var $url = $this.attr('data-url');
+					$.get($url, function(data) { 
+						swal({
+							title: "Saved !",
+							text: "Thanks for your participation in Planet Alert !",
+							timer: 1000,
+							showConfirmButton: false
+						});
+					});
+				}
+			});
+		}
+		if ($type == 'teamNews') {
+			$teamNews = $('#newsList').html();
+			swal({
+				title: "Team news",
+				text: "Choose a news in the list.",
+				timer: 2000,
+				showConfirmButton : false,
+			});
+			window.scrollBy(0,1000);
+		}
+		return false;
+	});
+
 	$(document).on('click', '.buyBtn', function() {
 		var $this = $(this);
 		swal({

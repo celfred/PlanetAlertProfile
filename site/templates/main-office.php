@@ -314,10 +314,13 @@
     $out .= '</div>';
     $out .= '<div class="panel-body">';
     $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
+    $counter = 1;
     foreach ($news as $n) {
       $currentPlayer = $n->parent('template=player');
       $out .= '<li>';
-      $out .= '<div class="thumbnail text-center">';
+      $out .= '<div class="thumbnail">';
+      $out .= '<span class="badge">'.$counter.'</span>';
+      $counter++;
       if ($n->refPage->photo) {
         $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
       }
@@ -325,8 +328,8 @@
         $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
       }
       $out .= '<caption class="text-center">';
-      $out .= ' <span class="badge">'.$currentPlayer->title.'</span><br />';
-      $out .= ' <span>(On '.date('l, F j', $n->date).')</span>';
+      $out .= ' <span>(On '.date('l, F j', $n->date).')</span><br />';
+      $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
       $out .= '</caption>';
       $out .= '</div>';
       $out .= '</li>';
