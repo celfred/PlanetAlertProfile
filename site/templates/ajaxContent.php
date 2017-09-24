@@ -275,7 +275,7 @@
           $out .= '<li><span class="strikeText">No team news today...</span></li>';
         }
         $task = $pages->get("name=personal-initiative");
-        $out .= '<li><span><a hreh="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a></span></li>';
+        $out .= '<li><span><a href="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a></span></li>';
         $out .= '<li><span><a href="#" onclick="swal.close();">→ Choose another player.</a></span></li>';
         if ($p->is("parent.name!=groups")) {
           if ($possibleItems->count() > 0) {
