@@ -10,7 +10,7 @@ if ($user->isSuperuser()) {
 }
 
 // Reload to include 'no-team' players
-$globalPlayers = $pages->find("template='player', sort=title, name!=test");
+$globalPlayers = $pages->find("template='player', name!=test")->sort('team.name, title');
 
 $out = '';
 
