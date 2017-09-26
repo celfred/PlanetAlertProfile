@@ -306,6 +306,7 @@
       $last = $p->get("name=history")->children("sort=-date")->find("date>=$limitDate,task.name=free|buy");
       if ($last->count() > 0) {
         $news->add($last);
+        $news->sort('-date');
       }
     }
     $out .= '<div id="" class="board panel panel-primary">';
