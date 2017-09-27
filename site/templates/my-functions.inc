@@ -136,6 +136,7 @@ function updateScore($player, $task, $real = true) {
       $tmpEvent->task = $task;
       if ($task->refPage) { $tmpEvent->refPage = $task->refPage; };
       $player->yearlyKarma += eventKarma($tmpEvent);
+      if ($player->yearlyKarma < 0) { $player->yearlyKarma = 0; }
     }
 
     if ($real == true) { // Save player's new scores if necessary
