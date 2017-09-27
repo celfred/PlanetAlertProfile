@@ -830,7 +830,9 @@ namespace ProcessWire;
                 }
                 if ($e->linkedId) {
                   $discount = $pages->get("$e->linkedId");
-                  $out .= ' ['.$discount->title.'% discount]';
+                  if ($discount->id && $discount->parent->is("name=specials")) {
+                    $out .= ' ['.$discount->title.'% discount]';
+                  }
                 }
               }
               if ($e->task->is("name=death")) {
