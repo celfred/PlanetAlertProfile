@@ -785,34 +785,40 @@ namespace ProcessWire;
                     $dirty = true;
                   }
                   if ($newItem->parent->is("name=group-items")) {
-                    // Check if group members have [unlocked] item
-                    $members = $allPlayers->find("team=$selectedPlayer->team, group=$selectedPlayer->group");
+                    // Check if groups have been set
                     $out .= '<ul class="list-inline">';
                     $out .= '<li>Group item status → </li>';
-                    $boughtNb = 0;
-                    foreach ($members as $p) {
-                      $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
-                      if ($bought->id) {
-                        $boughtNb++;
-                        $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
-                      } else {
-                        $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
+                    if ($selectedPlayer->group != '') {
+                      // Check if group members have [unlocked] item
+                      $members = $allPlayers->find("team=$selectedPlayer->team, group=$selectedPlayer->group");
+                      $boughtNb = 0;
+                      foreach ($members as $p) {
+                        $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
+                        if ($bought->id) {
+                          $boughtNb++;
+                          $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
+                        } else {
+                          $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
+                        }
                       }
-                    }
-                    if ($boughtNb != $members->count-1) {
-                      $dirty = true;
-                      $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
-                    }
-                    // [unlocked] or [bought] ?
-                    // task page should be set accordingly but prevention here for backward compatibility
-                    preg_match("/\[unlocked\]/", $comment, $matches);
-                    if (isset($matches[0]) && $e->task->is("name=buy")) {
-                      $dirty = true;
-                      $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
-                    }
-                    if (!isset($matches[0]) && $e->task->is("name=bought")) {
-                      $dirty = true;
-                      $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
+                      if ($boughtNb != $members->count-1) {
+                        $dirty = true;
+                        $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
+                      }
+                      // [unlocked] or [bought] ?
+                      // task page should be set accordingly but prevention here for backward compatibility
+                      preg_match("/\[unlocked\]/", $comment, $matches);
+                      if (isset($matches[0]) && $e->task->is("name=buy")) {
+                        $dirty = true;
+                        $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
+                      }
+                      if (!isset($matches[0]) && $e->task->is("name=bought")) {
+                        $dirty = true;
+                        $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
+                      }
+                    } else { // No groups, item shoudn't be there
+                        $dirty = true;
+                        $out .= ' <span class="label label-danger">Error : No groups set. Item shouldn\'t be there.</span>';
                     }
                     $out .= '</ul>';
                   }

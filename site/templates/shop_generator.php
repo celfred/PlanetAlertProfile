@@ -53,6 +53,14 @@ if ($player->coma == false) {
       }
     }
   }
+  // Get rid of group items if no groups are set
+  if ($player->group == '') {
+    foreach ($possibleEquipment as $eq) {
+      if ($eq->parent->is("name=group-items")) {
+        $eq->locked = "No group.";
+      }
+    }
+  }
 
   // Possible places
   $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
@@ -77,15 +85,27 @@ if ( $possibleEquipment->count() > 0) {
     if ($item->parent->name !== $lastCat) {
       $out .= '<li class="label label-primary">'.$item->parent->title.'</li>';
     }
-    $out .= '<li>';
-    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
-    if ($item->image) {
-      $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
+    if (!$item->locked) {
+      $out .= '<li>';
+      $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+      if ($item->image) {
+        $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
+      }
+      $out .= $item->title.' ['.$item->GC.'GC]';
+      $out .= '</label>';
+      $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+      $out .= '</li>';
+    } else {
+      $out .= '<li>';
+      $out .= '<label class="strikeText"> ';
+      if ($item->image) {
+        $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
+      }
+      $out .= $item->title;
+      $out .= ' <span class="badge badge-danger">'.$item->locked.'</span>';
+      $out .= '</label>';
+      $out .= '</li>';
     }
-    $out .= $item->title.' ['.$item->GC.'GC]';
-    $out .= '</label>';
-    $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
-    $out .= '</li>';
     $lastCat = $item->parent->name;
   }
 } else {
@@ -109,7 +129,7 @@ if ($possiblePotions->count() > 0) {
       $out .= '</li>';
     } else {
       $out .= '<li>';
-      $out .= '<label> ';
+      $out .= '<label class="strikeText"> ';
       if ($item->image) {
         $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
       }
