@@ -61,10 +61,13 @@ $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
   </thead>
   <tbody>
   <?php
+    $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
     foreach ($allPlayers as $player) { 
-    $id = $player->id; 
+      $id = $player->id; 
+      // See if absence already recorded the same day
+      $abs = $player->get("name=history")->children()->get("template=event, task.name=absent, date>=$today");
   ?>
-  <tr>
+  <tr class="<?php if ($abs->id) { echo 'negative'; } ?>">
   <td><?php if (isset($player->group->id)) { echo $player->group->title; } ?></td>
   <th><?php echo $player->title; ?></th>
     <?php foreach ($allTasks as $task) {
