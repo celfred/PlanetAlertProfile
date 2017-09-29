@@ -12,6 +12,8 @@ $player = $pages->get($playerId);
 
 $out = '';
 
+$out .= '<div id="showInfo" data-href="'.$pages->get('name=ajax-content')->url.'"></div>';
+
 $out .= "<h2 class='well text-center'>Marketplace for {$player->title} ({$player->team->title})</h2>";
 $out .= "<h3 class='text-center well'>";
 $out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='' />&nbsp;<span id='remainingGC'>{$player->GC}</span> GC available. (<span id='nbChecked'>0</span> checked) <span class='badge badge-warning'>3 items per day limit !</span>";
@@ -94,6 +96,7 @@ if ( $possibleEquipment->count() > 0) {
       $out .= $item->title.' ['.$item->GC.'GC]';
       $out .= '</label>';
       $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+      $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
       $out .= '</li>';
     } else {
       $out .= '<li>';
@@ -104,6 +107,7 @@ if ( $possibleEquipment->count() > 0) {
       $out .= $item->title;
       $out .= ' <span class="badge badge-danger">'.$item->locked.'</span>';
       $out .= '</label>';
+      $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
       $out .= '</li>';
     }
     $lastCat = $item->parent->name;
@@ -126,6 +130,7 @@ if ($possiblePotions->count() > 0) {
       $out .= $item->title.' ['.$item->GC.'GC]';
       $out .= '</label>';
       $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+      $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
       $out .= '</li>';
     } else {
       $out .= '<li>';
@@ -136,6 +141,7 @@ if ($possiblePotions->count() > 0) {
       $out .= $item->title;
       $out .= ' <span class="badge badge-danger">'.$item->locked.'</span>';
       $out .= '</label>';
+      $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
       $out .= '</li>';
     }
   }
@@ -150,7 +156,9 @@ if ( $possiblePlaces->count() > 0) {
   $out .= '<li class="label label-primary">Possible Places</li>';
   foreach($possiblePlaces as $item) {
     $out .= '<li>';
-    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->country->title.'] ['.$item->GC.'GC]</label></li>';
+    $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->country->title.'] ['.$item->GC.'GC]</label>';
+    $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
+    $out .= '</li>';
   }
   $out .= "</ul>";
 } else {
@@ -166,7 +174,9 @@ if ($player->rank->name == '4emes' || $player->rank->name == '3emes') {
     $out .= "<li class='label label-primary'>Possible People</li>";
     foreach($possiblePeople as $item) {
       $out .= '<li>';
-      $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->GC.'GC]</label></li>';
+      $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->GC.'GC]</label>';
+    $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
+    $out .= '</li>';
       /* if ($item->photo) { */
       /*   $out .= ' <img src="'.$item->photo->eq(0)->getCrop('mini')->url.'" alt="Image" /> '; */
       /* } */

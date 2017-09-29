@@ -32,8 +32,8 @@
   <?php if ($page->template != 'newsboard') { ?>
 		<script src="<?php echo $config->urls->templates?>bower_components/DataTables/media/js/jquery.dataTables.min.js"></script>
 		<script src="<?php echo $config->urls->templates?>bower_components/datatables-plugins-bootstrap3/dist/js/datatables-plugins-bootstrap3.min.js"></script>
-		<script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.min.js'></script>
-		<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert/dist/sweetalert.css">
+		<script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.min.js'></script>
+		<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.css">
   <?php } ?>
   <?php if ($page->template == 'hall-of-fame') { ?>
 		<script src="<?php echo $config->urls->templates?>bower_components/masonry/dist/masonry.pkgd.min.js"></script>

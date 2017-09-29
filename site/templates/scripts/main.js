@@ -51,26 +51,23 @@ $(document).ready(function() {
 	$('.proceed').on('click', function() {
 		$this = $(this);
 		swal({
-			html: true,
 			title: "Are you sure?",
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
 			cancelButtonText: "No",
-			confirmButtonText: "Yes!"
-		}, function(isConfirm) {
-			if (isConfirm) {
-				var href = $this.attr('data-href') + "/save-options/" + $('#periodId').val() + "/1";
-				$this.next('.proceedFeedback').html("Saving...");
-				$('.notification').remove();
-				$.get(href, function(data) { 
-					$this.next('.proceedFeedback').html("Saved!");
-					$('#wrap').prepend(data);
-					setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
-				}); 
-			} else {
-				return false;
-			}
+			confirmButtonText: "Yes!",
+		}).then( function(isConfirm) {
+			var href = $this.attr('data-href') + "/save-options/" + $('#periodId').val() + "/1";
+			$this.next('.proceedFeedback').html("Saving...");
+			$('.notification').remove();
+			$.get(href, function(data) { 
+				$this.next('.proceedFeedback').html("Saved!");
+				$('#wrap').prepend(data);
+				setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
+			}); 
+		}, function(dismiss) {
+			return false;
 		});
 
 	});
@@ -466,26 +463,22 @@ $(document).ready(function() {
 		var $url = $('#showInfo').attr('data-href') + '?id=showInfo&pageId=' + $itemId;
 		swal('','',''); // Workaround to empty previous alert ?
 		swal({
-			html: true,
 			title: 'Loading info...',
-			text: '<span class="label label-danger blink">...</span>',
-			timer: 1000,
-			showConfirmButton: false,
-			closeOnConfirm: false
-		}, function() {
-			$.get($url, function(data) { 
-				var $myContent = data;
-				swal({
-					html: true,
-					title: '<h4>Read about...</h4>',
-					text: $myContent,
-					showConfirmButton: false,
-					cancelButtonText : 'Close',
-					showCancelButton: true,
-					allowOutsideClick: true,
+			onOpen: function() {
+				swal.showLoading()
+				$.get($url, function(data) { 
+					var $myContent = data;
+					swal({
+						title: '',
+						html: $myContent,
+						showConfirmButton: false,
+						cancelButtonText : 'Close',
+						showCancelButton: true,
+						allowOutsideClick: true,
+						width: 800
+					});
 				});
-			});
-		});
+		}});
 	});
 
   $('.pickFromList').on('click', function() {
@@ -495,27 +488,25 @@ $(document).ready(function() {
 		var $pageId = chance.pick(items);
 		var $news = $('#newsList li').length;
 		var $url = $('#ajaxDecision').attr('data-href') + '?id=' + $('#ajaxDecision').attr('data-id')+'&pageId='+$pageId+'&news='+$news;
-		swal('','',''); // Workaround to empty previous alert ?
+		// swal('','',''); // Workaround to empty previous alert ?
+
 		swal({
-			html: true,
 			title: 'Decision time for...',
-			text: '<span class="label label-danger blink">...</span>',
-			timer: 1000,
-			showConfirmButton: false,
-			closeOnConfirm: false
-		}, function() {
-			$.get($url, function(data) { 
-				var $myContent = data;
-				swal({
-					html: true,
-					title: '<h4>What do you want to do ? [I want to...]</h4>',
-					text: $myContent,
-					showConfirmButton: false,
-					cancelButtonText : 'Do nothing',
-					showCancelButton: true,
-					allowOutsideClick: true,
+			onOpen: function () {
+				swal.showLoading()
+				$.get($url, function(data) { 
+					var $myContent = data;
+					swal({
+						title: '<h4>What do you want to do ? [I want to...]</h4>',
+						html: $myContent,
+						width: 800,
+						showConfirmButton: false,
+						cancelButtonText : 'Do nothing',
+						showCancelButton: true,
+						allowOutsideClick: true,
+					});
 				});
-			});
+			},
 		});
 	});
 
@@ -529,26 +520,23 @@ $(document).ready(function() {
 		var $type = $this.attr("data-type");
 		if ($type == 'initiative') {
 			swal({
-				html: true,
 				title: "Let me tell you about [...]",
 				type: "info",
-				text: "<ul class='list-unstyled'><li>About 2 minutes</li><li>Others may ask questions</li></ul>",
+				html: "<ul class='list-unstyled'><li>About 2 minutes</li><li>Others may ask questions</li></ul>",
 				showCancelButton : true,
 				allowOutsideClick : false,
 				cancelButtonText: "Not enough",
 				confirmButtonText: "Good job !"
-			}, function(isConfirm) {
-				if (isConfirm) {
-					var $url = $this.attr('data-url');
-					$.get($url, function(data) { 
-						swal({
-							title: "Saved !",
-							text: "Thanks for your participation in Planet Alert !",
-							timer: 1000,
-							showConfirmButton: false
-						});
+			}).then( function() {
+				var $url = $this.attr('data-url');
+				$.get($url, function(data) { 
+					swal({
+						title: "Saved !",
+						text: "Thanks for your participation in Planet Alert !",
+						timer: 1000,
+						showConfirmButton: false
 					});
-				}
+				});
 			});
 		}
 		if ($type == 'teamNews') {
@@ -567,29 +555,26 @@ $(document).ready(function() {
 	$(document).on('click', '.buyBtn', function() {
 		var $this = $(this);
 		swal({
-			html: true,
 			title: "Are you sure?",
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
 			cancelButtonText: "No",
 			confirmButtonText: "Yes"
-		}, function(isConfirm) {
-			if (isConfirm) {
-				var $url = $this.attr('data-url');
-				var $type = $this.attr('data-type');
-				if ($type == 'heal') {
-					$this.parents("div.thumbnail").remove();
-				}
-				$.get($url, function(data) { 
-					swal({
-						title: "Saved !",
-						text: "Thanks for your participation in Planet Alert !",
-						timer: 1000,
-						showConfirmButton: false
-					});
-				});
+		}).then( function() {
+			var $url = $this.attr('data-url');
+			var $type = $this.attr('data-type');
+			if ($type == 'heal') {
+				$this.parents("div.thumbnail").remove();
 			}
+			$.get($url, function(data) { 
+				swal({
+					title: "Saved !",
+					text: "Thanks for your participation in Planet Alert !",
+					timer: 1000,
+					showConfirmButton: false
+				});
+			});
 		});
 		return false;
 	});
@@ -609,7 +594,6 @@ $(document).ready(function() {
 		var $redirectUrl = '';
 		e.preventDefault();
 		swal({
-			html: true,
 			title: "Are you sure?",
 			type: "warning",
 			showCancelButton : true,
@@ -617,53 +601,52 @@ $(document).ready(function() {
 			cancelButtonText: "No, let me check again...",
 			confirmButtonText: "Yes, save it!",
 			closeOnConfirm: false
-		}, function(isConfirm) {
-			if (isConfirm) { // Send adminTableForm (via Ajax)
-				$("#adminTableForm :submit").prop('disabled', true);
-				var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment');
-				var $toSave = 'adminTableSubmit=Save&';
-				var $formUrl = $this.attr('action');
-				for (var i=0; i<$checked.length; i++) {
-					var $customId = $checked.eq(i).attr('data-customId');
-					var $comment = $("input:text[name*="+$customId+"]");
-					$toSave += $checked.eq(i).attr('name')+'=on&'+$comment.attr('name')+'='+$comment.val()+'&';
-					if ($checked.length-i > 5) {
-						if (i>0 && i % 5 == 0) {
-							$.post($formUrl, $toSave, function(data) {
-								data = JSON.parse(data);
-								$alreadySaved = parseInt($('#progress').text());
-								$('#progress').text($alreadySaved + data.saved+' saved.');
-							}).fail( function() {
-								$('#progress').text('ERROR !!!');
-							});
-							$toSave = 'adminTableSubmit=Save&';
-						}
-					} else { // In the 5 last
-						if (i == $checked.length-1) {
-							$.post($formUrl, $toSave, function(data) {
-								data = JSON.parse(data);
-								$alreadySaved = parseInt($('#progress').text());
-								$('#progress').text($alreadySaved + data.saved +' saved.');
-								$redirectUrl = data.url;
-							}).fail( function() {
-								$('#progress').text('ERROR !!!');
-							});
-						}
+		}).then( function(isConfirm) {
+			// Send adminTableForm (via Ajax)
+			$("#adminTableForm :submit").prop('disabled', true);
+			var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment');
+			var $toSave = 'adminTableSubmit=Save&';
+			var $formUrl = $this.attr('action');
+			for (var i=0; i<$checked.length; i++) {
+				var $customId = $checked.eq(i).attr('data-customId');
+				var $comment = $("input:text[name*="+$customId+"]");
+				$toSave += $checked.eq(i).attr('name')+'=on&'+$comment.attr('name')+'='+$comment.val()+'&';
+				if ($checked.length-i > 5) {
+					if (i>0 && i % 5 == 0) {
+						$.post($formUrl, $toSave, function(data) {
+							data = JSON.parse(data);
+							$alreadySaved = parseInt($('#progress').text());
+							$('#progress').text($alreadySaved + data.saved+' saved.');
+						}).fail( function() {
+							$('#progress').text('ERROR !!!');
+						});
+						$toSave = 'adminTableSubmit=Save&';
+					}
+				} else { // In the 5 last
+					if (i == $checked.length-1) {
+						$.post($formUrl, $toSave, function(data) {
+							data = JSON.parse(data);
+							$alreadySaved = parseInt($('#progress').text());
+							$('#progress').text($alreadySaved + data.saved +' saved.');
+							$redirectUrl = data.url;
+						}).fail( function() {
+							$('#progress').text('ERROR !!!');
+						});
 					}
 				}
-				$(document).ajaxStop(function() {
-					window.location.href = $redirectUrl;
-					setTimeout( function(){ $('#progress').text('Redirecting...'); }, 1000);
-				})
-				swal({
-					title: '<span id="progress">0 saved.</span>',
-					text: "<p>Saving form, please wait...</p><p>("+$checked.length+" items to save.)</p>",
-					html: true,
-					showConfirmButton: false
-				});
-			} else { // Don't send adminTableForm
-				return false;
 			}
+			$(document).ajaxStop(function() {
+				window.location.href = $redirectUrl;
+				setTimeout( function(){ $('#progress').text('Redirecting...'); }, 1000);
+			})
+			swal({
+				title: '<span id="progress">0 saved.</span>',
+				html: "<p>Saving form, please wait...</p><p>("+$checked.length+" items to save.)</p>",
+				showConfirmButton: false
+			});
+		}, function(dismiss) {
+			// Don't send adminForm
+			return false;
 		});
 	})
 

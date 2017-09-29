@@ -508,14 +508,13 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		}
     $scope.saveData();
     swal({
-			html: true,
       title: "Congratulations !",
-      text: "The monster ran away ! You have repelled "+ $scope.nbAttacks +" words with a quality of "+ $scope.quality +"%.<br />This is a <span class='label label-primary'>"+ feedback +"</span> fight !",
+      html: "The monster ran away ! You have repelled "+ $scope.nbAttacks +" words with a quality of "+ $scope.quality +"%.<br />This is a <span class='label label-primary'>"+ feedback +"</span> fight !",
       type: "success",
       confirmButtonText: "Cool ! Let's see my updated profile !"
-    }, function() {
+    }).then( function() {
 			$timeout($scope.redirect($scope.redirectUrl), 200);
-    });;
+    });
   }
 
   $scope.loseFight = function () {
@@ -533,12 +532,11 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		}
     $scope.saveData();
     swal({
-			html: true,
       title: "Sorry !",
-      text: "You need to revise more and fight back against this monster ! Don't give up !<br />This is a <span class='label label-primary'>"+feedback+"</span> fight.",
+      html: "You need to revise more and fight back against this monster ! Don't give up !<br />This is a <span class='label label-primary'>"+feedback+"</span> fight.",
       type: "error",
       confirmButtonText: "Ok, I'll do better next time..."
-    }, function() {
+    }).then( function() {
 			$timeout($scope.redirect($scope.redirectUrl), 200);
     });
   }
@@ -686,9 +684,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 				// Get number of words
 				if (Math.floor($scope.counter/10) < $scope.result+1) {
 					swal({
-						html: true,
 						title: "Correct !",
-						text: "+1 word !",
+						html: "+1 word !",
 						type: "success",
 						showConfirmButton: false,
 						timer: 1000
@@ -705,9 +702,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			$scope.initQuestion();
     } else { // Wrong answer
 			swal({
-				html: true,
 				title: "Wrong !",
-				text: "Copy the correction !",
+				html: "Copy the correction !",
 				type: "error",
 				showConfirmButton: false,
 				timer: 1000
@@ -724,21 +720,16 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.stopSession = function() {
     if ($scope.result >= 1) {
       swal({
-        html: true,
-        title: "Stop training?",
-        text: "Good job! You've set <span class='label label-success'>"+$scope.counter+" words</span> in your brain. This will credit you of <span class='label label-success'>+"+$scope.result+" U.T.</span>",
+        title: "Stop training ?",
+        html: "Good job! You've set <span class='label label-success'>"+$scope.counter+" words</span> in your brain. This will credit you of <span class='label label-success'>+"+$scope.result+" U.T.</span>",
         type: "success",
         showCancelButton : true,
         cancelButtonText: "Continue training",
         confirmButtonText: "Stop training & Save results"
-      }, function(isConfirm) {
-        if (isConfirm) { // Save and redirect
-          $scope.saveData(true);
-					$scope.waitForStart = true;
-        } else { // Save and continue
-					// Do not save (prevent a bug?), just continue
-          //$scope.saveData(false);
-        }
+      }).then( function() {
+        // Save and redirect
+				$scope.saveData(true);
+				$scope.waitForStart = true;
       });
     } else {
       swal({
@@ -748,10 +739,9 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         showCancelButton : true,
         cancelButtonText: "Keep the helmet on (Continue training)",
         confirmButtonText: "Take the helmet off (Stop training)"
-      }, function() {
-        // DO not save, but redirect
+      }).then( function() { // DO not save, but redirect
 				$timeout($scope.redirect($scope.redirectUrl), 200);
-      });;
+      });
     }
   }
 
@@ -770,12 +760,11 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       $scope.saved = 'Result saved!';
 			if (data["data"] == '1') {
 				swal({
-					html: true,
 					title: "Congratulations !",
-					text: "You've just set a new training record !<br /><br /><small>This message should disappear in 2 seconds. If not, click 'OK' below :)</small>",
+					html: "You've just set a new training record !<br /><br /><small>This message should disappear in 2 seconds. If not, click 'OK' below :)</small>",
 					type: "success",
 					timer: 2000
-				}, function() {
+				}).then( function() {
 					if (redirect === true) {
 						$timeout($scope.redirect($scope.redirectUrl), 200);
 					}
