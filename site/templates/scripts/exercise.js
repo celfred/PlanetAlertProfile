@@ -511,7 +511,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
       title: "Congratulations !",
       html: "The monster ran away ! You have repelled "+ $scope.nbAttacks +" words with a quality of "+ $scope.quality +"%.<br />This is a <span class='label label-primary'>"+ feedback +"</span> fight !",
       type: "success",
-      confirmButtonText: "Cool ! Let's see my updated profile !"
+      confirmButtonText: "Let's see my updated profile !"
     }).then( function() {
 			$timeout($scope.redirect($scope.redirectUrl), 200);
     });
@@ -721,7 +721,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     if ($scope.result >= 1) {
       swal({
         title: "Stop training ?",
-        html: "Good job! You've set <span class='label label-success'>"+$scope.counter+" words</span> in your brain. This will credit you of <span class='label label-success'>+"+$scope.result+" U.T.</span>",
+        html: "You've set <span class='label label-success'>"+$scope.counter+" words</span> in your brain and won <span class='label label-success'>+"+$scope.result+" U.T.</span>",
         type: "success",
         showCancelButton : true,
         cancelButtonText: "Continue training",
@@ -733,12 +733,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       });
     } else {
       swal({
-        title: "Stop training?",
-        text: "You didn't use the memory helmet enough to record words in your brain. Are you sure you want to stop?",
+        title: "Stop training ?",
+        text: "You didn't use the memory helmet enough to record words in your brain.",
         type: "warning",
         showCancelButton : true,
-        cancelButtonText: "Keep the helmet on (Continue training)",
-        confirmButtonText: "Take the helmet off (Stop training)"
+        cancelButtonText: "Continue training",
+        confirmButtonText: "Stop training"
       }).then( function() { // DO not save, but redirect
 				$timeout($scope.redirect($scope.redirectUrl), 200);
       });
