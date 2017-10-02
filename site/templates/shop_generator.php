@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
 if (!$config->ajax) {
   include("./head.inc"); 
 }
@@ -208,5 +208,8 @@ echo $out;
 
 if (!$config->ajax) {
   include("./foot.inc"); 
+} else { // Have JS functions available
+  echo '<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
 }
+
 ?>

@@ -209,8 +209,8 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
           echo '<input type="hidden" name="player" value="'.$player->id.'" />';
           echo '<input type="hidden" name="item" value="'.$item->id.'" />';
           echo '<div class="row well text-center">';
-          echo '<a href="'.$page->url.'" class="btn btn-danger">No, cancel the deal!</a>&nbsp;&nbsp;&nbsp;';
-          echo '<input type="submit" name="buyFormSubmit" value="Yes, buy this item !" class="btn btn-primary" />';
+          echo '<a href="'.$page->url.'" class="btn btn-danger">No</a>&nbsp;&nbsp;&nbsp;';
+          echo '<input type="submit" id="buyFormSubmit" name="buyFormSubmit" value="Yes" class="btn btn-primary" />';
           echo '</div>';
           echo '</form>';
         }

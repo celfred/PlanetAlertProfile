@@ -255,31 +255,65 @@ $(document).ready(function() {
     });
   }
 
-  $('#donation').click( function() {
-    $('#donationDiv').toggle();
-    $('#marketPlaceForm').toggle();
-    if ($(this).html() === 'Make a donation') {
-      $(this).html('Go back to the Marketplace');
-    } else {
-      $(this).html('Make a donation');
-    }
-  });
-  var submitDonation = function() {
+  $('#buyFormSubmit').on( "click", function(e) {
+		e.preventDefault();
+		var $this = $(this).parents("form");
+		swal({
+			title: "Are you sure?",
+			type: "question",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes",
+		}).then( function() { // Send form
+			// Send form (via Ajax)
+			var $data = $this.serialize()+'&buyFormSubmit=save';
+			var $formUrl = $this.attr('action');
+			$.post($formUrl, $data, function(data) {
+				data = JSON.parse(data);
+				$redirectUrl = data.url;
+				window.location.href = $redirectUrl;
+			});
+		}, function(dismiss) { // Don't send form
+			return false;
+		});
+	});
+
+  $('#donateFormSubmit').on( "click", function(e) {
+		e.preventDefault();
+		var $this = $(this).parents("form");
     if ($('#donator').val() == 0 ) {
-      alert('Donator error?');
+      swal('Donator error?');
       return false;
     }
     if ($('#receiver').val() == 0 ) {
-      alert('You must select a player!');
+      swal('You must select a player!');
       return false;
     }
     if ($('#amount').val() == 0 || $('#amount').val() == '') {
-      alert('Invalid amount !');
+			swal("Invalid amount !");
       return false;
     } 
-    return true; // Submit form
-  };
-  $('#donateFormSubmit').on( "click", submitDonation);
+		swal({
+			title: "Are you sure?",
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes",
+		}).then( function() { // Send form
+			// Send form (via Ajax)
+			var $data = $this.serialize()+'&donateFormSubmit=save';
+			var $formUrl = $this.attr('action');
+			$.post($formUrl, $data, function(data) {
+				data = JSON.parse(data);
+				$redirectUrl = data.url;
+				window.location.href = $redirectUrl;
+			});
+		}, function(dismiss) { // Don't send form
+			return false;
+		});
+	});
 	var checkAmount = function(amount) {
     if (!$.isNumeric(amount)) { // A number is needed ! 
       $('#amount').val('');
@@ -600,7 +634,6 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: "No, let me check again...",
 			confirmButtonText: "Yes, save it!",
-			closeOnConfirm: false
 		}).then( function(isConfirm) {
 			// Send adminTableForm (via Ajax)
 			$("#adminTableForm :submit").prop('disabled', true);
@@ -820,6 +853,32 @@ var shopCheck = function(obj, remainingGC, itemGC) {
     }
   }
 }
+
+$('#marketPlaceForm :submit').on('click', function(e){
+	var $this = $(this).parents("form");
+	e.preventDefault();
+	swal({
+		title: "Are you sure?",
+		type: "warning",
+		showCancelButton : true,
+		allowOutsideClick : true,
+		cancelButtonText: "No, let me check again...",
+		confirmButtonText: "Yes, save it!",
+	}).then( function() { // Send form
+		// Send form (via Ajax)
+		$("#marketPlaceForm :submit").prop('disabled', true);
+		var $data = $this.serialize()+'&marketPlaceSubmit=save';
+		var $formUrl = $this.attr('action');
+		$.post($formUrl, $data, function(data) {
+			console.log(data);
+			data = JSON.parse(data);
+			$redirectUrl = data.url;
+			window.location.href = $redirectUrl;
+		});
+	}, function(dismiss) { // Don't send form
+		return false;
+	});
+})
 
 var marketPlaceSelect = function(obj, playerId) {
   var type = obj.className;

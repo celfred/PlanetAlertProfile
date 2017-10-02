@@ -134,8 +134,10 @@
     // Set group captains
     setCaptains($player->team, true);
 
-    // Redirect to player's profile
-    $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name);
+    // Redirect to player's profile (in main.js, because doesn't work due to Ajax ?)
+    /* $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name); */
+    $url = $pages->get('/players')->url.$player->team->name.'/'.$player->name;
+    echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
   }
 
   if ($user->isSuperuser()) { // Admin front-end
@@ -228,7 +230,7 @@
       // Set group captains
       setCaptains($player->team);
 
-      // Redirect to team page (in main.js)
+      // Redirect to team page (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
       $url = $pages->get('/players')->url.$player->team->name;
       echo json_encode(array("sender"=>"adminTable", "saved"=>count($checked), "url"=>$url));
@@ -261,8 +263,10 @@
       }
       // Set group captains
       setCaptains($player->team);
-      // Redirect to MarketPlace
-      $session->redirect($pages->get('/shop')->url.$player->team->name);
+      // Redirect to MarketPlace (in main.js, because doesn't work due to Ajax ?)
+      /* $session->redirect($pages->get('/shop')->url.$player->team->name); */
+      $url = $pages->get('/shop')->url.$player->team->name;
+      echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
     }
 
     if($input->post->donateFormSubmit) { // donateForm submitted
@@ -288,8 +292,10 @@
         // Set group captains
         setCaptains($player->team);
 
-        // Redirection to Team page
-        $session->redirect($pages->get("name=players")->url.$player->team->name);
+        // Redirection to Team page (in main.js, because doesn't work due to Ajax ?)
+        /* $session->redirect($pages->get("name=players")->url.$player->team->name); */
+        $url = $pages->get('/players')->url.$player->team->name;
+        echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
       }
     }
   } // End if superUser
