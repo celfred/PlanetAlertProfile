@@ -32,7 +32,7 @@
       $out .= '<td>'.$p->level.'</td>';
       $out .= '<td>'.$p->GC.'</td>';
       $out .= '<td>'.$p->nationality.'</td>';
-      $out .= '<td>'.$p->summary;
+      $out .= '<td class="text-justify">'.$p->summary;
       $out .= '</td>';
       $out .= '</tr>';
     }

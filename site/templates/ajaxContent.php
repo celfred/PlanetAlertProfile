@@ -344,7 +344,7 @@
           $out .= $mini;
           $out .= '</h3>';
         $out .= '</div>';
-        $out .= '<div class="col-sm-8 text-center">';
+        $out .= '<div class="col-sm-8 text-justify">';
           $out .= '<p>'.$p->summary.'</p>';
         $out .= '</div>';
         $out .= '</div>';

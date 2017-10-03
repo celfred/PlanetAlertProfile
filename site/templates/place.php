@@ -64,7 +64,7 @@ include("./head.inc");
       </td>
     </tr>
     <tr>
-      <td colspan="2" class="col-sm-10">
+      <td colspan="2" class="col-sm-10 text-justify">
         <p class="lead"><?php echo $page->summary; ?> <span class="btn btn-info"><a href="<?php echo $page->link; ?>">[Read more about this place]</a></span></p>
       </td>
     <tr>
