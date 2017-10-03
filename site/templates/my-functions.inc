@@ -616,16 +616,12 @@ function setCaptains($team, $real = true) {
   $allGroups = $pages->get('/groups')->children();
   foreach($allGroups as $group) {
     // Find group captain
-    $members = $players->find("group=$group, sort=-yearlyKarma");
+    $members = $players->find("group=$group, sort=-yearlyKarma, sort=-karma");
     $captain = $members->first();
     if (isset($captain->id)) {
-      // No captain if same karma
-      $next = $members->getNext($captain);
-      if ($next->yearlyKarma < $captain->yearlyKarma) {
-        $captain->skills->add($role);
-        if ($real == true) {
-          $captain->save();
-        }
+      $captain->skills->add($role);
+      if ($real == true) {
+        $captain->save();
       }
     }
   }
