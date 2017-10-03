@@ -935,10 +935,7 @@ function possibleDefense($team) {
       }
     }
   } else {
-    $allConcerned = $pages->find("template=player, team.name=$team, places.count>=3"); // Find players having at least 3 places
-    if ($allConcerned->count() > 0) {
-      $nbConcerned++;
-    }
+    $nbConcerned = $pages->count("template=player, team=$team, places.count>=3"); // Find players having at least 3 places
   }
   return $nbConcerned;
 }
