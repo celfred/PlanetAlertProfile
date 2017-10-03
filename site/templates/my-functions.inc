@@ -616,7 +616,7 @@ function setCaptains($team, $real = true) {
   $allGroups = $pages->get('/groups')->children();
   foreach($allGroups as $group) {
     // Find group captain
-    $members = $players->find("group=$group, sort=-yearlyKarma, sort=-karma");
+    $members = $players->find("group=$group")->sort("-yearlyKarma, -karma");
     $captain = $members->first();
     if (isset($captain->id)) {
       $captain->skills->add($role);
