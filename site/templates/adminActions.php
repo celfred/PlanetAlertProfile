@@ -964,7 +964,7 @@ namespace ProcessWire;
         break;
       case 'setCaptains':
         if ($selectedTeam && $selectedTeam != '-1') {
-          $oldCaptains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
+          $oldCaptains = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=captain")->implode(', ', '{title}');
           $out .= '</div>';
           $out .= '<h4 class="text-center">';
           $out .=   'Set Captains for '.$selectedTeam->title;
@@ -972,7 +972,7 @@ namespace ProcessWire;
           $out .= '<section>';
           $out .= '<p> Old captains : '.$oldCaptains.'</p>';
           setCaptains($selectedTeam, false);
-          $newCaptains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
+          $newCaptains = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=captain")->implode(', ', '{title}');
           $out .= '<p> New captains : '.$newCaptains.'</p>';
           $out .= '</section>';
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveCaptains/'.$selectedTeam->id.'/1">Save new captains</button>';
