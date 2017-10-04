@@ -1,9 +1,15 @@
-<?php
+<?php namespace ProcessWire;
   include("./head.inc");
 
   $people = $pages->find("template=people, name!='people', sort=title");
   $totalPeopleCount = count($people);
   $out = '';
+
+  if ($user->isLoggedin() && !$user->isSuperuser()) { // Show player's mini-profile
+    echo '<div class="row well text-center">';
+      echo miniProfile($player, 'people');
+    echo '</div>';
+  }
 
 ?>
 <div class="row">

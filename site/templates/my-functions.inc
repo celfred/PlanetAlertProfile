@@ -1396,6 +1396,27 @@ function pma($player) {
   return $out;
 }
 
+function possibleElement($player, $item) {
+  $pages = wire('pages');
+  $already = $player->places;
+  $already->add($player->people);
+  $already->add($player->equipment);
+  if ($already->has($item)) {
+    $item->pb = 'already';
+  } else {
+    $nbEl = $player->places->count()+$player->people->count();
+    $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$already");
+    if ($possibleItems->has($item)) {
+      $item->pb = 'possible';
+    } else {
+      if ($item->level > $player->level) { $item->pb = 'level'; }
+      if ($item->GC > $player->GC) { $item->pb = 'GC'; }
+      if ($item->freeActs > $nbEl) { $item->pb = 'freeActs'; }
+    }
+  }
+  return $item;
+}
+
 function setParticipation($player, $dateStart='', $dateEnd='') {
   $pages = wire('pages');
   // Get official period
@@ -1427,6 +1448,83 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
     $player->partPositive = '-';
     $player->partNegative = '-';
   }
+}
+
+function miniProfile($player, $type = '') {
+  $config = wire('config');
+  if ($player->avatar) {
+    $mini = '<img class="" src="'.$player->avatar->getCrop("mini")->url.'" alt="Avatar" />';
+  } else {
+    $mini = '<Avatar>';
+  }
+  $out = '<div class="lead">';
+  $out .= '<ul class="list-unstyled list-inline">';
+  $out .= $mini;
+  if ($player->coma == 0) {
+    // Display scores
+    $out .= '<li><span class="label label-success">Karma : '.$player->yearlyKarma.'</span></li>';
+    $out .= '<li><span class="label label-success">Reputation : '.$player->karma.'</span></li>';
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span> '.$player->level.'</span>';
+    $threshold = getLevelThreshold($player->level);
+    $out .= ' <span class="label label-default" data-toggle="tooltip" title="XP"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$player->XP.'/'.$threshold.'</span></li>';
+    $nbFreeEl = $player->places->count();
+    if ($player->team->rank && $player->team->rank->is('name=4emes|3emes')) {
+      $nbFreeEl += $player->people->count();
+    }
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Free Elements"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
+    $out .= ' <span class="label label-default" data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span> '.$player->equipment->count().'</span></li>';
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' UT</span>';
+    $out .= ' <span class="label label-default" data-toggle="tooltip" title="Fighting Power">'.$player->fighting_power.' FP</span>';
+    $out .= '</li>';
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Health Points"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> '.$player->HP.'</span>';
+    $out .= ' <span class="label label-default" data-toggle="tooltip" title="Gold Coins"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$player->GC.'</span></li>';
+
+    // Display according to $type
+    switch ($type) {
+      case 'equipment' :
+        if ($player->equipment && $player->equipment->count() > 0) {
+          $out .= '<ul class="list-inline">';
+          $out .= '<li>Your equipment ('.$player->equipment->count().') → </li>';
+          foreach($player->equipment as $p) {
+            $out .= '<li><a href="'.$p->url.'"><img class="" src="'.$p->image->getCrop('small')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>You don\'t have any equipment for the moment.</p>';
+        }
+        break;
+      case 'places' :
+        if ($player->places && $player->places->count() > 0) {
+          $out .= '<ul class="list-inline">';
+          $out .= '<li>Your places ('.$player->places->count().') → </li>';
+          foreach($player->places as $p) {
+            $out .= '<li><a href="'.$p->url.'"><img class="" src="'.$p->photo->eq(0)->getCrop('mini')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>You don\'t have any places for the moment.</p>';
+        }
+        break;
+      case 'people' :
+        if ($player->people && $player->people->count() > 0) {
+          $out .= '<ul class="list-inline">';
+          $out .= '<li>Your people ('.$player->people->count().') → </li>';
+          foreach($player->people as $p) {
+            $out .= '<li><a href="'.$p->url.'"><img class="" src="'.$p->photo->eq(0)->getCrop('mini')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>You don\'t have any people for the moment.</p>';
+        }
+        break;
+      default: break;
+    }
+  } else {
+    $out .= '<li class="label label-danger">Coma !</li>';
+  }
+  $out .= '</ul>';
+  $out .= '</div>';
+  return $out;
 }
 
 function displayGroups($allPlayers, $button = 0) {
