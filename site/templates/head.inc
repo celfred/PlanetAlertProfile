@@ -166,7 +166,7 @@
 									echo "<li><a$class href='{$pages->get('name=admin-actions')->url}/script/'>Script</a></li>";
 								echo '</ul>';
 							echo '</div>';
-							echo '<a class="btn" href="./?logout=1">Log out</a>';
+							echo '<a class="btn" href="'.$loginUrl.'?logout=1">Log out</a>';
 						echo '</div>';
 					echo '</ul>';
 				}
@@ -349,7 +349,7 @@
               ?>
             </ul>
           </div>
-					<?php echo '<a class="btn" href="./?logout=1">Log out</a>'; ?>
+					<?php echo '<a class="btn" href="'.$loginUrl.'?logout=1">Log out</a>'; ?>
         </div>
         </ul>
       <?php } ?> <!-- /!isSuperuser() -->
