@@ -1378,7 +1378,7 @@ function pma($player) {
   // Possible places
   $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
   $possibleElements = $possiblePlaces->count();
-  if ($player->rank->name == '4emes|3emes' || $player->team->rank->name == '4emes|3emes') {
+  if ($player->rank->is("name=4emes|3emes") || ($player->team->is("name!=no-team") && $player->team->is("rank.name=4emes|3emes"))) {
     $allPeople = $pages->find("template=people, name!=people, sort=title");
     // Possible people
     $possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name");
