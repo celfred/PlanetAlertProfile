@@ -30,15 +30,6 @@
 	<!--[if IE]>
 	<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/ie.css" />
 	<![endif]-->	
-
-  <?php 
-		// Planet Alert PHP functions
-		if (!$input->get['pages2pdf'] && $user->isSuperuser()) {
-			include('./my-functions.inc');
-		} else {
-			include('../my-functions.inc');
-		}
-	?>
 </head>
 
 <body>
