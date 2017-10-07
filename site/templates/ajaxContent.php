@@ -329,14 +329,14 @@
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
         if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('big')->url.'" alt="Photo" />'; }
-        if ($p->image) { $mini = '<img src="'.$p->image->getCrop('big')->url.'" alt="Photo" />'; }
-        $out .= '<h3><span class="label label-primary">'.$p->title.'</span></h3>';
+        if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="Photo" />'; }
+        $out .= '<h3><span class="label label-primary">'.$p->title.'</span>';
         if ($p->is("template=place")) {
-          $out .= '<h4>(in '.$p->city->title.', '.$p->country->title.')</h3>';
+          $out .= ' (in '.$p->city->title.', '.$p->country->title.')</h3>';
         } else if ($p->is("template=people")) {
-          $out .= '<h4>(from '.$p->country->title.')</h3>';
+          $out .= ' (from '.$p->country->title.')</h3>';
         } else {
-          $out .= '<h4>('.$p->category->title.')</h3>';
+          $out .= ' ('.$p->category->title.')</h3>';
         }
         $out .= '<div class="row">';
         $out .= '<div class="col-sm-4 text-center">';
@@ -345,6 +345,7 @@
           $out .= '</h3>';
         $out .= '</div>';
         $out .= '<div class="col-sm-8 text-justify">';
+          $out .= '<br/>';
           $out .= '<p>'.$p->summary.'</p>';
         $out .= '</div>';
         $out .= '</div>';
