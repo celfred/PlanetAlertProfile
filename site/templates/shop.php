@@ -22,45 +22,8 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
   if ($page->name == 'shop') {
     if ($user->isLoggedin() && !$user->isSuperuser()) { // Show player's mini-profile
       echo '<div class="row well text-center">';
-      echo miniProfile($player, 'equipment');
-      /* $item = possibleElement($player, $page); */
-      /* switch($item->pb) { */
-      /*   case 'possible' : */ 
-      /*     echo "<p class='lead'>You can buy this item.</p>"; */
-      /*     echo  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>'; */
-      /*     break; */
-      /*   case 'already' : */ 
-      /*     echo "<p class='lead'>You already own this item.</p>"; */
-      /*     break; */
-      /*   case 'freeActs' : */ 
-      /*     $nbEl = $player->places->count()+$player->people->count(); */
-      /*     echo "<p class='lead'>This item requires ".$item->freeActs." free elements ! You have only ".$nbEl." free elements.</p>"; */
-      /*     break; */
-      /*   case 'GC' : */ 
-      /*     echo "<p class='lead'>This item requires ".$item->GC."GC ! You have only ".$player->GC."GC.</p>"; */
-      /*     break; */
-      /*   case 'level' : */ 
-      /*     echo "<p class='lead'>This item requires a level ".$item->level." ! You are only at level ".$player->level.".</p>"; */
-      /*     break; */
-      /*   default: */ 
-      /*     echo "<p class='lead'>You can't buy this item for the moment. Sorry.</p>"; */
-      /* } */
-    echo '</div>';
-        /* echo '<h4>'; */
-        /* echo '<span class="lead label label-default"><span class="glyphicon glyphicon-signal"></span>'.$player->level.'&nbsp;&nbsp;<img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" />'.$player->GC.'</span>'; */
-        /* echo '</h4>'; */
-        /* echo '<img class="" src="'.$player->avatar->getCrop('thumbnail')->url.'" alt="No avatar" />'; */
-        /* if ($player->equipment->count > 0) { */
-        /*   $playerEquipment = []; */
-        /*   foreach ($player->equipment as $equipment) { */
-        /*     array_push($playerEquipment, $equipment->id); */
-        /*     $mini = "<img class='img-thumbnail' data-toggle='tooltip' data-html='true' data-original-title='".$equipment->title."' src='".$equipment->image->getCrop('small')->url."' alt='avatar' />"; */
-        /*     echo $mini; */
-        /*   } */
-        /* } else { */
-        /*   echo '<span class="label label-info">No equipment.</span>'; */
-        /* } */
-        /* echo '</div>'; */
+        echo miniProfile($player, 'equipment');
+      echo '</div>';
     }
 
     if ($user->isSuperuser() ) {

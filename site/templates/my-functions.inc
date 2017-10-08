@@ -1452,6 +1452,7 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
 
 function miniProfile($player, $type = '') {
   $config = wire('config');
+  $pages = wire('pages');
   if ($player->avatar) {
     $mini = '<img class="" src="'.$player->avatar->getCrop("mini")->url.'" alt="Avatar" />';
   } else {
@@ -1483,10 +1484,11 @@ function miniProfile($player, $type = '') {
     switch ($type) {
       case 'equipment' :
         if ($player->equipment && $player->equipment->count() > 0) {
+          $shop = $pages->get("name=shop");
           $out .= '<ul class="list-inline">';
           $out .= '<li>Your equipment ('.$player->equipment->count().') → </li>';
           foreach($player->equipment as $p) {
-            $out .= '<li><a href="'.$p->url.'"><img class="" src="'.$p->image->getCrop('small')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
+            $out .= '<li><a href="'.$shop->url.'details/'.$p->name.'"><img class="" src="'.$p->image->getCrop('small')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
           }
           $out .= '</ul>';
         } else {
