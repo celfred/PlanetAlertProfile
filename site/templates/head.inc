@@ -219,7 +219,7 @@
 								echo '</ul>';
 							echo '</div>';
 							$class = $page->name == 'login' ? "on" : "";
-							echo "<a class='btn $class' href='".$pages->get('/login')->url."?sender=".$page->id.'&team='.$input->urlSegment1."'>Login</a>";
+							echo "<a class='btn $class' href='".$loginUrl."?sender=".$page->id.'&team='.$input->urlSegment1."'>Login</a>";
 						echo '</div>';
 					echo '</ul>';
       } else { // Player Menu

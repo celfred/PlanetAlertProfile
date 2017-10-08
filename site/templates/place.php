@@ -1,29 +1,35 @@
-<?php 
+<?php namespace ProcessWire; 
 /* Place template */
 
 include("./head.inc"); 
 
   // Test if a player is connected
-  if ($user->isLoggedin()) {
-    if ($user->isSuperuser() == false ) { // Not admin
-      echo '<div class="row well">';
-      echo '<h4>';
-      echo '<span class="lead label label-default"><span class="glyphicon glyphicon-signal"></span>'.$player->level.'&nbsp;&nbsp;<img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" />'.$player->GC.'</span>';
-      echo '</h4>';
-      echo '<img src="'.$player->avatar->url.'" alt="No avatar" />';
-      if ($player->places->count > 0) {
-        $playerPlaces = [];
-        foreach ($player->places as $place) {
-          array_push($playerPlaces, $place->id);
-          $mini = "<img class='img-thumbnail' data-toggle='tooltip' data-html='true' data-original-title='".$place->title."' src='".$place->photo->eq(0)->getCrop('big')->url."' alt='Photo' />";
-          echo $mini;
-        }
-      } else {
-        echo '<span class="label label-info">No places.</span>';
+  if ($user->isLoggedin() && !$user->isSuperuser()) { // Show player's mini-profile
+    echo '<div class="row well text-center">';
+      echo miniProfile($player, 'places');
+      $item = possibleElement($player, $page);
+      switch($item->pb) {
+        case 'possible' : 
+          echo "<p class='lead'>You can buy this item.</p>";
+          echo  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
+          break;
+        case 'already' : 
+          echo "<p class='lead'>You already own this item.</p>";
+          break;
+        case 'freeActs' : 
+          $nbEl = $player->places->count()+$player->people->count();
+          echo "<p class='lead'>This item requires ".$item->freeActs." free elements ! You have only ".$nbEl." free elements.</p>";
+          break;
+        case 'GC' : 
+          echo "<p class='lead'>This item requires ".$item->GC."GC ! You have only ".$player->GC."GC.</p>";
+          break;
+        case 'level' : 
+          echo "<p class='lead'>This item requires a level ".$item->level." ! You are only at level ".$player->level.".</p>";
+          break;
+        default: 
+          echo "<p class='lead'>You can't buy this item for the moment. Sorry.</p>";
       }
-      echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
-      echo '</div>';
-    }
+    echo '</div>';
   }
 
   echo '<h4 class="text-center"><a href="'.$pages->get("name=places")->photo->eq(0)->url.'" target="_blank" data-toggle="tooltip" title="Write the corresponding number on your places in your copybook.">See the map with numbers</a></h4>';
@@ -32,6 +38,7 @@ include("./head.inc");
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
   }
 
+  /* $thumbImage = $page->photo->eq(0)->getCrop('thumbnail')->url; */
   $imageHeight = $page->photo->eq(0)->height;
   $imageWidth = $page->photo->eq(0)->width;
   if ($imageWidth > $imageHeight) { // Landscape
@@ -45,12 +52,12 @@ include("./head.inc");
 ?>
   <table class="table">
     <tr>
-      <td rowspan="2" class="col-sm-2">
+      <td rowspan="2" class="col-sm-3">
         <img class="img-thumbnail" src="<?php echo $thumbImage; ?>" alt="Photo" />
       </td>
-      <td class="col-sm-8">
+      <td class="col-sm-7">
         <h1><?php echo $page->title; ?></h1>
-        <?php echo "<h2><a href='places/?type=city&name={$city->name}' data-toggle='tooltip' title='See all places in {$city->title}' data-placement='bottom'>{$city->title}</a>, <a href='places/?type=country&name={$country->name}' data-toggle='tooltip' title='See all places in {$city->country}' data-placement='bottom'>{$country->title}</a></h2>"; ?>
+        <?php echo "<h2><a href='places/?type=city&name={$city->name}' data-toggle='tooltip' title='See all places in {$city->title}' data-placement='bottom'>{$city->title}</a>, <a href='places/?type=country&name={$country->name}' data-toggle='tooltip' title='See all places in {$country->title}' data-placement='bottom'>{$country->title}</a></h2>"; ?>
       </td>
       <td class="col-sm-2">
         <div class="panel panel-success">

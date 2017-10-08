@@ -14,7 +14,11 @@ $out = '';
 
 $out .= '<div id="showInfo" data-href="'.$pages->get('name=ajax-content')->url.'"></div>';
 
-$out .= "<h2 class='well text-center'>Marketplace for {$player->title} ({$player->team->title})</h2>";
+$out .= '<div class="row well text-center">';
+$out .= "<h2>Marketplace for {$player->title} ({$player->team->title})</h2>";
+$out .= miniProfile($player, 'equipment');
+$out .= '</div>';
+
 $out .= "<h3 class='text-center well'>";
 $out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='' />&nbsp;<span id='remainingGC'>{$player->GC}</span> GC available. (<span id='nbChecked'>0</span> checked) <span class='badge badge-warning'>3 items per day limit !</span>";
 $out .= "</h3>";

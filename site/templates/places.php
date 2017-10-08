@@ -1,5 +1,11 @@
-<?php /* All places template */
+<?php namespace ProcessWire; /* All places template */
   include("./head.inc"); 
+
+  if ($user->isLoggedin() && !$user->isSuperuser()) { // Show player's mini-profile
+    echo '<div class="row well text-center">';
+      echo miniProfile($player, 'places');
+    echo '</div>';
+  }
 
   if ($user->isSuperuser()) {
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'all?pages2pdf=1">Get PDF [The Map]</a>';

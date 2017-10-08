@@ -20,26 +20,10 @@ $out = '';
 if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
   // All shop catalogue
   if ($page->name == 'shop') {
-    // Test if a player is connected
-    if ($user->isLoggedin()) {
-      if ($user->isSuperuser() == false ) { // Not admin
-        echo '<div class="row well">';
-        echo '<h4>';
-        echo '<span class="lead label label-default"><span class="glyphicon glyphicon-signal"></span>'.$player->level.'&nbsp;&nbsp;<img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" />'.$player->GC.'</span>';
-        echo '</h4>';
-        echo '<img class="" src="'.$player->avatar->url.'" alt="No avatar" />';
-        if ($player->equipment->count > 0) {
-          $playerEquipment = [];
-          foreach ($player->equipment as $equipment) {
-            array_push($playerEquipment, $equipment->id);
-            $mini = "<img class='img-thumbnail' data-toggle='tooltip' data-html='true' data-original-title='".$equipment->title."' src='".$equipment->image->url."' alt='avatar' />";
-            echo $mini;
-          }
-        } else {
-          echo '<span class="label label-info">No equipment.</span>';
-        }
-        echo '</div>';
-      }
+    if ($user->isLoggedin() && !$user->isSuperuser()) { // Show player's mini-profile
+      echo '<div class="row well text-center">';
+        echo miniProfile($player, 'equipment');
+      echo '</div>';
     }
 
     if ($user->isSuperuser() ) {
@@ -81,8 +65,9 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
             $mini = '';
           }
           // Check item's availability for logged-in player
+          // TODO : put setStatus($player, $item) in my-functions.php
           if ($user->isLoggedin() && !$user->isSuperuser()) {
-            if (in_array($item->id, $playerEquipment) ) {
+            if ($player->equipment->has($item)) {
               if ($item->category->name !== 'potions') {
                 $item->stat = 2;
               } else {
@@ -116,10 +101,10 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
           <td><?php echo $item->category->title; ?></td>
           <td><?php
           switch ($item->stat) {
-          case 0 : echo '<span>Out of reach</span>'; break;
-          case 1 : echo '<a class="buyButton label label-primary" href="'.$page->url.$player->team->name.'/'.$item->id.'">Buy</a>'; break;
-          case 2 : echo '<span class="label label-success">Owned</span>'; break;
-          default : echo 'Out of reach';
+            case 0 : echo '<span>Out of reach</span>'; break;
+            case 1 : echo '<a class="buyButton label label-primary" href="'.$page->url.$player->team->name.'/'.$item->id.'">Buy</a>'; break;
+            case 2 : echo '<span class="label label-success">Owned</span>'; break;
+            default : echo 'Out of reach';
           } 
           ?></td>
         </tr>
