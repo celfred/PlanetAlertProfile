@@ -18,8 +18,7 @@ foreach ($allEquipments as $equipment) {
 
 $out = '';
 if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
-  // All shop catalogue
-  if ($page->name == 'shop') {
+  if ($page->name == 'shop') { // All shop catalogue
     if ($user->isLoggedin() && !$user->isSuperuser()) { // Show player's mini-profile
       echo '<div class="row well text-center">';
         echo miniProfile($player, 'equipment');
@@ -54,7 +53,6 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
           <th><img src="<?php  echo $config->urls->templates?>img/star.png" alt="" /> XP</th>
           <th><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="" /> GC</th>
           <th>Category</th>
-          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -63,27 +61,6 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
             $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$item->image->url."\" alt=\"avatar\" />' src='".$item->image->getCrop('mini')->url."' alt='avatar' />";
           } else {
             $mini = '';
-          }
-          // Check item's availability for logged-in player
-          // TODO : put setStatus($player, $item) in my-functions.php
-          if ($user->isLoggedin() && !$user->isSuperuser()) {
-            if ($player->equipment->has($item)) {
-              if ($item->category->name !== 'potions') {
-                $item->stat = 2;
-              } else {
-                if ($item->level <= $player->level && $item->GC <= $player->GC ) {
-                  $item->stat = 1;
-                } else {
-                  $item->stat = 0;
-                }
-              }
-            } else {
-              if ($item->level <= $player->level && $item->GC <= $player->GC ) {
-                $item->stat = 1;
-              } else {
-                $item->stat = 0;
-              }
-            }
           }
         ?>
         <tr>
@@ -99,14 +76,6 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
           <td><?php echo $item->XP; ?></td>
           <td><?php echo $item->GC; ?></td>
           <td><?php echo $item->category->title; ?></td>
-          <td><?php
-          switch ($item->stat) {
-            case 0 : echo '<span>Out of reach</span>'; break;
-            case 1 : echo '<a class="buyButton label label-primary" href="'.$page->url.$player->team->name.'/'.$item->id.'">Buy</a>'; break;
-            case 2 : echo '<span class="label label-success">Owned</span>'; break;
-            default : echo 'Out of reach';
-          } 
-          ?></td>
         </tr>
         <?php } ?>
       </tbody>
@@ -121,6 +90,31 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
 } else { 
     if ($input->urlSegment1 == 'details') { // Equipment detail
       $item = $pages->get("name=$input->urlSegment2");
+      $out .= '<div class="well text-center">';
+      $out .= miniProfile($player, 'equipment');
+      $item = possibleElement($player, $item);
+      switch($item->pb) {
+        case 'possible' : 
+          $out .= "<p class='lead'>You can buy this item.</p>";
+          $out .=  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
+          break;
+        case 'already' : 
+          $out .= "<p class='lead'>You already own this item.</p>";
+          break;
+        case 'freeActs' : 
+          $nbEl = $player->places->count()+$player->people->count();
+          $out .= "<p class='lead'>This item requires ".$item->freeActs." free elements ! You have only ".$nbEl." free elements.</p>";
+          break;
+        case 'GC' : 
+          $out .= "<p class='lead'>This item requires ".$item->GC."GC ! You have only ".$player->GC."GC.</p>";
+          break;
+        case 'level' : 
+          $out .= "<p class='lead'>This item requires a level ".$item->level." ! You are only at level ".$player->level.".</p>";
+          break;
+        default: 
+          $out .= "<p class='lead'>You can't buy this item for the moment. Sorry.</p>";
+      }
+      $out .= '</div>';
       $out .= '<div class="well">';
       $out .= '<span class="badge badge-default">'.$item->category->title.'</span>';
       $out .= '<br />';

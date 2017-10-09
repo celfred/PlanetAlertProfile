@@ -67,7 +67,7 @@ $(document).ready(function() {
 				setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
 			}); 
 		}, function(dismiss) {
-			return false;
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 		});
 
 	});
@@ -275,7 +275,7 @@ $(document).ready(function() {
 				window.location.href = $redirectUrl;
 			});
 		}, function(dismiss) { // Don't send form
-			return false;
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 		});
 	});
 
@@ -311,7 +311,7 @@ $(document).ready(function() {
 				window.location.href = $redirectUrl;
 			});
 		}, function(dismiss) { // Don't send form
-			return false;
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 		});
 	});
 	var checkAmount = function(amount) {
@@ -494,25 +494,67 @@ $(document).ready(function() {
   $('.showInfo').on('click', function() {
 		var $this = $(this);
 		var $itemId = $this.attr("data-id");
-		var $url = $('#showInfo').attr('data-href') + '?id=showInfo&pageId=' + $itemId;
-		swal('','',''); // Workaround to empty previous alert ?
-		swal({
-			title: 'Loading info...',
-			onOpen: function() {
-				swal.showLoading()
-				$.get($url, function(data) { 
-					var $myContent = data;
-					swal({
-						title: '',
-						html: $myContent,
-						showConfirmButton: false,
-						cancelButtonText : 'Close',
-						showCancelButton: true,
-						allowOutsideClick: true,
-						width: 800
+		if ($this.hasClass("buy")) {
+			var $url = $('#showInfo').attr('data-href') + '?id=buy&pageId=' + $itemId;
+			var $submit = $this.attr('data-href');
+			var $formData = "buyFormSubmit=on&playerId="+$this.attr('data-playerId')+"&item="+$this.attr('data-id');
+			swal({
+				title: 'Loading info...',
+				onOpen: function() {
+					swal.showLoading();
+					$.get($url, function(data) { 
+						var $myContent = data;
+						swal({
+							title: 'Buy this item ?',
+							html: $myContent,
+							showConfirmButton: true,
+							confirmButtonText : 'Yes',
+							cancelButtonText : 'No',
+							showCancelButton: true,
+							allowOutsideClick: true,
+							width: 800
+						}).then( function(){ // Buy item
+								swal.showLoading();
+								$.post($submit, $formData, function(data) { 
+									swal({
+										title: "Saved !",
+										text: "Thanks for your participation in Planet Alert !",
+										timer: 1000,
+										showConfirmButton: false
+									}).then( function() {}, function(dismiss) {
+										if (dismiss === 'timer') {
+											window.location.reload();
+											// TODO JS update to avoid reloading
+											// $this.remove(); // Remove newly bought item
+											// TODO : Update miniProfile
+										}
+									});
+								});
+							}, function(dismiss) {
+								return;
+						});
 					});
-				});
-		}});
+			}});
+		} else {
+			var $url = $('#showInfo').attr('data-href') + '?id=showInfo&pageId=' + $itemId;
+			swal({
+				title: 'Loading info...',
+				onOpen: function() {
+					swal.showLoading()
+					$.get($url, function(data) { 
+						var $myContent = data;
+						swal({
+							title: '',
+							html: $myContent,
+							showConfirmButton: false,
+							cancelButtonText : 'Close',
+							showCancelButton: true,
+							allowOutsideClick: true,
+							width: 800
+						}).catch(swal.noop);
+					});
+			}}).catch(swal.noop);
+		}
 	});
 
   $('.pickFromList').on('click', function() {
@@ -522,8 +564,6 @@ $(document).ready(function() {
 		var $pageId = chance.pick(items);
 		var $news = $('#newsList li').length;
 		var $url = $('#ajaxDecision').attr('data-href') + '?id=' + $('#ajaxDecision').attr('data-id')+'&pageId='+$pageId+'&news='+$news;
-		// swal('','',''); // Workaround to empty previous alert ?
-
 		swal({
 			title: 'Decision time for...',
 			onOpen: function () {
@@ -539,9 +579,9 @@ $(document).ready(function() {
 						showCancelButton: true,
 						allowOutsideClick: true,
 					});
-				});
-			},
-		});
+				}).catch(swal.noop);
+			}
+		}).catch(swal.noop);
 	});
 
 	$(document).on('click', '.toggleStrike', function() {
@@ -569,9 +609,13 @@ $(document).ready(function() {
 						text: "Thanks for your participation in Planet Alert !",
 						timer: 1000,
 						showConfirmButton: false
-					});
+					}).catch(swal.noop);
 				});
-			});
+			}), function(dismiss) {
+				if (dismiss === 'cancel' || dismiss == 'overlay') {
+					return;
+				}
+			};
 		}
 		if ($type == 'teamNews') {
 			$teamNews = $('#newsList').html();
@@ -580,7 +624,7 @@ $(document).ready(function() {
 				text: "Choose a news in the list.",
 				timer: 2000,
 				showConfirmButton : false,
-			});
+			}).catch(swal.noop);
 			window.scrollBy(0,1000);
 		}
 		return false;
@@ -607,9 +651,13 @@ $(document).ready(function() {
 					text: "Thanks for your participation in Planet Alert !",
 					timer: 1000,
 					showConfirmButton: false
-				});
+				}).catch(swal.noop);
 			});
-		});
+		}), function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') {
+				return;
+			}
+		};
 		return false;
 	});
 
@@ -679,7 +727,9 @@ $(document).ready(function() {
 			});
 		}, function(dismiss) {
 			// Don't send adminForm
-			return false;
+			if (dismiss === 'cancel' || dismiss == 'overlay') {
+				return false;
+		 	}
 		});
 	})
 
@@ -876,7 +926,7 @@ $('#marketPlaceForm :submit').on('click', function(e){
 			window.location.href = $redirectUrl;
 		});
 	}, function(dismiss) { // Don't send form
-		return false;
+		if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 	});
 })
 

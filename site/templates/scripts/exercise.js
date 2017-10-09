@@ -689,7 +689,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 						type: "success",
 						showConfirmButton: false,
 						timer: 1000
-					});
+					}).catch(swal.noop);
 				} else { // Calculate result
 					$scope.result++;
 					$scope.utPoint = true;
@@ -707,7 +707,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 				type: "error",
 				showConfirmButton: false,
 				timer: 1000
-			});
+			}).catch(swal.noop);
 			// Show correction
 			$scope.showCorrection = $scope.allCorrections.join(', ');
       $scope.wrong = true;
@@ -721,27 +721,32 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     if ($scope.result >= 1) {
       swal({
         title: "Stop training ?",
-        html: "You've set <span class='label label-success'>"+$scope.counter+" words</span> in your brain and won <span class='label label-success'>+"+$scope.result+" U.T.</span>",
+        html: "You've won <span class='label label-success'>+"+$scope.result+" UT</span> ! (<span class='label label-success'>"+$scope.counter+" words set in your brain)</span>",
         type: "success",
         showCancelButton : true,
-        cancelButtonText: "Continue training",
-        confirmButtonText: "Stop training & Save results"
+        cancelButtonText: "Continue",
+        confirmButtonText: "Stop & Save"
       }).then( function() {
         // Save and redirect
 				$scope.saveData(true);
 				$scope.waitForStart = true;
-      });
+			},function(dismiss) {
+				if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+			});
     } else {
       swal({
         title: "Stop training ?",
         text: "You didn't use the memory helmet enough to record words in your brain.",
         type: "warning",
         showCancelButton : true,
-        cancelButtonText: "Continue training",
-        confirmButtonText: "Stop training"
+        cancelButtonText: "Continue",
+        confirmButtonText: "Stop"
       }).then( function() { // DO not save, but redirect
 				$timeout($scope.redirect($scope.redirectUrl), 200);
-      });
+      },function(dismiss) {
+				if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+			});
+;
     }
   }
 
@@ -768,7 +773,9 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 					if (redirect === true) {
 						$timeout($scope.redirect($scope.redirectUrl), 200);
 					}
-				});
+				}), function(dismiss) {
+					if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+				};
 			} else {
 				if (redirect === true) {
 					$timeout($scope.redirect($scope.redirectUrl), 200);

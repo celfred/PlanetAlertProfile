@@ -1,13 +1,20 @@
 <?php namespace ProcessWire;
 
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
-    $playerId = $input->post->player;
+    // Get logged in player
+    $player = $pages->get("template=player, login=$user->name");
+    $player->of(false);
 
     if($input->post->buyFormSubmit) { // buyForm submitted
-      $player = $pages->get($playerId);
-      $task = $pages->get("name='buy'");
       $itemId = $input->post->item;
       $newItem = $pages->get($itemId);
+      // Set task according to newItem's type
+      if ($newItem->template == 'equipment' || $newItem->template == 'item') {
+        $task = $pages->get("name='buy'");
+      }
+      if ($newItem->template == 'place' || $newItem->template == 'people') {
+        $task = $pages->get("name='free'");
+      }
       // Check if item is not already there
       $already = false;
       foreach ($player->equipment as $eq) {
@@ -34,14 +41,19 @@
       $task->comment = $newItem->title;
       $task->refPage = $newItem;
       $task->linkedId = false;
-      if ($newItem->GC <= $player->GC) { // Final 'security' check
+      if ($newItem->GC <= $player->GC && $already != true) { // Final 'security' check
         updateScore($player, $task, true);
         // No need to checkDeath, Buyform can't cause death
+        // Notify admin
+        $msg = "Player : ". $player->title."[".$player->team->title."]\r\n";
+        $msg .= "Item : ". $newItem->title;
+      } else {
+        // Notify admin
+        $msg = "Player : ". $player->title."[".$player->team->title."]\r\n";
+        $msg .= "Item : ". $newItem->title."\r\n";
+        $msg .= "An error has occurred.";
       }
-      // Notify admin
-      $msg = "Player : ". $player->title."\r\n";
-      $msg .= "Team : ". $player->team->title."\r\n";
-      $msg .= "Item : ". $newItem->title;
+
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
         mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
       }
@@ -49,7 +61,6 @@
 
     if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
       $checkedItems = $input->post->item; // Array
-      $player = $pages->get($playerId);
 
       foreach($checkedItems as $item=>$state) {
         $newItem = $pages->get($item);
@@ -104,9 +115,6 @@
     }
 
     if($input->post->donateFormSubmit) { // donateForm submitted
-      $playerId = $input->post->donator;
-      $player = $pages->get($playerId);
-      $player->of(false);
       $amount = (integer) $input->post->amount;
       $receiverId = $input->post->receiver;
       $receiver = $pages->get($receiverId);
@@ -132,12 +140,14 @@
       }
     }
     // Set group captains
-    setCaptains($player->team, true);
+    if ($player->team->name != 'no-team') {
+      setCaptains($player->team, true);
+    }
 
     // Redirect to player's profile (in main.js, because doesn't work due to Ajax ?)
     /* $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name); */
     $url = $pages->get('/players')->url.$player->team->name.'/'.$player->name;
-    echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
+    echo json_encode(array("sender"=>"marketPlace", "url"=>$url, "newItem"=>$newItem->id));
   }
 
   if ($user->isSuperuser()) { // Admin front-end

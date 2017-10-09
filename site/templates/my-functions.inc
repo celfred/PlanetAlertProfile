@@ -1396,11 +1396,42 @@ function pma($player) {
   return $out;
 }
 
+function possibleElements($player) {
+  $pages = wire('pages');
+  $already = new PageArray();
+  $already->add($player->equipment);
+  $already->add($player->places);
+  $already->add($player->usabledItems); // Items waiting to be used (potions)
+  // Get rid of potions bought within the last 15 days
+  $today = new \DateTime("today");
+  $interval = new \DateInterval('P15D');
+  $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
+  $boughtEvents = $player->find("template=event, date>=$limitDate, refPage.name~=potion, refPage.name!=health-potion");
+  $items['locked'] = new PageArray();
+  foreach($boughtEvents as $b) {
+    $already->add($b->refPage);
+    $date2 = new \DateTime(date("Y-m-d", $b->date));
+    $interval = $today->diff($date2)->format("%a");
+    $b->refPage->locked = $interval+1;
+    $items['locked']->add($b->refPage);
+  }
+  if ($player->rank->is("name=4emes|3emes") || ($player->team->is("name!=no-team") && $player->team->is("rank.name=4emes|3emes"))) {
+    $already->add($player->people);
+    $nbEl = $player->places->count() + $player->people->count();
+    $items['unlocked'] = $pages->find("template=place|people|item|equipment, name!=people, GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$already")->sort("template, name");
+  } else {
+    $nbEl = $player->places->count();
+    $items['unlocked'] = $pages->find("template=place|item|equipment, GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$already")->sort("template, name");
+  }
+  return $items;
+}
+
 function possibleElement($player, $item) {
   $pages = wire('pages');
-  $already = $player->places;
-  $already->add($player->people);
+  $already = new PageArray();
   $already->add($player->equipment);
+  $already->add($player->places);
+  $already->add($player->people);
   if ($already->has($item)) {
     $item->pb = 'already';
   } else {
