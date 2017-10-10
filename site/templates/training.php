@@ -312,13 +312,15 @@
               $out .= '</div>';
               $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
               $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">Try again</button>';
-              $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}" onmouseenter="$(this).tooltip(\'show\')"></span></h3> ';
+              $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
+              $out .= '<span id="clue">{{mixedWord}}</span>';
               $out .= '<br /><br />';
               $out .= '<h3 id="" ng-bind="playerAnswer"></h3>';
             } else {
               $out .= '<div class="text-center">';
               $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
-              $out .= ' <h3 class="inline"><span class="glyphicon glyphicon-sunglasses" data-toggle="tooltip" data-html="true" title="{{mixedWord}}"></span></h3> ';
+              $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
+              $out .= '<span id="clue">{{mixedWord}}</span>';
               $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> <span ng-bind-html="showCorrection|underline"></span> {{feedBack}}</span></h3> ';
               $out .= '</div>';
               $out .= '<br />';
