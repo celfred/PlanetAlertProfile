@@ -393,7 +393,7 @@ function extraActionAfterSave($player, $historyPage, $real) {
   }
   
   if ($historyPage->task->is("name=buy")) {
-    if ($historyPage->refPage->parent->is("name=group-items")) { // Save group items for all group members 
+    if ($historyPage->refPage->parent->is("name=group-items") && isset($player->group->id)) { // Save group items for all group members 
       addGroupItem($player, $historyPage, $real);
     }
     if ($historyPage->refPage->parent->is("name=potions") && $historyPage->refPage->is("name!=health-potion")) {

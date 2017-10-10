@@ -3,10 +3,6 @@ if (!$config->ajax) {
   include("./head.inc");
 }
 
-/* $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'"); */
-/* $allPlaces = $pages->get("/places/")->find("template='place', sort='title'"); */
-/* $allPeople = $pages->find("template=people, name!=people, sort=title"); */
-
 $out = '<div id="showInfo" data-href="'.$pages->get('name=ajax-content')->url.'"></div>';
 
 $playerId = $input->urlSegment1;
@@ -19,8 +15,8 @@ $lockedItems = $allItems['locked'];
 $pPlaces = $items->find("template=place");
 $pPeople = $items->find("template=people");
 $pEquipment = $items->find("template=equipment");
-$pPotions = $items->find("template=item");
-
+$pPotions = $items->find("template=item, category.name=potions");
+$pItems = $items->find("template=item, category.name=group-items");
 
 if (!$user->isSuperuser()) {
   if ($user->isLoggedin() && $user->name==$player->login) { // Check if correct player is logged in
@@ -71,6 +67,21 @@ if (!$user->isSuperuser()) {
         $out .= '<p>Nothing available.</p>';
       }
      
+      // Available Group items
+      $out .= '<p class="label label-primary">Available group items</p>';
+      if ($pItems->count() > 0) {
+        $out .= '<ul class="list-unstyled list-inline">';
+        foreach ($pPotions as $item) {
+          if ($item->image) { $mini = $item->image->getCrop("small"); }
+          $out .= '<li>';
+          $out .= '<a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a>';
+          $out .='</li>';
+        }
+        $out .= '</ul>';
+      } else {
+        $out .= '<p>Nothing available.</p>';
+      }
+
       // Available Potions
       $out .= '<p class="label label-primary">Available Potions</p>';
       if ($pPotions->count() > 0) {
@@ -160,7 +171,25 @@ if (!$user->isSuperuser()) {
       $lastCat = $item->parent->name;
     }
   } else {
-    $out .= "<li><h3>No possible equipment !</h3></li>";
+    $out .= "<li><h3>Nothing available.</h3></li>";
+  }
+  // Add group items
+  if ($pItems->count() > 0) {
+    $out .= '<li class="label label-primary">Group items</li>';
+    foreach($pItems as $item) {
+        $out .= '<li>';
+        $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+        if ($item->image) {
+          $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
+        }
+        $out .= $item->title.' ['.$item->GC.'GC]';
+        $out .= '</label>';
+        $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
+        $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
+        $out .= '</li>';
+    }
+  } else {
+    $out .= "<li><h3>Nothing available.</h3></li>";
   }
   // Add potions
   if ($pPotions->count() > 0) {
@@ -178,7 +207,7 @@ if (!$user->isSuperuser()) {
         $out .= '</li>';
     }
   } else {
-    $out .= "<li><h3>No possible potion !</h3></li>";
+    $out .= "<li><h3>Nothing available.</h3></li>";
   }
   $out .= "</ul>";
 
@@ -194,7 +223,7 @@ if (!$user->isSuperuser()) {
     $out .= "</ul>";
   } else {
     $out .= "<ul class='itemList col-md-4'>";
-    $out .= "<li><h3>No possible place !</h3></li>";
+    $out .= "<li><h3>Nothing available.</h3></li>";
     $out .= "</ul>";
   }
   if ($player->rank->name == '4emes' || $player->rank->name == '3emes') {
@@ -210,7 +239,7 @@ if (!$user->isSuperuser()) {
       $out .= "</ul>";
     } else {
       $out .= "<ul class='itemList col-md-4'>";
-      $out .= "<li><h3>No possible people !</h3></li>";
+      $out .= "<li><h3>Nothing available.</h3></li>";
       $out .= "</ul>";
     }
   } else {
