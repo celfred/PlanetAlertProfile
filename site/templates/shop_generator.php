@@ -71,8 +71,8 @@ if (!$user->isSuperuser()) {
       $out .= '<p class="label label-primary">Available group items</p>';
       if ($pItems->count() > 0) {
         $out .= '<ul class="list-unstyled list-inline">';
-        foreach ($pPotions as $item) {
-          if ($item->image) { $mini = $item->image->getCrop("small"); }
+        foreach ($pItems as $item) {
+          if ($item->image) { $mini = $item->image->getCrop("thumbnail"); }
           $out .= '<li>';
           $out .= '<a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a>';
           $out .='</li>';
@@ -145,35 +145,26 @@ if (!$user->isSuperuser()) {
       if ($item->parent->name !== $lastCat) {
         $out .= '<li class="label label-primary">'.$item->parent->title.'</li>';
       }
-        $out .= '<li>';
-        $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
-        if ($item->image) {
-          $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
-        }
-        $out .= $item->title.' ['.$item->GC.'GC]';
-        $out .= '</label>';
-        $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
-        $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
-        $out .= '</li>';
-      /* if (!$item->locked) { */
-      /* } else { */
-        /* $out .= '<li>'; */
-        /* $out .= '<label class="strikeText"> '; */
-        /* if ($item->image) { */
-        /*   $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> '; */
-        /* } */
-        /* $out .= $item->title; */
-        /* $out .= ' <span class="badge badge-danger">'.$item->locked.'</span>'; */
-        /* $out .= '</label>'; */
-        /* $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>'; */
-        /* $out .= '</li>'; */
-      /* } */
+      $out .= '<li>';
+      $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
+      if ($item->image) {
+        $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
+      }
+      $out .= $item->title.' ['.$item->GC.'GC]';
+      $out .= '</label>';
+      $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
+      $out .= '</li>';
       $lastCat = $item->parent->name;
     }
   } else {
     $out .= "<li><h3>Nothing available.</h3></li>";
   }
   // Add group items
+  if (!isset($player->group->id)) {
+    $warning = ' <span class="label label-warning">No groups are set. This item will be individual !</span>';
+  } else {
+    $warning = '';
+  }
   if ($pItems->count() > 0) {
     $out .= '<li class="label label-primary">Group items</li>';
     foreach($pItems as $item) {
@@ -184,8 +175,8 @@ if (!$user->isSuperuser()) {
         }
         $out .= $item->title.' ['.$item->GC.'GC]';
         $out .= '</label>';
-        $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
         $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
+        $out .= $warning;
         $out .= '</li>';
     }
   } else {
@@ -202,7 +193,6 @@ if (!$user->isSuperuser()) {
         }
         $out .= $item->title.' ['.$item->GC.'GC]';
         $out .= '</label>';
-        $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$item->summary.'" ></span>';
         $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="Click for info" ></span></a>';
         $out .= '</li>';
     }

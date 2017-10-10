@@ -379,6 +379,10 @@
         $out .= '<div class="row">';
           $out .= '<span class="alert alert-info">This item costs '.$p->GC.'GC. (You have '.$player->GC.'GC.)</span>';
         $out .= '</div>';
+        if (!isset($player->group->id) && $p->category->name == 'group-items') {
+          $out .= '<br /><br />';
+          $out .= '<span class="alert alert-warning">No groups are set. This item will be individual !</span>';
+        }
         break;
       default :
         $out = 'Todo...';
