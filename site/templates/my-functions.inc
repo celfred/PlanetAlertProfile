@@ -1187,6 +1187,90 @@ function isFightAllowed($player, $monster) {
   return $monster;
 }
 
+function utReport($player, $monster = false) {
+  if (!$monster) { // All monsters
+    $today = new \DateTime("today");
+    $allEvents = $player->find("template=event, task~=ut-action")->sort("refPage.name, date");
+    $allConcernedMonsters = new PageArray();
+    $lastMonster = '';
+    if ($allEvents->count() > 0) {
+      foreach($allEvents as $e) { // Create monsters list
+        if ($e->refPage) {
+          if ($e->refPage->name != $lastMonster) {
+            $allConcernedMonsters->add($e->refPage);
+          }
+          $lastMonster = $e->refPage->name;
+        }
+      }
+      foreach ($allConcernedMonsters as $m) {
+        // Set monster result
+        $fights = $allEvents->find("refPage=$m")->sort("-date");
+        $lastFight = $fights->first();
+        $date2 = new \DateTime(date("Y-m-d", $lastFight->date));
+        $interval = $today->diff($date2)->format("%a");
+        $m->lastFight = $interval;
+        $m->fightsCount = $fights->count();
+        $m->total = $allEvents->count();
+        $m->utGain= utGain($m, $player);
+        // Set monster status
+        $m = isTrainingAllowed($player, $m);
+      }
+      $allConcernedMonsters->sort("lastFight, -utGain");
+    }
+    return $allConcernedMonsters;
+  } else { // TODO ??? Single monster stats
+
+  }
+}
+
+function fightReport($player, $monster = false) {
+  if (!$monster) { // All monsters
+    $today = new \DateTime("today");
+    $allFights = $player->find("template=event, task~=test, refPage!=NULL")->sort("refPage.name, date");
+    $allConcernedMonsters = new PageArray();
+    $lastMonster = '';
+    if ($allFights->count() > 0) {
+      foreach($allFights as $f) { // Create monsters list
+        if ($f->refPage) {
+          if ($f->refPage->name != $lastMonster) {
+            $allConcernedMonsters->add($f->refPage);
+          }
+          $lastMonster = $f->refPage->name;
+        }
+      }
+      foreach ($allConcernedMonsters as $m) {
+        // Set monster result
+        $fights = $allFights->find("refPage=$m")->sort("-date");
+        $lastFight = $fights->first();
+        $date2 = new \DateTime(date("Y-m-d", $lastFight->date));
+        $interval = $today->diff($date2)->format("%a");
+        $m->lastFight = $interval;
+        $m->fightsCount = $fights->count();
+        // Calculate average
+        $VV = $fights->find("task.name=test-vv")->count();
+        $V = $fights->find("task.name=test-v")->count();
+        $R = $fights->find("task.name=test-r")->count();
+        $RR = $fights->find("task.name=test-rr")->count();
+        $m->positive = $V + $VV;
+        $m->negative = $R + $RR;
+        if ($m->fightsCount > 0) {
+          $m->ratio = round(($VV*2+$V-$R-$RR*2)/$m->fightsCount, 1);
+          if ($m->ratio >= 1.5) { $m->average = '<span class="label label-success">VV</span>'; }
+          if ($m->ratio < 1.5 && $m->ratio > 0.3) { $m->average = '<span class="label label-success">V</span>'; }
+          if ($m->ratio <= 0.3 && $m->ratio > -0.4) { $m->average = '<span class="label label-danger">R</span>'; }
+          if ($m->ratio <= -0.4) { $m->average = '<span class="label label-danger">RR</span>'; }
+        }
+        // Set monster status
+        $m = isFightAllowed($player, $m);
+      }
+      $allConcernedMonsters->sort("lastFight, -fightsCount");
+    }
+    return $allConcernedMonsters;
+  } else { // TODO ??? Single monster stats
+
+  }
+}
+
 function utGain($monsterId, $player, $startDate='', $endDate='') {
   $utGain = 0;
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }

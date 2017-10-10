@@ -62,6 +62,7 @@
           $out .= '</tr>';
           $out .= '</thead>';
           $out .= '<tbody>';
+        $date1 = new \DateTime("today");
         foreach($allMonsters as $m) {
           if (!$user->isSuperuser()) {
             $m = isTrainingAllowed($player, $m);
@@ -75,7 +76,6 @@
           $out .= '<td>';
           $out .= $m->title;
           // Find # of days compared to today to set 'New' indicator
-          $date1 = new \DateTime("today");
           $date2 = new \DateTime(date("Y-m-d", $m->published));
           $interval = $date1->diff($date2);
           if ($interval->days < 7) {

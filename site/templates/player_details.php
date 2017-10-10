@@ -129,7 +129,7 @@
                   if ($equipment->image) {
                     $thumb = $equipment->image->url;
                     echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
-                    if ($equipment->name == "memory-helmet") { // Dircet link to training zone
+                    if ($equipment->name == "memory-helmet") { // Direct link to training zone
                       echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
                     } else {
                       echo "<img class='img-thumbnail' src='{$thumb}' />";
@@ -147,7 +147,7 @@
         </div>
         <div class="panel-footer text-center">
           <?php 
-            echo '<p>Fighting power : '.$playerPage->fighting_power.'</p>';
+            echo '<p><span class="glyphicon glyphicon-flash"></span> Fighting power : '.$playerPage->fighting_power.'</p>';
           ?>
         </div>
       </div>
@@ -158,41 +158,71 @@
     <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
-          <h4 class="panel-title"><span class="">Underground Training (U.T.) : <?php echo $playerPage->underground_training; ?></span></h4>
+        <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (U.T.) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Monster fights</span></h4>
         </div>
         <div class="panel-body">
-          <ul>
           <?php 
-          // Find # of untrained pages
-          $allPossible = $pages->find("template=exercise, type.name=translate");
-          $allUt = $playerPage->find("template=event, task=ut-action-v|ut-action-vv");
-          $refPages = [];
-          $untrained = [];
-          foreach ($allUt as $p) { // Build array of trained ids
-            array_push($refPages, $p->refPage);
-          }
-          foreach ($allPossible as $p) { // Compare to all possible pages
-            if (!in_array($p, $refPages)) {
-              array_push($untrained, $p->id);
+            // UT report
+            $utConcernedMonsters = utReport($playerPage);
+            $never = $pages->count("template=exercise")-$utConcernedMonsters->count();
+            if ($utConcernedMonsters->count() > 0) {
+              echo '<p class="label label-primary">You have trained '.$utConcernedMonsters->first()->total.' times.</p>';
+              if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
+                echo '<ul class="utReport list-group list-unstyled">';
+                $trainingUrl = $pages->get("name=underground-training")->url.'?id=';
+                foreach ($utConcernedMonsters as $m) {
+                  echo '<li>';
+                  if ($m->isTrainable == 0) { // Not allowed because of spaced repetition.
+                    echo '<span data-toggle="tooltip" title="Available in '.$m->spaced.' days">'.$m->title.'</span> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
+                  } else {
+                    echo '<a href="'.$trainingUrl.$m->id.'">'.$m->title.'</a> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
+                  }
+                  echo ' [Last training : '.$m->lastFight.' days ago.]</span>';
+                  echo '</li>';
+                }
+                echo '<li class="label label-danger">You have NEVER trained on '.$never.' monsters.</li>';
+                echo '</ul>';
+              } else {
+                echo '<p>Details are private.</p>';
+              }
+            } else {
+              echo "<p>You have never used the Memory Helmet.</p>";
             }
-          }
-          if (count($allUt) > 0) {
-            echo 'You have revised '.count($allUt).' times.';
-            /* foreach ($allUt as $p) { */
-            /*   echo '<li>'.$p->summary.'</li>'; */
-            /* } */
-          } else {
-            echo 'You have NEVER used the Memory Helmet.';
-          }
+
+            // Fights report
+            $playerConcernedMonsters = fightReport($playerPage);
+            if ($playerConcernedMonsters->count() > 0) {
+              echo '<p class="label label-primary">You have fought '.$playerConcernedMonsters->count().' monsters.</p>';
+              if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
+                echo '<ul class="utReport list-group list-unstyled">';
+                foreach ($playerConcernedMonsters as $m) {
+                  if ($m->isFightable == 0 && $m->interval!=-1) {
+                    echo '<li><span data-toggle="tooltip" title="Available in '.$m->spaced.' days">'.$m->title.'</span> : '.$m->fightsCount.' fights ';
+                  } else {
+                    echo '<li><a href="'.$m->url.'">'.$m->title.'</a> : '.$m->fightsCount.' fights ';
+                  }
+                  echo '<span data-toggle="tooltip" data-html="true" title="Quality:'.$m->ratio.'<br /><span class=\'glyphicon glyphicon-thumbs-up\'></span>'.$m->positive.' / <span class=\'glyphicon glyphicon-thumbs-down\'></span>'.$m->negative.'">→ '.$m->average.'</span>';
+                  echo ' [Last fight : '.$m->lastFight.' days ago.]';
+                  echo '</li>';
+                }
+                echo '</ul>';
+              } else {
+                echo '<p>Details are private.</p>';
+              }
+            } else {
+              echo "<p>You haven't fought any monsters yet.</p>";
+            }
           ?>
-          </ul>
         </div>
         <div class="panel-footer">
         <?php
-          if ($playerPage->equipment->get("name=memory-helmet")) {
-            echo 'You can use your <a href="'.$pages->get('name=underground-training')->url.'">Memory Helmet</a> to practise and improve your Underground Training rate :)';
-          } else {
-            echo 'Sorry, but at least one member in your group needs to buy the <a href="'.$pages->get('name=shop')->url.'details/memory-helmet">Memory Helmet</a> to be able to access the Underground Training zone.';
+          if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
+            if ($playerPage->equipment->get("name=memory-helmet")) {
+              echo '<p><a href="'.$pages->get('name=underground-training')->url.'">→ Use the Memory Helmet (Training Zone)</a>.</p>';
+              echo '<p><a href="'.$pages->get('name=fighting-zone')->url.'">→ Go to the Fighting Zone</a>.</p>';
+            } else {
+              echo 'Sorry, but at least one member in your group needs to buy the <a href="'.$pages->get('name=shop')->url.'details/memory-helmet">Memory Helmet</a> to be able to access the Underground Training zone.';
+            }
           }
         ?>
         </div>
@@ -352,6 +382,7 @@
         <?php } ?>
 
         <div class="panel-footer">
+            <span class="glyphicon glyphicon-star"></span>
             <?php
             if ($rightInvasions > 0 || $wrongInvasions > 0) {
               echo 'Defensive power : <span>'.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)';
@@ -432,5 +463,6 @@
     </div>
   </div>
 
-  <?php } ?>
+<?php } ?>
 </div>
+

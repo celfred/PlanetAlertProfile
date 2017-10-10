@@ -811,6 +811,9 @@ header {
 .shown {
   display: block;
 }
+.utReport {
+	padding: 10px;
+}
 .list-group {
   -moz-column-count: 3;
   -webkit-column-count: 3;
