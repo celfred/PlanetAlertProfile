@@ -366,9 +366,18 @@
         }
         $out .= '<div class="row">';
         $out .= '<div class="col-sm-4 text-center">';
-          $out .= '<h3 class="thumbnail">';
-          $out .= $mini;
-          $out .= '</h3>';
+          $out .= '<div class="">';
+            $out .= $mini;
+            if ($p->is("template=place|people")) {
+              // Find element's # of owners
+              $out .= '<div class="alert alert-info">';
+              $p = setOwners($p, $player);
+              $out .= '<span class="">Free rate : ['.$p->owners->count().'/'.$p->teamRate.']</span> ';
+              $out .= progressbar($p->owners->count(), $p->teamRate);
+              if ($p->completed == 1) { $out .= '<span class="badge">Congratulations !</span>'; }
+              $out .= '</div>';
+            }
+          $out .= '</div>';
         $out .= '</div>';
         $out .= '<div class="col-sm-8 text-justify">';
           $out .= '<br/>';
@@ -379,7 +388,7 @@
         $out .= '<div class="row">';
           $out .= '<span class="alert alert-info">This item costs '.$p->GC.'GC. (You have '.$player->GC.'GC.)</span>';
         $out .= '</div>';
-        if (!isset($player->group->id) && $p->category->name == 'group-items') {
+        if (!isset($player->group->id) && $p->is("template=item") && $p->category->name == 'group-items') {
           $out .= '<br /><br />';
           $out .= '<span class="alert alert-warning">No groups are set. This item will be individual !</span>';
         }

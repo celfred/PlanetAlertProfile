@@ -855,19 +855,47 @@ function nbFreedomActs($team, $startDate='', $endDate='') {
   return $nbFree-$nbRemove;
 }
 
+function progressBar($index, $total) {
+  $width = 150*$index/50;
+  $out = '<div class="progress progress-striped progress-mini">';
+  $out .= '<div class="progress-bar progress-bar-danger" role="progressbar" style="width: '.$width.'px;"></div>';
+  $out .= '</div>';
+  return $out;
+}
+
+function setOwners($el, $player) {
+  $pages = wire('pages');
+  $allPlayers = $pages->find("template=player, team=$player->team");
+  $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
+  if ($el->template == 'place') {
+    $teamOwners = $allPlayers->find("places=$el");
+  }
+  if ($el->template == 'people') {
+    $teamOwners = $allPlayers->find("people=$el");
+  }
+  $el->owners = $teamOwners;
+  // Set element free rate
+  if ($teamOwners->count() >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'label label-info'; }
+  if ($teamOwners->count() >= $teamRate) { $el->completed = 1; $el->cssClass = 'label label-success'; }
+  if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = 'label label-danger'; }
+  $el->teamRate = $teamRate;
+  return $el;
+}
+
 function teamFreeworld($team) {
   $pages = wire('pages');
   $allPlayers = $pages->find("template=player, team=$team->name");
   $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
   // Get all possible elements
   $allElements = new pageArray();
-  $allPlaces = $pages->find("template=place, name!=places");
-  $allPeople = $pages->find("template=people, name!=people");
   $rank = $team->rank->name;
   if ($rank == '4emes' || $rank == '3emes') {
+    $allPlaces = $pages->find("template=place, name!=places");
     $allElements->add($allPlaces);
+    $allPeople = $pages->find("template=people, name!=people");
     $allElements->add($allPeople);
   } else {
+    $allPlaces = $pages->find("template=place, name!=places");
     $allElements->add($allPlaces);
   }
   // Test if teamRate is reached
