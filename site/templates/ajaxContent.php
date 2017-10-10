@@ -135,27 +135,27 @@
         }
         $unusedConcerned = $pages->find("template=player, usabledItems.count>0");
         if ($unusedConcerned->count > 0) {
+          $date1 = new \DateTime("today");
           $out .= '<p class="label label-primary">Potion Planner</p>';
+          $out .= '<ul class="list-unstyled">';
           foreach ($unusedConcerned as $p) {
-            $out .= '<ul class="list-unstyled">';
             foreach ($p->usabledItems as $item) {
               $historyPage = $p->get("name=history")->get("refPage=$item, linkedId=0");
               if ($historyPage->id) {
                 $out .= '<li class="">';
-                // Find # of days compared to today to set 'New' indicator
-                $date1 = new \DateTime("today");
+                // Find # of days compared to today
                 $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
                 $interval = $date1->diff($date2);
                 if ($interval->days > 21) {
                   $out .= ' <span class="badge">!</span> ';
                 }
-                $out .= $p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)';
+                $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
                 $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> Used today<span id="feedback"></span></label>';
                 $out .= '</li>';
               }
             }
-            $out .= '</ul>';
           }
+          $out .= '</ul>';
         } else {
           $out .= '<hr /><p class="">No Potion to be used.</p>';
         }
