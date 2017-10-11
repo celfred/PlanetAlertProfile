@@ -1106,7 +1106,7 @@ function getScoreboard($player, $field, $limit=5) {
 }
 
 function isTrainingAllowed($player, $monster) {
-  $utGain = utGain($monster->id, $player);
+  $utGain = utGain($monster, $player);
   $prevTrainings = $player->find("template=event,task.name=ut-action-v|ut-action-vv, refPage=$monster->id, sort=-date");
   if ($utGain > 0) { // Already trained
     $lastTraining = $prevTrainings->first();
@@ -1155,7 +1155,7 @@ function isTrainingAllowed($player, $monster) {
 function isFightAllowed($player, $monster) {
   $minUt = 20; // Previous training required to be able to fight
   $spaced = 15; // 15 days between fights
-  $utGain = utGain($monster->id, $player);
+  $utGain = utGain($monster, $player);
   $monster->utGain = $utGain;
   if ($utGain >= $minUt) { // Player has trained enough
     // Check last fight interval
@@ -1279,7 +1279,6 @@ function utGain($monsterId, $player, $startDate='', $endDate='') {
   if ($prevUt->count() > 0) {
     foreach($prevUt as $p) {
       preg_match("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches);
-
       if (!$matches) {
         $utGain = $utGain+1;
       } else {
