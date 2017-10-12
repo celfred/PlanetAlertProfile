@@ -634,7 +634,7 @@ img.align_right {
   color: #FFF;
 }
 .negative:hover, .negative a:hover {
-  color: #000;
+  color: #FFF;
 }
 .inline { display: inline; }
 .double {

@@ -67,7 +67,7 @@ $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
       // See if absence already recorded the same day
       $abs = $player->get("name=history")->children()->get("template=event, task.name=absent, date>=$today");
   ?>
-  <tr class="<?php if ($abs->id) { echo 'negative'; } ?>">
+  <tr class="<?php if ($abs) { $disabled = 'disabled'; echo 'negative'; } else { $disabled = ''; } ?>">
   <td><?php if (isset($player->group->id)) { echo $player->group->title; } ?></td>
   <th><?php echo $player->title; ?></th>
     <?php foreach ($allTasks as $task) {
@@ -75,8 +75,9 @@ $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
       $taskId = $task->id;
     ?>
     <td class="<?php echo $type; ?>" data-toggle="tooltip" title="<?php echo $player->title.' - '.$task->title; ?>">
-    <input type="checkbox" class="ctPlayer ct_<?php echo $taskId; ?>" id="" data-customId="<?php echo $id.'_'.$taskId; ?>" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $taskId; ?>)" />
-    <input style="display: none;" type="text" data-customId="<?php echo $id.'_'.$taskId; ?>" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="Comment" />
+      <input type="checkbox" <?php echo $disabled; ?> class="ctPlayer ct_<?php echo $taskId; ?>" id="" data-customId="<?php echo $id.'_'.$taskId; ?>" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $taskId; ?>)" />
+      <input style="display: none;" <?php echo $disabled; ?> type="text" data-customId="<?php echo $id.'_'.$taskId; ?>" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="Comment" />
+      <?php if ($abs && $task->is("name=absent|abs")) { echo "<a href='#' class='removeAbs' data-type='removeAbs' data-url='".$pages->get('name=submitforms')->url."?form=deleteForm&eventId=".$abs->id."'>[Remove]</a>"; } ?>
     </td>
     <?php } ?>
   </tr>

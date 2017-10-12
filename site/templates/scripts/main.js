@@ -83,13 +83,36 @@ $(document).ready(function() {
 		return false;
 	})
 
+  $(".removeAbs").on('click', function(e) {
+		e.preventDefault();
+    $this = $(this);
+		swal({
+			title: "Are you sure?",
+			type: "question",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes",
+		}).then( function() { // Send Ajax request
+			$.get($this.attr('data-url'), function(data) { 
+				$tr = $this.parents("tr");
+				$tr.removeClass('negative');
+				$tr.find("input[type=checkbox]").each( function() {
+						$(this).prop('disabled', 0);
+				});
+				$this.remove();
+			}); 
+		}, function(dismiss) { // Don't send form
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		}); 
+    return false; 
+  }); 
+
   $(".ajax").click(function() {
     $("#reportDiv").html("<p>Loading...</p>"); 
-    
     $.get($(this).attr('href'), function(data) { 
         $("#reportDiv").html(data); 
     }); 
-
     return false; 
   }); 
 
@@ -832,7 +855,7 @@ var isAnyCheckedCol = function(taskId) {
 	}
 }
 var selectAll = function(taskId) {
-	$('.ct_'+taskId).prop('checked', $('#csat_'+taskId).prop('checked'));
+	$('.ct_'+taskId).not(':disabled').prop('checked', $('#csat_'+taskId).prop('checked'));
 	isAnyChecked();
 	isAnyCheckedCol(taskId);
 }

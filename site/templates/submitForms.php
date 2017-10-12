@@ -191,6 +191,14 @@
       }
     }
 
+    if (isset($input->get->form) && $input->get->form == 'deleteForm' && $input->get->eventId != '') { // Delete an event
+      $event = $pages->get($input->get->eventId);
+      // Limit to absence (no need to recalculate scores)
+      if ($event->is("task.name=absent|abs")) {
+        $pages->trash($event);
+      }
+    }
+
     if (isset($input->get->form) && $input->get->form == 'buyForm' && $input->get->playerId != '') { // Healing potion in Main Office, Discount in Decision...
       $player = $pages->get($input->get->playerId);
       $item = $pages->get($input->get->itemId);
