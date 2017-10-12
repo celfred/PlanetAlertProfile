@@ -242,7 +242,7 @@ function taskExtraAction($player, $task, $real) {
   if ($task->is("name=fake-donator")) { // Reset donation indicator
     $player->donation = 0;
   }
-  if ($task->is("name=bought") && $real == true) { // Add equipment
+  if ($task->is("name=bought")) { // Add equipment
     if ($task->refPage) {
       $player->equipment->add($task->refPage);
     }
@@ -268,7 +268,7 @@ function taskExtraAction($player, $task, $real) {
   if ($task->is("name=homework-half-done|signature")) {
     $player->hkcount += 0.5;
   }
-  if ($task->is("name=remove") && $real == true) { // Remove element
+  if ($task->is("name=remove")) { // Remove element
     if ($task->refPage != false && $task->refPage->template == 'place') {
       $player->places->remove($task->refPage);
     }
