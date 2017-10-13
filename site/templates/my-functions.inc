@@ -1013,10 +1013,13 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   if ($pb >= 3 || $player->penalty->count() >= 1) { $player->homework = 'RR'; }
   $player->hkPb = $pb;
   $nbBonus = $player->initiative->count() + $player->extraHk->count() + $player->veryExtraHk->count();
-  if ($nbBonus >= 8 || $player->ut->count() >= 50) { $player->motivation = 'VV'; }
-  if (($nbBonus >= 3 && $nbBonus < 8) || ($player->ut->count() >= 20 && $player->ut->count() < 50)) { $player->motivation = 'V'; }
-  if ($nbBonus < 3) { $player->motivation = 'No bonus for the moment'; }
-
+  if ($nbBonus >= 10 || $player->ut->count() >= 50 || ($player->ut->count() >= 47 && $nbBonus == 9)) {
+    $player->motivation = 'VV';
+  } else if (($nbBonus >= 5 && $nbBonus < 10) || ($player->ut->count() >= 20 && $player->ut->count() < 50) || ($player->ut->count() >= 18 && $player->ut->count() < 50 && $nbBonus == 4)) {
+    $player->motivation = 'V';
+  } else {
+    $player->motivation = 'No bonus for the moment';
+  }
   return $pb;
 }
 

@@ -294,23 +294,22 @@
             // Attitude
             $disobedience = $allEvents->find("task.name=civil-disobedience");
             $ambush = $allEvents->find("task.name=ambush");
+            $noisy = $allEvents->find("task.name=noisy-mission");
             $late = $allEvents->find("task.name=late");
-            $pb = $disobedience->count()+$ambush->count()+$late->count();
+            $pb = new PageArray();
+            $pb->add($disobedience);
+            $pb->add($ambush);
+            $pb->add($noisy);
+            $pb->add($late);
             echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Soucis avec l\'attitude"></span> Attitude problems :';
-            echo ' <span class=""> ['.$disobedience->count()+$ambush->count().' problems - </span>';
-            echo ' <span class="">'.$late->count().' slow moves]</span>';
+            $attPb = $disobedience->count()+$ambush->count()+$noisy->count();
+            echo ' <span> ['.$attPb.' problems - </span>';
+            echo ' <span>'.$late->count().' slow moves]</span>';
             echo ' ⇒ ';
-            if ($pb >= 3) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-danger">RR</span>';
-            }
-            if ($pb < 3 && $pb>1) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-danger">R</span>';
-            }
-            if ($pb > 0 && $pb<1) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-success">V</span>';
-            }
-            if ($pb == 0) {
+            if ($pb->count() == 0) {
               echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-success">VV</span>';
+            } else {
+              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève.">Ask your teacher.</span>';
             }
             echo '</p>';
             ?>

@@ -21,7 +21,7 @@
 		<th>Tests</th>
 		<th><span data-toggle="tooltip" title="Solo missions" class="glyphicon glyphicon-user"></span></th>
 		<th><span data-toggle="tooltip" title="Group missions"><span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></span></th>
-		<th>UT</th>
+		<th data-toggle="tooltip" title="Compétence SACoche : Je prend une initiative particulière.">UT</th>
 		<th>Planet Alert</th>
   </tr>
   <?php
@@ -43,7 +43,11 @@
 		$teamUt = 0;
 		$teamPosTests = 0;
 		$teamNegTests = 0;
+		$listNoHk = '';
+		$listHalfHk = '';
 		$listExtraHk = '';
+		$listForgotStuff = '';
+		$listForgotSigned = '';
 
     foreach($allPlayers as $player) {
 			setHomework($player,$period->dateStart, $period->dateEnd);
@@ -95,18 +99,34 @@
 			echo  '<span data-toggle="tooltip" title="Éléments évalués : '.$player->nbHk.'" class="label label-'.$class.'">'.$player->homework.'</span> ';
 			if (!$input->get['pages2pdf']) {
 				if ($nbNoHk > 0) {
-					echo  '<span data-toggle="tooltip" data-html="true" title="'. $listNoHk .'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
+					$listNoHk = '';
+					foreach ($player->noHk as $e) {
+						$listNoHk .= '- '.strftime("%d/%m", $e->date).' - '.$e->summary.'<br />';
+					}
+					echo  '<span data-toggle="tooltip" data-html="true" title="'.$listNoHk.'"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;<span>'.$nbNoHk.'</span></span>';
 					echo '&nbsp;&nbsp;&nbsp;';
 				}
 				if ($nbHalfHk > 0) {
-					echo  '<span data-toggle="tooltip" data-html="true" title="'. $listHalfHk .'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
+					$listHalfHk = '';
+					foreach ($player->halfHk as $e) {
+						$listHalfHk .= '- '.strftime("%d/%m", $e->date).' - '.$e->summary.'<br />';
+					}
+					echo  '<span data-toggle="tooltip" data-html="true" title="'.$listHalfHk.'"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<span>'.$nbHalfHk.'</span></span>';
 					echo '&nbsp;&nbsp;&nbsp;';
 				}
 				if ($nbForgotSigned > 0) {
-					echo  '<span data-toggle="tooltip" data-html="true" title="'. $listForgotSigned .'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="">'.$nbForgotSigned.'</span></span> ';
+					$listForgotSigned = '';
+					foreach ($player->notSigned as $e) {
+						$listForgotSigned .= '- '.strftime("%d/%m", $e->date).' - '.$e->summary.'<br />';
+					}
+					echo  '<span data-toggle="tooltip" data-html="true" title="'.$listForgotSigned.'"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<span class="">'.$nbForgotSigned.'</span></span> ';
 				}
 				if ($nbExtraHk > 0) {
-					echo  '<span data-toggle="tooltip" data-html="true" title="'. $listExtraHk .'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
+					$listExtraHk = '';
+					foreach ($player->extraHk as $e) {
+						$listExtraHk .= '- '.strftime("%d/%m", $e->date).' - '.$e->summary.'<br />';
+					}
+					echo  '<span data-toggle="tooltip" data-html="true" title="'.$listExtraHk.'"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<span>'.$nbExtraHk.'</span></span>';
 				}
 			} else {
 				if ($nbNoHk > 0) {
@@ -259,6 +279,9 @@
 				}
 			}
 			echo '<span data-toggle="tooltip" data-html="true" title="'.$listUt.'">'.$utSessions->count().'</span>';
+			if ($player->motivation == 'V' || $player->motivation == 'VV') {
+				echo  ' <span data-toggle="tooltip" data-html="true" title="<span class=\'label label-success\'>VV</span> 9xtHk ET 47→49UT<br /><span class=\'label label-success\'>VV</span> 10xtHk OU 50→+UT<br /><span class=\'label label-success\'>V</span> 4xtHk ET 18→19UT<br /><span class=\'label label-success\'>V</span> 5xtHK OU 20→49UT" class="label label-success">'.$player->motivation.'</span> ';
+			}
       echo '</td>';
 			// Planet Alert
       echo '<td>';
