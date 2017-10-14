@@ -127,7 +127,7 @@ namespace ProcessWire;
         $out .=   'Global options';
         $out .= '</h3>';
         $out .= '<div>';
-        $allPeriods = $pages->find("template=period");
+        $allPeriods = $pages->get("name=periods")->children();
         $officialPeriod = $page->periods;
         $out .=   '<span>Official period : </span>';
         $out .=   '<select id="periodId">';
