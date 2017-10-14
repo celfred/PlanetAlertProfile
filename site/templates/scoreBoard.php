@@ -4,10 +4,12 @@
     include("./head.inc"); 
 
     $field = $input->get('field');
+    if (!isset($player)) { $player = ''; }
     list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, -1);
     switch ($field) {
       case 'karma' :
         $title = 'Most influential';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       case 'places' :
         $title = 'Greatest # of places';
@@ -52,7 +54,7 @@
   ?>
 
   <div class="row">
-    <?php echo $pos; ?>
+    <?php if (isset($pos)) { echo $pos; } ?>
     <div class="panel panel-success">
       <div class="panel-heading">
       <h4 class="panel-title"><?php echo $img .' '. $title; ?></h4>

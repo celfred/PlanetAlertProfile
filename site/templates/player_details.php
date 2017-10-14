@@ -1,8 +1,16 @@
 <?php
   $playerPage = $pages->get("template=player,name=".$input->urlSegment2);
   $playersTotalNb = $pages->count("template=player,team=$playerPage->team");
-  $playerPlacesNb = $playerPage->places->count();
-  $playerPeopleNb = $playerPage->people->count();
+  if ($playerPage->places) {
+    $playerPlacesNb = $playerPage->places->count();
+  } else {
+    $playerPlacesNb = 0;
+  }
+  if ($playerPlacesNb->people) {
+    $playerPeopleNb = $playerPage->people->count();
+  } else {
+    $playerPeopleNb = 0;
+  }
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
   $rightInvasions = $allEvents->find("task.name=right-invasion")->count();
   $wrongInvasions = $allEvents->find("task.name=wrong-invasion")->count();

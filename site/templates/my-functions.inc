@@ -1091,9 +1091,9 @@ function getScoreboard($player, $field, $limit=5) {
       $allPlayers = $allGroups->sort('-karma');
       break;
     default : 
-      $allPlayers = '';
+      $allPlayers = NULL;
   }
-  if ($field != 'group') {
+  if ($allPlayers && $field != 'group') {
     if ($allPlayers->getItemKey($player) != 0) {
       $playerPos = $allPlayers->getItemKey($player)+1;
     } else {
@@ -1613,8 +1613,10 @@ function miniProfile($player, $type = '') {
     $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span> '.$player->level.'</span>';
     $threshold = getLevelThreshold($player->level);
     $out .= ' <span class="label label-default" data-toggle="tooltip" title="XP"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$player->XP.'/'.$threshold.'</span></li>';
-    $nbFreeEl = $player->places->count();
-    if ($player->team->rank && $player->team->rank->is('name=4emes|3emes')) {
+    if ($player->places) {
+      $nbFreeEl = $player->places->count();
+    }
+    if ($player->team->rank && $player->team->rank->is('name=4emes|3emes') && $player->people) {
       $nbFreeEl += $player->people->count();
     }
     $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Free Elements"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';

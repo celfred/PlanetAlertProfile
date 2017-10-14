@@ -233,10 +233,10 @@
 					} else {
 						echo '<Avatar>';
 					}
-					if ($bestWeapon->id && $bestWeapon->image) {
+					if ($bestWeapon && $bestWeapon->image) {
 						echo '<img class="weapon mini superpose" src="'.$bestWeapon->image->getCrop("mini")->url.'" alt="'.$bestWeapon->title.'" />';
 					}
-					if ($bestProtection->id && $bestProtection->image) {
+					if ($bestProtection && $bestProtection->image) {
 						echo '<img class="protection mini superpose" src="'.$bestProtection->image->getCrop("mini")->url.'" alt="'.$bestProtection->title.'" />';
 					}
 					echo '</span>';
