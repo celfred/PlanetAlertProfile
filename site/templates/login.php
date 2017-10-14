@@ -12,8 +12,8 @@ if ( $input->get('sender') != 1) {
 }
 
 // check for login before outputting markup
-if($input->post->user && $input->post->pass) {
-  $user = $sanitizer->username($input->post->user);
+if($input->post->username && $input->post->pass) {
+  $user = $sanitizer->username($input->post->username);
   $pass = $input->post->pass; 
   if($session->login($user, $pass)) {
     if (!$homepage) {
@@ -33,11 +33,11 @@ $logoUrl = $pages->get("name=home")->photo->eq(1)->url;
   <div class="col-md-10 text-center">
     <h1>Welcome to Planet Alert !</h1>
     <form class="form-horizontal loginForm" action="<?php echo $page->url; ?>?sender=<?php echo $input->get('sender').'&team='.$input->get('team'); ?>" method="post">
-      <?php if($input->post->user) echo "<h3><span class='label label-danger'>Login failed...</span></h3>"; ?>
+      <?php if($input->post->username) echo "<h3><span class='label label-danger'>Login failed...</span></h3>"; ?>
       <div class="form-group">
-        <label for="user" class="col-sm-4 control-label">User :</label>
+        <label for="username" class="col-sm-4 control-label">User :</label>
         <div class="col-sm-6">
-          <input class="form-control" type="text" name="user" id="user" placeholder="Username" />
+          <input class="form-control" type="text" name="username" id="username" placeholder="Username" />
         </div>
       </div>
       <div class="form-group">
