@@ -513,7 +513,7 @@ function checkActivity(HookEvent $e) {
 
 function lastActivity($player) {
   $historyPage = $player->children("sort=-created")->first();
-  $lastEvent = $historyPage->find("template=event, sort=-date")->first();
+  $lastEvent = $historyPage->children()->findOne("template=event, sort=-date");
   if ($lastEvent->id) {
     // Find # of days compared to today
     $date1 = new \DateTime("today");
@@ -616,8 +616,7 @@ function setCaptains($team, $real = true) {
   $allGroups = $pages->get('/groups')->children();
   foreach($allGroups as $group) {
     // Find group captain
-    $members = $players->find("group=$group")->sort("-yearlyKarma, -karma");
-    $captain = $members->first();
+    $captain = $players->findOne("group=$group, sort=-yearlyKarma");
     if (isset($captain->id)) {
       $captain->skills->add($role);
       if ($real == true) {
@@ -1531,11 +1530,11 @@ function possibleElements($player) {
   }
   if ($player->rank->is("name=4emes|3emes") || ($player->team->is("name!=no-team") && $player->team->is("rank.name=4emes|3emes"))) {
     $already->add($player->people);
-    $nbEl = $player->places->count() + $player->people->count();
-    $items['unlocked'] = $pages->find("template=place|people|item|equipment, name!=people, GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$already")->sort("template, name");
+    $nbEl = ($player->places->count() + $player->people->count())+1;
+    $items['unlocked'] = $pages->find("template=place|people|item|equipment, name!=people, GC<=$player->GC, level<=$player->level, freeActs<$nbEl, id!=$already")->sort("template, name");
   } else {
-    $nbEl = $player->places->count();
-    $items['unlocked'] = $pages->find("template=place|item|equipment, GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$already")->sort("template, name");
+    $nbEl = $player->places->count()+1;
+    $items['unlocked'] = $pages->find("template=place|item|equipment, GC<=$player->GC, level<=$player->level, freeActs<$nbEl, id!=$already")->sort("template, name");
   }
   return $items;
 }
