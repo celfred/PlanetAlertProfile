@@ -1548,8 +1548,8 @@ function possibleElement($player, $item) {
   if ($already->has($item)) {
     $item->pb = 'already';
   } else {
-    $nbEl = $player->places->count()+$player->people->count();
-    $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$already");
+    $nbEl = $player->places->count()+$player->people->count()+1;
+    $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<$nbEl, id!=$already");
     if ($possibleItems->has($item)) {
       $item->pb = 'possible';
     } else {
