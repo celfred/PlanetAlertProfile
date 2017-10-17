@@ -606,17 +606,19 @@ function setCaptains($team, $real = true) {
   $players = $pages->find("template=player, team=$team");
   // Remove old captains
   $role = $pages->get("name=captain");
+  $groups = new PageArray();
   foreach($players as $p) {
     $p->of(false);
     $p->skills->remove($role);
+    $groups->add($p->group);
     if ($real == true) {
       $p->save();
     }
   }
-  $allGroups = $pages->get('/groups')->children();
-  foreach($allGroups as $group) {
+  foreach($groups as $group) {
     // Find group captain
-    $captain = $players->findOne("group=$group, sort=-yearlyKarma");
+    $captain = $players->sort("-yearlyKarma")->findOne("group=$group");
+    $out .= $captain->id.'-';
     if (isset($captain->id)) {
       $captain->skills->add($role);
       if ($real == true) {
