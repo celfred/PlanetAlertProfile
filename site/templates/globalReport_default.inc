@@ -348,7 +348,11 @@
     echo '</th>';
 		// Tests
     echo '<th>';
-		$teamTestRatio = round(($teamPosTests*100)/($teamPosTests+$teamNegTests));
+		if ($teamPosTests > 0 || $teamNegTests > 0) {
+			$teamTestRatio = round(($teamPosTests*100)/($teamPosTests+$teamNegTests));
+		} else {
+			$teamTestRatio = "-";
+		}
 		echo $teamTestRatio.'%';
     echo '</th>';
 		// Solo missions

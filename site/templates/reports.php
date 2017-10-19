@@ -40,7 +40,7 @@ if ($user->isSuperuser()) {
   <?php
     echo "<option value='{$input->urlSegment1}'>The whole team</option>";
     foreach($allPlayers as $player) {
-      echo "<option value='{$player->name}'>{$player->title}</option>";
+      echo "<option value='{$player->id}'>{$player->title}</option>";
     }
   echo '</select>';
   // reportUrl is based on url segments : all|category/team|player/periodId?sort=title|lastName

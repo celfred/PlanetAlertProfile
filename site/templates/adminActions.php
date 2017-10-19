@@ -373,9 +373,9 @@ namespace ProcessWire;
           $out .= '<div>';
           $out .= '<span>Select a player : </span>';
           $out .= '<select id="reportPlayer">';
-          $out .= '<option value="'.$selectedTeam->name.'">The whole team</option>';
+          $out .= '<option value="'.$selectedTeam->id.'">The whole team</option>';
           foreach($allPlayers as $player) {
-            $out .= '<option value="'.$player->name.'">'.$player->title.'</option>';
+            $out .= '<option value="'.$player->id.'">'.$player->title.'</option>';
           }
           $out .= '</select>';
           // reportUrl is based on url segments : all|category/team|player/periodId?sort=title|lastName

@@ -971,12 +971,16 @@ function possibleDefense($team) {
 
 function calculate_average($arr) {
   $total = 0;
-  $count = count($arr); //total numbers in array
-  foreach ($arr as $value) {
-      $total = $total + $value; // total value of array numbers
+  if (count($arr) > 0) {
+    $count = count($arr); //total numbers in array
+    foreach ($arr as $value) {
+        $total = $total + $value; // total value of array numbers
+    }
+    $average = round($total/$count, 1); // get average value
+    return $average;
+  } else {
+    return '-';
   }
-  $average = round($total/$count, 1); // get average value
-  return $average;
 }
 
 function taskCount($taskName, $allEvents) {
@@ -1016,7 +1020,7 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $nbBonus = $player->initiative->count() + $player->extraHk->count() + $player->veryExtraHk->count();
   if ($nbBonus >= 10 || $player->ut->count() >= 50 || ($player->ut->count() >= 47 && $nbBonus == 9)) {
     $player->motivation = 'VV';
-  } else if (($nbBonus >= 5 && $nbBonus < 10) || ($player->ut->count() >= 20 && $player->ut->count() < 50) || ($player->ut->count() >= 18 && $player->ut->count() < 50 && $nbBonus == 4)) {
+  } else if (($nbBonus >= 5 && $nbBonus < 10) || ($player->ut->count() >= 20 && $player->ut->count() < 50) || (($player->ut->count() >= 18 && $player->ut->count() < 50) && $nbBonus == 4)) {
     $player->motivation = 'V';
   } else {
     $player->motivation = 'No bonus for the moment';

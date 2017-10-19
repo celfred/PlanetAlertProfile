@@ -1,41 +1,43 @@
 <?php
 
-if ($user->isSuperuser() || $user->isLoggedin() ) {
-
+$selected = $pages->get("id=$input->urlSegment2");
+if ($user->isSuperuser() || $user->isLoggedin()) {
   if (!$config->ajax) {
     include("./head_report.inc"); 
   }
 
   $reportTitle = '';
   $category = $input->urlSegment1;
-  $selected = $pages->get("name=$input->urlSegment2");
   $period = $pages->get("$input->urlSegment3");
   $sort = $input->get['sort'];
 
   $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat|oublis|group-items");
 
   if ($selected->template == 'player') { // Player's report
-    $player = $selected;
-    $global = false;
-    $reportTitle = '';
-    $reportType = '';
-    if ($category == 'all') { // Global report
-    } else { // Category report
-      $reportTitle .= "'".$category."' report.";
-      switch ($category) {
-        case 'participation' : $reportType = 'participation'; break;
-        case 'planetAlert' : $reportType = 'planetAlert'; break;
-        default: break;
+    if ($user->isSuperuser() || $selected->login == $user->name) {
+      $player = $selected;
+      $global = false;
+      $reportTitle = '';
+      $reportType = '';
+      if ($category == 'all') { // Global report
+      } else { // Category report
+        $reportTitle .= "'".$category."' report.";
+        switch ($category) {
+          case 'participation' : $reportType = 'participation'; break;
+          case 'planetAlert' : $reportType = 'planetAlert'; break;
+          default: $reportType =  'test';
+        }
       }
+      $reportTitle .= ' for '.$selected->title.' '.$selected->lastName.' ('.$selected->team->title.')'; 
+      $reportTitle .= '<br />';
+      $reportTitle .= 'Period : '.$period->title;
+      $reportTitle .= ' ('.date("d/m", $period->dateStart).' → '.date("d/m", $period->dateEnd).')';
+    } else {
+      echo "You can't see this page. If you think this is an error, contact the administrator.";
     }
-    $reportTitle .= ' for '.$selected->title.' '.$selected->lastName.' ('.$selected->team->title.')'; 
-    $reportTitle .= '<br />';
-    $reportTitle .= 'Period : '.$period->title;
-    $reportTitle .= ' ('.date("d/m", $period->dateStart).' → '.date("d/m", $period->dateEnd).')';
   } else { // Team's report
     $global = true;
-    $selected = strtoupper($input->urlSegment2);
-    $allPlayers = $pages->find("team.name=$selected, template=player, sort=$sort");
+    $allPlayers = $pages->find("team=$selected, template=player, sort=$sort");
     $reportTitle = '';
     $reportType = '';
     if ($category == 'all') { // Global report
@@ -48,7 +50,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
         default: break;
       }
     }
-    $reportTitle .= ' ('.$selected.' team)'; 
+    $reportTitle .= ' ('.$selected->title .' team)'; 
     $reportTitle .= '<br />';
     $reportTitle .= 'Period : '.$period->title;
     $reportTitle .= ' ('.date("d/m", $period->dateStart).' → '.date("d/m", $period->dateEnd).')';
@@ -62,18 +64,14 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
   if (!$global) { // Single Player report
     $player = $selected;
     switch($reportType) {
-    default: 
-      if ($user->isSuperuser() || $user->isLoggedin() == $player->login ) {
+      default: 
         include('./singlePlayerReport_default.inc');
-      } else {
-        echo 'Please log in to see this report.';
-      }
     }
   } else { // Team report
     switch($reportType) {
-    case 'participation': include('./globalReport_participation.inc'); break;
-    case 'planetAlert': include('./globalReport_planetAlert.inc'); break;
-    default: include('./globalReport_default.inc');
+      case 'participation': include('./globalReport_participation.inc'); break;
+      case 'planetAlert': include('./globalReport_planetAlert.inc'); break;
+      default: include('./globalReport_default.inc');
     }
   }
 
@@ -81,5 +79,7 @@ if ($user->isSuperuser() || $user->isLoggedin() ) {
     include("./foot.inc"); 
   }
 
+} else {
+  echo "You need to log in to see the reports.";
 }
 ?>

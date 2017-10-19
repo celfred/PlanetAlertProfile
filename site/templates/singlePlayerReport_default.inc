@@ -1,4 +1,3 @@
-
 <table class="report table">
   <tr>
     <td>
@@ -70,7 +69,7 @@
         $rr = 0;
         if ($nbEvents > 0) {
           foreach ($events as $index=>$event) {
-            $task = wire(pages)->get("$event->task");
+            $task = $pages->get("$event->task");
             if ($task->HP <= -5) {
               $rr += 1;
             }
@@ -111,12 +110,12 @@
           }
           $out .= ' - <span>'.$nbEvents.' évaluations</span> ';
 
-          if (!wire(input)->get['pages2pdf']) {
+          if (!$input->get['pages2pdf']) {
             $out .= ' [ <span data-toggle="tooltip" title="Positif (V+VV)">'.($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Négatif (R+RR)">'.($r+$rr).' <i class="glyphicon glyphicon-thumbs-down"></i></span> ]';
           } else {
             $out .= ' [<span>'.($v+$vv).' V+VV</span> <span>'.($r+$rr).' R+RR</span> ]';
           }
-          if ($abs != 0) {
+          if (isset($abs) && $abs != 0) {
             $out .= ' <span data-toggle="tooltip" data-html="true" title="Absences" class="absent">['.$abs.' abs.]</span>';
           }
           $out .= '</span>';
@@ -170,7 +169,7 @@
             if ($event->task->name != 'homework') {
               $eventTitle = $event->title;
               // Get rid of admin debugging comment [HP,GC...]
-              $eventTitle = ereg_replace(' (\[.*\])', '', $eventTitle);
+              $eventTitle = \preg_replace(' (\[.*\])', '', $eventTitle);
               $out .= '<li>';
               if ($event->task->HP < 0) {
                 $out .= '<i class="glyphicon glyphicon-thumbs-down"></i> ';

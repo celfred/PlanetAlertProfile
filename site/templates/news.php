@@ -206,7 +206,6 @@
               default: $class = '';
             }
             echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
-
             if ($player->partRatio != '-') {
               echo '<span data-toggle="tooltip" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
             }
@@ -315,7 +314,7 @@
             ?>
           </div>
           <div class="panel-footer text-right">
-          <p class="">End of period : <?php echo date("F j, Y", $officialPeriod->dateEnd) ?></p>
+          <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$officialPeriod->title; ?>  : from <?php echo date("F j, Y", $officialPeriod->dateStart) ?> to <?php echo date("F j, Y", $officialPeriod->dateEnd) ?></p>
           </div>
         </div>
 
