@@ -36,9 +36,9 @@
         }
         $out .= '<br />';
         if ( $xtHk->count() > 0) {
-          $out .= '<i class="glyphicon glyphicon-thumbs-up"></i> <span class=""> '.$xtHk->count().' travail supplémentaire rendu. C\'est bien.</span>';
+          $out .= '<i class="glyphicon glyphicon-thumbs-up"></i> <span class=""> Travail supplémentaire optionnel : '.$xtHk->count().' fois fait. C\'est bien.</span>';
         } else {
-          $out .= '<span class=""> Aucun travail supplémentaire rendu, c\'est dommage...</span>';
+          $out .= '<span class=""> Aucun travail supplémentaire (optionnel) fait, c\'est dommage...</span>';
         }
         break;
       case 'oublis' :
