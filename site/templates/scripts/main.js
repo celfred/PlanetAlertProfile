@@ -1,5 +1,4 @@
 $(document).ready(function() {
-
 	$('#scrollDown').on('click', function(e) {
 		e.preventDefault();
 		window.scrollBy(0,350);

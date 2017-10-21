@@ -168,66 +168,67 @@
         <div class="panel-heading">
         <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (U.T.) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Monster fights</span></h4>
         </div>
-        <div class="panel-body">
+        <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="helmetreport&playerId=<?php echo $playerPage->id; ?>">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
           <?php 
-            // UT report
-            $utConcernedMonsters = utReport($playerPage);
-            $never = $pages->count("template=exercise")-$utConcernedMonsters->count();
-            if ($utConcernedMonsters->count() > 0) {
-              echo '<p class="label label-primary">You have trained '.$utConcernedMonsters->first()->total.' times.</p>';
-              if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
-                echo '<ul class="utReport list-group list-unstyled">';
-                $trainingUrl = $pages->get("name=underground-training")->url.'?id=';
-                foreach ($utConcernedMonsters as $m) {
-                  echo '<li>';
-                  if ($m->isTrainable == 0) { // Not allowed because of spaced repetition.
-                    if ($m->waitForTrain == 1) {
-                      echo '<span data-toggle="tooltip" title="Available tomorrow !">'.$m->title.'</span> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
-                    } else {
-                      echo '<span data-toggle="tooltip" title="Available in '.$m->waitForTrain.' days">'.$m->title.'</span> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
-                    }
-                  } else {
-                    echo '<a href="'.$trainingUrl.$m->id.'">'.$m->title.'</a> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
-                  }
-                  echo ' [Last training : '.$m->lastFight.' days ago.]</span>';
-                  echo '</li>';
-                }
-                echo '<li class="label label-danger">You have NEVER trained on '.$never.' monsters.</li>';
-                echo '</ul>';
-              } else {
-                echo '<p>Details are private.</p>';
-              }
-            } else {
-              echo "<p>You have never used the Memory Helmet.</p>";
-            }
+            /* // UT report */
+            /* $utConcernedMonsters = utReport($playerPage); */
+            /* $never = $pages->count("template=exercise")-$utConcernedMonsters->count(); */
+            /* if ($utConcernedMonsters->count() > 0) { */
+            /*   echo '<p class="label label-primary">You have trained '.$utConcernedMonsters->first()->total.' times.</p>'; */
+            /*   if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user */
+            /*     echo '<ul class="utReport list-group list-unstyled">'; */
+            /*     $trainingUrl = $pages->get("name=underground-training")->url.'?id='; */
+            /*     foreach ($utConcernedMonsters as $m) { */
+            /*       echo '<li>'; */
+            /*       if ($m->isTrainable == 0) { // Not allowed because of spaced repetition. */
+            /*         if ($m->waitForTrain == 1) { */
+            /*           echo '<span data-toggle="tooltip" title="Available tomorrow !">'.$m->title.'</span> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT '; */
+            /*         } else { */
+            /*           echo '<span data-toggle="tooltip" title="Available in '.$m->waitForTrain.' days">'.$m->title.'</span> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT '; */
+            /*         } */
+            /*       } else { */
+            /*         echo '<a href="'.$trainingUrl.$m->id.'">'.$m->title.'</a> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT '; */
+            /*       } */
+            /*       echo ' [Last training : '.$m->lastFight.' days ago.]</span>'; */
+            /*       echo '</li>'; */
+            /*     } */
+            /*     echo '<li class="label label-danger">You have NEVER trained on '.$never.' monsters.</li>'; */
+            /*     echo '</ul>'; */
+            /*   } else { */
+            /*     echo '<p>Details are private.</p>'; */
+            /*   } */
+            /* } else { */
+            /*   echo "<p>You have never used the Memory Helmet.</p>"; */
+            /* } */
 
-            // Fights report
-            $playerConcernedMonsters = fightReport($playerPage);
-            if ($playerConcernedMonsters->count() > 0) {
-              echo '<p class="label label-primary">You have fought '.$playerConcernedMonsters->count().' monsters.</p>';
-              if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
-                echo '<ul class="utReport list-group list-unstyled">';
-                foreach ($playerConcernedMonsters as $m) {
-                  if ($m->isFightable == 0) {
-                    if ($m->lastTrainingInterval == 0) {
-                      echo '<li><span data-toggle="tooltip" title="Available tomorrow !">'.$m->title.'</span> : '.$m->fightsCount.' fights ';
-                    } else {
-                      echo '<li><span data-toggle="tooltip" title="Available in '.$m->waitForFight.' days">'.$m->title.'</span> : '.$m->fightsCount.' fights ';
-                    }
-                  } else {
-                    echo '<li><a href="'.$m->url.'">'.$m->title.'</a> : '.$m->fightsCount.' fights ';
-                  }
-                  echo '<span data-toggle="tooltip" data-html="true" title="Quality:'.$m->ratio.'<br /><span class=\'glyphicon glyphicon-thumbs-up\'></span>'.$m->positive.' / <span class=\'glyphicon glyphicon-thumbs-down\'></span>'.$m->negative.'">→ '.$m->average.'</span>';
-                  echo ' [Last fight : '.$m->lastFight.' days ago.]';
-                  echo '</li>';
-                }
-                echo '</ul>';
-              } else {
-                echo '<p>Details are private.</p>';
-              }
-            } else {
-              echo "<p>You haven't fought any monsters yet.</p>";
-            }
+            /* // Fights report */
+            /* $playerConcernedMonsters = fightReport($playerPage); */
+            /* if ($playerConcernedMonsters->count() > 0) { */
+            /*   echo '<p class="label label-primary">You have fought '.$playerConcernedMonsters->count().' monsters.</p>'; */
+            /*   if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user */
+            /*     echo '<ul class="utReport list-group list-unstyled">'; */
+            /*     foreach ($playerConcernedMonsters as $m) { */
+            /*       if ($m->isFightable == 0) { */
+            /*         if ($m->lastTrainingInterval == 0) { */
+            /*           echo '<li><span data-toggle="tooltip" title="Available tomorrow !">'.$m->title.'</span> : '.$m->fightsCount.' fights '; */
+            /*         } else { */
+            /*           echo '<li><span data-toggle="tooltip" title="Available in '.$m->waitForFight.' days">'.$m->title.'</span> : '.$m->fightsCount.' fights '; */
+            /*         } */
+            /*       } else { */
+            /*         echo '<li><a href="'.$m->url.'">'.$m->title.'</a> : '.$m->fightsCount.' fights '; */
+            /*       } */
+            /*       echo '<span data-toggle="tooltip" data-html="true" title="Quality:'.$m->ratio.'<br /><span class=\'glyphicon glyphicon-thumbs-up\'></span>'.$m->positive.' / <span class=\'glyphicon glyphicon-thumbs-down\'></span>'.$m->negative.'">→ '.$m->average.'</span>'; */
+            /*       echo ' [Last fight : '.$m->lastFight.' days ago.]'; */
+            /*       echo '</li>'; */
+            /*     } */
+            /*     echo '</ul>'; */
+            /*   } else { */
+            /*     echo '<p>Details are private.</p>'; */
+            /*   } */
+            /* } else { */
+            /*   echo "<p>You haven't fought any monsters yet.</p>"; */
+            /* } */
           ?>
         </div>
         <div class="panel-footer">
@@ -481,4 +482,3 @@
 
 <?php } ?>
 </div>
-
