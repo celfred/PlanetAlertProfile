@@ -1,8 +1,7 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
-  // Test player login
-  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test player login
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $player->team->forceHelmet == 1) {
@@ -13,11 +12,6 @@
     if ($helmet) {
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
-        // Display Personal Mission Analyzer
-        if (!$user->isSuperuser()) {
-          echo pma($player);
-        }
-
         // Set all available monsters
         if ($user->isSuperuser()) {
           $allMonsters = $pages->find('template=exercise, sort=name, include=all');
@@ -62,22 +56,21 @@
           $out .= '</tr>';
           $out .= '</thead>';
           $out .= '<tbody>';
-        $date1 = new \DateTime("today");
+        $today = new \DateTime("today");
         foreach($allMonsters as $m) {
           if (!$user->isSuperuser()) {
-            $m = isTrainingAllowed($player, $m);
+            $m = setMonstersActivity($player, $m);
           } else { // Never trained (for admin)
             $m->isTrainable = 1;
-            $m->lastTrainingDate = 0;
-            $m->interval = -1;
-            $m->spaced = 0;
+            $m->lastTrainingInterval = -1;
+            $m->waitForTrain = 0;
           }
           $out .= '<tr>';
           $out .= '<td>';
           $out .= $m->title;
           // Find # of days compared to today to set 'New' indicator
           $date2 = new \DateTime(date("Y-m-d", $m->published));
-          $interval = $date1->diff($date2);
+          $interval = $today->diff($date2);
           if ($interval->days < 7) {
             $out .= ' <span class="badge">New</span>';
           }
@@ -193,30 +186,29 @@
           $out .= '</td>';
           // Last training session date
           $out .= '<td>';
-          if ($m->lastTrainingDate != 0) {
-            switch ($m->interval) {
-              case 0 :
-                $out .= "Today !";
-                break;
-              case 1 : 
-                $out .= "1 day ago.";
-                break;
-              default:
-                $out .= $m->interval . " days ago.";
-                break;
-            }
-          } else {
-            $out .= "Not trained yet.";
+          switch ($m->lastTrainingInterval) {
+            case 0 :
+              $out .= "Today !";
+              break;
+            case 1 : 
+              $out .= "1 day ago.";
+              break;
+            case '-1' :
+              $out .= "Not trained yet.";
+              break;
+            default:
+              $out .= $m->lastTrainingInterval . " days ago.";
+              break;
           }
           $out .= '</td>';
           $out .= '<td>';
-          if ($m->isTrainable != 0 && $m->spaced == 0) {
-            $out .= ' <a class="label label-sm label-primary" href="'.$page->url.'?id='.$m->id.'">Put the helmet on!</a>';
+          if ($m->isTrainable == 1) {
+            $out .= ' <a class="btn btn-primary" href="'.$page->url.'?id='.$m->id.'"><i class="glyphicon glyphicon-headphones"></i> Put the helmet on!</a>';
           } else {
-            if ($m->spaced == 1) {
+            if ($m->waitForTrain == 1) { // Trained today
               $out .= 'Come back tomorrow ;)';
             } else {
-              $out .= 'Come back in '.$m->spaced.' days ;)';
+              $out .= 'Come back in '.$m->waitForTrain.' days ;)';
             }
           }
           $out .= '</td>';
@@ -245,11 +237,10 @@
         $redirectUrl = $pages->get('name=underground-training')->url;
 
         if (!$user->isSuperuser()) {
-          $monster = isTrainingAllowed($player, $monster);
+          $monster = setMonstersActivity($player, $monster);
         } else { // Never trained (for admin)
           $monster->isTrainable = 1;
-          $monster->lastTrainingDate = 0;
-          $monster->interval = -1;
+          $monster->lastTrainingInterval = -1;
           $monster->spaced = 0;
         }
         if ($monster->isTrainable == 0) { // Not allowed because of spaced repetition.

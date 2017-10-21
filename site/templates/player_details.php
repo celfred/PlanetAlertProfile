@@ -6,7 +6,7 @@
   } else {
     $playerPlacesNb = 0;
   }
-  if ($playerPlacesNb->people) {
+  if ($playerPage->people) {
     $playerPeopleNb = $playerPage->people->count();
   } else {
     $playerPeopleNb = 0;
@@ -181,7 +181,11 @@
                 foreach ($utConcernedMonsters as $m) {
                   echo '<li>';
                   if ($m->isTrainable == 0) { // Not allowed because of spaced repetition.
-                    echo '<span data-toggle="tooltip" title="Available in '.$m->spaced.' days">'.$m->title.'</span> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
+                    if ($m->waitForTrain == 1) {
+                      echo '<span data-toggle="tooltip" title="Available tomorrow !">'.$m->title.'</span> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
+                    } else {
+                      echo '<span data-toggle="tooltip" title="Available in '.$m->waitForTrain.' days">'.$m->title.'</span> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
+                    }
                   } else {
                     echo '<a href="'.$trainingUrl.$m->id.'">'.$m->title.'</a> : <span data-toggle="tooltip" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
                   }
@@ -204,8 +208,12 @@
               if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
                 echo '<ul class="utReport list-group list-unstyled">';
                 foreach ($playerConcernedMonsters as $m) {
-                  if ($m->isFightable == 0 && $m->interval!=-1) {
-                    echo '<li><span data-toggle="tooltip" title="Available in '.$m->spaced.' days">'.$m->title.'</span> : '.$m->fightsCount.' fights ';
+                  if ($m->isFightable == 0) {
+                    if ($m->lastTrainingInterval == 0) {
+                      echo '<li><span data-toggle="tooltip" title="Available tomorrow !">'.$m->title.'</span> : '.$m->fightsCount.' fights ';
+                    } else {
+                      echo '<li><span data-toggle="tooltip" title="Available in '.$m->waitForFight.' days">'.$m->title.'</span> : '.$m->fightsCount.' fights ';
+                    }
                   } else {
                     echo '<li><a href="'.$m->url.'">'.$m->title.'</a> : '.$m->fightsCount.' fights ';
                   }

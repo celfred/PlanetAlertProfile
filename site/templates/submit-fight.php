@@ -18,11 +18,11 @@
       }
 
       if ($monster->id && $player->id && $task->id) {
+        $monster = setMonstersActivity($player, $monster);
         $task->comment = $monster->title.' [+'.$result.'U.T.]';
         $task->refPage = $monster;
         $task->linkedId = false;
         // test if training is possible
-        $monster = isTrainingAllowed($player, $monster);
         if ($monster->isTrainable == 0 || $monster->spaced != 0) {
           // Record to log file
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result. ' - Training not allowed!';
@@ -76,12 +76,12 @@
 
       echo 'Before Saving';
       if ($monster->id && $player->id && $task->id) {
+        $monster = setMonstersActivity($player, $monster);
         // Update player's scores
         $task->comment = $monster->title.' ['.$result.']';
         $task->refPage = $monster;
         $task->linkedId = false;
         // test if fight is possible
-        $monster = isFightAllowed($player, $monster);
         if ($monster->isFightable == 0) {
           // Record to log file
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality.' - Fight not allowed!';

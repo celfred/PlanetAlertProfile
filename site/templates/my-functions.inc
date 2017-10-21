@@ -1141,84 +1141,87 @@ function getScoreboard($player, $field, $limit=5) {
   return array($topPlayers, $prevPlayers, $playerPos, $allPlayers->count);
 }
 
-function isTrainingAllowed($player, $monster) {
-  $utGain = utGain($monster, $player);
-  $prevTrainings = $player->find("template=event,task.name=ut-action-v|ut-action-vv, refPage=$monster->id, sort=-date");
-  if ($utGain > 0) { // Already trained
+function setMonstersActivity($player, $monster) {
+  $today = new \DateTime("today");
+  // Init variables
+  $monster->spacedTrainingsAllowed = -1;
+  $monster->lastTrainingInterval = -1;
+  $monster->lastFightDate = 0;
+  $monster->spacedFightsAllowed = -1;
+  $monster->waitForTrain = -1;
+  $monster->waitForFight = -1;
+  $monster->lastFightInterval = -1;
+  $minUt = 20; // Previous training required to be able to fight
+  $spacedFights = 15; // 15 days between fights
+
+  // Check activity
+  $monster->utGain = utGain($monster, $player);
+  if ($monster->utGain) { // Already trained
+    // Check trainings/fights
+    $prevTrainings = $player->find("template=event,task.name=ut-action-v|ut-action-vv, refPage=$monster, sort=-date");
+    $allFights = $player->find("template=event, task.name=test-vv|test-v|test-r|test-rr, refPage=$monster, sort=-date");
+    $monster->allFightsNb = $allFights->count();
+
+    // Set training possibilities
     $lastTraining = $prevTrainings->first();
     // Find # of days compared to today
-    $date1 = new \DateTime("today");
     $date2 = new \DateTime(date("Y-m-d", $lastTraining->date));
-    $interval = $date1->diff($date2);
+    $interval = $today->diff($date2);
+    $monster->lastTrainingInterval = $interval->days;
     // Set spaced repetition according to monster's level?
     if ($monster->level >= 1 ) { // For the moment, all levels
-      // Limit to 1 training session a day if prevTrainings<5
-      // Limit to 1 training session a week if prevTrainings<10
-      // Limit to 1 training session a month if prevTrainings>15
-      if ($prevTrainings->count() > 0 && $prevTrainings->count() <= 5) {
-        $spaced = 1;
+      // Limit to 1 training session a day if prevTrainings<=5
+      // Limit to 1 training session a week if prevTrainings<=10
+      // Limit to 1 training session a month if prevTrainings>=15
+      if ($prevTrainings->count() >= 0 && $prevTrainings->count() <= 5) {
+        $spacedTrainings = 1;
       }
       if ($prevTrainings->count() > 5 && $prevTrainings->count() <= 10) {
-        $spaced = 7;
+        $spacedTrainings = 7;
       }
       if ($prevTrainings->count() > 10) {
-        $spaced = 30;
+        $spacedTrainings = 30;
       }
     }
-    $monster->lastTrainingDate = $lastTraining->date;
-    $monster->interval = $interval->days;
-    $monster->utGain = $utGain;
-    if ($interval->days < $spaced && $interval->days!= 0) {
+    if ($interval->days < $spacedTrainings && $interval->days!= 0) { // Trained recently
       $monster->isTrainable = 0;
-      $nbDays = $spaced-$interval->days;
-      $monster->spaced = $nbDays;
-    } else if ($interval->days == 0) { // Today's training
-      $monster->isTrainable = 2;
-      $monster->spaced = $spaced;
-    } else {
+      $nbDays = $spacedTrainings-$interval->days;
+      $monster->spacedTrainingsAllowed = $nbDays;
+      $monster->waitForTrain = $spacedTrainings-$interval->days;
+    } else if ($interval->days == 0) { // Trained today
+      $monster->isTrainable = 0;
+      $monster->spacedTrainingsAllowed = $spacedTrainings;
+      $monster->waitForTrain = $spacedTrainings;
+      $monster->isFightable = 0; // Monster is not foghtable
+    } else { // Monster is trainable
       $monster->isTrainable = 1;
-      $monster->spaced = 0;
+      $monster->spacedTrainingsAllowed = 0;
+      $monster->waitForTrain = 0;
+    }
+
+    if ($monster->utGain >= $minUt) { // Minimum training reached
+      // Set fights possibilities
+      $lastFight = $allFights->first();
+      if ($lastFight) { // Monster has been fought
+        // Find # of days compared to today
+        $date2 = new \DateTime(date("Y-m-d", $lastFight->date));
+        $interval = $today->diff($date2);
+        if ($interval->days < $spacedFights || $monster->lastTrainingInterval == 0) { // Monster fought/trained recently
+          $monster->isFightable = 0;
+        } else { // Monster is fightable
+          $monster->isFightable = 1;
+        }
+        $monster->lastFightDate = $lastFight->date;
+        $monster->lastFightInterval = $interval->days;
+        $monster->spacedFightsAllowed = $spacedFights-$interval->days;
+        $monster->waitForFight = $spacedFights-$interval->days;
+      } else { // Never fought
+        $monster->isFightable = 1;
+      }
     }
   } else { // Never trained
     $monster->isTrainable = 1;
-    $monster->lastTrainingDate = 0;
-    $monster->interval = -1;
-    $monster->spaced = 0;
-  }
-  return $monster;
-}
-
-function isFightAllowed($player, $monster) {
-  $minUt = 20; // Previous training required to be able to fight
-  $spaced = 15; // 15 days between fights
-  $utGain = utGain($monster, $player);
-  $monster->utGain = $utGain;
-  if ($utGain >= $minUt) { // Player has trained enough
-    // Check last fight interval
-    $allFights = $player->find("template=event, task.name=test-vv|test-v|test-r|test-rr, refPage=$monster, sort=-date");
-    $lastFight = $allFights->first();
-    if ($lastFight) {
-      $monster->allFightsNb = $allFights->count();
-      // Find # of days compared to today
-      $date1 = new \DateTime("today");
-      $date2 = new \DateTime(date("Y-m-d", $lastFight->date));
-      $interval = $date1->diff($date2);
-      $monster->lastFightDate = $lastFight->date;
-      $monster->interval = $interval->days;
-      if ($interval->days < $spaced) {
-        $monster->isFightable = 0;
-      } else {
-        $monster->isFightable = 1;
-      }
-      $monster->spaced = $spaced-$interval->days;
-    } else { // Never fought
-      $monster->isFightable = 1;
-      $monster->lastFightDate = 0;
-      $monster->interval = -1;
-    }
-  } else {
     $monster->isFightable = 0;
-    $monster->interval = -1;
   }
   return $monster;
 }
@@ -1249,7 +1252,7 @@ function utReport($player, $monster = false) {
         $m->total = $allEvents->count();
         $m->utGain= utGain($m, $player);
         // Set monster status
-        $m = isTrainingAllowed($player, $m);
+        $m = setMonstersActivity($player, $m);
       }
       $allConcernedMonsters->sort("lastFight, -utGain");
     }
@@ -1297,7 +1300,7 @@ function fightReport($player, $monster = false) {
           if ($m->ratio <= -0.4) { $m->average = '<span class="label label-danger">RR</span>'; }
         }
         // Set monster status
-        $m = isFightAllowed($player, $m);
+        $m = setMonstersActivity($player, $m);
       }
       $allConcernedMonsters->sort("lastFight, -fightsCount");
     }
@@ -1363,8 +1366,7 @@ function pma($player) {
   }
   if ($player->equipment->has('name=memory-helmet')) {
     foreach($allMonsters as $m) {
-      $m = isTrainingAllowed($player, $m);
-      $m = isFightAllowed($player, $m);
+      $m = setMonstersActivity($player, $m);
     }
   }
   $suggestedFights = $allMonsters->find("isFightable=0, interval=0, sort=random, limit=3"); // Pick today's fights first to check for today's mission
@@ -1379,10 +1381,10 @@ function pma($player) {
   $suggestedTrainings = $allMonsters->find("isTrainable=2, sort=name, limit=3");
   if ($suggestedTrainings->count() < 3) {
     $n = 3-$suggestedTrainings->count();
-    $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingDate=0, level=$levels, sort=random, limit=$n"));
+    $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingInterval=-1, level=$levels, sort=random, limit=$n"));
     if ($suggestedTrainings->count() < 3) {
       $n = 3-$suggestedTrainings->count();
-      $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingDate!=0, level=$levels, sort=lastTrainingDate, limit=$n"));
+      $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingInterval!=-1, level=$levels, sort=-lastTrainingInterval, limit=$n"));
     }
   }
 
@@ -1461,7 +1463,7 @@ function pma($player) {
         } else {
           $mini = '';
         }
-        if ($m->interval == 0) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
+        if ($m->interval == 0 || $m->lastTrainingInterval == 0) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought/Trained today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
         $out .= '<a href="'.$m->url.'" class="btn btn-sm btn-danger" '.$style.' data-toggle="tooltip" data-html="true">'.$mini.' '.$m->title.' '.$tag.'</a> ';
       }
     } else {

@@ -25,8 +25,18 @@ $allCategories = $pages->find("parent.name=topics, sort=name");
       $helmet = $player->equipment->get('memory-helmet');
     }
     if ($helmet) {
+      $helmet = $pages->get("name=memory-helmet");
       echo '<div class="well text-center">';
-      echo '<h4><a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a></h4>';
+      echo '<h4>';
+      if ($helmet->image) {
+        echo '<img class="" src="'.$helmet->image->getCrop('small')->url.'" alt="Helmet" />';
+      }
+      echo ' <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a> / ';
+      echo '<a href="'.$pages->get("name=fighting-zone")->url.'">Go to the Fighting Zone !</a>';
+      if ($helmet->image) {
+        echo ' <img class="" src="'.$helmet->image->getCrop('small')->url.'" alt="Helmet" />';
+      }
+      echo '</h4>';
       echo '</div>';
     } else {
       echo '<div class="well text-center">';
