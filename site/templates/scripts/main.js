@@ -391,95 +391,6 @@ $(document).ready(function() {
 			$(this).tooltip('hide');
 	});
 
-  $('#mapTable').DataTable({
-    dom: 'ft',
-    paging: false,
-    order: [[ 0, "asc"]]
-  });
-  var trainingTable = $('#trainingTable').DataTable({
-    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
-    order: [[ 2, "asc"], [1, "asc"]]
-  });
-  var historyTable = $('#historyTable').DataTable({
-    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
-    order: [[ 0, "desc"]]
-  });
-  var taskTable = $('#taskTable').DataTable({
-    dom: 'ft',
-    paging: false,
-    order: [[ 0, "asc"]]
-  });
-  var mainShop = $('#mainShop').DataTable({
-    dom: 'ft',
-    paging: false,
-    order: [[ 0, "asc"]]
-  });
-  var shopAdminTable = $('#shopAdminTable').DataTable({
-    paging: false,
-    order: [[ 0, "asc"]]
-  });
-  $('#freeWorld').DataTable({
-    dom: 'ft',
-    paging: false,
-    order: [[ 6, "desc" ]]
-  });
-  $('#teamTable').DataTable({
-    paging: false,
-    searching: false,
-    columnDefs: [{ "orderable": false, "targets": 1 },
-      { "orderable": false, "targets": 4}],
-    order: [[ 3, "desc" ]]
-  });
-  var adminTable = $('#adminTable').DataTable({
-    dom: 't',
-    paging: false,
-    order: [[ 1, "asc" ]],
-    orderCellsTop: true,
-    searching: false,
-    "columnDefs": [ {
-      "targets": "task",
-      "orderable": false
-    } ]
-  });
-  var monstersTable = $('#monstersTable').DataTable({
-    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
-    order: [[ 2, "asc"], [0, "asc"]],
-    orderCellsTop: true
-  });
-  var loggedTable = $('#loggedTable').DataTable({
-    lengthMenu: [ [25, 50, -1], [25, 50, 75, 100, "All"] ],
-    order: [[ 1, "desc"]],
-    orderCellsTop: true
-  });
-
-  $('.categoryFilter').click(function(){
-    mainShop.draw();
-    taskTable.draw();
-    historyTable.draw();
-    monstersTable.draw();
-    trainingTable.draw();
-  });		    
-    
-  $('a.toggle-vis').on( 'click', function (e) {
-    e.preventDefault();
-    // Show all columns
-    adminTable.columns( ).visible( true, false );
-    // Get the column API object
-    var category = $(this).attr('data-category');
-    if (category !== '') {
-      // Get columns index of the category
-      var allColumns = $("#adminTable th[data-category='"+ category +"']");
-      var indexHidden = new Array();
-      $('#adminTable th.task').each( function(index) {
-        if ( $(this).attr('data-category') !== category && $(this).attr('data-keepVisible') != 'true' ) { // Nothing is checked in this column : hide it
-          indexHidden.push(index+2);
-        }
-      });
-      adminTable.columns( indexHidden ).visible( false, false );
-      //adminTable.columns.adjust().draw( false ); // adjust column sizing and redraw
-    }
-  });
-
 	// Monster invasions
   $('#toggle').on('click', function() {
     $('#quizMenu').toggleClass('shown');
@@ -773,14 +684,111 @@ $(document).ready(function() {
 	function getContentFromAjax(url, el) {
 		var id = el.attr('data-id');
     $.get(url+'?id='+id, function(data) { 
-        el.html(data); 
-				el.children('[data-toggle="tooltip"]').tooltip();
+			el.html(data); 
+			el.children('[data-toggle="tooltip"]').tooltip();
+			initTables();
     }); 
     return false; 
 	}
 
+	// Gallery function
 	if ($('.grid').length > 0) { $('.grid').masonry(); }
+	
+	// Init tables if needed
+	if ($('table').length > 0) { initTables(); }
 }); 
+
+// Tables init
+var initTables = function() {
+  $('#mapTable').DataTable({
+    dom: 'ft',
+    paging: false,
+    order: [[ 0, "asc"]]
+  });
+  var trainingTable = $('#trainingTable').DataTable({
+    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+    order: [[ 2, "asc"], [1, "asc"]]
+  });
+  var historyTable = $('#historyTable').DataTable({
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+    order: [[ 0, "desc"]]
+  });
+  var taskTable = $('#taskTable').DataTable({
+    dom: 'ft',
+    paging: false,
+    order: [[ 0, "asc"]]
+  });
+  var mainShop = $('#mainShop').DataTable({
+    dom: 'ft',
+    paging: false,
+    order: [[ 0, "asc"]]
+  });
+  var shopAdminTable = $('#shopAdminTable').DataTable({
+    paging: false,
+    order: [[ 0, "asc"]]
+  });
+  $('#freeWorld').DataTable({
+    dom: 'ft',
+    paging: false,
+    order: [[ 6, "desc" ]]
+  });
+  $('#teamTable').DataTable({
+    paging: false,
+    searching: false,
+    columnDefs: [{ "orderable": false, "targets": 1 },
+      { "orderable": false, "targets": 4}],
+    order: [[ 3, "desc" ]]
+  });
+  var adminTable = $('#adminTable').DataTable({
+    dom: 't',
+    paging: false,
+    order: [[ 1, "asc" ]],
+    orderCellsTop: true,
+    searching: false,
+    "columnDefs": [ {
+      "targets": "task",
+      "orderable": false
+    } ]
+  });
+  var monstersTable = $('#monstersTable').DataTable({
+    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+    order: [[ 2, "asc"], [0, "asc"]],
+    orderCellsTop: true
+  });
+  var loggedTable = $('#loggedTable').DataTable({
+    lengthMenu: [ [25, 50, -1], [25, 50, 75, 100, "All"] ],
+    order: [[ 1, "desc"]],
+    orderCellsTop: true
+  });
+
+  $('.categoryFilter').click(function(){
+    mainShop.draw();
+    taskTable.draw();
+    historyTable.draw();
+    monstersTable.draw();
+    trainingTable.draw();
+  });		    
+    
+  $('a.toggle-vis').on( 'click', function (e) {
+    e.preventDefault();
+    // Show all columns
+    adminTable.columns( ).visible( true, false );
+    // Get the column API object
+    var category = $(this).attr('data-category');
+    if (category !== '') {
+      // Get columns index of the category
+      var allColumns = $("#adminTable th[data-category='"+ category +"']");
+      var indexHidden = new Array();
+      $('#adminTable th.task').each( function(index) {
+        if ( $(this).attr('data-category') !== category && $(this).attr('data-keepVisible') != 'true' ) { // Nothing is checked in this column : hide it
+          indexHidden.push(index+2);
+        }
+      });
+      adminTable.columns( indexHidden ).visible( false, false );
+      //adminTable.columns.adjust().draw( false ); // adjust column sizing and redraw
+    }
+  });
+}
 
 // Hide rows functions
 $.fn.dataTable.ext.search.push(

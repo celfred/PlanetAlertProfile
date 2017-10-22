@@ -393,8 +393,7 @@
           $out .= '<span class="alert alert-warning">No groups are set. This item will be individual !</span>';
         }
         break;
-      case 'helmetreport' :
-        // UT report
+      case 'helmetreport' : // UT report
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
         $utConcernedMonsters = utReport($playerPage);
@@ -454,6 +453,70 @@
         } else {
           echo "<p>You haven't fought any monsters yet.</p>";
         }
+        break;
+      case 'history' :
+        $playerId = $input->get('playerId');
+        $playerPage = $pages->get("id=$playerId");
+        $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
+        $allCategories = new PageArray();
+        foreach ($allEvents as $e) {
+          if (isset($e->task->category)) {
+            $allCategories->add($e->task->category);
+            $allCategories->sort("title");
+          }
+        }
+        $out .= '<div id="Filters" data-fcolindex="2" class="text-center">';
+        $out .= ' <ul class="list-inline well">';
+        foreach ($allCategories as $c) {
+          $out .= '<li><label for="'.$c->name.'" class="btn btn-primary btn-xs">'.$c->title.' <input type="checkbox" value="'.$c->title.'" class="categoryFilter" name="categoryFilter" id="'.$c->name.'"></label></li>';
+        }
+        $out .= '</ul>';
+        $out .= '</div>';
+        $out .= ' <table id="historyTable" class="table table-condensed table-hover">';
+        $out .= '  <thead>';
+        $out .= '    <tr>';
+        $out .= '    <th>Date</th>';
+        $out .= '    <th>+/-</th>';
+        $out .= '    <th>Category</th>';
+        $out .= '    <th>Title</th>';
+        $out .= '    <th>Comment</th>';
+        $out .= '  </tr>';
+        $out .= '  </thead>';
+        $out .= '  <tbody>';
+        foreach($allEvents as $event) {
+          if ($event->task->XP > 0 || ($event->task->category->name === 'place' || $event->task->category->name === 'shop' || $event->task->name === 'positive-collective-alchemy') ) {
+            $class = '+';
+          } else {
+            $class = '-';
+          }
+          $out .= '<tr>';
+          $out .= '<td data-order='.$event->date.'>';
+          if ($event->date != '') {
+            $out .= date('d/m', $event->date);
+          } else {
+            $out .= 'Date error!';
+          }
+          $out .= '</td>';
+          $out .= '<td>';
+          $out .= $class;
+          $out .= '</td>';
+          $out .= '<td>';
+          $out .= $event->task->category->title;
+          if ($event->name == 'freeing') {
+            if ($event->refPage->template == 'place') { $out .= 'Place'; }
+            if ($event->refPage->template == 'people') { $out .= 'People'; }
+          }
+          $out .= '</td>';
+          if ($user->isSuperuser()) {
+            $out .= '<td>'.$event->title.'</td>';
+          } else {
+            $out .= '<td>'.$event->task->title.'</td>';
+          }
+          $out .= '<td>'.$event->summary.'</td>';
+          $out .= '</tr>';
+        }
+        $out .= ' </tbody>';
+        $out .= '</table>';
         break;
       default :
         $out = 'Todo...';
