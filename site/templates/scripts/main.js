@@ -727,11 +727,6 @@ var initTables = function() {
     paging: false,
     order: [[ 0, "asc"]]
   });
-  $('#freeWorld').DataTable({
-    dom: 'ft',
-    paging: false,
-    order: [[ 6, "desc" ]]
-  });
   $('#teamTable').DataTable({
     paging: false,
     searching: false,

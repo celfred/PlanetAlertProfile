@@ -579,6 +579,33 @@ tr.completed {
 tr.almost {
   background: orange;
 }
+.freeWorld div {
+	display: inline;
+}
+img.completed {
+	width: 140px;
+	height: 140px;
+	border: 3px solid #000;
+	padding: 5px;
+	background: green;
+	margin: 7px;
+}
+img.almost {
+	width: 100px;
+	height: 100px;
+	border: 2px solid #000;
+	padding: 4px;
+	background: orange;
+	margin: 7px;
+}
+img.far {
+	width: 70px;
+	height: 70px;
+	border: 1px solid #000;
+	padding: 3px;
+	background: red;
+	margin: 7px;
+}
 img.align_right {
   float: right;
 }

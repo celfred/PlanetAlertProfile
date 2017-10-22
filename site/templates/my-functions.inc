@@ -889,7 +889,11 @@ function teamFreeworld($team) {
   $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
   // Get all possible elements
   $allElements = new pageArray();
-  $rank = $team->rank->name;
+  if ($team->name == 'no-team' || !isset($team->rank)) {
+    $rank = '3emes';
+  } else {
+    $rank = $team->rank->name;
+  }
   if ($rank == '4emes' || $rank == '3emes') {
     $allPlaces = $pages->find("template=place, name!=places");
     $allElements->add($allPlaces);
@@ -909,7 +913,7 @@ function teamFreeworld($team) {
     }
     if ($teamOwners->count() >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'almost'; }
     if ($teamOwners->count() >= $teamRate) { $el->completed = 1; $el->cssClass = 'completed'; }
-    if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = ''; }
+    if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = 'far'; }
     $el->teamOwners = $teamOwners;
   }
   $allElements->sort("-completed, level, title");

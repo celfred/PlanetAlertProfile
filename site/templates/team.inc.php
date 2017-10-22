@@ -81,7 +81,9 @@
 
   // Nav tabs
   $team = $pages->get("template=team, name=$input->urlSegment1");;
-  include("./tabList.inc"); 
+  if ($user->isSuperuser()) {
+    include("./tabList.inc"); 
+  }
 
   if ($input->urlSegment1 != 'no-team') {
     if ($user->isLoggedin() && !$user->isSuperuser()) {

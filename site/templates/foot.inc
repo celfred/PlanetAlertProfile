@@ -35,7 +35,7 @@
 		<script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.min.js'></script>
 		<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.css">
   <?php } ?>
-  <?php if ($page->template == 'hall-of-fame') { ?>
+  <?php if ($page->is("template=hall-of-fame")) { ?>
 		<script src="<?php echo $config->urls->templates?>bower_components/masonry/dist/masonry.pkgd.min.js"></script>
   <?php } ?>
   <?php if ($page->is("template=quiz|main-office")) { ?>

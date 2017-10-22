@@ -96,6 +96,7 @@
 									echo "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team->name)}'>{$team->title} marketplace</a></li>";
 									echo "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team->name)}'>{$team->title} adminTable</a></li>";
 									echo "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team->name)}'>{$team->title} monster invasions</a></li>";
+									echo "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team->name)}'>{$team->title} Free World</a></li>";
 									echo "</ul>";
 									echo "</li>";
 								}
@@ -249,11 +250,22 @@
             echo "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
             $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
             echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}/{$player->name}'>My Profile</a>";
-						if ($player->team != '') {
-							$class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == '') ? "on" : "";
-							echo "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}'>My Team</a>";
-						}
           ?>
+
+          <div class="btn-group">
+						<?php $class = ($page->is("name=players|main-office|world") && $input->urlSegment2 == '') ? "on" : ""; ?>
+            <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Team <span class="caret"> </span></button>
+            <ul class="dropdown-menu">
+              <?php
+              $class = $page->name == 'main-office' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=main-office')->url}{$player->team->name}'><span class='glyphicon glyphicon-eye-open'></span> - Main Office</a></li>";
+              $class = $page->name == 'players' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}'><span class='glyphicon glyphicon-th-list'></span> - List </a></li>";
+              $class = $page->name == 'world' ? " class='selected-left'" : "";
+              echo "<li><a$class href='{$pages->get('name=world')->url}{$player->team->name}'><span class='glyphicon glyphicon-flag'></span> - Free World</a></li>";
+							?>
+            </ul>
+          </div>
 
           <div class="btn-group">
             <?php $class = $page->is("name=shop_generator|makedonation") ? "on" : ""; ?>

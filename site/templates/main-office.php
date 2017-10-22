@@ -9,9 +9,9 @@
   } else {
     $allPlayers = $pages->find("team=$team")->sort("-karma");
   }
-  include("./tabList.inc");
 
   if ($user->isSuperuser()) {
+    include("./tabList.inc");
     $pickFromList = 'pickFromList';
   } else {
     $pickFromList = '';
