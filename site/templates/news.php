@@ -12,84 +12,243 @@
     $player = $pages->get("login=$user->name");
     echo pma($player);
   }
-
 ?>
 
 <div class="row">
-  <div class="col-sm-4">
-    <div id="" class="panel panel-success">
-      <div class="panel-heading">
-      <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-      <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
-      </div>
-      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="karma">
-        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-      </div>
-    </div>
+  <div class="col-sm-6">
+    <?php if ($user->isLoggedin() && !$user->isSuperuser()) { ?>
+        <?php
+        // Get last 10 players's events
+        $allEvents = $player->child("name=history")->find("template=event,sort=-created,limit=10");
+        ?>
+        <div id="" class="news panel panel-primary">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
+              Last 10 events in your personal history
+            </h4>
+          </div>
+          <div class="panel-body">
+            <ul class="list-unstyled">
+            <?php
+              if ($allEvents->count() > 0) {
+                foreach ($allEvents as $event) {
+                  if ($event->task->HP < 0) {
+                    $className = 'negative';
+                    $sign = '';
+                    $signicon = '<span class="glyphicon glyphicon-minus-sign"></span> ';
+                  } else {
+                    $className = 'positive';
+                    //$className = '';
+                    $sign = '+';
+                    $signicon = '<span class="glyphicon glyphicon-plus-sign"></span> ';
+                  }
+                  echo '<li class="'.$className.'">';
+                  echo $signicon;
+                  echo date("F j (l)", $event->date).' : ';
+                  /* echo '<span data-toggle="tooltip" title="XP" class="badge badge-success">'.$sign.$event->task->XP.'</span><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '; */
+                  /* echo '<span data-toggle="tooltip" title="GC" class="badge badge-default">'.$sign.$event->task->GC.'</span><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '; */
+                  if ($className == 'negative') {
+                    echo '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'</span><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> ';
+                  }
+                  echo $event->task->title;
+                  echo ' ['.$event->summary.']';
+                  echo '</li>';
+                };
+              } else {
+                echo 'No personal history yet...';
+              }
+            ?>
+            </ul>
+          </div>
+          <div class="panel-footer text-right">
+          <p>To see your complete history, go the the <a href="<?php echo $pages->get('/players')->url.$player->team->name.'/'.$player->name; ?>">'My Profile'</a> page.</p>
+          </div>
+        </div>
 
-    <div class="panel panel-success">
-      <div class="panel-heading">
-        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Places</h4>
-      </div>
-      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="places">
-        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-      </div>
-    </div>
+        <?php
+          // Most active players
+          $top = $allPlayers->sort('-yearlyKarma, karma')->find("limit=10, yearlyKarma>0");
+          $out = '';
+          $out .= '<div class="row">';
+          $out .= '<div class="col-sm-6">';
+          if ($top->count() != 0) {
+            $topList = $top->implode(', ', '{id}');
+            $out .= '<div id="" class="board panel panel-primary">';
+            $out .= '<div class="panel-heading">';
+            $out .= '<h4><span class="label label-primary">Team most active players !</span></h4>';
+            $out .= '</div>';
+            $out .= '<ol class="">';
+            foreach ($top as $p) {
+              $out .= '<li>';
+              if ($p->avatar) { $out .= '<img src="'.$p->avatar->getCrop('mini')->url.'" alt="avatar" />'; }
+              $out .= $p->title;
+              $out .= '</li>';
+            }
+            $out .= '</ol>';
+            $out .= '</div>';
+          }
+          $out .= '</div>';
 
-    <div class="panel panel-success">
-      <div class="panel-heading">
-        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of People</h4>
-      </div>
-      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="people">
-        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-      </div>
-    </div>
+          // Help needed
+          $out .= '<div class="col-sm-6">';
+          $out .= '<div id="" class="board panel panel-primary">';
+          $out .= '<div class="panel-heading">';
+            $dangerPlayers = $allPlayers->find('coma=1');
+            $dangerPlayers->add($allPlayers->find("HP<=10"))->sort("coma, HP");
+            $out .= '<p class="panel-title">Help needed!</p>';
+          $out .= '</div>';
+          $out .= '<div class="panel-body">';
+            if ($dangerPlayers->count() != 0) {
+              $out .= '<ul class="list list-unstyled list-inline text-center">';
+              foreach($dangerPlayers as $p) {
+                if ($p->coma == 1) {
+                  $label = 'Coma';
+                } else {
+                  $label = $p->HP.'HP';
+                }
+                $out .= '<li>';
+                if ($p->avatar) {
+                  $out .= '<img class="" src="'.$p->avatar->getCrop("mini")->url.'" width="50" alt="Avatar" />';
+                } else {
+                  $out .= '<Avatar>';
+                }
 
-    <div class="panel panel-info">
-      <div class="panel-heading">
-        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> Best warriors</h4>
-      </div>
-      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="fighting_power">
-        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-      </div>
-    </div>
+                $out .= $p->title;
+                $out .= ' <span class="badge">'.$label.'</span><br />';
+                $out .= '</li>';
+              }
+              $out .= '<ul>';
+            } else {
+              $out .= '<p>Congratulations ! No player with HP<10 !</p>';
+            }
+          $out .= '</div>';
+          $out .= '<div class="panel-footer text-right">';
+          $out .= '</div>';
+          $out .= '</div>';
+          $out .= '</div>';
+          $out .= '</div>';
 
-    <div id="" class="panel panel-info">
-      <div class="panel-heading">
-        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> Best donators</h4>
+        // Team News (Free/Buy actions during last 7 days)
+        $news = new PageArray();
+        $today = new \DateTime("today");
+        $interval = new \DateInterval('P5D');
+        $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
+        foreach($allPlayers as $p) {
+          $last = $p->get("name=history")->children("sort=-date")->find("date>=$limitDate,task.name=free|buy");
+          if ($last->count() > 0) {
+            $news->add($last);
+            $news->sort('-date');
+          }
+        }
+        $out .= '<div id="" class="board panel panel-primary">';
+        $out .= '<div class="panel-heading">';
+        $out .= '<h4 class=""><span class="label label-primary">Team News (last 5 days)</span></h4>';
+        $out .= '</div>';
+        $out .= '<div class="panel-body">';
+        $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
+        $counter = 1;
+        foreach ($news as $n) {
+          $currentPlayer = $n->parent('template=player');
+          $out .= '<li>';
+          $out .= '<div class="thumbnail">';
+          $out .= '<span class="badge">'.$counter.'</span>';
+          $counter++;
+          if ($n->refPage->photo) {
+            $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+          }
+          if ($n->refPage->image) {
+            $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+          }
+          $out .= '<caption class="text-center">';
+          $out .= ' <span>(On '.date('l, F j', $n->date).')</span><br />';
+          $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
+          $out .= '</caption>';
+          $out .= '</div>';
+          $out .= '</li>';
+        }
+        if ($news->count() == 0) {
+          $out .= '<p>No recent news.</p>';
+        }
+        $out .= '</ul>';
+        $out .= '</div>';
+        $out .= '</div>';
+        
+        echo $out;
+    } else { ?>
+      <div id="" class="panel panel-success">
+        <div class="panel-heading">
+        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
+        </div>
+        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="karma">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
       </div>
-      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="donation">
-        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-      </div>
-    </div>
 
-    <div id="" class="panel panel-info">
-      <div class="panel-heading">
-        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Places</h4>
+        </div>
+        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="places">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
       </div>
-      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="underground_training">
-        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-      </div>
-    </div>
 
-    <div id="" class="panel panel-success">
-      <div class="panel-heading">
-        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=group"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most active groups</h4>
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of People</h4>
+        </div>
+        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="people">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
       </div>
-      <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="group">
-        <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-      </div>
-    </div>
 
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+          <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> Best warriors</h4>
+        </div>
+        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="fighting_power">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
+      </div>
+
+      <div id="" class="panel panel-info">
+        <div class="panel-heading">
+          <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> Best donators</h4>
+        </div>
+        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="donation">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
+      </div>
+
+      <div id="" class="panel panel-info">
+        <div class="panel-heading">
+          <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+          <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
+        </div>
+        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="underground_training">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
+      </div>
+
+      <div id="" class="panel panel-success">
+        <div class="panel-heading">
+          <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=group"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most active groups</h4>
+        </div>
+        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="group">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
+      </div>
+    <?php } ?>
   </div>
 
-  <div class="col-sm-8">
+  <div class="col-sm-6">
     <?php
       // Admin news
       if ($user->isLoggedin()) {
@@ -173,208 +332,159 @@
 
       // User is logged in, show personal history
       if ($user->isLoggedin() && $user->isSuperuser() == false) {
-        // Get current period statistics
-        $officialPeriod = $pages->get("name=admin-actions")->periods;
-        $allEvents = $player->child("name=history")->find("template=event, date>=$officialPeriod->dateStart, date<=$officialPeriod->dateEnd");
-        ?>
-        <div id="" class="news panel panel-primary">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
-              Work statistics on current period (<?php echo $officialPeriod->title; ?>) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n'est pas terminée, tu peux encore améliorer tes résultats !"></span>
-            </h4>
-          </div>
-          <div class="panel-body">
-            <?php
-            // Participation
-            $out = '';
-            setParticipation($player);
-            echo '<p>';
-            echo '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe"></span> Communication ';
-            echo ' ⇒ ';
-            switch ($player->participation) {
-              case 'NN' : $class='primary';
-                break;
-              case 'VV' : $class='success';
-                break;
-              case 'V' : $class='success';
-                break;
-              case 'R' : $class='danger';
-                break;
-              case 'RR' : $class='danger';
-                break;
-              default: $class = '';
-            }
-            echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
-            if ($player->partRatio != '-') {
-              echo '<span data-toggle="tooltip" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
-            }
-            // Homework stats
-            setHomework($player, $officialPeriod->dateStart, $officialPeriod->dateEnd);
-            if ($player->noHk->count() > 0) {
+        if ($player->team->name != 'no-team') {
+          // Get current period statistics
+          $officialPeriod = $pages->get("name=admin-actions")->periods;
+          $allEvents = $player->child("name=history")->find("template=event, date>=$officialPeriod->dateStart, date<=$officialPeriod->dateEnd"); ?>
+          <div id="" class="news panel panel-primary">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
+                Work statistics on current period (<?php echo $officialPeriod->title; ?>) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n'est pas terminée, tu peux encore améliorer tes résultats !"></span>
+              </h4>
+            </div>
+            <div class="panel-body">
+              <?php
+              // Participation
               $out = '';
-              foreach($player->noHk as $index=>$e) {
-                $out .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+              setParticipation($player);
+              echo '<p>';
+              echo '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe"></span> Communication ';
+              echo ' ⇒ ';
+              switch ($player->participation) {
+                case 'NN' : $class='primary';
+                  break;
+                case 'VV' : $class='success';
+                  break;
+                case 'V' : $class='success';
+                  break;
+                case 'R' : $class='danger';
+                  break;
+                case 'RR' : $class='danger';
+                  break;
+                default: $class = '';
               }
-            } else { $out='';}
-            if ($player->halfHk->count()>0) {
-              $out02 = '';
-              foreach($player->halfHk as $index=>$e) {
-                $out02 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+              echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
+              if ($player->partRatio != '-') {
+                echo '<span data-toggle="tooltip" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
               }
-            } else { $out02='';}
-            if ($player->notSigned->count()>0) {
-              $out03 = '';
-              foreach($player->notSigned as $index=>$e) {
-                $out03 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+              // Homework stats
+              setHomework($player, $officialPeriod->dateStart, $officialPeriod->dateEnd);
+              if ($player->noHk->count() > 0) {
+                $out = '';
+                foreach($player->noHk as $index=>$e) {
+                  $out .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+                }
+              } else { $out='';}
+              if ($player->halfHk->count()>0) {
+                $out02 = '';
+                foreach($player->halfHk as $index=>$e) {
+                  $out02 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+                }
+              } else { $out02='';}
+              if ($player->notSigned->count()>0) {
+                $out03 = '';
+                foreach($player->notSigned as $index=>$e) {
+                  $out03 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+                }
+              } else { $out03 = '';}
+              echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Exercices non faits ou à moitié faits"></span> Training problems :';
+              echo ' <span class="">'.$player->hkPb.'</span>';
+              echo ' [<span data-toggle="tooltip" data-html="true" title="'.$out.'">'.$player->noHk->count().' Hk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$player->halfHk->count().' HalfHk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out03.'">'.$player->notSigned->count().' notSigned</span>]';
+              echo ' ⇒ ';
+              switch ($player->homework) {
+                case 'NN' : $class='primary'; break;
+                case 'VV' : $class='success'; break;
+                case 'V' : $class='success'; break;
+                case 'R' : $class='danger'; break;
+                case 'RR' : $class='danger'; break;
+                default: $class = '';
               }
-            } else { $out03 = '';}
-            echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Exercices non faits ou à moitié faits"></span> Training problems :';
-            echo ' <span class="">'.$player->hkPb.'</span>';
-            echo ' [<span data-toggle="tooltip" data-html="true" title="'.$out.'">'.$player->noHk->count().' Hk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$player->halfHk->count().' HalfHk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out03.'">'.$player->notSigned->count().' notSigned</span>]';
-            echo ' ⇒ ';
-            switch ($player->homework) {
-              case 'NN' : $class='primary'; break;
-              case 'VV' : $class='success'; break;
-              case 'V' : $class='success'; break;
-              case 'R' : $class='danger'; break;
-              case 'RR' : $class='danger'; break;
-              default: $class = '';
-            }
-            echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-'.$class.'">'.$player->homework.'</span> ';
-            // Forgotten material
-            if ($player->noMaterial->count() > 0) {
-              $out04 = '';
-              foreach($player->noMaterial as $index=>$e) {
-                $out04 .= '- '.strftime("%d/%m", $e->date).'<br />';
+              echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-'.$class.'">'.$player->homework.'</span> ';
+              // Forgotten material
+              if ($player->noMaterial->count() > 0) {
+                $out04 = '';
+                foreach($player->noMaterial as $index=>$e) {
+                  $out04 .= '- '.strftime("%d/%m", $e->date).'<br />';
+                }
+              } else { $out04 = '';}
+              echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Affaires oubliées"></span> Forgotten material : ';
+              echo '<span data-toggle="tooltip" data-html="true" title="'.$out04.'">'.$player->noMaterial->count().'</span>';
+              echo ' ⇒ ';
+              if ($player->noMaterial->count() == 0) {
+                echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">VV</span>';
               }
-            } else { $out04 = '';}
-            echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Affaires oubliées"></span> Forgotten material : ';
-            echo '<span data-toggle="tooltip" data-html="true" title="'.$out04.'">'.$player->noMaterial->count().'</span>';
-            echo ' ⇒ ';
-            if ($player->noMaterial->count() == 0) {
-              echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">VV</span>';
-            }
-            if ($player->noMaterial->count() == 1) {
-              echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">V</span>';
-            }
-            if ($player->noMaterial->count() == 2) {
-              echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">R</span>';
-            }
-            if ($player->noMaterial->count() > 2) {
-              echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">RR</span>';
-            }
-            echo '</p>';
-            // Extra-hk
-            if ($player->extraHk->count()>0) {
-              $out = '';
-              foreach($player->extraHk as $index=>$e) {
-                $out .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+              if ($player->noMaterial->count() == 1) {
+                echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">V</span>';
               }
-            } else {
-              $out = '';
-            }
-            if ($player->initiative->count()>0) {
-              $out02 = '';
-              foreach($player->initiative as $index=>$e) {
-                $out02 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+              if ($player->noMaterial->count() == 2) {
+                echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">R</span>';
               }
-            } else {
-              $out02 = '';
-            }
-            echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Travail supplémentaire : extra-homework, personal initiative, underground training..."></span> Personal motivation :';
-            echo ' <span data-toggle="tooltip" data-html="true" title="'.$out.'"> ['.$player->extraHk->count().' extra - </span>';
-            echo ' <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$player->initiative->count().' initiatives - </span>';
-            echo ' <span class="">'.$player->ut->count().' UT session]</span>';
-            echo ' ⇒ ';
-            echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je prend une initiative particulière." class="label label-'.$class.'">'.$player->motivation.'</span> ';
-            echo '</p>';
-            
-            // Attitude
-            $disobedience = $allEvents->find("task.name=civil-disobedience");
-            $ambush = $allEvents->find("task.name=ambush");
-            $noisy = $allEvents->find("task.name=noisy-mission");
-            $late = $allEvents->find("task.name=late");
-            $pb = new PageArray();
-            $pb->add($disobedience);
-            $pb->add($ambush);
-            $pb->add($noisy);
-            $pb->add($late);
-            echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Soucis avec l\'attitude"></span> Attitude problems :';
-            $attPb = $disobedience->count()+$ambush->count()+$noisy->count();
-            echo ' <span> ['.$attPb.' problems - </span>';
-            echo ' <span>'.$late->count().' slow moves]</span>';
-            echo ' ⇒ ';
-            if ($pb->count() == 0) {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-success">VV</span>';
-            } else {
-              echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève.">Ask your teacher.</span>';
-            }
-            echo '</p>';
-            ?>
-          </div>
-          <div class="panel-footer text-right">
-          <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$officialPeriod->title; ?>  : from <?php echo date("F j, Y", $officialPeriod->dateStart) ?> to <?php echo date("F j, Y", $officialPeriod->dateEnd) ?></p>
-          </div>
-        </div>
-
-        <?php
-        // Get last 10 players's events
-        $allEvents = $player->child("name=history")->find("template=event,sort=-created,limit=10");
-        ?>
-        <div id="" class="news panel panel-primary">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
-              Last 10 events in your personal history
-            </h4>
-          </div>
-          <div class="panel-body">
-            <ul class="list-unstyled">
-            <?php
-              if ($allEvents->count() > 0) {
-                foreach ($allEvents as $event) {
-                  if ($event->task->HP < 0) {
-                    $className = 'negative';
-                    $sign = '';
-                    $signicon = '<span class="glyphicon glyphicon-minus-sign"></span> ';
-                  } else {
-                    $className = 'positive';
-                    //$className = '';
-                    $sign = '+';
-                    $signicon = '<span class="glyphicon glyphicon-plus-sign"></span> ';
-                  }
-                  echo '<li class="'.$className.'">';
-                  echo $signicon;
-                  echo date("F j (l)", $event->date).' : ';
-                  /* echo '<span data-toggle="tooltip" title="XP" class="badge badge-success">'.$sign.$event->task->XP.'</span><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '; */
-                  /* echo '<span data-toggle="tooltip" title="GC" class="badge badge-default">'.$sign.$event->task->GC.'</span><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '; */
-                  if ($className == 'negative') {
-                    echo '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'</span><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> ';
-                  }
-                  echo $event->task->title;
-                  echo ' ['.$event->summary.']';
-                  echo '</li>';
-                };
+              if ($player->noMaterial->count() > 2) {
+                echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">RR</span>';
+              }
+              echo '</p>';
+              // Extra-hk
+              if ($player->extraHk->count()>0) {
+                $out = '';
+                foreach($player->extraHk as $index=>$e) {
+                  $out .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+                }
               } else {
-                echo 'No personal history yet...';
+                $out = '';
               }
-            ?>
-            </ul>
+              if ($player->initiative->count()>0) {
+                $out02 = '';
+                foreach($player->initiative as $index=>$e) {
+                  $out02 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
+                }
+              } else {
+                $out02 = '';
+              }
+              echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Travail supplémentaire : extra-homework, personal initiative, underground training..."></span> Personal motivation :';
+              echo ' <span data-toggle="tooltip" data-html="true" title="'.$out.'"> ['.$player->extraHk->count().' extra - </span>';
+              echo ' <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$player->initiative->count().' initiatives - </span>';
+              echo ' <span class="">'.$player->ut->count().' UT session]</span>';
+              echo ' ⇒ ';
+              echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je prend une initiative particulière." class="label label-'.$class.'">'.$player->motivation.'</span> ';
+              echo '</p>';
+              
+              // Attitude
+              $disobedience = $allEvents->find("task.name=civil-disobedience");
+              $ambush = $allEvents->find("task.name=ambush");
+              $noisy = $allEvents->find("task.name=noisy-mission");
+              $late = $allEvents->find("task.name=late");
+              $pb = new PageArray();
+              $pb->add($disobedience);
+              $pb->add($ambush);
+              $pb->add($noisy);
+              $pb->add($late);
+              echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Soucis avec l\'attitude"></span> Attitude problems :';
+              $attPb = $disobedience->count()+$ambush->count()+$noisy->count();
+              echo ' <span> ['.$attPb.' problems - </span>';
+              echo ' <span>'.$late->count().' slow moves]</span>';
+              echo ' ⇒ ';
+              if ($pb->count() == 0) {
+                echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-success">VV</span>';
+              } else {
+                echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève.">Ask your teacher.</span>';
+              }
+              echo '</p>';
+              ?>
+            </div>
+            <div class="panel-footer text-right">
+            <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$officialPeriod->title; ?>  : from <?php echo date("F j, Y", $officialPeriod->dateStart) ?> to <?php echo date("F j, Y", $officialPeriod->dateEnd) ?></p>
+            </div>
           </div>
-          <div class="panel-footer text-right">
-          <p>To see your complete history, go the the <a href="<?php echo $pages->get('/players')->url.$player->team->name.'/'.$player->name; ?>">'My Profile'</a> page.</p>
-          </div>
-        </div>
-
       <?php 
+        }
       }
 
       // Last public news
       ?>
         <div id="" class="news panel panel-primary">
           <div class="panel-heading">
-            <h4 class="panel-title">Recent Activity</h4>
+            <h4 class="panel-title">Recent public activity</h4>
           </div>
           <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="lastEvents">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
