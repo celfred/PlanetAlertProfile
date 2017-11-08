@@ -304,7 +304,7 @@ namespace ProcessWire;
       $endDate = $endDate.' 23:59:59';
     }
 
-    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'reset-streaks'];
+    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'forceVisualizer', 'reset-streaks'];
     if (in_array($action, $teamActions)) {
       $type = 'team';
     }
@@ -1087,6 +1087,17 @@ namespace ProcessWire;
         }
         $team->save();
         break;
+      case 'forceVisualizer':
+        $team = $pages->get("$selectedTeam");
+        $team->of(false);
+        if ($team->forceVisualizer == 1) {
+          // Remove lock
+          $team->forceVisualizer = 0;
+        } else {
+          $team->forceVisualizer = 1;
+        }
+        $team->save();
+        break;
       case 'archivePlayer':
         $p = $selectedPlayer;
         $noteam = $pages->get("template=team, name=no-team");
@@ -1345,6 +1356,16 @@ namespace ProcessWire;
           }
           $out .= '<li><label for="forceHelmet"><input type="checkbox" id="forceHelmet" '.$status.'> Force Memory Helmet</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceHelmet/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
+          $lock = $pages->get("$selectedTeam")->forceVisualizer;
+          bd($pages->get("$selectedTeam")->forceVisualizer);
+          if ($lock == 1) {
+            $status = 'checked="checked"';
+          } else {
+            $status = '';
+          }
+          $out .= '<li><label for="forceVisualizer"><input type="checkbox" id="forceVisualizer" '.$status.'> Force Visualizer</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceVisualizer/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
           $lock = $pages->get("$selectedTeam")->lockFights;
           if ($lock == 1) {

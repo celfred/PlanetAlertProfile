@@ -300,6 +300,18 @@
                 echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Use the Memory helmet</li>";
                 echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Fight a monster</li>";
               }
+              // Check if Visualizer is accessible in player's group
+              if ($player && ($player->team->forceVisualizer == 1 || $player->equipment->get("name=electronic-visualizer"))) {
+								$class = $page->name == 'visualizer' ? " class='selected-left'" : "";
+								if ($player->team->forceVisualizer == 1) {
+									echo "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=visualizer')->url}'><span class='glyphicon glyphicon-th'></span> - Use the Electronic Visualizer</a></li>";
+								} else {
+									echo "<li><a$class href='{$pages->get('name=visualizer')->url}'><span class='glyphicon glyphicon-th'></span> - Use the Electronic Visualizer</a></li>";
+								}
+              } else {
+                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Use the Electronic Visualizer</li>";
+              }
+							// Hall of Fame
 							$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 							echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'><span class='glyphicon glyphicon-eye-open'></span> - Visit the Hall of Fame</a></li>";
 							?>

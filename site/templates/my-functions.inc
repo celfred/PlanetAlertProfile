@@ -1226,6 +1226,7 @@ function setMonstersActivity($player, $monster) {
   } else { // Never trained
     $monster->isTrainable = 1;
     $monster->isFightable = 0;
+    $monster->allFightsNb = 0;
   }
   return $monster;
 }

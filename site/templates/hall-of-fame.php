@@ -1,4 +1,5 @@
-<?php
+<?php namespace ProcessWire;
+
 include("./head.inc"); 
 
 $allPlayers = $pages->find("template=player, level>1")->shuffle();

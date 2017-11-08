@@ -907,33 +907,32 @@ header {
 	border-radius: 5px;
 	background: #313131;
 }
+.monsterDiv {
+	border: 2px dotted #000;
+	margin: 1px;
+}
+.monsterDiv.fightable {
+	border: 2px solid #000;
+}
 .grid {
 	width : 100%;
 }
 .grid-item {
 	float: left;
 	width: 40px;
-	height: 36px;
+	height: auto;
 }
 .grid-item--width2 {
-	float: left;
 	width: 80px;
-	height: 72px;
 }
 .grid-item--width3 {
-	float: left;
 	width: 120px;
-	height: 108px;
 }
 .grid-item--width4 {
-	float: left;
 	width: 160px;
-	height: 142px;
 }
 .grid-item--width5 {
-	float: left;
 	width: 200px;
-	height: 178px;
 }
 
 .jumbleW {
