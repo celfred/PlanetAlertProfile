@@ -46,7 +46,7 @@ if(!$sent) {
   $page->body .= <<< _OUT
 
     $error
-    <form role="form" class="form-horizontal" action="contact/" method="post">
+    <form role="form" class="form-horizontal" action="./" method="post">
       <div class="form-group">
         <label for="fullname" class="col-sm-2 control-label">First AND last name</label>
         <div class="col-sm-8">
