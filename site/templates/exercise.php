@@ -34,9 +34,8 @@
       $out .= $mini;
       $out .= '</h3>';
     $out .= '</div>';
-    $out .= '<div class="col-sm-8 text-justify">';
-      $out .= '<br/>';
-      $out .= '<p>'.$page->summary.' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$page->frenchSummary.'"></i></p>';
+    $out .= '<div class="col-sm-8 text-left">';
+      $out .= '<p class="text-center"><h3>'.$page->summary.' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$page->frenchSummary.'"></i></h3></p>';
       // Get player's stats
       if ($user->isLoggedin()) {
         $player = $pages->get("template='player', login=$user->name");
@@ -48,6 +47,8 @@
           $page->lastTrainingInterval = -1;
           $page->waitForTrain = 0;
         }
+        $out .= "<br /><br />";
+        $out .= '<p>Your activity :</p>';
         $out .= '<ul>';
         $out .= '<li><i class="glyphicon glyphicon-headphones"></i> UT gained : <span class="label label-primary">'.$page->utGain.'</span>';
         if ($page->isTrainable == 1) {
@@ -62,6 +63,11 @@
         $out .= '</li>';
         $out .= '</ul>';
       }
+    $out .= '</div>';
+    $out .= '<div class="col-sm-8 text-left">';
+      $out .= "<br /><br />";
+      if ($page->mostTrained->team->name != "no-team" ) { $team = ' ['.$page->mostTrained->team->title.']'; } else { $team = ''; }
+      $out .= '<p><i class="glyphicon glyphicon-thumbs-up"></i> Most trained player : <span class="label label-success">'.$page->mostTrained->title.$team.' → '.$page->best.'UT</span></p>';
     $out .= '</div>';
     $out .= '</div>';
     echo $out;

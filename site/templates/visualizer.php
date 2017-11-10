@@ -29,8 +29,12 @@ $out .= '<img class="" src="'.$visualizer->image->getCrop("small")->url.'" alt="
 $out .= $visualizer->title;
 $out .= '</h1>';
 
+$allMonsters->sort('level');
+$previousLevel = 1;
+$out .= '<p class="label label-danger">Level 1</p>';
 $out .= '<div class="grid">';
 foreach ($allMonsters as $m) {
+  if ($m->level !== $previousLevel) { $out .= '</div><p class="label label-danger">Level '.$m->level.'</p><div class="grid">'; }
   if (!$user->isSuperuser() && $user->isLoggedin() && isset($player)) {
     if ($player->equipment->has('name=memory-helmet')) {
       $m = setMonstersActivity($player, $m);
@@ -43,10 +47,8 @@ foreach ($allMonsters as $m) {
   }
   if (isset($m->image)) {
     $class = 'grid-item';
-    /* if ($m->level == 2) { $class .= 'grid-item--width2'; } */
-    /* if ($m->level == 3) { $class .= 'grid-item--width3'; } */
-    if ($m->lastTrainingInterval == -1) {
-        $class .= ' grid-item--width3';
+    if ($m->lastTrainingInterval == -1) { // Never trained
+        $class .= ' grid-item--width2 neverTrained';
     } else {
       if ($m->isFightable) {
         $class .= ' grid-item--width3 fightable';
@@ -54,11 +56,17 @@ foreach ($allMonsters as $m) {
         $class .= ' grid-item--width2';
       }
     }
+    if ($m->special) { $class .= ' special'; }
     $out .= '<div class="'.$class.' monsterDiv text-center">';
-    $out .= '<span class="label label-primary">'.$m->title.'</span>';
+    if ($m->special) {
+      $out .= '<span class="label label-danger">'.$m->title.'</span>';
+    } else {
+      $out .= '<span class="label label-primary">'.$m->title.'</span>';
+    }
     $out .= '<img class="monsterInfo img-thumbnail" data-href="'.$m->url.'" data-toggle="tooltip" data-html="true" title="'.$m->title.'<br />Level '.$m->level.'<br />'.$m->summary.'" src="'.$m->image->url.'" alt="image" />';
     $out .= '</div>';
   }
+  $previousLevel = $m->level;
 }
 $out .= '</div>';
 

@@ -908,11 +908,18 @@ header {
 	background: #313131;
 }
 .monsterDiv {
-	border: 2px dotted #000;
+	border: 2px solid #000;
 	margin: 1px;
+	background: #A5CF84;
 }
 .monsterDiv.fightable {
-	border: 2px solid #000;
+	border: 3px double #000;
+}
+.monsterDiv.neverTrained {
+	background: #D2FFD2;
+}
+.monsterDiv.special {
+	background: #B11512;
 }
 .grid {
 	width : 100%;

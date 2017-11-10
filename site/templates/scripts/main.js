@@ -57,7 +57,6 @@ $(document).ready(function() {
 				$.get($url, function(data) { 
 					var $myContent = data;
 					swal({
-						title: 'Monster information',
 						html: $myContent,
 						cancelButtonText : 'Ok',
 						showConfirmButton: false,

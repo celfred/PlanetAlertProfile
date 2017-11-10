@@ -16,7 +16,12 @@
         if ($user->isSuperuser()) {
           $allMonsters = $pages->find('template=exercise, sort=name, include=all');
         } else {
-          $allMonsters = $pages->find('template=exercise, sort=name');
+          // Check if player has the Visualizer (or forced by admin)
+          if ($player->equipment->has('name=visualizer') || $player->team->forceVisualizer == 1) {
+            $allMonsters = $pages->find('template=exercise, sort=name');
+          } else {
+            $allMonsters = $pages->find('template=exercise, special=0, sort=name');
+          }
         }
         $out .= '<br />';
         $out .= '<div class="well">';

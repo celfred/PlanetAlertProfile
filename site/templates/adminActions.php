@@ -333,17 +333,17 @@ namespace ProcessWire;
 
     switch ($action) {
       case 'script' :
-        $allPlayers = $pages->find("template=player");
-        $ambassador = $pages->get("name=ambassador");
-        foreach($allPlayers as $p) {
-          $p->streak = 0;
-          $allEvents = $p->get("name=history")->children("template=event, task.name!=donation|donated|absent, sort=-date, limit=10")->sort('date');
-          foreach($allEvents as $e) {
-            setStreak($p, $e->task);
-          }
-          $p->of(false);
-          $p->save();
-        }
+        /* $allPlayers = $pages->find("template=player"); */
+        /* $ambassador = $pages->get("name=ambassador"); */
+        /* foreach($allPlayers as $p) { */
+        /*   $p->streak = 0; */
+        /*   $allEvents = $p->get("name=history")->children("template=event, task.name!=donation|donated|absent, sort=-date, limit=10")->sort('date'); */
+        /*   foreach($allEvents as $e) { */
+        /*     setStreak($p, $e->task); */
+        /*   } */
+        /*   $p->of(false); */
+        /*   $p->save(); */
+        /* } */
         break;
       case 'reports' :
         $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';

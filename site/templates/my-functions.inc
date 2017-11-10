@@ -493,6 +493,24 @@ function checkStreak($player) {
   return $streak;
 }
 
+function randomSpecial(HookEvent $e) { // Random monsters are hidden if player doesn't have the Visualizer
+  $pages = wire('pages');
+  $allMonsters = $pages->find("template=exercise");
+  // Reset all specials
+  foreach ($allMonsters as $m) {
+    $m->of(false);
+    if ($m->special === 1) { $m->special = 0; }
+    $m->save();
+  }
+  $nb = round($allMonsters->count()/2); // 50% of monsters
+  $specialMonsters = $allMonsters->findRandom($nb);
+  foreach($specialMonsters as $m) {
+    $m->of(false);
+    $m->special = 1;
+    $m->save();
+  }
+}
+
 function checkActivity(HookEvent $e) {
   $pages = wire('pages');
   $allPlayers = $pages->find("template=player, team.name=no-team"); // Limit to no-team players
