@@ -47,6 +47,16 @@ $(document).ready(function() {
     return false; 
   }); 
 
+	$('#limitFightable').on('click', function() {
+		$(".monsterDiv:not('.fightable')").toggle();
+	});
+	$('#limitTrainable').on('click', function() {
+		$(".monsterDiv:not('.trainable')").toggle();
+	});
+	$('#limitNever').on('click', function() {
+		$(".monsterDiv:not('.neverTrained')").toggle();
+	});
+
 	$('.monsterInfo').on('click', function() {
 		$this = $(this);
 		var $url = $this.attr('data-href');
@@ -69,7 +79,7 @@ $(document).ready(function() {
 				});
 			}
 		});
-	})
+	});
 
 	$('.proceed').on('click', function() {
 		$this = $(this);

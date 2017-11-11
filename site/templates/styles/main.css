@@ -908,6 +908,7 @@ header {
 	background: #313131;
 }
 .monsterDiv {
+	cursor: pointer;
 	border: 2px solid #000;
 	margin: 1px;
 	background: #A5CF84;

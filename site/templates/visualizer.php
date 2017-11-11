@@ -12,7 +12,7 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test pla
   }
   if ($visualizer) {
 
-$allMonsters = $pages->find("template=exercise")->sort("level")->sort("title");
+$allMonsters = $pages->find("template=exercise");
 
 $out = '';
 
@@ -24,12 +24,23 @@ if ($user->isLoggedin() && $user->isSuperuser()==false) {
   echo pma($player);
 }
 
-$out .= '<h1 class="well text-center">';
-$out .= '<img class="" src="'.$visualizer->image->getCrop("small")->url.'" alt="image" /> ';
-$out .= $visualizer->title;
-$out .= '</h1>';
+$out .= '<section class="well text-center">';
+  $out .= '<h2>';
+    $out .= '<img class="" src="'.$visualizer->image->getCrop("small")->url.'" alt="image" /> ';
+    $out .= $visualizer->title;
+    $out .= ' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="All monsters are visible. The bigger the monster is, the closest to you it is. This means you should take action !"></i>';
+  $out .= '</h2>';
+  $out .= '<p class="text-center">';
+    $out .= 'See only : ';
+    $out .= '<button class="btn btn-primary" id="limitTrainable"><i class="glyphicon glyphicon-headphones"></i> monsters I can TRAIN on</button>';
+    $out .= ' ';
+    $out .= '<button class="btn btn-primary" id="limitFightable"><i class="glyphicon glyphicon-flash"></i> monsters I can FIGHT</button>';
+    $out .= ' ';
+    $out .= '<button class="btn btn-primary" id="limitNever"><i class="glyphicon glyphicon-remove"></i> monsters I have NEVER trained on</button>';
+  $out .= '</p>';
+$out .= '</section>';
 
-$allMonsters->sort('level');
+$allMonsters->sort('level, title');
 $previousLevel = 1;
 $out .= '<p class="label label-danger">Level 1</p>';
 $out .= '<div class="grid">';
@@ -48,20 +59,24 @@ foreach ($allMonsters as $m) {
   if (isset($m->image)) {
     $class = 'grid-item';
     if ($m->lastTrainingInterval == -1) { // Never trained
-        $class .= ' grid-item--width2 neverTrained';
+        $class .= ' grid-item--width2 trainable neverTrained';
     } else {
       if ($m->isFightable) {
-        $class .= ' grid-item--width3 fightable';
+        $class .= ' grid-item--width3 trainable fightable';
       } else {
-        $class .= ' grid-item--width2';
+        if ($m->isTrainable) {
+          $class .= ' grid-item--width2 trainable';
+        }
       }
     }
     if ($m->special) { $class .= ' special'; }
     $out .= '<div class="'.$class.' monsterDiv text-center">';
-    if ($m->special) {
-      $out .= '<span class="label label-danger">'.$m->title.'</span>';
-    } else {
-      $out .= '<span class="label label-primary">'.$m->title.'</span>';
+    if ($m->isTrainable) {
+      if ($m->special) {
+        $out .= '<span class="label label-danger">'.$m->title.'</span>';
+      } else {
+        $out .= '<span class="label label-primary">'.$m->title.'</span>';
+      }
     }
     $out .= '<img class="monsterInfo img-thumbnail" data-href="'.$m->url.'" data-toggle="tooltip" data-html="true" title="'.$m->title.'<br />Level '.$m->level.'<br />'.$m->summary.'" src="'.$m->image->url.'" alt="image" />';
     $out .= '</div>';

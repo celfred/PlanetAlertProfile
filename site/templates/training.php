@@ -21,6 +21,7 @@
             $allMonsters = $pages->find('template=exercise, sort=name');
           } else {
             $allMonsters = $pages->find('template=exercise, special=0, sort=name');
+            $hiddenMonstersNb = $pages->count("template=exercise, special=1");
           }
         }
         $out .= '<br />';
@@ -35,14 +36,21 @@
         $out .= '</p>';
 
         $out .= '<h4 class="text-center">';
-        $out .= 'There are currently '.$allMonsters->count().' monsters in the list.';
+        $out .= 'There are currently '.$allMonsters->count().' monsters detected.';
+        if (isset($hiddenMonstersNb)) {
+          $out .= '<p>('.$hiddenMonstersNb.' monsters are absent because you don\'t have the <a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>.)</p>';
+        } else {
+          $out .= '<p>(All monsters are visible thanks to your Electronic Visualizer.)</p>';
+        }
         $out .= '</h4>';
 
         $allCategories = $pages->find("parent.name=topics, sort=name");
         $out .= '<div id="Filters" data-fcolindex="1" class="text-center">';
         $out .= '  <ul class="list-inline well">';
         foreach ($allCategories as $category) {
-          $out .= '<li><label for="'.$category->name.'" class="btn btn-primary btn-xs">'.$category->title.' <input type="checkbox" value="'.$category->title.'" class="categoryFilter" name="categoryFilter" id="'.$category->name.'"></label></li>';
+          if ($allMonsters->get("topic=$category")) {
+            $out .= '<li><label for="'.$category->name.'" class="btn btn-primary btn-xs">'.$category->title.' <input type="checkbox" value="'.$category->title.'" class="categoryFilter" name="categoryFilter" id="'.$category->name.'"></label></li>';
+          }
         }
         $out .= '</ul>';
         $out .= '</div>';
@@ -78,6 +86,9 @@
           $interval = $today->diff($date2);
           if ($interval->days < 7) {
             $out .= ' <span class="badge">New</span>';
+          }
+          if ($m->special) {
+            $out .= ' <span class="badge">Detected !</span>';
           }
           $out .= '</td>';
           $out .= '<td>';

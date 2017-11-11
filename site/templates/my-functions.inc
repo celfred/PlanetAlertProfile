@@ -1233,6 +1233,7 @@ function setMonstersActivity($player, $monster) {
         } else { // Monster is fightable
           $monster->isFightable = 1;
         }
+        $monster->lastFight = $lastFight;
         $monster->lastFightDate = $lastFight->date;
         $monster->lastFightInterval = $interval->days;
         $monster->spacedFightsAllowed = $spacedFights-$interval->days;
