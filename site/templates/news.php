@@ -12,25 +12,27 @@
     $player = $pages->get("login=$user->name");
     echo pma($player);
   }
-?>
 
-<div class="row">
-  <div class="col-sm-6">
-    <?php if ($user->isLoggedin() && !$user->isSuperuser()) { ?>
-        <?php
-        // Get last 10 players's events
+  $out = '';
+  $out .= '<div class="row">';
+    $out .= '<div class="col-sm-6">';
+      if ($user->isLoggedin() && !$user->isSuperuser()) {
+        /* $teamPlayers = $allPlayers->filter("team=$player->team"); // Limit to logged player's team */
+        $teamPlayers = $pages->find("template=player, team=$player->team, sort=title");
+        
+        // Get players' last 10 events
         $allEvents = $player->child("name=history")->find("template=event,sort=-created,limit=10");
-        ?>
-        <div id="" class="news panel panel-primary">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
-              Last 10 events in your personal history
-            </h4>
-          </div>
-          <div class="panel-body">
-            <ul class="list-unstyled">
-            <?php
+        $out .= '<div id="" class="news panel panel-primary">';
+          $out .= '<div class="panel-heading">';
+            $out .= '<h4 class="panel-title">';
+              if ($player->avatar) {
+                $out .= '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />';
+              }
+              $out .= 'Last 10 events in your personal history';
+            $out .= '</h4>';
+          $out .= '</div>';
+          $out .= '<div class="panel-body">';
+            $out .= '<ul class="list-unstyled">';
               if ($allEvents->count() > 0) {
                 foreach ($allEvents as $event) {
                   if ($event->task->HP < 0) {
@@ -43,91 +45,27 @@
                     $sign = '+';
                     $signicon = '<span class="glyphicon glyphicon-plus-sign"></span> ';
                   }
-                  echo '<li class="'.$className.'">';
-                  echo $signicon;
-                  echo date("F j (l)", $event->date).' : ';
+                  $out .= '<li class="'.$className.'">';
+                  $out .= $signicon;
+                  $out .= date("F j (l)", $event->date).' : ';
                   /* echo '<span data-toggle="tooltip" title="XP" class="badge badge-success">'.$sign.$event->task->XP.'</span><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '; */
                   /* echo '<span data-toggle="tooltip" title="GC" class="badge badge-default">'.$sign.$event->task->GC.'</span><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '; */
                   if ($className == 'negative') {
-                    echo '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'</span><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> ';
+                    $out .= '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'</span><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> ';
                   }
-                  echo $event->task->title;
-                  echo ' ['.$event->summary.']';
-                  echo '</li>';
+                  $out .= $event->task->title;
+                  $out .= ' ['.$event->summary.']';
+                  $out .= '</li>';
                 };
               } else {
-                echo 'No personal history yet...';
+                $out .= 'No personal history yet...';
               }
-            ?>
-            </ul>
-          </div>
-          <div class="panel-footer text-right">
-          <p>To see your complete history, go the the <a href="<?php echo $pages->get('/players')->url.$player->team->name.'/'.$player->name; ?>">'My Profile'</a> page.</p>
-          </div>
-        </div>
-
-        <?php
-          // Most active players
-          $top = $allPlayers->sort('-yearlyKarma, karma')->find("limit=10, yearlyKarma>0");
-          $out = '';
-          $out .= '<div class="row">';
-          $out .= '<div class="col-sm-6">';
-          if ($top->count() != 0) {
-            $topList = $top->implode(', ', '{id}');
-            $out .= '<div id="" class="board panel panel-primary">';
-            $out .= '<div class="panel-heading">';
-            $out .= '<h4><span class="label label-primary">Team most active players !</span></h4>';
-            $out .= '</div>';
-            $out .= '<ol class="">';
-            foreach ($top as $p) {
-              $out .= '<li>';
-              if ($p->avatar) { $out .= '<img src="'.$p->avatar->getCrop('mini')->url.'" alt="avatar" />'; }
-              $out .= $p->title;
-              $out .= '</li>';
-            }
-            $out .= '</ol>';
-            $out .= '</div>';
-          }
-          $out .= '</div>';
-
-          // Help needed
-          $out .= '<div class="col-sm-6">';
-          $out .= '<div id="" class="board panel panel-primary">';
-          $out .= '<div class="panel-heading">';
-            $dangerPlayers = $allPlayers->find('coma=1');
-            $dangerPlayers->add($allPlayers->find("HP<=10"))->sort("coma, HP");
-            $out .= '<p class="panel-title">Help needed!</p>';
-          $out .= '</div>';
-          $out .= '<div class="panel-body">';
-            if ($dangerPlayers->count() != 0) {
-              $out .= '<ul class="list list-unstyled list-inline text-center">';
-              foreach($dangerPlayers as $p) {
-                if ($p->coma == 1) {
-                  $label = 'Coma';
-                } else {
-                  $label = $p->HP.'HP';
-                }
-                $out .= '<li>';
-                if ($p->avatar) {
-                  $out .= '<img class="" src="'.$p->avatar->getCrop("mini")->url.'" width="50" alt="Avatar" />';
-                } else {
-                  $out .= '<Avatar>';
-                }
-
-                $out .= $p->title;
-                $out .= ' <span class="badge">'.$label.'</span><br />';
-                $out .= '</li>';
-              }
-              $out .= '<ul>';
-            } else {
-              $out .= '<p>Congratulations ! No player with HP<10 !</p>';
-            }
+            $out .= '</ul>';
           $out .= '</div>';
           $out .= '<div class="panel-footer text-right">';
+          $out .= '<p>To see your complete history, go the the <a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'">My Profile</a> page.</p>';
           $out .= '</div>';
-          $out .= '</div>';
-          $out .= '</div>';
-          $out .= '</div>';
+        $out .= '</div>';
 
         // Team News (Free/Buy actions during last 7 days)
         $news = new PageArray();
@@ -142,39 +80,166 @@
           }
         }
         $out .= '<div id="" class="board panel panel-primary">';
-        $out .= '<div class="panel-heading">';
-        $out .= '<h4 class=""><span class="label label-primary">Team News (last 5 days)</span></h4>';
-        $out .= '</div>';
-        $out .= '<div class="panel-body">';
-        $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
-        $counter = 1;
-        foreach ($news as $n) {
-          $currentPlayer = $n->parent('template=player');
-          $out .= '<li>';
-          $out .= '<div class="thumbnail">';
-          $out .= '<span class="badge">'.$counter.'</span>';
-          $counter++;
-          if ($n->refPage->photo) {
-            $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-          }
-          if ($n->refPage->image) {
-            $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-          }
-          $out .= '<caption class="text-center">';
-          $out .= ' <span>(On '.date('l, F j', $n->date).')</span><br />';
-          $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
-          $out .= '</caption>';
+          $out .= '<div class="panel-heading">';
+          $out .= '<h4 class=""><span class="label label-primary">Team News (last 5 days)</span></h4>';
           $out .= '</div>';
-          $out .= '</li>';
-        }
-        if ($news->count() == 0) {
-          $out .= '<p>No recent news.</p>';
-        }
-        $out .= '</ul>';
+          $out .= '<div class="panel-body">';
+            $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
+            $counter = 1;
+            foreach ($news as $n) {
+              $currentPlayer = $n->parent('template=player');
+              $out .= '<li>';
+              $out .= '<div class="thumbnail">';
+              $out .= '<span class="badge">'.$counter.'</span>';
+              $counter++;
+              if ($n->refPage->photo) {
+                $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+              }
+              if ($n->refPage->image) {
+                $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+              }
+              $out .= '<caption class="text-center">';
+              $out .= ' <span>(On '.date('l, F j', $n->date).')</span><br />';
+              $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
+              $out .= '</caption>';
+              $out .= '</div>';
+              $out .= '</li>';
+            }
+            if ($news->count() == 0) {
+              $out .= '<p>No recent news.</p>';
+            }
+            $out .= '</ul>';
+          $out .= '</div>';
         $out .= '</div>';
-        $out .= '</div>';
+            
+        $out .= '<div class="row">'; // Nested 2 columns
+          $out .= '<div class="col-sm-6">'; // Subcolumn 1
         
-        echo $out;
+            // Most active
+            $out .= '<div class="board panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=yearlyKarma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+            $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/star.png" alt="" /> Team Most Active Players</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "-yearlyKarma");
+            $out .= '  </div>';
+            $out .= '</div>';
+
+            // Most influential
+            $out .= '<div id="" class="panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+            $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/star.png" alt="" /> Team Most influential</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body" data-href="'.$pages->get('name=scoreboard')->url.'" data-id="karma">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "-karma");
+            $out .= '  </div>';
+            $out .= '</div>';
+
+            // Best UT
+            $out .= '<div id="" class="panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+            $out .= '  <h4 class="panel-title"><span class="label label-primary">UT</span> Team Most Trained</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body" data-href="'.$pages->get('name=scoreboard')->url.'" data-id="underground_training">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "-underground_training");
+            $out .= '  </div>';
+            $out .= '</div>';
+
+          $out .= '</div>'; // /subcolumn 1
+
+          $out .= '<div class="col-sm-6">'; // Subcolumn 2
+            // Help needed
+            $out .= '<div id="" class="board panel panel-danger">';
+              $out .= '<div class="panel-heading">';
+                $dangerPlayers = $allPlayers->find('coma=1');
+                $dangerPlayers->add($allPlayers->find("HP<=10"))->sort("coma, HP");
+                $out .= '<p class="panel-title">Help needed!</p>';
+              $out .= '</div>';
+              $out .= '<div class="panel-body">';
+                if ($dangerPlayers->count() != 0) {
+                  $out .= '<ul class="list list-unstyled list-inline text-center">';
+                  foreach($dangerPlayers as $p) {
+                    if ($p->coma == 1) {
+                      $label = 'Coma';
+                    } else {
+                      $label = $p->HP.'HP';
+                    }
+                    $out .= '<li>';
+                    if ($p->avatar) {
+                      $out .= '<img class="" src="'.$p->avatar->getCrop("mini")->url.'" width="50" alt="Avatar" />';
+                    } else {
+                      $out .= '<Avatar>';
+                    }
+
+                    $out .= $p->title;
+                    $out .= ' <span class="badge">'.$label.'</span><br />';
+                    $out .= '</li>';
+                  }
+                  $out .= '<ul>';
+                } else {
+                  $out .= '<p>Congratulations ! No player with HP<10 !</p>';
+                }
+              $out .= '</div>';
+              $out .= '<div class="panel-footer text-right">';
+              $out .= '</div>';
+            $out .= '</div>';
+           
+            // Greatest # of places
+            $out .= '<div id="" class="panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+            $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> Team Greatest # of places</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "places");
+            $out .= '  </div>';
+            $out .= '</div>';
+
+            $teamPlayers->sort('-places.count');
+            bd($teamPlayers->getItemKey($player));
+            // Greatest # of people if needed
+            if ($player->team->rank->is("name=4emes|3emes")) {
+              $out .= '<div id="" class="panel panel-success">';
+              $out .= '  <div class="panel-heading">';
+              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+              $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> Team Greatest # of people</h4>';
+              $out .= '  </div>';
+              $out .= '  <div class="panel-body">';
+              $out .= displayTeamScoreboard($teamPlayers, $player, "-people.count");
+              $out .= '  </div>';
+              $out .= '</div>';
+            }
+
+            // Best donators
+            $out .= '<div id="" class="panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+            $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> Team Best donators</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "-donation");
+            $out .= '  </div>';
+            $out .= '</div>';
+
+            // Best warrior
+            $out .= '<div id="" class="panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+            $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/flash.png" alt="" /> Team Best warriors</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "-fighting_power");
+            $out .= '  </div>';
+            $out .= '</div>';
+
+          $out .= '</div>'; // /subcolumn 2
+
+    $out .= '</div>'; // /row
+
+    echo $out;
     } else { ?>
       <div id="" class="panel panel-success">
         <div class="panel-heading">
@@ -249,8 +314,7 @@
   </div>
 
   <div class="col-sm-6">
-    <?php
-      // Admin news
+    <?php // Admin news
       if ($user->isLoggedin()) {
         if ($user->isSuperuser()) {
           // Admin gets all published news

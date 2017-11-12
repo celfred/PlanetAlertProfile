@@ -124,12 +124,16 @@
   <?php
     include("./foot.inc"); 
 
-  } else {
+  } else { // Ajax loaded
     $out = '';
     $field = $input->get('id');
     $player = $pages->get("login=$user->name");
     $limit = 5;
-    list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit);
+    if ($user->isLoggedin() && !$user->isSuperuser()) {
+      list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, false);
+    } else {
+      list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, true);
+    }
     if ($prevPlayers != false) { // Player is 'surrounded'
       $out .= '<ol>';
       if ($topPlayers->count() > 0) {
