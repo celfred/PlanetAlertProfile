@@ -1046,47 +1046,57 @@ function setAttitude($player, $dateStart='', $dateEnd='') {
 }
 
 function setScoreboard($allPlayers, $player, $field) {
-  $allPlayers->sort($field);
-  if ($allPlayers && $field != 'group') {
-    if ($allPlayers->getItemKey($player) != 0) {
-      $playerPos = $allPlayers->getItemKey($player)+1;
-  if ($field == 'places') { bd($playerPos);}
-    } else {
-      $playerPos = false;
-    }
+  if ($field != 'group') {
+    $allPlayers->sort($field);
   } else {
-    /* if ($allPlayers->getItemKey($player->group) != 0) { */
-    /*   $playerPos = $allPlayers->getItemKey($player->group); */
-    /* } else { */
-    /*   $playerPos = false; */
-    /* } */
-    /* $pos = 1; */
-    /* foreach($allGroups as $g) { */
-    /*   if ($g == $player->group) { */
-    /*     $playerPos = $pos; */
-    /*     $g->focus = 1; */
-    /*   } else { */
-    /*     $g->focus = 0; */
-    /*     $pos++; */
-    /*   } */
-    /* } */
+    // Build group list
+    $allGroups = new PageArray();
+    foreach($allPlayers as $p) {
+      $allGroups->add($p->group);
+    }
+    foreach( $allGroups as $group) {
+      $players = $allPlayers->find("group=$group");
+      // Check for group bonus
+      $group->nbBonus = groupBonus($players);
+      $group->karma = $group->nbBonus*30;
+
+      // Add individual karmas
+      foreach( $players as $p) {
+        // Karma is divided by number of players in the group to be fair with smaller groups
+        $groupYearlyKarma = round($p->yearlyKarma/$players->count);
+        (int) $group->yearlyKarma = $group->yearlyKarma + $groupYearlyKarma;
+        $group->details .= $p->title.' - ';
+        $group->team = $p->team;
+      }
+    }
+    $allPlayers = $allGroups->sort('-yearlyKarma');
   }
+  $allPlayersReindexed = new PageArray();
+  $allPlayersReindexed->import($allPlayers);
+  $playerPos = $allPlayersReindexed->getItemKey($player)+1;
   if ($playerPos) { // Player is in the charts
-    if ($playerPos <= 8) { // Good position, get Top 10
-      $topPlayers = $allPlayers->slice(0, 10);
-      $prevPlayers = false;
+    if ($field != 'group') {
+      if ($playerPos <= 5) { // Good position, get Top 6
+        $topPlayers = $allPlayersReindexed->slice(0, 6);
+        $prevPlayers = false;
+      } else {
+        $topPlayers = $allPlayersReindexed->slice(0, 3); // Get top 3 players
+        $prevIndex = $playerPos-3;
+        $prevPlayers = $allPlayersReindexed->slice($prevIndex, 4);
+      }
     } else {
-      $topPlayers = $allPlayers->slice(0, 3); // Get top 3 players
-      $prevIndex = $playerPos-3;
-      $prevPlayers = $allPlayers->slice($prevIndex, 5);
+      $topPlayers = $allPlayersReindexed;
+      $prevPlayers = false;
     }
   } else { // No ranking (or complete scoreboard)
-    $topPlayers = $allPlayers->slice(0, 10); // Get Top 10
+    if ($field != 'group') {
+      $topPlayers = $allPlayersReindexed->slice(0, 5); // Get Top 5
+    } else {
+      $topPlayers = $allPlayersReindexed;
+    }
     $prevPlayers = false;
   }
-
-  /* return $allPlayers; */
-  return array($topPlayers, $prevPlayers, $playerPos, $allPlayers->count);
+  return array($topPlayers, $prevPlayers, $playerPos, $allPlayersReindexed->count);
 }
 
 function displayTeamScoreboard($allPlayers, $player, $field) {
@@ -1113,7 +1123,7 @@ function displayTeamScoreboard($allPlayers, $player, $field) {
         }
         switch($field) {
           case 'yearlyKarma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' K</span></li>';
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
             break;
           case 'karma':
             $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' reputation</span></li>';
@@ -1138,7 +1148,7 @@ function displayTeamScoreboard($allPlayers, $player, $field) {
             $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
             break;
           case 'group':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' reputation</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
             break;
           default: $out .= 'Error.';
         }
@@ -1160,35 +1170,34 @@ function displayTeamScoreboard($allPlayers, $player, $field) {
         } else {
           $focus = "";
         }
-        if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
         switch($field) {
           case 'yearlyKarma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' K</span></li>';
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' K</span></li>';
             break;
           case 'karma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' reputation</span></li>';
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' reputation</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' places</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' places</span></li>';
             } else {
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' place</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' place</span></li>';
             }
             break;
           case 'people':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' people</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->people->count.' people</span></li>';
             break;
           case 'fighting_power':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
             break;
           case 'donation':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' GC</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' GC</span></li>';
             break;
           case 'underground_training':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' UT</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
             break;
           case 'group':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' reputation</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
             break;
           default: $out .= 'Error.';
         }
@@ -1203,44 +1212,46 @@ function displayTeamScoreboard($allPlayers, $player, $field) {
       } else {
         $mini = '';
       }
-      if ($p->login == $user->name) {
+      if ($p->login == $player->name) {
         $focus = "class='focus'";
       } else {
         $focus = "";
       }
-      if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
       switch($field) {
+        case 'yearlyKarma':
+          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
+          break;
         case 'karma':
-          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' reputation</span></li>';
+          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' reputation</span></li>';
           break;
         case 'places':
           if ($p->places->count > 1) {
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' places</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' places</span></li>';
           } else {
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' place</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' place</span></li>';
           }
           break;
         case 'people':
-          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' people</span></li>';
+          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->people->count.' people</span></li>';
           break;
         case 'fighting_power':
-          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
+          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
           break;
         case 'donation':
-          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' GC</span></li>';
+          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' GC</span></li>';
           break;
         case 'underground_training':
-          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' UT</span></li>';
+          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
           break;
         case 'group':
-          if ($p->focus == 1) {
+          if ($p->name == $player->group->name) {
             $focus = "class='focus'";
           } else {
             $focus = "";
           }
           $out .= '<li>';
           $out .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$p->details.'">';
-          $out .= $p->title.' ['.$p->team->title.']</span> <span class="badge">'.$p->karma.'</span>';
+          $out .= $p->title.'</span> <span class="badge">'.$p->yearlyKarma.' K</span>';
           // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
           $starsGroups = floor($p->nbBonus/5);
           if ( $starsGroups < 1) {

@@ -17,8 +17,7 @@
   $out .= '<div class="row">';
     $out .= '<div class="col-sm-6">';
       if ($user->isLoggedin() && !$user->isSuperuser()) {
-        /* $teamPlayers = $allPlayers->filter("team=$player->team"); // Limit to logged player's team */
-        $teamPlayers = $pages->find("template=player, team=$player->team, sort=title");
+        $teamPlayers = $allPlayers->filter("team=$player->team"); // Limit to logged player's team
         
         // Get players' last 10 events
         $allEvents = $player->child("name=history")->find("template=event,sort=-created,limit=10");
@@ -132,7 +131,7 @@
             $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
             $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/star.png" alt="" /> Team Most influential</h4>';
             $out .= '  </div>';
-            $out .= '  <div class="panel-body" data-href="'.$pages->get('name=scoreboard')->url.'" data-id="karma">';
+            $out .= '  <div class="panel-body">';
             $out .= displayTeamScoreboard($teamPlayers, $player, "-karma");
             $out .= '  </div>';
             $out .= '</div>';
@@ -143,8 +142,18 @@
             $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
             $out .= '  <h4 class="panel-title"><span class="label label-primary">UT</span> Team Most Trained</h4>';
             $out .= '  </div>';
-            $out .= '  <div class="panel-body" data-href="'.$pages->get('name=scoreboard')->url.'" data-id="underground_training">';
+            $out .= '  <div class="panel-body">';
             $out .= displayTeamScoreboard($teamPlayers, $player, "-underground_training");
+            $out .= '  </div>';
+            $out .= '</div>';
+
+            // Groups
+            $out .= '<div id="" class="panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <h4 class="panel-title">Team Most Active Groups</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "group");
             $out .= '  </div>';
             $out .= '</div>';
 
@@ -198,8 +207,6 @@
             $out .= '  </div>';
             $out .= '</div>';
 
-            $teamPlayers->sort('-places.count');
-            bd($teamPlayers->getItemKey($player));
             // Greatest # of people if needed
             if ($player->team->rank->is("name=4emes|3emes")) {
               $out .= '<div id="" class="panel panel-success">';
