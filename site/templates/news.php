@@ -15,8 +15,8 @@
 
   $out = '';
   $out .= '<div class="row">';
-    $out .= '<div class="col-sm-6">';
       if ($user->isLoggedin() && !$user->isSuperuser()) {
+      $out .= '<div class="col-sm-6">';
         $teamPlayers = $allPlayers->filter("team=$player->team"); // Limit to logged player's team
         
         // Get players' last 10 events
@@ -140,7 +140,7 @@
             $out .= '<div id="" class="panel panel-success">';
             $out .= '  <div class="panel-heading">';
             $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-            $out .= '  <h4 class="panel-title"><span class="label label-primary">UT</span> Team Most Trained</h4>';
+            $out .= '  <h4 class="panel-title"><i class="glyphicon glyphicon-headphones"></i> Team Most Trained</h4>';
             $out .= '  </div>';
             $out .= '  <div class="panel-body">';
             $out .= displayTeamScoreboard($teamPlayers, $player, "-underground_training");
@@ -244,10 +244,14 @@
 
           $out .= '</div>'; // /subcolumn 2
 
-    $out .= '</div>'; // /row
+    $out .= '</div>'; // /col-sm-6
 
     echo $out;
-    } else { ?>
+    } else {
+      echo '<div class="col-sm-6">';
+        echo '<div class="row">'; // Nested 2 columns
+          echo '<div class="col-sm-6">'; // Subcolumn 1
+    ?>
       <div id="" class="panel panel-success">
         <div class="panel-heading">
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
@@ -288,6 +292,11 @@
         </div>
       </div>
 
+      <?php
+        echo '</div>';
+        echo '<div class="col-sm-6">';
+      ?>
+
       <div id="" class="panel panel-info">
         <div class="panel-heading">
           <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
@@ -301,7 +310,7 @@
       <div id="" class="panel panel-info">
         <div class="panel-heading">
           <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-          <h4 class="panel-title"><span class="label label-primary">U.T.</span> Most trained</h4>
+          <h4 class="panel-title"><i class="glyphicon glyphicon-headphones"></i> Most trained</h4>
         </div>
         <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="underground_training">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
@@ -317,6 +326,10 @@
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
         </div>
       </div>
+      <?php
+        echo '</div>';
+        echo '</div>';
+      ?>
     <?php } ?>
   </div>
 

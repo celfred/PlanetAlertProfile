@@ -1175,7 +1175,7 @@ function displayTeamScoreboard($allPlayers, $player, $field) {
             $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' K</span></li>';
             break;
           case 'karma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' reputation</span></li>';
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' rep.</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {
@@ -1222,7 +1222,7 @@ function displayTeamScoreboard($allPlayers, $player, $field) {
           $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
           break;
         case 'karma':
-          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' reputation</span></li>';
+          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
           break;
         case 'places':
           if ($p->places->count > 1) {
@@ -1326,18 +1326,18 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
         $players = $allPlayers->find("group=$group");
         // Check for group bonus
         $group->nbBonus = groupBonus($players);
-        $group->karma = $group->nbBonus*30;
+        $group->yearlyKarma = $group->nbBonus*30;
 
         // Add individual karmas
         foreach( $players as $p) {
           // Karma is divided by number of players in the group to be fair with smaller groups
-          $groupKarma = round($p->karma/$players->count);
-          (int) $group->karma = $group->karma + $groupKarma;
+          $groupYearlyKarma = round($p->yearlyKarma/$players->count);
+          (int) $group->yearlyKarma = $group->yearlyKarma + $groupYearlyKarma;
           $group->details .= $p->title.' - ';
           $group->team = $p->team;
         }
       }
-      $allPlayers = $allGroups->sort('-karma');
+      $allPlayers = $allGroups->sort('-yearlyKarma');
       break;
     default : 
       $allPlayers = NULL;
