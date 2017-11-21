@@ -329,7 +329,7 @@
         break;
       case 'ambassador' :
         $pageId = $input->get('pageId');
-        $p = $pages->get("title=$pageId");
+        $p = $pages->get("id=$pageId");
         if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
         $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
         break;

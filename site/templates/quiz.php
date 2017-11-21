@@ -57,12 +57,14 @@ if ($user->isSuperuser()) {
     $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
     $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');
   }
-  $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador")->implode(', ', '{title}');
-  if ( strlen($ambassadors) == 0 ) { 
+  $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador");
+  if ( $ambassadors->count() == 0 ) { 
     $ambassadors = 'Nobody.';
     $ambassadorsButton = '';
   } else {
-    $ambassadorsButton = ' <a class="btn btn-info btn-sm pickFromList" data-list="'.$ambassadors.'">Pick a player</a>';
+    $ambassadorsNames = $ambassadors->implode(', ', '{title}');
+    $ambassadorsIds = $ambassadors->implode(', ', '{id}');
+    $ambassadorsButton = ' <a class="btn btn-info btn-sm pickFromList" data-list="'.$ambassadorsIds.'">Pick a player</a>';
   }
 
   $out .= '<div id="ajaxDecision" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="ambassador"></div>';
@@ -169,7 +171,7 @@ if ($user->isSuperuser()) {
       $out .= '<button id="untickAll" class="btn btn-danger btn-sm">Untick all</button>';
     $out .= '</ul>';
     // Ambassadors
-    $out .= '<p>Ambassadors : '.$ambassadors;
+    $out .= '<p>Ambassadors : '.$ambassadorsNames;
     $out .= $ambassadorsButton;
     $out .= '</p>';
     $out .= '<h3 class="text-center"><span id="honored" class="label label-primary"></span></h3>';
