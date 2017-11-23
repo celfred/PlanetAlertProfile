@@ -73,13 +73,17 @@ $(document).ready(function() {
 
 	$('#playerId').on('change', function() {
 		var pageId = $(this).val();
-		var oldHref = $('#backendEditable').attr('href');
-		$('#backendEditable').attr('href', oldHref+pageId); 
+		var url = $('#backendEditable').attr('data-href');
+		$('#backendEditable').attr('href', url+pageId); 
 	});
 	$('#backendEditable').on('click', function() {
-		var url = $(this).attr('href')+pageId;
-		window.location.href = url;
-		return false;
+		if ($(this).attr('href') != '') {
+			var url = $(this).attr('href');
+			window.location.href = url;
+			return false;
+		} else {
+			window.alert("Please, select a player first.");
+		}
 	})
 
   $(".removeAbs").on('click', function(e) {

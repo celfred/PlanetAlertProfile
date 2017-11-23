@@ -115,7 +115,7 @@ namespace ProcessWire;
         $out .= '</select>';
         $out .= '</div>';
         $out .= '<div class="text-right">';
-        $out .= '<a id="backendEditable" class="btn btn-success" href="'.$config->urls->admin.'page/edit/?id=" data-id="-1">Edit player in backend</a>';
+        $out .= '<a id="backendEditable" class="btn btn-success" href="" data-href="'.$config->urls->admin.'page/edit/?id=" data-id="-1">Edit player in backend</a>';
         $out .= '</div>';
         $out .= '</section>';
         $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="recalculate">Generate</button>';
