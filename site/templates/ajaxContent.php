@@ -258,25 +258,25 @@
         }
         $out .= '<div class="contrast">';
         $out .= '<ul class="text-left list-unstyled">';
-        if ($p->GC > 5 || $p->is("parent.name=groups")) {
-          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
-        } else {
-          $out .= '<li><span class="strikeText">Not enough GC to make a donation.</span></li>';
-        }
+        // Organize team defense
         $nbConcerned = possibleDefense($p->team);
         if ($nbConcerned > 0) {
           $out .= '<li><span><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">→ Organize team defense ('.$nbConcerned.' players concerned).</a></span></li>';
         } else {
-          $out .= '<li><span class="strikeText">No team defense.</span></li>';
+          /* $out .= '<li><span class="strikeText">→ No team defense.</span></li>'; */
         }
-        if ($input->get->news && $input->get->news>0) {
-          $out .= '<li><span><a href="#" data-type="teamNews" class="ajaxBtn">→ Read about Team News.</a></span></li>';
-        } else {
-          $out .= '<li><span class="strikeText">No team news today...</span></li>';
+        // Read Team news
+        /* if ($input->get->news && $input->get->news>0) { */
+          /* $out .= '<li><span><a href="#" data-type="teamNews" class="ajaxBtn">→ Read about Team News.</a></span></li>'; */
+        /* } else { */
+          /* $out .= '<li><span class="strikeText">→ No team news today...</span></li>'; */
+        /* } */
+        // Personal initiative Talk (for 4emes/3emes)
+        if ($p->team->rank && $p->team->rank->is('name=4emes|3emes')) {
+          $task = $pages->get("name=personal-initiative");
+          $out .= '<li><span><a href="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a> [Personal initiative]</span></li>';
         }
-        $task = $pages->get("name=personal-initiative");
-        $out .= '<li><span><a href="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a></span></li>';
-        $out .= '<li><span><a href="#" onclick="swal.close();">→ Choose another player.</a></span></li>';
+        // Special discount
         if ($p->is("parent.name!=groups")) {
           if ($possibleItems->count() > 0) {
             if (rand(0,1)) { // Random special discount
@@ -310,18 +310,26 @@
               $out .= '</div>';
               $out .= '</li>';
             } else {
-              $out .= '<li><span class="strikeText">No special offer today...</span></li>';
+              /* $out .= '<li><span class="strikeText">→ No special offer today...</span></li>'; */
             }
           } else {
-            $out .= '<li><span class="strikeText">No possible item (not enough GC ?).</span></li>';
+            /* $out .= '<li><span class="strikeText">→ No possible item (not enough GC ?).</span></li>'; */
           }
         }
+        // Make a donation
+        if ($p->GC > 5 || $p->is("parent.name=groups")) {
+          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
+        } else {
+          /* $out .= '<li><span class="strikeText">→ Not enough GC to make a donation.</span></li>'; */
+        }
+        // Choose another player
+        $out .= '<li><span><a href="#" onclick="swal.close();">→ Choose another player.</a></span></li>';
         $out .= '</ul>';
         $out .= '</div>';
         break;
       case 'ambassador' :
         $pageId = $input->get('pageId');
-        $p = $pages->get("title=$pageId");
+        $p = $pages->get("id=$pageId");
         if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
         $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
         break;
