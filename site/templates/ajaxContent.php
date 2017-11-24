@@ -266,11 +266,11 @@
           /* $out .= '<li><span class="strikeText">→ No team defense.</span></li>'; */
         }
         // Read Team news
-        if ($input->get->news && $input->get->news>0) {
-          $out .= '<li><span><a href="#" data-type="teamNews" class="ajaxBtn">→ Read about Team News.</a></span></li>';
-        } else {
+        /* if ($input->get->news && $input->get->news>0) { */
+          /* $out .= '<li><span><a href="#" data-type="teamNews" class="ajaxBtn">→ Read about Team News.</a></span></li>'; */
+        /* } else { */
           /* $out .= '<li><span class="strikeText">→ No team news today...</span></li>'; */
-        }
+        /* } */
         // Personal initiative Talk (for 4emes/3emes)
         if ($p->team->rank && $p->team->rank->is('name=4emes|3emes')) {
           $task = $pages->get("name=personal-initiative");
