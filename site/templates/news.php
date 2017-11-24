@@ -30,36 +30,8 @@
               $out .= 'Last 10 events in your personal history';
             $out .= '</h4>';
           $out .= '</div>';
-          $out .= '<div class="panel-body">';
-            $out .= '<ul class="list-unstyled">';
-              if ($allEvents->count() > 0) {
-                foreach ($allEvents as $event) {
-                  if ($event->task->HP < 0) {
-                    $className = 'negative';
-                    $sign = '';
-                    $signicon = '<span class="glyphicon glyphicon-minus-sign"></span> ';
-                  } else {
-                    $className = 'positive';
-                    //$className = '';
-                    $sign = '+';
-                    $signicon = '<span class="glyphicon glyphicon-plus-sign"></span> ';
-                  }
-                  $out .= '<li class="'.$className.'">';
-                  $out .= $signicon;
-                  $out .= date("F j (l)", $event->date).' : ';
-                  /* echo '<span data-toggle="tooltip" title="XP" class="badge badge-success">'.$sign.$event->task->XP.'</span><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '; */
-                  /* echo '<span data-toggle="tooltip" title="GC" class="badge badge-default">'.$sign.$event->task->GC.'</span><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '; */
-                  if ($className == 'negative') {
-                    $out .= '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'</span><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> ';
-                  }
-                  $out .= $event->task->title;
-                  $out .= ' ['.$event->summary.']';
-                  $out .= '</li>';
-                };
-              } else {
-                $out .= 'No personal history yet...';
-              }
-            $out .= '</ul>';
+          $out .= '<div class="panel-body ajaxContent" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="last10&playerId='.$player->id.'" data-priority="1">';
+          $out .= '<p class="text-center"><img src="'.$config->urls->templates.'img/hourglass.gif"></p>';
           $out .= '</div>';
           $out .= '<div class="panel-footer text-right">';
           $out .= '<p>To see your complete history, go the the <a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'">My Profile</a> page.</p>';
@@ -124,6 +96,16 @@
             $out .= displayTeamScoreboard($teamPlayers, $player, "-yearlyKarma");
             $out .= '  </div>';
             $out .= '</div>';
+            
+            // Groups
+            $out .= '<div id="" class="panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <h4 class="panel-title">Team Most Active Groups</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "group");
+            $out .= '  </div>';
+            $out .= '</div>';
 
             // Most influential
             $out .= '<div id="" class="panel panel-success">';
@@ -144,16 +126,6 @@
             $out .= '  </div>';
             $out .= '  <div class="panel-body">';
             $out .= displayTeamScoreboard($teamPlayers, $player, "-underground_training");
-            $out .= '  </div>';
-            $out .= '</div>';
-
-            // Groups
-            $out .= '<div id="" class="panel panel-success">';
-            $out .= '  <div class="panel-heading">';
-            $out .= '  <h4 class="panel-title">Team Most Active Groups</h4>';
-            $out .= '  </div>';
-            $out .= '  <div class="panel-body">';
-            $out .= displayTeamScoreboard($teamPlayers, $player, "group");
             $out .= '  </div>';
             $out .= '</div>';
 
@@ -414,150 +386,21 @@
       <?php
       }
 
-      // User is logged in, show personal history
+      // User is logged in and in a team, load work statistics
       if ($user->isLoggedin() && $user->isSuperuser() == false) {
-        if ($player->team->name != 'no-team') {
-          // Get current period statistics
-          $officialPeriod = $pages->get("name=admin-actions")->periods;
-          $allEvents = $player->child("name=history")->find("template=event, date>=$officialPeriod->dateStart, date<=$officialPeriod->dateEnd"); ?>
+        if ($player->team->name != 'no-team') { ?>
           <div id="" class="news panel panel-primary">
             <div class="panel-heading">
               <h4 class="panel-title">
                 <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
-                Work statistics on current period (<?php echo $officialPeriod->title; ?>) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n'est pas terminée, tu peux encore améliorer tes résultats !"></span>
+                Work statistics on current period (<?php echo $currentPeriod->title; ?>) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n'est pas terminée, tu peux encore améliorer tes résultats !"></span>
               </h4>
             </div>
-            <div class="panel-body">
-              <?php
-              // Participation
-              $out = '';
-              setParticipation($player);
-              echo '<p>';
-              echo '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe"></span> Communication ';
-              echo ' ⇒ ';
-              switch ($player->participation) {
-                case 'NN' : $class='primary';
-                  break;
-                case 'VV' : $class='success';
-                  break;
-                case 'V' : $class='success';
-                  break;
-                case 'R' : $class='danger';
-                  break;
-                case 'RR' : $class='danger';
-                  break;
-                default: $class = '';
-              }
-              echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
-              if ($player->partRatio != '-') {
-                echo '<span data-toggle="tooltip" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
-              }
-              // Homework stats
-              setHomework($player, $officialPeriod->dateStart, $officialPeriod->dateEnd);
-              if ($player->noHk->count() > 0) {
-                $out = '';
-                foreach($player->noHk as $index=>$e) {
-                  $out .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
-                }
-              } else { $out='';}
-              if ($player->halfHk->count()>0) {
-                $out02 = '';
-                foreach($player->halfHk as $index=>$e) {
-                  $out02 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
-                }
-              } else { $out02='';}
-              if ($player->notSigned->count()>0) {
-                $out03 = '';
-                foreach($player->notSigned as $index=>$e) {
-                  $out03 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
-                }
-              } else { $out03 = '';}
-              echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Exercices non faits ou à moitié faits"></span> Training problems :';
-              echo ' <span class="">'.$player->hkPb.'</span>';
-              echo ' [<span data-toggle="tooltip" data-html="true" title="'.$out.'">'.$player->noHk->count().' Hk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$player->halfHk->count().' HalfHk</span> - <span data-toggle="tooltip" data-html="true" title="'.$out03.'">'.$player->notSigned->count().' notSigned</span>]';
-              echo ' ⇒ ';
-              switch ($player->homework) {
-                case 'NN' : $class='primary'; break;
-                case 'VV' : $class='success'; break;
-                case 'V' : $class='success'; break;
-                case 'R' : $class='danger'; break;
-                case 'RR' : $class='danger'; break;
-                default: $class = '';
-              }
-              echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-'.$class.'">'.$player->homework.'</span> ';
-              // Forgotten material
-              if ($player->noMaterial->count() > 0) {
-                $out04 = '';
-                foreach($player->noMaterial as $index=>$e) {
-                  $out04 .= '- '.strftime("%d/%m", $e->date).'<br />';
-                }
-              } else { $out04 = '';}
-              echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Affaires oubliées"></span> Forgotten material : ';
-              echo '<span data-toggle="tooltip" data-html="true" title="'.$out04.'">'.$player->noMaterial->count().'</span>';
-              echo ' ⇒ ';
-              if ($player->noMaterial->count() == 0) {
-                echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">VV</span>';
-              }
-              if ($player->noMaterial->count() == 1) {
-                echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">V</span>';
-              }
-              if ($player->noMaterial->count() == 2) {
-                echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">R</span>';
-              }
-              if ($player->noMaterial->count() > 2) {
-                echo  '<span data-toggle="tooltip" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">RR</span>';
-              }
-              echo '</p>';
-              // Extra-hk
-              if ($player->extraHk->count()>0) {
-                $out = '';
-                foreach($player->extraHk as $index=>$e) {
-                  $out .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
-                }
-              } else {
-                $out = '';
-              }
-              if ($player->initiative->count()>0) {
-                $out02 = '';
-                foreach($player->initiative as $index=>$e) {
-                  $out02 .= '- '.strftime("%d/%m", $e->date).' : '.$e->summary.'<br />';
-                }
-              } else {
-                $out02 = '';
-              }
-              echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Travail supplémentaire : extra-homework, personal initiative, underground training..."></span> Personal motivation :';
-              echo ' <span data-toggle="tooltip" data-html="true" title="'.$out.'"> ['.$player->extraHk->count().' extra - </span>';
-              echo ' <span data-toggle="tooltip" data-html="true" title="'.$out02.'">'.$player->initiative->count().' initiatives - </span>';
-              echo ' <span class="">'.$player->ut->count().' UT session]</span>';
-              echo ' ⇒ ';
-              echo  '<span data-toggle="tooltip" title="Compétence SACoche : Je prend une initiative particulière." class="label label-'.$class.'">'.$player->motivation.'</span> ';
-              echo '</p>';
-              
-              // Attitude
-              $disobedience = $allEvents->find("task.name=civil-disobedience");
-              $ambush = $allEvents->find("task.name=ambush");
-              $noisy = $allEvents->find("task.name=noisy-mission");
-              $late = $allEvents->find("task.name=late");
-              $pb = new PageArray();
-              $pb->add($disobedience);
-              $pb->add($ambush);
-              $pb->add($noisy);
-              $pb->add($late);
-              echo '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Soucis avec l\'attitude"></span> Attitude problems :';
-              $attPb = $disobedience->count()+$ambush->count()+$noisy->count();
-              echo ' <span> ['.$attPb.' problems - </span>';
-              echo ' <span>'.$late->count().' slow moves]</span>';
-              echo ' ⇒ ';
-              if ($pb->count() == 0) {
-                echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-success">VV</span>';
-              } else {
-                echo '<span data-toggle="tooltip" title="Compétence SACoche : J\'adopte une attitude d\'élève.">Ask your teacher.</span>';
-              }
-              echo '</p>';
-              ?>
+            <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-priority="1" data-id="work-statistics&playerId='.$player->id.'">
+              <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
             </div>
             <div class="panel-footer text-right">
-            <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$officialPeriod->title; ?>  : from <?php echo date("F j, Y", $officialPeriod->dateStart) ?> to <?php echo date("F j, Y", $officialPeriod->dateEnd) ?></p>
+            <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$currentPeriod->title; ?>  : from <?php echo date("F j, Y", $currentPeriod->dateStart) ?> to <?php echo date("F j, Y", $currentPeriod->dateEnd) ?></p>
             </div>
           </div>
       <?php 
@@ -570,7 +413,7 @@
           <div class="panel-heading">
             <h4 class="panel-title">Recent public activity</h4>
           </div>
-          <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="lastEvents">
+          <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="lastEvents">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
           </div>
         </div>

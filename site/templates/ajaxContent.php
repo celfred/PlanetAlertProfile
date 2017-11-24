@@ -9,11 +9,11 @@
         $lastMonsters = $pages->find("template=exercise, sort=-published, limit=3");
         foreach($lastMonsters as $m) {
           if ($m->image) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
+            $mini = "<img data-toggle='tooltip' src='".$m->image->getCrop('mini')->url."' alt='image' />";
           } else {
             $mini = '';
           }
-          $out .= '  <li data-toggle="tooltip" title="'.$m->summary.'">'.$mini.' '.$m->title.'</li>  ';
+          $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$m->summary.'">'.$mini.' '.$m->title.'</li>  ';
         }
         if ($user->isLoggedin()) {
           if ($user->isSuperuser() == false) {
@@ -517,6 +517,129 @@
         }
         $out .= ' </tbody>';
         $out .= '</table>';
+        break;
+      case 'last10' :
+        $playerId = $input->get('playerId');
+        $playerPage = $pages->get("id=$playerId");
+        $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date, limit=10");
+        $out = '';
+        $out .= '<ul class="list-unstyled">';
+          if ($allEvents->count() > 0) {
+            foreach ($allEvents as $event) {
+              if ($event->task->HP < 0) {
+                $className = 'negative';
+                $sign = '';
+                $signicon = '<span class="glyphicon glyphicon-minus-sign"></span> ';
+              } else {
+                $className = 'positive';
+                //$className = '';
+                $sign = '+';
+                $signicon = '<span class="glyphicon glyphicon-plus-sign"></span> ';
+              }
+              $out .= '<li class="'.$className.'">';
+              $out .= $signicon;
+              $out .= date("F j (l)", $event->date).' : ';
+              if ($className == 'negative') {
+                $out .= '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'HP</span> ';
+              }
+              $out .= $event->task->title;
+              $out .= ' ['.$event->summary.']';
+              $out .= '</li>';
+            };
+          } else {
+            $out .= 'No personal history yet...';
+          }
+        $out .= '</ul>';
+        break;
+      case 'work-statistics' :
+        $playerId = $input->get('playerId');
+        $player = $pages->get("id=$playerId");
+        $allEvents = $player->child("name=history")->find("template=event,sort=-date");
+        // Participation
+        $out = '';
+        setParticipation($player);
+        $out .= '<p>';
+        $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe" onmouseenter="$(this).tooltip(\'show\');"></span> Communication ';
+        $out .= ' ⇒ ';
+        switch ($player->participation) {
+          case 'NN' : $class='primary';
+            break;
+          case 'VV' : $class='success';
+            break;
+          case 'V' : $class='success';
+            break;
+          case 'R' : $class='danger';
+            break;
+          case 'RR' : $class='danger';
+            break;
+          default: $class = '';
+        }
+        $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
+        if ($player->partRatio != '-') {
+          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+        }
+        // Homework stats
+        setHomework($player, $officialPeriod->dateStart, $officialPeriod->dateEnd);
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Exercices non faits ou à moitié faits"></span> Training problems :';
+        $out .= ' <span class="">'.$player->hkPb.'</span>';
+        $out .= ' [<span>'.$player->noHk->count().' Hk</span> - <span>'.$player->halfHk->count().' HalfHk</span> - <span>'.$player->notSigned->count().' notSigned</span>]';
+        $out .= ' ⇒ ';
+        switch ($player->homework) {
+          case 'NN' : $class='primary'; break;
+          case 'VV' : $class='success'; break;
+          case 'V' : $class='success'; break;
+          case 'R' : $class='danger'; break;
+          case 'RR' : $class='danger'; break;
+          default: $class = '';
+        }
+        $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-'.$class.'">'.$player->homework.'</span> ';
+        // Forgotten material
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Affaires oubliées"></span> Forgotten material : ';
+        $out .= '<span>'.$player->noMaterial->count().'</span>';
+        $out .= ' ⇒ ';
+        if ($player->noMaterial->count() == 0) {
+          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">VV</span>';
+        }
+        if ($player->noMaterial->count() == 1) {
+          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">V</span>';
+        }
+        if ($player->noMaterial->count() == 2) {
+          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">R</span>';
+        }
+        if ($player->noMaterial->count() > 2) {
+          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">RR</span>';
+        }
+        $out .= '</p>';
+        // Extra-hk
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Travail supplémentaire : extra-homework, personal initiative, underground training..."></span> Personal motivation :';
+        $out .= ' <span> ['.$player->extraHk->count().' extra - </span>';
+        $out .= ' <span>'.$player->initiative->count().' initiatives - </span>';
+        $out .= ' <span class="">'.$player->ut->count().' UT session]</span>';
+        $out .= ' ⇒ ';
+        $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je prend une initiative particulière." class="label label-'.$class.'">'.$player->motivation.'</span> ';
+        $out .= '</p>';
+        
+        // Attitude
+        $disobedience = $allEvents->find("task.name=civil-disobedience");
+        $ambush = $allEvents->find("task.name=ambush");
+        $noisy = $allEvents->find("task.name=noisy-mission");
+        $late = $allEvents->find("task.name=late");
+        $pb = new PageArray();
+        $pb->add($disobedience);
+        $pb->add($ambush);
+        $pb->add($noisy);
+        $pb->add($late);
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Soucis avec l\'attitude"></span> Attitude problems :';
+        $attPb = $disobedience->count()+$ambush->count()+$noisy->count();
+        $out .= ' <span> ['.$attPb.' problems - </span>';
+        $out .= ' <span>'.$late->count().' slow moves]</span>';
+        $out .= ' ⇒ ';
+        if ($pb->count() == 0) {
+          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-success">VV</span>';
+        } else {
+          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'adopte une attitude d\'élève.">Ask your teacher.</span>';
+        }
+        $out .= '</p>';
         break;
       default :
         $out = 'Todo...';
