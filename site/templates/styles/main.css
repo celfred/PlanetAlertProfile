@@ -941,6 +941,10 @@ header {
 	margin: 0px 5px;
 }
 
+img.showInfo {
+	max-width: 150px;
+}
+
 /* Large desktop */
 @media (min-width: 1200px) { 
 }
