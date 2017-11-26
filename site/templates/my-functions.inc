@@ -1099,7 +1099,7 @@ function setScoreboard($allPlayers, $player, $field) {
   return array($topPlayers, $prevPlayers, $playerPos, $allPlayersReindexed->count);
 }
 
-function displayTeamScoreboard($allPlayers, $player, $field) {
+function displayTeamScoreboard($allPlayers, $player = false, $field) {
   $out = '';
   $limit = 5;
   list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = setScoreboard($allPlayers, $player, $field);
@@ -1212,7 +1212,7 @@ function displayTeamScoreboard($allPlayers, $player, $field) {
       } else {
         $mini = '';
       }
-      if ($p->login == $player->name) {
+      if ($player && ($p->login == $player->name)) {
         $focus = "class='focus'";
       } else {
         $focus = "";
@@ -1244,7 +1244,7 @@ function displayTeamScoreboard($allPlayers, $player, $field) {
           $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
           break;
         case 'group':
-          if ($p->name == $player->group->name) {
+          if ($player && $p->name == $player->group->name) {
             $focus = "class='focus'";
           } else {
             $focus = "";
@@ -1929,6 +1929,7 @@ function miniProfile($player, $type = '') {
 
 function displayGroups($allPlayers, $button = 0) {
   $rank = $allPlayers->first->team->rank;
+  $team = $allPlayers->first->team;
   // Build allGroups
   $allGroups = new PageArray();
   foreach($allPlayers as $p) {
@@ -1959,10 +1960,11 @@ function displayGroups($allPlayers, $button = 0) {
     $group->karma = $group->nbBonus*30;
 
     // Add individual karmas
-    foreach( $players as $player) {
+    foreach($players as $player) {
       // Karma is divided by number of players in the group to be fair with smaller groups
       $groupKarma = round($player->yearlyKarma/$players->count);
       (int) $group->karma += $groupKarma;
+      $group->members = $players->implode('- ', '{title}');
       /* $group->details .= '- '.$player->title.' ('.$groupKarma.'k - '.$player->nbEl.'el)<br />'; */
     }
     $index++;
@@ -1972,13 +1974,13 @@ function displayGroups($allPlayers, $button = 0) {
   $allGroups->sort('-karma');
   $groupList = $allGroups->implode(', ', '{id}');
   if ($groupList && $button == 1) {
-    $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'">Pick 1!</a>';
+    $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'" data-team="'.$team.'">Pick 1!</a>';
   } else {
     $pickButton = '';
   }
   $outGroups .= '<div id="" class="board panel panel-primary">';
   $outGroups .= '<div class="panel-heading">';
-  $outGroups .= '<h4><span class="label label-primary">Most influential groups</span>'.$pickButton.'</h4>';
+  $outGroups .= '<h4><span class="label label-primary">Most active groups</span>'.$pickButton.'</h4>';
   $outGroups .= '</div>';
   $outGroups .= '<div class="panel-body">';
   if ($groupList) {
@@ -1986,12 +1988,12 @@ function displayGroups($allPlayers, $button = 0) {
     foreach( $allGroups as $group) {
       $outGroups .= '<li>';
       if ($button == 1) {
-        $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+        $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
       } else {
-        $outGroups .= '<p data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+        $outGroups .= '<p data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
       }
       $outGroups .= $group->title;
-      $outGroups .= ' <span class="badge">'.$group->karma.'</span>';
+      $outGroups .= ' <span class="badge">'.$group->karma.' K</span>';
       $outGroups .= '</p>';
       /* // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member) */
       /* $starsGroups = floor($group->nbBonus/5); */
@@ -2014,16 +2016,6 @@ function displayGroups($allPlayers, $button = 0) {
   } else {
     $outGroups .= '<p>The groups aren\'t ready yet.</p>';
   }
-  $outGroups .= '</div>';
-  $outGroups .= '<div class="panel-footer text-center">';
-  $teamPlayers = $allPlayers->find("coma!=1");
-  $teamPlayersList = $teamPlayers->implode(', ', '{id}');
-  if ($button == 1) {
-    $pickButton = ' <a class="btn btn-danger btn-xs pickFromList" data-list="'.$teamPlayersList.'">Pick a player in the whole team !</a>';
-  } else {
-    $pickButton = '';
-  }
-  $outGroups .= $pickButton;
   $outGroups .= '</div>';
   $outGroups .= '</div>';
   return $outGroups;

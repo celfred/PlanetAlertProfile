@@ -225,7 +225,8 @@
         }
         if ($p->is("parent.name=groups")) {
           // Get group members
-          $groupPlayers = $pages->find("template=player, group=$pageId");
+          $team = $input->get('teamId');
+          $groupPlayers = $pages->find("template=player, team=$team, group=$pageId");
           $out .= '<div class="row">';
             $out .= '<p class="text-center"><span class="label label-primary">'.$p->title.'</span></p>';
             $out .= '<ul class="list-unstyled list-inline text-left">';
