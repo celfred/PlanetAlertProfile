@@ -31,7 +31,7 @@ $out .= '<section class="well text-center">';
     $out .= ' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="All monsters are visible. The bigger the monster is, the closest to you it is. This means you should take action !"></i>';
   $out .= '</h2>';
   $out .= '<p class="text-center">';
-    $out .= 'See only : ';
+    $out .= 'Limit to ';
     $out .= '<button class="btn btn-primary" id="limitTrainable"><i class="glyphicon glyphicon-headphones"></i> monsters I can TRAIN on</button>';
     $out .= ' ';
     $out .= '<button class="btn btn-primary" id="limitFightable"><i class="glyphicon glyphicon-flash"></i> monsters I can FIGHT</button>';
