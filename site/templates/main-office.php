@@ -112,18 +112,6 @@
 
     // Groups
     if ($user->isSuperuser()) {
-            /* // Groups */
-            /* $out .= '<div id="" class="panel panel-success">'; */
-            /* $out .= '  <div class="panel-heading">'; */
-            /* $out .= '  <h4 class="panel-title">Team Most Active Groups</h4>'; */
-            /* $out .= '  </div>'; */
-            /* $out .= '  <div class="panel-body">'; */
-            /* $out .= displayTeamScoreboard($allPlayers, false, "group"); */
-            /* $out .= '  </div>'; */
-            /* $out .= '  <div class="panel-footer">'; */
-            /* $out .= '  </div>'; */
-            /* $out .= '</div>'; */
-
       $out .= displayGroups($allPlayers, 1);
     } else {
       $out .= displayGroups($allPlayers, 0);
@@ -151,13 +139,10 @@
     $out .= '</div>';
     $out .= '<div class="panel-body">';
     $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
-    $counter = 1;
     foreach ($news as $n) {
       $currentPlayer = $n->parent('template=player');
       $out .= '<li>';
       $out .= '<div class="thumbnail">';
-      $out .= '<span class="badge">'.$counter.'</span>';
-      $counter++;
       if ($n->refPage->photo) {
         $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
       }
@@ -165,7 +150,7 @@
         $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
       }
       $out .= '<caption class="text-center">';
-      $out .= ' <span>(On '.date('l, F j', $n->date).')</span><br />';
+      $out .= ' <span>(On '.date('l, M. j', $n->date).')</span><br />';
       $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
       $out .= '</caption>';
       $out .= '</div>';

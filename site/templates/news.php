@@ -75,7 +75,7 @@
                   $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
                 }
                 $out .= '<caption class="text-center">';
-                $out .= ' <span>(On '.date('l, F j', $n->date).')</span><br />';
+                $out .= ' <span>(On '.date('D, M. j', $n->date).')</span><br />';
                 $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
                 $out .= '</caption>';
                 $out .= '</div>';
@@ -335,7 +335,7 @@
              <?php
               $logo = $homepage->photo->eq(0)->size(40,40); 
               echo '<img src="'.$logo->url.'" alt="" /> ';
-              echo date("F d, Y", $n->created);
+              echo date("M. d, Y", $n->created);
               echo ' - ';
               echo $n->title;
               if ($n->public == 0) {
@@ -408,7 +408,7 @@
               <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
             </div>
             <div class="panel-footer text-right">
-            <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$currentPeriod->title; ?>  : from <?php echo date("F j, Y", $currentPeriod->dateStart) ?> to <?php echo date("F j, Y", $currentPeriod->dateEnd) ?></p>
+            <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$currentPeriod->title; ?>  : from <?php echo date("M. j, Y", $currentPeriod->dateStart) ?> to <?php echo date("M. j, Y", $currentPeriod->dateEnd) ?></p>
             </div>
           </div>
       <?php 

@@ -44,7 +44,7 @@
         $out .= '<ul class="">';
         $blogUrl = $pages->get("name=blog")->url;
         foreach($newsAdmin as $n) {
-          $out .= '<li>'.date("F d, Y", $n->created).' : <a href="'.$blogUrl.'">'.$n->title.'</a></li>';
+          $out .= '<li>'.date("M. d, Y", $n->created).' : <a href="'.$blogUrl.'">'.$n->title.'</a></li>';
         }
         $out .= '</ul>';
         $out .= '</p>';
@@ -68,7 +68,7 @@
             }
             $out .= '<li>';
             $out .= $mini;
-            $out .= date("F j (l)", $n->date).' : ';
+            $out .= date("M. j (D)", $n->date).' : ';
             $out .= '<span>';
             switch ($n->task->category->name) {
             case 'place' : 
@@ -104,7 +104,7 @@
             $currentPlayer = $n->parent('template=player');
             if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
             $out .= '<li class="">';
-            $out .= date("F j (l)", $n->date).' : ';
+            $out .= date("M. j (D)", $n->date).' : ';
             $out .= '<span>';
 
             switch ($n->task->category->name) {
@@ -547,7 +547,7 @@
               }
               $out .= '<li class="'.$className.'">';
               $out .= $signicon;
-              $out .= date("F j (l)", $event->date).' : ';
+              $out .= date("M. j (D)", $event->date).' : ';
               if ($className == 'negative') {
                 $out .= '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'HP</span> ';
               }
