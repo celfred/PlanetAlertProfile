@@ -15,6 +15,6 @@
     <li class="<?php if ($page->name=='shop') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'shop/'.$team->name; ?>">The marketplace</a></li>
     <li class="<?php if ($page->is('name=makedonation')) { echo 'active'; } ?>"><a href="<?php echo $pages->get('name=makedonation')->url.$team->name; ?>">Donation</a></li>
     <li class="<?php if ($page->name=='quiz') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'quiz/'.$team->name; ?>">Monster invasions</a></li>
-    <li><a target="_blank" href="<?php echo $homepage->url.'report_generator/participation/'.$team->name.'/'.$currentPeriod->id.'?sort=title'; ?>">Current period participation</a></li>
+    <li><a target="_blank" href="<?php echo $homepage->url.'report_generator/participation/'.$team->id.'/'.$currentPeriod->id.'?sort=title'; ?>">Current period participation</a></li>
   <?php } ?>
 </ul>
