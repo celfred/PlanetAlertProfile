@@ -47,10 +47,8 @@
     echo '</div>';
   }
 ?>
-<div>
-  <div class="row">
-    <div class="col-sm-12">
-      <div id="" class="col-sm-6 panel panel-success panel-player">
+    <div class="row">
+      <div class="col-lg-6 panel panel-success panel-player">
           <div class="panel-heading">
             <h1 class="panel-title">
               <span class=""><?php echo $playerPage->title; ?></span>
@@ -125,7 +123,7 @@
           <?php } ?>
       </div>
 
-      <div id="" class="col-sm-5 panel panel-success">
+      <div class="col-lg-5 panel panel-success">
         <div class="panel-heading">
           <h4 class="panel-title">Equipment</h4>
         </div>
@@ -160,10 +158,8 @@
         </div>
       </div>
     </div>
-  </div>
 
   <div class="row">
-    <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
         <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (U.T.) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Monster fights</span></h4>
@@ -184,9 +180,7 @@
         ?>
         </div>
       </div>
-    </div>
 
-    <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
           <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-list"></span> Global Hall of Fames (Your positions)</span></h4>
@@ -303,27 +297,25 @@
           </ul>
         </div>
       </div>
-    </div>
 
-    <div class="col-sm-12">
       <div class="panel panel-success">
         <div class="panel-heading">
           <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free elements : <?php echo $playerPlacesNb+$playerPeopleNb; ?></span></h4>
         </div>
-          <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free places </span></h4>
         <div class="panel-body">
-            <ul class="playerPlaces list-inline">
-            <?php
-              foreach($playerPage->places as $place) {
-                $thumbImage = $place->photo->eq(0)->getCrop('thumbnail')->url;
-                echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$place->title<br />$place->summary<br />[{$place->parent->title},{$place->parent->parent->title}]' /></a></li>";
-              }
-            ?>
-            </ul>
+          <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free places </span></h4>
+          <ul class="playerPlaces list-inline">
+          <?php
+            foreach($playerPage->places as $place) {
+              $thumbImage = $place->photo->eq(0)->getCrop('thumbnail')->url;
+              echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$place->title<br />$place->summary<br />[{$place->parent->title},{$place->parent->parent->title}]' /></a></li>";
+            }
+          ?>
+          </ul>
 
-            <?php
-              if ($playerPage->rank && $playerPage->rank->is("name=4emes|3emes")) {
-            ?>
+          <?php
+            if ($playerPage->rank && $playerPage->rank->is("name=4emes|3emes")) {
+          ?>
             <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free people </span></h4>
             <ul class="playerPlaces list-inline">
             <?php
@@ -333,11 +325,10 @@
               }
             ?>
             </ul>
+          <?php } else { ?>
+            <p class="badge badge-danger">People are available for 4emes and 3emes only.</p>
+          <?php } ?>
         </div>
-        <?php } else { ?>
-          <p class="badge badge-danger">People are available for 4emes and 3emes only.</p>
-        <?php } ?>
-
         <div class="panel-footer">
             <span class="glyphicon glyphicon-star"></span>
             <?php
@@ -349,12 +340,10 @@
             ?>
         </div>
       </div>
-    </div>
 
   <?php
     if ($user->name === $playerPage->login || ($user->isSuperuser())) { // Logged-in user or Admin front-end
   ?>
-      <div class="col-sm-12">
         <div class="panel panel-success">
           <div class="panel-heading">
             <h4>History</h4>
@@ -363,6 +352,6 @@
             <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
           </div>
         </div>
-      </div>
   <?php } ?>
+
 </div>
