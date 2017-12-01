@@ -369,6 +369,6 @@
 			<?php } ?> <!-- /isLoggedin() -->
     </div> <!-- /#masthead -->
 
-  <div class="container">
+  <div class="container-fluid">
     <div class="row">
       <div id="content" class="col-sm-12">
