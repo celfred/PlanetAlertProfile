@@ -20,7 +20,7 @@
             $currentPlayer = $pages->get("template=player, login=$user->name");
             $helmet = $currentPlayer->equipment->get("name=memory-helmet");
           }
-          if ($helmet || $user->isSuperuser()) {
+          if (isset($helmet) || $user->isSuperuser()) {
             $out .= '<li>→ <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a></li>';
           } else {
             $out .= '<li>→ You need to buy the Memory Helmet to fight monsters !</a></li>';
@@ -140,7 +140,7 @@
           $out .= '<ul class="list-unstyled">';
           foreach ($unusedConcerned as $p) {
             foreach ($p->usabledItems as $item) {
-              $historyPage = $p->get("name=history")->get("refPage=$item, linkedId=0");
+              $historyPage = $p->get("name=history")->find("refPage=$item, linkedId=0")->last();
               if ($historyPage->id) {
                 $out .= '<li class="">';
                 // Find # of days compared to today
