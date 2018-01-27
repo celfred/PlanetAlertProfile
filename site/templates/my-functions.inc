@@ -1429,14 +1429,13 @@ function setMonstersActivity($player, $monster) {
     }
     if ($interval->days < $spacedTrainings && $interval->days!= 0) { // Trained recently
       $monster->isTrainable = 0;
-      $nbDays = $spacedTrainings-$interval->days;
-      $monster->spacedTrainingsAllowed = $nbDays;
+      $monster->spacedTrainingsAllowed = $spacedTrainings-$interval->days;
       $monster->waitForTrain = $spacedTrainings-$interval->days;
     } else if ($interval->days == 0) { // Trained today
       $monster->isTrainable = 0;
       $monster->spacedTrainingsAllowed = $spacedTrainings;
       $monster->waitForTrain = $spacedTrainings;
-      $monster->isFightable = 0; // Monster is not foghtable
+      $monster->isFightable = 0; // Monster is not fightable
     } else { // Monster is trainable
       $monster->isTrainable = 1;
       $monster->spacedTrainingsAllowed = 0;
@@ -1462,6 +1461,8 @@ function setMonstersActivity($player, $monster) {
       } else { // Never fought
         $monster->isFightable = 1;
       }
+    } else {
+      $monster->isFightable = 0;
     }
   } else { // Never trained
     $monster->isTrainable = 1;
@@ -1613,15 +1614,16 @@ function pma($player) {
       $m = setMonstersActivity($player, $m);
     }
   }
-  $suggestedFights = $allMonsters->find("isFightable=0, interval=0, sort=random, limit=3"); // Pick today's fights first to check for today's mission
-  if ($suggestedFights->count() < 3) { // Complete with never fought
-    $n = 3-$suggestedFights->count();
-    $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate=0, level=$levels, sort=random, limit=$n"));
-    if ($suggestedFights->count() < 3) { // Complete with oldest
-      $n = 3-$suggestedFights->count();
-      $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate!=0, level=$levels, sort=lastFightDate, limit=$n"));
-    }
-  }
+  /* $suggestedFights = $allMonsters->find("isFightable=1, lastTrainingInterval>=15, sort=random, limit=3"); // Pick less-recently trained fightable monsters */
+  $suggestedFights = $allMonsters->find("isFightable=1, sort=lastFightDate, sort=random, limit=3"); // Pick less-recently trained fightable monsters
+  /* if ($suggestedFights->count() < 3) { // Complete with never fought */
+  /*   $n = 3-$suggestedFights->count(); */
+  /*   $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate=0, level=$levels, sort=random, limit=$n")); */
+  /*   if ($suggestedFights->count() < 3) { // Complete with oldest */
+  /*     $n = 3-$suggestedFights->count(); */
+  /*     $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate!=0, level=$levels, sort=lastFightDate, limit=$n")); */
+  /*   } */
+  /* } */
   $suggestedTrainings = $allMonsters->find("isTrainable=2, sort=name, limit=3");
   if ($suggestedTrainings->count() < 3) {
     $n = 3-$suggestedTrainings->count();
@@ -1694,7 +1696,7 @@ function pma($player) {
     }
   }
   $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-  $out .= '<span class="label label-primary">Monster Fight(s)</span> ⇒ ';
+  $out .= '<span class="label label-primary"><span class="glyphicon glyphicon-flash"></span> Monster Fight(s)</span> ⇒ ';
   // Test if fights have been disabled by Admin
   $lock = $pages->get("$player->team")->lockFights;
   if ($lock == 1) {
@@ -1707,7 +1709,13 @@ function pma($player) {
         } else {
           $mini = '';
         }
-        if ($m->interval == 0 || $m->lastTrainingInterval == 0) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought/Trained today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
+        if ($m->lastTrainingInterval == 0) {
+          $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought/Trained today"></span>';
+          $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"';
+        } else {
+          $tag = '';
+          $style = 'title="'.$m->summary.'"';
+        }
         $out .= '<a href="'.$m->url.'" class="btn btn-sm btn-danger" '.$style.' data-toggle="tooltip" data-html="true">'.$mini.' '.$m->title.' '.$tag.'</a> ';
       }
     } else {
