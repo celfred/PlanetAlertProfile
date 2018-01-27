@@ -168,14 +168,17 @@
       $historyPage = $pages->get($input->get->usedItemHistoryPageId);
       $player = $historyPage->parent("template=player");
       $usedItem = $historyPage->refPage;
-      // Remove item from player's usabledItems list
-      $player->of(false);
-      $player->usabledItems->remove($usedItem);
-      $player->save();
-      // Remove linkedId from historyPage
-      $historyPage->of(false);
-      $historyPage->linkedId = '';
-      $historyPage->save();
+      if ($player->usabledItems->has($usedItem)) { // 'Used today' is ticked
+        // Remove item from player's usabledItems list
+        $player->of(false);
+        $player->usabledItems->remove($usedItem);
+        $player->save();
+      } else { // Used today is unclicked
+        // Restore item in player's usabledItems list
+        $player->of(false);
+        $player->usabledItems->add($usedItem);
+        $player->save();
+      }
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, for example

@@ -133,7 +133,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '</tr>';
 
     $out .= '<tr>';
-    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
+    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="width:4cm; height:2cm; border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
     $textLength = strlen($page->summary);
     $fontSize = '10px;';
     if ($textLength >= 600) { $fontSize = '8px'; }
@@ -146,7 +146,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
 
     $out .= '<td class="empty" style="width:0.5cm;">&nbsp;</td>';
 
-    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
+    $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="width:4cm; height:2cm; border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
     $textLength = strlen($page->summary);
     $fontSize = '10px;';
     if ($textLength >= 600) { $fontSize = '8px'; }

@@ -57,6 +57,10 @@
         $officialPeriod = $pages->get("name=admin-actions")->periods;
 				if ($now < $officialPeriod->dateStart || $now > $officialPeriod->dateEnd) {
 					echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
+				} else {
+					$dateStart = date("M. d", $officialPeriod->dateStart);
+					$dateEnd = date("M. d", $officialPeriod->dateEnd);
+					echo '<div class="notification alert alert-danger"><span class="">'.$officialPeriod->title.' ('.$dateStart.' → '.$dateEnd.')</span></div>';
 				}
 			}
 		}
@@ -381,6 +385,6 @@
 			<?php } ?> <!-- /isLoggedin() -->
     </div> <!-- /#masthead -->
 
-  <div class="container">
+  <div class="container-fluid">
     <div class="row">
       <div id="content" class="col-sm-12">

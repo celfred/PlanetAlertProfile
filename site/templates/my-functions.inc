@@ -1063,32 +1063,272 @@ function setAttitude($player, $dateStart='', $dateEnd='') {
   $player->nbAmbush = $allEvents->find("task.name=ambush")->count();
 }
 
-function getScoreboard($player, $field, $limit=5) {
+function setScoreboard($allPlayers, $player, $field) {
+  if ($field != 'group') {
+    $allPlayers->sort($field);
+  } else {
+    // Build group list
+    $allGroups = new PageArray();
+    foreach($allPlayers as $p) {
+      $allGroups->add($p->group);
+    }
+    foreach( $allGroups as $group) {
+      $players = $allPlayers->find("group=$group");
+      // Check for group bonus
+      $group->nbBonus = groupBonus($players);
+      $group->karma = $group->nbBonus*30;
+
+      // Add individual karmas
+      foreach( $players as $p) {
+        // Karma is divided by number of players in the group to be fair with smaller groups
+        $groupYearlyKarma = round($p->yearlyKarma/$players->count);
+        (int) $group->yearlyKarma = $group->yearlyKarma + $groupYearlyKarma;
+        $group->details .= $p->title.' - ';
+        $group->team = $p->team;
+      }
+    }
+    $allPlayers = $allGroups->sort('-yearlyKarma');
+  }
+  $allPlayersReindexed = new PageArray();
+  $allPlayersReindexed->import($allPlayers);
+  $playerPos = $allPlayersReindexed->getItemKey($player)+1;
+  if ($playerPos) { // Player is in the charts
+    if ($field != 'group') {
+      if ($playerPos <= 5) { // Good position, get Top 6
+        $topPlayers = $allPlayersReindexed->slice(0, 6);
+        $prevPlayers = false;
+      } else {
+        $topPlayers = $allPlayersReindexed->slice(0, 3); // Get top 3 players
+        $prevIndex = $playerPos-3;
+        $prevPlayers = $allPlayersReindexed->slice($prevIndex, 4);
+      }
+    } else {
+      $topPlayers = $allPlayersReindexed;
+      $prevPlayers = false;
+    }
+  } else { // No ranking (or complete scoreboard)
+    if ($field != 'group') {
+      $topPlayers = $allPlayersReindexed->slice(0, 5); // Get Top 5
+    } else {
+      $topPlayers = $allPlayersReindexed;
+    }
+    $prevPlayers = false;
+  }
+  return array($topPlayers, $prevPlayers, $playerPos, $allPlayersReindexed->count);
+}
+
+function displayTeamScoreboard($allPlayers, $player = false, $field) {
+  $out = '';
+  $limit = 5;
+  list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = setScoreboard($allPlayers, $player, $field);
+  // Clean field
+  $field = \str_replace('-', '', $field);
+  $field = \str_replace('+', '', $field);
+  $field = \str_replace('.count', '', $field);
+  if ($prevPlayers != false) { // Player is 'surrounded'
+    $out .= '<ol>';
+    if ($topPlayers->count() > 0) {
+      foreach ($topPlayers as $p) {
+        if ($p->avatar) {
+          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
+        } else {
+          $mini = '';
+        }
+        if ($p->login == $player->name) {
+          $focus = "class='focus'";
+        } else {
+          $focus = "";
+        }
+        switch($field) {
+          case 'yearlyKarma':
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
+            break;
+          case 'karma':
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' reputation</span></li>';
+            break;
+          case 'places':
+            if ($p->places->count > 1) {
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' places</span></li>';
+            } else {
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' place</span></li>';
+            }
+            break;
+          case 'people':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->people->count.' people</span></li>';
+            break;
+          case 'fighting_power':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
+            break;
+          case 'donation':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' GC</span></li>';
+            break;
+          case 'underground_training':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
+            break;
+          case 'group':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
+            break;
+          default: $out .= 'Error.';
+        }
+      }
+    }
+    $out .= '</ol>';
+    $out .= '<hr />';
+    $startIndex = (int) $playerPos-round($limit/2)+1; 
+    $out .= '<ol start="'.$startIndex.'">';
+      if ($prevPlayers->count() > 0) {
+      foreach ($prevPlayers as $p) {
+        if ($p->avatar) {
+          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
+        } else {
+          $mini = '';
+        }
+        if ($p->login == $player->name) {
+          $focus = "class='focus'";
+        } else {
+          $focus = "";
+        }
+        switch($field) {
+          case 'yearlyKarma':
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' K</span></li>';
+            break;
+          case 'karma':
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' rep.</span></li>';
+            break;
+          case 'places':
+            if ($p->places->count > 1) {
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' places</span></li>';
+            } else {
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' place</span></li>';
+            }
+            break;
+          case 'people':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->people->count.' people</span></li>';
+            break;
+          case 'fighting_power':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
+            break;
+          case 'donation':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' GC</span></li>';
+            break;
+          case 'underground_training':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
+            break;
+          case 'group':
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
+            break;
+          default: $out .= 'Error.';
+        }
+      }
+      }
+    $out .= '</ol>';
+  } else { // No ranking or Top 10
+    $out .= '<ol>';
+    foreach ($topPlayers as $p) {
+      if ($p->avatar) {
+        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
+      } else {
+        $mini = '';
+      }
+      if ($player && ($p->login == $player->name)) {
+        $focus = "class='focus'";
+      } else {
+        $focus = "";
+      }
+      switch($field) {
+        case 'yearlyKarma':
+          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
+          break;
+        case 'karma':
+          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
+          break;
+        case 'places':
+          if ($p->places->count > 1) {
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' places</span></li>';
+          } else {
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' place</span></li>';
+          }
+          break;
+        case 'people':
+          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->people->count.' people</span></li>';
+          break;
+        case 'fighting_power':
+          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
+          break;
+        case 'donation':
+          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' GC</span></li>';
+          break;
+        case 'underground_training':
+          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
+          break;
+        case 'group':
+          if ($player && $p->name == $player->group->name) {
+            $focus = "class='focus'";
+          } else {
+            $focus = "";
+          }
+          $out .= '<li>';
+          $out .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$p->details.'">';
+          $out .= $p->title.'</span> <span class="badge">'.$p->yearlyKarma.' K</span>';
+          // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
+          $starsGroups = floor($p->nbBonus/5);
+          if ( $starsGroups < 1) {
+            for ($i=0; $i<$p->nbBonus; $i++) {
+              $out .= ' <span class="glyphicon glyphicon-star-empty"></span>';
+            }
+          } else {
+            for ($i=0; $i<$starsGroups; $i++) {
+              $out .= ' <span class="glyphicon glyphicon-star"></span>';
+            }
+            $p->nbBonus = $p->nbBonus - $starsGroups*5;
+            for ($i=0; $i<$p->nbBonus; $i++) {
+              $out .= ' <span class="glyphicon glyphicon-star-empty"></span>';
+            }
+          }
+          $out .= '</p>';
+          $out .= '</li>';
+          break;
+        default: $out .= 'Error.';
+      }
+    }
+    $out .= '</ol>';
+  }
+
+  return $out;
+}
+
+function getScoreboard($player, $field, $limit=5, $global=true) {
   $pages = wire('pages');
+  // Limit to team players if player is logged in
+  if ($global === false) {
+    $team = ',team='.$player->team;
+  } else {
+    $team = '';
+  }
   switch ($field) {
     case 'karma' :
-      $allPlayers = $pages->find("template=player, name!=test, sort=-karma, karma>0");
+      $allPlayers = $pages->find("template=player, name!=test $team, sort=-karma, karma>0");
       break;
     case 'places' :
-      $allPlayers = $pages->find("template=player, name!=test, sort=-places.count, sort=-karma, places.count>0");
+      $allPlayers = $pages->find("template=player, name!=test $team, sort=-places.count, sort=-karma, places.count>0");
       break;
     case 'people' :
-      $allPlayers = $pages->find("template=player, name!=test, sort=-people.count, sort=-karma, people.count>0");
+      $allPlayers = $pages->find("template=player, name!=test $team, sort=-people.count, sort=-karma, people.count>0");
       break;
     case 'fighting_power' :
-      $allPlayers = $pages->find('template=player, name!=test, sort=-fighting_power, sort=-karma, fighting_power>0');
+      $allPlayers = $pages->find('template=player, name!=test $team, sort=-fighting_power, sort=-karma, fighting_power>0');
       break;
     case 'equipment' :
-      $allPlayers = $pages->find('template=player, name!=test, sort=-equipment.count, sort=-karma, equipment.count>0');
+      $allPlayers = $pages->find('template=player, name!=test $team, sort=-equipment.count, sort=-karma, equipment.count>0');
       break;
     case 'donation' :
-      $allPlayers = $pages->find('template=player, name!=test, sort=-donation, sort=-karma, donation>0');
+      $allPlayers = $pages->find('template=player, name!=test $team, sort=-donation, sort=-karma, donation>0');
       break;
     case 'underground_training' :
-      $allPlayers = $pages->find('template=player, name!=test, sort=-underground_training, sort=-karma, underground_training>0');
+      $allPlayers = $pages->find('template=player, name!=test $team, sort=-underground_training, sort=-karma, underground_training>0');
       break;
     case 'group' :
-      $allPlayers = $pages->find('template=player, name!=test');
+      $allPlayers = $pages->find('template=player, name!=test $team');
       $allGroups = $pages->get('/groups')->children();
       $index = 0;
       foreach( $allGroups as $group) {
@@ -1104,18 +1344,18 @@ function getScoreboard($player, $field, $limit=5) {
         $players = $allPlayers->find("group=$group");
         // Check for group bonus
         $group->nbBonus = groupBonus($players);
-        $group->karma = $group->nbBonus*30;
+        $group->yearlyKarma = $group->nbBonus*30;
 
         // Add individual karmas
         foreach( $players as $p) {
           // Karma is divided by number of players in the group to be fair with smaller groups
-          $groupKarma = round($p->karma/$players->count);
-          (int) $group->karma = $group->karma + $groupKarma;
+          $groupYearlyKarma = round($p->yearlyKarma/$players->count);
+          (int) $group->yearlyKarma = $group->yearlyKarma + $groupYearlyKarma;
           $group->details .= $p->title.' - ';
           $group->team = $p->team;
         }
       }
-      $allPlayers = $allGroups->sort('-karma');
+      $allPlayers = $allGroups->sort('-yearlyKarma');
       break;
     default : 
       $allPlayers = NULL;
@@ -1127,7 +1367,7 @@ function getScoreboard($player, $field, $limit=5) {
       $playerPos = false;
     }
   } else {
-    if ($allPlayers->getItemKey($player->group) != 0) {
+    if ($player->group  && $allPlayers->getItemKey($player->group) != 0) {
       $playerPos = $allPlayers->getItemKey($player->group);
     } else {
       $playerPos = false;
@@ -1207,14 +1447,13 @@ function setMonstersActivity($player, $monster) {
     }
     if ($interval->days < $spacedTrainings && $interval->days!= 0) { // Trained recently
       $monster->isTrainable = 0;
-      $nbDays = $spacedTrainings-$interval->days;
-      $monster->spacedTrainingsAllowed = $nbDays;
+      $monster->spacedTrainingsAllowed = $spacedTrainings-$interval->days;
       $monster->waitForTrain = $spacedTrainings-$interval->days;
     } else if ($interval->days == 0) { // Trained today
       $monster->isTrainable = 0;
       $monster->spacedTrainingsAllowed = $spacedTrainings;
       $monster->waitForTrain = $spacedTrainings;
-      $monster->isFightable = 0; // Monster is not foghtable
+      $monster->isFightable = 0; // Monster is not fightable
     } else { // Monster is trainable
       $monster->isTrainable = 1;
       $monster->spacedTrainingsAllowed = 0;
@@ -1241,6 +1480,8 @@ function setMonstersActivity($player, $monster) {
       } else { // Never fought
         $monster->isFightable = 1;
       }
+    } else {
+      $monster->isFightable = 0;
     }
   } else { // Never trained
     $monster->isTrainable = 1;
@@ -1393,15 +1634,16 @@ function pma($player) {
       $m = setMonstersActivity($player, $m);
     }
   }
-  $suggestedFights = $allMonsters->find("isFightable=0, interval=0, sort=random, limit=3"); // Pick today's fights first to check for today's mission
-  if ($suggestedFights->count() < 3) { // Complete with never fought
-    $n = 3-$suggestedFights->count();
-    $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate=0, level=$levels, sort=random, limit=$n"));
-    if ($suggestedFights->count() < 3) { // Complete with oldest
-      $n = 3-$suggestedFights->count();
-      $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate!=0, level=$levels, sort=lastFightDate, limit=$n"));
-    }
-  }
+  /* $suggestedFights = $allMonsters->find("isFightable=1, lastTrainingInterval>=15, sort=random, limit=3"); // Pick less-recently trained fightable monsters */
+  $suggestedFights = $allMonsters->find("isFightable=1, sort=lastFightDate, sort=random, limit=3"); // Pick less-recently trained fightable monsters
+  /* if ($suggestedFights->count() < 3) { // Complete with never fought */
+  /*   $n = 3-$suggestedFights->count(); */
+  /*   $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate=0, level=$levels, sort=random, limit=$n")); */
+  /*   if ($suggestedFights->count() < 3) { // Complete with oldest */
+  /*     $n = 3-$suggestedFights->count(); */
+  /*     $suggestedFights->add($allMonsters->find("isFightable=1, lastFightDate!=0, level=$levels, sort=lastFightDate, limit=$n")); */
+  /*   } */
+  /* } */
   $suggestedTrainings = $allMonsters->find("isTrainable=2, sort=name, limit=3");
   if ($suggestedTrainings->count() < 3) {
     $n = 3-$suggestedTrainings->count();
@@ -1474,7 +1716,7 @@ function pma($player) {
     }
   }
   $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-  $out .= '<span class="label label-primary">Monster Fight(s)</span> ⇒ ';
+  $out .= '<span class="label label-primary"><span class="glyphicon glyphicon-flash"></span> Monster Fight(s)</span> ⇒ ';
   // Test if fights have been disabled by Admin
   $lock = $pages->get("$player->team")->lockFights;
   if ($lock == 1) {
@@ -1487,7 +1729,13 @@ function pma($player) {
         } else {
           $mini = '';
         }
-        if ($m->interval == 0 || $m->lastTrainingInterval == 0) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought/Trained today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
+        if ($m->lastTrainingInterval == 0) {
+          $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought/Trained today"></span>';
+          $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"';
+        } else {
+          $tag = '';
+          $style = 'title="'.$m->summary.'"';
+        }
         $out .= '<a href="'.$m->url.'" class="btn btn-sm btn-danger" '.$style.' data-toggle="tooltip" data-html="true">'.$mini.' '.$m->title.' '.$tag.'</a> ';
       }
     } else {
@@ -1709,6 +1957,7 @@ function miniProfile($player, $type = '') {
 
 function displayGroups($allPlayers, $button = 0) {
   $rank = $allPlayers->first->team->rank;
+  $team = $allPlayers->first->team;
   // Build allGroups
   $allGroups = new PageArray();
   foreach($allPlayers as $p) {
@@ -1739,10 +1988,11 @@ function displayGroups($allPlayers, $button = 0) {
     $group->karma = $group->nbBonus*30;
 
     // Add individual karmas
-    foreach( $players as $player) {
+    foreach($players as $player) {
       // Karma is divided by number of players in the group to be fair with smaller groups
       $groupKarma = round($player->yearlyKarma/$players->count);
       (int) $group->karma += $groupKarma;
+      $group->members = $players->implode('- ', '{title}');
       /* $group->details .= '- '.$player->title.' ('.$groupKarma.'k - '.$player->nbEl.'el)<br />'; */
     }
     $index++;
@@ -1752,13 +2002,13 @@ function displayGroups($allPlayers, $button = 0) {
   $allGroups->sort('-karma');
   $groupList = $allGroups->implode(', ', '{id}');
   if ($groupList && $button == 1) {
-    $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'">Pick 1!</a>';
+    $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'" data-team="'.$team.'">Pick 1!</a>';
   } else {
     $pickButton = '';
   }
   $outGroups .= '<div id="" class="board panel panel-primary">';
   $outGroups .= '<div class="panel-heading">';
-  $outGroups .= '<h4><span class="label label-primary">Most influential groups</span>'.$pickButton.'</h4>';
+  $outGroups .= '<h4><span class="label label-primary">Most active groups</span>'.$pickButton.'</h4>';
   $outGroups .= '</div>';
   $outGroups .= '<div class="panel-body">';
   if ($groupList) {
@@ -1766,12 +2016,12 @@ function displayGroups($allPlayers, $button = 0) {
     foreach( $allGroups as $group) {
       $outGroups .= '<li>';
       if ($button == 1) {
-        $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+        $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
       } else {
-        $outGroups .= '<p data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
+        $outGroups .= '<p data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
       }
       $outGroups .= $group->title;
-      $outGroups .= ' <span class="badge">'.$group->karma.'</span>';
+      $outGroups .= ' <span class="badge">'.$group->karma.' K</span>';
       $outGroups .= '</p>';
       /* // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member) */
       /* $starsGroups = floor($group->nbBonus/5); */
@@ -1794,16 +2044,6 @@ function displayGroups($allPlayers, $button = 0) {
   } else {
     $outGroups .= '<p>The groups aren\'t ready yet.</p>';
   }
-  $outGroups .= '</div>';
-  $outGroups .= '<div class="panel-footer text-center">';
-  $teamPlayers = $allPlayers->find("coma!=1");
-  $teamPlayersList = $teamPlayers->implode(', ', '{id}');
-  if ($button == 1) {
-    $pickButton = ' <a class="btn btn-danger btn-xs pickFromList" data-list="'.$teamPlayersList.'">Pick a player in the whole team !</a>';
-  } else {
-    $pickButton = '';
-  }
-  $outGroups .= $pickButton;
   $outGroups .= '</div>';
   $outGroups .= '</div>';
   return $outGroups;

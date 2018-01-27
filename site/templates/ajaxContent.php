@@ -9,18 +9,18 @@
         $lastMonsters = $pages->find("template=exercise, sort=-published, limit=3");
         foreach($lastMonsters as $m) {
           if ($m->image) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
+            $mini = "<img data-toggle='tooltip' src='".$m->image->getCrop('mini')->url."' alt='image' />";
           } else {
             $mini = '';
           }
-          $out .= '  <li data-toggle="tooltip" title="'.$m->summary.'">'.$mini.' '.$m->title.'</li>  ';
+          $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$m->summary.'">'.$mini.' '.$m->title.'</li>  ';
         }
         if ($user->isLoggedin()) {
           if ($user->isSuperuser() == false) {
             $currentPlayer = $pages->get("template=player, login=$user->name");
             $helmet = $currentPlayer->equipment->get("name=memory-helmet");
           }
-          if ($helmet || $user->isSuperuser()) {
+          if (isset($helmet) || $user->isSuperuser()) {
             $out .= '<li>→ <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a></li>';
           } else {
             $out .= '<li>→ You need to buy the Memory Helmet to fight monsters !</a></li>';
@@ -44,7 +44,7 @@
         $out .= '<ul class="">';
         $blogUrl = $pages->get("name=blog")->url;
         foreach($newsAdmin as $n) {
-          $out .= '<li>'.date("F d, Y", $n->created).' : <a href="'.$blogUrl.'">'.$n->title.'</a></li>';
+          $out .= '<li>'.date("M. d, Y", $n->created).' : <a href="'.$blogUrl.'">'.$n->title.'</a></li>';
         }
         $out .= '</ul>';
         $out .= '</p>';
@@ -68,7 +68,7 @@
             }
             $out .= '<li>';
             $out .= $mini;
-            $out .= date("F j (l)", $n->date).' : ';
+            $out .= date("M. j (D)", $n->date).' : ';
             $out .= '<span>';
             switch ($n->task->category->name) {
             case 'place' : 
@@ -104,7 +104,7 @@
             $currentPlayer = $n->parent('template=player');
             if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
             $out .= '<li class="">';
-            $out .= date("F j (l)", $n->date).' : ';
+            $out .= date("M. j (D)", $n->date).' : ';
             $out .= '<span>';
 
             switch ($n->task->category->name) {
@@ -140,7 +140,7 @@
           $out .= '<ul class="list-unstyled">';
           foreach ($unusedConcerned as $p) {
             foreach ($p->usabledItems as $item) {
-              $historyPage = $p->get("name=history")->get("refPage=$item, linkedId=0");
+              $historyPage = $p->get("name=history")->find("refPage=$item, linkedId=0")->last();
               if ($historyPage->id) {
                 $out .= '<li class="">';
                 // Find # of days compared to today
@@ -225,7 +225,8 @@
         }
         if ($p->is("parent.name=groups")) {
           // Get group members
-          $groupPlayers = $pages->find("template=player, group=$pageId");
+          $team = $input->get('teamId');
+          $groupPlayers = $pages->find("template=player, team=$team, group=$pageId");
           $out .= '<div class="row">';
             $out .= '<p class="text-center"><span class="label label-primary">'.$p->title.'</span></p>';
             $out .= '<ul class="list-unstyled list-inline text-left">';
@@ -266,16 +267,16 @@
           /* $out .= '<li><span class="strikeText">→ No team defense.</span></li>'; */
         }
         // Read Team news
-        if ($input->get->news && $input->get->news>0) {
-          $out .= '<li><span><a href="#" data-type="teamNews" class="ajaxBtn">→ Read about Team News.</a></span></li>';
-        } else {
+        /* if ($input->get->news && $input->get->news>0) { */
+          /* $out .= '<li><span><a href="#" data-type="teamNews" class="ajaxBtn">→ Read about Team News.</a></span></li>'; */
+        /* } else { */
           /* $out .= '<li><span class="strikeText">→ No team news today...</span></li>'; */
-        }
+        /* } */
         // Personal initiative Talk (for 4emes/3emes)
-        if ($p->team->rank && $p->team->rank->is('name=4emes|3emes')) {
-          $task = $pages->get("name=personal-initiative");
-          $out .= '<li><span><a href="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a> [Personal initiative]</span></li>';
-        }
+        /* if ($p->team->rank && $p->team->rank->is('name=4emes|3emes')) { */
+        /*   $task = $pages->get("name=personal-initiative"); */
+        /*   $out .= '<li><span><a href="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a> [Personal initiative]</span></li>'; */
+        /* } */
         // Special discount
         if ($p->is("parent.name!=groups")) {
           if ($possibleItems->count() > 0) {
@@ -329,7 +330,7 @@
         break;
       case 'ambassador' :
         $pageId = $input->get('pageId');
-        $p = $pages->get("title=$pageId");
+        $p = $pages->get("id=$pageId");
         if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
         $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
         break;
@@ -525,6 +526,129 @@
         }
         $out .= ' </tbody>';
         $out .= '</table>';
+        break;
+      case 'last10' :
+        $playerId = $input->get('playerId');
+        $playerPage = $pages->get("id=$playerId");
+        $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date, limit=10");
+        $out = '';
+        $out .= '<ul class="list-unstyled">';
+          if ($allEvents->count() > 0) {
+            foreach ($allEvents as $event) {
+              if ($event->task->HP < 0) {
+                $className = 'negative';
+                $sign = '';
+                $signicon = '<span class="glyphicon glyphicon-minus-sign"></span> ';
+              } else {
+                $className = 'positive';
+                //$className = '';
+                $sign = '+';
+                $signicon = '<span class="glyphicon glyphicon-plus-sign"></span> ';
+              }
+              $out .= '<li class="'.$className.'">';
+              $out .= $signicon;
+              $out .= date("M. j (D)", $event->date).' : ';
+              if ($className == 'negative') {
+                $out .= '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'HP</span> ';
+              }
+              $out .= $event->task->title;
+              $out .= ' ['.$event->summary.']';
+              $out .= '</li>';
+            };
+          } else {
+            $out .= 'No personal history yet...';
+          }
+        $out .= '</ul>';
+        break;
+      case 'work-statistics' :
+        $playerId = $input->get('playerId');
+        $player = $pages->get("id=$playerId");
+        $allEvents = $player->child("name=history")->find("template=event,sort=-date");
+        // Participation
+        $out = '';
+        setParticipation($player);
+        $out .= '<p>';
+        $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe" onmouseenter="$(this).tooltip(\'show\');"></span> Communication ';
+        $out .= ' ⇒ ';
+        switch ($player->participation) {
+          case 'NN' : $class='primary';
+            break;
+          case 'VV' : $class='success';
+            break;
+          case 'V' : $class='success';
+            break;
+          case 'R' : $class='danger';
+            break;
+          case 'RR' : $class='danger';
+            break;
+          default: $class = '';
+        }
+        $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
+        if ($player->partRatio != '-') {
+          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+        }
+        // Homework stats
+        setHomework($player, $officialPeriod->dateStart, $officialPeriod->dateEnd);
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Exercices non faits ou à moitié faits"></span> Training problems :';
+        $out .= ' <span class="">'.$player->hkPb.'</span>';
+        $out .= ' [<span>'.$player->noHk->count().' Hk</span> - <span>'.$player->halfHk->count().' HalfHk</span> - <span>'.$player->notSigned->count().' notSigned</span>]';
+        $out .= ' ⇒ ';
+        switch ($player->homework) {
+          case 'NN' : $class='primary'; break;
+          case 'VV' : $class='success'; break;
+          case 'V' : $class='success'; break;
+          case 'R' : $class='danger'; break;
+          case 'RR' : $class='danger'; break;
+          default: $class = '';
+        }
+        $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-'.$class.'">'.$player->homework.'</span> ';
+        // Forgotten material
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Affaires oubliées"></span> Forgotten material : ';
+        $out .= '<span>'.$player->noMaterial->count().'</span>';
+        $out .= ' ⇒ ';
+        if ($player->noMaterial->count() == 0) {
+          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">VV</span>';
+        }
+        if ($player->noMaterial->count() == 1) {
+          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">V</span>';
+        }
+        if ($player->noMaterial->count() == 2) {
+          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">R</span>';
+        }
+        if ($player->noMaterial->count() > 2) {
+          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">RR</span>';
+        }
+        $out .= '</p>';
+        // Extra-hk
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Travail supplémentaire : extra-homework, personal initiative, underground training..."></span> Personal motivation :';
+        $out .= ' <span> ['.$player->extraHk->count().' extra - </span>';
+        $out .= ' <span>'.$player->initiative->count().' initiatives - </span>';
+        $out .= ' <span class="">'.$player->ut->count().' UT session]</span>';
+        $out .= ' ⇒ ';
+        $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je prend une initiative particulière." class="label label-'.$class.'">'.$player->motivation.'</span> ';
+        $out .= '</p>';
+        
+        // Attitude
+        $disobedience = $allEvents->find("task.name=civil-disobedience");
+        $ambush = $allEvents->find("task.name=ambush");
+        $noisy = $allEvents->find("task.name=noisy-mission");
+        $late = $allEvents->find("task.name=late");
+        $pb = new PageArray();
+        $pb->add($disobedience);
+        $pb->add($ambush);
+        $pb->add($noisy);
+        $pb->add($late);
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Soucis avec l\'attitude"></span> Attitude problems :';
+        $attPb = $disobedience->count()+$ambush->count()+$noisy->count();
+        $out .= ' <span> ['.$attPb.' problems - </span>';
+        $out .= ' <span>'.$late->count().' slow moves]</span>';
+        $out .= ' ⇒ ';
+        if ($pb->count() == 0) {
+          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-success">VV</span>';
+        } else {
+          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'adopte une attitude d\'élève.">Ask your teacher.</span>';
+        }
+        $out .= '</p>';
         break;
       default :
         $out = 'Todo...';

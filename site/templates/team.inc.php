@@ -102,7 +102,8 @@
 
   // Players table
   $allPlayers->sort('-yearlyKarma, -level, -XP');
-  $out = '<table id="teamTable" class="table table-hover table-condensed teamView">';
+  $out = '';
+  $out .= '<table id="teamTable" class="table table-hover table-condensed teamView">';
   $out .= '<thead>';
   $out .= '<tr>';
   $out .= '<th data-toggle="tooltip" title="Group"><span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></th>';
@@ -141,6 +142,7 @@
     $prevEvents = $player->child("name='history'")->children("date>=$prevDate");
     $trend = '';
     foreach ($prevEvents as $event) {
+      if ($user->isSuperuser() && $event->task->is("name=penalty|death|inactivity")) { $class = ' class="selected"';}
       $HP = $event->task->HP;
       $title = $event->task->title;
       if ($HP < 0) {

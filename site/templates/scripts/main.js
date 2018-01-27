@@ -106,13 +106,17 @@ $(document).ready(function() {
 
 	$('#playerId').on('change', function() {
 		var pageId = $(this).val();
-		var oldHref = $('#backendEditable').attr('href');
-		$('#backendEditable').attr('href', oldHref+pageId); 
+		var url = $('#backendEditable').attr('data-href');
+		$('#backendEditable').attr('href', url+pageId); 
 	});
 	$('#backendEditable').on('click', function() {
-		var url = $(this).attr('href')+pageId;
-		window.location.href = url;
-		return false;
+		if ($(this).attr('href') != '') {
+			var url = $(this).attr('href');
+			window.location.href = url;
+			return false;
+		} else {
+			window.alert("Please, select a player first.");
+		}
 	})
 
   $(".removeAbs").on('click', function(e) {
@@ -528,8 +532,10 @@ $(document).ready(function() {
 		var list = $this.attr("data-list");
 		var items = list.split(',');
 		var $pageId = chance.pick(items);
+		var $team = $this.attr("data-team");
+		if ($team) { $team = '&teamId='+$team; }
 		var $news = $('#newsList li').length;
-		var $url = $('#ajaxDecision').attr('data-href') + '?id=' + $('#ajaxDecision').attr('data-id')+'&pageId='+$pageId+'&news='+$news;
+		var $url = $('#ajaxDecision').attr('data-href') + '?id=' + $('#ajaxDecision').attr('data-id')+'&pageId='+$pageId+'&news='+$news+$team;
 		swal({
 			title: 'Decision time for...',
 			onOpen: function () {
