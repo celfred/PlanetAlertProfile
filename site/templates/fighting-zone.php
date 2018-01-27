@@ -9,7 +9,13 @@
     } else { // Fights are allowed
       // Set all available monsters
       if (!$user->isSuperuser()) {
-        $allMonsters = $pages->find("template=exercise, sort=level, sort=name");
+        // Check if player has the Visualizer (or forced by admin)
+        if ($player->equipment->has('name=visualizer') || $player->team->forceVisualizer == 1) {
+          $allMonsters = $pages->find("template=exercise, sort=level, sort=name");
+        } else { // Limit to visible monsters
+          $allMonsters = $pages->find("template=exercise, sort=level, sort=name, special=0");
+          $hiddenMonstersNb = $pages->count("template=exercise, special=1");
+        }
       } else {
         $allMonsters = $pages->find("template=exercise, sort=level, sort=name, include=all");
         $availableFights = $allMonsters;
@@ -32,6 +38,15 @@
         $out .= '<h2 class="text-center">'.$page->title.'</h2>';
         $out .= $page->summary;
         $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->frenchSummary.'"></span>';
+
+        $out .= '<h4 class="text-center">';
+        $out .= 'There are currently '.$allMonsters->count().' monsters detected.';
+        if (isset($hiddenMonstersNb)) {
+          $out .= '<p>('.$hiddenMonstersNb.' monsters are absent because you don\'t have the <a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>.)</p>';
+        } else {
+          $out .= '<p>(All monsters are visible thanks to your Electronic Visualizer.)</p>';
+        }
+        $out .= '</h4>';
 
         if ($availableFights->count() > 0) {
           $out .= '<br />';
@@ -61,6 +76,7 @@
               $mini = '';
             }
             $out .= '<li>';
+            $out .= $m->lastFightInterval;
             if ($m->waitForFight > 1) {
               $out .= '<span class="label label-success">'.$mini.' '.$m->title.'</span> will be at proximity in <span class="badge badge-primary">'.$m->waitForFight.' days</span>';
             } else {

@@ -164,7 +164,10 @@
         <div class="panel-heading">
         <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (U.T.) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Monster fights</span></h4>
         </div>
-        <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="helmetreport&playerId=<?php echo $playerPage->id; ?>">
+        <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="utreport&playerId=<?php echo $playerPage->id; ?>">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
+        <div class="panel-body ajaxContent" data-priority="2" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="fightreport&playerId=<?php echo $playerPage->id; ?>">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
         </div>
         <div class="panel-footer">
