@@ -273,10 +273,10 @@
           /* $out .= '<li><span class="strikeText">→ No team news today...</span></li>'; */
         /* } */
         // Personal initiative Talk (for 4emes/3emes)
-        if ($p->team->rank && $p->team->rank->is('name=4emes|3emes')) {
-          $task = $pages->get("name=personal-initiative");
-          $out .= '<li><span><a href="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a> [Personal initiative]</span></li>';
-        }
+        /* if ($p->team->rank && $p->team->rank->is('name=4emes|3emes')) { */
+        /*   $task = $pages->get("name=personal-initiative"); */
+        /*   $out .= '<li><span><a href="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a> [Personal initiative]</span></li>'; */
+        /* } */
         // Special discount
         if ($p->is("parent.name!=groups")) {
           if ($possibleItems->count() > 0) {
