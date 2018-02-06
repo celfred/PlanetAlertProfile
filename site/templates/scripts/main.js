@@ -492,6 +492,7 @@ $(document).ready(function() {
 					});
 			}}).catch(swal.noop);
 		}
+		return false;
 	});
 
   $('.pickFromList').on('click', function() {

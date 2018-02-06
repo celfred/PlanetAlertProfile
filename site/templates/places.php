@@ -49,7 +49,7 @@
   ?>
   <div class="row">
     <div class="text-center">
-      <h2><a href="map/">See complete Planet Alert World map</a></h2>
+    <h2><a href="<?php echo $pages->get('name=map')->url; ?>">See complete Planet Alert World map</a></h2>
       <?php
         if ($formattedName) {
           echo "<h2>Places in : {$formattedName} ({$selectedPlaces->count()})</h2>";
