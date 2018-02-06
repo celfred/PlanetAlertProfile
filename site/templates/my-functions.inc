@@ -1405,7 +1405,7 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
 
 function setMonstersActivity($player, $monster) {
   // Check if player has the Visualizer (or forced by admin) or monster is detected
-  if ($player->equipment->has('name=visualizer') || $player->team->forceVisualizer == 1 || $monster->special == 0) {
+  if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1 || $monster->special == 0) {
     $today = new \DateTime("today");
     // Init variables
     $monster->spacedTrainingsAllowed = -1;

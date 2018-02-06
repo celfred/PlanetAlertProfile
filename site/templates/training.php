@@ -17,7 +17,7 @@
           $allMonsters = $pages->find('template=exercise, sort=name, include=all');
         } else {
           // Check if player has the Visualizer (or forced by admin)
-          if ($player->equipment->has('name=visualizer') || $player->team->forceVisualizer == 1) {
+          if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
             $allMonsters = $pages->find('template=exercise, sort=name');
           } else {
             $allMonsters = $pages->find('template=exercise, special=0, sort=name');

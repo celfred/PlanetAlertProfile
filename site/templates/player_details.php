@@ -133,10 +133,13 @@
               if ($playerPage->equipment->count > 0) {
                 foreach ($playerPage->equipment as $equipment) {
                   if ($equipment->image) {
-                    $thumb = $equipment->image->url;
+                    /* $thumb = $equipment->image->url; */
+                    $thumb = $equipment->image->getCrop('thumbnail')->url;
                     echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
                     if ($equipment->name == "memory-helmet") { // Direct link to training zone
                       echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                    } else if ($equipment->has("name~=visualizer")) { // Direct link to Visualizer page
+                      echo '<a href="'.$pages->get("name~=visualizer")->url.'" title="Use the Electronic Visualizer"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
                     } else {
                       echo "<img class='img-thumbnail' src='{$thumb}' />";
                     }
