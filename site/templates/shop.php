@@ -90,31 +90,33 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
 } else { 
     if ($input->urlSegment1 == 'details') { // Equipment detail
       $item = $pages->get("name=$input->urlSegment2");
-      $out .= '<div class="well text-center">';
-      $out .= miniProfile($player, 'equipment');
-      $item = possibleElement($player, $item);
-      switch($item->pb) {
-        case 'possible' : 
-          $out .= "<p class='lead'>You can buy this item.</p>";
-          $out .=  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
-          break;
-        case 'already' : 
-          $out .= "<p class='lead'>You already own this item.</p>";
-          break;
-        case 'freeActs' : 
-          $nbEl = $player->places->count()+$player->people->count();
-          $out .= "<p class='lead'>This item requires ".$item->freeActs." free elements ! You have only ".$nbEl." free elements.</p>";
-          break;
-        case 'GC' : 
-          $out .= "<p class='lead'>This item requires ".$item->GC."GC ! You have only ".$player->GC."GC.</p>";
-          break;
-        case 'level' : 
-          $out .= "<p class='lead'>This item requires a level ".$item->level." ! You are only at level ".$player->level.".</p>";
-          break;
-        default: 
-          $out .= "<p class='lead'>You can't buy this item for the moment. Sorry.</p>";
+      if ($user->isLoggedin() && !$user->isSuperuser()) {
+        $out .= '<div class="well text-center">';
+        $out .= miniProfile($player, 'equipment');
+        $item = possibleElement($player, $item);
+        switch($item->pb) {
+          case 'possible' : 
+            $out .= "<p class='lead'>You can buy this item.</p>";
+            $out .=  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
+            break;
+          case 'already' : 
+            $out .= "<p class='lead'>You already own this item.</p>";
+            break;
+          case 'freeActs' : 
+            $nbEl = $player->places->count()+$player->people->count();
+            $out .= "<p class='lead'>This item requires ".$item->freeActs." free elements ! You have only ".$nbEl." free elements.</p>";
+            break;
+          case 'GC' : 
+            $out .= "<p class='lead'>This item requires ".$item->GC."GC ! You have only ".$player->GC."GC.</p>";
+            break;
+          case 'level' : 
+            $out .= "<p class='lead'>This item requires a level ".$item->level." ! You are only at level ".$player->level.".</p>";
+            break;
+          default: 
+            $out .= "<p class='lead'>You can't buy this item for the moment. Sorry.</p>";
+        }
+        $out .= '</div>';
       }
-      $out .= '</div>';
       $out .= '<div class="well">';
       $out .= '<span class="badge badge-default">'.$item->category->title.'</span>';
       $out .= '<br />';

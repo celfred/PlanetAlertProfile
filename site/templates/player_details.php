@@ -133,10 +133,13 @@
               if ($playerPage->equipment->count > 0) {
                 foreach ($playerPage->equipment as $equipment) {
                   if ($equipment->image) {
-                    $thumb = $equipment->image->url;
+                    /* $thumb = $equipment->image->url; */
+                    $thumb = $equipment->image->getCrop('thumbnail')->url;
                     echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
                     if ($equipment->name == "memory-helmet") { // Direct link to training zone
                       echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                    } else if ($equipment->has("name~=visualizer")) { // Direct link to Visualizer page
+                      echo '<a href="'.$pages->get("name~=visualizer")->url.'" title="Use the Electronic Visualizer"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
                     } else {
                       echo "<img class='img-thumbnail' src='{$thumb}' />";
                     }
@@ -164,7 +167,10 @@
         <div class="panel-heading">
         <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (U.T.) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Monster fights</span></h4>
         </div>
-        <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="helmetreport&playerId=<?php echo $playerPage->id; ?>">
+        <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="utreport&playerId=<?php echo $playerPage->id; ?>">
+          <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        </div>
+        <div class="panel-body ajaxContent" data-priority="2" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="fightreport&playerId=<?php echo $playerPage->id; ?>">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
         </div>
         <div class="panel-footer">

@@ -47,6 +47,40 @@ $(document).ready(function() {
     return false; 
   }); 
 
+	$('#limitFightable').on('click', function() {
+		$(".monsterDiv:not('.fightable')").toggle();
+	});
+	$('#limitTrainable').on('click', function() {
+		$(".monsterDiv:not('.trainable')").toggle();
+	});
+	$('#limitNever').on('click', function() {
+		$(".monsterDiv:not('.neverTrained')").toggle();
+	});
+
+	$('.monsterInfo').on('click', function() {
+		$this = $(this);
+		var $url = $this.attr('data-href');
+		swal({
+			title: 'Loading info...',
+			onOpen: function() {
+				swal.showLoading();
+				$.get($url, function(data) { 
+					var $myContent = data;
+					swal({
+						html: $myContent,
+						cancelButtonText : 'Ok',
+						showConfirmButton: false,
+						showCancelButton: true,
+						allowOutsideClick: true,
+						width: 800
+					}).then( function(dismiss) {
+							return;
+					});
+				});
+			}
+		});
+	});
+
 	$('.proceed').on('click', function() {
 		$this = $(this);
 		swal({
@@ -68,7 +102,6 @@ $(document).ready(function() {
 		}, function(dismiss) {
 			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 		});
-
 	});
 
 	$('#playerId').on('change', function() {

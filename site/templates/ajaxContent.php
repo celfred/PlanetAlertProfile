@@ -402,7 +402,7 @@
           $out .= '<span class="alert alert-warning">No groups are set. This item will be individual !</span>';
         }
         break;
-      case 'helmetreport' : // UT report
+      case 'utreport' : // UT report
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
         $utConcernedMonsters = utReport($playerPage);
@@ -434,7 +434,10 @@
         } else {
           echo "<p>You have never used the Memory Helmet.</p>";
         }
-
+        break;
+      case 'fightreport' : // Fights report
+        $playerId = $input->get('playerId');
+        $playerPage = $pages->get("id=$playerId");
         // Fights report
         $playerConcernedMonsters = fightReport($playerPage);
         if ($playerConcernedMonsters->count() > 0) {
@@ -462,7 +465,6 @@
         } else {
           echo "<p>You haven't fought any monsters yet.</p>";
         }
-        break;
       case 'history' :
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
