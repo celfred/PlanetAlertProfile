@@ -5,6 +5,27 @@
     $player = $pages->get("template=player, login=$user->name");
     $player->of(false);
 
+    if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '' && $input->get->lessonId != '') { // Book of Knowledge use
+      $player = $pages->get($input->get->playerId);
+      $task = $pages->get($input->get->taskId);
+      $refPage = $pages->get($input->get->lessonId);
+      if ($task->is("name=extra-homework|intensive-extra-homework")) {
+        $task->comment = "Good Copy work";
+        $task->refPage = $refPage;
+        $task->linkedId = false;
+        // Record in player's history but don't calculate new scores. Wait for admin's validation
+        // TODO : Change : Make an admin's work list in backend > record playerId and task info ???
+        //  > Use Book of Knowledge page > Add repeater : playerId, lessonId, date
+        //  > Loop over this list in Admin's work
+        //  > If 'validated' > create extra-training with refPage in Player's history and updateScore
+        // TODO : Clone historyPage with updateScore then delete old history ?
+        savePendingLesson($player, $task);
+        // setEventDate($task);
+        //$historyPage = saveHistory($player, $task, 1);
+        //addUsable($player, $historyPage, 1);
+      }
+    }
+
     if($input->post->buyFormSubmit) { // buyForm submitted
       $itemId = $input->post->item;
       $newItem = $pages->get($itemId);
@@ -147,7 +168,7 @@
     // Redirect to player's profile (in main.js, because doesn't work due to Ajax ?)
     /* $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name); */
     $url = $pages->get('/players')->url.$player->team->name.'/'.$player->name;
-    echo json_encode(array("sender"=>"marketPlace", "url"=>$url, "newItem"=>$newItem->id));
+    /* echo json_encode(array("sender"=>"marketPlace", "url"=>$url, "newItem"=>$newItem->id)); */
   }
 
   if ($user->isSuperuser()) { // Admin front-end
@@ -179,6 +200,28 @@
         $player->usabledItems->add($usedItem);
         $player->save();
       }
+    }
+    // Validate Book of Knowledge
+    if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->usedPending != '') {
+      $pending = $pages->get($input->get->usedPending);
+      echo $pending->player->title;
+      // TODO 
+      // > Create player's history page according to task (with date...)
+      // > Remove pendingLesson ? Pb : What if unticked ?
+      /* $historyPage = $pages->get($input->get->usedItemHistoryPageId); */
+      /* $player = $historyPage->parent("template=player"); */
+      /* $usedItem = $historyPage->refPage; */
+      /* if ($player->usabledItems->has($usedItem)) { // 'Used today' is ticked */
+      /*   // Remove item from player's usabledItems list */
+      /*   $player->of(false); */
+      /*   $player->usabledItems->remove($usedItem); */
+      /*   $player->save(); */
+      /* } else { // Used today is unclicked */
+      /*   // Restore item in player's usabledItems list */
+      /*   $player->of(false); */
+      /*   $player->usabledItems->add($usedItem); */
+      /*   $player->save(); */
+      /* } */
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, for example

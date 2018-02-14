@@ -126,6 +126,8 @@
 										echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
 										$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 										echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
+										$class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
+										echo "<li><a$class href='{$pages->get('/book-knowledge')->url}'>The Book of Knowledge</a></li>";
 									echo '</ul>';
 								echo '</li>';
 								$class = $page->name == 'contact' ? " class='selected-left'" : "";
@@ -209,6 +211,8 @@
 									echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
 									$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
+									$class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/book-knowledge')->url}'>The Book of Knowledge</a></li>";
 								echo '</ul>';
 							echo '</div>';
 							echo '<div class="btn-group">';
@@ -336,6 +340,8 @@
 									echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
 									$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
+									$class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/book-knowledge')->url}'>The Book of Knowledge</a></li>";
 									?>
 								</ul>
 							</li>
@@ -364,6 +370,8 @@
 									echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
 									$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
+									$class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('/book-knowledge')->url}'>The Book of Knowledge</a></li>";
 									?>
 								</ul>
 							</li>

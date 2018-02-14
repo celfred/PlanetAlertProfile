@@ -140,24 +140,45 @@
           $out .= '<ul class="list-unstyled">';
           foreach ($unusedConcerned as $p) {
             foreach ($p->usabledItems as $item) {
-              $historyPage = $p->get("name=history")->find("refPage=$item, linkedId=0")->last();
-              if ($historyPage) {
-                $out .= '<li class="">';
-                // Find # of days compared to today
-                $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
-                $interval = $date1->diff($date2);
-                if ($interval->days > 21) {
-                  $out .= ' <span class="badge">!</span> ';
+                $historyPage = $p->get("name=history")->find("refPage=$item, linkedId=0")->last();
+                if ($historyPage) {
+                  $out .= '<li class="">';
+                  // Find # of days compared to today
+                  $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
+                  $interval = $date1->diff($date2);
+                  if ($interval->days > 21) {
+                    $out .= ' <span class="badge">!</span> ';
+                  }
+                  $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                  $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> used today<span id="feedback"></span></label>';
+                  $out .= '</li>';
                 }
-                $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
-                $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> Used today<span id="feedback"></span></label>';
-                $out .= '</li>';
-              }
             }
           }
           $out .= '</ul>';
         } else {
           $out .= '<hr /><p class="">No Potion to be used.</p>';
+        }
+        $pending = $pages->get("name=book-knowledge");
+        if (count($pending->pendingLessons) > 0) {
+          $date1 = new \DateTime("today");
+          $out .= '<p class="label label-primary">Copy work</p>';
+          $out .= '<ul class="list-unstyled">';
+          foreach ($pending->pendingLessons as $p) {
+            $out .= '<li class="">';
+            // Find # of days compared to today
+            $date2 = new \DateTime(date("Y-m-d", $p->date));
+            $interval = $date1->diff($date2);
+            if ($interval->days > 21) {
+              $out .= ' <span class="badge">!</span> ';
+            }
+            $out .= '<span>'.$p->player->title.' ['.$p->player->team->title.'] : '.$p->refPage->title.' (warning '.$interval->days.' days ago)</span>';
+            $out .= ' <label for="unpublish_'.$p->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$p->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedPending='.$p->id.'" /> validated today<span id="feedback"></span></label>';
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<hr /><p class="">No Lessons to be validated.</p>';
         }
         break;
       case 'decision' :

@@ -340,6 +340,21 @@ function addUsable($player, $historyPage, $real) {
   }
 }
 
+function savePendingLesson($player, $task) {
+  $pages = wire('pages');
+  setEventDate($task);
+  $book = $pages->get("name=book-knowledge");
+  $book->of(false);
+  $pending = $book->pendingLessons->getNew();
+  $pending->player = $player;
+  $pending->task = $task;
+  $pending->refPage = $task->refPage;
+  $pending->date = $task->eDate;
+  $pending->save();
+  $book->pendingLessons->add($pending);
+  $book->save();
+}
+
 function addGroupItem($player, $historyPage, $real) {
   $pages = wire('pages');
   $player->equipment->add($historyPage->refPage);
@@ -1262,10 +1277,12 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
           $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
           break;
         case 'group':
-          if ($player && $p->name == $player->group->name) {
-            $focus = "class='focus'";
-          } else {
-            $focus = "";
+          if ($player->team->name != 'no-team') {
+            if ($player && $player->group && $p->name == $player->group->name) {
+              $focus = "class='focus'";
+            } else {
+              $focus = "";
+            }
           }
           $out .= '<li>';
           $out .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$p->details.'">';

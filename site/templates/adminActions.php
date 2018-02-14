@@ -304,7 +304,7 @@ namespace ProcessWire;
       $endDate = $endDate.' 23:59:59';
     }
 
-    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'forceVisualizer', 'reset-streaks'];
+    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'reset-streaks'];
     if (in_array($action, $teamActions)) {
       $type = 'team';
     }
@@ -1098,6 +1098,17 @@ namespace ProcessWire;
         }
         $team->save();
         break;
+      case 'forceKnowledge':
+        $team = $pages->get("$selectedTeam");
+        $team->of(false);
+        if ($team->forceKnowledge == 1) {
+          // Remove lock
+          $team->forceKnowledge = 0;
+        } else {
+          $team->forceKnowledge = 1;
+        }
+        $team->save();
+        break;
       case 'archivePlayer':
         $p = $selectedPlayer;
         $noteam = $pages->get("template=team, name=no-team");
@@ -1366,6 +1377,16 @@ namespace ProcessWire;
           }
           $out .= '<li><label for="forceVisualizer"><input type="checkbox" id="forceVisualizer" '.$status.'> Force Visualizer</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceVisualizer/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
+          $lock = $pages->get("$selectedTeam")->forceKnowledge;
+          bd($pages->get("$selectedTeam")->forceKnowledge);
+          if ($lock == 1) {
+            $status = 'checked="checked"';
+          } else {
+            $status = '';
+          }
+          $out .= '<li><label for="forceKnowledge"><input type="checkbox" id="forceKnowledge" '.$status.'> Force the Book of Knowledge</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceKnowledge/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
           $lock = $pages->get("$selectedTeam")->lockFights;
           if ($lock == 1) {

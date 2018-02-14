@@ -152,6 +152,38 @@ $(document).ready(function() {
     return false; 
   }); 
 
+	$(document).on('click', '#copied', (function() {
+		var $this = $(this);
+		var $url = $this.attr('data-url');
+		var $playerId = $this.attr('data-playerId');
+		var $lessonId = $this.attr('data-lessonId');
+		var $taskId = $this.attr('data-taskId');
+		swal({
+			title: "Are you sure?",
+			text: "This action will alert your teacher.",
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes"
+		}).then( function() {
+			$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId+'&taskId='+$taskId;
+			$.get($url, function(data) { 
+				swal({
+					title: "Saved !",
+					text: "Thanks for your participation in Planet Alert !",
+					timer: 1000,
+					showConfirmButton: false
+				}).catch(swal.noop);
+			});
+		}), function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') {
+				return;
+			}
+		};
+		return false;
+	}));
+
   $(document).on('click', '.ajaxUnpublish', (function() {
     //$("#feedback").html("<p>Loading...</p>"); 
     $(this).parents('li').toggleClass('strikeText');
@@ -615,7 +647,7 @@ $(document).ready(function() {
 		}).then( function() {
 			var $url = $this.attr('data-url');
 			var $type = $this.attr('data-type');
-			if ($type == 'heal') {
+			if ($type == 'heal')  {
 				$this.parents("div.thumbnail").remove();
 			}
 			$.get($url, function(data) { 

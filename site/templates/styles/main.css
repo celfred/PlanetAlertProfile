@@ -952,6 +952,14 @@ img.showInfo {
 	max-width: 150px;
 }
 
+.copybook {
+	background: #FFF;
+	padding : 5px;
+}
+.copybook h1 {
+	text-decoration : underline;
+}
+
 /* Large desktop */
 @media (min-width: 1200px) { 
 }
