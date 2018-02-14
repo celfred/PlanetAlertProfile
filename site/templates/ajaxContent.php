@@ -141,7 +141,7 @@
           foreach ($unusedConcerned as $p) {
             foreach ($p->usabledItems as $item) {
               $historyPage = $p->get("name=history")->find("refPage=$item, linkedId=0")->last();
-              if ($historyPage->id) {
+              if ($historyPage) {
                 $out .= '<li class="">';
                 // Find # of days compared to today
                 $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
