@@ -13,16 +13,8 @@
         $task->comment = "Good Copy work";
         $task->refPage = $refPage;
         $task->linkedId = false;
-        // Record in player's history but don't calculate new scores. Wait for admin's validation
-        // TODO : Change : Make an admin's work list in backend > record playerId and task info ???
-        //  > Use Book of Knowledge page > Add repeater : playerId, lessonId, date
-        //  > Loop over this list in Admin's work
-        //  > If 'validated' > create extra-training with refPage in Player's history and updateScore
-        // TODO : Clone historyPage with updateScore then delete old history ?
+        // TODO : Check if lesson is not already in pending lessons
         savePendingLesson($player, $task);
-        // setEventDate($task);
-        //$historyPage = saveHistory($player, $task, 1);
-        //addUsable($player, $historyPage, 1);
       }
     }
 

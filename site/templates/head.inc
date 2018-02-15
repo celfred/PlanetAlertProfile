@@ -319,6 +319,17 @@
               } else {
                 echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Use the Electronic Visualizer</li>";
               }
+              // Check if Book of Knowledge is accessible in player's group
+              if ($player && ($player->team->forceKnowledge == 1 || $player->equipment->get("name=book-knowledge"))) {
+								$class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
+								if ($player->team->forceKnowledge == 1) {
+									echo "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-th'></span> - Read the Book of Knowledge</a></li>";
+								} else {
+									echo "<li><a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-th'></span> - Read the Book of Knowledge</a></li>";
+								}
+              } else {
+                echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Read the Book of Knowledge</li>";
+              }
 							// Hall of Fame
 							$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 							echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'><span class='glyphicon glyphicon-eye-open'></span> - Visit the Hall of Fame</a></li>";
