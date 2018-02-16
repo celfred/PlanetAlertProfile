@@ -60,10 +60,10 @@
         $out .= "<br /><br />";
         $out .= '<p>Your activity :</p>';
         $out .= '<ul>';
-        $out .= '<li><i class="glyphicon glyphicon-headphones"></i> UT gained : <span class="label label-primary">'.$page->utGain.'</span>';
+        $out .= '<li><i class="glyphicon glyphicon-headphones"></i> <span class="label label-primary">'.$page->utGain.'</span>UT gained ';
         if ($page->isTrainable == 1) {
           $helmet = $pages->get("name=memory-helmet");
-          $out .= '→ <button class="btn"><a href="'.$pages->get("name=underground-training")->url.'?id='.$page->id.'"><img src="'.$helmet->image->getCrop("mini")->url.'" alt="Use the Memory Helmet" /> Use the Memory Helmet !</a></button>';
+          $out .= '→ <a class="btn btn-primary" href="'.$pages->get("name=underground-training")->url.'?id='.$page->id.'"><img src="'.$helmet->image->getCrop("mini")->url.'" alt="Use the Memory Helmet" /> Use the Memory Helmet !</a>';
           if ($page->lastTrainingInterval != -1) {
             $out .= '<p>Last training session : '.$page->lastTrainingInterval.' days ago.</p>';
           } else {
@@ -82,9 +82,9 @@
           }
         }
         $out .= '</li>';
-        $out .= '<li><i class="glyphicon glyphicon-flash"></i> Nb of fights : <span class="label label-primary">'.$page->allFightsNb.'</span>';
+        $out .= '<li><i class="glyphicon glyphicon-flash"></i> <span class="label label-primary">'.$page->allFightsNb.'</span> fights ';
         if ($page->isFightable == 1) {
-          $out .= '→ <button class="btn"><a href="'.$pages->url.'"><i class="glyphicon glyphicon-flash"></i> Fight  the monster !</a></button>';
+          $out .= '→ <a class="btn btn-primary" href="'.$page->url.'"><i class="glyphicon glyphicon-flash"></i> Fight  the monster !</a>';
           if ($page->lastFightInterval != -1) {
             $out .= '<p>Last Fight : '.$page->lastFightInterval.' days ago.</p>';
           } else {
