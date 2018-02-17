@@ -332,6 +332,18 @@ function taskExtraAction($player, $task, $real) {
   }
 }
 
+function removeTaskRecalculate($player, $task) {
+  // Limit to 'easy' tasks (extra-training for the moment)
+  if ($task->is("name=extra-homework|intensive-extra-homework")) {
+    setDelta($player, $task);
+
+    $player->XP = (int) $player->XP-($task->XP+$player->deltaXP);
+    $player->GC = (int) $player->GC-$task->GC;
+    $player->streak--;
+    // Pb if level changed thanks to the task being removed...
+  }
+}
+
 function addUsable($player, $historyPage, $real) {
   $player->of(false);
   if ($real == true) {
@@ -651,7 +663,6 @@ function setCaptains($team, $real = true) {
   foreach($groups as $group) {
     // Find group captain
     $captain = $players->sort("-yearlyKarma")->findOne("group=$group");
-    $out .= $captain->id.'-';
     if (isset($captain->id)) {
       $captain->skills->add($role);
       if ($real == true) {

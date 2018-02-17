@@ -160,7 +160,7 @@ $(document).ready(function() {
 		var $taskId = $this.attr('data-taskId');
 		swal({
 			title: "Are you sure?",
-			text: "This action will alert your teacher.",
+			text: "This action will alert your teacher. A fake alert will cost you a civil disobedience !",
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
@@ -184,12 +184,42 @@ $(document).ready(function() {
 		return false;
 	}));
 
+  $(document).on('click', '.del', (function() {
+    var $this = $(this);
+		swal({
+			title: "Are you sure?",
+			text: "This action will permanently delete the notification !",
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes"
+		}).then( function() {
+			$this.parent('li').remove();
+			$.get($this.attr('href'), function(data) { 
+				swal({
+					title: "Saved !",
+					text: "",
+					timer: 1000,
+					showConfirmButton: false
+				}).catch(swal.noop);
+			}); 
+		}), function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') {
+				return;
+			}
+		};
+		return false;
+  })); 
+
   $(document).on('click', '.ajaxUnpublish', (function() {
-    //$("#feedback").html("<p>Loading...</p>"); 
+    //$(this).parent().next(".feedback").html("<p>Loading...</p>"); 
+		$delLink = $(this).parent().next('a.del');
+		if ($delLink) { $delLink.toggle(); }
     $(this).parents('li').toggleClass('strikeText');
     var $this = $(this);
     $.get($(this).val(), function(data) { 
-        //$("#feedback").html(''); 
+        //$(this).parent().next(".feedback").html(''); 
     }); 
   })); 
 

@@ -9,9 +9,10 @@
 
   $out .= '<ul>';
   foreach($allLessons as $l) {
+    // TODO : Calculate possible credit according to player's equipment
     $length = strlen($l->body);
     $out .= '<li>';
-    $out .= 'Level '.$l->level.' : <a href="'.$l->url.'">'.$l->title.'</a> : +'.$l->GC.'GC, +'.$l->XP.'XP';
+    $out .= 'Level '.$l->level.' →  <a href="'.$l->url.'">'.$l->title.'</a> <span class="label label-default">+'.$l->GC.'GC</span> <span class="label label-default">+'.$l->XP.'XP</span>';
     $out .= ' ('.$length.' signs)';
     $out .= '</li>';
   }

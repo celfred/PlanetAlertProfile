@@ -13,8 +13,11 @@
         $task->comment = "Good Copy work";
         $task->refPage = $refPage;
         $task->linkedId = false;
-        // TODO : Check if lesson is not already in pending lessons
-        savePendingLesson($player, $task);
+        // Only 1 pending lesson allowed for a player
+        $already = $pages->get("name=book-knowledge, pendingLessons.player=$player");
+        if (!$already || !$already->isTrash()) {
+          savePendingLesson($player, $task);
+        }
       }
     }
 
@@ -196,24 +199,50 @@
     // Validate Book of Knowledge
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->usedPending != '') {
       $pending = $pages->get($input->get->usedPending);
-      echo $pending->player->title;
-      // TODO 
-      // > Create player's history page according to task (with date...)
-      // > Remove pendingLesson ? Pb : What if unticked ?
-      /* $historyPage = $pages->get($input->get->usedItemHistoryPageId); */
-      /* $player = $historyPage->parent("template=player"); */
-      /* $usedItem = $historyPage->refPage; */
-      /* if ($player->usabledItems->has($usedItem)) { // 'Used today' is ticked */
-      /*   // Remove item from player's usabledItems list */
-      /*   $player->of(false); */
-      /*   $player->usabledItems->remove($usedItem); */
-      /*   $player->save(); */
-      /* } else { // Used today is unclicked */
-      /*   // Restore item in player's usabledItems list */
-      /*   $player->of(false); */
-      /*   $player->usabledItems->add($usedItem); */
-      /*   $player->save(); */
-      /* } */
+      $player = $pending->player;
+      if ($pending->isTrash()) { // 'Validated' is unclicked
+        $pages->restore($pending); // Restore trashed pending lesson
+        // Delete linked page in player's history
+        $historyPage = $player->get("name=history")->get("linkedId=$pending->id");
+        if ($historyPage) { $historyPage->delete(); }
+        // Reset scores
+        $task = $pending->task;
+        $tempPlayer = $pages->get("parent.name=tmp, login=$player->login");
+        if ($tempPlayer) { 
+          $player->XP = $tempPlayer->XP;
+          $player->HP = $tempPlayer->HP;
+          $player->GC = $tempPlayer->GC;
+          $player->level = $tempPlayer->level;
+          $player->karma = $tempPlayer->karma;
+          $player->yearlyKarma = $tempPlayer->yearlyKarma;
+        }
+        setCaptains($player->team);
+        $player->of(false);
+        $player->save();
+        $tempPlayer->delete();
+      } else { // 'Validated' is ticked
+        // Store previous player's state in temp page for restore possibility
+        $tmpParent = $pages->get("name=tmp");
+        $tempPlayer = $pages->clone($player, $tmpParent, false);
+        $tempPlayer->save();
+        // Create task in player's history
+        $task = $pending->task;
+        $task->date = $pending->date;
+        if ($task->is("name=extra-homework|intensive-extra-homework")) {
+          $task->comment = 'Book of Knowledge use ['.$pending->refPage->title.']';
+          $task->refPage = $pending->refPage;
+          $task->linkedId = $pending->id;
+          updateScore($player, $task, true);
+          // Set group captains
+          setCaptains($player->team);
+          $pending->trash();
+        }
+      }
+    }
+    // Delete pending lesson without scoring
+    if (isset($input->get->form) && $input->get->form == 'deleteNotification' && $input->get->usedPending != '') {
+      $pending = $pages->get($input->get->usedPending);
+      $pending->trash();
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, for example
