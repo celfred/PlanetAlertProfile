@@ -14,13 +14,6 @@
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
   $rightInvasions = $allEvents->find("task.name=right-invasion")->count();
   $wrongInvasions = $allEvents->find("task.name=wrong-invasion")->count();
-  $allCategories = new PageArray();
-  foreach ($allEvents as $e) {
-    if (isset($e->task->category)) {
-      $allCategories->add($e->task->category);
-      $allCategories->sort("title");
-    }
-  }
 
   $karma = $playerPage->yearlyKarma;
   if (!$karma) $karma = 0;
@@ -47,120 +40,120 @@
     echo '</div>';
   }
 ?>
-    <div class="row">
-      <div class="col-lg-6 panel panel-success panel-player">
-          <div class="panel-heading">
-            <h1 class="panel-title">
-              <span class=""><?php echo $playerPage->title; ?></span>
-              <?php 
-                if ($playerPage->skills->has("name=captain")) {
-                  $showSkills = '<span class="label label-primary">Captain</span>';
-                } else {
-                  $showSkills = '';
-                }
-                if ($playerPage->skills->has("name=ambassador")) {
-                  $showSkills .= '<span class="label label-success">Ambassador</span>';
-                }
-                echo $showSkills;
-              ?>
-            </h1>
-          </div>
-          <div class="panel-body row">
-          <div class="text-center col-sm-6">
-            <img src="<?php if ($playerPage->avatar) echo $playerPage->avatar->url; ?>" alt="No avatar" />
-          </div>
-          <div class="col-sm-6">
-            <ul class="player-details">
-            <li>Karma : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
-            <li>Reputation : <span class="label label-default"><?php echo $playerPage->karma; ?></span></li>
-            <li>Level : <?php echo $playerPage->level; ?></li>
-            <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></li>
-            <li><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></li>
-            <?php
-              if ($lastActivityCount >= 0 && $lastActivityCount < 30) { // Active players
-                echo '<li><span class="glyphicon glyphicon-thumbs-up"></span> Active player !</li>';
-              } else { // 30 days of inactivity > lose all GC
-                if ($lastActivityCount >= 20 && $lastActivityCount <= 30) { // Warning 10 days before losing GC
-                  $delay = 31-$lastActivityCount;
-                  echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' days of inactivity. ('.$delay.' day(s) before losing all GC !)</li>';
-                } else {
-                  echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' days of inactivity. (All GC have been lost !)</li>';
-                }
-              }
-            ?>
-            </ul>
-          </div>
-          </div>
-          <?php if ($playerPage->coma == 0) { ?>
-          <div class="col-sm-2 text-right">
-            <span class="badge" tooltip="Points de santé"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="Santé" /> <?php echo $playerPage->HP; ?>/50</span>
-          </div>
-          <div class="col-sm-10">
-            <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="Health points">
-              <div class="progress-bar progress-bar-danger" role="progressbar" style="width:<?php echo 2*$playerPage->HP; ?>%">
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-2 text-right">
-            <?php
-            if ($playerPage->level <= 4) {
-              $delta = 40+($playerPage->level*10);
-            } else {
-              $delta = 90;
-            }
-            $threshold = ($playerPage->level*10)+$delta;
-            ?>
-            <span class="badge" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)"><img src="<?php  echo $config->urls->templates?>img/star.png" alt="Experience" /> <?php echo $playerPage->XP; ?>/<?php echo $threshold; ?></span>
-          </div>
-          <div class="col-sm-10">
-            <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)">
-              <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo (100*$playerPage->XP)/$threshold; ?>%">
-              </div>
-            </div>
-          </div>
-          <?php } else { ?>
-            <h4 class="text-center"><span class="label label-danger">You're in a COMA !</span></h4><h4 class="text-center"><span>Buy a healing potion to go back to normal state !</span></h4>
-          <?php } ?>
-      </div>
-
-      <div class="col-lg-5 panel panel-success">
+  <div class="row">
+    <div class="col-lg-6 panel panel-success panel-player">
         <div class="panel-heading">
-          <h4 class="panel-title">Equipment</h4>
-        </div>
-        <div class="panel-body text-center">
-          <ul class="list-inline">
-            <?php
-              if ($playerPage->equipment->count > 0) {
-                foreach ($playerPage->equipment as $equipment) {
-                  if ($equipment->image) {
-                    /* $thumb = $equipment->image->url; */
-                    $thumb = $equipment->image->getCrop('thumbnail')->url;
-                    echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
-                    if ($equipment->name == "memory-helmet") { // Direct link to training zone
-                      echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
-                    } else if ($equipment->has("name=electronic-visualizer")) { // Direct link to Visualizer page
-                      echo '<a href="'.$pages->get("name=visualizer")->url.'" title="Use the Electronic Visualizer"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
-                    } else {
-                      echo "<img class='img-thumbnail' src='{$thumb}' />";
-                    }
-                    echo "</li>";
-                  } else {
-                    echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>{$equipment->title}</li>";
-                  }
-                }
+          <h1 class="panel-title">
+            <span class=""><?php echo $playerPage->title; ?></span>
+            <?php 
+              if ($playerPage->skills->has("name=captain")) {
+                $showSkills = '<span class="label label-primary">Captain</span>';
               } else {
-                echo "<p>Aucun équipement.</p>";
+                $showSkills = '';
               }
+              if ($playerPage->skills->has("name=ambassador")) {
+                $showSkills .= '<span class="label label-success">Ambassador</span>';
+              }
+              echo $showSkills;
             ?>
+          </h1>
+        </div>
+        <div class="panel-body row">
+        <div class="text-center col-sm-6">
+          <img src="<?php if ($playerPage->avatar) echo $playerPage->avatar->url; ?>" alt="No avatar" />
+        </div>
+        <div class="col-sm-6">
+          <ul class="player-details">
+          <li>Karma : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
+          <li>Reputation : <span class="label label-default"><?php echo $playerPage->karma; ?></span></li>
+          <li>Level : <?php echo $playerPage->level; ?></li>
+          <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC; ?> GC</span></li>
+          <li><span class="glyphicon glyphicon-exclamation-sign"></span> Hk count : <?php echo $hkCount; ?></li>
+          <?php
+            if ($lastActivityCount >= 0 && $lastActivityCount < 30) { // Active players
+              echo '<li><span class="glyphicon glyphicon-thumbs-up"></span> Active player !</li>';
+            } else { // 30 days of inactivity > lose all GC
+              if ($lastActivityCount >= 20 && $lastActivityCount <= 30) { // Warning 10 days before losing GC
+                $delay = 31-$lastActivityCount;
+                echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' days of inactivity. ('.$delay.' day(s) before losing all GC !)</li>';
+              } else {
+                echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' days of inactivity. (All GC have been lost !)</li>';
+              }
+            }
+          ?>
           </ul>
         </div>
-        <div class="panel-footer text-center">
-          <?php 
-            echo '<p><span class="glyphicon glyphicon-flash"></span> Fighting power : '.$playerPage->fighting_power.'</p>';
-          ?>
         </div>
+        <?php if ($playerPage->coma == 0) { ?>
+        <div class="col-sm-2 text-right">
+          <span class="badge" tooltip="Points de santé"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="Santé" /> <?php echo $playerPage->HP; ?>/50</span>
+        </div>
+        <div class="col-sm-10">
+          <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="Health points">
+            <div class="progress-bar progress-bar-danger" role="progressbar" style="width:<?php echo 2*$playerPage->HP; ?>%">
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-2 text-right">
+          <?php
+          if ($playerPage->level <= 4) {
+            $delta = 40+($playerPage->level*10);
+          } else {
+            $delta = 90;
+          }
+          $threshold = ($playerPage->level*10)+$delta;
+          ?>
+          <span class="badge" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)"><img src="<?php  echo $config->urls->templates?>img/star.png" alt="Experience" /> <?php echo $playerPage->XP; ?>/<?php echo $threshold; ?></span>
+        </div>
+        <div class="col-sm-10">
+          <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="Experience (Level <?php echo $playerPage->level; ?>)">
+            <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo (100*$playerPage->XP)/$threshold; ?>%">
+            </div>
+          </div>
+        </div>
+        <?php } else { ?>
+          <h4 class="text-center"><span class="label label-danger">You're in a COMA !</span></h4><h4 class="text-center"><span>Buy a healing potion to go back to normal state !</span></h4>
+        <?php } ?>
+    </div>
+
+    <div class="col-lg-5 panel panel-success">
+      <div class="panel-heading">
+        <h4 class="panel-title">Equipment</h4>
+      </div>
+      <div class="panel-body text-center">
+        <ul class="list-inline">
+          <?php
+            if ($playerPage->equipment->count > 0) {
+              foreach ($playerPage->equipment as $equipment) {
+                if ($equipment->image) {
+                  /* $thumb = $equipment->image->url; */
+                  $thumb = $equipment->image->getCrop('thumbnail')->url;
+                  echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
+                  if ($equipment->name == "memory-helmet") { // Direct link to training zone
+                    echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                  } else if ($equipment->has("name=electronic-visualizer")) { // Direct link to Visualizer page
+                    echo '<a href="'.$pages->get("name=visualizer")->url.'" title="Use the Electronic Visualizer"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                  } else {
+                    echo "<img class='img-thumbnail' src='{$thumb}' />";
+                  }
+                  echo "</li>";
+                } else {
+                  echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>{$equipment->title}</li>";
+                }
+              }
+            } else {
+              echo "<p>Aucun équipement.</p>";
+            }
+          ?>
+        </ul>
+      </div>
+      <div class="panel-footer text-center">
+        <?php 
+          echo '<p><span class="glyphicon glyphicon-flash"></span> Fighting power : '.$playerPage->fighting_power.'</p>';
+        ?>
       </div>
     </div>
+  </div>
 
   <div class="row">
       <div class="panel panel-success">

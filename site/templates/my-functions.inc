@@ -1262,7 +1262,7 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
           $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
           break;
         case 'group':
-          if ($player && $p->name == $player->group->name) {
+          if ($player && $p->group && $p->name == $player->group->name) {
             $focus = "class='focus'";
           } else {
             $focus = "";

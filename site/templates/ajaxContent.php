@@ -465,6 +465,7 @@
         } else {
           echo "<p>You haven't fought any monsters yet.</p>";
         }
+        break;
       case 'history' :
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
