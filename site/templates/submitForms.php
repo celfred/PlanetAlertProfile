@@ -229,7 +229,7 @@
         $task = $pending->task;
         $task->date = $pending->date;
         if ($task->is("name=extra-homework|intensive-extra-homework")) {
-          $task->comment = 'Book of Knowledge use ['.$pending->refPage->title.']';
+          $task->comment = 'Book of Knowledge use : '.$pending->refPage->title;
           $task->refPage = $pending->refPage;
           $task->linkedId = $pending->id;
           updateScore($player, $task, true);
@@ -243,6 +243,16 @@
     if (isset($input->get->form) && $input->get->form == 'deleteNotification' && $input->get->usedPending != '') {
       $pending = $pages->get($input->get->usedPending);
       $pending->trash();
+    }
+
+    // Buy PDF
+    if (isset($input->get->form) && $input->get->form == 'buyPdf' && $input->get->playerId != '' && $input->get->lessonId != '') {
+      // Add buy-pdf action to player's history and update GC
+      $player = $pages->get($input->get->playerId);
+      $lesson = $pages->get($input->get->lessonId);
+      $task = $pages->get("name=buy-pdf");
+      $task->comment = 'Buy PDF ('.$lesson->title.')';
+      updateScore($player, $task, true);
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, for example

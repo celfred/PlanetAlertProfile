@@ -323,9 +323,9 @@
               if ($player && ($player->team->forceKnowledge == 1 || $player->equipment->get("name=book-knowledge"))) {
 								$class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
 								if ($player->team->forceKnowledge == 1) {
-									echo "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-th'></span> - Read the Book of Knowledge</a></li>";
+									echo "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-book'></span> - Read the Book of Knowledge</a></li>";
 								} else {
-									echo "<li><a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-th'></span> - Read the Book of Knowledge</a></li>";
+									echo "<li><a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-book'></span> - Read the Book of Knowledge</a></li>";
 								}
               } else {
                 echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Read the Book of Knowledge</li>";

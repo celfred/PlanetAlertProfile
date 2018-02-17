@@ -11,16 +11,17 @@
       $player = $pages->get("template=player, name=test");
     } else {
       $access = $player->equipment->get('knowledge');
-      setDelta($player, $task);
     }
     if ($access) {
       $out .= '<div class="text-center">';
         $task = $page->task;
-        $out .= '<span>Possible credit : '.$task->title.'</span>';
         // Calculate possible credit according to player's equipment
-        $out .= ' <span class="label label-default">+'.$task->XP+$player->deltaXP.' XP</span>';
-        $out .= ' <span class="label label-default">+'.$task->GC.' GC</span>';
-        $out .= "<p>Copy in your copybook and show it in class to your teacher. You will get the credit if you don't make any spelling mistakes, if you write as best as you can and if you <u>underline</u> the title !</p>";
+        setDelta($player, $task);
+        $out .= "<p>Copy in your copybook and show it in class to your teacher to get the credit : ";
+        $out .= '<span class="label label-primary">'.$task->title.'</span> → ';
+        $out .= ' <span class="label label-default">+'.($task->GC+$player->deltaGC).' GC</span>';
+        $out .= ' <span class="label label-default">+'.($task->XP+$player->deltaXP).' XP</span>';
+        $out .= "<p>(No spelling mistakes, good writing and title is <u>underlined</u> to get the points !)</p>";
       $out .= '</div>';
 
       $out .= '<section class="copybook">';
@@ -31,10 +32,26 @@
       // 1 pending lesson at a time allowed for a player
       $already = $pages->get("name=book-knowledge, pendingLessons.player=$player");
       if (!$already || !$already->isTrash()) {
-        $out .= '<p class="text-center"><button class="btn btn-primary btn-block" id="copied" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask" data-taskId="'.$task->id.'" data-lessonId="'.$page->id.'" data-playerId="0">✓ Copied in my copybook ! (Warn the teacher)</button></p>';
+        $out .= '<p class="text-center"><button class="btn btn-primary" id="copied" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask" data-taskId="'.$task->id.'" data-lessonId="'.$page->id.'" data-playerId="0">✓ Copied in my copybook ! (Alert the teacher)</button></p>';
       } else {
         $out .= '<p class="text-center warning">Good job ! You jave already asked to validate  a copied lesson. You have to wait for the validation before asking for another one !</p>';
       }
+
+      $buyPdf = $pages->get("name=buy-pdf");
+      if ($player->GC > $buyPdf->GC || $user->isSuperuser) {
+        $out .= '<div class="text-center">';
+        $out .= '<p>You can print a PDF for <span class="label label-danger">'.abs($buyPdf->GC).'GC</span> : ';
+        $out .= ' (No XP, no GC gained and you would have <span class="label label-danger">'.($player->GC+$buyPdf->GC).'GC</span> left)</p>';
+        $out .= '<a href="'.$page->url.'?pages2pdf=1" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">Get PDF link</a>';
+        $out .= '<p class="text-center feedback"></p>';
+        $out .= '</div>';
+      }
+
+      $out .= '<p class="text-center"> Monsters related to this lesson : ';
+        foreach ($page->linkedMonsters as $lm) {
+          $out .= '<span>'.$lm->title.'</span> ';
+        }
+      $out .= '</p>';
     }
   } else {
     $out .= '<p class="alert alert-warning">Sorry, but you don\'t have access to this page. Contact the administrator if yoy think this is an error.</p> ';

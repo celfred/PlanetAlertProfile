@@ -184,6 +184,33 @@ $(document).ready(function() {
 		return false;
 	}));
 
+	$(document).on('click', '.buyPdf', (function() {
+		var $this = $(this);
+		var $url = $this.attr('data-url');
+		var $playerId = $this.attr('data-playerId');
+		var $lessonId = $this.attr('data-lessonId');
+		swal({
+			title: "Are you sure?",
+			text: "This action will cost you 10GC.",
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes"
+		}).then( function() {
+			$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId;
+			$.get($url, function(data) { 
+				// Display PDF Link
+				$this.next(".feedback").html('<a href="'+$this.attr("href")+'" class="btn btn-lg">Click here to download the PDF</a>');
+			});
+		}), function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') {
+				return;
+			}
+		};
+		return false;
+	}));
+
   $(document).on('click', '.del', (function() {
     var $this = $(this);
 		swal({
