@@ -252,6 +252,7 @@
       $lesson = $pages->get($input->get->lessonId);
       $task = $pages->get("name=buy-pdf");
       $task->comment = 'Buy PDF ('.$lesson->title.')';
+      $task->refPage = $lesson;
       updateScore($player, $task, true);
     }
 

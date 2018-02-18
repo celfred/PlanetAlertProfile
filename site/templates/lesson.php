@@ -27,6 +27,13 @@
       $out .= '<section class="copybook">';
         $out .= '<h1 class="text-center">'.$page->title.'</h1>';
         $out .= $page->body;
+
+        $out .= '<hr />';
+        $out .= '<p class="text-center"> Monsters related to this lesson : ';
+          foreach ($page->linkedMonsters as $lm) {
+            $out .= '<span class="label label-default"><img src="'.$lm->image->getCrop('mini')->url.'" alt="image" /> '.$lm->title.'</span> ';
+          }
+        $out .= '</p>';
       $out .= '</section>';
 
       // 1 pending lesson at a time allowed for a player
@@ -40,18 +47,12 @@
       $buyPdf = $pages->get("name=buy-pdf");
       if ($player->GC > $buyPdf->GC || $user->isSuperuser) {
         $out .= '<div class="text-center">';
-        $out .= '<p>You can print a PDF for <span class="label label-danger">'.abs($buyPdf->GC).'GC</span> : ';
+        $out .= '<a href="'.$page->url.'?pages2pdf=1" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">Buy PDF to print ('.abs($buyPdf->GC).'GC)</a>';
         $out .= ' (No XP, no GC gained and you would have <span class="label label-danger">'.($player->GC+$buyPdf->GC).'GC</span> left)</p>';
-        $out .= '<a href="'.$page->url.'?pages2pdf=1" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">Get PDF link</a>';
         $out .= '<p class="text-center feedback"></p>';
         $out .= '</div>';
       }
 
-      $out .= '<p class="text-center"> Monsters related to this lesson : ';
-        foreach ($page->linkedMonsters as $lm) {
-          $out .= '<span>'.$lm->title.'</span> ';
-        }
-      $out .= '</p>';
     }
   } else {
     $out .= '<p class="alert alert-warning">Sorry, but you don\'t have access to this page. Contact the administrator if yoy think this is an error.</p> ';
