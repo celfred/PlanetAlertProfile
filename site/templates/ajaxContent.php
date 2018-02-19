@@ -98,7 +98,9 @@
         break;
       case 'admin-work' :
         $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy|penalty");
+        $out .= '<div class="col-sm-6">';
         if ($news->count() > 0) {
+          $out .= '<p class="label label-primary">Papers to be given</p>';
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {
             $currentPlayer = $n->parent('template=player');
@@ -133,7 +135,9 @@
         } else {
           $out .= '<p>Nothing to do.</p>';
         }
-        $unusedConcerned = $pages->find("template=player, usabledItems.count>0");
+        $out .= '</div>';
+        $unusedConcerned = $pages->find("template=player, usabledItems.count>0")->sort("-team.name, name");
+        $out .= '<div class="col-sm-6">';
         if ($unusedConcerned->count > 0) {
           $date1 = new \DateTime("today");
           $out .= '<p class="label label-primary">Potion Planner</p>';
@@ -159,6 +163,7 @@
         } else {
           $out .= '<hr /><p class="">No Potion to be used.</p>';
         }
+        $out .= '</div>';
         break;
       case 'decision' :
         $pageId = $input->get('pageId');

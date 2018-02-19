@@ -91,7 +91,6 @@
             
         $out .= '<div class="row">'; // Nested 2 columns
           $out .= '<div class="col-sm-6">'; // Subcolumn 1
-        
             // Most active
             $out .= '<div class="board panel panel-success">';
             $out .= '  <div class="panel-heading">';
@@ -228,6 +227,7 @@
 
     echo $out;
     } else {
+      if (!$user->isSuperuser()) {
       echo '<div class="col-sm-6">';
         echo '<div class="row">'; // Nested 2 columns
           echo '<div class="col-sm-6">'; // Subcolumn 1
@@ -311,10 +311,17 @@
         echo '</div>';
       ?>
     <?php } ?>
+    <?php } // End isSuperuser() ?>
   </div>
 
-  <div class="col-sm-6">
-    <?php // Admin news
+    <?php
+      if (!$user->isSuperuser()) { // Scoreboards take place !
+        echo '<div class="col-sm-6">';
+      } else {
+        echo '<div class="col-sm-12">'; // No scoreboards
+      }
+    
+      // Admin news
       if ($user->isLoggedin()) {
         if ($user->isSuperuser()) {
           // Admin gets all published news
@@ -385,7 +392,7 @@
       ?>
       <div id="" class="news panel panel-primary">
         <div class="panel-heading">
-          <h4 class="panel-title">Admin's work (papers to be given to players)</h4>
+          <h4 class="panel-title">Admin's work</h4>
         </div>
         <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="admin-work">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>

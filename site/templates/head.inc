@@ -124,6 +124,8 @@
 										echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
 										$class = $page->name == 'monsters' ? " class='selected-left'" : "";
 										echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
+										$class = $page->name == 'the-scoreboards' ? " class='selected-left'" : "";
+										echo "<li><a$class href='{$pages->get('name=the-scoreboards')->url}'>The Scoreboards</a></li>";
 										$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 										echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
 									echo '</ul>';
@@ -194,7 +196,7 @@
 								echo '</ul>';
 							echo '</div>';
 							echo '<div class="btn-group">';
-								$class = $page->is("name=shop|places|people|actions|monsters|hall-of-fame") ? "selected-left" : "";
+								$class = $page->is("name=shop|places|people|actions|monsters|hall-of-fame|the-scoreboards") ? "selected-left" : "";
 								echo '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">The World <span class="caret"> </span></button>';
 								echo '<ul class="dropdown-menu">';
 									$class = $page->name == 'shop' ? " class='selected-left'" : "";
@@ -207,6 +209,8 @@
 									echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
 									$class = $page->name == 'monsters' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
+									$class = $page->name == 'the-scoreboards' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('name=the-scoreboards')->url}'>The Scoreboards</a></li>";
 									$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
 								echo '</ul>';
@@ -320,7 +324,7 @@
 							echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'><span class='glyphicon glyphicon-eye-open'></span> - Visit the Hall of Fame</a></li>";
 							?>
 							<li class="dropdown-submenu">
-								<?php $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : ""; ?>
+								<?php $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame|the-scoreboards") ? "selected-left" : ""; ?>
 								<a class="<?php echo $class; ?>" href=""><span class='glyphicon glyphicon-globe'></span> - Discover Planet Alert World</a>
 								<ul class="dropdown-menu">
 									<?php
@@ -334,6 +338,8 @@
 									echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
 									$class = $page->name == 'monsters' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
+									$class = $page->name == 'the-scoreboards' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('name=the-scoreboards')->url}'>The Scoreboards</a></li>";
 									$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
 									?>
@@ -348,7 +354,7 @@
             <button type="button" class="<?php echo $class; ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>
             <ul class="dropdown-menu">
 							<li class="dropdown-submenu">
-								<?php $class = $page->is("name=shop|places|people|actions|monsters|hall-of-fame") ? "selected-left" : ""; ?>
+								<?php $class = $page->is("name=shop|places|people|actions|monsters|hall-of-fame|the-scoreboards") ? "selected-left" : ""; ?>
 								<a class="<?php echo $class; ?>" href=""><span class='glyphicon glyphicon-globe'></span> - The World</a>
 								<ul class="dropdown-menu">
 									<?php
@@ -362,6 +368,8 @@
 									echo "<li><a$class href='{$pages->get('/tasks')->url}'>The Actions</a></li>";
 									$class = $page->name == 'monsters' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/monsters')->url}'>The Monsters</a></li>";
+									$class = $page->name == 'the-scoreboards' ? " class='selected-left'" : "";
+									echo "<li><a$class href='{$pages->get('name=the-scoreboards')->url}'>The Scoreboards</a></li>";
 									$class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
 									echo "<li><a$class href='{$pages->get('/hall-of-fame')->url}'>The Hall of Fame</a></li>";
 									?>
