@@ -1772,8 +1772,16 @@ function pma($player) {
     $possibleElements += $possiblePeople->count();
   }
   if ($possibleEquipment->count() > 0 || $possibleElements > 0) {
-    $marketPlace = $pages->get("name=shop_generator")->url.$player->id;
-    $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> New elements are available for you at <a href="'.$marketPlace.'">the Marketplace</a> ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="De nouveaux éléments sont accessibles pour toi dans la Marketplace !"></span></p>';
+    //Limit to 3 items a day
+    $today = new \DateTime("today");
+    $limitDate = strtotime($today->format('Y-m-d'));
+    $todayItemsCount = $player->get("name=history")->find("date>=$limitDate")->count();
+    if ($todayItemsCount >= 3) {
+      $out .= "<p class='text-center alert alert-warning'>You have reached the 3 items limit for today ! Come back tomorrow  to go to the Marketplace !</p>";
+    } else {
+      $marketPlace = $pages->get("name=shop_generator")->url.$player->id;
+      $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> New elements are available for you at <a href="'.$marketPlace.'">the Marketplace</a> ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="De nouveaux éléments sont accessibles pour toi dans la Marketplace !"></span></p>';
+    }
   }
   $out .= '</div>';
   $out .= '</div>';
@@ -1815,6 +1823,10 @@ function possibleElements($player) {
 
 function possibleElement($player, $item) {
   $pages = wire('pages');
+  //Limit to 3 items a day
+  $today = new \DateTime("today");
+  $limitDate = strtotime($today->format('Y-m-d'));
+  $todayItemsCount = $player->get("name=history")->find("date>=$limitDate")->count();
   $already = new PageArray();
   $already->add($player->equipment);
   $already->add($player->places);
@@ -1824,12 +1836,13 @@ function possibleElement($player, $item) {
   } else {
     $nbEl = $player->places->count()+$player->people->count()+1;
     $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<$nbEl, id!=$already");
-    if ($possibleItems->has($item)) {
+    if ($possibleItems->has($item) && $todayItemsCount < 3) {
       $item->pb = 'possible';
     } else {
       if ($item->level > $player->level) { $item->pb = 'level'; }
       if ($item->GC > $player->GC) { $item->pb = 'GC'; }
       if ($item->freeActs > $nbEl) { $item->pb = 'freeActs'; }
+      if ($todayItemsCount >= 3) { $item->pb = 'maxToday'; }
     }
   }
   return $item;
@@ -1871,14 +1884,12 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
 function miniProfile($player, $type = '') {
   $config = wire('config');
   $pages = wire('pages');
-  if ($player->avatar) {
-    $mini = '<img class="" src="'.$player->avatar->getCrop("mini")->url.'" alt="Avatar" />';
-  } else {
-    $mini = '<Avatar>';
-  }
+  //Limit to 3 items a day
+  $today = new \DateTime("today");
+  $limitDate = strtotime($today->format('Y-m-d'));
+  $todayItemsCount = $player->get("name=history")->find("date>=$limitDate")->count();
   $out = '<div class="lead">';
   $out .= '<ul class="list-unstyled list-inline">';
-  $out .= $mini;
   if ($player->coma == 0) {
     // Display scores
     $out .= '<li><span class="label label-success">Karma : '.$player->yearlyKarma.'</span></li>';
