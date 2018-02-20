@@ -140,8 +140,8 @@ function updateScore($player, $task, $real = true) {
     }
 
     if ($real == true) { // Save player's new scores if necessary
-      // Publish on Newsboard?
-      if ($task->is("name=inactivity|penalty|buy|free|ut-action-v|ut-action-vv|bought|remove")) {
+      // Publish on Public Newsboard ?
+      if ($task->is("name=inactivity|penalty|buy|free|ut-action-v|ut-action-vv|bought|remove|buy-pdf")) {
         $newsBoard = 1;
       } else {
         $newsBoard = 0;
