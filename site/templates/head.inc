@@ -320,7 +320,7 @@
                 echo "<li>&nbsp; <span class='badge badge-danger'>Locked</span> Use the Electronic Visualizer</li>";
               }
               // Check if Book of Knowledge is accessible in player's group
-              if ($player && ($player->team->forceKnowledge == 1 || $player->equipment->get("name=book-knowledge"))) {
+              if ($player && ($player->team->forceKnowledge == 1 || $player->equipment->get("name~=book-knowledge"))) {
 								$class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
 								if ($player->team->forceKnowledge == 1) {
 									echo "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-book'></span> - Read the Book of Knowledge</a></li>";

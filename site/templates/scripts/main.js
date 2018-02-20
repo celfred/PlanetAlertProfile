@@ -884,6 +884,12 @@ var initTables = function() {
     order: [[ 1, "desc"]],
     orderCellsTop: true
   });
+  var lessonsTable = $('#lessonsTable').DataTable({
+    paging: false,
+    lengthMenu: [ [25, 50, -1], [25, 50, 75, 100, "All"] ],
+    order: [[ 0, "asc"], [1, "asc"]],
+    orderCellsTop: true
+  });
 
   $('.categoryFilter').click(function(){
     mainShop.draw();

@@ -17,15 +17,20 @@
         $task = $page->task;
         // Calculate possible credit according to player's equipment
         setDelta($player, $task);
-        $out .= "<p>Copy in your copybook and show it in class to your teacher to get the credit : ";
+        $out .= "<h3> Possible credit : ";
         $out .= '<span class="label label-primary">'.$task->title.'</span> → ';
         $out .= ' <span class="label label-default">+'.($task->GC+$player->deltaGC).' GC</span>';
         $out .= ' <span class="label label-default">+'.($task->XP+$player->deltaXP).' XP</span>';
-        $out .= "<p>(No spelling mistakes, good writing and title is <u>underlined</u> to get the points !)</p>";
+        $out .= '</h3>';
+        $out .= "<p>Copy in your copybook and show it in class to your teacher (Don't forget anything, make no spelling mistakes, use your best hand-writing and <u>underlined</u> the title to get the points !)</p>";
       $out .= '</div>';
 
       $out .= '<section class="copybook">';
         $out .= '<h1 class="text-center">'.$page->title.'</h1>';
+        $out .= '<p class="text-center">'.$page->summary.'</p>';
+
+        $out .= '<hr />';
+
         $out .= $page->body;
 
         $out .= '<hr />';

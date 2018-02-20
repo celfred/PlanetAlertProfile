@@ -121,7 +121,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       $out .= '<span class="badge badge-default">'.$item->category->title.'</span>';
       $out .= '<br />';
       $out .= '<br />';
-      $out .= '<img class="img-thumbnail" src="'.$item->image->url.'" alt="Image" />&nbsp;&nbsp;';
+      $out .= '<img class="img-thumbnail" src="'.$item->image->getCrop("big")->url.'" alt="Image" />&nbsp;&nbsp;';
       $out .= '<h2 class="inline"><strong>'.$item->title.'</strong>';
       $out .= '</h2>';
       $out .= '<h4>';

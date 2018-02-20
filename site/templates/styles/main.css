@@ -954,7 +954,10 @@ img.showInfo {
 
 .copybook {
 	background: #FFF;
-	padding : 5px;
+	padding : 10px;
+	border-radius: 20px;
+	border: 2px solid #000;
+	font-size: 1.2em;
 }
 .copybook h1 {
 	text-decoration : underline;
