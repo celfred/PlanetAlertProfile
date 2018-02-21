@@ -7,7 +7,8 @@ $out = '';
 
 $out .= '<img src="'.$logo->url.'" width="100" height="100" /> ';
 $out .= '<h1>'.$page->title.'</h1>';
-$out .= '<div>';
+$out .= '<p>'.$page->summary.'</p>';
+$out .= '<div class="copybook">';
 $out .= $page->body;
 $out .= '</div>';
 

@@ -79,3 +79,35 @@ li.bigger {
 	font-size: 18pt;
 	margin-bottom: 10px;
 }
+.copybook p {
+	text-align: left;
+}
+.copybook h1 {
+	text-decoration : underline;
+}
+.copybook table caption {
+	text-align: left;
+	text-decoration : underline;
+}
+.copybook table {
+	vertical-align: middle;
+}
+.copybook table.examples {
+	text-align: left;
+	border: 0px;
+}
+.copybook table.examples td {
+	text-align: left;
+}
+.copybook table.examples ol li {
+	list-style-position: inside;
+}
+.copybook ul.col2, .copybook ol.col2 {
+	column-count: 2;
+}
+.copybook hr {
+	width: 30%;
+}
+hr {
+	width: 150px;
+}

@@ -962,6 +962,28 @@ img.showInfo {
 .copybook h1 {
 	text-decoration : underline;
 }
+.copybook table caption {
+	text-align: left;
+	text-decoration : underline;
+}
+.copybook table {
+	vertical-align: middle;
+}
+.copybook table.examples {
+	border: 0px;
+}
+.copybook table.examples td {
+	text-align: left;
+}
+.copybook ul.col2, .copybook ol.col2 {
+	column-count: 2;
+}
+.copybook table.examples ol li {
+	list-style-position: inside;
+}
+.copybook hr {
+	width: 30%;
+}
 
 /* Large desktop */
 @media (min-width: 1200px) { 

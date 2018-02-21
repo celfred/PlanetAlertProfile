@@ -7,10 +7,10 @@
     // Test if player has unlocked Book of Knowledge 
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $player->team->forceKnowledge == 1) {
-      $access = $pages->get("name=knowledge");
+      $access = $pages->get("name=book-knowledge-item");
       $player = $pages->get("template=player, name=test");
     } else {
-      $access = $player->equipment->get('knowledge');
+      $access = $player->equipment->get('name~=book-knowledge');
     }
     if ($access) {
       $out .= '<div class="text-center">';
@@ -49,15 +49,28 @@
         $out .= '<p class="text-center warning">Good job ! You jave already asked to validate  a copied lesson. You have to wait for the validation before asking for another one !</p>';
       }
 
-      $buyPdf = $pages->get("name=buy-pdf");
-      if ($player->GC > $buyPdf->GC || $user->isSuperuser) {
+      $bought = $player->get("name=history")->find("task.name=buy-pdf, refPage=$page");
+      if ($bought->count() == 1) {
         $out .= '<div class="text-center">';
-        $out .= '<a href="'.$page->url.'?pages2pdf=1" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">Buy PDF to print ('.abs($buyPdf->GC).'GC)</a>';
-        $out .= ' (No XP, no GC gained and you would have <span class="label label-danger">'.($player->GC+$buyPdf->GC).'GC</span> left)</p>';
-        $out .= '<p class="text-center feedback"></p>';
+        $out .= '<a href="'.$page->url.'?pages2pdf=1" class="btn btn-primary btn-sm">Download PDF</a></td>';
         $out .= '</div>';
+      } else {
+        $buyPdf = $pages->get("name=buy-pdf");
+        if ($player->GC > $buyPdf->GC || $user->isSuperuser) {
+          $out .= '<div class="text-center">';
+          $out .= '<a href="'.$page->url.'?pages2pdf=1" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">Buy PDF to print ('.abs($buyPdf->GC).'GC)</a>';
+          $out .= ' (No XP, no GC gained and you would have <span class="label label-danger">'.($player->GC+$buyPdf->GC).'GC</span> left)</p>';
+          $out .= '<p class="text-center feedback"></p>';
+          $out .= '</div>';
+        } else {
+          $out .= '<div class="text-center">';
+          $out .= '<p class="text-center">You need at least '.abs($buyPdf->GC).'GC to be ablet to download a PDF version of this lesson.</p>';
+          $out .= '</div>';
+        }
       }
 
+    } else {
+      $out .= '<p class="alert alert-warning">Sorry, but you don\'t have access to this page. Contact the administrator if yoy think this is an error.</p> ';
     }
   } else {
     $out .= '<p class="alert alert-warning">Sorry, but you don\'t have access to this page. Contact the administrator if yoy think this is an error.</p> ';
