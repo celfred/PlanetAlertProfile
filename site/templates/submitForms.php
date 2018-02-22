@@ -5,6 +5,17 @@
     $player = $pages->get("template=player, login=$user->name");
     $player->of(false);
 
+    // Buy PDF
+    if (isset($input->get->form) && $input->get->form == 'buyPdf' && $input->get->playerId != '' && $input->get->lessonId != '') {
+      // Add buy-pdf action to player's history and update GC
+      $player = $pages->get($input->get->playerId);
+      $lesson = $pages->get($input->get->lessonId);
+      $task = $pages->get("name=buy-pdf");
+      $task->comment = 'Buy PDF ('.$lesson->title.')';
+      $task->refPage = $lesson;
+      updateScore($player, $task, true);
+    }
+
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '' && $input->get->lessonId != '') { // Book of Knowledge use
       $player = $pages->get($input->get->playerId);
       $task = $pages->get($input->get->taskId);
@@ -243,17 +254,6 @@
     if (isset($input->get->form) && $input->get->form == 'deleteNotification' && $input->get->usedPending != '') {
       $pending = $pages->get($input->get->usedPending);
       $pending->trash();
-    }
-
-    // Buy PDF
-    if (isset($input->get->form) && $input->get->form == 'buyPdf' && $input->get->playerId != '' && $input->get->lessonId != '') {
-      // Add buy-pdf action to player's history and update GC
-      $player = $pages->get($input->get->playerId);
-      $lesson = $pages->get($input->get->lessonId);
-      $task = $pages->get("name=buy-pdf");
-      $task->comment = 'Buy PDF ('.$lesson->title.')';
-      $task->refPage = $lesson;
-      updateScore($player, $task, true);
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, for example

@@ -191,7 +191,6 @@ $(document).ready(function() {
 		var $lessonId = $this.attr('data-lessonId');
 		swal({
 			title: "Are you sure?",
-			text: "This action will cost you 10GC.",
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,

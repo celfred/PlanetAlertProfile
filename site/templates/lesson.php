@@ -58,13 +58,13 @@
         $buyPdf = $pages->get("name=buy-pdf");
         if ($player->GC > $buyPdf->GC || $user->isSuperuser) {
           $out .= '<div class="text-center">';
-          $out .= '<a href="'.$page->url.'?pages2pdf=1" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">Buy PDF to print ('.abs($buyPdf->GC).'GC)</a>';
-          $out .= ' (No XP, no GC gained and you would have <span class="label label-danger">'.($player->GC+$buyPdf->GC).'GC</span> left)</p>';
+          $out .= '<a href="'.$page->url.'" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">Buy PDF to print ('.abs($buyPdf->GC).'GC)</a>';
           $out .= '<p class="text-center feedback"></p>';
+          $out .= '<p> (No XP, no GC gained and you would have <span class="label label-danger">'.($player->GC+$buyPdf->GC).'GC</span> left)</p>';
           $out .= '</div>';
         } else {
           $out .= '<div class="text-center">';
-          $out .= '<p class="text-center">You need at least '.abs($buyPdf->GC).'GC to be ablet to download a PDF version of this lesson.</p>';
+          $out .= '<p class="text-center">You need at least '.abs($buyPdf->GC).'GC to be able to download a PDF version of this lesson.</p>';
           $out .= '</div>';
         }
       }
