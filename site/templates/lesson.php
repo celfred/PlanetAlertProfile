@@ -36,18 +36,28 @@
         $out .= '<hr />';
         $out .= '<p class="text-center"> Monsters related to this lesson : ';
           foreach ($page->linkedMonsters as $lm) {
-            $out .= '<span class="label label-default"><img src="'.$lm->image->getCrop('mini')->url.'" alt="image" /> '.$lm->title.'</span> ';
+            if ($user->isLoggedin() && $player->equipment->has("name=memory-helmet") || $user->isSuperuser()) {
+              if (!$user->isSuperuser()) {
+                setMonstersActivity($player, $lm);
+              }
+              if ($user->isSuperuser() || $lm->isTrainable != 0) {
+                $training = $pages->get("name=underground-training");
+                $out .= '<a class="btn btn-primary" href="'.$training->url.'?id='.$lm->id.'"><img src="'.$lm->image->getCrop('mini')->url.'" alt="image" /> '.$lm->title.'</a> ';
+              }
+            } else {
+              $out .= '<span class="label label-default"><img src="'.$lm->image->getCrop('mini')->url.'" alt="image" /> '.$lm->title.'</span> ';
+            }
           }
         $out .= '</p>';
-      $out .= '</section>';
-
       // 1 pending lesson at a time allowed for a player
       $already = $pages->get("name=book-knowledge, pendingLessons.player=$player");
       if (!$already || !$already->isTrash()) {
-        $out .= '<p class="text-center"><button class="btn btn-primary" id="copied" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask" data-taskId="'.$task->id.'" data-lessonId="'.$page->id.'" data-playerId="0">✓ Copied in my copybook ! (Alert the teacher)</button></p>';
+        $out .= '<p class="text-right"><button class="btn btn-primary" id="copied" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask" data-taskId="'.$task->id.'" data-lessonId="'.$page->id.'" data-playerId="0">✓ Copied in my copybook ! (Alert the teacher)</button></p>';
       } else {
         $out .= '<p class="text-center warning">Good job ! You jave already asked to validate  a copied lesson. You have to wait for the validation before asking for another one !</p>';
       }
+
+      $out .= '</section>';
 
       $bought = $player->get("name=history")->find("task.name=buy-pdf, refPage=$page");
       if ($bought->count() == 1) {

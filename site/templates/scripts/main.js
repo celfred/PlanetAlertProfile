@@ -160,7 +160,7 @@ $(document).ready(function() {
 		var $taskId = $this.attr('data-taskId');
 		swal({
 			title: "Are you sure?",
-			text: "This action will alert your teacher. A fake alert will cost you a civil disobedience !",
+			html: "This action will alert your teacher.<br />A fake alert will cost you a <span class='label label-danger'>civil disobedience</span> !",
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
