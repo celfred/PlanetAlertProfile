@@ -984,6 +984,12 @@ img.showInfo {
 .copybook hr {
 	width: 30%;
 }
+.copybook .date {
+	position: absolute;
+	text-decoration : underline;
+	font-size: 1.1em;
+	right: 50px;
+}
 
 /* Large desktop */
 @media (min-width: 1200px) { 

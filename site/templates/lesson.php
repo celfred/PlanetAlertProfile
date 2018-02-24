@@ -22,12 +22,14 @@
         $out .= ' <span class="label label-default">+'.($task->GC+$player->deltaGC).' GC</span>';
         $out .= ' <span class="label label-default">+'.($task->XP+$player->deltaXP).' XP</span>';
         $out .= '</h3>';
-        $out .= "<p>Copy in your copybook and show it in class to your teacher (Don't forget anything, make no spelling mistakes, use your best hand-writing and <u>underlined</u> the title to get the points !)</p>";
+        $out .= "<p>Copy in your copybook and show it in class to your teacher (Don't forget anything, make no spelling mistakes, use your best hand-writing and <u>underline</u> the title and date to get the points !)</p>";
       $out .= '</div>';
 
       $out .= '<section class="copybook">';
+        // Add today's date
+        $out .= '<p class="date">'.\date('l, F dS').'</p>';
         $out .= '<h1 class="text-center">'.$page->title.'</h1>';
-        $out .= '<p class="text-center">'.$page->summary.'</p>';
+        $out .= '<h3 class="text-center">'.$page->summary.'</h3>';
 
         $out .= '<hr />';
 

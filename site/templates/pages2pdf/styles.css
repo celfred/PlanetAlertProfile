@@ -108,6 +108,10 @@ li.bigger {
 .copybook hr {
 	width: 30%;
 }
+.copybook .date {
+	text-decoration : underline;
+	float: right;
+}
 hr {
 	width: 150px;
 }
