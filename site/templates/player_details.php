@@ -138,8 +138,10 @@
                     echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
                     if ($equipment->name == "memory-helmet") { // Direct link to training zone
                       echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
-                    } else if ($equipment->has("name=electronic-visualizer")) { // Direct link to Visualizer page
-                      echo '<a href="'.$pages->get("name=visualizer")->url.'" title="Use the Electronic Visualizer"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                    } else if ($equipment->name == "electronic-visualizer") { // Direct link to Visualizer page
+                      echo '<a href="'.$pages->get("name=visualizer")->url.'" title="Use the '.$equipment->title.'"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                    } else if ($equipment->name == "book-knowledge-item") { // Direct link to Visualizer page
+                      echo '<a href="'.$pages->get("name=book-knowledge")->url.'" title="Use the '.$equipment->title.'"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
                     } else {
                       echo "<img class='img-thumbnail' src='{$thumb}' />";
                     }
