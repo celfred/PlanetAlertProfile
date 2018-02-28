@@ -984,6 +984,9 @@ img.showInfo {
 .copybook hr {
 	width: 30%;
 }
+.copybook td img {
+	float: none;
+}
 .copybook .date {
 	position: absolute;
 	text-decoration : underline;

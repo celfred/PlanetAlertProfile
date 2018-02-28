@@ -63,13 +63,13 @@
       $out .= '</section>';
 
       $bought = $player->get("name=history")->find("task.name=buy-pdf, refPage=$page");
-      if ($bought->count() == 1) {
+      if ($bought->count() == 1 || $user->isSuperuser()) {
         $out .= '<div class="text-center">';
         $out .= '<a href="'.$page->url.'?pages2pdf=1" class="btn btn-primary btn-sm">Download PDF</a></td>';
         $out .= '</div>';
       } else {
         $buyPdf = $pages->get("name=buy-pdf");
-        if ($player->GC > $buyPdf->GC || $user->isSuperuser) {
+        if ($player->GC > $buyPdf->GC) {
           $out .= '<div class="text-center">';
           $out .= '<a href="'.$page->url.'" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">Buy PDF to print ('.abs($buyPdf->GC).'GC)</a>';
           $out .= '<p class="text-center feedback"></p>';
@@ -83,10 +83,10 @@
       }
 
     } else {
-      $out .= '<p class="alert alert-warning">Sorry, but you don\'t have access to this page. Contact the administrator if yoy think this is an error.</p> ';
+      $out .= '<p class="alert alert-warning">Sorry, but you don\'t have access to this page. Contact the administrator if you think this is an error.</p> ';
     }
   } else {
-    $out .= '<p class="alert alert-warning">Sorry, but you don\'t have access to this page. Contact the administrator if yoy think this is an error.</p> ';
+    $out .= '<p class="alert alert-warning">Sorry, but you don\'t have access to this page. Contact the administrator if you think this is an error.</p> ';
   }
   //
   echo $out;
