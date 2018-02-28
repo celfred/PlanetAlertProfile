@@ -1,11 +1,8 @@
 <?php 
 
-// TODO : Use download area
-$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
-
 $out = '';
 
-$out .= '<img src="'.$logo->url.'" width="100" height="100" /> ';
+$out .= '<img style="float: left;" src="http://download.tuxfamily.org/planetalert/logo.png" width="100" height="100" /> ';
 // Add today's date
 $out .= '<p style="text-decoration: underline;">'.\date('l, F dS').'</p>';
 $out .= '<h1 style="text-decoration: underline;">'.$page->title.'</h1>';

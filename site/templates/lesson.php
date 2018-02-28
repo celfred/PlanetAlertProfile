@@ -26,6 +26,7 @@
       $out .= '</div>';
 
       $out .= '<section class="copybook">';
+        $out .= '<img class="pull-left" src="http://download.tuxfamily.org/planetalert/logo.png" width="100" height="100" /> ';
         // Add today's date
         $out .= '<p class="date">'.\date('l, F dS').'</p>';
         $out .= '<h1 class="text-center">'.$page->title.'</h1>';
