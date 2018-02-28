@@ -105,24 +105,26 @@ $stats .= $totalTrainingSessions->count.' with '.$trainedPlayers->count.' player
 $stats .= ' ['.$totalUt.' UT points = '.($totalUt*10).' words, '.round(($totalUt/$totalTrainingSessions->count())*10).' words/session]';
 $stats .= '</span></h3>';
 
-// Last connected users (and dates)
-$stats .= '<h3 class="text-center">Last logged dates</h3>';
-$stats .= '<table id="loggedTable" class="table table-condensed table-hover">';
-$stats .= '<thead>';
-$stats .= '<tr>';
-$stats .= '<th>Username</th>';
-$stats .= '<th>Last logged date</th>';
-$stats .= '</tr>';
-$stats .= '</thead>';
-$stats .= '<tbody>';
-foreach ($allPlayers as $p) {
-  $query = $database->prepare("SELECT login_timestamp FROM process_login_history WHERE username = :username AND login_was_successful=1 ORDER BY login_timestamp DESC LIMIT 1");   
-  $query->execute(array(':username' => $p->name));
-  $lastvisit = $query->fetchColumn();
-  $stats .= '<tr><td>'.$p->title.' ['.$p->team->title.']</td><td>'. $lastvisit .'</td></tr>';
+if ($user->isSuperuser()) {
+  // Last connected users (and dates)
+  $stats .= '<h3 class="text-center">Last logged dates</h3>';
+  $stats .= '<table id="loggedTable" class="table table-condensed table-hover">';
+  $stats .= '<thead>';
+  $stats .= '<tr>';
+  $stats .= '<th>Username</th>';
+  $stats .= '<th>Last logged date</th>';
+  $stats .= '</tr>';
+  $stats .= '</thead>';
+  $stats .= '<tbody>';
+  foreach ($allPlayers as $p) {
+    $query = $database->prepare("SELECT login_timestamp FROM process_login_history WHERE username = :username AND login_was_successful=1 ORDER BY login_timestamp DESC LIMIT 1");   
+    $query->execute(array(':username' => $p->name));
+    $lastvisit = $query->fetchColumn();
+    $stats .= '<tr><td>'.$p->title.' ['.$p->team->title.']</td><td>'. $lastvisit .'</td></tr>';
+  }
+  $stats .= '</tbody>';
+  $stats .= '</table>';
 }
-$stats .= '</tbody>';
-$stats .= '</table>';
 
 $stats .= '</div>';
 $stats .= '</div>';
