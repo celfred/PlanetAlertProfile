@@ -100,7 +100,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
             $out .=  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
             break;
           case 'already' : 
-            $out .= "<p class='lead'>You already own this item.</p>";
+            $out .= "<p class='lead'>You already have this item.</p>";
             break;
           case 'freeActs' : 
             $nbEl = $player->places->count()+$player->people->count();
@@ -111,6 +111,9 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
             break;
           case 'level' : 
             $out .= "<p class='lead'>This item requires a level ".$item->level." ! You are only at level ".$player->level.".</p>";
+            break;
+          case 'maxToday' :
+            $out .= "<p class='text-center alert alert-warning'>You have reached the 3 items limit for today ! Come back tomorrow  to go to the Marketplace !</p>";
             break;
           default: 
             $out .= "<p class='lead'>You can't buy this item for the moment. Sorry.</p>";

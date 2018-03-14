@@ -163,6 +163,7 @@
         } else {
           $out .= '<hr /><p class="">No Potion to be used.</p>';
         }
+<<<<<<< HEAD
         $pending = $pages->get("name=book-knowledge");
         if (count($pending->pendingLessons) > 0) {
           $date1 = new \DateTime("today");
@@ -185,6 +186,10 @@
         } else {
           $out .= '<hr /><p class="">No Lessons to be validated.</p>';
         }
+||||||| merged common ancestors
+=======
+        $out .= '</div>';
+>>>>>>> dev
         break;
       case 'decision' :
         $pageId = $input->get('pageId');

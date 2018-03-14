@@ -67,6 +67,12 @@ switch ($m->type->name) {
       array_push($listWords, $mixedSentence);
     }
     break;
+  case 'image-map' :
+    foreach($allLines as $l) {
+      list($left, $right) = preg_split('/::/', $l);
+      array_push($listWords, $left);
+    }
+    break;
   default :
     array_push($listWords, 'TODO');
 }
@@ -83,29 +89,51 @@ if (count($allLines) > 24) {
   $nb = count($allLines);
 }
 
-$out .= '<table class="table">';
-for($i=0; $i<=$nb; $i++) {
-  if (trim($listWords[$i]) != '') {
-    $lenght = strlen($listWords[$i]);
-    if ($length < 70) {
-      $fontSize = '14pt';
-      $wrap = 'white-space:nowrap;';
-    } else {
-      $fontSize = '12pt';
-      $wrap = 'white-space:normal;';
-    }
-
-    $out .= '<tr>';
-    $j = $i+1;
-    $out .= '<td class="text-center" style="font-size:14pt;">'.$j.'</td>';
-    $out .= '<td style="'.$wrap.' padding: 4pt;">';
-    $out .= '<p style="font-size: '.$fontSize.';">'.$listWords[$i].'</p>';
-    $out .= '</td>';
-    $out .= '<td style="width:60%">';
-    $out .= '</td>';
-    $out .= '</tr>';
+if ($m->type->name == "image-map") {
+  if (count($allLines) > 15) { // Limit to 15
+    $nb = 14;
+  } else {
+    $nb = count($allLines);
+  }
+  // Get image map
+  if ($m->imageMap) {
+    $options = array(
+      'cropping' => false,
+      'upscaling' => false
+    );
+    $imageMap = "<img alt=\"image\" src='".$m->imageMap->size('500', '350', $options)->url."' />";
+    $out .= '<div style="text-align: center;">';
+    $out .= $imageMap;
+    $out .= '</div>';
+  } else {
+    $imageMap = '';
   }
 }
+
+$out .= '<table class="table">';
+  for($i=0; $i<=$nb; $i++) {
+    if (trim($listWords[$i]) != '') {
+      $length = strlen($listWords[$i]);
+      if ($length < 70) {
+        $fontSize = '14pt';
+        $wrap = 'white-space:nowrap;';
+      } else {
+        $fontSize = '12pt';
+        $wrap = 'white-space:normal;';
+      }
+      $out .= '<tr>';
+      $j = $i+1;
+      if ($m->type->name != "image-map") {
+        $out .= '<td class="text-center" style="font-size:14pt;">'.$j.'</td>';
+      }
+      $out .= '<td style="'.$wrap.' padding: 4pt;">';
+      $out .= '<p style="font-size: '.$fontSize.';">'.$listWords[$i].'</p>';
+      $out .= '</td>';
+      $out .= '<td style="width:60%">';
+      $out .= '</td>';
+      $out .= '</tr>';
+    }
+  }
 $out .= '</table>';
 $out .= '<p class="text-center" style="margin: 0pt;">';
 $out .= '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⇒ Sweeping victory - Won fight - Lost fight - Heavy defeat </span>';

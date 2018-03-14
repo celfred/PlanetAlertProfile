@@ -32,7 +32,7 @@ include("./head.inc");
     echo '</div>';
   }
 
-  echo '<h4 class="text-center"><a href="'.$pages->get("name=places")->photo->eq(0)->url.'" target="_blank" data-toggle="tooltip" title="Write the corresponding number on your places in your copybook.">See the map with numbers</a></h4>';
+  echo '<h4 class="text-center"><a href="http://download.tuxfamily.org/planetalert/map/worldMap-numbers.png" target="_blank" data-toggle="tooltip" title="Write the corresponding number on your places in your copybook.">See the map with numbers</a></h4>';
 
   if ($user->isSuperuser()) {
     echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
@@ -56,7 +56,7 @@ include("./head.inc");
         <img class="img-thumbnail" src="<?php echo $thumbImage; ?>" alt="Photo" />
       </td>
       <td class="col-sm-7">
-        <h1><?php echo $page->title; ?></h1>
+        <h1><span class="label label-danger" data-toggle="tooltip" title="Map index (Write it in your copybook)"><?php echo $page->mapIndex; ?></span> <?php echo $page->title; ?></h1>
         <?php echo "<h2><a href='places/?type=city&name={$city->name}' data-toggle='tooltip' title='See all places in {$city->title}' data-placement='bottom'>{$city->title}</a>, <a href='places/?type=country&name={$country->name}' data-toggle='tooltip' title='See all places in {$country->title}' data-placement='bottom'>{$country->title}</a></h2>"; ?>
       </td>
       <td class="col-sm-2">

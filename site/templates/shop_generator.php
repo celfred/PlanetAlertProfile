@@ -20,12 +20,17 @@ $pItems = $items->find("template=item, category.name=group-items");
 
 if (!$user->isSuperuser()) {
   if ($user->isLoggedin() && $user->name==$player->login) { // Check if correct player is logged in
+    //Limit to 3 items a day
+    $today = new \DateTime("today");
+    $limitDate = strtotime($today->format('Y-m-d'));
+    $todayItemsCount = $player->get("name=history")->find("date>=$limitDate")->count();
+
     $out .= '<div class="row text-center">';
     $out .= "<h2>Marketplace for {$player->title} ({$player->team->title})</h2>";
     $out .= miniProfile($player, 'equipment');
     $out .= '</div>';
 
-    if ($player->coma == 0) {
+    if ($player->coma == 0 && $todayItemsCount < 3) {
       // Available Places
       $out .= '<p class="label label-primary">Available Places</p>';
       if ($pPlaces->count() > 0) {
@@ -109,14 +114,18 @@ if (!$user->isSuperuser()) {
         $out .= '</ul>';
       }
     } else {
-      $out .= "<p class='badge badge-danger'>Your player is in a COMA state. Get the Healing potion as soon as possible !</p>";
-      $healingPotion = $pages->get("name=health-potion");
-      if ($player->GC >= $healingPotion->GC) {
-        $out .= '<ul class="list-unstyled list-inline">';
-        $out .= '<li>';
-        $out .= '<a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$healingPotion->id.'"><img class="thumbnail" src="'.$healingPotion->image->getCrop("small")->url.'" data-toggle="tooltip" data-html="true" title="'.$healingPotion->title.'" /></a>';
-        $out .='</li>';
-        $out .= '</ul>';
+      if ($todayItemsCount >= 3) {
+        $out .= "<p class='text-center alert alert-warning'>You have reached the 3 items limit for today ! Come back tomorrow !</p>";
+      } else {
+        $out .= "<p class='badge badge-danger'>Your player is in a COMA state. Get the Healing potion as soon as possible !</p>";
+        $healingPotion = $pages->get("name=health-potion");
+        if ($player->GC >= $healingPotion->GC) {
+          $out .= '<ul class="list-unstyled list-inline">';
+          $out .= '<li>';
+          $out .= '<a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$healingPotion->id.'"><img class="thumbnail" src="'.$healingPotion->image->getCrop("small")->url.'" data-toggle="tooltip" data-html="true" title="'.$healingPotion->title.'" /></a>';
+          $out .='</li>';
+          $out .= '</ul>';
+        }
       }
     }
 

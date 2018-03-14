@@ -838,6 +838,7 @@ var initTables = function() {
     order: [[ 2, "asc"], [1, "asc"]]
   });
   var historyTable = $('#historyTable').DataTable({
+		retrieve: true,
     lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
     order: [[ 0, "desc"]]
   });

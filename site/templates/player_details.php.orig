@@ -111,6 +111,7 @@
             </div>
           </div>
         </div>
+<<<<<<< HEAD
         <div class="panel-body text-center">
           <ul class="list-inline">
             <?php
@@ -130,6 +131,48 @@
                       echo "<img class='img-thumbnail' src='{$thumb}' />";
                     }
                     echo "</li>";
+||||||| merged common ancestors
+        <div class="panel-body text-center">
+          <ul class="list-inline">
+            <?php
+              if ($playerPage->equipment->count > 0) {
+                foreach ($playerPage->equipment as $equipment) {
+                  if ($equipment->image) {
+                    /* $thumb = $equipment->image->url; */
+                    $thumb = $equipment->image->getCrop('thumbnail')->url;
+                    echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
+                    if ($equipment->name == "memory-helmet") { // Direct link to training zone
+                      echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                    } else if ($equipment->has("name=electronic-visualizer")) { // Direct link to Visualizer page
+                      echo '<a href="'.$pages->get("name=visualizer")->url.'" title="Use the Electronic Visualizer"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                    } else {
+                      echo "<img class='img-thumbnail' src='{$thumb}' />";
+                    }
+                    echo "</li>";
+=======
+        <?php } else { ?>
+          <h4 class="text-center"><span class="label label-danger">You're in a COMA !</span></h4><h4 class="text-center"><span>Buy a healing potion to go back to normal state !</span></h4>
+        <?php } ?>
+    </div>
+
+    <div class="col-lg-5 panel panel-success">
+      <div class="panel-heading">
+        <h4 class="panel-title">Equipment</h4>
+      </div>
+      <div class="panel-body text-center">
+        <ul class="list-inline">
+          <?php
+            if ($playerPage->equipment->count > 0) {
+              foreach ($playerPage->equipment as $equipment) {
+                if ($equipment->image) {
+                  /* $thumb = $equipment->image->url; */
+                  $thumb = $equipment->image->getCrop('thumbnail')->url;
+                  echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
+                  if ($equipment->name == "memory-helmet") { // Direct link to training zone
+                    echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                  } else if ($equipment->has("name=electronic-visualizer")) { // Direct link to Visualizer page
+                    echo '<a href="'.$pages->get("name=visualizer")->url.'" title="Use the Electronic Visualizer"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+>>>>>>> dev
                   } else {
                     echo "<img class='img-thumbnail' src='{$thumb}' />";
                   }

@@ -89,7 +89,7 @@
           $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
           $city = $place->parent->title;
           $country = $place->parent->parent->title;
-          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage->url}' alt='' data-toggle='tooltip' data-html='true' title='<h4>$place->title</h4> <h5>{$city},{$country}</h5> <strong>Coût: {$place->GC} or, Niveau {$place->level}</strong>' dta-placement='bottom' /></a></li>";
+          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage->url}' alt='' data-toggle='tooltip' data-html='true' title='<h4><span>{$place->mapIndex}</span> - {$place->title}</h4> <h5>{$city},{$country}</h5> <strong>Level {$place->level}, {$place->GC} GC</strong>' data-placement='bottom' /></a></li>";
         }
       ?>
     </ul>
