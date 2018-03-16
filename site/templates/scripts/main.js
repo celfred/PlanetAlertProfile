@@ -200,7 +200,9 @@ $(document).ready(function() {
 			$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId;
 			$.get($url, function(data) { 
 				// Display PDF Link
-				$this.next(".feedback").html('<a href="'+$this.attr("href")+'" class="btn btn-lg">Click here to download the PDF</a>');
+				$this.next(".feedback").html('<a href="'+$this.attr("href")+'" class="btn btn-lg btn-primary">Cliclk here to download PDF</a>');
+				// Remove Buy button
+				$this.remove();
 			});
 		}), function(dismiss) {
 			if (dismiss === 'cancel' || dismiss == 'overlay') {

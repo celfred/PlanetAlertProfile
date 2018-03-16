@@ -22,7 +22,7 @@
         $out .= ' <span class="label label-default">+'.($task->GC+$player->deltaGC).' GC</span>';
         $out .= ' <span class="label label-default">+'.($task->XP+$player->deltaXP).' XP</span>';
         $out .= '</h3>';
-        $out .= "<p>Copy in your copybook and show it in class to your teacher (Don't forget anything, make no spelling mistakes, use your best hand-writing and <u>underline</u> the title and date to get the points !)</p>";
+        $out .= "<p class='alert alert-warning'>Copy in your copybook and show it in class to your teacher (Don't forget anything, make no spelling mistakes, use your best hand-writing and <u>underline</u> the title and date to get the points !)</p>";
       $out .= '</div>';
 
       $out .= '<section class="copybook">';
