@@ -18,7 +18,9 @@ if($input->post->submit) {
 	
   // determine if any fields were ommitted or didn't validate
   foreach($form as $key => $value) {
+    if ($value != 'email') {
       if(empty($value)) $error = "<p class='error'>An error occurred.<br />Please check that all fields have been completed.</p>";
+    }
   }
 
   // if no errors, email the form results
@@ -48,13 +50,13 @@ if(!$sent) {
     $error
     <form role="form" class="form-horizontal" action="./" method="post">
       <div class="form-group">
-        <label for="fullname" class="col-sm-2 control-label">First AND last name</label>
+        <label for="fullname" class="col-sm-2 control-label">First AND last name *</label>
         <div class="col-sm-8">
           <input type="text" class="form-control" id="fullname" name="fullname" value="$form[fullname]" placeholder="First AND last name" />
         </div>
       </div>
       <div class="form-group">
-        <label for="playerClass" class="col-sm-2 control-label">Class</label>
+        <label for="playerClass" class="col-sm-2 control-label">Class *</label>
         <div class="col-sm-8">
           <input type="text" class="form-control" id="playerClass" name="playerClass" value="$form[playerClass]" placeholder="Class" />
         </div>
@@ -66,10 +68,11 @@ if(!$sent) {
         </div>
       </div>
       <div class="form-group">
-        <label for="comments" class="col-sm-2 control-label">Your message</label>
+        <label for="comments" class="col-sm-2 control-label">Your message *</label>
         <div class="col-sm-8">
           <textarea id="comments" class="form-control" name="comments" rows="6">$form[comments]</textarea>
-          <span class="help-box"><em>Please watch out your spelling and DO NOT use SMS syntax ;)</em></span>
+          <p><em>Please watch out your spelling and DO NOT use SMS syntax ;)</em></p>
+          <p>(* Fields MUST be filled !)</p>
         </div>
       </div>
       <div class="col-sm-offset-2 col-sm-8">
