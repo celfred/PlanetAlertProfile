@@ -607,7 +607,7 @@
           case 'V' : $class='success'; break;
           case 'R' : $class='danger'; break;
           case 'RR' : $class='danger'; break;
-          default: $class = '';
+          default: $class = 'primary';
         }
         $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-'.$class.'">'.$player->homework.'</span> ';
         // Forgotten material
