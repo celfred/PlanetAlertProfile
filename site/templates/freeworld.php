@@ -18,12 +18,6 @@
     include("./tabList.inc"); 
   }
   
-  // Display Personal Analyzer if user is logged in
-  if ($user->isLoggedin() && $user->isSuperuser()==false) {
-    $player = $pages->get("login=$user->name");
-    echo pma($player);
-  }
-
   showScores($team);
   $allElements = teamFreeworld($team);
   $allCompleted = $allElements->find("completed=1");

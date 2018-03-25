@@ -9,7 +9,7 @@ include("./tabList.inc");
 
 $team = $input->urlSegment1;
 $allCategories = $pages->get('/categories/')->children("name!=potions|place|shop|protections|weapons|manual-cat|planet-alert|group-items");
-$allTasks = $pages->get('/tasks/')->children();
+$allTasks = $pages->get('/tasks/')->children()->sort('category.name, HP, XP');
 $allPlayers = $pages->find("template='player', team.name=$team, sort='title'");
 
 ?>
