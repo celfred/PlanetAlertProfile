@@ -23,7 +23,7 @@ if (!$user->isSuperuser()) {
     //Limit to 3 items a day
     $today = new \DateTime("today");
     $limitDate = strtotime($today->format('Y-m-d'));
-    $todayItemsCount = $player->get("name=history")->find("date>=$limitDate")->count();
+    $todayItemsCount = $player->get("name=history")->find("date>=$limitDate, task.name=buy|free")->count();
 
     $out .= '<div class="row text-center">';
     $out .= "<h2>Marketplace for {$player->title} ({$player->team->title})</h2>";
