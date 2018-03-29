@@ -136,7 +136,7 @@
                   } else if ($equipment->name == "book-knowledge-item") { // Direct link to Visualizer page
                     echo '<a href="'.$pages->get("name=book-knowledge")->url.'" title="Use the '.$equipment->title.'"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
                   } else {
-                    echo '<img class="img-thumbnail" src="'.$thumb.'}" />';
+                    echo '<img class="img-thumbnail" src="'.$thumb.'" />';
                   }
                   echo "</li>";
                 } else {

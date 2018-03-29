@@ -411,7 +411,7 @@
                 Work statistics on current period (<?php echo $currentPeriod->title; ?>) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n'est pas terminée, tu peux encore améliorer tes résultats !"></span>
               </h4>
             </div>
-            <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-priority="1" data-id="work-statistics&playerId='.$player->id.'">
+            <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-priority="1" data-id="work-statistics&playerId=<?php echo $player->id; ?>&periodId=<?php echo $currentPeriod->id; ?>">
               <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
             </div>
             <div class="panel-footer text-right">

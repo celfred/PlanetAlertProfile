@@ -590,8 +590,11 @@
         $out .= '</ul>';
         break;
       case 'work-statistics' :
-        $playerId = $input->get('playerId');
+        $playerId = $input->get("playerId");
         $player = $pages->get("id=$playerId");
+        $periodId = $input->get("periodId");
+        $officialPeriod = $pages->get("id=$periodId");
+        // TODO : Limit to official period dates
         $allEvents = $player->child("name=history")->find("template=event,sort=-date");
         // Participation
         $out = '';
