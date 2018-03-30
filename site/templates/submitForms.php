@@ -20,7 +20,7 @@
       $player = $pages->get($input->get->playerId);
       $task = $pages->get($input->get->taskId);
       $refPage = $pages->get($input->get->lessonId);
-      if ($task->is("name=extra-homework|intensive-extra-homework")) {
+      if ($task->is("name=extra-homework|very-extra-homework")) {
         $task->comment = "Good Copy work";
         $task->refPage = $refPage;
         $task->linkedId = false;
@@ -209,12 +209,13 @@
     }
     // Validate Book of Knowledge
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->usedPending != '') {
-      $pending = $pages->get($input->get->usedPending);
+      $pendingId = $input->get->usedPending;
+      $pending = $pages->get("id=$pendingId");
       $player = $pending->player;
       if ($pending->isTrash()) { // 'Validated' is unclicked
         $pages->restore($pending); // Restore trashed pending lesson
         // Delete linked page in player's history
-        $historyPage = $player->get("name=history")->get("linkedId=$pending->id");
+        $historyPage = $player->get("name=history")->get("linkedId=$pendingId");
         if ($historyPage) { $historyPage->delete(); }
         // Reset scores
         $task = $pending->task;
@@ -230,7 +231,9 @@
         setCaptains($player->team);
         $player->of(false);
         $player->save();
-        $tempPlayer->delete();
+        if ($tempPlayer) { 
+          $tempPlayer->delete();
+        }
       } else { // 'Validated' is ticked
         // Store previous player's state in temp page for restore possibility
         $tmpParent = $pages->get("name=tmp");
@@ -239,14 +242,17 @@
         // Create task in player's history
         $task = $pending->task;
         $task->date = $pending->date;
-        if ($task->is("name=extra-homework|intensive-extra-homework")) {
+        if ($task->is("name=extra-homework|very-extra-homework")) {
           $task->comment = 'Book of Knowledge use : '.$pending->refPage->title;
           $task->refPage = $pending->refPage;
           $task->linkedId = $pending->id;
           updateScore($player, $task, true);
           // Set group captains
           setCaptains($player->team);
-          $pending->trash();
+          if ($pending) {
+            $pending->of(false);
+            $pending->trash();
+          }
         }
       }
     }

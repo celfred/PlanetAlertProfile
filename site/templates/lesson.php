@@ -55,7 +55,7 @@
       // 1 pending lesson at a time allowed for a player
       $already = $pages->get("name=book-knowledge, pendingLessons.player=$player");
       if (!$already || !$already->isTrash()) {
-        $out .= '<p class="text-right"><button class="btn btn-primary" id="copied" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask" data-taskId="'.$task->id.'" data-lessonId="'.$page->id.'" data-playerId="0">✓ Copied in my copybook ! (Alert the teacher)</button></p>';
+        $out .= '<p class="text-right"><button class="btn btn-primary" id="copied" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask" data-taskId="'.$task->id.'" data-lessonId="'.$page->id.'" data-playerId="'.$player->id.'">✓ Copied in my copybook ! (Alert the teacher)</button></p>';
       } else {
         $out .= '<p class="text-center warning">Good job ! You jave already asked to validate  a copied lesson. You have to wait for the validation before asking for another one !</p>';
       }
