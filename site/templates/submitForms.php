@@ -14,6 +14,12 @@
       $task->comment = 'Buy PDF ('.$lesson->title.')';
       $task->refPage = $lesson;
       updateScore($player, $task, true);
+      // Notify admin
+      $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
+      $msg .= "Buy PDF : ". $refPage->title."\r\n";
+      if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+        mail("planetalert@tuxfamily.org", "buyPdf", $msg, "From: planetalert@tuxfamily.org");
+      }
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '' && $input->get->lessonId != '') { // Book of Knowledge use
@@ -28,6 +34,12 @@
         $already = $pages->get("name=book-knowledge, pendingLessons.player=$player");
         if (!$already || !$already->isTrash()) {
           savePendingLesson($player, $task);
+        }
+        // Notify admin
+        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
+        $msg .= "Copied lesson : ". $refPage->title."\r\n";
+        if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+          mail("planetalert@tuxfamily.org", "bookForm", $msg, "From: planetalert@tuxfamily.org");
         }
       }
     }
@@ -72,11 +84,11 @@
         updateScore($player, $task, true);
         // No need to checkDeath, Buyform can't cause death
         // Notify admin
-        $msg = "Player : ". $player->title."[".$player->team->title."]\r\n";
+        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
         $msg .= "Item : ". $newItem->title;
       } else {
         // Notify admin
-        $msg = "Player : ". $player->title."[".$player->team->title."]\r\n";
+        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
         $msg .= "Item : ". $newItem->title."\r\n";
         $msg .= "An error has occurred.";
       }
