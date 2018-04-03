@@ -44,7 +44,7 @@
 		// Cache allPlayers for faster access
 		$template = $templates->get("player");
 		$allPlayers = $cache->get("allPlayers", $template, function($pages) {
-			return $pages->find("template=player, team.name!=no-team")->sort("team->name, title");
+			return $pages->find("template=player, parent.name=players, team.name!=no-team")->sort("team->name, title");
 		});
     if ($user->isLoggedin()) {
 			if (!$user->isSuperuser()) { // Player is logged in
