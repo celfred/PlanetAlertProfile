@@ -2,7 +2,7 @@
   if ($config->ajax) {
     $out = '';
     switch ($input->get('id')) {
-      case 'lastEvents' :
+      case 'lastEvents' : // Public activity
         // Last 3 published monsters
         $out .= '<ul class="list-inline">&nbsp;';
         $out .= '<li class="label label-success"><span class="glyphicon glyphicon-headphones"></span> New monsters !</li>';
@@ -53,7 +53,7 @@
         // Find current school year date
         $schoolYear = $pages->get("template=period, name=school-year");
         // Find last events
-        $news = $pages->find("template=event, date>=$schoolYear->dateStart, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+        $news = $pages->find("template=event, parent.name=history, date>=$schoolYear->dateStart, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
         if ($news->count() > 0) {
           $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> New public activity !</h4>';
           $out .= '<ul class="list-unstyled">';
@@ -593,9 +593,11 @@
         $playerId = $input->get("playerId");
         $player = $pages->get("id=$playerId");
         $periodId = $input->get("periodId");
-        $officialPeriod = $pages->get("id=$periodId");
-        // TODO : Limit to official period dates
-        $allEvents = $player->child("name=history")->find("template=event,sort=-date");
+        $officialPeriod= $pages->get("id=$periodId");
+        // Limit to official period dates
+        $dateStart = $officialPeriod->dateStart;
+        $dateEnd = $officialPeriod->dateEnd;
+        $allEvents = $player->child("name=history")->find("template=event, date>=$dateStart, date<=$dateEnd, sort=-date");
         // Participation
         $out = '';
         setParticipation($player);
@@ -617,7 +619,7 @@
         }
         $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
         if ($player->partRatio != '-') {
-          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+          $out .= ' <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
         }
         // Homework stats
         setHomework($player, $officialPeriod->dateStart, $officialPeriod->dateEnd);
