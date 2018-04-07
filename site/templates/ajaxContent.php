@@ -602,7 +602,7 @@
         $out = '';
         setParticipation($player);
         $out .= '<p>';
-        $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Participation en classe" onmouseenter="$(this).tooltip(\'show\');"></span> Communication ';
+        $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Compétence SACoche : Je participe en classe." onmouseenter="$(this).tooltip(\'show\');"></span> Communication ';
         $out .= ' ⇒ ';
         switch ($player->participation) {
           case 'NN' : $class='primary';
@@ -617,13 +617,13 @@
             break;
           default: $class = '';
         }
-        $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je participe en classe." class="label label-'.$class.'">'.$player->participation.'</span>';
+        $out .=  '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> <span class=\'label label-success\'>V</span> <span class=\'label label-danger\'>R</span> <span class=\'label label-danger\'>RR</span> See report below." class="label label-'.$class.'">'.$player->participation.'</span>';
         if ($player->partRatio != '-') {
           $out .= ' <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation positive">'.$player->partPositive.' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Participation négative">'.$player->partNegative.' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
         }
         // Homework stats
         setHomework($player, $officialPeriod->dateStart, $officialPeriod->dateEnd);
-        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Exercices non faits ou à moitié faits"></span> Training problems :';
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Exercices non faits ou à moitié faits<br />Compétence SACoche : Je peux présenter mon travail fait à la maison."></span> Training problems :';
         $out .= ' <span class="">'.$player->hkPb.'</span>';
         $out .= ' [<span>'.$player->noHk->count().' Hk</span> - <span>'.$player->halfHk->count().' HalfHk</span> - <span>'.$player->notSigned->count().' notSigned</span>]';
         $out .= ' ⇒ ';
@@ -635,31 +635,28 @@
           case 'RR' : $class='danger'; break;
           default: $class = 'primary';
         }
-        $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je peux présenter mon travail fait à la maison." class="label label-'.$class.'">'.$player->homework.'</span> ';
+        $out .=  '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 0/0.5 problems<br /><span class=\'label label-success\'>V</span> 1/1.5 problems<br /><span class=\'label label-danger\'>R</span> 2/2.5 problems<br /><span class=\'label label-danger\'>RR</span> 3/+ problems" class="label label-'.$class.'">'.$player->homework.'</span> ';
         // Forgotten material
-        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Affaires oubliées"></span> Forgotten material : ';
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Affaires oubliées<br />Compétence SACoche : J\'ai mon matériel."></span> Forgotten material : ';
         $out .= '<span>'.$player->noMaterial->count().'</span>';
         $out .= ' ⇒ ';
-        if ($player->noMaterial->count() == 0) {
-          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">VV</span>';
+        switch ($player->materialLabel) {
+          case 'NN' : $class='primary'; break;
+          case 'VV' : $class='success'; break;
+          case 'V' : $class='success'; break;
+          case 'R' : $class='danger'; break;
+          case 'RR' : $class='danger'; break;
+          default: $class = 'primary';
         }
-        if ($player->noMaterial->count() == 1) {
-          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">V</span>';
-        }
-        if ($player->noMaterial->count() == 2) {
-          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">R</span>';
-        }
-        if ($player->noMaterial->count() > 2) {
-          $out .=  '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'ai mon matériel." class="label label-success">RR</span>';
-        }
+        $out .=  '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 0 oublis<br /><span class=\'label label-success\'>V</span> 1 oubli<br /><span class=\'label label-danger\'>R</span> 2 oublis<br /><span class=\'label label-danger\'>RR</span> 3 oublis (ou +)" class="label label-'.$class.'">'.$player->materialLabel.'</span>';
         $out .= '</p>';
         // Extra-hk
-        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Travail supplémentaire : extra-homework, personal initiative, underground training..."></span> Personal motivation :';
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Travail supplémentaire : extra-homework, personal initiative, underground training...<br />Compétence SACoche : Je prend une initiative particulière."></span> Personal motivation :';
         $out .= ' <span> ['.$player->extraHk->count().' extra - </span>';
         $out .= ' <span>'.$player->initiative->count().' initiatives - </span>';
         $out .= ' <span class="">'.$player->ut->count().' UT session]</span>';
         $out .= ' ⇒ ';
-        $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : Je prend une initiative particulière." class="label label-'.$class.'">'.$player->motivation.'</span> ';
+        $out .= '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 9xtHk AND 47→49UT<br /><span class=\'label label-success\'>VV</span> 10xtHk OR 50→+UT<br /><span class=\'label label-success\'>V</span> 4xtHk AND 18→19UT<br /><span class=\'label label-success\'>V</span> 5xtHK OR 20→49UT" class="label label-'.$class.'">'.$player->motivation.'</span> ';
         $out .= '</p>';
         
         // Attitude
@@ -672,15 +669,15 @@
         $pb->add($ambush);
         $pb->add($noisy);
         $pb->add($late);
-        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Soucis avec l\'attitude"></span> Attitude problems :';
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Soucis avec l\'attitude<br />Compétence SACoche : J\'adopte une attitude d\'élève."></span> Attitude problems :';
         $attPb = $disobedience->count()+$ambush->count()+$noisy->count();
         $out .= ' <span> ['.$attPb.' problems - </span>';
         $out .= ' <span>'.$late->count().' slow moves]</span>';
         $out .= ' ⇒ ';
         if ($pb->count() == 0) {
-          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'adopte une attitude d\'élève." class="label label-success">VV</span>';
+          $out .= '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 0 problems<br /><span class=\'label label-success\'>V</span> <span class=\'label label-danger\'>R</span> <span class=\'label label-danger\'>RR</span> Ask your teacher" class="label label-success">VV</span>';
         } else {
-          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Compétence SACoche : J\'adopte une attitude d\'élève.">Ask your teacher.</span>';
+          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="">Ask your teacher.</span>';
         }
         $out .= '</p>';
         break;
