@@ -224,6 +224,7 @@
       $pendingId = $input->get->usedPending;
       $pending = $pages->get("id=$pendingId");
       $player = $pending->player;
+      $name = $player->name.'.'.$pendingId;
       if ($pending->isTrash()) { // 'Validated' is unclicked
         $pages->restore($pending); // Restore trashed pending lesson
         // Delete linked page in player's history
@@ -231,7 +232,7 @@
         if ($historyPage) { $historyPage->delete(); }
         // Reset scores
         $task = $pending->task;
-        $tempPlayer = $pages->get("parent.name=tmp, login=$player->login");
+        $tempPlayer = $pages->get("parent.name=tmp, login=$name");
         if ($tempPlayer) { 
           $player->XP = $tempPlayer->XP;
           $player->HP = $tempPlayer->HP;
@@ -250,6 +251,8 @@
         // Store previous player's state in temp page for restore possibility
         $tmpParent = $pages->get("name=tmp");
         $tempPlayer = $pages->clone($player, $tmpParent, false);
+        $tempPlayer->of(false);
+        $tempPlayer->login = $name;
         $tempPlayer->save();
         // Create task in player's history
         $task = $pending->task;
