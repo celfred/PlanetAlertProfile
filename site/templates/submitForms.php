@@ -16,7 +16,7 @@
       updateScore($player, $task, true);
       // Notify admin
       $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
-      $msg .= "Buy PDF : ". $refPage->title."\r\n";
+      $msg .= "Buy PDF : ". $lesson->title."\r\n";
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
         mail("planetalert@tuxfamily.org", "buyPdf", $msg, "From: planetalert@tuxfamily.org");
       }
