@@ -6,7 +6,7 @@ namespace ProcessWire;
     $allTeams = $pages->find("template=team")->sort("title");
     if ($user->isSuperuser()) {
       $action = $input->urlSegment1;
-      $allPlayers = $pages->find("template=player");
+      $allPlayers = $pages->find("parent.name=players, template=player");
       $allPlayers->sort("team.name, title");
       $out .= '<div class="alert alert-warning text-center">Admin Actions : Be careful !</div>';
       switch ($action) {
@@ -230,7 +230,7 @@ namespace ProcessWire;
         $out .= '<section id="ajaxViewport" class="well"></section>';
         break;
       case 'users' :
-        $allPlayers = $pages->find("template=player")->sort("title");
+        $allPlayers = $pages->find("parent.name=players, template=player")->sort("title");
         $out .= '<section class="well">';
         $out .= '<p><span class="glyphicon glyphicon-alert"></span> 1 player / line → Name [,lastName] [,rank =6emes,5emes,4emes,3emes)] [,team]</p>';
         $out .= '<textarea id="newPlayers" name="newPlayers" rows="5" cols="50"></textarea>';
@@ -285,7 +285,7 @@ namespace ProcessWire;
     echo '</script>';
   }
   } else { // Ajax call, display requested information
-    $allPlayers = $pages->find("template=player")->sort("team.name, title");
+    $allPlayers = $pages->find("parent.name=players, template=player")->sort("team.name, title");
     $action = $input->urlSegment1;
     $playerId = $input->urlSegment2;
     $confirm = $input->urlSegment3;
@@ -333,7 +333,7 @@ namespace ProcessWire;
 
     switch ($action) {
       case 'script' :
-        /* $allPlayers = $pages->find("template=player"); */
+        /* $allPlayers = $pages->find("parent.name=players, template=player"); */
         /* $ambassador = $pages->get("name=ambassador"); */
         /* foreach($allPlayers as $p) { */
         /*   $p->streak = 0; */
@@ -449,7 +449,7 @@ namespace ProcessWire;
         }
         break;
       case 'reset-streaks' :
-        $allPlayers = $pages->find("template=player, team=$selectedTeam");
+        $allPlayers = $pages->find("parent.name=players, template=player, team=$selectedTeam");
         $role = $pages->get("name=ambassador");
         foreach($allPlayers as $p) {
           $streak = checkStreak($p);
@@ -465,7 +465,7 @@ namespace ProcessWire;
         break;
       case 'add-death' :
         if ($selectedPlayer) {
-          $allPlayers = $pages->find("template=player, team=$selectedPlayer->team");
+          $allPlayers = $pages->find("parent.name=players, template=player, team=$selectedPlayer->team");
           $eventId = $confirm; // urlSegment3 used for eventId
           $currentLevel = $input->urlSegment4;
           $allEvents = $selectedPlayer->get("name=history")->children()->sort("date");
@@ -941,7 +941,7 @@ namespace ProcessWire;
         $player->save();
         break;
       case 'save-options':
-        $allPlayers = $pages->find("template=player");
+        $allPlayers = $pages->find("parent.name=players, template=player");
         $id = $input->urlSegment2;
         $officialPeriod = $pages->get("id=$id");
         $page->of(false);
@@ -1149,7 +1149,7 @@ namespace ProcessWire;
         }
         $p->save();
       case 'archive':
-        $allPlayers = $pages->find("template=player, team=$selectedTeam");
+        $allPlayers = $pages->find("template=player, parent.name=players, team=$selectedTeam");
         $noteam = $pages->get("template=team, name=no-team");
         // Archive player's history
         foreach($allPlayers as $p) {

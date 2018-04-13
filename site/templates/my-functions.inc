@@ -929,7 +929,7 @@ function setOwners($el, $player) {
 
 function teamFreeworld($team) {
   $pages = wire('pages');
-  $allPlayers = $pages->find("template=player, team=$team->name");
+  $allPlayers = $pages->find("parent.name=players, template=player, team=$team->name");
   $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
   // Get all possible elements
   $allElements = new pageArray();
