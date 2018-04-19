@@ -449,7 +449,7 @@
               } else {
                 echo '<a href="'.$trainingUrl.$m->id.'">'.$m->title.'</a> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
               }
-              echo ' [Last training : '.$m->lastFight.' days ago.]</span>';
+              echo ' [Last training : '.$m->lastTrainingInterval.' days ago.]</span>';
               echo '</li>';
             }
             echo '<li class="label label-danger">You have NEVER trained on '.$never.' monsters.</li>';
@@ -473,15 +473,15 @@
             foreach ($playerConcernedMonsters as $m) {
               if ($m->isFightable == 0) {
                 if ($m->lastTrainingInterval == 0) {
-                  echo '<li><span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available tomorrow !">'.$m->title.'</span> : '.$m->fightsCount.' fights ';
+                  echo '<li><span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available tomorrow !">'.$m->title.'</span> : '.$m->fightsCount.' fight·s ';
                 } else {
-                  echo '<li><span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available in '.$m->waitForFight.' days">'.$m->title.'</span> : '.$m->fightsCount.' fights ';
+                  echo '<li><span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available in '.$m->waitForFight.' days">'.$m->title.'</span> : '.$m->fightsCount.' fight·s ';
                 }
               } else {
-                echo '<li><a href="'.$m->url.'">'.$m->title.'</a> : '.$m->fightsCount.' fights ';
+                echo '<li><a href="'.$m->url.'">'.$m->title.'</a> : '.$m->fightsCount.' fight·s ';
               }
               echo '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Quality:'.$m->ratio.'<br /><span class=\'glyphicon glyphicon-thumbs-up\'></span>'.$m->positive.' / <span class=\'glyphicon glyphicon-thumbs-down\'></span>'.$m->negative.'">→ '.$m->average.'</span>';
-              echo ' [Last fight : '.$m->lastFight.' days ago.]';
+              echo ' [Last fight : '.$m->lastFightInterval.' days ago.]';
               echo '</li>';
             }
             echo '</ul>';

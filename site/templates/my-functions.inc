@@ -1540,13 +1540,8 @@ function utReport($player, $monster = false) {
       foreach ($allConcernedMonsters as $m) {
         // Set monster result
         $fights = $allEvents->find("refPage=$m")->sort("-date");
-        $lastFight = $fights->first();
-        $date2 = new \DateTime(date("Y-m-d", $lastFight->date));
-        $interval = $today->diff($date2)->format("%a");
-        $m->lastFight = $interval;
         $m->fightsCount = $fights->count();
         $m->total = $allEvents->count();
-        $m->utGain= utGain($m, $player);
         // Set monster status
         $m = setMonstersActivity($player, $m);
       }
@@ -1576,10 +1571,6 @@ function fightReport($player, $monster = false) {
       foreach ($allConcernedMonsters as $m) {
         // Set monster result
         $fights = $allFights->find("refPage=$m")->sort("-date");
-        $lastFight = $fights->first();
-        $date2 = new \DateTime(date("Y-m-d", $lastFight->date));
-        $interval = $today->diff($date2)->format("%a");
-        $m->lastFight = $interval;
         $m->fightsCount = $fights->count();
         // Calculate average
         $VV = $fights->find("task.name=test-vv")->count();
