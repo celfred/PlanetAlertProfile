@@ -13,9 +13,9 @@ if ( $input->get('sender') != 1) {
 
 // check for login before outputting markup
 if($input->post->username && $input->post->pass) {
-  $user = $sanitizer->username($input->post->username);
+  $userName = $sanitizer->pageName($input->post->username);
   $pass = $input->post->pass; 
-  if($session->login($user, $pass)) {
+  if($session->login($userName, $pass)) {
     if (!$homepage) {
       //$session->redirect($url); 
       // Redirect user to Newsboard
@@ -32,8 +32,8 @@ $logoUrl = $pages->get("name=home")->photo->eq(1)->url;
 <div class="row">
   <div class="col-md-10 text-center">
     <h1>Welcome to Planet Alert !</h1>
+    <?php if($input->post->username) echo "<h3><span class='label label-danger'>Login failed... (check user name or password)</span></h3>"; ?>
     <form class="form-horizontal loginForm" action="<?php echo $page->url; ?>?sender=<?php echo $input->get('sender').'&team='.$input->get('team'); ?>" method="post">
-      <?php if($input->post->username) echo "<h3><span class='label label-danger'>Login failed...</span></h3>"; ?>
       <div class="form-group">
         <label for="username" class="col-sm-4 control-label">User :</label>
         <div class="col-sm-6">
