@@ -24,7 +24,7 @@
         }
         
         // Get players' last 10 events
-        $allEvents = $player->child("name=history")->find("template=event,sort=-created,limit=10");
+        $allEvents = $player->find("template=event, parent.name=history, sort=-created, limit=10");
         $out .= '<div id="" class="news panel panel-primary">';
           $out .= '<div class="panel-heading">';
             $out .= '<h4 class="panel-title">';

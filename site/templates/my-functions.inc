@@ -1327,6 +1327,7 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
 
 function getScoreboard($player, $field, $limit=5, $global=true) {
   $pages = wire('pages');
+  // TODO : Use session or cache to get only once the list of players and then simply sort them according to the scoreboard ? But needs to be updated whenever something is recorded...
   // Limit to team players if player is logged in
   if ($global === false) {
     $team = ',team='.$player->team;

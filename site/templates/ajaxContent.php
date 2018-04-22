@@ -48,12 +48,15 @@
         }
         $out .= '</ul>';
         $out .= '</p>';
-        // Last public news
-        $excluded = $pages->find("template=player, name=test");
-        // Find current school year date
-        $schoolYear = $pages->get("template=period, name=school-year");
+        t();
+        // Recent public news (30 previous days)
+        $excluded = $pages->get("template=player, name=test");
+        $today = new \DateTime("today");
+        $interval = new \DateInterval('P30D');
+        $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
         // Find last events
-        $news = $pages->find("template=event, parent.name=history, date>=$schoolYear->dateStart, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+        $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+        bd(t());
         if ($news->count() > 0) {
           $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> New public activity !</h4>';
           $out .= '<ul class="list-unstyled">';
@@ -93,7 +96,7 @@
           }
           $out .= '</ul>';
         } else {
-          echo '<h4 class="well">No public news... :(</h4>';
+          echo '<h4 class="well">No public news within the last 30 days... :(</h4>';
         }
         break;
       case 'admin-work' :
