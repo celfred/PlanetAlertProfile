@@ -43,13 +43,13 @@
         $out .= '</div>';
 
         if ($player->team->is("name!=no-team")) {
-          // Team News (Free/Buy actions during last 7 days)
+          // Team News (Free/Buy actions during last 5 days)
           $news = new PageArray();
           $today = new \DateTime("today");
           $interval = new \DateInterval('P5D');
           $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
           foreach($allPlayers as $p) {
-            $last = $p->get("name=history")->children("sort=-date")->find("date>=$limitDate,task.name=free|buy");
+            $last = $p->find("parent.name=history, date>=$limitDate,task.name=free|buy");
             if ($last->count() > 0) {
               $news->add($last);
               $news->sort('-date');
