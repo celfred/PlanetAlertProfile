@@ -48,7 +48,6 @@
         }
         $out .= '</ul>';
         $out .= '</p>';
-        t();
         // Recent public news (30 previous days)
         $excluded = $pages->get("template=player, name=test");
         $today = new \DateTime("today");
@@ -56,7 +55,6 @@
         $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
         // Find last events
         $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
-        bd(t());
         if ($news->count() > 0) {
           $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> New public activity !</h4>';
           $out .= '<ul class="list-unstyled">';
@@ -100,7 +98,7 @@
         }
         break;
       case 'admin-work' :
-        $news = $pages->find("template=event, sort=-created, publish=1, task=free|buy|penalty");
+        $news = $pages->find("template=event, publish=1, task=free|buy|penalty")->sort('-created');
         $out .= '<div class="col-sm-6">';
         if ($news->count() > 0) {
           $out .= '<p class="label label-primary">Papers to be given</p>';
