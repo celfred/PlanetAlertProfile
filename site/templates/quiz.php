@@ -54,7 +54,7 @@ if ($user->isSuperuser()) {
     }
     $notConcerned = $notConcerned->implode(', ', '{title}');
   } else {
-    $allConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
+    $allConcerned = $pages->find("template=player, parent.name=players, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
     $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');
   }
   $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador");
