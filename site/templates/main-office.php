@@ -28,7 +28,7 @@
     $out .= '<div id="" class="board panel panel-primary">';
     $out .= '<div class="panel-heading">';
       $dangerPlayers = $allPlayers->find('coma=1');
-      $dangerPlayers->add($allPlayers->find("HP<=10"))->sort("coma, HP");
+      $dangerPlayers->add($allPlayers->find("HP<=15"))->sort("coma, HP");
       $out .= '<p class="panel-title">Help needed!</p>';
     $out .= '</div>';
     $out .= '<div class="panel-body">';
@@ -64,7 +64,7 @@
         }
         $out .= '<ul>';
       } else {
-        $out .= '<p>Congratulations ! No player with HP<10 !</p>';
+        $out .= '<p>Congratulations ! No player with HP<15 !</p>';
       }
     $out .= '</div>';
     $out .= '<div class="panel-footer text-right">';
