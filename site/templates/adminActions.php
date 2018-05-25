@@ -349,6 +349,7 @@ namespace ProcessWire;
         $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
         if ($selectedTeam && $selectedTeam != '-1') {
           $allPeriods = $pages->get("name=periods")->children();
+          $officialPeriod = $pages->get("name=admin-actions")->periods;
           $allPlayers = $allPlayers->find("team.name=$selectedTeam->name");
           $out .= '<section class="well">';
           $out .= '<div>';
@@ -366,7 +367,8 @@ namespace ProcessWire;
           $out .= '<span>Period : </span>';
           $out .= '<select id="periodId">';
           foreach($allPeriods as $period) {
-            $out .= '<option value="'.$period->id.'">'.$period->title.'</option>';
+            if ($period->id == $officialPeriod->id) {$selected = 'selected="selected"';} else {$selected = '';};
+            $out .= '<option value="'.$period->id.'" '.$selected.'>'.$period->title.'</option>';
           }
           $out .= '</select>';
           $out .= '</div>';
