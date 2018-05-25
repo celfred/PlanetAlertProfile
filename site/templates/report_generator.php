@@ -37,7 +37,7 @@ if ($user->isSuperuser() || $user->isLoggedin()) {
     }
   } else { // Team's report
     $global = true;
-    $allPlayers = $pages->find("team=$selected, template=player, sort=$sort");
+    $allPlayers = $pages->find("parent.name=players, team=$selected, template=player, sort=$sort");
     $reportTitle = '';
     $reportType = '';
     if ($category == 'all') { // Global report
