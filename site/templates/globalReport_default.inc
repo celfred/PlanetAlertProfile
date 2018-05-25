@@ -21,7 +21,7 @@
 		<th>Tests</th>
 		<th><span data-toggle="tooltip" title="Solo missions" class="glyphicon glyphicon-user"></span></th>
 		<th><span data-toggle="tooltip" title="Group missions"><span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></span></th>
-		<th><span data-toggle="tooltip" title="Compétence SACoche : Je prends une initiative particulière.">UT</span> <i data-toggle="tooltip" data-html="true" title="<span class='label label-success'>VV</span> 9xtHk ET 47→49UT<br /><span class='label label-success'>VV</span> 10xtHk OU 50→+UT<br /><span class='label label-success'>V</span> 4xtHk ET 18→19UT<br /><span class='label label-success'>V</span> 5xtHK OU 20→49UT" class="glyphicon glyphicon-question-sign"></i></th>
+		<th><span data-toggle="tooltip" title="Compétence SACoche : Je prends une initiative particulière.">UT</span> <i data-toggle="tooltip" data-html="true" title="<span class='label label-success'>VV</span> 9xtHk ET 47→49UT/FP<br /><span class='label label-success'>VV</span> 10xtHk OU 50→+UT/FP<br /><span class='label label-success'>V</span> 4xtHk ET 18→19UT/FP<br /><span class='label label-success'>V</span> 5xtHK OU 20→49UT/FP" class="glyphicon glyphicon-question-sign"></i></th>
 		<th>Planet Alert</th>
   </tr>
   <?php
@@ -280,7 +280,7 @@
 			}
 			echo '<span data-toggle="tooltip" data-html="true" title="'.$listUt.'">'.$utSessions->count().'</span>';
 			if ($player->motivation == 'V' || $player->motivation == 'VV') {
-				echo  ' <span class="label label-success">'.$player->motivation.'</span> ';
+				echo  ' <span class="label label-success" data-toggle="tooltip" title="'.$player->ut->count().'UT/'.$player->fp->count().'FP">'.$player->motivation.'</span> ';
 			}
       echo '</td>';
 			// Planet Alert

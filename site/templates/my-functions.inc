@@ -1046,6 +1046,7 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $allHk = $player->find("template=event, task.category.name=homework, date>=$dateStart, date<=$dateEnd");
   $player->initiative = $player->find("task.name=personal-initiative, date>=$dateStart, date<=$dateEnd");
   $player->ut = $player->find("task.name=ut-action-v|ut-action-vv, date>=$dateStart, date<=$dateEnd");
+  $player->fp = $player->find("task.name=test-v|test-vv, date>=$dateStart, date<=$dateEnd");
   $player->nbHk = $allHk->count();
   $player->noHk = $allHk->find("task.name=no-homework");
   $player->halfHk = $allHk->find("task.name=homework-half-done");
@@ -1066,9 +1067,9 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   if ($pb >= 3 || $player->penalty->count() >= 1) { $player->homework = 'RR'; }
   $player->hkPb = $pb;
   $nbBonus = $player->initiative->count() + $player->extraHk->count() + $player->veryExtraHk->count();
-  if ($nbBonus >= 10 || $player->ut->count() >= 50 || ($player->ut->count() >= 47 && $nbBonus == 9)) {
+  if ($nbBonus >= 10 || ($player->ut->count()+$player->fp->count()) >= 50 || (($player->ut->count()+$player->fp->count()) >= 47 && $nbBonus == 9)) {
     $player->motivation = 'VV';
-  } else if (($nbBonus >= 5 && $nbBonus < 10) || ($player->ut->count() >= 20 && $player->ut->count() < 50) || (($player->ut->count() >= 18 && $player->ut->count() < 50) && $nbBonus == 4)) {
+  } else if (($nbBonus >= 5 && $nbBonus < 10) || (($player->ut->count()+$player->fp->count()) >= 20 && ($player->ut->count()+$player->fp->count()) < 50) || ((($player->ut->count()+$player->fp->count()) >= 18 && ($player->ut->count()+$player->fp->count()) < 50) && $nbBonus == 4)) {
     $player->motivation = 'V';
   } else {
     $player->motivation = 'No bonus for the moment';
