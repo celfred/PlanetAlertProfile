@@ -131,6 +131,7 @@
     if ($user->isLoggedin() && !$user->isSuperuser()) {
       list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, false);
     } else {
+      $player = '';
       list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, true);
     }
     if ($prevPlayers != false) { // Player is 'surrounded'
