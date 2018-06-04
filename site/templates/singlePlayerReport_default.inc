@@ -69,25 +69,25 @@
         $rr = 0;
         if ($nbEvents > 0) {
           foreach ($events as $index=>$event) {
-            $task = $pages->get("$event->task");
-            if ($task->HP <= -5) {
-              $rr += 1;
-            }
-            if ($task->HP > -5 && $task->HP < 0) {
-              $r += 1;
-            }
-            if ($task->GC > 0 && $task->GC < 5) {
-              $v += 1;
-            }
-            if ($task->GC >= 5) {
-              $vv += 1;
-            }
-            if ($task->name == 'absent') {
-              $abs += 1;
-              $nbEvents -= 1;
-            }
-            $ratio = (int) round(((($vv*2)+($v*1.6)-$rr)*100)/($nbEvents*2));
-            if ( $ratio < 0) { $ratio = 0; }
+						$task = $pages->get("$event->task");
+						if ($task->HP <= -5) {
+							$rr += 1;
+						}
+						if ($task->HP > -5 && $task->HP < 0) {
+							$r += 1;
+						}
+						if ($task->GC > 0 && $task->GC < 5) {
+							$v += 1;
+						}
+						if ($task->GC >= 5) {
+							$vv += 1;
+						}
+						if ($task->name == 'absent') {
+							$abs += 1;
+							$nbEvents -= 1;
+						}
+						$ratio = (int) round(((($vv*2)+($v*1.6)-$rr)*100)/($nbEvents*2));
+						if ( $ratio < 0) { $ratio = 0; }
           }
           $out .= '<span>Moyenne sur la période : </span>';
           if (is_int($ratio)) {
@@ -108,7 +108,12 @@
           if (is_int($ratio)) {
             $out .= ' <span data-toggle="tooltip" title="% de qualité">'.$ratio.'%</span>';
           }
-          $out .= ' - <span>'.$nbEvents.' évaluations</span> ';
+					$inClassEventsCount = $allEvents->find("inClass=1")->count();
+					if ($inClassEventsCount > 0) {
+						$out .= ' - <span>'.$nbEvents.' évaluations ('.$inClassEventsCount.' en classe)</span> ';
+					} else {
+						$out .= ' - <span>'.$nbEvents.' évaluations</span> ';
+					}
 
           if (!$input->get['pages2pdf']) {
             $out .= ' [ <span data-toggle="tooltip" title="Positif (V+VV)">'.($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Négatif (R+RR)">'.($r+$rr).' <i class="glyphicon glyphicon-thumbs-down"></i></span> ]';
@@ -179,6 +184,9 @@
               $out .= strftime("%d/%m", $event->date). ' : ' . $eventTitle;
               if ($event->summary !== '') {
                 $out .= ' ['.$event->summary.']';
+								if ($event->inClass == 1 && $event->task->is("name~=test|ut-action")) {
+									$out .= ' [en classe]';
+								}
               }
               $out .= '</li>';
             }

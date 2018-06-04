@@ -192,7 +192,7 @@ function setEventDate($task) { // Set date for correct sorting
 function setDelta($player, $task) { // Ponderate task's impact according to player's equipment
   $player->deltaXP = 0;
   $player->deltaHP = 0;
-  // Except for training (core values are used) and micro solo missino
+  // Except for training and micro solo mission (core values are used)
   // TODO : Ignore fights ?
   if ($task->is("name!=ut-action-v|ut-action-vv|micro-solo-mission")) {
     if ($player->equipment) {

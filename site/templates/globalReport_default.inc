@@ -60,9 +60,10 @@
 			$nbHk = $player->nbHk;
 			$nbExtraHk = $player->extraHk->count() + $player->veryExtraHk->count();
 			$death = $player->find("task.name=death, date>=$period->dateStart, date<=$period->dateEnd");
-			$utSessions = $player->find("template=event, task.name=ut-action-v|ut-action-vv, date>=$period->dateStart, date<=$period->dateEnd");
-			$posTests = $player->find("template=event, task.category.name=test, task.HP=0, date>=$period->dateStart, date<=$period->dateEnd");
-			$negTests = $player->find("template=event, task.category.name=test, task.HP<0, date>=$period->dateStart, date<=$period->dateEnd");
+			// Get rid of in-class activities
+			$utSessions = $player->find("template=event, task.name=ut-action-v|ut-action-vv, inClass=0, date>=$period->dateStart, date<=$period->dateEnd");
+			$posTests = $player->find("template=event, task.category.name=test, task.HP=0, inClass=0, date>=$period->dateStart, date<=$period->dateEnd");
+			$negTests = $player->find("template=event, task.category.name=test, task.HP<0, inClass=0, date>=$period->dateStart, date<=$period->dateEnd");
 			// Team stats
 			$teamNoHk += $nbNoHk;
 			$teamHalfHk += $nbHalfHk;
