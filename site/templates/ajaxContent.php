@@ -546,11 +546,16 @@
             if ($event->refPage->template == 'people') { $out .= 'People'; }
           }
           $out .= '</td>';
-          if ($user->isSuperuser()) {
-            $out .= '<td>'.$event->title.'</td>';
-          } else {
-            $out .= '<td>'.$event->task->title.'</td>';
-          }
+          $out .= '<td>';
+            if ($user->isSuperuser()) {
+              $out .= $event->title;
+            } else {
+              $out .= $event->task->title;
+            }
+            if ($event->inClass == 1 && $event->task->is("name~=test|ut-action")) {
+              $out .= ' [in class]';
+            }
+          $out .= '</td>';
           $out .= '<td>'.$event->summary.'</td>';
           $out .= '</tr>';
         }

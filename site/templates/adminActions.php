@@ -304,7 +304,7 @@ namespace ProcessWire;
       $endDate = $endDate.' 23:59:59';
     }
 
-    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'reset-streaks'];
+    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks'];
     if (in_array($action, $teamActions)) {
       $type = 'team';
     }
@@ -862,6 +862,9 @@ namespace ProcessWire;
                   $out .= ' ['.$e->linkedId.']';
                 }
               }
+              if ($e->inClass == 1 && $e->task->is("name~=test|ut-action")) {
+                $out .= ' [in class]';
+              }
               $e->task->comment = $comment;
               $e->task->refPage = $e->refPage;
               $e->task->linkedId = $e->linkedId;
@@ -1108,6 +1111,17 @@ namespace ProcessWire;
           $team->forceKnowledge = 0;
         } else {
           $team->forceKnowledge = 1;
+        }
+        $team->save();
+        break;
+      case 'classActivity':
+        $team = $pages->get("$selectedTeam");
+        $team->of(false);
+        if ($team->classActivity == 1) {
+          // Remove lock
+          $team->classActivity = 0;
+        } else {
+          $team->classActivity = 1;
         }
         $team->save();
         break;
@@ -1361,6 +1375,7 @@ namespace ProcessWire;
           $out .=   'Team options for '.$selectedTeam->title;
           $out .= '</h4>';
           $out .= '<ul>';
+          // Force Memory Helmet
           $lock = $pages->get("$selectedTeam")->forceHelmet;
           if ($lock == 1) {
             $status = 'checked="checked"';
@@ -1370,8 +1385,9 @@ namespace ProcessWire;
           $out .= '<li><label for="forceHelmet"><input type="checkbox" id="forceHelmet" '.$status.'> Force Memory Helmet</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceHelmet/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
+          // Force Visualizer
           $lock = $pages->get("$selectedTeam")->forceVisualizer;
-          bd($pages->get("$selectedTeam")->forceVisualizer);
+          /* bd($pages->get("$selectedTeam")->forceVisualizer); */
           if ($lock == 1) {
             $status = 'checked="checked"';
           } else {
@@ -1380,8 +1396,9 @@ namespace ProcessWire;
           $out .= '<li><label for="forceVisualizer"><input type="checkbox" id="forceVisualizer" '.$status.'> Force Visualizer</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceVisualizer/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
+          // Force Book of Knowledge
           $lock = $pages->get("$selectedTeam")->forceKnowledge;
-          bd($pages->get("$selectedTeam")->forceKnowledge);
+          /* bd($pages->get("$selectedTeam")->forceKnowledge); */
           if ($lock == 1) {
             $status = 'checked="checked"';
           } else {
@@ -1390,6 +1407,7 @@ namespace ProcessWire;
           $out .= '<li><label for="forceKnowledge"><input type="checkbox" id="forceKnowledge" '.$status.'> Force the Book of Knowledge</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceKnowledge/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
+          // Lock Fights (Training but no 'tests')
           $lock = $pages->get("$selectedTeam")->lockFights;
           if ($lock == 1) {
             $status = 'checked="checked"';
@@ -1399,7 +1417,17 @@ namespace ProcessWire;
           $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
-
+          // 'Class activity' tag (ignored for 'motivation' statistic)
+          $lock = $pages->get("$selectedTeam")->classActivity;
+          if ($lock == 1) {
+            $status = 'checked="checked"';
+          } else {
+            $status = '';
+          }
+          $out .= '<li><label for="classActivity"><input type="checkbox" id="classActivity" '.$status.'> Class activity tag</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'classActivity/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
+          // Archive team
           $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> Archive</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';

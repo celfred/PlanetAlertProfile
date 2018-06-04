@@ -765,6 +765,13 @@ function saveHistory($player, $task, $newsBoard = 0) {
   $p->title = str_replace('&#039;', '\'', $task->title);
   $p->task = $task;
   if ($task->refPage) { $p->refPage = $task->refPage; }
+  // Tick inClass checkbox if classActivity Team option is on
+  // For UT and FP actions only
+  if ($player->team->classActivity == 1 && $task->is("name~=test|ut-action")) {
+    $p->inClass = 1;
+  } else {
+    $p->inClass = 0;
+  }
   $p->summary = $task->comment;
   $p->publish = $newsBoard;
   $p->linkedId = $task->linkedId;
@@ -1600,6 +1607,7 @@ function fightReport($player, $monster = false) {
 }
 
 function utGain($monsterId, $player, $startDate='', $endDate='') {
+  // TODO : Manage inClass events ???
   $utGain = 0;
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
