@@ -635,8 +635,10 @@ namespace ProcessWire;
           $bestUt = $m->best;
           $out .= '<li>'.$m->title.' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.'] : '.$bestUt.']';
           foreach($allPlayers as $p) {
-            $playerUt = utGain($m, $p);
-            $p->ut = $playerUt;
+            list($utGain, $inClassUtGain) = utGain($m, $p);
+            /* $playerUt = utGain($m, $p); */
+            /* $p->ut = $playerUt; */
+            $p->ut = $utGain;
           }
           $allPlayers->sort("-ut");
           if ($allPlayers->first()->ut != $m->best) {
@@ -1243,10 +1245,15 @@ namespace ProcessWire;
           /* $allEvents = $selectedPlayer->get("name=history")->find("task.name=ut-action-v|ut-action-vv,date>$start,date<$end")->sort("date"); */
           $allMonsters = $pages->find("template=exercise")->sort("level, title");
           foreach($allMonsters as $m) {
-            $playerUt = utGain($m, $selectedPlayer, $startDate, $endDate);
+            /* $playerUt = utGain($m, $selectedPlayer, $startDate, $endDate); */
+            list($playerUt, $inClassUtGain) = utGain($m, $selectedPlayer, $startDate, $endDate);
             if ($playerUt > 0) {
               $out .= $m->title.' [Level '.$m->level.'] → ';
               $out .= $playerUt.' UT';
+              $out .= '<br />';
+            } else if ($inClassUtGain > 0) {
+              $out .= $m->title.' [Level '.$m->level.'] → ';
+              $out .= $playerUt.' UT [in class]';
               $out .= '<br />';
             }
           }
@@ -1270,16 +1277,25 @@ namespace ProcessWire;
           $out .= '<ul>';
           foreach($allPlayers as $p) {
             $activity = 0;
+            $inClassActivity = 0;
             $out_03 = '<ul>';
             foreach($allMonsters as $m) {
-              $playerUt = utGain($m, $p, $startDate, $endDate);
+              /* $playerUt = utGain($m, $p, $startDate, $endDate); */
+              list($playerUt, $inClassUtGain) = utGain($m, $p, $startDate, $endDate);
               if ($playerUt > 0) { 
                 $activity += $playerUt;
                 $out_03 .= '<li>'.$m->title. ' [level '.$m->level.']: +'.$playerUt.'UT</li>';
+              } else if ($inClassUtGain > 0) {
+                $activity += $inClassUtGain;
+                $inClassActivity += $inClassUtGain;
+                $out_03 .= '<li>';
+                $out_03 .= $m->title.' [Level '.$m->level.'] → ';
+                $out_03 .= $inClassUtGain.' UT [in class]';
+                $out_03 .= '</li>';
               }
             }
             $out_03 .= '</ul>';
-            $out_02 = '<li><strong>'.$p->title.'</strong> → <span class="label label-success">+'.$activity.'UT</span></li>';
+            $out_02 = '<li><strong>'.$p->title.'</strong> → <span class="label label-success">+'.$activity.'UT ('.$inClassActivity.' in class)</span></li>';
             if ($activity != 0) {
               $out .= $out_02.$out_03;
             }

@@ -22,6 +22,7 @@
 		<th><span data-toggle="tooltip" title="Solo missions" class="glyphicon glyphicon-user"></span></th>
 		<th><span data-toggle="tooltip" title="Group missions"><span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></span></th>
 		<th><span data-toggle="tooltip" title="Compétence SACoche : Je prends une initiative particulière.">UT</span> <i data-toggle="tooltip" data-html="true" title="<span class='label label-success'>VV</span> 9xtHk ET 47→49UT/FP<br /><span class='label label-success'>VV</span> 10xtHk OU 50→+UT/FP<br /><span class='label label-success'>V</span> 4xtHk ET 18→19UT/FP<br /><span class='label label-success'>V</span> 5xtHK OU 20→49UT/FP" class="glyphicon glyphicon-question-sign"></i></th>
+		<th>Mot.</th>
 		<th>Planet Alert</th>
   </tr>
   <?php
@@ -41,6 +42,7 @@
 		$teamEq = 0;
 		$teamDeath = 0;
 		$teamUt = 0;
+		$teamMotivation = 0;
 		$teamPosTests = 0;
 		$teamNegTests = 0;
 		$listNoHk = '';
@@ -60,10 +62,12 @@
 			$nbHk = $player->nbHk;
 			$nbExtraHk = $player->extraHk->count() + $player->veryExtraHk->count();
 			$death = $player->find("task.name=death, date>=$period->dateStart, date<=$period->dateEnd");
-			// Get rid of in-class activities
-			$utSessions = $player->find("template=event, task.name=ut-action-v|ut-action-vv, inClass=0, date>=$period->dateStart, date<=$period->dateEnd");
-			$posTests = $player->find("template=event, task.category.name=test, task.HP=0, inClass=0, date>=$period->dateStart, date<=$period->dateEnd");
-			$negTests = $player->find("template=event, task.category.name=test, task.HP<0, inClass=0, date>=$period->dateStart, date<=$period->dateEnd");
+			$utSessions = $player->find("template=event, task.name=ut-action-v|ut-action-vv, date>=$period->dateStart, date<=$period->dateEnd");
+			$inClassUtCount = $utSessions->find("inClass=1")->count();
+			$fpSessions = $player->find("template=event, task.category.name=test, date>=$period->dateStart, date<=$period->dateEnd");
+			$inClassFpCount = $fpSessions->find("inClass=1")->count();
+			$posTests = $fpSessions->find("task.HP=0");
+			$negTests = $fpSessions->find("task.HP<0");
 			// Team stats
 			$teamNoHk += $nbNoHk;
 			$teamHalfHk += $nbHalfHk;
@@ -77,6 +81,9 @@
 			$teamEq += $player->equipment->count();
 			$teamDeath += $death->count();
 			$teamUt += $utSessions->count();
+			if ($player->motivation == 'V' || $player->motivation == 'VV') {
+				$teamMotivation++;
+			}
 			$teamPosTests += $posTests->count();
 			$teamNegTests += $negTests->count();
 
@@ -230,6 +237,9 @@
 			echo '<span data-toggle="tooltip" data-html="true" title="'.$listPosTests.'">'.$posTests->count().' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
 			echo '&nbsp;';
 			echo '<span data-toggle="tooltip" data-html="true" title="'.$listNegTests.'">'.$negTests->count().' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+			if ($player->inClassFpCount > 0) {
+				echo '<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$player->inClassFpCount.' in class fights"></i>';
+			}
       echo '</td>';
 			// Solo missions
       echo '<td>';
@@ -276,13 +286,22 @@
 			$listUt = '';
 			if ($utSessions->count() > 0) {
 				foreach ($utSessions as $e) {
-					$listUt .= '- '.strftime("%d/%m", $e->date).': '.$e->summary.'<br />';
+					if ($e->inClass == 1) {
+						$inClass = '*';
+					} else {
+						$inClass = '';
+					}
+					$listUt .= '- '.strftime("%d/%m", $e->date).': '.$e->summary.$inClass.'<br />';
 				}
 			}
 			echo '<span data-toggle="tooltip" data-html="true" title="'.$listUt.'">'.$utSessions->count().'</span>';
-			if ($player->motivation == 'V' || $player->motivation == 'VV') {
-				echo  ' <span class="label label-success" data-toggle="tooltip" title="'.$player->ut->count().'UT/'.$player->fp->count().'FP">'.$player->motivation.'</span> ';
-			}
+      echo '</td>';
+      echo '<td>';
+				if ($player->motivation == 'V' || $player->motivation == 'VV') {
+					echo '<span class="label label-success" data-toggle="tooltip" title="'.$player->ut->count().'UT/'.$player->fp->count().'FP">'.$player->motivation.'</span>';
+				} else {
+					echo '<span class="label label-default">NN</span>';
+				}
       echo '</td>';
 			// Planet Alert
       echo '<td>';
@@ -365,6 +384,10 @@
 		// UT
     echo '<th>';
 		echo $teamUt.' UT';
+    echo '</th>';
+		// Motivation
+    echo '<th>';
+		echo $teamMotivation.' Bonus';
     echo '</th>';
 		// Planet ALert
     echo '<th>';

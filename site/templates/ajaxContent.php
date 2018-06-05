@@ -657,10 +657,10 @@
         $out .=  '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 0 oublis<br /><span class=\'label label-success\'>V</span> 1 oubli<br /><span class=\'label label-danger\'>R</span> 2 oublis<br /><span class=\'label label-danger\'>RR</span> 3 oublis (ou +)" class="label label-'.$class.'">'.$player->materialLabel.'</span>';
         $out .= '</p>';
         // Extra-hk
-        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Travail supplémentaire : extra-homework, personal initiative, underground training...<br />Compétence SACoche : Je prend une initiative particulière."></span> Personal motivation :';
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Travail supplémentaire HORS-CLASSE : extra-homework, personal initiative, underground training...<br />Compétence SACoche : Je prend une initiative particulière."></span> Personal motivation :';
         $out .= ' <span> ['.$player->extraHk->count().' extra - </span>';
         $out .= ' <span>'.$player->initiative->count().' initiatives - </span>';
-        $out .= ' <span class="">'.$player->ut->count().' UT session]</span>';
+        $out .= ' <span>'.$player->outClassActivity.' UT/FP session]</span>';
         $out .= ' ⇒ ';
         $out .= '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 9xtHk AND 47→49UT/FP<br /><span class=\'label label-success\'>VV</span> 10xtHk OR 50→+UT/FP<br /><span class=\'label label-success\'>V</span> 4xtHk AND 18→19UT/FP<br /><span class=\'label label-success\'>V</span> 5xtHK OR 20→49UT/FP" class="label label-'.$class.'">'.$player->motivation.'</span> ';
         $out .= '</p>';

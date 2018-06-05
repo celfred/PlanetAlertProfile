@@ -1055,6 +1055,12 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $player->initiative = $player->find("task.name=personal-initiative, date>=$dateStart, date<=$dateEnd");
   $player->ut = $player->find("task.name=ut-action-v|ut-action-vv, date>=$dateStart, date<=$dateEnd");
   $player->fp = $player->find("task.name=test-v|test-vv, date>=$dateStart, date<=$dateEnd");
+  $player->inClassUtCount = $player->ut->find("inClass=1")->count();
+  $player->outClassUtCount = $player->ut->find("inClass=0")->count();
+  $player->inClassFpCount = $player->fp->find("inClass=1")->count();
+  $player->outClassFpCount = $player->fp->find("inClass=0")->count();
+  $player->inClassActivity = $player->inClassUtCount + $player->inoutClassFpCount;
+  $player->outClassActivity = $player->outClassUtCount + $player->outClassFpCount;
   $player->nbHk = $allHk->count();
   $player->noHk = $allHk->find("task.name=no-homework");
   $player->halfHk = $allHk->find("task.name=homework-half-done");
@@ -1075,9 +1081,9 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   if ($pb >= 3 || $player->penalty->count() >= 1) { $player->homework = 'RR'; }
   $player->hkPb = $pb;
   $nbBonus = $player->initiative->count() + $player->extraHk->count() + $player->veryExtraHk->count();
-  if ($nbBonus >= 10 || ($player->ut->count()+$player->fp->count()) >= 50 || (($player->ut->count()+$player->fp->count()) >= 47 && $nbBonus == 9)) {
+  if ($nbBonus >= 10 || ($player->outClassActivity) >= 50 || (($player->outClassActivity) >= 47 && $nbBonus == 9)) {
     $player->motivation = 'VV';
-  } else if (($nbBonus >= 5 && $nbBonus < 10) || (($player->ut->count()+$player->fp->count()) >= 20 && ($player->ut->count()+$player->fp->count()) < 50) || ((($player->ut->count()+$player->fp->count()) >= 18 && ($player->ut->count()+$player->fp->count()) < 50) && $nbBonus == 4)) {
+  } else if (($nbBonus >= 5 && $nbBonus < 10) || (($player->outClassActivity) >= 20 && ($player->outClassActivity) < 50) || ((($player->outClassActivity) >= 18 && ($player->outClassActivity) < 50) && $nbBonus == 4)) {
     $player->motivation = 'V';
   } else {
     $player->motivation = 'No bonus for the moment';
@@ -1608,7 +1614,6 @@ function fightReport($player, $monster = false) {
 }
 
 function utGain($monsterId, $player, $startDate='', $endDate='') {
-  // TODO : Manage inClass events ???
   $utGain = 0;
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
@@ -1617,15 +1622,24 @@ function utGain($monsterId, $player, $startDate='', $endDate='') {
     foreach($prevUt as $p) {
       preg_match("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches);
       if (!$matches) {
-        $utGain = $utGain+1;
+        if ($p->inClass == 0) {
+          $utGain = $utGain+1;
+        } else {
+          $inClassUtGain = $utGain+1;
+        }
       } else {
-        $utGain = $utGain+$matches[1];
+        if ($p->inClass == 0) {
+          $utGain = $utGain+$matches[1];
+        } else {
+          $inClassUtGain = $utGain+$matches[1];
+        }
       }
     }
   } else {
     $utGain = 0;
   }
-  return $utGain;
+  /* return $utGain; */
+  return array($utGain, $inClassUtGain);
 }
 
 function setBestPlayer($monster, $player, $utGain) {
