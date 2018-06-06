@@ -1411,7 +1411,7 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
       $playerPos = false;
     }
   } else {
-    if ($player->group  && $allPlayers->getItemKey($player->group) != 0) {
+    if ($player->group  && $allGroups->getItemKey($player->group) != 0) {
       $playerPos = $allPlayers->getItemKey($player->group);
     } else {
       $playerPos = false;
