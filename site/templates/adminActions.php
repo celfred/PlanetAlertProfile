@@ -636,8 +636,6 @@ namespace ProcessWire;
           $out .= '<li>'.$m->title.' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.'] : '.$bestUt.']';
           foreach($allPlayers as $p) {
             list($utGain, $inClassUtGain) = utGain($m, $p);
-            /* $playerUt = utGain($m, $p); */
-            /* $p->ut = $playerUt; */
             $p->ut = $utGain;
           }
           $allPlayers->sort("-ut");
@@ -1242,10 +1240,8 @@ namespace ProcessWire;
           $out .= 'from '.$startDate.' ';
           $out .= 'to '.$endDate;
           $out .= '</h3>';
-          /* $allEvents = $selectedPlayer->get("name=history")->find("task.name=ut-action-v|ut-action-vv,date>$start,date<$end")->sort("date"); */
           $allMonsters = $pages->find("template=exercise")->sort("level, title");
           foreach($allMonsters as $m) {
-            /* $playerUt = utGain($m, $selectedPlayer, $startDate, $endDate); */
             list($playerUt, $inClassUtGain) = utGain($m, $selectedPlayer, $startDate, $endDate);
             if ($playerUt > 0) {
               $out .= $m->title.' [Level '.$m->level.'] → ';
@@ -1257,15 +1253,6 @@ namespace ProcessWire;
               $out .= '<br />';
             }
           }
-          /* if ($allEvents->count() > 0) { */
-          /*   foreach($allEvents as $e) { */
-          /*     $out .= strftime("%d/%m", $e->date); */
-          /*     $out .= ' : '; */
-          /*     $out .= $e->summary.'<br />'; */
-          /*   } */
-          /* } else { */
-          /*   $out .= '<p>No training yet.</p>'; */
-          /* } */
         } else if ($selectedTeam && $selectedTeam != '-1') {
           $out .= '<h3 class="text-center">';
           $out .= 'UT Stats for '.$selectedTeam->title .'   ';
@@ -1280,7 +1267,6 @@ namespace ProcessWire;
             $inClassActivity = 0;
             $out_03 = '<ul>';
             foreach($allMonsters as $m) {
-              /* $playerUt = utGain($m, $p, $startDate, $endDate); */
               list($playerUt, $inClassUtGain) = utGain($m, $p, $startDate, $endDate);
               if ($playerUt > 0) { 
                 $activity += $playerUt;
@@ -1315,7 +1301,8 @@ namespace ProcessWire;
           $allPlayers = $allPlayers->find("team=$selectedTeam");
           $out .= '<ul>';
           foreach($allPlayers as $p) {
-            $allTests = $p->find("template=event, task.name=test-vv|test-v|test-r|test-rr, refPage!='', date>=$startDate, date<=$endDate, sort=refPage, sort=date");
+            $allTests = $p->find("template=event, task.name~=test, refPage!='', date>=$startDate, date<=$endDate, sort=refPage, sort=date");
+            $inClassAllTestsCount = $allTests->find("inClass=1")->count();
             if ($allTests->count() > 0) {
               $out_03 = '<ul>';
               $prevDate = '';
@@ -1337,12 +1324,19 @@ namespace ProcessWire;
                 } else {
                   $error = '';
                 }
-                $out_03 .= '<li>'.date('d/m', $t->date).' → '.$t->refPage->title.' [lvl '.$t->refPage->level.'] <span class="label label-'.$class.'">'.$result.'</span> <span class="label label-danger">'.$error.'</span></li>';
+                $out_03 .= '<li>';
+                $out_03 .= date('d/m', $t->date).' → '.$t->refPage->title.' [lvl '.$t->refPage->level.'] <span class="label label-'.$class.'">'.$result.'</span> <span class="label label-danger">'.$error.'</span>';
+                if ($t->inClass == 1) {
+                  $out_03 .= ' [in class]';
+                } else {
+                  $out_03 .= ' [not in class]';
+                }
+                $out_03 .='</li>';
                 $prevDate = date('Y-m-d', $t->date);
                 $prevName = $t->refPage->name;
               }
               $out_03 .= '</ul>';
-              $out_02 = '<li><strong>'.$p->title.'</strong> → <span class="label label-success">'.$allTests->count().' fights</span></li>';
+              $out_02 = '<li><strong>'.$p->title.'</strong> → <span class="label label-success">'.$allTests->count().' fights</span> ['.$inClassAllTestsCount.' in class]</li>';
               $out .= $out_02.$out_03;
             }
           }
@@ -1372,7 +1366,12 @@ namespace ProcessWire;
               $out .= '<ul>';
               foreach($prevTask as $t) {
                 $tDate = strftime("%d/%m/%y", $t->date).' - ';
-                $out .= '<li>'.$tDate. $t->summary.'</li>';
+                $out .= '<li>';
+                $out .= $tDate. $t->summary;
+                if ($t->inClass == 1) {
+                  $out .= ' [in class]';
+                }
+                $out .= '</li>';
               }
               $out .= '</ul>';
             }

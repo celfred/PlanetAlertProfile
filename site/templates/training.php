@@ -291,7 +291,8 @@
             $out .= '</div>';
             $out .= '<div class="panel-footer">';
             if (!$user->isSuperuser()) {
-              $out .= '<p>Your global UT for this monster: '.utGain($monster, $player).'</p>';
+              list($utGain, $inClassGain) = utGain($monster, $player);
+              $out .= '<p>Your global UT for this monster: '.$utGain.'</p>';
             }
             $out .= '</div>';
             $out .= '</div>';
