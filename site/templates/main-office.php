@@ -140,11 +140,11 @@
             $news->sort('-date');
           } else {
             $currentPlayer = $n->parent('template=player');
-            if ($n->task->is("name~=ut-action")) { 
+            if ($n->task->is("name~=ut-action" && $n->inClass == 0)) { 
               $teamRecentUtPlayers->add($currentPlayer);
               $teamRecentUt++;
             }
-            if ($n->task->is("name~=test")) {
+            if ($n->task->is("name~=test") && $n->inClass == 0) {
               $teamRecentFightPlayers->add($currentPlayer);
               $teamRecentFight++;
             }
