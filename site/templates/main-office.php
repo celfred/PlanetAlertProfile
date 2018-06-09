@@ -121,45 +121,78 @@
 
   $out .= '<div class="col-sm-8">';
     
-    // Team News (Free/Buy actions during last 7 days)
+    // Team News (Free/Buy actions during last 5 days)
     $news = new PageArray();
     $today = new \DateTime("today");
     $interval = new \DateInterval('P5D');
     $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
+    $teamRecentUt = 0;
+    $teamRecentUtPlayers = new PageArray();
+    $teamRecentFight = 0;
+    $teamRecentFightPlayers = new PageArray();
+
     foreach($allPlayers as $p) {
-      $last = $p->get("name=history")->children("sort=-date")->find("date>=$limitDate,task.name=free|buy");
+      $last = $p->get("name=history")->children("sort=-date")->find("template=event, date>=$limitDate, task.name~=free|buy|ut-action|test");
       if ($last->count() > 0) {
-        $news->add($last);
-        $news->sort('-date');
+        foreach ($last as $n) {
+          if ($n->task->is("name=free|buy")) {
+            $news->add($last);
+            $news->sort('-date');
+          } else {
+            $currentPlayer = $n->parent('template=player');
+            if ($n->task->is("name~=ut-action")) { 
+              $teamRecentUtPlayers->add($currentPlayer);
+              $teamRecentUt++;
+            }
+            if ($n->task->is("name~=test")) {
+              $teamRecentFightPlayers->add($currentPlayer);
+              $teamRecentFight++;
+            }
+          }
+        }
       }
     }
+    $utPlayersList = $teamRecentUtPlayers->implode(', ', '{title}');
+    $fightPlayersList = $teamRecentFightPlayers->implode(', ', '{title}');
     $out .= '<div id="" class="board panel panel-primary">';
     $out .= '<div class="panel-heading">';
     $out .= '<h4 class=""><span class="label label-primary">Team News (last 5 days)</span></h4>';
     $out .= '</div>';
     $out .= '<div class="panel-body">';
     $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
-    foreach ($news as $n) {
-      $currentPlayer = $n->parent('template=player');
-      $out .= '<li>';
-      $out .= '<div class="thumbnail">';
-      if ($n->refPage->photo) {
-        $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+    if ($news->count() != 0) {
+      foreach ($news as $n) {
+        $currentPlayer = $n->parent('template=player');
+        $out .= '<li>';
+        $out .= '<div class="thumbnail">';
+        if ($n->refPage->photo) {
+          $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+        }
+        if ($n->refPage->image) {
+          $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+        }
+        $out .= '<caption class="text-center">';
+        $out .= ' <span>(On '.date('l, M. j', $n->date).')</span><br />';
+        $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
+        $out .= '</caption>';
+        $out .= '</div>';
+        $out .= '</li>';
       }
-      if ($n->refPage->image) {
-        $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-      }
-      $out .= '<caption class="text-center">';
-      $out .= ' <span>(On '.date('l, M. j', $n->date).')</span><br />';
-      $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
-      $out .= '</caption>';
-      $out .= '</div>';
-      $out .= '</li>';
-    }
-    if ($news->count() == 0) {
-      $out .= '<p>No recent news.</p>';
+    } else {
+      $out .= '<p>No recent news :(</p>';
     }
     $out .= '</ul>';
+    $out .= '</div>';
+    $out .= '<div class="panel-footer text-center">';
+    if ($teamRecentUt > 0 || $teamRecentFight > 0) {
+      $out .= '<p>';
+        $out .= '<span class="badge"><i class="glyphicon glyphicon-headphones"></i> '.$teamRecentUt.' UT → '.$utPlayersList.'</span>';
+        $out .= '&nbsp;&nbsp;';
+        $out .= '<span class="badge"><i class="glyphicon glyphicon-flash"></i> Fight '.$teamRecentFight.' FP → '.$fightPlayersList.'</span>';
+      $out .= '</p>';
+    } else {
+      $out .= '<p>No recent UT or FP training :( </p>';
+    }
     $out .= '</div>';
     $out .= '</div>';
 
