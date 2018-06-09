@@ -1634,6 +1634,7 @@ function fightReport($player, $monster = false) {
 
 function utGain($monsterId, $player, $startDate='', $endDate='') {
   $utGain = 0;
+  $inClassUtGain = 0;
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
   $prevUt = $player->find("template=event,refPage=$monsterId, date>$startDate, date<$endDate, sort=-date");
@@ -1657,7 +1658,6 @@ function utGain($monsterId, $player, $startDate='', $endDate='') {
   } else {
     $utGain = 0;
   }
-  /* return $utGain; */
   return array($utGain, $inClassUtGain);
 }
 
