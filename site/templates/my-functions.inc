@@ -807,14 +807,14 @@ function pick_question($player) {
           array_push($type, 'country', 'country', 'city', 'city');
           break;
         case '4emes':
-          if ($randEl->quiz->count > 0) {
+          if ($randEl->quiz->count > 0) { // Add questions if they exists in backend
             array_push($type, 'country', 'country', 'city', 'city', 'quiz', 'quiz');
           } else {
             array_push($type, 'country', 'country', 'city', 'city');
           }
           break;
         case '3emes':
-          if ($randEl->quiz->count > 0) {
+          if ($randEl->quiz->count > 0) { // Add questions if they exists in backend
             array_push($type, 'country', 'city', 'quiz', 'quiz');
           } else {
             array_push($type, 'country', 'country', 'city', 'city');
@@ -826,14 +826,14 @@ function pick_question($player) {
     if ($randList == 'people') {
       switch ($player->rank->name) {
         case '4emes':
-          if ($randEl->quiz->count > 0) {
+          if ($randEl->quiz->count > 0) { // Add questions if they exists in backend
             array_push($type, 'country', 'nationality', 'quiz');
           } else {
             array_push($type, 'country', 'nationality');
           }
           break;
         case '3emes':
-          if ($randEl->quiz->count > 0) {
+          if ($randEl->quiz->count > 0) { // Add questions if they exists in backend
             array_push($type, 'country', 'nationality', 'quiz', 'quiz');
           } else {
             array_push($type, 'country', 'nationality');
@@ -893,7 +893,26 @@ function pick_question($player) {
     }
   }
   $quiz['id'] = $randEl->id;
+  // Get player's stats on quizzed element (over current school year)
+  $quiz['stats'] = quizStat($randEl, $player);
+
   return $quiz;
+}
+
+function quizStat($el, $player, $startDate='', $endDate='') { // Get player's stats on quizzed element
+  $pages = wire('pages');
+  $right = 0;
+  $wrong = 0;
+  // Find current school year date
+  $schoolYear = $pages->get("template=period, name=school-year");
+  if ($startDate == '') { $startDate = $schoolYear->dateStart; }
+  if ($endDate == '') { $endDate = $schoolYear->dateEnd; }
+  $invasions = $player->get("name=history")->find("template=event, task.name~=invasion, refPage=$el, date>=$startDate, date<=$endDate");
+  if ($invasions->count() > 0) {
+    $right = $invasions->find("task.name=right-invasion")->count();
+    $wrong = $invasions->find("task.name=wrong-invasion")->count();
+  }
+  return array($right, $wrong);
 }
 
 function nbFreedomActs($team, $startDate='', $endDate='') {

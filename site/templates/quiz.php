@@ -69,25 +69,27 @@ if ($user->isSuperuser()) {
 
   $out .= '<div id="ajaxDecision" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="ambassador"></div>';
 
-  if ( isset($selectedIds) && count($selectedIds) > 0 ) { // Players have been checked
-    // Pick one
-    shuffle($selectedIds);
-    if ($input->post->reloadButton) {
-      $selectedPlayer = $input->post->playerId;
-    } else {
+  if ($input->post->reloadButton) {
+    $selectedPlayer = $input->post->playerId;
+    $display = 'hidden'; // Hide players list
+  } else {
+    if (isset($selectedIds) && count($selectedIds) > 0) { // Players have been checked
+      // Shuffle, pick one and get rid of it
+      shuffle($selectedIds);
       $selectedPlayer = $selectedIds[0];
       // Get rid of it
       array_splice($selectedIds, 0, 1);
+      $display = 'hidden'; // Hide players list
+    } else {
+      $display = 'shown'; // Show players list on first load
     }
-    $display = 'hidden'; // Hide players list
-  } else {
-    $display = 'shown'; // Show players list on first load
   }
 
   // Set nbInvasion foreach players
   $allConcerned->sort("name");
-  foreach($allConcerned as $p) {
-    $p->nbInvasions = $p->find("template=event, task.name=right-invasion|wrong-invasion")->count();
+  foreach($allConcerned as $p) { // Limited to current schoolyear
+    $schoolYear = $pages->get("template=period, name=school-year");
+    $p->nbInvasions = $p->find("template=event, task.name=right-invasion|wrong-invasion, date>=$schoolYear->dateStart, date<=$schoolYear->dateEnd")->count();
     if ($selectedIds && in_array($p, $selectedIds)) { // Keep checked players
       $p->checked = "checked='checked'";
     } else {
@@ -111,6 +113,13 @@ if ($user->isSuperuser()) {
         $out .= '<img class="avatar" src="'.$player->avatar->url.'" />';
         $out .= '<h1 class="playerName">'.$player->title.'</h1>';
         $out .= '<h3>Monster invasion ! Team '.$player->team->title.' has to react!</h3>';
+        // Stats analysis
+        $out .= '<h4 class="">';
+          $out .= '<span class="">Your stats on this element → </span>';
+          $out .= '<span class="label label-success">'.$quiz['stats']['0'].' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
+          $out .= ' <span class="label label-danger">'.$quiz['stats']['1'].' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
+          if ($quiz['stats']['1'] == 2) { $out .= ' <span class="blink"><i class="glyphicon glyphicon-warning-sign"></i></span>'; }
+        $out .= '</h4>';
         $out .= '<h2 class="alert alert-danger text-center">';
         $out .= $quiz['question'].'&nbsp;&nbsp;';
         $out .= '</h2>';
