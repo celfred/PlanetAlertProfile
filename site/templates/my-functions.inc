@@ -1465,7 +1465,7 @@ function setMonstersActivity($player, $monster) {
     $spacedFights = 15; // 15 days between fights
 
     // Check activity
-    $monster->utGain = utGain($monster, $player);
+    list($monster->utGain, $tmp) = utGain($monster, $player);
     if ($monster->utGain > 0) { // Already trained
       // Check trainings/fights
       $prevTrainings = $player->find("template=event,task.name=ut-action-v|ut-action-vv, refPage=$monster, sort=-date");
