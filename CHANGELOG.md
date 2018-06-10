@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Planet Alert Changelog
 All notable changes to this project will be documented in this file.
 
@@ -31,7 +30,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Allow multiple teachers
 
 
-## 1.0.0 - Unreleased
+## v1.0.0 - [Unreleased]
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
@@ -54,4 +53,4 @@ Initial official release.
 
 
 [Unreleased]: https://framagit.org/celfred/planetAlert/compare/v0.1.0...master
-[v.0.1.0]: https://framagit.org/celfred/planetAlert/tags/v0.1.0
+[v0.1.0]: https://framagit.org/celfred/planetAlert/tags/v0.1.0
