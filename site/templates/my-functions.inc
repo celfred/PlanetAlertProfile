@@ -539,6 +539,15 @@ function randomSpecial(HookEvent $e) { // Random monsters are hidden if player d
   }
 }
 
+function emptyTmp(HookEvent $e) { // Empty /tmp subtree
+  $pages = wire('pages');
+  $allTmp = $pages->get("name=tmp")->children();
+  foreach ($allTmp as $p) {
+    $p->of(false);
+    $pages->trash($p);
+  }
+}
+
 function checkActivity(HookEvent $e) {
   $pages = wire('pages');
   $allPlayers = $pages->find("template=player, team.name=no-team, name!=test"); // Limit to no-team players, avoid 'test'

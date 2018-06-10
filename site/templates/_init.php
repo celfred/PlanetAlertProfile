@@ -8,5 +8,6 @@
 
   $wire->addHook('LazyCron::everyDay', null, 'checkActivity'); // Check all players activity
   $wire->addHook('LazyCron::everyDay', null, 'randomSpecial'); // Set random special monsters
+  $wire->addHook('LazyCron::everyDay', null, 'emptyTmp'); // Empty /tmp subtree every night
 
 ?>
