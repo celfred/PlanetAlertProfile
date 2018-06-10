@@ -3,10 +3,13 @@
     $out = '';
     switch ($input->get('id')) {
       case 'lastEvents' : // Public activity
+        $adminId = $users->get("name=admin")->id;
+        $lastMonsters = $pages->find("template=exercise, created_users_id=$adminId, sort=-published, limit=3");
+        $lastLessons = $pages->find("template=lesson, created_users_id=$adminId, sort=-published, limit=3");
+        $lastUpdatedLessons = $pages->find("template=lesson, modified_users_id=$adminId, sort=-modified, limit=3");
         // Last 3 published monsters
         $out .= '<ul class="list-inline">&nbsp;';
         $out .= '<li class="label label-success"><span class="glyphicon glyphicon-headphones"></span> New monsters !</li>';
-        $lastMonsters = $pages->find("template=exercise, sort=-published, limit=3");
         foreach($lastMonsters as $m) {
           if ($m->image) {
             $mini = "<img data-toggle='tooltip' src='".$m->image->getCrop('mini')->url."' alt='image' />";
@@ -24,6 +27,30 @@
             $out .= '<li>→ <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a></li>';
           } else {
             $out .= '<li>→ You need to buy the Memory Helmet to fight monsters !</a></li>';
+          }
+        }
+        $out .= '</ul>';
+        // Last 3 published lessons
+        $out .= '<ul class="list-inline">&nbsp;';
+        $out .= '<li class="label label-success"><span class="glyphicon glyphicon-book"></span> New lessons !</li>';
+        foreach($lastLessons as $l) {
+          $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$l->summary.'">'.$l->title.'</li>  ';
+        }
+        // Last updated lessons
+        foreach($lastUpdatedLessons as $l) {
+          if ($lastLessons->has($l) == false) {
+            $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$l->summary.'">'.$l->title.' <span class="badge">Updated !</span></li>  ';
+          }
+        }
+        if ($user->isLoggedin()) {
+          if ($user->isSuperuser() == false) {
+            $currentPlayer = $pages->get("template=player, login=$user->name");
+            $book = $currentPlayer->equipment->get("name~=book-knowledge");
+          }
+          if (isset($book) || $user->isSuperuser()) {
+            $out .= '<li>→ <a href="'.$pages->get("name=book-knowledge")->url.'">Read my Book of Knowledge</a></li>';
+          } else {
+            $out .= '<li>→ You need to buy the Book of Knowledge to see the lessons !</a></li>';
           }
         }
         $out .= '</ul>';
