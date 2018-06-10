@@ -96,8 +96,11 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
         $item = possibleElement($player, $item);
         switch($item->pb) {
           case 'possible' : 
-            $out .= "<p class='lead'>You can buy this item.</p>";
+            $out .=  '<p class="lead">You can buy this item.</p>';
             $out .=  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
+            break;
+          case 'helmet' : 
+            $out .= '<p class="lead">You must buy the <a href="'.$page->url.'details/memory-helmet">Memory Helmet</a> first before buying this item.</p>';
             break;
           case 'already' : 
             $out .= "<p class='lead'>You already have this item.</p>";

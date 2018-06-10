@@ -1882,6 +1882,11 @@ function possibleElements($player) {
     $b->refPage->locked = $interval+1;
     $items['locked']->add($b->refPage);
   }
+  // Lock visualizer if Memory helmet isn't in player's equipment
+  if ($player->equipment->has('name=memory-helmet') == false) {
+    $visualizer = $pages->get("name~=visualizer");
+    $already->add($visualizer);
+  }
   if ($player->rank->is("name=4emes|3emes") || ($player->team->is("name!=no-team") && $player->team->is("rank.name=4emes|3emes"))) {
     $already->add($player->people);
     $nbEl = ($player->places->count() + $player->people->count())+1;
@@ -1910,6 +1915,10 @@ function possibleElement($player, $item) {
     $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<$nbEl, id!=$already");
     if ($possibleItems->has($item) && $todayItemsCount < 3) {
       $item->pb = 'possible';
+      // Lock visualizer if Memory helmet isn't in player's equipment
+      if ($item->is("name~=visualizer") && $player->equipment->has("name=memory-helmet") == false) {
+        $item->pb = 'helmet';
+      }
     } else {
       if ($item->level > $player->level) { $item->pb = 'level'; }
       if ($item->GC > $player->GC) { $item->pb = 'GC'; }

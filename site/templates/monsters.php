@@ -1,49 +1,56 @@
 <?php
-include("./head.inc"); 
+  include("./head.inc"); 
 
-$out = '';
-$out .= '<div>';
+  $out = '';
 
-echo '<div class="well">';
-echo '<h4>'.$page->summary.'</h4>';
-echo '</div>';
+  if ($user->isSuperuser()) {
+    $allMonsters = $page->children("include=all")->sort("level, name");
+  } else {
+    $allMonsters = $page->children->sort("level, name");
+  }
 
-if ($user->isSuperuser()) {
-  $allMonsters = $page->children("include=all")->sort("level, name");
-} else {
-  $allMonsters = $page->children->sort("level, name");
-}
-
-$allCategories = $pages->find("parent.name=topics, sort=name");
+  $allCategories = $pages->find("parent.name=topics, sort=name");
 
   // Test player login
   if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
-    // Test if player has unlocked Memory helmet (only training equipment for the moment)
+    // Test if player has unlocked Memory helmet or Visualizer
     if ($user->isSuperuser()) {
       $helmet = $pages->get("name=memory-helmet");
+      $visualizer = $pages->get("name~=visualizer");
     } else {
       $helmet = $player->equipment->get('memory-helmet');
+      $visualizer = $player->equipment->get('name~=visualizer');
     }
+    echo '<div class="text-center">';
+    echo '<h4>';
     if ($helmet) {
-      $helmet = $pages->get("name=memory-helmet");
-      echo '<div class="well text-center">';
-      echo '<h4>';
       if ($helmet->image) {
         echo '<img class="" src="'.$helmet->image->getCrop('small')->url.'" alt="Helmet" />';
       }
-      echo ' <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a> / ';
-      echo '<a href="'.$pages->get("name=fighting-zone")->url.'">Go to the Fighting Zone !</a>';
-      if ($helmet->image) {
-        echo ' <img class="" src="'.$helmet->image->getCrop('small')->url.'" alt="Helmet" />';
-      }
-      echo '</h4>';
-      echo '</div>';
+      echo ' <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a>   ';
     } else {
       echo '<div class="well text-center">';
       echo 'You must buy the Memory Helmet if you want to do Underground Training.';
       echo '</div>';
     }
+    if ($visualizer) {
+      if ($visualizer->image) {
+        echo '<img class="" src="'.$visualizer->image->getCrop('small')->url.'" alt="Visualizer" />';
+      }
+      echo ' <a href="'.$pages->get("name=Visualizer")->url.'">Use the Electronic Visualizer</a> / ';
+    } else {
+      echo '<div class="well text-center">';
+      echo 'You must buy the Electronic Visualizer to detect ALL monsters.';
+      echo '</div>';
+    }
+    echo '</h4>';
+    echo '</div>';
+  } else {
+    echo '<div>';
+    echo '<h4>'.$page->summary.'</h4>';
+    echo '</div>';
   }
+
 
   if ($user->isSuperuser()) {
     $colIndex = 3;
