@@ -29,10 +29,17 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Added
 - Allow multiple teachers
 
-
 ## v1.0.0 - [Unreleased]
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
+
+## [v0.1.1] - 2018-06-14
+### Changed
+- Limit to Fights/Buy/Free actions in Team News thumbnails 
+- Limit to UT training in Team News footer
+- Add Monster's names in Team News
+- More details in Monster invasions automatic answers (city/country)
+
 
 ## [v0.1.0] - 2018-06-10
 Initial official release.
@@ -54,3 +61,4 @@ Initial official release.
 
 [Unreleased]: https://framagit.org/celfred/planetAlert/compare/v0.1.0...master
 [v0.1.0]: https://framagit.org/celfred/planetAlert/tags/v0.1.0
+[v0.1.1]: https://framagit.org/celfred/planetAlert/tags/v0.1.1
