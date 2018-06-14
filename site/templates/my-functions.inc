@@ -857,15 +857,15 @@ function pick_question($player) {
       switch($quiz['type']) {
         case 'country' :
           $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randEl->title.'</strong>?';
-          $quiz['answer'] = $randEl->country->title;
+          $quiz['answer'] = 'In '.$randEl->country->title.' (in the city of '.$randEl->city->title.')';
           break;    
         case 'city' :
           $quiz['question'] = 'In which <strong>'.$type[$rand].'</strong> can you see <strong>'.$randEl->title.'</strong>?';
-          $quiz['answer'] = $randEl->city->title;
+          $quiz['answer'] = 'In '.$randEl->city->title.' (in '.$randEl->country->title.')';
           break;    
         case 'photo' :
           $quiz['question'] = 'What <strong>monument</strong> is it?';
-          $quiz['answer'] = $randEl->title. ' in '. $randEl->city->title.', '.$randEl->country->title;
+          $quiz['answer'] = $randEl->title. ' (in '. $randEl->city->title.', in '.$randEl->country->title.')';
           break;    
         case 'quiz' :
           $randQuiz = $randEl->quiz->getRandom();
@@ -882,15 +882,15 @@ function pick_question($player) {
       switch($quiz['type']) {
         case 'country' :
           $quiz['question'] = 'Where is '.$randEl->title.' from ? (<strong>'.$type[$rand].'</strong></strong>)';
-          $quiz['answer'] = $randEl->country->title;
+          $quiz['answer'] = 'From '.$randEl->country->title;
           break;    
         case 'nationality' :
           $quiz['question'] = 'What\'s '.$randEl->title.'\'s <strong>'.$type[$rand].'</strong> ?';
-          $quiz['answer'] = $randEl->nationality;
+          $quiz['answer'] = $randEl->nationality.' (from '.$randEl->country->title.')';
           break;    
         case 'photo' :
           $quiz['question'] = '<strong>Who</strong> is this ?';
-          $quiz['answer'] = $randEl->title. ', '. $randEl->country->title.' ('.$randEl->nationality.')';
+          $quiz['answer'] = $randEl->title. ', from '. $randEl->country->title.' ('.$randEl->nationality.')';
           break;    
         case 'quiz' :
           $randQuiz = $randEl->quiz->getRandom();
