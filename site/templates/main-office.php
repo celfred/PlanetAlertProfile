@@ -178,7 +178,7 @@
     $out .= '</ul>';
     $out .= '</div>';
     $out .= '<div class="panel-footer text-center">';
-    if ($teamRecentUt && $teamRecentUt->count() > 0) {
+    if (isset($teamRecentUt) && $teamRecentUt->count() > 0) {
       $out .= '<p>';
         $out .= '<span class="badge"><i class="glyphicon glyphicon-headphones"></i> '.$teamRecentUt->count().' UT sessions → '.$utPlayersList.' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
       $out .= '</p>';
