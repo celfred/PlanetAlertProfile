@@ -14,7 +14,7 @@ include("./head.inc");
           echo  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
           break;
         case 'helmet' : 
-          echo "<p class='lead'>You must buy the <a href="'.$pages->get("name=memory-helmet")->url.'">Memory Helmet</a> first before buying this item.</p>";
+          echo '<p class="lead">You must buy the <a href="'.$pages->get("name=memory-helmet")->url.'">Memory Helmet</a> first before buying this item.</p>';
           break;
         case 'already' : 
           echo "<p class='lead'>You already own this item.</p>";
