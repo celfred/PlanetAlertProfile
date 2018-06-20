@@ -689,7 +689,7 @@
         $out .= ' <span>'.$player->initiative->count().' initiatives - </span>';
         $out .= ' <span>'.$player->outClassActivity.' UT/FP session]</span>';
         $out .= ' ⇒ ';
-        $out .= '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 9xtHk AND 47→49UT/FP<br /><span class=\'label label-success\'>VV</span> 10xtHk OR 50→+UT/FP<br /><span class=\'label label-success\'>V</span> 4xtHk AND 18→19UT/FP<br /><span class=\'label label-success\'>V</span> 5xtHK OR 20→49UT/FP" class="label label-'.$class.'">'.$player->motivation.'</span> ';
+        $out .= '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 9xtHk/init. AND 47→49 UT/FP<br /><span class=\'label label-success\'>VV</span> 10xtHk/init. OR 50→+ UT/FP<br /><span class=\'label label-success\'>V</span> 4xtHk/init. AND 18→19 UT/FP<br /><span class=\'label label-success\'>V</span> 5xtHK/init. OR 20→49 UT/FP" class="label label-'.$class.'">'.$player->motivation.'</span> ';
         $out .= '</p>';
         
         // Attitude
