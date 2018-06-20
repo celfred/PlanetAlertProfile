@@ -75,4 +75,4 @@ Initial official release.
 [Unreleased]: https://framagit.org/celfred/planetAlert/compare/v0.1.0...master
 [v0.1.0]: https://framagit.org/celfred/planetAlert/tags/v0.1.0
 [v0.1.1]: https://framagit.org/celfred/planetAlert/tags/v0.1.1
-[v0.1.1]: https://framagit.org/celfred/planetAlert/tags/v0.1.2
+[v0.1.2]: https://framagit.org/celfred/planetAlert/tags/v0.1.2
