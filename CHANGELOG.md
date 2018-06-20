@@ -34,7 +34,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 ## [v0.1.2] - 2018-06-20
-### Added
+### Added
 - Admin's possibility to save actions (in adminTable) even though a player is ticked 'absent'.
 
 ### Fixed
