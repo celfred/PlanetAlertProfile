@@ -119,6 +119,12 @@ $(document).ready(function() {
 		}
 	})
 
+  $(".toggleEnabled").on('click', function(e) {
+		e.preventDefault();
+		$checkbox = $(this).parents('td').find("input");
+		$checkbox.prop('disabled', !$checkbox.prop('disabled'));
+	});
+
   $(".removeAbs").on('click', function(e) {
 		e.preventDefault();
     $this = $(this);
@@ -135,6 +141,9 @@ $(document).ready(function() {
 				$tr.removeClass('negative');
 				$tr.find("input[type=checkbox]").each( function() {
 						$(this).prop('disabled', 0);
+				});
+				$tr.find("a.toggleEnabled").each( function() {
+					$(this).remove();
 				});
 				$this.remove();
 			}); 

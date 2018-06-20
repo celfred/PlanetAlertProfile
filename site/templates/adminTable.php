@@ -77,7 +77,13 @@ $allPlayers = $pages->find("template=player, parent.name=players, team.name=$tea
     <td class="<?php echo $type; ?>" data-toggle="tooltip" title="<?php echo $player->title.' - '.$task->title; ?>">
       <input type="checkbox" <?php echo $disabled; ?> class="ctPlayer ct_<?php echo $taskId; ?>" id="" data-customId="<?php echo $id.'_'.$taskId; ?>" name="player[<?php echo $id.'_'.$taskId; ?>]" onChange="onCheck(<?php echo $taskId; ?>)" />
       <input style="display: none;" <?php echo $disabled; ?> type="text" data-customId="<?php echo $id.'_'.$taskId; ?>" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="Comment" />
-      <?php if ($abs && $task->is("name=absent|abs")) { echo "<a href='#' class='removeAbs' data-type='removeAbs' data-url='".$pages->get('name=submitforms')->url."?form=deleteForm&eventId=".$abs->id."'>[Remove]</a>"; } ?>
+      <?php 
+        if ($abs && $task->is("name=absent|abs")) { 
+          echo "<a href='#' class='removeAbs' data-type='removeAbs' data-url='".$pages->get('name=submitforms')->url."?form=deleteForm&eventId=".$abs->id."'>[Remove]</a>"; 
+        } else {
+          if ($disabled == 'disabled') { echo "<a href='#' class='toggleEnabled'>[Toggle]</a>"; } 
+        }
+      ?>
     </td>
     <?php } ?>
   </tr>
