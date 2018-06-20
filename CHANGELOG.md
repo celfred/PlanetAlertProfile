@@ -33,6 +33,19 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
+## [v0.1.2] - 2018-06-20
+### Added
+- Admin's possibility to save actions (in adminTable) even though a player is ticked 'absent'.
+
+### Fixed
+- Redirection after donation didn't work
+- Filtering on Visualizer's page had an inconsistent behavior. Buttons are more explicit now and should work as expected.
+- Quote syntax error Places page (causing a 500 error)
+- Forgotten isset() to avoid a PHP warning
+
+### Changed
+- Scoring scale for Motivation is more explicit in global reports
+
 ## [v0.1.1] - 2018-06-14
 ### Changed
 - Limit to Fights/Buy/Free actions in Team News thumbnails 
@@ -62,3 +75,4 @@ Initial official release.
 [Unreleased]: https://framagit.org/celfred/planetAlert/compare/v0.1.0...master
 [v0.1.0]: https://framagit.org/celfred/planetAlert/tags/v0.1.0
 [v0.1.1]: https://framagit.org/celfred/planetAlert/tags/v0.1.1
+[v0.1.1]: https://framagit.org/celfred/planetAlert/tags/v0.1.2
