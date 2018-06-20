@@ -31,11 +31,13 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test pla
       $out .= '</h2>';
       $out .= '<p class="text-center">';
         $out .= 'Limit to ';
-        $out .= '<button class="btn btn-primary" id="limitTrainable"><i class="glyphicon glyphicon-headphones"></i> monsters I can TRAIN on</button>';
+        $out .= '<button class="limitButton btn btn-success" id="limitAll">All monsters</button>';
         $out .= ' ';
-        $out .= '<button class="btn btn-primary" id="limitFightable"><i class="glyphicon glyphicon-flash"></i> monsters I can FIGHT</button>';
+        $out .= '<button class="limitButton btn btn-primary" id="limitTrainable"><i class="glyphicon glyphicon-headphones"></i> monsters I can TRAIN on</button>';
         $out .= ' ';
-        $out .= '<button class="btn btn-primary" id="limitNever"><i class="glyphicon glyphicon-remove"></i> monsters I have NEVER trained on</button>';
+        $out .= '<button class="limitButton btn btn-primary" id="limitFightable"><i class="glyphicon glyphicon-flash"></i> monsters I can FIGHT</button>';
+        $out .= ' ';
+        $out .= '<button class="limitButton btn btn-primary" id="limitNever"><i class="glyphicon glyphicon-remove"></i> monsters I have NEVER trained on</button>';
       $out .= '</p>';
     $out .= '</section>';
 

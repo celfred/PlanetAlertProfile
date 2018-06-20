@@ -47,14 +47,22 @@ $(document).ready(function() {
     return false; 
   }); 
 
-	$('#limitFightable').on('click', function() {
-		$(".monsterDiv:not('.fightable')").toggle();
-	});
-	$('#limitTrainable').on('click', function() {
-		$(".monsterDiv:not('.trainable')").toggle();
-	});
-	$('#limitNever').on('click', function() {
-		$(".monsterDiv:not('.neverTrained')").toggle();
+	$('.limitButton').on('click', function() {
+		$('.limitButton').each( function() {
+			$(this).prop('class', 'limitButton btn btn-primary');
+		});
+		$(this).toggleClass('btn-primary btn-success');
+		$(".monsterDiv").show();
+		switch($(this).prop('id')) {
+			case 'limitTrainable' : $(".monsterDiv:not('.trainable')").toggle();
+				break;
+			case 'limitFightable' : $(".monsterDiv:not('.fightable')").toggle();
+				break;
+			case 'limitNever' : $(".monsterDiv:not('.neverTrained')").toggle();
+				break;
+			default : $(".monsterDiv").show();
+				break;
+		}
 	});
 
 	$('.monsterInfo').on('click', function() {
