@@ -468,9 +468,11 @@ $(document).ready(function() {
 			cancelButtonText: "No",
 			confirmButtonText: "Yes",
 		}).then( function() { // Send form
+			$('#donateFormSubmit').prop('disabled', true);
 			// Send form (via Ajax)
 			var $data = $this.serialize()+'&donateFormSubmit=save';
 			var $formUrl = $this.attr('action');
+			// var $redirectUrl = $('#redirectUrl').val();
 			$.post($formUrl, $data, function(data) {
 				data = JSON.parse(data);
 				$redirectUrl = data.url;

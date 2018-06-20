@@ -186,7 +186,7 @@
     // Redirect to player's profile (in main.js, because doesn't work due to Ajax ?)
     /* $session->redirect($pages->get('/players')->url.$player->team->name.'/'.$player->name); */
     $url = $pages->get('/players')->url.$player->team->name.'/'.$player->name;
-    /* echo json_encode(array("sender"=>"marketPlace", "url"=>$url, "newItem"=>$newItem->id)); */
+    echo json_encode(array("sender"=>"donationForm", "url"=>$url));
   }
 
   if ($user->isSuperuser()) { // Admin front-end
