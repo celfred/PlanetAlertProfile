@@ -470,9 +470,9 @@
               echo '<li>';
               if ($m->isTrainable == 0) { // Not allowed because of spaced repetition.
                 if ($m->waitForTrain == 1) {
-                  echo '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available tomorrow !">'.$m->title.'</span> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
+                  echo '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available tomorrow !">'.$m->title.'</span> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.($m->utGain+$m->inClassUtGain).'UT ';
                 } else {
-                  echo '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available in '.$m->waitForTrain.' days">'.$m->title.'</span> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
+                  echo '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available in '.$m->waitForTrain.' days">'.$m->title.'</span> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.($m->utGain+$m->inClassUtGain).'UT ';
                 }
               } else {
                 echo '<a href="'.$trainingUrl.$m->id.'">'.$m->title.'</a> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';

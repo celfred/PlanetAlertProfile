@@ -194,8 +194,8 @@
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
           $out .= '<td>';
-          if ($m->utGain > 0) {
-            $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> +'.$m->utGain.'</span> ';
+          if (($m->utGain+$m->inClassUtGain) > 0) {
+            $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> +'.($m->utGain+$m->inClassUtGain).'</span> ';
           } else {
             $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span> 0</span> ';
           }
@@ -292,7 +292,7 @@
             $out .= '<div class="panel-footer">';
             if (!$user->isSuperuser()) {
               list($utGain, $inClassGain) = utGain($monster, $player);
-              $out .= '<p>Your global UT for this monster: '.$utGain.'</p>';
+              $out .= '<p>Your global UT for this monster: '.($utGain+$inClassGain).'</p>';
             }
             $out .= '</div>';
             $out .= '</div>';

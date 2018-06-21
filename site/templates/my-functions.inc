@@ -1476,8 +1476,7 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
 }
 
 function setMonstersActivity($player, $monster) {
-  // Check if player has the Visualizer (or forced by admin) or monster is detected
-  if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1 || $monster->special == 0) {
+  /* if ($already > 0 || $player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1 || $monster->special == 0) { */
     $today = new \DateTime("today");
     // Init variables
     $monster->spacedTrainingsAllowed = -1;
@@ -1493,8 +1492,8 @@ function setMonstersActivity($player, $monster) {
     $spacedFights = 15; // 15 days between fights
 
     // Check activity
-    list($monster->utGain, $tmp) = utGain($monster, $player);
-    if ($monster->utGain > 0) { // Already trained
+    list($monster->utGain, $monster->inClassUtGain) = utGain($monster, $player);
+    if ($monster->utGain > 0 || $monster->inClassUtGain > 0) { // Already trained
       // Check trainings/fights
       $prevTrainings = $player->find("template=event,task.name=ut-action-v|ut-action-vv, refPage=$monster, sort=-date");
       $allFights = $player->find("template=event, task.name=test-vv|test-v|test-r|test-rr, refPage=$monster, sort=-date");
@@ -1559,10 +1558,10 @@ function setMonstersActivity($player, $monster) {
       $monster->isFightable = 0;
       $monster->allFightsNb = 0;
     }
-  } else { // Undetected monster
-      $monster->isTrainable = 0;
-      $monster->isFightable = 0;
-  }
+  /* } else { // Undetected monster */
+  /*     $monster->isTrainable = 0; */
+  /*     $monster->isFightable = 0; */
+  /* } */
   return $monster;
 }
 
@@ -1574,12 +1573,7 @@ function utReport($player, $monster = false) {
     $lastMonster = '';
     if ($allEvents->count() > 0) {
       foreach($allEvents as $e) { // Create monsters list
-        if ($e->refPage) {
-          if ($e->refPage->name != $lastMonster) {
-            $allConcernedMonsters->add($e->refPage);
-          }
-          $lastMonster = $e->refPage->name;
-        }
+        $allConcernedMonsters->add($e->refPage);
       }
       foreach ($allConcernedMonsters as $m) {
         // Set monster result
