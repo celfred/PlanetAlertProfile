@@ -130,7 +130,7 @@
     $teamRecentFightPlayers = new PageArray();
 
     foreach($allPlayers as $p) {
-      $lastInClass = $p->get("name=history")->children("sort=-date")->find("template=event, date>=$limitDate, task.name~=free|buy|ut-action|test, inClass=0");
+      $lastInClass = $p->get("name=history")->children("sort=-date")->find("template=event, date>=$limitDate, task.name~=free|buy|ut-action|test, refPage!='', inClass=0");
       $news->add($lastInClass);
       if ($news->count() > 0) {
         $news->sort("-date");
@@ -145,7 +145,7 @@
     }
     $out .= '<div id="" class="board panel panel-primary">';
     $out .= '<div class="panel-heading">';
-    $out .= '<h4 class=""><span class="label label-primary">Team News (last 5 days)</span></h4>';
+    $out .= '<h4 class=""><span class="label label-primary">Team News (Equipment, places, people, out of class activity during the last 5 days)</span></h4>';
     $out .= '</div>';
     $out .= '<div class="panel-body">';
     $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
