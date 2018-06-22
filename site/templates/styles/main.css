@@ -994,6 +994,8 @@ img.showInfo {
 	right: 50px;
 }
 
+#discount { display: none; }
+
 /* Large desktop */
 @media (min-width: 1200px) { 
 }

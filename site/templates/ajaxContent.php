@@ -245,6 +245,7 @@
             $possibleItems->add($possibleEquipment);
             $possibleItems->add($possiblePotions);
           }
+          $team = $p->team;
           $donatorId = $p->id;
           if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
           $out .= '<div class="row">';
@@ -279,7 +280,8 @@
         }
         if ($p->is("parent.name=groups")) {
           // Get group members
-          $team = $input->get('teamId');
+          $teamId = $input->get('teamId');
+          $team = $pages->get("id=$teamId");
           $groupPlayers = $pages->find("template=player, team=$team, group=$pageId");
           $out .= '<div class="row">';
             $out .= '<p class="text-center"><span class="label label-primary">'.$p->title.'</span></p>';
@@ -312,11 +314,11 @@
           $out .= '</div>';
         }
         $out .= '<div class="contrast">';
-        $out .= '<ul class="text-left list-unstyled">';
+        $out .= '<ul class="text-left list-unstyled">[I want to...]';
         // Organize team defense
-        $nbConcerned = possibleDefense($p->team);
+        $nbConcerned = possibleDefense($team);
         if ($nbConcerned > 0) {
-          $out .= '<li><span><a href="'.$pages->get("name=quiz")->url.$p->team->name.'">→ Organize team defense ('.$nbConcerned.' players concerned).</a></span></li>';
+          $out .= '<li><span><a href="'.$pages->get("name=quiz")->url.$team->name.'">→ Organize team defense ('.$nbConcerned.' players concerned).</a></span></li>';
         } else {
           /* $out .= '<li><span class="strikeText">→ No team defense.</span></li>'; */
         }
@@ -331,8 +333,8 @@
         /*   $task = $pages->get("name=personal-initiative"); */
         /*   $out .= '<li><span><a href="#" class="ajaxBtn" data-type="initiative" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&playerId='.$p->id.'&taskId='.$task->id.'">→ Talk about [...] for 2 minutes.</a> [Personal initiative]</span></li>'; */
         /* } */
-        // Special discount
-        if ($p->is("parent.name!=groups")) {
+        if ($p->is("parent.name!=groups")) { // Not for groups
+          // Special discount
           if ($possibleItems->count() > 0) {
             if (rand(0,1)) { // Random special discount
               // Pick a random item
@@ -348,11 +350,11 @@
               $discount = $pages->find("parent=/specials")->getRandom();
               $newPrice = round($selectedItem->GC-($selectedItem->GC*($discount->name/100))).'GC';
               if ($newPrice == 0) { $newPrice = 'Free'; }
-              $out .= '<li>';
-                $out .= ' <span><a href="#" class="buyBtn" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$selectedItem->id.'&discount='.$discount->id.'" data-GC="'.$p->GC.'" data-item-price="'.$selectedItem->GC.'">→ Get <span class="label label-danger">'.$discount->title.'%</span> discount on <span class="label label-primary">'.$selectedItem->title.'</span> '.$details.' !</a></span>';
+              $out .= '<li id="discount">';
+                $out .= ' <h3><a href="#" class="buyBtn" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$selectedItem->id.'&discount='.$discount->id.'" data-GC="'.$p->GC.'" data-item-price="'.$selectedItem->GC.'">→ Get <span class="label label-danger">'.$discount->title.'%</span> discount on <span class="label label-primary">'.$selectedItem->title.'</span> '.$details.' !</a></h3>';
               $out .= '<div class="row">';
                 $out .= '<div class="col-sm-6 text-right">';
-                  $out .= '<h4><span class="strikeText">'.$selectedItem->GC.'GC</span> → <span class="label label-success">'.$newPrice.'</span></h4>';
+                  $out .= '<h3><span class="strikeText">'.$selectedItem->GC.'GC</span> → <span class="label label-success">'.$newPrice.'</span></h3>';
                 $out .= '</div>';
                 $out .= '<div class="col-sm-6 text-left">';
                 if ($selectedItem->photo) {
@@ -365,20 +367,28 @@
               $out .= '</div>';
               $out .= '</li>';
             } else {
-              /* $out .= '<li><span class="strikeText">→ No special offer today...</span></li>'; */
+              $out .= '<li id="discount"><h3>Sorry, no discount available...</h3></li>';
             }
-          } else {
-            /* $out .= '<li><span class="strikeText">→ No possible item (not enough GC ?).</span></li>'; */
+            // Play for a discount
+            $out .= '<li><span><a href="#" class="ajaxBtn" data-type="discount">→ Play for a random discount (cheaper place, equipment...)</a></span></li>';
+          }
+          // Go to the Marketplace
+          if ($possibleItems->count() > 0) {
+            $out .= '<li><span><a href="'.$pages->get("name=shop")->url.$team->name.'">→ Go to the Marketplace.</a></span></li>';
           }
         }
         // Make a donation
         if ($p->GC > 5 || $p->is("parent.name=groups")) {
-          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$p->team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
-        } else {
-          /* $out .= '<li><span class="strikeText">→ Not enough GC to make a donation.</span></li>'; */
+          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
         }
-        // Choose another player
-        $out .= '<li><span><a href="#" onclick="swal.close();">→ Choose another player.</a></span></li>';
+        // Go to team's Freeworld
+        $out .= '<li><span><a href="'.$pages->get("name=world")->url.$team->name.'">→ See team\'s Freeworld.</a></span></li>';
+        // Go to team's scoring table
+        $out .= '<li><span><a href="'.$pages->get("name=players")->url.$team->name.'">→ See team\'s scoring table.</a></span></li>';
+        // Pick another player
+        $out .= '<li><span><a href="#" onclick="swal.close(); $(\'#pickTeamPlayer\').click(); return false;">→ Pick a random player in the team.</a></span></li>';
+        // Visit the Hall of Fame
+        $out .= '<li><span><a href="'.$pages->get("name=hall-of-fame")->url.'">→ Visit the Hall of Fame.</a></span></li>';
         $out .= '</ul>';
         $out .= '</div>';
         break;

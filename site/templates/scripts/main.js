@@ -653,7 +653,7 @@ $(document).ready(function() {
 				$.get($url, function(data) { 
 					var $myContent = data;
 					swal({
-						title: '<h4>What do you want to do ? [I want to...]</h4>',
+						title: '<h3>What do you want to do ?</h3>',
 						html: $myContent,
 						width: 800,
 						showConfirmButton: false,
@@ -700,7 +700,7 @@ $(document).ready(function() {
 			};
 		}
 		if ($type == 'teamNews') {
-			$teamNews = $('#newsList').html();
+			var $teamNews = $('#newsList').html();
 			swal({
 				title: "Team news",
 				text: "Choose a news in the list.",
@@ -708,6 +708,25 @@ $(document).ready(function() {
 				showConfirmButton : false,
 			}).catch(swal.noop);
 			window.scrollBy(0,1000);
+		}
+		if ($type == 'discount') {
+			var $discount = $('#discount').html();
+			swal({
+				title: "Looking for a discount ?",
+				text: "Please, wait...",
+				timer: 2000,
+				showConfirmButton : false,
+				onClose : () => {
+					swal({
+						title: "Get a discount ?",
+						html: $discount,
+						showConfirmButton : false,
+						showCancelButton : true,
+						allowOutsideClick : false,
+						cancelButtonText: "Nevermind..."
+					});
+				}
+			}).catch(swal.noop);
 		}
 		return false;
 	});

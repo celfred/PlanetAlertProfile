@@ -104,7 +104,7 @@
       $out .= '<div class="panel-footer text-center">';
       $teamPlayersList = $allPlayers->implode(', ', '{id}');
       if ($user->isSuperuser()) {
-        $out .= ' <a class="btn btn-danger btn-xs pickFromList" data-list="'.$teamPlayersList.'">Pick a player in the whole team !</a>';
+        $out .= ' <a id="pickTeamPlayer" class="btn btn-danger btn-xs pickFromList" data-list="'.$teamPlayersList.'">Pick a player in the whole team !</a>';
       }
       $out .= '</div>';
       $out .= '</div>';
