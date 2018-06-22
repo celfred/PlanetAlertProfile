@@ -661,7 +661,7 @@ $(document).ready(function() {
 						showCancelButton: true,
 						allowOutsideClick: true,
 					});
-				}).catch(swal.noop);
+				});
 			}
 		}).catch(swal.noop);
 	});
@@ -727,6 +727,28 @@ $(document).ready(function() {
 					});
 				}
 			}).catch(swal.noop);
+		}
+		if ($type == 'showInfo') {
+			var $this = $(this);
+			var $itemId = $this.attr("data-id");
+			var $url = $('#showInfo').attr('data-href') + '?id=showInfo&pageId=' + $itemId;
+			swal({
+				title: 'Loading info...',
+				onOpen: function() {
+					swal.showLoading()
+					$.get($url, function(data) { 
+						var $myContent = data;
+						swal({
+							title: '',
+							html: $myContent,
+							showConfirmButton: false,
+							cancelButtonText : 'Close',
+							showCancelButton: true,
+							allowOutsideClick: true,
+							width: 800
+						}).catch(swal.noop);
+					});
+			}}).catch(swal.noop);
 		}
 		return false;
 	});

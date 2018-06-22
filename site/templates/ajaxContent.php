@@ -387,6 +387,15 @@
         $out .= '<li><span><a href="'.$pages->get("name=players")->url.$team->name.'">→ See team\'s scoring table.</a></span></li>';
         // Pick another player
         $out .= '<li><span><a href="#" onclick="swal.close(); $(\'#pickTeamPlayer\').click(); return false;">→ Pick a random player in the team.</a></span></li>';
+        // Read about a random element
+        $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
+        $allPeople = $pages->find("template=people, name!=people, sort=title");
+        if (isset($allPlaces) && isset($allPeople)) {
+          $allElements = clone($allPlaces);
+          $allElements->add($allPeople);
+          $randomId = $allElements->getRandom()->id;
+          $out .= '<li><span><a href="#" class="ajaxBtn" data-type="showInfo" data-id="'.$randomId.'">→ Read about a random element.</a></span></li>';
+        }
         // Visit the Hall of Fame
         $out .= '<li><span><a href="'.$pages->get("name=hall-of-fame")->url.'">→ Visit the Hall of Fame.</a></span></li>';
         $out .= '</ul>';
