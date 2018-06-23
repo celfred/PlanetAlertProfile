@@ -141,7 +141,7 @@ function updateScore($player, $task, $real = true) {
 
     if ($real == true) { // Save player's new scores if necessary
       // Publish on Public Newsboard ?
-      if ($task->is("name=inactivity|penalty|buy|free|ut-action-v|ut-action-vv|bought|remove|buy-pdf")) {
+      if ($task->is("name=inactivity|penalty|buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|bought|remove|buy-pdf")) {
         $newsBoard = 1;
       } else {
         $newsBoard = 0;
@@ -251,16 +251,16 @@ function taskExtraAction($player, $task, $real) {
   if ($task->is("name=group-death|team-death")) { // No death because of others
     if ($player->HP<=0) { $player->HP = 1; }
   }
-  if ($task->is("name=test-rr")) {
+  if ($task->is("name=battle-rr|fight-rr")) {
     $player->fighting_power = $player->fighting_power-2;
   }
-  if ($task->is("name=test-r|wrong-invasion")) {
+  if ($task->is("name=battle-r|fight-r|wrong-invasion")) {
     $player->fighting_power = $player->fighting_power-1;
   }
-  if ($task->is("name=test-v|right-invasion")) {
+  if ($task->is("name=battle-v|fight-v|right-invasion")) {
     $player->fighting_power = $player->fighting_power+1;
   }
-  if ($task->is("name=test-vv")) {
+  if ($task->is("name=battle-vv|fight-vv")) {
     $player->fighting_power = $player->fighting_power+2;
   }
   if ($task->is("name=no-homework")) {
@@ -777,7 +777,7 @@ function saveHistory($player, $task, $newsBoard = 0) {
   if ($task->refPage) { $p->refPage = $task->refPage; }
   // Tick inClass checkbox if classActivity Team option is on
   // For UT and FP actions only
-  if ($player->team->classActivity == 1 && $task->is("name~=test|ut-action")) {
+  if ($player->team->classActivity == 1 && $task->is("name~=fight|ut-action")) {
     $p->inClass = 1;
   } else {
     $p->inClass = 0;
@@ -1082,7 +1082,7 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $allHk = $player->find("template=event, task.category.name=homework, date>=$dateStart, date<=$dateEnd");
   $player->initiative = $player->find("task.name=personal-initiative, date>=$dateStart, date<=$dateEnd");
   $player->ut = $player->find("task.name=ut-action-v|ut-action-vv, date>=$dateStart, date<=$dateEnd");
-  $player->fp = $player->find("task.name=test-v|test-vv, date>=$dateStart, date<=$dateEnd");
+  $player->fp = $player->find("task.name=battle-v|battle-vv|fight-v|fight-vv, date>=$dateStart, date<=$dateEnd");
   $player->inClassUtCount = $player->ut->find("inClass=1")->count();
   $player->outClassUtCount = $player->ut->find("inClass=0")->count();
   $player->inClassFpCount = $player->fp->find("inClass=1")->count();
@@ -1496,7 +1496,7 @@ function setMonstersActivity($player, $monster) {
     if ($monster->utGain > 0 || $monster->inClassUtGain > 0) { // Already trained
       // Check trainings/fights
       $prevTrainings = $player->find("template=event,task.name=ut-action-v|ut-action-vv, refPage=$monster, sort=-date");
-      $allFights = $player->find("template=event, task.name=test-vv|test-v|test-r|test-rr, refPage=$monster, sort=-date");
+      $allFights = $player->find("template=event, task.name~=fight, refPage=$monster, sort=-date");
       $monster->allFightsNb = $allFights->count();
 
       // Set training possibilities
@@ -1594,7 +1594,7 @@ function utReport($player, $monster = false) {
 function fightReport($player, $monster = false) {
   if (!$monster) { // All monsters
     $today = new \DateTime("today");
-    $allFights = $player->find("template=event, task~=test, refPage!=NULL")->sort("refPage.name, date");
+    $allFights = $player->find("template=event, task~=fight, refPage!=NULL")->sort("refPage.name, date");
     $allConcernedMonsters = new PageArray();
     $lastMonster = '';
     if ($allFights->count() > 0) {
@@ -1611,10 +1611,10 @@ function fightReport($player, $monster = false) {
         $fights = $allFights->find("refPage=$m")->sort("-date");
         $m->fightsCount = $fights->count();
         // Calculate average
-        $VV = $fights->find("task.name=test-vv")->count();
-        $V = $fights->find("task.name=test-v")->count();
-        $R = $fights->find("task.name=test-r")->count();
-        $RR = $fights->find("task.name=test-rr")->count();
+        $VV = $fights->find("task.name=fight-vv")->count();
+        $V = $fights->find("task.name=fight-v")->count();
+        $R = $fights->find("task.name=fight-r")->count();
+        $RR = $fights->find("task.name=fight-rr")->count();
         $m->positive = $V + $VV;
         $m->negative = $R + $RR;
         if ($m->fightsCount > 0) {
@@ -1631,7 +1631,24 @@ function fightReport($player, $monster = false) {
     }
     return $allConcernedMonsters;
   } else { // TODO ??? Single monster stats
+  }
+}
 
+function battleReport($player, $monster = false) {
+  if (!$monster) { // All monsters
+    $today = new \DateTime("today");
+    $allBattles = $player->find("template=event, task~=battle")->sort("-date");
+    if ($allBattles->count() > 0) {
+      foreach($allBattles as $f) { // Create monsters list
+        // Set monster result
+        if ($f->task->name == "battle-vv") { $f->result = "<span class='label label-success'>VV</span>"; }
+        if ($f->task->name == "battle-v") { $f->result = "<span class='label label-success'>V</span>"; }
+        if ($f->task->name == "battle-r") { $f->result = "<span class='label label-danger'>R</span>"; }
+        if ($f->task->name == "battle-rr") { $f->result = "<span class='label label-danger'>RR</span>"; }
+      }
+    }
+    return $allBattles;
+  } else { // TODO ??? Single monster stats
   }
 }
 

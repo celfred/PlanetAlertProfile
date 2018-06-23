@@ -500,7 +500,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		$scope.waitForStart = true;
 		$scope.quality = Math.round(100-(($scope.shownWords/$scope.nbAttacks)*100));
 		if ($scope.quality > 90) {
-			var feedback = 'sweeping victory (VV)';
+			var feedback = 'successful (VV)';
 			$scope.result = 'VV';
 		} else {
 			var feedback = 'won (V)';
@@ -527,7 +527,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 			var feedback = 'lost (R)';
 			$scope.result = 'R';
 		} else {
-			var feedback = 'heavy defeat (RR)';
+			var feedback = 'disastrous (RR)';
 			$scope.result = 'RR';
 		}
     $scope.saveData();

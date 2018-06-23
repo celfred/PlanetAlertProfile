@@ -16,7 +16,7 @@
   }
   $specialData['noHk'] = $allEvents->find("task.name=no-homework, sort=-date");
   $specialData['noSigned'] = $allEvents->find("task.name=test-not-signed, sort=-date");
-  $specialData['noMaterial'] = $allEvents->find("task.name=forgotten-weapons, sort=-date");
+  $specialData['noMaterial'] = $allEvents->find("task.name=material, sort=-date");
   $specialData['xtHk'] = $allEvents->find("task.name=extra-homework, sort=-date");
   $out = '';
   
@@ -27,7 +27,7 @@
     switch ($category) {
       case 'homework' :
         $noHk = $events->find("task.name=no-homework, sort=-date");
-        $xtHk = $events->find("task.name=extra-homework, sort=-date");
+        $xtHk = $events->find("task.name=extra-homework|very-extra-homework, sort=-date");
         $out .= '<h3><span class="label label-default pull-left">Travail à la maison</span></h3>';
         if ($noHk->count() == 0) {
           $out .= '<i class="glyphicon glyphicon-thumbs-up"></i> <span class="">Toujours fait! C\'est bien!</span>';
@@ -40,11 +40,10 @@
         } else {
           $out .= '<span class=""> Aucun travail supplémentaire (optionnel) fait, c\'est dommage...</span>';
         }
-        break;
-      case 'oublis' :
-        $noSigned = $events->find("task.name=test-not-signed, sort=-date");
-        $noMaterial = $events->find("task.name=forgotten-weapons, sort=-date");
-        $out .= '<h3><span class="label label-default pull-left">Signatures</span></h3>';
+				// Forgotten
+				$out .= '<br />';
+        $noSigned = $events->find("task.name=signature, sort=-date");
+        $noMaterial = $events->find("task.name=material, sort=-date");
         if ($noSigned->count() > 0 || $noMaterial->count() > 0) {
           if ($noSigned->count() > 0) {
             $out .= '<i class="glyphicon glyphicon-thumbs-down"></i> Oubli(s) de signatures : '.$noSigned->count();
@@ -184,7 +183,7 @@
               $out .= strftime("%d/%m", $event->date). ' : ' . $eventTitle;
               if ($event->summary !== '') {
                 $out .= ' ['.$event->summary.']';
-								if ($event->inClass == 1 && $event->task->is("name~=test|ut-action")) {
+								if ($event->inClass == 1 && $event->task->is("name~=fight|ut-action")) {
 									$out .= ' [en classe]';
 								}
               }

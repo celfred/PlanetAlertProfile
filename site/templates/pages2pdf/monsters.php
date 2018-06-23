@@ -136,7 +136,7 @@ $out .= '<table class="table">';
   }
 $out .= '</table>';
 $out .= '<p class="text-center" style="margin: 0pt;">';
-$out .= '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⇒ Sweeping victory - Won fight - Lost fight - Heavy defeat </span>';
+$out .= '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⇒ Successful Fight - Won fight - Lost fight - Disastrous Fight </span>';
 if (count($allLines) > 24) {
   $out .= '<span style="font-size:8pt;">&nbsp;&nbsp;&nbsp;[Selection of 25 words out of '.count($allLines).']</span>';
 }

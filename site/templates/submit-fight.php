@@ -59,16 +59,16 @@
 
       switch($result) {
         case 'RR' :
-          $task = $pages->get("name=test-rr|fight-rr");
+          $task = $pages->get("name=fight-rr");
           break;
         case 'R' :
-          $task = $pages->get("name=test-r|fight-r");
+          $task = $pages->get("name=fight-r");
           break;
         case 'V' :
-          $task = $pages->get("name=test-v|fight-v");
+          $task = $pages->get("name=fight-v");
           break;
         case 'VV' :
-          $task = $pages->get("name=test-vv|fight-vv");
+          $task = $pages->get("name=fight-vv");
           break;
         default:
           break;

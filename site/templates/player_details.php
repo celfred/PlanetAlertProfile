@@ -150,9 +150,9 @@
           ?>
         </ul>
       </div>
-      <div class="panel-footer text-center">
-        <?php 
-          echo '<p><span class="glyphicon glyphicon-flash"></span> Fighting power : '.$playerPage->fighting_power.'</p>';
+      <div class="panel-footer">
+        <?php
+          echo '<p><a href="'.$pages->get('name=shop_generator')->url.$playerPage->id.'">→ Go to the Marketplace</a>.</p>';
         ?>
       </div>
   </div>
@@ -161,12 +161,15 @@
 <div class="row">
   <div class="panel panel-success">
     <div class="panel-heading">
-      <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (U.T.) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Monster fights</span></h4>
+    <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (UT) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Monster fights / Monster Attacks (FP) : <?php echo $playerPage->fighting_power; ?></span></h4>
     </div>
     <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="utreport&playerId=<?php echo $playerPage->id; ?>">
       <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
     </div>
     <div class="panel-body ajaxContent" data-priority="2" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="fightreport&playerId=<?php echo $playerPage->id; ?>">
+      <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+    </div>
+    <div class="panel-body ajaxContent" data-priority="3" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="battlereport&playerId=<?php echo $playerPage->id; ?>">
       <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
     </div>
     <div class="panel-footer">

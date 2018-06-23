@@ -44,10 +44,10 @@
           $page = setMonstersActivity($player, $page);
           if ($page->allFightsNb > 0) {
             switch ($page->lastFight->task->name) {
-              case 'test-vv' : $result = '<span class="label label-success">VV</span>'; break;
-              case 'test-v' : $result = '<span class="label label-success">V</span>'; break;
-              case 'test-r' : $result = '<span class="label label-danger">R</span>'; break;
-              case 'test-rr' : $result = '<span class="label label-danger">RR</span>'; break;
+              case 'fight-vv' : $result = '<span class="label label-success">VV</span>'; break;
+              case 'fight-v' : $result = '<span class="label label-success">V</span>'; break;
+              case 'fight-r' : $result = '<span class="label label-danger">R</span>'; break;
+              case 'fight-rr' : $result = '<span class="label label-danger">RR</span>'; break;
               default : $result = '';
             }
           }

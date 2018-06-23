@@ -862,7 +862,7 @@ namespace ProcessWire;
                   $out .= ' ['.$e->linkedId.']';
                 }
               }
-              if ($e->inClass == 1 && $e->task->is("name~=test|ut-action")) {
+              if ($e->inClass == 1 && $e->task->is("name~=fight|ut-action")) {
                 $out .= ' [in class]';
               }
               $e->task->comment = $comment;
@@ -1301,7 +1301,7 @@ namespace ProcessWire;
           $allPlayers = $allPlayers->find("team=$selectedTeam");
           $out .= '<ul>';
           foreach($allPlayers as $p) {
-            $allTests = $p->find("template=event, task.name~=test, refPage!='', date>=$startDate, date<=$endDate, sort=refPage, sort=date");
+            $allTests = $p->find("template=event, task.name~=fight, refPage!='', date>=$startDate, date<=$endDate, sort=refPage, sort=date");
             $inClassAllTestsCount = $allTests->find("inClass=1")->count();
             if ($allTests->count() > 0) {
               $out_03 = '<ul>';
@@ -1309,13 +1309,13 @@ namespace ProcessWire;
               $prevName = '';
               foreach($allTests as $t) {
                 switch ($t->task->name) {
-                  case 'test-vv' : $class="success"; $result="VV";
+                  case 'fight-vv' : $class="success"; $result="VV";
                     break;
-                  case 'test-v' : $class="success"; $result="V";
+                  case 'fight-v' : $class="success"; $result="V";
                     break;
-                  case 'test-r' : $class="danger"; $result="R";
+                  case 'fight-r' : $class="danger"; $result="R";
                     break;
-                  case 'test-rr' : $class="danger"; $result="RR";
+                  case 'fight-rr' : $class="danger"; $result="RR";
                     break;
                   default: $class = ""; $result = "";
                 }

@@ -539,6 +539,28 @@
           echo "<p>You haven't fought any monsters yet.</p>";
         }
         break;
+      case 'battlereport' : // Battle report
+        $playerId = $input->get('playerId');
+        $playerPage = $pages->get("id=$playerId");
+        /* $allBattles = $playerPage->get("name=history")->find("template=event, task.name~=battle"); */
+        $allBattles = battleReport($playerPage);
+        if ($allBattles->count() > 0) {
+          echo '<p class="label label-primary">You have faced '.$allBattles->count().' monster attacks.</p>';
+          if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
+            echo '<ul class="utReport list-group list-unstyled">';
+            foreach ($allBattles as $m) {
+              echo '<li>'.$m->result.' : '.$m->summary.'';
+              echo ' ['.date('d/m', $m->date).']';
+              echo '</li>';
+            }
+            echo '</ul>';
+          } else {
+            echo '<p>Details are private.</p>';
+          }
+        } else {
+          echo "<p>You haven't faced any monster attacks yet.</p>";
+        }
+        break;
       case 'history' :
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
