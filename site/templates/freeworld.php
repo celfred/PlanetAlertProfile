@@ -2,7 +2,7 @@
   include("./head.inc"); 
 
   $team = $pages->get("template=team, name=$input->urlSegment1");
-  $allPlayers = $pages->find("template=player, parent.name=players, team=$team")->sort("group.name");
+  $allPlayers = $allPlayers->find("team=$team, sort=group"); // Limit to team players
   $rank = $allPlayers->first()->rank->name;
   if ($rank == '4emes' || $rank == '3emes') {
     $totalElements = $pages->find("template=place|people, name!=places|people, sort=level");

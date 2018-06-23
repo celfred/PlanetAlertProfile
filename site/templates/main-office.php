@@ -27,8 +27,7 @@
     // Help needed
     $out .= '<div id="" class="board panel panel-primary">';
     $out .= '<div class="panel-heading">';
-      $dangerPlayers = $allPlayers->find('coma=1');
-      $dangerPlayers->add($allPlayers->find("HP<=15"))->sort("coma, HP");
+      $dangerPlayers = $allPlayers->find("(HP<=15), (coma=1)")->sort("coma, HP");
       $out .= '<p class="panel-title">Help needed!</p>';
     $out .= '</div>';
     $out .= '<div class="panel-body">';
@@ -128,9 +127,8 @@
     $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
     $teamRecentUtPlayers = new PageArray();
     $teamRecentFightPlayers = new PageArray();
-
     foreach($allPlayers as $p) {
-      $lastInClass = $p->get("name=history")->children("sort=-date")->find("template=event, date>=$limitDate, task.name~=free|buy|ut-action|test, refPage!='', inClass=0");
+      $lastInClass = $p->get("name=history")->children("sort=-date")->find("template=event, date>=$limitDate, task.name~=free|buy|ut-action|fight, refPage!='', inClass=0");
       $news->add($lastInClass);
       if ($news->count() > 0) {
         $news->sort("-date");
@@ -140,7 +138,7 @@
           $teamRecentUtPlayers->add($currentPlayer);
         }
         $utPlayersList = $teamRecentUtPlayers->implode(', ', '{title}');
-        $teamRecentFight = $news->find("task.name~=test");
+        $teamRecentFight = $news->find("task.name~=fight");
       }
     }
     $out .= '<div id="" class="board panel panel-primary">';
@@ -155,7 +153,7 @@
           $currentPlayer = $n->parent('template=player');
           $out .= '<li>';
           $out .= '<div class="thumbnail">';
-          if ($n->task->is("name~=test")) {
+          if ($n->task->is("name~=fight")) {
             $out .= '<span class="label label-primary"><i class="glyphicon glyphicon-flash"></i> '.$n->refPage->title.'</span>';
           }
           if ($n->refPage->photo) {

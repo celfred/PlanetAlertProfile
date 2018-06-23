@@ -10,7 +10,6 @@
   // Display Personal Analyzer if user is logged in
   if ($user->isLoggedin() && $user->isSuperuser()==false) {
     $player = $pages->get("login=$user->name");
-    echo pma($player);
   }
 
   $out = '';
@@ -24,7 +23,7 @@
         }
         
         // Get players' last 10 events
-        $allEvents = $player->find("template=event, parent.name=history, sort=-created, limit=10");
+        $allEvents = $player->find("parent.name=history, sort=-created, limit=10");
         $out .= '<div id="" class="news panel panel-primary">';
           $out .= '<div class="panel-heading">';
             $out .= '<h4 class="panel-title">';
@@ -48,13 +47,7 @@
           $today = new \DateTime("today");
           $interval = new \DateInterval('P5D');
           $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
-          foreach($allPlayers as $p) {
-            $last = $p->find("parent.name=history, date>=$limitDate,task.name=free|buy");
-            if ($last->count() > 0) {
-              $news->add($last);
-              $news->sort('-date');
-            }
-          }
+          $news = $allPlayers->find("date>=$limitDate,task.name~=free|buy|ut-action|fight, refPage!=NULL, inClass=0")->sort("-date");
           $out .= '<div id="" class="board panel panel-primary">';
             $out .= '<div class="panel-heading">';
             $out .= '<h4 class=""><span class="label label-primary">Team News (last 5 days)</span></h4>';
@@ -141,8 +134,9 @@
               // Help needed
               $out .= '<div id="" class="board panel panel-danger">';
                 $out .= '<div class="panel-heading">';
-                  $dangerPlayers = $allPlayers->find('coma=1');
-                  $dangerPlayers->add($allPlayers->find("HP<=10"))->sort("coma, HP");
+                t();
+                  $dangerPlayers = $allPlayers->find('(coma=1), (HP<=15>)')->sort("coma, HP");
+                bd(t());
                   $out .= '<p class="panel-title">Help needed!</p>';
                 $out .= '</div>';
                 $out .= '<div class="panel-body">';

@@ -7,10 +7,9 @@ include("./head.inc");
 $team = $pages->get("template=team, name=$input->urlSegment1");;
 include("./tabList.inc"); 
 
-$team = $input->urlSegment1;
 $allCategories = $pages->get('/categories/')->children("name!=potions|place|shop|protections|weapons|manual-cat|planet-alert|group-items");
 $allTasks = $pages->get('/tasks/')->children()->sort('category.name, HP, XP');
-$allPlayers = $pages->find("template=player, parent.name=players, team.name=$team, sort=title");
+$allPlayers = $allPlayers->find("team=$team"); // Limit to team players
 
 ?>
 
@@ -65,7 +64,7 @@ $allPlayers = $pages->find("template=player, parent.name=players, team.name=$tea
     foreach ($allPlayers as $player) { 
       $id = $player->id; 
       // See if absence already recorded the same day
-      $abs = $player->get("name=history")->children()->get("template=event, task.name=absent, date>=$today");
+      $abs = $player->get("name=history")->children()->get("task.name=absent, date>=$today");
   ?>
   <tr class="<?php if ($abs) { $disabled = 'disabled'; echo 'negative'; } else { $disabled = ''; } ?>">
   <td><?php if (isset($player->group->id)) { echo $player->group->title; } ?></td>

@@ -41,7 +41,7 @@ if ($user->isSuperuser()) {
   $selectedIds = $input->post->selected; // Checked players
   $rank = $pages->get("template=team, name=$selectedTeam")->rank->name;
   if ( $rank == '4emes' || $rank == '3emes' ) {
-    $allPlayers = $pages->find("template=player, parent.name=players, team.name=$selectedTeam");
+    $allPlayers = $allPlayers->find("team=$team"); // Limit to team players
     $allConcerned = new pageArray();
     $notConcerned = new pageArray();
     foreach($allPlayers as $p) { // Find players having at least 3 free elements

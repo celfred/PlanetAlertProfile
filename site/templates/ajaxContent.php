@@ -620,7 +620,7 @@
             } else {
               $out .= $event->task->title;
             }
-            if ($event->inClass == 1 && $event->task->is("name~=test|ut-action")) {
+            if ($event->inClass == 1 && $event->task->is("name~=fight|ut-action")) {
               $out .= ' [in class]';
             }
           $out .= '</td>';

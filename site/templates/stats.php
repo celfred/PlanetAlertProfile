@@ -83,8 +83,10 @@ if ($user->isSuperuser()) {
 
 // Training sessions stats
 $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
-$totalTrainingSessions = $pages->find("template=event, task.name=ut-action-v|ut-action-vv");
+t();
+$totalTrainingSessions = $allPlayers->find("template=event, task.name=ut-action-v|ut-action-vv");
 $todayTrainingSessions = $totalTrainingSessions->find("date>=$today");
+bd(t());
 $totalUt = 0;
 $todayTrainedPlayers = [];
 foreach( $todayTrainingSessions as $t) {
@@ -93,7 +95,7 @@ foreach( $todayTrainingSessions as $t) {
     array_push($todayTrainedPlayers, $pl->id);
   }
 }
-$trainedPlayers = $pages->find('template=player, underground_training>0');
+$trainedPlayers = $allPlayers->find('underground_training>0');
 foreach ($allPlayers as $p) {
   $totalUt += $p->underground_training;
 }
@@ -102,7 +104,9 @@ $stats .= $todayTrainingSessions->count().' with '.count($todayTrainedPlayers).'
 $stats .= '</span></h3>';
 $stats .= '<h3><span class="label label-default">Total Training sessions : ';
 $stats .= $totalTrainingSessions->count.' with '.$trainedPlayers->count.' player(s).';
-$stats .= ' ['.$totalUt.' UT points = '.($totalUt*10).' words, '.round(($totalUt/$totalTrainingSessions->count())*10).' words/session]';
+if ($totalTrainingSessions->count() > 0) {
+  $stats .= ' ['.$totalUt.' UT points = '.($totalUt*10).' words, '.round(($totalUt/$totalTrainingSessions->count())*10).' words/session]';
+}
 $stats .= '</span></h3>';
 
 if ($user->isSuperuser()) {

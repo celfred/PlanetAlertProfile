@@ -15,7 +15,7 @@
     $globalData[$category->name] = $allEvents->find("task.category=$category, sort=-date");
   }
   $specialData['noHk'] = $allEvents->find("task.name=no-homework, sort=-date");
-  $specialData['noSigned'] = $allEvents->find("task.name=test-not-signed, sort=-date");
+  $specialData['noSigned'] = $allEvents->find("task.name=signature, sort=-date");
   $specialData['noMaterial'] = $allEvents->find("task.name=material, sort=-date");
   $specialData['xtHk'] = $allEvents->find("task.name=extra-homework, sort=-date");
   $out = '';
