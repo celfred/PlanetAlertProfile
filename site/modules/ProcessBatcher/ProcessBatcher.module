@@ -37,6 +37,7 @@ class ProcessBatcher extends Process implements Module
             'unlock' => $this->_('Unlock'),
             'trash' => $this->_('Trash'),
             'delete' => $this->_('Delete'),
+            'deleteWithChildren' => $this->_('Delete (include child pages)'),
             'changeTemplate' => $this->_('Change Template'),
             'changeParent' => $this->_('Change Parent'),
         );
@@ -67,7 +68,7 @@ class ProcessBatcher extends Process implements Module
     public function init()
     {
         parent::init();
-        $this->modules->get('JqueryFancybox');
+        $this->modules->get('JqueryUI')->use('modal');
         $this->modules->get('JqueryWireTabs');
         $this->config->scripts->add($this->config->urls->ProcessBatcher . 'jquery.hotkeys.js');
     }
@@ -166,7 +167,7 @@ class ProcessBatcher extends Process implements Module
             $row = array(
                 "<input type='checkbox' name='pages[]' value='{$p->id}' class='toggle'{$checked}>",
                 $p->id,
-                "{$p->title} <a href='{$this->config->urls->admin}page/edit/?id={$p->id}&modal=1' class='batcher_edit batcher_small iframe'>" . $this->_('edit') . "</a>",
+                "{$p->title} <a href='{$this->config->urls->admin}page/edit/?id={$p->id}&modal=1' class='batcher_small pw-modal pw-modal-large' data-buttons='#submit_save, #submit_publish, #submit_save_unpublished' data-autoclose>" . $this->_('edit') . "</a>",
                 $p->name,
                 $p->template,
                 $p->parent->path,
@@ -234,6 +235,7 @@ class ProcessBatcher extends Process implements Module
     {
         $actions = $this->actions;
         if (!$this->user->hasPermission('page-delete')) unset($actions['delete']);
+        if (!$this->user->hasPermission('page-delete')) unset($actions['deleteWithChildren']);
         if (!$this->user->hasPermission('page-move')) unset($actions['changeParent']);
         if (!$this->user->hasPermission('page-template')) unset($actions['changeTemplate']);
         if (!$this->user->hasPermission('page-lock')) {
@@ -314,7 +316,7 @@ class ProcessBatcher extends Process implements Module
         $parent->label = $this->_('Parent');
         $parent->attr('name', 'parent');
         if ($this->input->post->parent) $parent->attr('value', $this->input->post->parent);
-        $addPage = "<p><a class='batcher_add' href='#'>" . $this->_('add Page') . "</a><span class='batcher_small'> (ctrl+n)</span></p>";
+        $addPage = "<p><a class='batcher_add' href='#'>" . $this->_('add Page') . "</a><span class='batcher_small'> (alt+n)</span></p>";
         $table = $this->modules->get('MarkupAdminDataTable');
         $table->setEncodeEntities(false);
         $table->setSortable(false);
@@ -661,6 +663,17 @@ class ProcessBatcher extends Process implements Module
                 }
                 $message = $this->_(sprintf("Deleted %d pages", $count));
                 break;
+            case 'deleteWithChildren' :
+                foreach ($pages as $p) { 
+                    // add the number of child pages to the count                   
+                    $count += $p->numChildren();
+                    $p->of(false);
+                    wire('pages')->delete($p, true); 
+                    // add the page itself to the count
+                    $count++;                        
+                }
+                $message = $this->_(sprintf("Deleted %d pages", $count));
+                break;
             case 'changeTemplate' :
                 $template = $this->input->post->changeTemplate;
                 foreach ($pages as $p) {
@@ -687,5 +700,3 @@ class ProcessBatcher extends Process implements Module
         $this->session->redirect('./');
     }
 }
-
-?>

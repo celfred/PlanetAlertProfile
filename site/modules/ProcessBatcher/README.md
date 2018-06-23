@@ -1,4 +1,4 @@
-#Batcher for ProcessWire
+# Batcher for ProcessWire
 Batch Editing of pages in the ProcessWire Admin Panel
 ## Resources
 * Forum Thread: http://processwire.com/talk/topic/2811-processbatcher/
