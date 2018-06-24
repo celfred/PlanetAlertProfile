@@ -33,6 +33,34 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
+## [v0.1.3] - 2018-06-24
+### Added
+- Monster Attacks report (battles) is now displayed in player's profile : this allows to separate Monster Fights (thanks to the Memory Helmet) and regular in-class test results (named 'battles')
+- Logged player's mini-Profile is displayed on Newsboard (in place of PMA, see below) 
+
+### Changed
+- Scoreboards order on Newsboard
+- Improve loading time
+- Decision menu for picked player offers more options (The idea is to increase interactivity at the beginning of lessons, in class) :
+	- Organize team defense
+	- Play for a random discount (cheaper place, equipment...)
+	- Go to the Marketplace.
+	- Make a donation (help another player).
+	- See team's Freeworld.
+	- See team's scoring table.
+	- Pick a random player in the team.
+	- Read about a random element.
+	- Visit the Hall of Fame.
+
+### Removed
+- Personal Mission Analyzer (PMA) is removed for the moment to improve loading time.
+
+### Fixed
+- Greatest # of Places scoreboard was is now correctly sorted
+- Wrong stats in UT and Fight reports when 'Force Visualizer' is used
+- Hide login form if user is already logged in and loginform page is displayed
+
+
 ## [v0.1.2] - 2018-06-20
 ### Added
 - Admin's possibility to save actions (in adminTable) even though a player is ticked 'absent'.
@@ -76,3 +104,4 @@ Initial official release.
 [v0.1.0]: https://framagit.org/celfred/planetAlert/tags/v0.1.0
 [v0.1.1]: https://framagit.org/celfred/planetAlert/tags/v0.1.1
 [v0.1.2]: https://framagit.org/celfred/planetAlert/tags/v0.1.2
+[v0.1.3]: https://framagit.org/celfred/planetAlert/tags/v0.1.3
