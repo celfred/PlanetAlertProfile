@@ -176,7 +176,7 @@
             $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> Team Greatest # of places</h4>';
             $out .= '  </div>';
             $out .= '  <div class="panel-body">';
-            $out .= displayTeamScoreboard($teamPlayers, $player, "places");
+            $out .= displayTeamScoreboard($teamPlayers, $player, "-places.count");
             $out .= '  </div>';
             $out .= '</div>';
 
@@ -193,17 +193,6 @@
               $out .= '</div>';
             }
 
-            // Best donators
-            $out .= '<div id="" class="panel panel-success">';
-            $out .= '  <div class="panel-heading">';
-            $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-            $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> Team Best donators</h4>';
-            $out .= '  </div>';
-            $out .= '  <div class="panel-body">';
-            $out .= displayTeamScoreboard($teamPlayers, $player, "-donation");
-            $out .= '  </div>';
-            $out .= '</div>';
-
             // Best warrior
             $out .= '<div id="" class="panel panel-success">';
             $out .= '  <div class="panel-heading">';
@@ -212,6 +201,17 @@
             $out .= '  </div>';
             $out .= '  <div class="panel-body">';
             $out .= displayTeamScoreboard($teamPlayers, $player, "-fighting_power");
+            $out .= '  </div>';
+            $out .= '</div>';
+
+            // Best donators
+            $out .= '<div id="" class="panel panel-success">';
+            $out .= '  <div class="panel-heading">';
+            $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+            $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> Team Best donators</h4>';
+            $out .= '  </div>';
+            $out .= '  <div class="panel-body">';
+            $out .= displayTeamScoreboard($teamPlayers, $player, "-donation");
             $out .= '  </div>';
             $out .= '</div>';
 
