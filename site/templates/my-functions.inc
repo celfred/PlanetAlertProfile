@@ -1976,12 +1976,11 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
 function miniProfile($player, $type = '') {
   $config = wire('config');
   $pages = wire('pages');
-  //Limit to 3 items a day
-  $today = new \DateTime("today");
-  $limitDate = strtotime($today->format('Y-m-d'));
-  $todayItemsCount = $player->get("name=history")->find("date>=$limitDate")->count();
   $out = '<div class="lead">';
   $out .= '<ul class="list-unstyled list-inline">';
+  if ($type == 'profile') {
+    $out .= '<span>Your scores : </span>';
+  }
   if ($player->coma == 0) {
     // Display scores
     $out .= '<li><span class="label label-success">Karma : '.$player->yearlyKarma.'</span></li>';

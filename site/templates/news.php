@@ -3,14 +3,15 @@
   include("./head.inc"); 
 
   // Display team scores
-  echo '<div class="row">';
+  echo '<div class="row text-center">';
     showScores($allTeams);
+    if ($user->isLoggedin() && $user->isSuperuser()==false) {
+      $player = $pages->get("login=$user->name");
+      echo '<hr>';
+      echo miniProfile($player, 'profile');
+    }
   echo '</div>';
   
-  // Display Personal Analyzer if user is logged in
-  if ($user->isLoggedin() && $user->isSuperuser()==false) {
-    $player = $pages->get("login=$user->name");
-  }
 
   $out = '';
   $out .= '<div class="row">';
@@ -134,9 +135,7 @@
               // Help needed
               $out .= '<div id="" class="board panel panel-danger">';
                 $out .= '<div class="panel-heading">';
-                t();
                   $dangerPlayers = $allPlayers->find('(coma=1), (HP<=15>)')->sort("coma, HP");
-                bd(t());
                   $out .= '<p class="panel-title">Help needed!</p>';
                 $out .= '</div>';
                 $out .= '<div class="panel-body">';
