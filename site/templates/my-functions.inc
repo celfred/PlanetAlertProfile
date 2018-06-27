@@ -1259,10 +1259,10 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
         }
         switch($field) {
           case 'yearlyKarma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' K</span></li>';
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
             break;
           case 'karma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' rep.</span></li>';
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {
