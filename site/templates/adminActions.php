@@ -628,33 +628,56 @@ namespace ProcessWire;
         break;
       case 'ut' :
         $dirty = false;
-        $allMonsters = $pages->find("template=exercise")->sort("level, title");
+        $allMonsters = $pages->find("template=exercise")->sort("title, level");
         $out .= '<h3>Best players among '.$allPlayers->count().' players.</h3>';
         $out .= '<ul>';
+        // Get all ut-actions
+        $testPlayer = $allPlayers->get("name=test");
+        $allUt = $pages->findMany("task.name~=ut-action, has_parent!=$testPlayer");
+        $concernedMonster = [];
+        // Build monsters stats
+        foreach($allUt as $e) {
+          $utGain = 1;
+          $pId = $e->parent("template=player")->id;
+          $mId = $e->refPage->id;
+          if (!isset($concernedMonster[$mId][$pId])) {
+            $concernedMonster[$mId][$pId] = 0;
+          }
+          preg_match("/\[\+([\d]+)U\.T\.\]/", $e->summary, $matches);
+          if ($matches) {
+            $utGain = $matches[1];
+          }
+          $concernedMonster[$mId][$pId] += $utGain;
+        }
+        // Check best players
         foreach($allMonsters as $m) {
           $bestUt = $m->best;
-          $out .= '<li>'.$m->title.' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.'] : '.$bestUt.']';
-          foreach($allPlayers as $p) {
-            list($utGain, $inClassUtGain) = utGain($m, $p);
-            $p->ut = $utGain;
+          if ($m->best && $m->mostTrained) {
+            $out .= '<li>'.$m->title.' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.'] : '.$bestUt.'UT]';
+          } else {
+            $out .= '<li>'.$m->title.' [Current best : Nobody.]';
           }
-          $allPlayers->sort("-ut");
-          if ($allPlayers->first()->ut != $m->best) {
+          if (isset($concernedMonster[$m->id])) {
+            $newBestUt = max($concernedMonster[$m->id]);
+            $newBestId = array_search(max($concernedMonster[$m->id]),$concernedMonster[$m->id]);
+          } else {
+            $newBestUt = $bestUt;
+          }
+          if ($newBestUt != $bestUt) {
+            $dirty = true;
+            $newBestPlayer = $allPlayers->get("id=$newBestId");
             $out .= ' <span class="label label-danger">Error</span>';
-            $out .= ' - New best : '.$allPlayers->first()->title.' ['.$allPlayers->first()->team->title.'] ⇒'.$allPlayers->first()->ut;
+            $out .= ' - New best : '.$newBestPlayer->title.' ['.$newBestPlayer->team->title.'] ⇒'.$newBestUt.'UT';
             if ($confirm == 1) { // Save new best players
               $m->of(false);
-              $m->mostTrained = $allPlayers->first();
-              $m->best = $allPlayers->first()->ut;
+              $m->mostTrained = $newBestPlayer;
+              $m->best = $newBestUt;
               $m->save();
             }
           } else {
-            $dirty = true;
             $out .= ' <span class="label label-success">OK</span>';
           }
-          $out .= '</li>';
         }
-        $out .= '</ul>';
         if ($dirty) {
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'ut/all/1">Save now!</button>';
         }
@@ -1402,7 +1425,6 @@ namespace ProcessWire;
           $out .= '</li>';
           // Force Visualizer
           $lock = $pages->get("$selectedTeam")->forceVisualizer;
-          /* bd($pages->get("$selectedTeam")->forceVisualizer); */
           if ($lock == 1) {
             $status = 'checked="checked"';
           } else {
@@ -1413,7 +1435,6 @@ namespace ProcessWire;
           $out .= '</li>';
           // Force Book of Knowledge
           $lock = $pages->get("$selectedTeam")->forceKnowledge;
-          /* bd($pages->get("$selectedTeam")->forceKnowledge); */
           if ($lock == 1) {
             $status = 'checked="checked"';
           } else {

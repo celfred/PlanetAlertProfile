@@ -34,8 +34,9 @@
           setCaptains($player->team);
           // Check if new record
           list($utGain, $inClassGain) = utGain($monster, $player);
+          $newUtGain = $utGain+$inClassGain;
           if ($utGain > $monster->best) {
-            setBestPlayer($monster, $player, $utGain);
+            setBestPlayer($monster, $player, $newUtGain);
             echo '1';
           }
           
