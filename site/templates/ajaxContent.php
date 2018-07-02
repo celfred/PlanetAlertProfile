@@ -172,7 +172,7 @@
           $out .= '<ul class="list-unstyled">';
           foreach ($unusedConcerned as $p) {
             foreach ($p->usabledItems as $item) {
-                $historyPage = $p->get("name=history")->find("refPage=$item, linkedId=0")->last();
+                $historyPage = $p->get("name=history")->find("refPage=$item")->last();
                 if ($historyPage) {
                   $out .= '<li class="">';
                   // Find # of days compared to today
@@ -181,8 +181,16 @@
                   if ($interval->days > 21) {
                     $out .= ' <span class="badge">!</span> ';
                   }
-                  $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
-                  $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> used today</label>';
+                  if ($historyPage->refPage->is("name!=memory-potion")) {
+                    $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                    $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> used today</label>';
+                  } else {
+                    $successId = $pages->get("template=memory-text, index=$historyPage->linkedId")->task->id;
+                    $failedId = $pages->get("name=solo-r")->id;
+                    $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->summary.' (bought '.$interval->days.' days ago)</span>';
+                    $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="memory" data-result="good" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$successId.'"><i class="glyphicon glyphicon-thumbs-up"></i></button>';
+                    $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="memory" data-result="bad" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$failedId.'"><i class="glyphicon glyphicon-thumbs-down"></i></button>';
+                  }
                   $out .= '</li>';
                 }
             }

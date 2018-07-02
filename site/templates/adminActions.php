@@ -888,6 +888,14 @@ namespace ProcessWire;
               if ($e->inClass == 1 && $e->task->is("name~=fight|ut-action")) {
                 $out .= ' [in class]';
               }
+              if ($e->refPage != false && $e->refPage->is("name=memory-potion") && $e->linkedId == 0) {
+                $used = $allEvents->get("linkedId=$e->id");
+                if (isset($used->id)) {
+                  $out .= ' [used on '.date('d/m', $used->date).' ?]';
+                } else {
+                  $out .= ' <span class="label label-danger">Not used ?</span>';
+                }
+              }
               $e->task->comment = $comment;
               $e->task->refPage = $e->refPage;
               $e->task->linkedId = $e->linkedId;
@@ -1241,7 +1249,6 @@ namespace ProcessWire;
         break;
       case 'trash' :
         $event = $pages->get($confirm); // urlSegment3 used for eventId
-        $pages->trash($event);
         // Delete team and group damage if needed (death)
         if ($event->task->is("name=death")) {
           $linkedDeath = $pages->find("template=event, linkedId=$event->id");
@@ -1249,6 +1256,13 @@ namespace ProcessWire;
             $pages->trash($p);
           }
         }
+        if ($event->refPage != false && $event->refPage->is("name=memory-potion")) { // Set back memory potion if needed
+          $playerPage = $pages->get("id=$playerId");
+          $playerPage->usabledItems->add($event->refPage);
+          $playerPage->of(false);
+          $playerPage->save();
+        }
+        $pages->trash($event);
         break;
       case 'removeUser' :
         $playerPage = $pages->get("id=$playerId");

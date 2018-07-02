@@ -127,7 +127,9 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       $out .= '<span class="badge badge-default">'.$item->category->title.'</span>';
       $out .= '<br />';
       $out .= '<br />';
-      $out .= '<img class="img-thumbnail" src="'.$item->image->getCrop("big")->url.'" alt="Image" />&nbsp;&nbsp;';
+      if ($item->image) {
+        $out .= '<img class="img-thumbnail" src="'.$item->image->getCrop("big")->url.'" alt="Image" />&nbsp;&nbsp;';
+      }
       $out .= '<h2 class="inline"><strong>'.$item->title.'</strong>';
       $out .= '</h2>';
       $out .= '<h4>';
@@ -156,6 +158,52 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
         $out .= 'French version in preparation, sorry ;)';
       }
       $out .= '</div></div>';
+      if ($item->is("name=memory-potion")) {
+        $out .= '<br />';
+        $allTexts = $pages->find("template=memory-text, include=hidden, sort=index");
+        $out .= '<p class="label label-default">'.$allTexts->count().' available texts</p>';
+        if ($user->isLoggedin()) {
+          $out .= '<ul class="list list-unstyled">';
+          if ($user->isSuperuser()) { // Show all texts for admin
+            foreach ($allTexts as $t) {
+              $out .= '<li><h4>';
+              $out .= '<span class="">'.$t->index.' - </span>';
+              $out .= $t->title;
+              $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.nl2br($t->summary).'"></span>';
+              $out .= ' ('.strlen($t->summary). ' caracters) ';
+              $out .= ' <span class="badge badge-default">'.$t->task->title.'</span>';
+              $out .= ' <a class="btn btn-info" href="'. $page->url.'/memory-potion/'.$t->id.'/?pages2pdf=1">[Get PDF]</a>';
+              $out .= '</h4></li>';
+            }
+          } else { // Show possible texts for logged-in player
+            $playerBoughtTexts = $player->find("template=event, refPage=$item, task.name=buy");
+            if ($playerBoughtTexts->count() > 0) {
+              foreach ($playerBoughtTexts as $bt) {
+                $t = $allTexts->get("index=$bt->linkedId");
+                $result = $player->find("template=event, linkedId=$bt->id")->last();
+                $out .= '<li><h4>';
+                $out .= '<span class="">'.$t->index.' - </span>';
+                $out .= $t->title;
+                $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.nl2br($t->summary).'"></span>';
+                if ($result->id) {
+                  if ($result->task->HP < 0) {
+                    $out .= ' → <i class="glyphicon glyphicon-thumbs-down"></i>';
+                  } else {
+                    $out .= ' → <i class="glyphicon glyphicon-thumbs-up"></i>';
+                  }
+                } else {
+                  $out .= ' → <span>You have about 2 weeks to learn this text. Tell your teacher when you are ready !</span>';
+                }
+                $out .= '</h4>';
+                $out .= '</li>';
+              }
+            } else {
+              $out .= '<p>You haven\'t bought any Memory potions yet.</p>';
+            }
+          }
+          $out .= "</ul>";
+        }
+      }
       $out .= '</div>';
       $out .= '<a class="btn btn-block btn-primary" href="'.$pages->get('name=shop')->url.'">Back to the Shop.</a>';
       echo $out;

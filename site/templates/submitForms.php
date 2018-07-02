@@ -280,6 +280,31 @@
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, for example
       $player = $pages->get($input->get->playerId);
       $task = $pages->get($input->get->taskId);
+      if (isset($input->get->type) && $input->get->type == 'memory') {
+        if (isset($input->get->historyPageId) && $input->get->historyPageId != '') {
+          // Validate Memory Potion
+          $historyPage = $pages->get($input->get->historyPageId);
+          $usedItem = $historyPage->refPage;
+          if ($player->usabledItems->has($usedItem)) {
+            // Remove item from player's usabledItems list
+            $player->of(false);
+            $player->usabledItems->remove($usedItem);
+            $player->save();
+          }
+          // Update player's scores and save
+          $task->comment = $historyPage->summary;
+          if ($task->HP < 0) { // Failed mission
+            $task->comment .= " [failed].";
+          } else {
+            $task->comment .= " [Successful].";
+          }
+          $task->refPage = $historyPage->refPage;
+          $task->linkedId = $historyPage->id;
+          updateScore($player, $task, true);
+          // Set group captains
+          setCaptains($player->team);
+        }
+      }
       if ($task->name == 'personal-initiative') {
         $task->comment = "Well done 'Talk about [...]'";
         $task->refPage = '';

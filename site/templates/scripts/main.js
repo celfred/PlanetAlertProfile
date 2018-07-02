@@ -268,13 +268,51 @@ $(document).ready(function() {
     }); 
   })); 
 
+  $(document).on('click', '.validatePotion', (function() {
+		var $this = $(this);
+		var $result = $this.attr('data-result');
+		var $playerId = $this.attr('data-playerId');
+		var $url = $this.attr('data-url');
+		switch($result) {
+			case 'good': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> Sucessful action ! Good job !'; break;
+			case 'bad': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> Failed action...'; break;
+			default: var $text='';
+		}
+		swal({
+			title: "Are you sure?",
+			type: "question",
+			html: $text,
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes",
+		}).then( function() { // Send form
+			// Send form (via Ajax)
+			var $data = 'result='+$result+'&playerId='+$playerId;
+			$.post($url, $data, function(data) {
+				data = data;
+				swal({
+					title: "Saved !",
+					text: "Thanks for your participation in Planet Alert !",
+					timer: 1000,
+					showConfirmButton: false
+				}).then( function() {}, function(dismiss) {
+					if (dismiss === 'timer') {
+						$this.remove();
+					}
+				});
+			});
+		}, function(dismiss) { // Don't send form
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		});
+    return false; 
+  })); 
+
   $('#shopSelect').change( function() {
     var url = $('#shopSelect').val();
-
     $.get(url, function(data) { 
         $("#possibleItems").html(data); 
     }); 
-
     return false; 
   });
 
@@ -674,6 +712,38 @@ $(document).ready(function() {
 	$(document).on('click', '.ajaxBtn', function() {
 		var $this = $(this);
 		var $type = $this.attr("data-type");
+		if ($type == 'memory') {
+			var $result = $this.attr('data-result');
+			switch($result) {
+				case 'good': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> Sucessful action ! Good job !'; break;
+				case 'bad': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> Failed action...'; break;
+				default: var $text='';
+			}
+			swal({
+				title: "Are you sure ?",
+				type: "question",
+				html: $text,
+				showCancelButton : true,
+				allowOutsideClick : true,
+				cancelButtonText: "No",
+				confirmButtonText: "Yes"
+			}).then( function() {
+				var $url = $this.attr('data-url');
+				$.get($url, function(data) { 
+					$this.parents("li").remove();
+					swal({
+						title: "Saved !",
+						text: "Thanks for your participation in Planet Alert !",
+						timer: 1000,
+						showConfirmButton: false
+					}).catch(swal.noop);
+				});
+			}), function(dismiss) {
+				if (dismiss === 'cancel' || dismiss == 'overlay') {
+					return;
+				}
+			};
+		}
 		if ($type == 'initiative') {
 			swal({
 				title: "Let me tell you about [...]",

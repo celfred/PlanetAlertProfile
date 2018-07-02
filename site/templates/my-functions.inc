@@ -194,7 +194,7 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
   $player->deltaHP = 0;
   // Except for training and micro solo mission (core values are used)
   // TODO : Ignore fights ?
-  if ($task->is("name!=ut-action-v|ut-action-vv|micro-solo-mission")) {
+  if ($task->is("name!=ut-action-v|ut-action-vv|micro-solo-v")) {
     if ($player->equipment) {
       // Limit to the 2 best weapons
       $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
@@ -321,7 +321,15 @@ function taskExtraAction($player, $task, $real) {
               $player->coma = 0;
             }
             if ($task->refPage->is("name!=health-potion")) {
-              $task->linkedId = 0; // Use 0 id to show unused potions
+              if ($task->refPage->is("name=memory-potion")) {
+                // Adapt comment to show index
+                $index = $player->get("name=history")->find("template=event, refPage.name=memory-potion")->count();
+                $index++;
+                $task->linkedId = $index;
+                $task->comment = 'Memory potion (text '.$index.')';
+              } else {
+                $task->linkedId = 0;
+              }
             }
             break;
           default:
