@@ -358,13 +358,13 @@ function savePendingLesson($player, $task) {
   setEventDate($task);
   $book = $pages->get("name=book-knowledge");
   $book->of(false);
-  $pending = $book->pendingLessons->getNew();
+  $pending = $book->pending->getNew();
   $pending->player = $player;
   $pending->task = $task;
   $pending->refPage = $task->refPage;
   $pending->date = $task->eDate;
   $pending->save();
-  $book->pendingLessons->add($pending);
+  $book->pending->add($pending);
   $book->save();
 }
 

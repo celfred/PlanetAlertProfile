@@ -31,7 +31,7 @@
         $task->refPage = $refPage;
         $task->linkedId = false;
         // Only 1 pending lesson allowed for a player
-        $already = $pages->get("name=book-knowledge, pendingLessons.player=$player");
+        $already = $pages->get("name=book-knowledge, pending.player=$player");
         if (!$already || !$already->isTrash()) {
           savePendingLesson($player, $task);
         }

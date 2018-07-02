@@ -54,7 +54,11 @@
         if ($bought->count() == 1) {
           $out .= '<td><a href="'.$l->url.'?pages2pdf=1" class="btn btn-primary btn-sm">Download PDF</a></td>';
         } else {
-          $out .= '<td>-</td>';
+          if ($user->isSuperuser()) {
+            $out .= '<td><a href="'.$l->url.'?pages2pdf=1" class="btn btn-primary btn-sm">Download PDF</a></td>';
+          } else {
+            $out .= '<td>-</td>';
+          }
         }
       } else {
         $out .= '<td>-</td>';

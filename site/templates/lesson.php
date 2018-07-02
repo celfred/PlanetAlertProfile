@@ -14,6 +14,7 @@
     }
     if ($access) {
       $out .= '<div class="text-center">';
+        $out .= '<a class="btn btn-primary" href="'.$pages->get("name=book-knowledge")->url.'">Go back to the Book of Knowledge</a>';
         $task = $page->task;
         // Calculate possible credit according to player's equipment
         setDelta($player, $task);
@@ -59,7 +60,7 @@
           }
         $out .= '</p>';
       // 1 pending lesson at a time allowed for a player
-      $already = $pages->get("name=book-knowledge, pendingLessons.player=$player");
+      $already = $pages->get("name=book-knowledge, pending.player=$player");
       if (!$already || !$already->isTrash()) {
         $out .= '<p class="text-right"><button class="btn btn-primary" id="copied" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask" data-taskId="'.$task->id.'" data-lessonId="'.$page->id.'" data-playerId="'.$player->id.'">✓ Copied in my copybook ! (Alert the teacher)</button></p>';
       } else {
