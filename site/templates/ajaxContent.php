@@ -200,11 +200,11 @@
           $out .= '<hr /><p class="">No Potion to be used.</p>';
         }
         $pending = $pages->get("name=book-knowledge");
-        if (count($pending->pendingLessons) > 0) {
+        if (count($pending->pending) > 0) {
           $date1 = new \DateTime("today");
           $out .= '<p class="label label-primary">Copy work</p>';
           $out .= '<ul class="list-unstyled">';
-          foreach ($pending->pendingLessons as $p) {
+          foreach ($pending->pending as $p) {
             $out .= '<li class="">';
             // Find # of days compared to today
             $date2 = new \DateTime(date("Y-m-d", $p->date));
