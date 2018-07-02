@@ -64,8 +64,8 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
           }
         ?>
         <tr>
-          <td data-order="<?php echo $item->title; ?>" data-toggle="tooltip" title="<?php echo $item->summary; ?>">
-            <a data-toggle="tooltip" data-html="true" title="<?php echo $item->summary; ?>" href="<?php echo $page->url.'details/'.$item->name; ?>"><?php echo $item->title; ?></a>
+          <td data-order="<?php echo $item->title; ?>" data-toggle="tooltip" title="<?php echo nl2br($item->summary); ?>">
+            <a data-toggle="tooltip" data-html="true" title="<?php echo nl2br($item->summary); ?>" href="<?php echo $page->url.'details/'.$item->name; ?>"><?php echo $item->title; ?></a>
           </td>
           <td>
             <?php echo $mini; ?>
@@ -147,13 +147,13 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
         $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '.$sign.$item->XP.'XP</span>';
       }
       $out .= '</h4>';
-      $out .= '<h2 class="">'.$item->summary;
+      $out .= '<h2 class="">'.nl2br($item->summary);
       $out .= '</h2>';
       $out .= '<br />';
       $out .= '<a role="button" class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
       $out .= '<div class="collapse" id="collapseDiv"><div class="well">';
       if ($item->frenchSummary != '') {
-        $out .= $item->frenchSummary;
+        $out .= nl2br($item->frenchSummary);
       } else {
         $out .= 'French version in preparation, sorry ;)';
       }

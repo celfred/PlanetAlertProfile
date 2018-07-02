@@ -1,6 +1,6 @@
 <?php 
 
-$logo = '<img style="float: left;" src="http://download.tuxfamily.org/planetalert/logo.png" width="100" height="100" /> ';
+$logo = 'http://download.tuxfamily.org/planetalert/logo.png';
 
 $weapons = $pages->find("template='equipment', category='weapons', sort='level'");
 $protections = $pages->find("template='equipment',category='protections', sort='level'");
@@ -39,20 +39,6 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
     }
   }
   if ($input->urlSegment2 === 'items') {
-      /*
-      $out .= '<tr>';
-      $out .= '<td><img style="" src="'.$logo->url.'" /></td>';
-      $out .= '<td colspan="2"><h1>'.$item->title.'</h1></td>';
-      $out .= '<td style="border: 0">&nbsp;</td>';
-      $out .= '</tr>';
-      $out .= '<tr>';
-      $out .= '<td>&nbsp;</td>';
-      $out .= '<td colspan="2" rowspan="2" style=""><h2>'.$item->summary.'</h2></td>';
-      $out .= '<td style="border: 0"><img style="" src="'.$thumbImage.'" /></td>';
-      $out .= '</tr>';
-       */
-/* $logo = '<img style="float: left;" src="http://download.tuxfamily.org/planetalert/logo.png" width="100" height="100" /> '; */
-      /* $image = $pages->get("/shop/potions")->photo->eq(0)->url; */
       $image1 = "http://download.tuxfamily.org/planetalert/potions-01.png";
       $image2 = "http://download.tuxfamily.org/planetalert/potions-02.png";
       $image3 = "http://download.tuxfamily.org/planetalert/potions-03.png";
@@ -68,27 +54,43 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $textId = $input->urlSegment2;
       $text = $pages->get("id=$textId");
     }
-    for ($i=0; $i<3; $i++) {
+    preg_match_all("/(\n)/", $text->summary, $matches);
+    $total_lines = count($matches[0]) + 1;
+    if ($total_lines > 20) {
+      $nbText = 1;
+    } else if ($total_lines > 10 && $total_lines <=20){
+      $nbText = 2;
+    } else {
+      $nbText = 3;
+    }
+    for ($i=0; $i<$nbText; $i++) {
       $out .= '<table class="">';
       $out .= '<tr>';
-      $out .= '<th width="60%">';
+      $out .= '<th width="50%">';
       $out .= '<h2>Memory Potion : Text n°'.$text->index.'</h2>';
+      $out .= '<br />';
       $out .= '<p>Player : _______________________________ (___________) </p>';
       $out .= '</th>';
       $out .= '<th>';
-      $out .= '<img style="float: right;" src="'.$logo->url.'" />';
+      $out .= '<img style="" src="'.$logo.'" width="75" height="75" />';
       $out .= '</th>';
       $out .= '</tr>';
       $out .= '<tr>';
-      $out .= '<td>';
-      $out .= '<img style="float: left;" src="'.$iconfig->urls->templates.'img/flag_en.png" alt="English" />';
+      if (strlen($text->frenchSummary) > 0) {
+        $out .= '<td>';
+      } else {
+        $out .= '<td colspan="2">';
+      }
+      $out .= '<img style="" src="'.$config->urls->templates.'img/flag_en.png" alt="English" />';
       $out .= '<h2>'.$text->title.'</h2>';
-      $out .= nl2br($text->summary);
+      $out .= '<p style="font-size: 16px;">'.nl2br($text->summary).'</p>';
       $out .= '</td>';
-      $out .= '<td>';
-      $out .= '<p><img style="float: right;" src="'.$iconfig->urls->templates.'img/flag_fr.png" alt="French" /></p>';
-      $out .= nl2br($text->frenchSummary);
-      $out .= '</td>';
+      if (strlen($text->frenchSummary) > 0) {
+        $out .= '<td>';
+        $out .= '<p><img style="" src="'.$config->urls->templates.'img/flag_fr.png" alt="French" /></p>';
+        $out .= '<p style="font-size:16px;">'.nl2br($text->frenchSummary).'</p>';
+        $out .= '</td>';
+      }
       $out .= '</tr>';
       $out .= '<tr>';
       $out .= '<td colspan="2"><p>Given date : ______________________________  Due date : ______________________________ </p></td>';
@@ -97,8 +99,8 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $out .= '<br /><br />';
     }
   } else {
-    $out .= '<img style="float: left;" src="'.$logo->url.'" />';
-    $out .= '<img style="float: right;" src="'.$logo->url.'" />';
+    $out .= '<img style="float: left;" src="'.$logo.'" width="100" height="100" />';
+    $out .= '<img style="float: right;" src="'.$logo.'" width="100" height="100" />';
     $out .= '<h1 style="text-align: center; text-decoration : underline;">The Shop</h1>';
 
     $out .= '<table class="">';
