@@ -396,22 +396,31 @@
 
       // User is logged in and in a team, load work statistics
       if ($user->isLoggedin() && $user->isSuperuser() == false) {
-        if ($player->team->name != 'no-team') { ?>
-          <div id="" class="news panel panel-primary">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
-                Work statistics on current period (<?php echo $currentPeriod->title; ?>) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n'est pas terminée, tu peux encore améliorer tes résultats !"></span>
-              </h4>
+        if ($currentPeriod != false) {
+          if ($player->team->name != 'no-team') { ?>
+            <div id="" class="news panel panel-primary">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <?php if ($player->avatar) { echo '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; } ?>
+                  Work statistics on current period (<?php echo $currentPeriod->title; ?>) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n'est pas terminée, tu peux encore améliorer tes résultats !"></span>
+                </h4>
+              </div>
+              <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-priority="1" data-id="work-statistics&playerId=<?php echo $player->id; ?>&periodId=<?php echo $currentPeriod->id; ?>">
+                <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+              </div>
+              <div class="panel-footer text-right">
+              <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$currentPeriod->title; ?>  : from <?php echo date("M. j, Y", $currentPeriod->dateStart) ?> to <?php echo date("M. j, Y", $currentPeriod->dateEnd) ?></p>
+              </div>
             </div>
-            <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-priority="1" data-id="work-statistics&playerId=<?php echo $player->id; ?>&periodId=<?php echo $currentPeriod->id; ?>">
-              <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+        <?php 
+          }
+        } else { ?>
+            <div id="" class="news panel panel-primary">
+              <div class="panel-heading">
+                <h4 class="panel-title">No work statistics !</h4>
+              </div>
             </div>
-            <div class="panel-footer text-right">
-            <p class=""><?php echo '<a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$currentPeriod->title; ?>  : from <?php echo date("M. j, Y", $currentPeriod->dateStart) ?> to <?php echo date("M. j, Y", $currentPeriod->dateEnd) ?></p>
-            </div>
-          </div>
-      <?php 
+        <?php
         }
       }
 

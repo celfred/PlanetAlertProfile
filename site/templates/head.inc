@@ -53,14 +53,17 @@
 				$bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
 			} else { // Admin is logged in
 				// Check official period dates vs today's date
-				$now = time();
-        $officialPeriod = $pages->get("name=admin-actions")->periods;
-				if ($now < $officialPeriod->dateStart || $now > $officialPeriod->dateEnd) {
-					echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
+				if ($currentPeriod != false) {
+					$now = time();
+					if ($now < $currentPeriod->dateStart || $now > $currentPeriod->dateEnd) {
+						echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
+					} else {
+						$dateStart = date("M. d", $currentPeriod->dateStart);
+						$dateEnd = date("M. d", $currentPeriod->dateEnd);
+						echo '<div class="notification alert alert-danger"><span class="">'.$currentPeriod->title.' ('.$dateStart.' → '.$dateEnd.')</span></div>';
+					}
 				} else {
-					$dateStart = date("M. d", $officialPeriod->dateStart);
-					$dateEnd = date("M. d", $officialPeriod->dateEnd);
-					echo '<div class="notification alert alert-danger"><span class="">'.$officialPeriod->title.' ('.$dateStart.' → '.$dateEnd.')</span></div>';
+						echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> No official period set !</div>';
 				}
 			}
 		}

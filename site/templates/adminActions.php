@@ -128,13 +128,21 @@ namespace ProcessWire;
         $out .= '</h3>';
         $out .= '<div>';
         $allPeriods = $pages->get("name=periods")->children();
-        $officialPeriod = $page->periods;
+        if ($page->periods != false) {
+          $officialPeriod = $page->periods;
+        } else {
+          $officialPeriod = false;
+        }
         $out .=   '<span>Official period : </span>';
         $out .=   '<select id="periodId">';
-        $out .=     '<option value="-1">Select a period</option>';
+        $out .=     '<option value="-1">No official period (holidays ?)</option>';
         foreach($allPeriods as $p) {
-          if ($p->id == $officialPeriod->id) {
-            $status = 'selected="selected"';
+          if ($officialPeriod != false) {
+            if ($p->id == $officialPeriod->id) {
+              $status = 'selected="selected"';
+            } else {
+              $status = '';
+            }
           } else {
             $status = '';
           }
@@ -977,24 +985,43 @@ namespace ProcessWire;
         $player->save();
         break;
       case 'save-options':
-        $allPlayers = $pages->find("parent.name=players, template=player");
+        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team");
         $id = $input->urlSegment2;
-        $officialPeriod = $pages->get("id=$id");
-        $page->of(false);
-        $page->periods = $officialPeriod;
-        $page->save();
-        $session->officialPeriod = $officialPeriod;
-        $now = time();
-        if ($now < $session->officialPeriod->dateStart || $now > $session->officialPeriod->dateEnd) {
-          echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
+        if ($id != '-1') {
+          $officialPeriod = $pages->get("id=$id");
+          $page->periods = $officialPeriod;
+        } else {
+          $page->periods = false;
         }
-        // TODO : Might be too long to recalculate hkcount over a long period with many events...
-        foreach($allPlayers as $p) {
-          $newCount = setHomework($p, $officialPeriod->dateStart, $officialPeriod->dateEnd);
-          if ($newCount != $p->hkcount) {
-            $p->hkcount = $newCount;
-            $p->of(false);
-            $p->save();
+        $page->of(false);
+        $page->save();
+        // Feedback
+        echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> ';
+        echo $allPlayers->count();
+        echo '</div>';
+        // Set hkCount for newly selected period
+        // Might be too long to recalculate hkcount over a long period with many events...
+        if ($id != -1) { 
+          $now = time();
+          if ($now < $officialPeriod->dateStart || $now > $officialPeriod->dateEnd) {
+            echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
+          }
+          foreach($allPlayers as $p) {
+            $newCount = setHomework($p, $officialPeriod->dateStart, $officialPeriod->dateEnd);
+            if ($newCount != $p->hkcount) {
+              $p->hkcount = $newCount;
+              $p->of(false);
+              $p->save();
+            }
+          }
+        } else {
+          foreach($allPlayers as $p) {
+            $newCount = 0;
+            if ($newCount != $p->hkcount) {
+              $p->hkcount = $newCount;
+              $p->of(false);
+              $p->save();
+            }
           }
         }
         break;
