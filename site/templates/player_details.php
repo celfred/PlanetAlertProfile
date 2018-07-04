@@ -159,6 +159,23 @@
             }
           ?>
         </ul>
+        <hr />
+        <p class="label label-danger">Items you need to use in class ↓</p>
+        <ul class="list-inline">
+        <?php
+          if ($playerPage->usabledItems->count() > 0) {
+            foreach($playerPage->usabledItems as $i) {
+              if ($i->image) {
+                echo '<li data-toggle="tooltip" title="'.$i->title.'"><img src="'.$i->image->getCrop("small")->url.'" alt="'.$i->title.'" /></li>';
+              } else {
+                echo '<li>'.$i->title.'</li>';
+              }
+            }
+          } else {
+            echo '<li>No items</li>';
+          }
+        ?>
+        </ul>
       </div>
       <div class="panel-footer">
         <?php
