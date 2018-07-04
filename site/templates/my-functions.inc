@@ -665,26 +665,28 @@ function displayPlayerScores($player, $type='new') {
 }
 
 function setCaptains($team, $real = true) {
-  $pages = wire('pages');
-  $players = $pages->find("template=player, team=$team");
-  // Remove old captains
-  $role = $pages->get("name=captain");
-  $groups = new PageArray();
-  foreach($players as $p) {
-    $p->of(false);
-    $p->skills->remove($role);
-    $groups->add($p->group);
-    if ($real == true) {
-      $p->save();
-    }
-  }
-  foreach($groups as $group) {
-    // Find group captain
-    $captain = $players->sort("-yearlyKarma")->findOne("group=$group");
-    if (isset($captain->id)) {
-      $captain->skills->add($role);
+  if ($team->is("name!=no-team")) { // Skip no-team players
+    $pages = wire('pages');
+    $players = $pages->find("template=player, team=$team");
+    // Remove old captains
+    $role = $pages->get("name=captain");
+    $groups = new PageArray();
+    foreach($players as $p) {
+      $p->of(false);
+      $p->skills->remove($role);
+      $groups->add($p->group);
       if ($real == true) {
-        $captain->save();
+        $p->save();
+      }
+    }
+    foreach($groups as $group) {
+      // Find group captain
+      $captain = $players->sort("-yearlyKarma")->findOne("group=$group");
+      if (isset($captain->id)) {
+        $captain->skills->add($role);
+        if ($real == true) {
+          $captain->save();
+        }
       }
     }
   }

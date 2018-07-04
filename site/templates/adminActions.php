@@ -1256,7 +1256,24 @@ namespace ProcessWire;
             $pages->trash($p);
           }
         }
-        if ($event->refPage != false && $event->refPage->is("name=memory-potion")) { // Set back memory potion if needed
+        if ($event->task->is("name=buy|free") && $event->refPage != false) { // Remove from player's equipment/places/people/usabledItems
+          $playerPage = $pages->get("id=$playerId");
+          if ($event->refPage->is("template=equipment")) {
+            $playerPage->equipment->remove($event->refPage);
+          }
+          if ($event->refPage->is("template=place")) {
+            $playerPage->places->remove($event->refPage);
+          }
+          if ($event->refPage->is("template=people")) {
+            $playerPage->people->remove($event->refPage);
+          }
+          if ($event->refPage->is("name~=potion") && $event->refPage->is("name!=health-potion")) {
+            $playerPage->usabledItems->remove($event->refPage);
+          }
+          $playerPage->of(false);
+          $playerPage->save();
+        }
+        if ($event->task->is("name!=buy") && $event->refPage != false && $event->refPage->is("name~=potion") && $event->refPage->is("name!=health-potion")) { // Set back usabled item (potion) if needed
           $playerPage = $pages->get("id=$playerId");
           $playerPage->usabledItems->add($event->refPage);
           $playerPage->of(false);
