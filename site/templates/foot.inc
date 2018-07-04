@@ -15,7 +15,7 @@
       <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS (v.<?php echo $config->version; ?>)- &copy; <?php echo date("Y"); ?> F.L. 
         <a href="about/">[About]</a>
         &nbsp;
-        <a href="https://github.com/celfred/PlanetAlertProfile">[Github repository]</a>
+        <a href="https://framagit.org/celfred/planetAlert">[Framagit repository]</a>
       </p>
 	</footer>
 
