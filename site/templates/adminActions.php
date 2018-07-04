@@ -1225,27 +1225,34 @@ namespace ProcessWire;
       case 'archive':
         $allPlayers = $pages->find("template=player, parent.name=players, team=$selectedTeam");
         $noteam = $pages->get("template=team, name=no-team");
+        $captain = $pages->get("name=captain");
         // Archive player's history
         foreach($allPlayers as $p) {
           $currentHistory = $p->children()->get("name=history");
           $counter = $p->children()->count();
           if ($counter > 0 && $currentHistory) {
             $currentHistory->of(false);
+            
             // Save scores
             $currentHistory->name = 'history-'.$counter;
             $currentHistory->title = 'history-'.$counter;
             $currentHistory->team = $p->team;
             $currentHistory->rank = $p->rank;
             $currentHistory->karma = $p->karma;
+            $currentHistory->yearlyKarma = $p->yearlyKarma;
             $currentHistory->level = $p->level;
             $currentHistory->HP = $p->HP;
             $currentHistory->XP = $p->XP;
             $currentHistory->GC = $p->GC;
+            $currentHistory->streak = $p->streak;
             $currentHistory->underground_training = $p->underground_training;
             $currentHistory->fighting_power = $p->fighting_power;
             $currentHistory->donation = $p->donation;
             $currentHistory->equipment = $p->equipment;
+            $currentHistory->usabledItems = $p->usabledItems;
             $currentHistory->places = $p->places;
+            $currentHistory->people = $p->people;
+            $currentHistory->skills = $p->skills;
             $currentHistory->coma = $p->coma;
             $currentHistory->save();
           }
@@ -1253,8 +1260,10 @@ namespace ProcessWire;
           $p->of(false);
           $p->HP = 50;
           $p->coma = 0;
+          $p->hkcount = 0;
           $p->team = $noteam;
           $p->group = '';
+          $p->skills->remove($captain);
           switch ($p->rank) {
             case '6emes' : $p->rank = '5emes'; break;
             case '5emes' : $p->rank = '4emes'; break;
