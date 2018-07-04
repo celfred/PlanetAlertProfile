@@ -11,6 +11,7 @@
   } else {
     $playerPeopleNb = 0;
   }
+  $playerNbEl = $playerPlacesNb+$playerPeopleNb;
   $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
   $rightInvasions = $allEvents->find("task.name=right-invasion")->count();
   $wrongInvasions = $allEvents->find("task.name=wrong-invasion")->count();
@@ -36,7 +37,13 @@
 <?php
   if ($user->isSuperuser()) {
     echo '<div class="row">';
-    echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?pages2pdf=1">Get PDF</a>';
+    // Check nb of pages according to nb of freed items
+    echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index=-1&pages2pdf=1">Empty PDF</a>';
+    echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index=0&pages2pdf=1">PDF 1</a>';
+    $nbPage = ceil($playerNbEl/10);
+    for ($i=0; $i<$nbPage; $i++) {
+      echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index='.($i+1).'&pages2pdf=1">PDF '.($i+2).'</a>';
+    }
     echo '</div>';
   }
 ?>
@@ -126,8 +133,11 @@
             if ($playerPage->equipment->count > 0) {
               foreach ($playerPage->equipment as $equipment) {
                 if ($equipment->image) {
-                  /* $thumb = $equipment->image->url; */
-                  $thumb = $equipment->image->getCrop('thumbnail')->url;
+                  if ($equipment->image->width() > $equipment->image->height()) {
+                    $thumb = $equipment->image->getCrop('small')->url;
+                  } else {
+                    $thumb = $equipment->image->getCrop('thumbnail')->url;
+                  }
                   echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
                   if ($equipment->name == "memory-helmet") { // Direct link to training zone
                     echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
