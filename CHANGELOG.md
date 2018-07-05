@@ -33,6 +33,37 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
+## [v0.1.4] - 2018-07-05
+### Added
+- Memory potion : Players can buy a short text to memorize
+- Possibility to set no official period
+- Usabled items now appear in player's profile
+- Book of Knowledge : PDF download link for admin
+- Book of Knowledge : Add 'Back to Book' button in lessons
+- Possibility to generate an empty PDF from player's profile (to put in copybook)
+
+### Fixed
+- Set highscores (Fights were taken into account along with UT, in-class training were ignored)
+- utGain() included fight results
+- Most active player scoreboard
+- Forgotten nl2br() in summaries
+- 'Archive' team option now takes care of people, streak, usabledItems, skills, yearlyKarma
+- Newsboard players having an empty rank
+- Visualizer not taken into account in Fighting Zone
+
+### Changed
+- pendingLessons field becomes pending
+- PDF design (for copybook)
+- PDF : Load each page separately to avoid server time-out
+- Delete option in adminActions now restore a usabled item or directly remove a deleted item
+- no-team players are ignored in setCaptains() (This was useless)
+- Framagit link instead of Github on Home page 
+
+### Removed
+- Work statistics from Newsboard for no-team players
+- Work statistics from Newsboard when no official period is set
+
+
 ## [v0.1.3] - 2018-06-24
 ### Added
 - Monster Attacks report (battles) is now displayed in player's profile : this allows to separate Monster Fights (thanks to the Memory Helmet) and regular in-class test results (named 'battles')
@@ -105,3 +136,4 @@ Initial official release.
 [v0.1.1]: https://framagit.org/celfred/planetAlert/tags/v0.1.1
 [v0.1.2]: https://framagit.org/celfred/planetAlert/tags/v0.1.2
 [v0.1.3]: https://framagit.org/celfred/planetAlert/tags/v0.1.3
+[v0.1.4]: https://framagit.org/celfred/planetAlert/tags/v0.1.4
