@@ -1667,7 +1667,7 @@ function utGain($monsterId, $player, $startDate='', $endDate='') {
   $inClassUtGain = 0;
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
-  $prevUt = $player->find("template=event,refPage=$monsterId, date>$startDate, date<$endDate, sort=-date");
+  $prevUt = $player->find("template=event,refPage=$monsterId, task.name~=ut-action, date>$startDate, date<$endDate, sort=-date");
   if ($prevUt->count() > 0) {
     foreach($prevUt as $p) {
       preg_match("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches);
