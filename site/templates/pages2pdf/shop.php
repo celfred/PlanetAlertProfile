@@ -21,9 +21,9 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
   $index = 0;
   foreach($items as $item) {
     if ($input->urlSegment2 != 'items') {
-      $thumbImage = $item->image;
+      $thumbImage = $item->image->getCrop('small');
       $out .= '<table>';
-      for ($i=0; $i<8; $i++) {
+      for ($i=0; $i<13; $i++) {
         $out .= '<tr>';
         for ($j=0; $j<5; $j++) {
           $out .= '<td style="border: 5px solid #000;"><img style="float: left;" src="'.$thumbImage->url.'" /></td>';

@@ -192,22 +192,25 @@ if ($pageNumber == 0) { // Player's equipment
 } else { // New empty PDF
   // First page
   $out .= '<table>';
-  $out .= '<tr><td style="height:3cm; width:8cm;">';
+  $out .= '<tr><td style="height:4cm; width:8cm;">';
   $out .= 'My Avatar';
   $out .= '</td>';
-  $out .= '<td rowspan="2" style="width:8cm; background-color: #C366FF; border-right: 0px;">';
+  $out .= '<td style="width:8cm; background-color: #C366FF; border-right: 0px;">';
   $out .= '<h1>';
   $out .= 'Player\'s profile page for ____________________';
   $out .= '</h1>';
   $out .= '</td>';
-  $out .= '<td rowspan="2" style="background-color: #C366FF; border-left: 0px; padding: 0px;">';
+  $out .= '<td style="background-color: #C366FF; border-left: 0px; padding: 0px;">';
   $out .= '<img src="'.$logo.'" width="100" height="100" /> ';
   $out .= '</td>';
-  $out .= '</tr>>';
-  $out .= '<tr><td>';
-  $out .= 'Login: _________________ <br /> Password : _________________';
-  $out .= '</td>';
+  $out .= '</tr>';
   $out .= '<tr>';
+  $out .= '<td colspan="3">';
+  $out .= '← Login ';
+  $out .= '&nbsp;|&nbsp;';
+  $out .= 'Password  →';
+  $out .= '</td>';
+  $out .= '</tr>';
   $out .= '</table>';
 
   $out .= '<div style="margin-top: 10px; text-align: center; background-color: #C366FF; padding: 5px;">';
@@ -218,20 +221,14 @@ if ($pageNumber == 0) { // Player's equipment
   for ($line=0; $line<3; $line++) {
     $eqMax = $line+7;
     $out .= '<tr>';
-    $out .= '<td style="height:100px; width:1px; background-color: #FFF; border:0px;"></td>';
-    while($index<7) {
-      $out .= '<td style="height:100px; background-color: #FFF; text-align: left; border:0px;">';
-      $out .= '</td>';
-      $index++;
-    }
+    $out .= '<td style="height:125; width:1px; background-color: #FFF; border:0px;"></td>';
     $out .= '</tr>';
-    $index=0;
   }
   $out .= '</table>';
   $out .= '</div>';
   $out .= '</div>';
 
-  $out .= '<br /><br />';
+  $out .= '<br />';
   $out .= '<img src="'.$worldMap.'" height="400" />';
   
   // Footer
@@ -254,7 +251,7 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</div>';
   
   // Footer
-  $out .= '<div style="text-align:center;"><img src="'.$favicon.'" alt="Planet Alert" /> https://planetalert.tuxfamily.org - Tested on Firefox</div>';
+  $out .= '<div style="text-align:center; margin:5px;"><img src="'.$favicon.'" alt="Planet Alert" /> https://planetalert.tuxfamily.org - Tested on Firefox</div>';
 }
 
 
