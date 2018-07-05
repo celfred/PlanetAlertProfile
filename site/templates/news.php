@@ -396,8 +396,8 @@
 
       // User is logged in and in a team, load work statistics
       if ($user->isLoggedin() && $user->isSuperuser() == false) {
-        if ($currentPeriod != false) {
-          if ($player->team->name != 'no-team') { ?>
+        if ($player->team->name != 'no-team') {
+          if ($currentPeriod != false) { ?>
             <div id="" class="news panel panel-primary">
               <div class="panel-heading">
                 <h4 class="panel-title">
@@ -413,16 +413,16 @@
               </div>
             </div>
         <?php 
-          }
-        } else { ?>
+          } else { ?>
             <div id="" class="news panel panel-primary">
               <div class="panel-heading">
                 <h4 class="panel-title">No work statistics !</h4>
               </div>
             </div>
         <?php
+          }
         }
-      }
+       }
 
       // Last public news
       ?>
