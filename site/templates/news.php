@@ -180,7 +180,7 @@
             $out .= '</div>';
 
             // Greatest # of people if needed
-            if ($player->rank->is("name=4emes|3emes")) {
+            if ($player->rank && $player->rank->is("name=4emes|3emes")) {
               $out .= '<div id="" class="panel panel-success">';
               $out .= '  <div class="panel-heading">';
               $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
