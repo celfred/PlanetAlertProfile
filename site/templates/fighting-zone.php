@@ -10,7 +10,7 @@
       // Set all available monsters
       if (!$user->isSuperuser()) {
         // Check if player has the Visualizer (or forced by admin)
-        if ($player->equipment->has('name=visualizer') || $player->team->forceVisualizer == 1) {
+        if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
           $allMonsters = $pages->find("template=exercise, sort=level, sort=name");
         } else { // Limit to visible monsters
           $allMonsters = $pages->find("template=exercise, sort=level, sort=name, special=0");
