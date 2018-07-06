@@ -85,7 +85,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
   for ($i=0; $i<5; $i++) {
     $out .= '<table class="miniTable">';
     $out .= '<tr>';
-    $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">&nbsp;</td>';
+    $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">'.$page->mapIndex.'</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
@@ -96,7 +96,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
 
     $out .= '<td class="empty" style="width:0.5cm">&nbsp;</td>';
 
-    $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">&nbsp;</td>';
+    $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">'.$page->mapIndex.'</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
