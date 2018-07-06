@@ -1229,7 +1229,7 @@ namespace ProcessWire;
         // Archive player's history
         foreach($allPlayers as $p) {
           $currentHistory = $p->children()->get("name=history");
-          $counter = $p->children()->count();
+          $counter = $p->children("name~=history")->count();
           if ($counter > 0 && $currentHistory) {
             $currentHistory->of(false);
             
