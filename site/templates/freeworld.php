@@ -18,7 +18,9 @@
     include("./tabList.inc"); 
   }
   
-  showScores($team);
+  if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
+    showScores($allTeams);
+  }
   $allElements = teamFreeworld($team);
   $allCompleted = $allElements->find("completed=1");
   $notCompleted = $allElements->find("completed!=1");

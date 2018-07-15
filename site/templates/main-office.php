@@ -21,7 +21,9 @@
   $out .= '<div id="ajaxDecision" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="decision"></div>';
   $out .= '<div id="showInfo" data-href="'.$pages->get('name=ajax-content')->url.'"></div>';
 
-  showScores($team);
+  if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
+    showScores($allTeams);
+  }
 
   $out .= '<div class="col-sm-4">';
     // Help needed

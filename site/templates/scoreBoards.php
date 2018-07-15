@@ -8,7 +8,9 @@
 
   // Display team scores
   echo '<div class="row">';
-    showScores($allTeams);
+    if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
+      showScores($allTeams);
+    }
   echo '</div>';
   
   echo '<div class="row">';

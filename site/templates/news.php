@@ -4,7 +4,9 @@
 
   // Display team scores
   echo '<div class="row text-center">';
-    showScores($allTeams);
+    if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
+      showScores($allTeams);
+    }
     if ($user->isLoggedin() && $user->isSuperuser()==false) {
       $player = $pages->get("login=$user->name");
       echo '<hr>';

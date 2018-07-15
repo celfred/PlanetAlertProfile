@@ -87,7 +87,9 @@
 
   if ($input->urlSegment1 != 'no-team') {
     if ($user->isLoggedin() && !$user->isSuperuser()) {
-      showScores($team);
+      if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
+        showScores($team);
+      }
     }
 
     $captains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
