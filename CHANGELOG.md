@@ -23,6 +23,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 	- 'Removed' for now removed features.
 	- 'Fixed' for any bug fixes.
 	- 'Security' in case of vulnerabilities.
+	- 'Backend' for changes in backend fields/templates
 
 
 ## Unreleased
@@ -32,6 +33,34 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ## v1.0.0 - [Unreleased]
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
+
+## [v0.1.5] - 2018-07-15
+### Added
+- tmp Page for players : Major update to manage trainings and fights activity. Each player has a child tmp page which is updated on every monster activity. This page is then used to display UT scores, fights scores, last dates... Loading time should be improved since no need to recalculate everything from player's complete history.
+- New tmp page is accessible for Admin on player's profile page
+- Admin action to recalculate all tmp pages in a team
+- mapIndex now is written on Places PDFs
+- Limit archiving to 'History' pages (since new tmp page is a sibling)
+
+### Changed
+- Order of elements on player's profile page
+
+### Backend
+- New Template : tmp
+	- title
+	- tmpMonstersActivity
+		- monster (new Page)
+		- inUt (new Integer)
+		- outUt (new Integer)
+		- trainNb (new Integer)
+		- fightNb (new Integer)
+		- lastFightDate (new Datetime)
+		- lastTrainDate (new Datetime)
+		- quality (new Float)
+		- date (not new)
+	- index (not new)
+- New Places added
+- Updated worldmap with Places numbers in download area
 
 ## [v0.1.4] - 2018-07-05
 ### Added
@@ -51,7 +80,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Newsboard players having an empty rank
 - Visualizer not taken into account in Fighting Zone
 
-### Changed
+### Changed
 - pendingLessons field becomes pending
 - PDF design (for copybook)
 - PDF : Load each page separately to avoid server time-out
@@ -137,3 +166,4 @@ Initial official release.
 [v0.1.2]: https://framagit.org/celfred/planetAlert/tags/v0.1.2
 [v0.1.3]: https://framagit.org/celfred/planetAlert/tags/v0.1.3
 [v0.1.4]: https://framagit.org/celfred/planetAlert/tags/v0.1.4
+[v0.1.5]: https://framagit.org/celfred/planetAlert/tags/v0.1.5
