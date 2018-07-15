@@ -17,10 +17,8 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test pla
 
     $out .= '<section class="row">';
 
-    // Display Personal Analyzer if user is logged in
     if ($user->isLoggedin() && $user->isSuperuser()==false) {
       $player = $pages->get("login=$user->name");
-      echo pma($player);
     }
 
     $out .= '<section class="well text-center">';
@@ -49,7 +47,7 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test pla
       if ($m->level !== $previousLevel) { $out .= '</div><p class="label label-danger">Level '.$m->level.'</p><div class="grid">'; }
       if (!$user->isSuperuser() && $user->isLoggedin() && isset($player)) {
         if ($player->equipment->has('name=memory-helmet')) {
-          $m = setMonstersActivity($player, $m);
+          $m = setMonster($player, $m);
         }
       } else { // Never trained (for admin)
         $m->isTrainable = 1;

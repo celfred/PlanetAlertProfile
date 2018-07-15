@@ -2,8 +2,12 @@
   include("./head.inc"); 
 
   $out = '';
-  if ($player && $user->isLoggedin() || $user->isSuperuser()) {
-    $lock = $pages->get("$player->team")->lockFights;
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
+    if (!$user->isSuperuser()) {
+      $lock = $pages->get("$player->team")->lockFights;
+    } else {
+      $lock = 0;
+    }
     if ($lock == 1) { // Fights are locked by admin
       echo '<p class="alert alert-warning">Sorry, but the administrator has disabled this option for the moment.</p> ';
     } else { // Fights are allowed
@@ -22,16 +26,13 @@
       }
 
       if (!$user->isSuperuser()) {
+        // Prepare player's fighting possibilities
         foreach($allMonsters as $m) {
-          $m = setMonstersActivity($player, $m);
+          setMonster($player, $m);
         }
         $availableFights = $allMonsters->find("isFightable=1");
         $waitingFights = $allMonsters->find("isFightable=0, lastFightInterval!=-1")->sort("waitForFight, allFightsNb");
-        $impossibleFights = $allMonsters->find("isFightable=0, lastFightInterval=-1")->sort("title");
-      } else {
-        $availableFights = $allMonsters;
-        $waitingFights = $allMonsters;
-        $impossibleFights = $allMonsters;
+        $impossibleFights = $allMonsters->find("isFightable=0, lastFightInterval=-1")->sort("-utGain, title");
       }
 
       $out .= '<div class="well">';
@@ -48,7 +49,7 @@
         }
         $out .= '</h4>';
 
-        if ($availableFights->count() > 0) {
+        if (isset($availableFights) && $availableFights->count() > 0) {
           $out .= '<br />';
           $out .= '<h4><span class="label label-danger">Monsters at proximity ! (You can fight them!)</span></h4>';
           $out .= '<ul class="list list-inline">';
@@ -65,7 +66,7 @@
           $out .= '<h4><span class="label label-danger">There are no monsters at proximity !</h4>';
         }
 
-        if ($waitingFights->count() > 0) {
+        if (isset($waitingFights) && $waitingFights->count() > 0) {
           $out .= '<br />';
           $out .= '<h4><span class="label label-success">Approaching monsters ! (You can\'t fight them today. You must wait.)</span></h4>';
           $out .= '<ul class="list">';
@@ -76,11 +77,10 @@
               $mini = '';
             }
             $out .= '<li>';
-            $out .= $m->lastFightInterval;
-            if ($m->waitForFight > 1) {
-              $out .= '<span class="label label-success">'.$mini.' '.$m->title.'</span> will be at proximity in <span class="badge badge-primary">'.$m->waitForFight.' days</span>';
-            } else {
+            if ($m->waitForFight == 1) {
               $out .= '<span class="label label-success">'.$mini.' '.$m->title.'</span> will be at proximity in <span class="badge badge-primary">tomorrow !</span>';
+            } else {
+              $out .= '<span class="label label-success">'.$mini.' '.$m->title.'</span> will be at proximity in <span class="badge badge-primary">'.$m->waitForFight.' days</span>';
             }
             if ($m->lastTrainingInterval == 0) {
               $out .= ' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Memory helmet used today. '.$m->title.' detected it and walked away."></i></li>';
@@ -90,7 +90,7 @@
           $out .= '</ul>';
         }
 
-        if ($impossibleFights->count() > 0) {
+        if (isset($impossibleFights) && $impossibleFights->count() > 0) {
           $out .= '<br /><br />';
           $utZone = $pages->get("name=underground-training")->url;
           $out .= '<h4><span class="glyphicon glyphicon-thumbs-down"></span> Out of reach monsters ! (You can\'t fight them, you must do <a href="'.$utZone.'">underground training</a> first and get at least <span class="label label-success">+20UT</span>)</h4>';
@@ -103,9 +103,7 @@
       $out .= '</div>';
 
       echo $out;
-
     }
-
   } else {
     echo '<p class="alert alert-warning">Sorry, but you don\'t have access to the Fighting Zone. Contact the administrator if you think this is an error.</p> ';
   }

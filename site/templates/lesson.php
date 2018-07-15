@@ -48,7 +48,7 @@
           foreach ($page->linkedMonsters as $lm) {
             if ($user->isLoggedin() && $player->equipment->has("name=memory-helmet") || $user->isSuperuser()) {
               if (!$user->isSuperuser()) {
-                setMonstersActivity($player, $lm);
+                setMonster($player, $lm);
               }
               if ($user->isSuperuser() || $lm->isTrainable != 0) {
                 $training = $pages->get("name=underground-training");

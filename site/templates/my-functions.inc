@@ -60,6 +60,8 @@ function initPlayer($player) {
     $player->people->removeAll();
     $player->coma = 0;
   }
+  createTmpCache($player);
+  createHistoryPage($player);
   return $player;
 }
 
@@ -440,6 +442,7 @@ function extraActionAfterSave($player, $historyPage, $real) {
 
   // Save new team scores (for cache) if necessary
   if ($real == true) {
+    updateCache($player, $historyPage);
     if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
       updateTeamScores($player->team);
     }
@@ -559,6 +562,7 @@ function emptyTmp(HookEvent $e) { // Empty /tmp subtree
 function checkActivity(HookEvent $e) {
   $pages = wire('pages');
   $allPlayers = $pages->find("template=player, team.name=no-team, name!=test"); // Limit to no-team players, avoid 'test'
+  $refPage = $pages->get("name=inactivity");
   foreach ($allPlayers as $player) {
     if ($player->GC > 0) { // Only players having GC
       $lastActivityCount = lastActivity($player);
@@ -575,9 +579,9 @@ function checkActivity(HookEvent $e) {
 }
 
 function lastActivity($player) {
-  $historyPage = $player->children("sort=-created")->first();
-  $lastEvent = $historyPage->children()->findOne("template=event, sort=-date");
-  if ($lastEvent->id) {
+  $historyPage = $player->get("name=history");
+  $lastEvent = $historyPage->children()->findOne("sort=-date");
+  if ($lastEvent) {
     // Find # of days compared to today
     $date1 = new \DateTime("today");
     $date2 = new \DateTime(date("Y-m-d", $lastEvent->created));
@@ -768,15 +772,8 @@ function groupBonus($players) {
 }
 
 function saveHistory($player, $task, $newsBoard = 0) {
+  createHistoryPage($player);
   $history = $player->child("name=history");
-  if (!$history->id) { // Creation of history page if it doesn't exist
-    $history = new Page();
-    $history->parent = $player;
-    $history->template = 'archive';
-    $history->name = 'history';
-    $history->title = 'history';
-    $history->save();
-  }
   $p = new Page();
   $p->of(false);
   $p->template = 'event';
@@ -1449,7 +1446,7 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
       $playerPos = false;
     }
   } else {
-    if ($player->group  && $allGroups->getItemKey($player->group) != 0) {
+    if (isset($player->group)  && $allGroups->getItemKey($player->group) != 0) {
       $playerPos = $allPlayers->getItemKey($player->group);
     } else {
       $playerPos = false;
@@ -1485,99 +1482,118 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
   return array($topPlayers, $prevPlayers, $playerPos, $allPlayers->count);
 }
 
-function setMonstersActivity($player, $monster) {
-  /* if ($already > 0 || $player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1 || $monster->special == 0) { */
-    $today = new \DateTime("today");
-    // Init variables
-    $monster->spacedTrainingsAllowed = -1;
-    $monster->lastTrainingInterval = -1;
-    $monster->lastFightDate = 0;
-    $monster->spacedFightsAllowed = -1;
-    $monster->waitForTrain = -1;
-    $monster->waitForFight = -1;
-    $monster->lastFightInterval = -1;
-    $monster->isTrainable = 0;
-    $monster->isFightable = 0;
-    $minUt = 20; // Previous training required to be able to fight
-    $spacedFights = 15; // 15 days between fights
+function setSpacedRepetition($level, $trainNb) { // Set spaced repetition according to monster's level?
+  if ($level >= 1 ) { // For the moment, all levels
+    // Limit to 1 training session a day if prevTrainings<=5
+    // Limit to 1 training session a week if prevTrainings<=10
+    // Limit to 1 training session a month if prevTrainings>=15
+    if ($trainNb >= 0 && $trainNb <= 5) {
+      $spacedTrainings = 1;
+    }
+    if ($trainNb > 5 && $trainNb <= 10) {
+      $spacedTrainings = 7;
+    }
+    if ($trainNb > 10) {
+      $spacedTrainings = 30;
+    }
+  }
+  return $spacedTrainings;
+}
 
-    // Check activity
-    list($monster->utGain, $monster->inClassUtGain) = utGain($monster, $player);
-    if ($monster->utGain > 0 || $monster->inClassUtGain > 0) { // Already trained
-      // Check trainings/fights
-      $prevTrainings = $player->find("template=event,task.name=ut-action-v|ut-action-vv, refPage=$monster, sort=-date");
-      $allFights = $player->find("template=event, task.name~=fight, refPage=$monster, sort=-date");
-      $monster->allFightsNb = $allFights->count();
+function averageLabel($quality) {
+  if ($quality >= 1.5) { $label = '<span class="label label-success">VV</span>'; }
+  if ($quality < 1.5 && $quality > 0.3) { $label = '<span class="label label-success">V</span>'; }
+  if ($quality <= 0.3 && $quality > -0.4) { $label = '<span class="label label-danger">R</span>'; }
+  if ($quality <= -0.4) { $label = '<span class="label label-danger">RR</span>'; }
+  return $label;
+}
 
-      // Set training possibilities
-      $lastTraining = $prevTrainings->first();
-      // Find # of days compared to today
-      $date2 = new \DateTime(date("Y-m-d", $lastTraining->date));
-      $interval = $today->diff($date2);
-      $monster->lastTrainingInterval = $interval->days;
-      // Set spaced repetition according to monster's level?
-      if ($monster->level >= 1 ) { // For the moment, all levels
-        // Limit to 1 training session a day if prevTrainings<=5
-        // Limit to 1 training session a week if prevTrainings<=10
-        // Limit to 1 training session a month if prevTrainings>=15
-        if ($prevTrainings->count() >= 0 && $prevTrainings->count() <= 5) {
-          $spacedTrainings = 1;
-        }
-        if ($prevTrainings->count() > 5 && $prevTrainings->count() <= 10) {
-          $spacedTrainings = 7;
-        }
-        if ($prevTrainings->count() > 10) {
-          $spacedTrainings = 30;
-        }
+function setFightsQuality($player, $monster) {
+  $fights = $player->find("template=event, task.name~=fight, refPage=$monster")->sort("date");
+  $fightNb = $fights->count();
+  if ($fightNb > 0) {
+    $lastFightDate = $fights->last()->date;
+  } else {
+    $lastFightDate = false;
+  }
+  // Calculate average
+  $VV = $fights->find("task.name=fight-vv")->count();
+  $V = $fights->find("task.name=fight-v")->count();
+  $R = $fights->find("task.name=fight-r")->count();
+  $RR = $fights->find("task.name=fight-rr")->count();
+  $posNb = $V + $VV;
+  $negNb = $R + $RR;
+  if ($fightNb > 0) {
+    $quality = round(($VV*2+$V-$R-$RR*2)/$fightNb, 1);
+    $averageLabel = averageLabel($quality);
+  } else {
+    $quality = false;
+    $averageLabel = false;
+  }
+  return array($fightNb, $posNb, $negNb, $quality, $averageLabel, $lastFightDate);
+}
+
+function setMonster($player, $monster) {
+  $minUt = 20; // Previous training required to be able to fight
+  $spacedFights = 15; // 15 days between fights
+  $fightInterval = new \DateInterval('P15D');
+  // Prepare monster from player's Cache page
+  $tmpCache = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
+  if ($tmpCache) {
+    // Sets inUt, outUt, lastFightDate.... ofr $monster
+    foreach ($tmpCache->fields as $f) {
+      if ($f->name != 'monster') {
+        $monster->$f = $tmpCache->$f;
       }
-      if ($interval->days < $spacedTrainings) { // Trained recently
-        $monster->isTrainable = 0;
-        $monster->spacedTrainingsAllowed = $spacedTrainings-$interval->days;
-        $monster->waitForTrain = $spacedTrainings-$interval->days;
-      } else {
-        $monster->isTrainable = 1;
-        $monster->spacedTrainingsAllowed = 0;
-        $monster->waitForTrain = 0;
-      }
-
-      // Set fights possibilities
-      if ($monster->utGain >= $minUt) { // Minimum training reached
-        $lastFight = $allFights->first();
-        if ($lastFight) { // Monster has been fought
-          // Find # of days compared to today
-          $date2 = new \DateTime(date("Y-m-d", $lastFight->date));
-          $interval = $today->diff($date2);
-          if ($interval->days < $spacedFights || $monster->lastTrainingInterval == 0) { // Monster fought/trained recently
-            $monster->isFightable = 0;
-          } else { // Monster is fightable
-            $monster->isFightable = 1;
-          }
-          $monster->lastFight = $lastFight;
-          $monster->lastFightDate = $lastFight->date;
-          $monster->lastFightInterval = $interval->days;
-          $monster->spacedFightsAllowed = $spacedFights-$interval->days;
-          $monster->waitForFight = $spacedFights-$interval->days;
-        } else { // Never fought
-          $monster->isFightable = 1;
-        }
+    }
+    // Sets training possibilities
+    $monster->utGain = ($tmpCache->inUt+$tmpCache->outUt);
+    $monster->lastTrainingInterval = wire('datetime')->relativeTimeStr($tmpCache->lastTrainDate);
+    if ($tmpCache->date) {
+      $availableTrainDate = new \DateTime(date("Y-m-d", $tmpCache->date));
+      $today = new \DateTime("today");
+      $monster->waitForTrain = $today->diff($availableTrainDate)->format("£r£a");
+    } else {
+      $monster->waitForTrain = 0;
+    }
+    if ($monster->waitForTrain <= 0) {
+      $monster->isTrainable = 1;
+    } else {
+      $monster->isTrainable = 0;
+      $monster->waitForTrain = abs($monster->waitForTrain);
+    }
+    // Sets fighting possibilities
+    $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
+    if ($tmpCache->lastFightDate != '') {
+      $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
+      $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
+    } else {
+      $monster->waitForFight = false; 
+      $monster->lastFightInterval = -1;
+    }
+    if ($monster->waitForFight < 0) {
+      if ($player->equipment->has("name~=visualizer") || $monster->special == 0) {
+        $monster->isFightable = 1;
       } else {
         $monster->isFightable = 0;
       }
-    } else { // Never trained
-      $monster->isTrainable = 1;
+    } else {
       $monster->isFightable = 0;
-      $monster->allFightsNb = 0;
     }
-  /* } else { // Undetected monster */
-  /*     $monster->isTrainable = 0; */
-  /*     $monster->isFightable = 0; */
-  /* } */
+  } else { // No previous monster activity
+    $monster->utGain = 0;
+    $monster->isTrainable = 1;
+    $monster->lastTrainingInterval = '-';
+    $monster->waitForTrain = 0;
+    $monster->isFightable = 0;
+    $monster->lastFightInterval = -1;
+    $monster->waitForFight = 0;
+  }
   return $monster;
 }
 
 function utReport($player, $monster = false) {
   if (!$monster) { // All monsters
-    $today = new \DateTime("today");
     $allEvents = $player->find("template=event, task~=ut-action")->sort("refPage.name, date");
     $allConcernedMonsters = new PageArray();
     $lastMonster = '';
@@ -1591,13 +1607,12 @@ function utReport($player, $monster = false) {
         $m->fightsCount = $fights->count();
         $m->total = $allEvents->count();
         // Set monster status
-        $m = setMonstersActivity($player, $m);
+        $m = setMonster($player, $m);
       }
-      $allConcernedMonsters->sort("lastFight, -utGain");
+      $allConcernedMonsters->sort("lastTrainDate, -utGain");
     }
     return $allConcernedMonsters;
   } else { // TODO ??? Single monster stats
-
   }
 }
 
@@ -1635,12 +1650,15 @@ function fightReport($player, $monster = false) {
           if ($m->ratio <= -0.4) { $m->average = '<span class="label label-danger">RR</span>'; }
         }
         // Set monster status
-        $m = setMonstersActivity($player, $m);
+        $m = setMonster($player, $m);
       }
       $allConcernedMonsters->sort("lastFight, -fightsCount");
     }
     return $allConcernedMonsters;
-  } else { // TODO ??? Single monster stats
+  } else { // Single monster stats
+    list($monster->fightsCount, $monster->positive, $monster->negative, $monster->quality, $monster->average, $monster->lastFightDate) = setFightsQuality($player, $monster);
+    $monster->ratio = $monster->quality;
+    return $monster;
   }
 }
 
@@ -1662,26 +1680,26 @@ function battleReport($player, $monster = false) {
   }
 }
 
-function utGain($monsterId, $player, $startDate='', $endDate='') {
+function calculatedUt($monster, $player, $startDate='', $endDate='') {
   $utGain = 0;
   $inClassUtGain = 0;
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
-  $prevUt = $player->find("template=event,refPage=$monsterId, task.name~=ut-action, date>$startDate, date<$endDate, sort=-date");
+  $prevUt = $player->find("template=event,refPage=$monster, task.name~=ut-action, date>$startDate, date<$endDate, sort=-date");
   if ($prevUt->count() > 0) {
     foreach($prevUt as $p) {
       preg_match("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches);
       if (!$matches) {
         if ($p->inClass == 0) {
-          $utGain = $utGain+1;
+          $utGain++;
         } else {
-          $inClassUtGain = $utGain+1;
+          $inClassUtGain++;
         }
       } else {
         if ($p->inClass == 0) {
           $utGain = $utGain+$matches[1];
         } else {
-          $inClassUtGain = $utGain+$matches[1];
+          $inClassUtGain = $inClassUtGain+$matches[1];
         }
       }
     }
@@ -1689,6 +1707,151 @@ function utGain($monsterId, $player, $startDate='', $endDate='') {
     $utGain = 0;
   }
   return array($utGain, $inClassUtGain);
+}
+
+function utGain($monster, $player, $startDate='', $endDate='') {
+  if ($startDate == '' && $endDate == '') { // No restricting dates (hence global UT), get from tmpCache if possible
+    $tmpPage = $player->child("name=tmp");
+    if ($tmpPage->id) { // Is tmpCache available ?
+      $tmp = $player->get("name=tmp")->tmpMonstersActivity->get("monster=$monster");
+      if ($tmp) {
+        $inUt = $tmp->inUt;
+        $outUt = $tmp->outUt;
+        return array($outUt, $inUt);
+      } else {
+        return calculatedUt($monster, $player, $startDate, $endDate);
+      }
+    } else { // Create tmp page for next call
+      $tmpPage = createTmpCache($player);
+      return calculatedUt($monster, $player, $startDate, $endDate);
+    }
+  } else { // Restricting dates means recalculate from scratch
+    return calculatedUt($monster, $player, $startDate, $endDate);
+  }
+}
+
+function createTmpCache($player) {
+  $tmpPage = $player->child("name=tmp");
+  if (!$tmpPage->id) {
+    $tmpPage = new Page();
+    $tmpPage->parent = $player;
+    $tmpPage->template = 'tmp';
+    $tmpPage->name = 'tmp';
+    $tmpPage->title = 'tmp';
+    $tmpPage->save();
+    /* initTmpMonstersActivity($player); */
+  }
+}
+
+function createHistoryPage($player) {
+  $history = $player->child("name=history");
+  if (!$history->id) { // Creation of history page if it doesn't exist
+    $history = new Page();
+    $history->parent = $player;
+    $history->template = 'archive';
+    $history->name = 'history';
+    $history->title = 'history';
+    $history->save();
+  }
+}
+
+function updateCache($player, $historyPage) {
+  $tmpPage = $player->child("name=tmp");
+  if (!$tmpPage->id) { createTmpCache($player); }
+  $monster = $historyPage->refPage;
+  $tmpCache = $tmpPage->tmpMonstersActivity->get("monster=$monster");
+  if (!$tmpCache->id) { // Monster is new in cache
+    $tmpCache = $tmpPage->tmpMonstersActivity->getNew();
+    $tmpCache->monster = $monster;
+  } else {
+    $tmpCache = $tmpPage->tmpMonstersActivity->get("monster=$monster");
+  }
+  if ($historyPage->task->is("name~=ut-action")) { // Update tmpCache
+    preg_match("/\[\+([\d]+)U\.T\.\]/", $historyPage->summary, $matches);
+    if ($matches[0]) {
+      $delta = $matches[1];
+    } else {
+      $delta = 1;
+    }
+    if ($tmpCache) { // Monster already exists in tmpMonstersActivity
+      if ($historyPage->inClass) {
+        $tmpCache->inUt += $delta;
+      } else {
+        $tmpCache->outUt += $delta;
+      }
+      $tmpCache->trainNb++;
+      $tmpCache->lastTrainDate = $historyPage->date;
+      // Set spacedRepetition date
+      $spacedRepetition = setSpacedRepetition($monster->level, $tmpCache->trainNb); 
+      $tmpCache->date = strtotime("+".$spacedRepetition."days",$tmpCache->lastTrainDate);
+    }
+    $tmpCache->of(false);
+    $tmpCache->save();
+  }
+
+  if ($historyPage->task->is("name~=fight")) { // Update tmpCache
+    if ($tmpCache) { // Monster already exists in tmpMonstersActivity
+      $tmpCache->lastFightDate = $historyPage->date;
+      list($tmpCache->fightNb, $posNb, $negNb, $tmpCache->quality, $average, $tmpCache->lastFightDate) = setFightsQuality($player, $monster);
+    }
+    $tmpCache->of(false);
+    $tmpCache->save();
+  }
+}
+
+function initTmpMonstersActivity($player) {
+  $pages = wire('pages');
+  $tmpPage = $player->child("name=tmp");
+  // Delete previous tmpMonstersActivity
+  if ($tmpPage->tmpMonstersActivity) {
+    foreach($tmpPage->tmpMonstersActivity as $p) {
+      $tmpPage->tmpMonstersActivity->remove($p);
+    }
+    $tmpPage->of(false);
+    $tmpPage->save();
+  }
+  $allMonsters = $pages->find("parent.name=monsters");
+  $tmpPage->index = $allMonsters->count();
+  foreach($allMonsters as $m) {
+    // Sets training activity
+    $allTrainings = $player->find("template=event, task.name~=ut-action, refPage=$m")->sort("date");
+    if ($allTrainings->count() > 0) {
+      $tmpCache = $tmpPage->tmpMonstersActivity->getNew();
+      $tmpCache->monster = $m;
+      foreach($allTrainings as $e) {
+        preg_match("/\[\+([\d]+)U\.T\.\]/", $e->summary, $matches);
+        if (isset($matches[0])) {
+          $delta = $matches[1];
+        } else {
+          $delta = 1;
+        }
+        if ($e->inClass) {
+          $tmpCache->inUt += $delta;
+        } else {
+          $tmpCache->outUt += $delta;
+        }
+        $tmpCache->trainNb++;
+      }
+      $tmpCache->lastTrainDate = $allTrainings->last()->date;
+      // Set spacedRepetition date
+      $spacedRepetition = setSpacedRepetition($m->level, $tmpCache->trainNb); 
+      $tmpCache->date = strtotime("+".$spacedRepetition."days",$allTrainings->last()->date);
+    }
+    // Sets fighting activity
+    list($fightNb, $posNb, $negNb, $quality, $average, $lastFightDate) = setFightsQuality($player, $m);
+    if (($allTrainings->count() + $fightNb) > 0) {
+      $tmpCache->fightNb = $fightNb;
+      $tmpCache->quality = $quality;
+      $tmpCache->lastFightDate = $lastFightDate;
+      $tmpCache->save();
+      $tmpPage->tmpMonstersActivity->add($tmpCache);
+      $tmpPage->index--;
+      $tmpPage->of(false);
+      $tmpPage->save();
+    }
+  }
+  $tmpPage->of(false);
+  $tmpPage->save();
 }
 
 function setBestPlayer($monster, $player, $utGain) {
@@ -1727,7 +1890,7 @@ function pma($player) {
   }
   if ($player->equipment->has('name=memory-helmet')) {
     foreach($allMonsters as $m) {
-      $m = setMonstersActivity($player, $m);
+      $m = setMonster($player, $m);
     }
   }
   $suggestedFights = $allMonsters->find("isFightable=1, sort=lastFightDate, sort=random, limit=3"); // Pick less-recently trained fightable monsters

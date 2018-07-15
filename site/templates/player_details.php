@@ -37,6 +37,14 @@
 <?php
   if ($user->isSuperuser()) {
     echo '<div class="row">';
+    $tmpCache = $playerPage->children()->get("name=tmp");
+    if ($tmpCache) {
+      echo '<a class="pdfLink btn btn-danger" href="'.$tmpCache->url.'">See tmpCache</a>';
+    } else {
+      createTmpCache($playerPage);
+      $tmpCache = $playerPage->children()->get("name=tmp");
+      echo '<a class="pdfLink btn btn-danger" href="'.$tmpCache->url.'">See tmpCache</a>';
+    }
     // Check nb of pages according to nb of freed items
     echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index=-1&pages2pdf=1">Empty PDF</a>';
     echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index=0&pages2pdf=1">PDF 1</a>';
@@ -177,40 +185,68 @@
         ?>
         </ul>
       </div>
+      <?php 
+        if ($user->isSuperuser() || ($user->isLoggedin() && $user->name === $playerPage->login)) { // Admin is logged or user
+      ?>
       <div class="panel-footer">
         <?php
           echo '<p><a href="'.$pages->get('name=shop_generator')->url.$playerPage->id.'">→ Go to the Marketplace</a>.</p>';
         ?>
       </div>
+      <?php
+        }
+      ?>
   </div>
 </div>
 
 <div class="row">
   <div class="panel panel-success">
     <div class="panel-heading">
-    <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (UT) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Monster fights / Monster Attacks (FP) : <?php echo $playerPage->fighting_power; ?></span></h4>
+      <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free elements : <?php echo $playerPlacesNb+$playerPeopleNb; ?></span></h4>
     </div>
-    <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="utreport&playerId=<?php echo $playerPage->id; ?>">
-      <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-    </div>
-    <div class="panel-body ajaxContent" data-priority="2" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="fightreport&playerId=<?php echo $playerPage->id; ?>">
-      <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-    </div>
-    <div class="panel-body ajaxContent" data-priority="3" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="battlereport&playerId=<?php echo $playerPage->id; ?>">
-      <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
-    </div>
-    <div class="panel-footer">
+    <div class="panel-body">
+      <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free places </span></h4>
+      <ul class="playerPlaces list-inline">
       <?php
-        if ($user->isSuperuser() || ($user->isLoggedin() && $user->name === $playerPage->login)) { // Admin is logged or user
-          if ($playerPage->equipment->get("name=memory-helmet")) {
-            echo '<p><a href="'.$pages->get('name=underground-training')->url.'">→ Use the Memory Helmet (Training Zone)</a>.</p>';
-            echo '<p><a href="'.$pages->get('name=fighting-zone')->url.'">→ Go to the Fighting Zone</a>.</p>';
-          } else {
-            echo 'Sorry, but at least one member in your group needs to buy the <a href="'.$pages->get('name=shop')->url.'details/memory-helmet">Memory Helmet</a> to be able to access the Underground Training zone.';
-          }
+        foreach($playerPage->places as $place) {
+          $thumbImage = $place->photo->eq(0)->getCrop('thumbnail')->url;
+          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$place->title<br />$place->summary<br />[{$place->parent->title},{$place->parent->parent->title}]' /></a></li>";
         }
       ?>
+      </ul>
+
+      <?php
+        if ($playerPage->rank && $playerPage->rank->is("name=4emes|3emes")) {
+      ?>
+        <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free people </span></h4>
+        <ul class="playerPlaces list-inline">
+        <?php
+          foreach($playerPage->people as $p) {
+            $thumbImage = $p->photo->eq(0)->getCrop('thumbnail')->url;
+            echo "<li><a href='{$p->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$p->title<br />$p->summary' /></a></li>";
+          }
+        ?>
+        </ul>
+      <?php } else { ?>
+        <p class="badge badge-danger">People are available for 4emes and 3emes only.</p>
+      <?php } ?>
     </div>
+    <?php 
+      if ($user->isSuperuser() || ($user->isLoggedin() && $user->name === $playerPage->login)) { // Admin is logged or user
+    ?>
+    <div class="panel-footer">
+        <span class="glyphicon glyphicon-star"></span>
+        <?php
+        if ($rightInvasions > 0 || $wrongInvasions > 0) {
+          echo 'Defensive power : <span>'.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)';
+        } else {
+          echo 'You have not faced any monster invasion yet.';
+        }
+        ?>
+    </div>
+    <?php 
+      }
+    ?>
   </div>
 
   <div class="panel panel-success">
@@ -332,45 +368,35 @@
 
   <div class="panel panel-success">
     <div class="panel-heading">
-      <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free elements : <?php echo $playerPlacesNb+$playerPeopleNb; ?></span></h4>
+    <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class="">Underground Training (UT) : <?php echo $playerPage->underground_training; ?> / <span class="glyphicon glyphicon-flash"></span> Fighting Power (FP) : <?php echo $playerPage->fighting_power; ?></span></h4>
     </div>
-    <div class="panel-body">
-      <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free places </span></h4>
-      <ul class="playerPlaces list-inline">
-      <?php
-        foreach($playerPage->places as $place) {
-          $thumbImage = $place->photo->eq(0)->getCrop('thumbnail')->url;
-          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$place->title<br />$place->summary<br />[{$place->parent->title},{$place->parent->parent->title}]' /></a></li>";
-        }
-      ?>
-      </ul>
-
-      <?php
-        if ($playerPage->rank && $playerPage->rank->is("name=4emes|3emes")) {
-      ?>
-        <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> Free people </span></h4>
-        <ul class="playerPlaces list-inline">
-        <?php
-          foreach($playerPage->people as $p) {
-            $thumbImage = $p->photo->eq(0)->getCrop('thumbnail')->url;
-            echo "<li><a href='{$p->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$p->title<br />$p->summary' /></a></li>";
-          }
-        ?>
-        </ul>
-      <?php } else { ?>
-        <p class="badge badge-danger">People are available for 4emes and 3emes only.</p>
-      <?php } ?>
+    <?php 
+      if ($user->isSuperuser() || ($user->isLoggedin() && $user->name === $playerPage->login)) { // Admin is logged or user
+    ?>
+    <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="utreport&playerId=<?php echo $playerPage->id; ?>">
+      <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+    </div>
+    <div class="panel-body ajaxContent" data-priority="2" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="fightreport&playerId=<?php echo $playerPage->id; ?>">
+      <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
+    </div>
+    <div class="panel-body ajaxContent" data-priority="3" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="battlereport&playerId=<?php echo $playerPage->id; ?>">
+      <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
     </div>
     <div class="panel-footer">
-        <span class="glyphicon glyphicon-star"></span>
-        <?php
-        if ($rightInvasions > 0 || $wrongInvasions > 0) {
-          echo 'Defensive power : <span>'.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span> (You have repelled '.$rightInvasions.' out of '.($rightInvasions+$wrongInvasions).' monster invasions)';
+      <?php
+        if ($playerPage->equipment->get("name=memory-helmet")) {
+          echo '<p><a href="'.$pages->get('name=underground-training')->url.'">→ Use the Memory Helmet (Training Zone)</a>.</p>';
+          echo '<p><a href="'.$pages->get('name=fighting-zone')->url.'">→ Go to the Fighting Zone</a>.</p>';
         } else {
-          echo 'You have not faced any monster invasion yet.';
+          echo 'Sorry, but at least one member in your group needs to buy the <a href="'.$pages->get('name=shop')->url.'details/memory-helmet">Memory Helmet</a> to be able to access the Underground Training zone.';
         }
-        ?>
+      ?>
     </div>
+    <?php
+      } else {
+        echo '<div class="panel-body"><p>Details are private.</p></div>';
+      }
+    ?>
   </div>
 
   <?php

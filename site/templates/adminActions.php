@@ -312,7 +312,7 @@ namespace ProcessWire;
       $endDate = $endDate.' 23:59:59';
     }
 
-    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks'];
+    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp'];
     if (in_array($action, $teamActions)) {
       $type = 'team';
     }
@@ -323,6 +323,7 @@ namespace ProcessWire;
       } else {
         $selectedTeam = '-1';
       }
+      $selectedPlayer = false;
     } else {
       switch($playerId) {
         case 'all' : 
@@ -471,6 +472,22 @@ namespace ProcessWire;
           }
           $p->of(false);
           $p->save();
+        }
+        break;
+      case 'recalculate-tmp' :
+        $allPlayers = $pages->find("parent.name=players, template=player, team=$selectedTeam");
+        foreach($allPlayers as $p) {
+          $tmpPage = $p->child("name=tmp");
+          if ($tmpPage->id) { // Is tmpCache available ?
+          } else { // Create it
+            $tmpPage = createTmpCache($p);
+          }
+          // Check date
+          $today = new \DateTime("today");
+          $modified = new \DateTime(date("Y-m-d", $tmpPage->modified));
+          if ($today->diff($modified)->days != 0) {
+            initTmpMonstersActivity($p);
+          }
         }
         break;
       case 'add-death' :
@@ -1324,7 +1341,7 @@ namespace ProcessWire;
         $pages->trash($playerPage);
         break;
       case 'ut-stats' :
-        if ($selectedPlayer) {
+        if ($selectedPlayer) { // TODO : Unused for the moment ?
           $out .= '<h3>';
           $out .= 'UT Stats for '.$selectedPlayer->title.' ['.$selectedPlayer->team->title.']   ';
           $out .= 'from '.$startDate.' ';
@@ -1332,7 +1349,7 @@ namespace ProcessWire;
           $out .= '</h3>';
           $allMonsters = $pages->find("template=exercise")->sort("level, title");
           foreach($allMonsters as $m) {
-            list($playerUt, $inClassUtGain) = utGain($m, $selectedPlayer, $startDate, $endDate);
+            list($playerUt, $inClassUtGain) = calculatedUt($m, $selectedPlayer, $startDate, $endDate);
             if ($playerUt > 0) {
               $out .= $m->title.' [Level '.$m->level.'] → ';
               $out .= $playerUt.' UT';
@@ -1349,34 +1366,43 @@ namespace ProcessWire;
           $out .= 'from '.$startDate.' ';
           $out .= 'to '.$endDate;
           $out .= '</h3>';
-          $allMonsters = $pages->find("template=exercise")->sort("level, title");
-          $allPlayers = $allPlayers->find("team=$selectedTeam");
-          $out .= '<ul>';
+          $allMonstersIds = $pages->findIds("parent.name=monsters");
+          $allPlayers = $pages->find("parent.name=players, team=$selectedTeam")->sort("title");
+          $teamUt = 0;
           foreach($allPlayers as $p) {
-            $activity = 0;
-            $inClassActivity = 0;
-            $out_03 = '<ul>';
-            foreach($allMonsters as $m) {
-              list($playerUt, $inClassUtGain) = utGain($m, $p, $startDate, $endDate);
-              if ($playerUt > 0) { 
-                $activity += $playerUt;
-                $out_03 .= '<li>'.$m->title. ' [level '.$m->level.']: +'.$playerUt.'UT</li>';
-              } else if ($inClassUtGain > 0) {
-                $activity += $inClassUtGain;
-                $inClassActivity += $inClassUtGain;
-                $out_03 .= '<li>';
-                $out_03 .= $m->title.' [Level '.$m->level.'] → ';
-                $out_03 .= $inClassUtGain.' UT [in class]';
-                $out_03 .= '</li>';
+            $playersTrainings = $pages->find("has_parent=$p, template=event, task.name~=ut-action, refPage!='', date>=$startDate, date<=$endDate");
+            $outUt = 0; // Out of class UT
+            $inUt= 0; // in class UT
+            $out .= '<ul>';
+            $out .= '<li>'.$p->title.' : '.$playersTrainings->count().' sessions.</li>';
+            foreach($allMonstersIds as $mId) {
+              $mTrainings  = $playersTrainings->find("refPage.id=$mId")->sort("refPage->title");
+              if ($mTrainings->count() > 0) {
+                $out .= '<ul>';
+                foreach($mTrainings as $mT) {
+                  preg_match("/\[\+([\d]+)U\.T\.\]/", $mT->summary, $matches);
+                  if (!$matches) {
+                    if ($mT->inClass == 0) {
+                      $outUt++;
+                    } else {
+                      $inUt++;
+                    }
+                  } else {
+                    if ($mT->inClass == 0) {
+                      $outUt = $outUt+$matches[1];
+                    } else {
+                      $inUt = $inUt+$matches[1];
+                    }
+                  }
+                }
+                $out .= '<li>'.$mT->refPage->title.' → '.($outUt+$inUt).' UT ['.$inUt.' in class] - '.$mTrainings->count().' session·s</li>';
+                $out .= '</ul>';
               }
             }
-            $out_03 .= '</ul>';
-            $out_02 = '<li><strong>'.$p->title.'</strong> → <span class="label label-success">+'.$activity.'UT ('.$inClassActivity.' in class)</span></li>';
-            if ($activity != 0) {
-              $out .= $out_02.$out_03;
-            }
+            $teamUt += ($inUt+$outUt);
+            $out .= '</ul>';
           }
-          $out .= '</ul>';
+          $out .= '<p class="label label-success">Total : +'.$teamUt.' UT for the team</p>';
         } else {
           $out .= 'You need to select 1 player or 1 team.';
         }
@@ -1409,7 +1435,7 @@ namespace ProcessWire;
                     break;
                   default: $class = ""; $result = "";
                 }
-                if ( $prevDate == date('Y-m-d', $t->date) && $prevName == $t->refPage->name) {
+                if ($prevDate == date('Y-m-d', $t->date) && $prevName == $t->refPage->name) {
                   $error = 'Error detected ?';
                 } else {
                   $error = '';
@@ -1534,8 +1560,13 @@ namespace ProcessWire;
           $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> Archive</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
+          // Reset streak
           $out .= '<li><label for="resetStreaks"><input type="checkbox" id="reset-streaks"> Reset streaks</label> ';
           $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'reset-streaks/'.$selectedTeam.'/1">Save</button>';
+          $out .= '</li>';
+          // Recalculate tmp page
+          $out .= '<li><label for="recalculateTmpPage"><input type="checkbox" id="recalculate-tmp"> Recalculate tmpPage</label> ';
+          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'recalculate-tmp/'.$selectedTeam.'/1">Save</button>';
           $out .= '</li>';
           $out .= '</ul>';
         } else {
@@ -1584,8 +1615,8 @@ namespace ProcessWire;
               $t = $pages->get("template=team, name=no-team");
               $p->team = $t;
             }
-            initPlayer($p);
             $p->save();
+            initPlayer($p);
             $p->login = $p->name;
             $p->save(login);
             // Create user (if he doesn't exit)

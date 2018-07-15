@@ -18,7 +18,7 @@
       }
 
       if ($monster->id && $player->id && $task->id) {
-        $monster = setMonstersActivity($player, $monster);
+        setMonster($player, $monster);
         $task->comment = $monster->title.' [+'.$result.'U.T.]';
         $task->refPage = $monster;
         $task->linkedId = false;
@@ -75,9 +75,9 @@
           break;
       }
 
-      echo 'Before Saving';
+      /* echo 'Before Saving'; */
       if ($monster->id && $player->id && $task->id) {
-        $monster = setMonstersActivity($player, $monster);
+        $monster = setMonster($player, $monster);
         // Update player's scores
         $task->comment = $monster->title.' ['.$result.']';
         $task->refPage = $monster;

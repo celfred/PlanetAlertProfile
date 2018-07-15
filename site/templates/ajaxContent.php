@@ -486,87 +486,101 @@
       case 'utreport' : // UT report
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
-        $utConcernedMonsters = utReport($playerPage);
-        $never = $pages->count("template=exercise")-$utConcernedMonsters->count();
-        if ($utConcernedMonsters->count() > 0) {
-          echo '<p class="label label-primary">You have trained '.$utConcernedMonsters->first()->total.' times.</p>';
-          if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
-            echo '<ul class="utReport list-group list-unstyled">';
-            $trainingUrl = $pages->get("name=underground-training")->url.'?id=';
-            foreach ($utConcernedMonsters as $m) {
-              echo '<li>';
-              if ($m->isTrainable == 0) { // Not allowed because of spaced repetition.
-                if ($m->waitForTrain == 1) {
-                  echo '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available tomorrow !">'.$m->title.'</span> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.($m->utGain+$m->inClassUtGain).'UT ';
+        // From tmpCache if available
+        $today = new \DateTime("today");
+        if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
+          $tmpPage = $playerPage->child("name=tmp");
+          if ($tmpPage->id && $tmpPage->tmpMonstersActivity) {
+            $allConcernedMonsters = $tmpPage->tmpMonstersActivity->find("trainNb>0");
+            $allConcernedMonsters->sort("date('Ymd', lastTrainDate), date");
+            if ($allConcernedMonsters->count() > 0) {
+              echo '<p class="label label-success"> You have trained on '.$allConcernedMonsters->count().' different monsters.</p>';
+              echo '<ul class="utReport list-group list-unstyled">';
+              foreach($allConcernedMonsters as $m) {
+                setMonster($playerPage, $m->monster);
+                // Find # of days compared to today
+                $date2 = new \DateTime(date("Y-m-d", $m->lastTrainDate));
+                $interval = $today->diff($date2);
+                $m->lastTrainingInterval = $interval->days;
+                $date3 = new \DateTime(date("Y-m-d", $m->date));
+                $availableInterval = $today->diff($date3);
+                echo '<li>';
+                echo '<span data-toggle="tooltip" title="'.$m->monster->summary.'" onmouseenter="$(this).tooltip(\'show\');" data-html="true">';
+                if ($m->monster->isTrainable == 1) {
+                  echo '<a href="'.$pages->get("name=underground-training")->url.'?id='.$m->monster->id.'">'.$m->monster->title.'</a>';
                 } else {
-                  echo '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available in '.$m->waitForTrain.' days">'.$m->title.'</span> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.($m->utGain+$m->inClassUtGain).'UT ';
+                  echo $m->monster->title;
                 }
-              } else {
-                echo '<a href="'.$trainingUrl.$m->id.'">'.$m->title.'</a> : <span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" data-html="true" title="'.$m->fightsCount.' training sessions">'.$m->utGain.'UT ';
+                echo '</span> : ';
+                echo '<span>'.$m->monster->utGain.'UT</span>';
+                if ($m->monster->isTrainable == 1) {
+                  echo ' <span>[Last training : '.$m->monster->lastTrainingInterval.']</span>';
+                } else {
+                  if ($m->monster->waitForTrain == 1) { $label = 'Available tomorrow !'; } else { $label = 'Available in '.$m->monster->waitForTrain.' days'; }
+                  echo ' <span data-toggle="tooltip" title="'.$label.'" onmouseenter="$(this).tooltip(\'show\');">[Last training : '.$m->monster->lastTrainingInterval.']</span>';
+                }
+                echo '</li>';
               }
-              echo ' [Last training : '.$m->lastTrainingInterval.' days ago.]</span>';
-              echo '</li>';
+              echo '<li class="label label-danger">You have NEVER trained on '.$tmpPage->index.' monsters.</li>';
+              echo '</ul>';
+            } else {
+              echo "<p>You have never used the Memory Helmet.</p>";
             }
-            echo '<li class="label label-danger">You have NEVER trained on '.$never.' monsters.</li>';
-            echo '</ul>';
-          } else {
-            echo '<p>Details are private.</p>';
           }
         } else {
-          echo "<p>You have never used the Memory Helmet.</p>";
+          echo '<p>Details are private.</p>';
         }
         break;
       case 'fightreport' : // Fights report
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
-        // Fights report
-        $playerConcernedMonsters = fightReport($playerPage);
-        if ($playerConcernedMonsters->count() > 0) {
-          echo '<p class="label label-primary">You have fought '.$playerConcernedMonsters->count().' monsters.</p>';
-          if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
+        $tmpPage = $playerPage->child("name=tmp");
+        if ($tmpPage->id && $tmpPage->tmpMonstersActivity) {
+          $allConcernedMonsters = $tmpPage->tmpMonstersActivity->find("fightNb>0")->sort("lastFightDate");
+          if ($allConcernedMonsters->count() > 0) {
+            echo '<p class="label label-success"> You have fought '.$allConcernedMonsters->count().' different monsters.</p>';
             echo '<ul class="utReport list-group list-unstyled">';
-            foreach ($playerConcernedMonsters as $m) {
-              if ($m->isFightable == 0) {
-                if ($m->lastTrainingInterval == 0) {
-                  echo '<li><span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available tomorrow !">'.$m->title.'</span> : '.$m->fightsCount.' fight·s ';
-                } else {
-                  echo '<li><span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="Available in '.$m->waitForFight.' days">'.$m->title.'</span> : '.$m->fightsCount.' fight·s ';
-                }
+            foreach($allConcernedMonsters as $m) {
+              setMonster($playerPage, $m->monster);
+              echo '<li>';
+              echo '<span data-toggle="tooltip" title="'.$m->monster->summary.'" onmouseenter="$(this).tooltip(\'show\');" data-html="true">';
+              if ($m->monster->isFightable == 1) {
+                echo '<a href="'.$m->monster->url.'">'.$m->monster->title.'</a>';
               } else {
-                echo '<li><a href="'.$m->url.'">'.$m->title.'</a> : '.$m->fightsCount.' fight·s ';
+                echo $m->monster->title;
               }
-              echo '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Quality:'.$m->ratio.'<br /><span class=\'glyphicon glyphicon-thumbs-up\'></span>'.$m->positive.' / <span class=\'glyphicon glyphicon-thumbs-down\'></span>'.$m->negative.'">→ '.$m->average.'</span>';
-              echo ' [Last fight : '.$m->lastFightInterval.' days ago.]';
+              echo '</span> : ';
+              echo '<span data-toggle="tooltip" title="Quality : '.$m->monster->quality.'" onmouseenter="$(this).tooltip(\'show\');" data-html="true"> '.averageLabel($m->monster->quality).'</span>';
+              if ($m->monster->fightNb == 1) { $label = ' fight'; } else { $label = ' fights'; }
+              echo ' → <span>'.$m->monster->fightNb.$label;
+              echo '  [Last fight : '.$m->monster->lastFightInterval.']</span>';
               echo '</li>';
             }
             echo '</ul>';
           } else {
-            echo '<p>Details are private.</p>';
+            echo "<p>You have never fought any monsters. You need +20UT on a monster to see it in the Fighting Zone.</p>";
           }
-        } else {
-          echo "<p>You haven't fought any monsters yet.</p>";
         }
         break;
       case 'battlereport' : // Battle report
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
-        /* $allBattles = $playerPage->get("name=history")->find("template=event, task.name~=battle"); */
         $allBattles = battleReport($playerPage);
-        if ($allBattles->count() > 0) {
-          echo '<p class="label label-primary">You have faced '.$allBattles->count().' monster attacks.</p>';
-          if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
-            echo '<ul class="utReport list-group list-unstyled">';
-            foreach ($allBattles as $m) {
-              echo '<li>'.$m->result.' : '.$m->summary.'';
-              echo ' ['.date('d/m', $m->date).']';
-              echo '</li>';
-            }
-            echo '</ul>';
+        if ($user->isSuperuser() || ($user->isLoggedin() && $user->name == $playerPage->login)) { // Admin is logged or user
+          if ($allBattles->count() > 0) {
+            echo '<p class="label label-primary">You have faced '.$allBattles->count().' monster attacks.</p>';
+              echo '<ul class="utReport list-group list-unstyled">';
+              foreach ($allBattles as $m) {
+                echo '<li>'.$m->result.' : '.$m->summary.'';
+                echo ' ['.date('d/m', $m->date).']';
+                echo '</li>';
+              }
+              echo '</ul>';
           } else {
-            echo '<p>Details are private.</p>';
+            echo "<p>You haven't faced any monster attacks yet.</p>";
           }
         } else {
-          echo "<p>You haven't faced any monster attacks yet.</p>";
+          echo '<p>Details are private.</p>';
         }
         break;
       case 'history' :

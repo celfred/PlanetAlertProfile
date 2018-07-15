@@ -72,7 +72,8 @@
         $today = new \DateTime("today");
         foreach($allMonsters as $m) {
           if (!$user->isSuperuser()) {
-            $m = setMonstersActivity($player, $m);
+            // Prepare player's training possibilities
+            setMonster($player, $m);
           } else { // Never trained (for admin)
             $m->isTrainable = 1;
             $m->lastTrainingInterval = -1;
@@ -183,8 +184,10 @@
                 foreach($allLines as $line) {
                   $pattern = '/\$.*?\$/';
                   preg_match($pattern, $line, $matches);
-                  $help = preg_replace('/\$/', '', $matches[0]);
-                  $listWords .= '- '.$help.'<br />';
+                  if ($matches) {
+                    $help = preg_replace('/\$/', '', $matches[0]);
+                    $listWords .= '- '.$help.'<br />';
+                  }
                 }
               }
               break;
@@ -194,27 +197,26 @@
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
           $out .= '<td>';
-          if (($m->utGain+$m->inClassUtGain) > 0) {
-            $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> +'.($m->utGain+$m->inClassUtGain).'</span> ';
+          if (!$user->isSuperuser()) {
+            if ($m->utGain > 0) {
+              $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> +'.$m->utGain.'</span> ';
+            } else {
+              $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span> 0</span> ';
+            }
           } else {
-            $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span> 0</span> ';
+              $out .= '[Admin]';
           }
           $out .= '</td>';
           // Last training session date
           $out .= '<td>';
-          switch ($m->lastTrainingInterval) {
-            case 0 :
-              $out .= "Today !";
-              break;
-            case 1 : 
-              $out .= "1 day ago.";
-              break;
-            case '-1' :
-              $out .= "Not trained yet.";
-              break;
-            default:
-              $out .= $m->lastTrainingInterval . " days ago.";
-              break;
+          if (!$user->isSuperuser()) {
+            if ($m->lastTrainingInterval != '') {
+              $out .= $m->lastTrainingInterval;
+            } else {
+              $out .= '-';
+            }
+          } else {
+              $out .= '[Admin]';
           }
           $out .= '</td>';
           $out .= '<td>';
@@ -251,13 +253,11 @@
         // Test if player is allowed to do the training session today
         $monster = $pages->get($input->get->id);
         $redirectUrl = $pages->get('name=underground-training')->url;
-
         if (!$user->isSuperuser()) {
-          $monster = setMonstersActivity($player, $monster);
+          setMonster($player, $monster);
         } else { // Never trained (for admin)
           $monster->isTrainable = 1;
           $monster->lastTrainingInterval = -1;
-          $monster->spaced = 0;
         }
         if ($monster->isTrainable == 0) { // Not allowed because of spaced repetition.
           // Redirect to training page
@@ -291,12 +291,11 @@
             $out .= '</div>';
             $out .= '<div class="panel-footer">';
             if (!$user->isSuperuser()) {
-              list($utGain, $inClassGain) = utGain($monster, $player);
-              $out .= '<p>Your global UT for this monster: '.($utGain+$inClassGain).'</p>';
+              list($utGain, $inClassUtGain) = utGain($monster, $player);
+              $out .= '<p>Your global UT for this monster: '.($utGain+$inClassUtGain).'</p>';
             }
             $out .= '</div>';
             $out .= '</div>';
-            /* $out .= '<h1><span class="glyphicon glyphicon-warning-sign"></span> Don\'t forget to save your result!</h1>'; */
             $out .= '</div>';
 
             $out .= '<div class="col-sm-9 text-center">';

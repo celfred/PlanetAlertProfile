@@ -5,8 +5,8 @@
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
   $team = $allTeams->get("name=$input->urlSegment1");
-  $rank = $team->rank->name;
   if ($input->urlSegment1 != 'no-team') {
+    $rank = $team->rank->name;
     $allPlayers = $allPlayers->find("team=$team, sort=group"); // Limit to team players
     
     // Build allGroups

@@ -41,15 +41,10 @@
       if ($user->isLoggedin()) {
         $player = $pages->get("template='player', login=$user->name");
         if (!$user->isSuperuser()) {
-          $page = setMonstersActivity($player, $page);
-          if ($page->allFightsNb > 0) {
-            switch ($page->lastFight->task->name) {
-              case 'fight-vv' : $result = '<span class="label label-success">VV</span>'; break;
-              case 'fight-v' : $result = '<span class="label label-success">V</span>'; break;
-              case 'fight-r' : $result = '<span class="label label-danger">R</span>'; break;
-              case 'fight-rr' : $result = '<span class="label label-danger">RR</span>'; break;
-              default : $result = '';
-            }
+          $page = setMonster($player, $page);
+          if ($page->fightNb > 0) {
+          } else {
+            $page->fightNb = 0;
           }
         } else { // Never trained (for admin)
           $page->isTrainable = 1;
@@ -60,12 +55,12 @@
         $out .= "<br /><br />";
         $out .= '<p>Your activity :</p>';
         $out .= '<ul>';
-        $out .= '<li><i class="glyphicon glyphicon-headphones"></i> <span class="label label-primary">'.$page->utGain.'</span>UT gained ';
+        $out .= '<li><i class="glyphicon glyphicon-headphones"></i> <span class="label label-primary">'.$page->utGain.' UT</span>';
         if ($page->isTrainable == 1) {
           $helmet = $pages->get("name=memory-helmet");
           $out .= '→ <a class="btn btn-primary" href="'.$pages->get("name=underground-training")->url.'?id='.$page->id.'"><img src="'.$helmet->image->getCrop("mini")->url.'" alt="Use the Memory Helmet" /> Use the Memory Helmet !</a>';
           if ($page->lastTrainingInterval != -1) {
-            $out .= '<p>Last training session : '.$page->lastTrainingInterval.' days ago.</p>';
+            $out .= '<p>Last training session : '.$page->lastTrainingInterval.'</p>';
           } else {
             $out .= '<p>You have never trained on this monster.</p>';
           }
@@ -73,7 +68,7 @@
           if ($page->lastTrainingInterval == 0) {
             $out .= '<p>Last training session : Today !</p>';
           } else {
-            $out .= '<p>Last training session : '.$page->lastTrainingInterval.' days ago.</p>';
+            $out .= '<p>Last training session : '.$page->lastTrainingInterval.'</p>';
           }
           if ($page->waitForTrain == 1) {
             $out .= '<p>You have to wait for tomorrow before training again on this monster.</p>';
@@ -82,11 +77,11 @@
           }
         }
         $out .= '</li>';
-        $out .= '<li><i class="glyphicon glyphicon-flash"></i> <span class="label label-primary">'.$page->allFightsNb.'</span> fights ';
+        $out .= '<li><i class="glyphicon glyphicon-flash"></i> <span class="label label-primary">'.$page->fightNb.' fight·s</span>';
         if ($page->isFightable == 1) {
           $out .= '→ <a class="btn btn-primary" href="'.$page->url.'"><i class="glyphicon glyphicon-flash"></i> Fight  the monster !</a>';
           if ($page->lastFightInterval != -1) {
-            $out .= '<p>Last Fight : '.$page->lastFightInterval.' days ago.</p>';
+            $out .= '<p>Last fight : '.$page->lastFightInterval.'</p>';
           } else {
             $out .= '<p>You have never fought this monster.</p>';
           }
@@ -102,8 +97,8 @@
           }
         }
         // Show last result
-        if (isset($result)) {
-          $out .= '<p>Last result : '.$result.'</p>';
+        if (isset($page->quality) && $page->fightNb > 0) {
+          $out .= '<p>Average result : '.averageLabel($page->quality).'</p>';
         }
         $out .= '</li>';
         $out .= '</ul>';
@@ -111,8 +106,14 @@
     $out .= '</div>';
     $out .= '<div class="col-sm-8 text-left">';
       $out .= "<br /><br />";
-      if ($page->mostTrained->team->name != "no-team" ) { $team = ' ['.$page->mostTrained->team->title.']'; } else { $team = ''; }
-      $out .= '<p><i class="glyphicon glyphicon-thumbs-up"></i> Most trained player : <span class="label label-success">'.$page->mostTrained->title.$team.' → '.$page->best.'UT</span></p>';
+      if ($page->mostTrained && $page->mostTrained->team->name != "no-team" ) { $team = ' ['.$page->mostTrained->team->title.']'; } else { $team = ''; }
+      $out .= '<p><i class="glyphicon glyphicon-thumbs-up"></i> Most trained player : ';
+      if ($page->mostTrained) {
+        $out .='<span class="label label-success">'.$page->mostTrained->title.$team.' → '.$page->best.'UT</span>';
+      } else {
+        $out .='Nobody !';
+      }
+      $out .= '</p>';
     $out .= '</div>';
     $out .= '</div>';
 
