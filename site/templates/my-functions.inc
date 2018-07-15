@@ -1552,7 +1552,7 @@ function setMonster($player, $monster) {
     if ($tmpCache->date) {
       $availableTrainDate = new \DateTime(date("Y-m-d", $tmpCache->date));
       $today = new \DateTime("today");
-      $monster->waitForTrain = $today->diff($availableTrainDate)->format("£r£a");
+      $monster->waitForTrain = $today->diff($availableTrainDate)->format("%r%a");
     } else {
       $monster->waitForTrain = 0;
     }
