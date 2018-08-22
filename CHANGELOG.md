@@ -34,7 +34,8 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
-## [v0.2.0] - 2018-08-19
+## [v0.2.0] - 2018-08-19
+
 ### Added
 - Multi-teacher access : profiles now exist. Teacher, player, and admin roles are now separate. This triggered many changes : new adminActions through Teacher Zone or Admin Zone, new restrictions because a teacher can choose his or her items / actions / periods / tasks...
 - Multi-language site : default is English, but French is available as well. The main teacher decides for his or her players. More translations could be added quite easily through PW tools.
@@ -68,6 +69,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 
 
 ## [v0.1.5] - 2018-07-15
+
 ### Added
 - tmp Page for players : Major update to manage trainings and fights activity. Each player has a child tmp page which is updated on every monster activity. This page is then used to display UT scores, fights scores, last dates... Loading time should be improved since no need to recalculate everything from player's complete history.
 - New tmp page is accessible for Admin on player's profile page
@@ -97,6 +99,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 
 
 ## [v0.1.4] - 2018-07-05
+
 ### Added
 - Memory potion : Players can buy a short text to memorize
 - Possibility to set no official period
@@ -128,6 +131,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 
 
 ## [v0.1.3] - 2018-06-24
+
 ### Added
 - Monster Attacks report (battles) is now displayed in player's profile : this allows to separate Monster Fights (thanks to the Memory Helmet) and regular in-class test results (named 'battles')
 - Logged player's mini-Profile is displayed on Newsboard (in place of PMA, see below) 
@@ -156,6 +160,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 
 
 ## [v0.1.2] - 2018-06-20
+
 ### Added
 - Admin's possibility to save actions (in adminTable) even though a player is ticked 'absent'.
 
@@ -169,6 +174,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Scoring scale for Motivation is more explicit in global reports
 
 ## [v0.1.1] - 2018-06-14
+
 ### Changed
 - Limit to Fights/Buy/Free actions in Team News thumbnails 
 - Limit to UT training in Team News footer
@@ -177,6 +183,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 
 
 ## [v0.1.0] - 2018-06-10
+
 Initial official release.
 
 ### Added
