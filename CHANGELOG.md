@@ -36,6 +36,8 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 
 ## [v0.2.0] - 2018-08-19
 
+Major update.
+
 ### Added
 - Multi-teacher access : profiles now exist. Teacher, player, and admin roles are now separate. This triggered many changes : new adminActions through Teacher Zone or Admin Zone, new restrictions because a teacher can choose his or her items / actions / periods / tasks...
 - Multi-language site : default is English, but French is available as well. The main teacher decides for his or her players. More translations could be added quite easily through PW tools.
