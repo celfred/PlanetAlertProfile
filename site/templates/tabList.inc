@@ -1,22 +1,34 @@
-<?php
+<?php namespace ProcessWire;
+
+  $out = '';
   $monthName = strtolower(date("F"));
   $monthId = $pages->get("name=$monthName")->id;
-  $currentPeriod = $pages->get("name=admin-actions")->periods;
+  $currentPeriod = $team->periods;
+
+  $out .= '<ul class="tabList list-inline">';
+
+  $class = $page->is("template=main-office") ? "active" : "";
+  $out .= '<li class="'.$class.'"><a href="'.$office->url.$team->name.'">'.$office->title.'</a></li>';
+  $class = $page->is("name=players") ? "active" : "";
+  $out .= '<li class="'.$class.'"><a href="'.$homepage->url.'players/'.$team->name.'">'.__("The team").'</a></li>';
+  $class = $page->is("name=world") ? "active" : "";
+  $out .= '<li class="'.$class.'"><a href="'.$homepage->url.'world/'.$team->name.'">'.__("The world").'</a></li>';
+  $class = $page->is("name=admintable") ? "active" : "";
+  $out .= '<li class="'.$class.'"><a href="'.$homepage->url.'adminTable/'.$team->name.'">'.__("Admin table").'</a></li>';
+  $class = $page->is("name=shop") ? "active" : "";
+  $out .= '<li class="'.$class.'"><a href="'.$shop->url.$team->name.'">'.$shop->title.'</a></li>';
+  $class = $page->is("name=makedonation") ? "active" : "";
+  $out .= '<li class="'.$class.'"><a href="'.$donation->url.$team->name.'">'.$donation->title.'</a></li>';
+  $class = $page->is("name=quiz") ? "active" : "";
+  $out .= '<li class="'.$class.'"><a href="'.$quiz->url.$team->name.'">'.$quiz->title.'</a></li>';
+
+  if (($user->isSuperuser() || $user->name == 'flieutaud') && $team->name != 'no-team') { // TODO Depends on teacher 
+    if ($currentPeriod != false) {
+      $out .= '<li><a target="_blank" href="'.$homepage->url.'report_generator/participation/'.$team->id.'/'.$currentPeriod->id.'?sort=title">'.__("Current period participation").'</a></li>';
+    }
+  }
+
+  $out .= '</ul>';
+
+  echo $out;
 ?>
-<ul class="tabList list-inline">
-  <li class="<?php if ($page->template=='main-office') { echo 'active'; } ?>"><a href="<?php echo $pages->get("name=main-office")->url.$team->name; ?>">Main Office</a></li>
-  <li class="<?php if ($page->is('name=players')) { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'players/'.$team->name; ?>">The team</a></li>
-  <li class="<?php if ($page->is('name=world')) { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'world/'.$team->name; ?>">The world</a></li>
-  <?php if ($user->isLoggedin() && !$user->isSuperuser()) { ?>
-    <li class="<?php if ($page->name=='shop') { echo 'active'; } ?>"><a class="" href="<?php echo $pages->get('/shop_generator')->url.$pages->get("template=player, login=$user->name"); ?>">The marketplace</a></li>
-  <?php } ?>
-  <?php if ( $user->isSuperuser()) { // Admin front-end ?>
-    <li class="<?php if ($page->name=='admintable') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'adminTable/'.$team->name; ?>">Admin table</a></li>
-    <li class="<?php if ($page->name=='shop') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'shop/'.$team->name; ?>">The marketplace</a></li>
-    <li class="<?php if ($page->is('name=makedonation')) { echo 'active'; } ?>"><a href="<?php echo $pages->get('name=makedonation')->url.$team->name; ?>">Donation</a></li>
-    <li class="<?php if ($page->name=='quiz') { echo 'active'; } ?>"><a href="<?php echo $homepage->url.'quiz/'.$team->name; ?>">Monster invasions</a></li>
-    <?php if ($currentPeriod != false) { ?>
-    <li><a target="_blank" href="<?php echo $homepage->url.'report_generator/participation/'.$team->id.'/'.$currentPeriod->id.'?sort=title'; ?>">Current period participation</a></li>
-    <?php } ?>
-  <?php } ?>
-</ul>

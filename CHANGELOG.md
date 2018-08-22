@@ -34,6 +34,39 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
+## [v0.2.0] - 2018-08-19
+### Added
+- Multi-teacher access : profiles now exist. Teacher, player, and admin roles are now separate. This triggered many changes : new adminActions through Teacher Zone or Admin Zone, new restrictions because a teacher can choose his or her items / actions / periods / tasks...
+- Multi-language site : default is English, but French is available as well. The main teacher decides for his or her players. More translations could be added quite easily through PW tools.
+- Versioning is now based on 'second number reflects back-end changes', i.e. in v0.2.0, the 2 illustrates the fact that back-end has heavily changed from v.0.1.5. 
+- Version number in footer
+
+### Changed
+- No team players now have a paginated team list and personal free world statistics to face the 350 users loading issue. It's a first draft.
+- Official periods is now integrated in 'team' template and is set by team main teacher
+- Ranks are now index based to deal with all schools levels (primary through high-school)
+- Planet Alert internal tasks are now indicated by the adminOnly checkbox
+- New back-end modules : see below
+- Memory potions texts are managed differently : no more need of index field
+
+### Backend (Many changes)
+- New fields : owner, periodOwner, textOwner (to operate with teachers variations), teacher, teacherTitle, singleTeacher, memoryPotionTexts, instructions, version...
+- New templates : tasks, categories, topics, groups,... (to operate with new teachers permissions), teacherProfile
+- New roles : teacher, player
+- Adapted permissions
+- Multi-language fieldtypes for title, summary, body, answer, question, instructions
+- New module : FrontEndEditLightbox : used to simplify teacher (and admin) front-end edit
+- New module : LimitRepeater to restrict teacher edit capabilities in repeater fields
+- Install Languages Support modules
+
+### Removed
+- frenchSummary field : now included through multi-language fieldtypes
+- index field from memory-text template
+
+### Security
+- More restrictive file and folder access rights (in config.php)
+
+
 ## [v0.1.5] - 2018-07-15
 ### Added
 - tmp Page for players : Major update to manage trainings and fights activity. Each player has a child tmp page which is updated on every monster activity. This page is then used to display UT scores, fights scores, last dates... Loading time should be improved since no need to recalculate everything from player's complete history.
@@ -61,6 +94,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 	- index (not new)
 - New Places added
 - Updated worldmap with Places numbers in download area
+
 
 ## [v0.1.4] - 2018-07-05
 ### Added
@@ -167,3 +201,4 @@ Initial official release.
 [v0.1.3]: https://framagit.org/celfred/planetAlert/tags/v0.1.3
 [v0.1.4]: https://framagit.org/celfred/planetAlert/tags/v0.1.4
 [v0.1.5]: https://framagit.org/celfred/planetAlert/tags/v0.1.5
+[v0.2.0]: https://framagit.org/celfred/planetAlert/tags/v0.2.0

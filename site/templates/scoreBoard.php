@@ -128,7 +128,7 @@
     $field = $input->get('id');
     $player = $pages->get("login=$user->name");
     $limit = 5;
-    if ($user->isLoggedin() && !$user->isSuperuser()) {
+    if ($user->hasRole('player') && !$user->isSuperuser()) {
       list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, false);
     } else {
       $player = '';

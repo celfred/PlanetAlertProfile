@@ -5,12 +5,12 @@ namespace ProcessWire;
 
   // Admin news
   if ($user->isLoggedin()) {
-    if ($user->isSuperuser()) {
-      // Admin gets all news
+    if ($user->isSuperuser() || $user->hasRole('teacher')) { // Admin and teacher get all news
       $newsAdmin = $pages->get("/newsboard")->children("limit=5")->sort("-created");
     } else {
-      // User gets public and ranked news
-      $newsAdmin = $pages->get("/newsboard")->children("limit=5, public=0|1, ranks=''|$player->rank")->sort("-created");
+      if ($user->hasRole('player')) { // Players get public and ranked news
+        $newsAdmin = $pages->get("/newsboard")->children("limit=5, public=0|1, ranks=''|$player->rank")->sort("-created");
+      }
     }
   } else { // Guests get public news only
     $newsAdmin = $pages->get("/newsboard")->children("limit=5, public=1")->sort("-created");
@@ -29,7 +29,7 @@ namespace ProcessWire;
           <?php
           $logo = $homepage->photo->eq(0)->size(40,40); 
           echo '<img src="'.$logo->url.'" alt="" /> ';
-          echo date("F d, Y", $n->created);
+          echo strftime("%d %b %Y", $n->created);
           echo ' - ';
           echo 'Official Announcement : '.$n->title;
           if ($n->public == 0) {
@@ -49,15 +49,17 @@ namespace ProcessWire;
          <?php
          echo $n->body;
          echo '<br />';
-         echo '<a role="button" class="" data-toggle="collapse" href="#collapseDiv'.$n->id.'" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
-         echo '<div class="collapse" id="collapseDiv'.$n->id.'"><div class="well">';
-         if ($n->frenchSummary != '') {
-           echo $n->frenchSummary;
-         } else {
-           echo 'French version in preparation, sorry ;)';
-         }
-         echo '</div>';
-         echo '</div>';
+        if ($user->language->name != 'french') {
+          $n->of(false);
+          if ($n->body->getLanguageValue($french) != '') {
+            echo '<a class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
+            echo '<div class="collapse" id="collapseDiv">';
+            echo '<div class="well">';
+            echo nl2br($n->body->getLanguageValue($french));
+            echo '</div>';
+            echo '</div>';
+          }
+        }
          ?>
          </div>
          <?php

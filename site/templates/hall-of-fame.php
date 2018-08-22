@@ -9,7 +9,7 @@ $out = '';
 $out .= '<section class="row">';
 $out .= '<h1 class="well text-center">';
 $out .= $page->title;
-$out .= '<span class="pull-right" data-toggle="tooltip" title="The higher your level is, the bigger your avatar is ;)"><span class="glyphicon glyphicon-question-sign"></span></span>';
+$out .= '<span class="pull-right" data-toggle="tooltip" title="'.__("The higher your level is, the bigger your avatar is ;)").'"><span class="glyphicon glyphicon-question-sign"></span></span>';
 $out .= '</h1>';
 
 $out .= '<div class="grid">';
@@ -26,7 +26,7 @@ foreach ($allPlayers as $p) {
     if ($p->level > 17 && $p->level<=22) { $class = 'grid-item--width4'; }
     if ($p->level > 22) { $class = 'grid-item--width5'; }
     $out .= '<div class="'.$class.' playerDiv">';
-    $out .= '<a href="'.$p->url.'"><img class="img-thumbnail" data-toggle="tooltip" data-html="true" title="'.$p->title.$team.'<br />Level '.$p->level.'" src="'.$p->avatar->url.'" alt="avatar" /></a>';
+    $out .= '<a href="'.$p->url.'"><img class="img-thumbnail" data-toggle="tooltip" data-html="true" title="'.$p->title.$team.'<br />'.__("Level").' '.$p->level.'" src="'.$p->avatar->url.'" alt="avatar" /></a>';
     $out .= '</div>';
   }
 }

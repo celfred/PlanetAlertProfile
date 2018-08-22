@@ -13,9 +13,50 @@ $(document).ready(function() {
     $(id).hide();
   });
 
+	$('a.frenchVersion').on('click', function() {
+		$('div.frenchVersion').toggle();
+		return false;
+	});
+
+	$('.publishElement').on('click', function() {
+		var href = $(this).attr('href');
+		var $this = $(this);
+    $this.html("<p>Saving...</p>"); 
+    $.get(href, function(data) { 
+			$this.prev().removeClass('strikeText');
+			$this.remove();
+    }); 
+    return false; 
+	});
+
+	$('.selectElement').on('click', function() {
+    $("#ajaxViewport").html("<p>Saving...</p>"); 
+		var href = $(this).attr('href');
+		$el = $(this).parent('li');
+		var $this = $(this);
+		$parentId = $el.parent().prop('id');
+    $.get(href, function(data) { 
+			$("#ajaxViewport").html(''); 
+			if ($parentId == 'teacherElements') {
+				$('#notTeacherElements').append($el);
+			} else {
+				$('#teacherElements').append($el);
+			}
+    }); 
+    return false; 
+	});
+
+	$('.teamOption').on('click', function() {
+    $("#ajaxViewport").html("<p>Loading...</p>"); 
+		var href = $(this).attr('href');
+    $.get(href, function(data) { 
+			$("#ajaxViewport").html(data); 
+    }); 
+    return false; 
+  }); 
+
   $(".adminAction").on('click', function() {
     $("#ajaxViewport").html("<p>Loading...</p>"); 
-    
 		var playerId = $('#playerId').val();
 		if (playerId == '-1' || playerId == null) {
 			var teamId = $('#teamId').val(); 
@@ -86,6 +127,34 @@ $(document).ready(function() {
 					});
 				});
 			}
+		});
+	});
+
+	$('.basicConfirm').on('click', function() {
+		$this = $(this);
+		$reload = $this.attr("data-reload");
+		swal({
+			title: "Are you sure?",
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes!",
+		}).then( function(isConfirm) {
+			var href = $this.attr('data-href');
+			$this.next('.proceedFeedback').html("Saving...");
+			$('.notification').remove();
+			if ($reload == 'false') {
+				$.get(href, function(data) { 
+					$this.next('.proceedFeedback').html("Saved!");
+					$('#wrap').prepend(data);
+					setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
+				}); 
+			} else {
+				window.location.href = href;
+			}
+		}, function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 		});
 	});
 

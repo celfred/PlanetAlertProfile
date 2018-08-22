@@ -1,7 +1,7 @@
 <?php namespace ProcessWire; /* tmp template */
   include("./head.inc"); 
 
-  if ($user->isSuperuser()) {
+  if ($user->isSuperuser() || $user->hasRole('teacher')) {
     $tmpPages = $page->tmpMonstersActivity;
     $tmpPages->sort("monster.name");
 

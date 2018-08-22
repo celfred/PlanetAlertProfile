@@ -25,31 +25,31 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test pla
       $out .= '<h2>';
         $out .= '<img class="" src="'.$visualizer->image->getCrop("small")->url.'" alt="image" /> ';
         $out .= $visualizer->title;
-        $out .= ' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="All monsters are visible. The bigger the monster is, the closest to you it is. This means you should take action !"></i>';
+        $out .= ' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.__("All monsters are visible. The bigger the monster is, the closest to you it is. This means you should take action !").'"></i>';
       $out .= '</h2>';
       $out .= '<p class="text-center">';
-        $out .= 'Limit to ';
-        $out .= '<button class="limitButton btn btn-success" id="limitAll">All monsters</button>';
+        $out .= __('Limit to ');
+        $out .= '<button class="limitButton btn btn-success" id="limitAll">'.__("All monsters").'</button>';
         $out .= ' ';
-        $out .= '<button class="limitButton btn btn-primary" id="limitTrainable"><i class="glyphicon glyphicon-headphones"></i> monsters I can TRAIN on</button>';
+        $out .= '<button class="limitButton btn btn-primary" id="limitTrainable"><i class="glyphicon glyphicon-headphones"></i> '.__("monsters I can TRAIN on").'</button>';
         $out .= ' ';
-        $out .= '<button class="limitButton btn btn-primary" id="limitFightable"><i class="glyphicon glyphicon-flash"></i> monsters I can FIGHT</button>';
+        $out .= '<button class="limitButton btn btn-primary" id="limitFightable"><i class="glyphicon glyphicon-flash"></i> '.__("monsters I can FIGHT").'</button>';
         $out .= ' ';
-        $out .= '<button class="limitButton btn btn-primary" id="limitNever"><i class="glyphicon glyphicon-remove"></i> monsters I have NEVER trained on</button>';
+        $out .= '<button class="limitButton btn btn-primary" id="limitNever"><i class="glyphicon glyphicon-remove"></i> '.__("monsters I have NEVER trained on").'</button>';
       $out .= '</p>';
     $out .= '</section>';
 
     $allMonsters->sort('level, title');
     $previousLevel = 1;
-    $out .= '<p class="label label-danger">Level 1</p>';
+    $out .= '<p class="label label-danger">'.__("Level 1").'</p>';
     $out .= '<div class="grid">';
     foreach ($allMonsters as $m) {
-      if ($m->level !== $previousLevel) { $out .= '</div><p class="label label-danger">Level '.$m->level.'</p><div class="grid">'; }
-      if (!$user->isSuperuser() && $user->isLoggedin() && isset($player)) {
+      if ($m->level !== $previousLevel) { $out .= '</div><p class="label label-danger">'.__("Level").' '.$m->level.'</p><div class="grid">'; }
+      if ($user->hasRole('player')) {
         if ($player->equipment->has('name=memory-helmet')) {
           $m = setMonster($player, $m);
         }
-      } else { // Never trained (for admin)
+      } else { // Never trained (for admin/teachers)
         $m->isTrainable = 1;
         $m->isFightable = 1;
         $m->lastTrainingInterval = -1;
@@ -87,12 +87,11 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test pla
     $out .= '</section>';
   } else {
     $out = '';
-    $shop = $pages->get("name=shop");
-    $out .= '<p>Your group has to buy the <a href="'.$shop->url.'/details/electronic-visualizer">Electronic Visualizer</a> to access this page.</p>';
+    $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
+    $out .= '<p>'.sprintf(__("Your group has to buy the %s to access this page."), $link).'</p>';
   }
 } else {
-  $out = '';
-  $out .= '<p>You need to log in to access this page.</p>';
+  $out = $noAuthMessage;
 }
 
 echo $out;

@@ -2,12 +2,13 @@
 
 include("./head.inc"); 
 
-$out = '';
-if ($user->isSuperuser()) {
+if ($user->hasRole('teacher') || $user->isSuperuser()) {
   // Nav tabs
   $team = $pages->get("template=team, name=$input->urlSegment1");;
   include("./tabList.inc"); 
   
+  $out = '';
+
   if ($input->post->quizFormSubmit) {
     $quizzing = true;
   } else {
@@ -39,8 +40,8 @@ if ($user->isSuperuser()) {
 
   $selectedTeam = $input->urlSegment1;
   $selectedIds = $input->post->selected; // Checked players
-  $rank = $pages->get("template=team, name=$selectedTeam")->rank->name;
-  if ( $rank == '4emes' || $rank == '3emes' ) {
+  $rank = $pages->get("template=team, name=$selectedTeam")->rank->index;
+  if ($rank >= 8) {
     $allPlayers = $allPlayers->find("team=$team"); // Limit to team players
     $allConcerned = new pageArray();
     $notConcerned = new pageArray();
@@ -58,13 +59,13 @@ if ($user->isSuperuser()) {
     $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');
   }
   $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador");
-  if ( $ambassadors->count() == 0 ) { 
-    $ambassadors = 'Nobody.';
+  if ($ambassadors->count() == 0 ) { 
+    $ambassadorsNames = __('Nobody.');
     $ambassadorsButton = '';
   } else {
     $ambassadorsNames = $ambassadors->implode(', ', '{title}');
     $ambassadorsIds = $ambassadors->implode(', ', '{id}');
-    $ambassadorsButton = ' <a class="btn btn-info btn-sm pickFromList" data-list="'.$ambassadorsIds.'">Pick a player</a>';
+    $ambassadorsButton = ' <a class="btn btn-info btn-sm pickFromList" data-list="'.$ambassadorsIds.'">'.__('Pick a player').'</a>';
   }
 
   $out .= '<div id="ajaxDecision" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="ambassador"></div>';
@@ -110,12 +111,14 @@ if ($user->isSuperuser()) {
       $out .= '<div class="well quiz">';
         $logo = $homepage->photo->eq(0)->getCrop('thumbnail');
         $out .= '<img class="monster" src="'.$logo->url.'" />';
-        $out .= '<img class="avatar" src="'.$player->avatar->url.'" />';
+        if ($player->avatar) {
+          $out .= '<img class="avatar" src="'.$player->avatar->url.'" />';
+        }
         $out .= '<h1 class="playerName">'.$player->title.'</h1>';
-        $out .= '<h3>Monster invasion ! Team '.$player->team->title.' has to react!</h3>';
+        $out .= '<h3>'.__("Monster invasion ! Your team has to react!").'</h3>';
         // Stats analysis
         $out .= '<h4 class="">';
-          $out .= '<span class="">Your stats on this element → </span>';
+          $out .= '<span class="">'.__("Your stats on this element").' → </span>';
           $out .= '<span class="label label-success">'.$quiz['stats']['0'].' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
           $out .= ' <span class="label label-danger">'.$quiz['stats']['1'].' <i class="glyphicon glyphicon-thumbs-down"></i></span>';
           if ($quiz['stats']['1'] == 2) { $out .= ' <span class="blink"><i class="glyphicon glyphicon-warning-sign"></i></span>'; }
@@ -138,7 +141,7 @@ if ($user->isSuperuser()) {
             $out .= '<img src="'.$photo->url.'" alt="Photo" />';
           $out .= '</section>';
         }
-        $out .= '<a id="showAnswer" class="label label-info lead">[Check answer]</a>';
+        $out .= '<a id="showAnswer" class="label label-info lead">['.__('Check answer').']</a>';
         $out .= '<h2 id="answer" class="lead text-center">';
         $out .= $quiz['answer'];
         $out .= '</h2>';
@@ -149,26 +152,26 @@ if ($user->isSuperuser()) {
         $out .= '<p class="text-center">';
         $out .= '<button class="btn btn-info generateQuiz" type="submit" name="reloadButton" value="update" title="Re-generate"><span class="glyphicon glyphicon-refresh"></span></button>';
         $out .= '&nbsp;&nbsp;';
-        $out .= '<button class="btn btn-success generateQuiz" type="submit" name="RightButton" value="right"><span class="glyphicon glyphicon-ok"></span> Right</button>';
+        $out .= '<button class="btn btn-success generateQuiz" type="submit" name="RightButton" value="right"><span class="glyphicon glyphicon-ok"></span> '.__('Right').'</button>';
         $out .= '&nbsp;&nbsp;';
-        $out .= '<button class="btn btn-danger generateQuiz" type="submit" name="WrongButton" value="wrong"><span class="glyphicon glyphicon-remove"></span> Wrong</button>';
+        $out .= '<button class="btn btn-danger generateQuiz" type="submit" name="WrongButton" value="wrong"><span class="glyphicon glyphicon-remove"></span> '.__('Wrong').'</button>';
         $out .= '&nbsp;&nbsp;';
-        $out .= '<label for="lastQuestion"><input type="checkbox" id="lastQuestion" name="lastQuestion" /> Last question</label>';
+        $out .= '<label for="lastQuestion"><input type="checkbox" id="lastQuestion" name="lastQuestion" /> '.__('Last question').'</label>';
         $out .= '</p>';
 
       $out .= '</div>';
     }
-    $out .= '<button type="submit" name="quizFormSubmitButton" class="btn btn-info btn-block generateQuiz">Generate</button>';
+    $out .= '<button type="submit" name="quizFormSubmitButton" class="btn btn-info btn-block generateQuiz">'.__('Generate').'</button>';
 
     // Players list display
     $out .= '<section class="well">';
-    $out .= '<button id="toggle" class="btn btn-default">Toggle list</button>';
+    $out .= '<button id="toggle" class="btn btn-default">'.__('Toggle list').'</button>';
     $out .= '<div id="quizMenu" class="'.$display.'">';
-    $out .= '<p>You need at least 3 free elements to appear in the list.</p>';
+    $out .= '<p>'.__("You need at least 3 free elements to appear in the list.").'</p>';
     $out .= '<ul class="list-group">';
       foreach($allConcerned as $p) {
           $details = "({$p->nbInvasions} inv. / ";
-          if ( $rank == '4emes' || $rank == '3emes' ) {
+          if ( $rank >= 8) {
             $freeElements = $p->places->count()+$p->people->count();
           } else {
             $freeElements = $p->places->count();
@@ -176,32 +179,32 @@ if ($user->isSuperuser()) {
           $details .= "{$freeElements} el.)";
           $out .= "<li class='list-group-item'><label for='ch[{$p->id}]'><input type='checkbox' id='ch[{$p->id}]' name='selected[]' value='{$p->id}' {$p->checked}'> {$p->title} {$details}</label></li>";
       }
-      $out .= '<button id="tickAll" class="btn btn-success btn-sm">Tick all</button>';
-      $out .= '<button id="untickAll" class="btn btn-danger btn-sm">Untick all</button>';
+      $out .= '<button id="tickAll" class="btn btn-success btn-sm">'.__('Tick all').'</button>';
+      $out .= '<button id="untickAll" class="btn btn-danger btn-sm">'.__('Untick all').'</button>';
     $out .= '</ul>';
     // Ambassadors
-    $out .= '<p>Ambassadors : '.$ambassadorsNames;
+    $out .= '<p>'.__('Ambassadors').' : '.$ambassadorsNames;
     $out .= $ambassadorsButton;
     $out .= '</p>';
     $out .= '<h3 class="text-center"><span id="honored" class="label label-primary"></span></h3>';
     // Not concerned
-    $out .= '<p>(Not concerned : '.$notConcerned.')</p>';
+    $out .= '<p>('.__('Not concerned').' : '.$notConcerned.')</p>';
     $out .= '</div>';
     $out .= '</section>';
-    $out .= '<input type="hidden" name="quizFormSubmit" value="Save" />';
+    $out .= '<input type="hidden" name="quizFormSubmit" value="'.__('Save').'" />';
     $out .= '</form>';
-    
   }
-
 } else {
-  if ($user->isLoggedin()) {
+  if ($user->hasRole('player')) {
+    $out = '';
     $player = $pages->get("login=$user->name");
 
     $quiz = pick_question($player);
     $out .= '<div class="well quiz">';
       $logo = $homepage->photo->eq(0)->getCrop('thumbnail');
       $out .= '<img class="monster" src="'.$logo->url.'" />';
-      $out .= '<h3>Defensive preparation ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="This is a simple practice area. Click on \'Check answer\' below to see the solution. Then you can click on \'Next question\'. Stop the session when you\'re tired :)"></span></h3>';
+      $out .= '<h3>'.__("Defensive preparation !");
+      $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("This is a simple practice area. Click on 'Check answer' below to see the solution. Then you can click on 'Next question'. Stop the session when you're tired :)").'"></span></h3>';
       $out .= '<h2 class="alert alert-danger text-center">';
       $out .= $quiz['question'].'&nbsp;&nbsp;';
       $out .= '</h2>';
@@ -220,17 +223,15 @@ if ($user->isSuperuser()) {
           $out .= '<img src="'.$photo->url.'" alt="Photo" />';
         $out .= '</section>';
       }
-      $out .= '<a id="showAnswer" class="label label-info lead">[Check answer]</a>';
+      $out .= '<a id="showAnswer" class="label label-info lead">'.__("[Check answer]").'</a>';
       $out .= '<h2 id="answer" class="lead text-center">';
       $out .= $quiz['answer'];
-      $out .= ' <a class="btn btn-primary" href="'.$page->url.'">Next question</a>';
+      $out .= ' <a class="btn btn-primary" href="'.$page->url.'">'.__("Next question").'</a>';
       $out .= '</h2>';
     $out .= '</div>';
-
   } else {
-    $out = '<p>You need to be logged in to access this page.</p>';
+    $out = $noAuthMessage;
   }
-
 }
 
 echo $out;

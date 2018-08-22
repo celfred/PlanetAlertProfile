@@ -1,14 +1,14 @@
 <?php namespace ProcessWire; /* All places template */
   include("./head.inc"); 
 
-  if ($user->isLoggedin() && !$user->isSuperuser()) { // Show player's mini-profile
+  if ($user->hasRole('player')) { // Show player's mini-profile
     echo '<div class="row well text-center">';
       echo miniProfile($player, 'places');
     echo '</div>';
   }
 
-  if ($user->isSuperuser()) {
-    echo '<a class="pdfLink btn btn-info" href="'. $page->url.'all?pages2pdf=1">Get PDF [The Map]</a>';
+  if ($user->isSuperuser() || $user->hasRole('teacher')) {
+    echo '<a class="pdfLink btn btn-info" href="'. $page->url.'all?pages2pdf=1">'.__("Get PDF [The Map]").'</a>';
   }
 
   // Get any limiting elements in URL
@@ -49,17 +49,17 @@
   ?>
   <div class="row">
     <div class="text-center">
-    <h2><a href="<?php echo $pages->get('name=map')->url; ?>">See complete Planet Alert World map</a></h2>
+    <h2><a href="<?php echo $pages->get('name=map')->url; ?>"><?php echo __("See complete Planet Alert World map"); ?></a></h2>
       <?php
         if ($formattedName) {
-          echo "<h2>Places in : {$formattedName} ({$selectedPlaces->count()})</h2>";
+          echo "<h2>".__('Places in')." : {$formattedName} ({$selectedPlaces->count()})</h2>";
         } else {
-          echo "<h2>All places ({$totalCount})</h2>";
+          echo "<h2>".__('All places')." ({$totalCount})</h2>";
         }
       ?>
-      <a class="btn btn-info" href="<?php echo $page->url; ?>">See ALL places</a>
+        <a class="btn btn-info" href="<?php echo $page->url; ?>"><?php echo __('See ALL places'); ?></a>
       <div class="dropdown btn-group">
-        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">Select a country <span class="caret"></span></button>
+      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"><?php echo __('Select a country'); ?> <span class="caret"></span></button>
         <ul class="dropdown-menu" role="menu">
           <?php
             foreach($countries as $country) {
@@ -69,7 +69,7 @@
         </ul>
       </div>
       <div class=" dropdown btn-group">
-        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">Select a city <span class="caret"></span></button>
+      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"><?php echo __('Select a city'); ?> <span class="caret"></span></button>
         <ul class="dropdown-menu" role="menu">
           <?php
             foreach($cities as $city) {
@@ -78,7 +78,7 @@
           ?>
         </ul>
       </div>
-      <span id="switchGallery" class="btn btn-primary" onclick="">Change view</span>
+      <span id="switchGallery" class="btn btn-primary" onclick=""><?php echo __('Change view'); ?></span>
     </div>
 
   <div id="galleryPlacesList" class="text-center">
@@ -127,7 +127,7 @@
   </div>
 
   <?php 
-    if ($user->isLoggedin() && !$user->isSuperuser()) {
+    if ($user->hasRole('player')) {
       echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
     }
   ?>

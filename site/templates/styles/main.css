@@ -21,6 +21,18 @@ body {
 }
 */
 
+div.frenchVersion {
+	display: none;
+	border: 2px solid #000;
+	border-radius: 15px;
+	width: 80%;
+	position: absolute;
+	background: #FFF;
+	left: 5%;
+	top: 5%;
+	padding: 10px;
+}
+
 .loginForm {
 	border: 2px solid #000;
 	border-radius: 20px;
@@ -679,7 +691,7 @@ img.align_right {
 table.adminTable > thead > tr > th {
   padding: 0;
 }
-.adminTable th {
+.adminTable .dark {
   border: 1px solid #000;
   background-color: #313131;
   color: #FFF;

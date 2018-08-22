@@ -1,30 +1,37 @@
+<?php namespace ProcessWire; ?>
       </div><!-- /#content -->
     </div><!-- /.row -->
   <div class="push"><!--//--!></div>
   </div><!-- /.container -->
 </div><!--/wrap-->
 
-	<?php if ($user->isSuperuser()) { ?>
-		<section class="navigate">
-			<a href="#" id="scrollUp"><span class="glyphicon glyphicon-triangle-top"></span></a>
-			<a href="#" id="scrollDown"><span class="glyphicon glyphicon-triangle-bottom"></span></a>
-		</section>
-	<?php } ?>
+<?php if ($user->isSuperuser()) { ?>
+  <section class="navigate">
+    <a href="#" id="scrollUp"><span class="glyphicon glyphicon-triangle-top"></span></a>
+    <a href="#" id="scrollDown"><span class="glyphicon glyphicon-triangle-bottom"></span></a>
+  </section>
+<?php } ?>
 
-  <footer class="text-center">
-      <p>Powered by <a href='http://processwire.com'>ProcessWire</a> OpenSource CMS (v.<?php echo $config->version; ?>)- &copy; <?php echo date("Y"); ?> F.L. 
-        <a href="about/">[About]</a>
-        &nbsp;
-        <a href="https://framagit.org/celfred/planetAlert">[Framagit repository]</a>
-      </p>
-	</footer>
+<footer class="text-center">
+  <p>Planet Alert <?php echo $homepage->version; ?>
+    &nbsp;&copy; <?php echo date("Y"); ?> FL 
+    &nbsp;-&nbsp;
+    Powered by <a href="http://processwire.com">ProcessWire</a> CMS (v<?php echo $config->version; ?>)
+    &nbsp;
+    <a href="about/">[<?php echo $pages->get("name=about")->title; ?>]</a>
+    &nbsp;
+    <a href="https://framagit.org/celfred/planetAlert"><?php echo __('[Framagit repository]'); ?></a>
+   </p>
+</footer>
 
-	<?php 
+<?php 
   if ($user->isSuperuser()) {
     echo '<span class="backendLink">';
     echo '<a href="'.$config->urls->admin.'">[Backend]</a>';
     echo '</span>';
-  }
+} else if ($user->hasRole('teacher')) {
+  echo '<span class="backendLink">'.__("Teacher").'</span>';
+}
 
 	?>
   <script src="<?php echo $config->urls->templates?>bower_components/jquery/dist/jquery.min.js"></script>

@@ -1,6 +1,10 @@
 <?php namespace ProcessWire;
+  include('./my-functions.inc'); // Planet Alert PHP functions
 
-  if ($user->isLoggedin() && $user->isSuperuser() == false) {
+  $headTeacher = getHeadTeacher($user);
+  $user->language = $headTeacher->language;
+
+  if ($user->hasRole('player')) {
     // Get logged in player
     $player = $pages->get("template=player, login=$user->name");
     $player->of(false);
@@ -15,10 +19,15 @@
       $task->refPage = $lesson;
       updateScore($player, $task, true);
       // Notify admin
+      // TODO : Notify main teacher
       $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
       $msg .= "Buy PDF : ". $lesson->title."\r\n";
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-        mail("planetalert@tuxfamily.org", "buyPdf", $msg, "From: planetalert@tuxfamily.org");
+        if ($headTeacher && $headTeacher->email != '') {
+          mail($headTeacher->email, "buyPdf", $msg, "From: planetalert@tuxfamily.org");
+        } else {
+          mail($users->get("name=admin")->email, "buyPdf", $msg, "From: planetalert@tuxfamily.org");
+        }
       }
     }
 
@@ -27,7 +36,7 @@
       $task = $pages->get($input->get->taskId);
       $refPage = $pages->get($input->get->lessonId);
       if ($task->is("name=extra-homework|very-extra-homework")) {
-        $task->comment = "Good Copy work";
+        $task->comment = __("Good Copy work");
         $task->refPage = $refPage;
         $task->linkedId = false;
         // Only 1 pending lesson allowed for a player
@@ -36,10 +45,14 @@
           savePendingLesson($player, $task);
         }
         // Notify admin
-        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
-        $msg .= "Copied lesson : ". $refPage->title."\r\n";
+        $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+        $msg .= __("Copied lesson")." : ". $refPage->title."\r\n";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-          mail("planetalert@tuxfamily.org", "bookForm", $msg, "From: planetalert@tuxfamily.org");
+          if ($headTeacher && $headTeacher->email != '') {
+            mail($headTeacher->email, "bookForm", $msg, "From: planetalert@tuxfamily.org");
+          } else {
+            mail($users->get("name=admin")->email, "bookForm", $msg, "From: planetalert@tuxfamily.org");
+          }
         }
       }
     }
@@ -83,7 +96,6 @@
       if ($newItem->GC <= $player->GC && $already != true) { // Final 'security' check
         updateScore($player, $task, true);
         // No need to checkDeath, Buyform can't cause death
-        // Notify admin
         $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
         $msg .= "Item : ". $newItem->title;
       } else {
@@ -92,9 +104,12 @@
         $msg .= "Item : ". $newItem->title."\r\n";
         $msg .= "An error has occurred.";
       }
-
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-        mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+        if ($headTeacher && $headTeacher->email != '') {
+          mail($headTeacher->email, "buyForm", $msg, "From: planetalert@tuxfamily.org");
+        } else {
+          mail($users->get("name=admin")->email, "buyForm", $msg, "From: planetalert@tuxfamily.org");
+        }
       }
     }
 
@@ -147,7 +162,11 @@
           $msg .= "Item : ". $newItem->title;
           /* $msg .= "Item : ". $newItem->title.$error; */
           if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-            mail("planetalert@tuxfamily.org", "buyForm", $msg, "From: planetalert@tuxfamily.org");
+            if ($headTeacher && $headTeacher->email != '') {
+              mail($headTeacher->email, "buyForm", $msg, "From: planetalert@tuxfamily.org");
+            } else {
+              mail($users->get("name=admin")->email, "buyForm", $msg, "From: planetalert@tuxfamily.org");
+            }
           }
         }
       }
@@ -174,7 +193,11 @@
         $msg .= "Donation amount : ". $amount."\r\n";
         $msg .= "Donated to : ". $receiver->title." [".$receiver->team->title."]";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-          mail("planetalert@tuxfamily.org", "donationForm", $msg, "From: planetalert@tuxfamily.org");
+          if ($headTeacher && $headTeacher->email != '') {
+            mail($headTeacher->email, "donationForm", $msg, "From: planetalert@tuxfamily.org");
+          } else {
+            mail($users->get("name=admin")->email, "donationForm", $msg, "From: planetalert@tuxfamily.org");
+          }
         }
       }
     }
@@ -189,7 +212,7 @@
     echo json_encode(array("sender"=>"donationForm", "url"=>$url));
   }
 
-  if ($user->isSuperuser()) { // Admin front-end
+  if ($user->hasRole('teacher') || $user->isSuperuser()) {
     // Unpublish News from Newsboard
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
@@ -277,7 +300,7 @@
       $pending->trash();
     }
 
-    if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, for example
+    if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, memory potion...
       $player = $pages->get($input->get->playerId);
       $task = $pages->get($input->get->taskId);
       if (isset($input->get->type) && $input->get->type == 'memory') {
@@ -440,5 +463,5 @@
         echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
       }
     }
-  } // End if superUser
+  }
 ?>

@@ -1,7 +1,7 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
-  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test player login
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $player->team->forceHelmet == 1) {
@@ -17,30 +17,29 @@
           $allMonsters = $pages->find('template=exercise, sort=name, include=all');
         } else {
           // Check if player has the Visualizer (or forced by admin)
-          if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
-            $allMonsters = $pages->find('template=exercise, sort=name');
+          if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
+            $allMonsters = $pages->find("template=exercise, teacher=$headTeacher, sort=name");
           } else {
-            $allMonsters = $pages->find('template=exercise, special=0, sort=name');
+            $allMonsters = $pages->find("template=exercise, teacher=$headTeacher, special=0, sort=name");
             $hiddenMonstersNb = $pages->count("template=exercise, special=1");
           }
         }
         $out .= '<br />';
         $out .= '<div class="well">';
-        $out .= '<h2 class="text-center">Underground Training Zone';
+        $out .= '<h2 class="text-center">'.$page->title;
         if ($helmet->image) {
           $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
         }
         $out .= '</h2>';
-        $out .= '<p class="text-center">'.$page->summary;
-        $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->frenchSummary.'"></span>';
-        $out .= '</p>';
+        $out .= '<p class="text-center">'.$page->summary.'</p>';
 
         $out .= '<h4 class="text-center">';
-        $out .= 'There are currently '.$allMonsters->count().' monsters detected.';
+        $out .= sprintf(__("There are currently %d monsters detected."), $allMonsters->count());
         if (isset($hiddenMonstersNb)) {
-          $out .= '<p>('.$hiddenMonstersNb.' monsters are absent because you don\'t have the <a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>.)</p>';
+          $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
+          $out .= '<p>('.sprintf(__("%1$s monsters are absent because you don't have the %2$s."), $hiddenMonstersNb, $link).')</p>';
         } else {
-          $out .= '<p>(All monsters are visible thanks to your Electronic Visualizer.)</p>';
+          $out .= '<p>('.__("All monsters are visible thanks to your Electronic Visualizer.").')</p>';
         }
         $out .= '</h4>';
 
@@ -57,15 +56,15 @@
         $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
           $out .= '<thead>';
           $out .= '<tr>';
-          $out .= '<th>Name</th>';
-          $out .= '<th>Topic</th>';
-          $out .= '<th>Level</th>';
-          $out .= '<th>Summary</th>';
-          $out .= '<th># of words</th>';
-          $out .= '<th>U.T. gained</th>';
-          $out .= '<th>Last training session</th>';
-          $out .= '<th>Action</th>';
-          $out .= '<th>Most trained player</th>';
+          $out .= '<th>'.__("Name").'</th>';
+          $out .= '<th>'.__("Topic").'</th>';
+          $out .= '<th>'.__("Level").'</th>';
+          $out .= '<th>'.__("Summary").'</th>';
+          $out .= '<th>'.__("# of words").'</th>';
+          $out .= '<th>'.__("U.T. gained").'</th>';
+          $out .= '<th>'.__("Last training session").'</th>';
+          $out .= '<th>'.__("Action").'</th>';
+          $out .= '<th>'.__("Most trained player").'</th>';
           $out .= '</tr>';
           $out .= '</thead>';
           $out .= '<tbody>';
@@ -86,10 +85,10 @@
           $date2 = new \DateTime(date("Y-m-d", $m->published));
           $interval = $today->diff($date2);
           if ($interval->days < 7) {
-            $out .= ' <span class="badge">New</span>';
+            $out .= ' <span class="badge">'.__("New").'</span>';
           }
           if ($m->special) {
-            $out .= ' <span class="badge">Detected !</span>';
+            $out .= ' <span class="badge">'.__("Detected").' !</span>';
           }
           $out .= '</td>';
           $out .= '<td>';
@@ -100,12 +99,12 @@
           $out .= '</td>';
           $out .= '<td>';
           $out .= $m->summary;
-          if ($m->frenchSummary != '') {
-            $fr = $m->frenchSummary;
-          } else {
-            $fr = 'French version in preparation, sorry ;)';
+          if ($user->language->name != 'french') {
+            $m->of(false);
+            if ($m->summary->getLanguageValue($french) != '') {
+              $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$m->summary->getLanguageValue($french).'"></span>';
+            }
           }
-          $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$fr.'"></span>';
           $out .= '</td>';
           // Count # of words
           $exData = $m->exData;
@@ -113,120 +112,63 @@
           /* Unused because triggers a bug with tooltip display */
           /* $out .= '<td data-sort="'.count($allLines).'">'; */
           $out .= '<td>';
-          // Prepare list of French words
+          $listWords = prepareListWords($allLines, $m->type->name);
           switch ($m->type->name) {
             case 'translate' :
-              $out .= count($allLines).' words';
-              if (count($allLines)>15) {
-                $listWords = '<strong>15 first words :</strong><br />';
-                for($i=0; $i<15; $i++) {
-                  list($left, $right) = preg_split('/,/', $allLines[$i]);
-                  $listWords .= $right.'<br />';
-                }
-                $listWords .= '[...]';
-              } else {
-                $listWords = '';
-                foreach($allLines as $line) {
-                  list($left, $right) = preg_split('/,/', $line);
-                  $listWords .= $right.'<br />';
-                }
-              }
+              $out .= count($allLines).' '.__("words");
               break;
             case 'quiz' :
-              $out .= count($allLines).' questions';
-              if (count($allLines)>15) {
-                $listWords = '<strong>15 first questions :</strong><br />';
-                for($i=0; $i<15; $i++) {
-                  list($left, $right) = preg_split('/::/', $allLines[$i]);
-                  $listWords .= '- '.$left.'<br />';
-                }
-                $listWords .= '[...]';
-              } else {
-                $listWords = '';
-                foreach($allLines as $line) {
-                  list($left, $right) = preg_split('/::/', $line);
-                  $listWords .= '- '.$left.'<br />';
-                }
-              }
+              $out .= count($allLines).' '.__("questions");
               break;
             case 'image-map' :
-              $out .= count($allLines).' words';
-              if (count($allLines)>15) {
-                $listWords = '<strong>15 first questions :</strong><br />';
-                for($i=0; $i<15; $i++) {
-                  list($left, $right) = preg_split('/::/', $allLines[$i]);
-                  $listWords .= '- '.$right.'<br />';
-                }
-                $listWords .= '[...]';
-              } else {
-                $listWords = '';
-                foreach($allLines as $line) {
-                  list($left, $right) = preg_split('/::/', $line);
-                  $listWords .= '- '.$right.'<br />';
-                }
-              }
+              $out .= count($allLines).' '.__("words");
               break;
             case 'jumble' :
-              $out .= count($allLines).' sentences';
-              if (count($allLines)>15) {
-                $listWords = '<strong>15 first sentences :</strong><br />';
-                for($i=0; $i<15; $i++) {
-                  $pattern = '/\$.*?\$/';
-                  preg_match($pattern, $allLines[$i], $matches);
-                  if ($matches) {
-                    $help = preg_replace('/\$/', '', $matches[0]);
-                  }
-                  $listWords .= '- '.$help.'<br />';
-                }
-                $listWords .= '[...]';
-              } else {
-                $listWords = '';
-                foreach($allLines as $line) {
-                  $pattern = '/\$.*?\$/';
-                  preg_match($pattern, $line, $matches);
-                  if ($matches) {
-                    $help = preg_replace('/\$/', '', $matches[0]);
-                    $listWords .= '- '.$help.'<br />';
-                  }
-                }
-              }
+              $out .= count($allLines).' '.__("sentences");
               break;
-            default :
-              $listWords = '';
+            default : continue;
           }
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
           $out .= '<td>';
-          if (!$user->isSuperuser()) {
+          if ($user->hasRole('player')) {
             if ($m->utGain > 0) {
               $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> +'.$m->utGain.'</span> ';
             } else {
               $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span> 0</span> ';
             }
           } else {
+            if ($user->isSuperuser()) {
               $out .= '[Admin]';
+            } else {
+              $out .= '['.__("Teacher").']';
+            }
           }
           $out .= '</td>';
           // Last training session date
           $out .= '<td>';
-          if (!$user->isSuperuser()) {
-            if ($m->lastTrainingInterval != '') {
+          if ($user->hasRole('player')) {
+            if ($m->lastTrainingInterval != '-1') {
               $out .= $m->lastTrainingInterval;
             } else {
               $out .= '-';
             }
           } else {
+            if ($user->isSuperuser()) {
               $out .= '[Admin]';
+            } else {
+              $out .= '['.__("Teacher").']';
+            }
           }
           $out .= '</td>';
           $out .= '<td>';
           if ($m->isTrainable == 1) {
-            $out .= ' <a class="btn btn-primary" href="'.$page->url.'?id='.$m->id.'"><i class="glyphicon glyphicon-headphones"></i> Put the helmet on!</a>';
+            $out .= ' <a class="btn btn-primary" href="'.$page->url.'?id='.$m->id.'"><i class="glyphicon glyphicon-headphones"></i> '.__("Put the helmet on !").'</a>';
           } else {
             if ($m->waitForTrain == 1) { // Trained today
-              $out .= 'Come back tomorrow ;)';
+              $out .= __('Come back tomorrow ;)');
             } else {
-              $out .= 'Come back in '.$m->waitForTrain.' days ;)';
+              $out .= sprintf(__("Come back in %d days ;)"), $m->waitForTrain);
             }
           }
           $out .= '</td>';
@@ -240,7 +182,7 @@
           }
           $out .= '<td data-sort="'.$m->best.'">';
           if ($m->mostTrained) {
-            $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
+            $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__("UT").' - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
           } else {
             $out .= '<span>No record yet.</span>';
           }
@@ -270,8 +212,16 @@
             $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$monster.'\', \''.$redirectUrl.'\', \'0\', \''.$pages->get("name=submit-fight")->url.'\')">';
           }
           if ($monster->id) { // Training session starts
-            $out .= '<h3>Memory helmet programmed : '. $monster->summary.'</h3> ';
-
+            $out .= '<h3>';
+            $out .= __("Memory helmet programmed").' : ';
+            $out .= $monster->summary;
+            if ($user->language->name != 'french') {
+              $monster->of(false);
+              if ($monster->summary->getLanguageValue($french) != '') {
+                $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$monster->summary->getLanguageValue($french).'"></span>';
+              }
+            }
+            $out .= '</h3> ';
             $out .= '<div class="col-sm-3">';
             $out .= '<h3><span ng-class="{label:true, \'label-primary\':true}">Training session <span class="blink">started</span></span></h3>';
             $out .= '<br />';
@@ -283,7 +233,7 @@
             $out .= '<h4 class="panel-title"><span class="glyphicon glyphicon-education"></span> Current record</h4>';
             $out .= '</div>';
             $out .= '<div class="panel-body">';
-            if ($monster->mostTrained->id) {
+            if ($monster->mostTrained && $monster->mostTrained->id) {
               $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->team->title.']</h4>';
             } else {
               $out .= '<h4 class="text-center">No record yet.</h4>';
@@ -299,7 +249,10 @@
             $out .= '</div>';
 
             $out .= '<div class="col-sm-9 text-center">';
-            $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
+              if ($monster->instructions != '') {
+                $out .= '<h3 class="text-center">'.$monster->instructions.'</h3>';
+              }
+              $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
             $out .= '</div>';
             $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
             if ($monster->type->name == 'image-map') {
@@ -365,7 +318,7 @@
       echo '</div>';
     }
   } else {
-    echo '<p class="alert alert-warning">Sorry, but you don\'t have access to the Underground Training page. Contact the administrator if yoy think this is an error.</p> ';
+    echo $noAuthMessage;
   }
 
   include("./foot.inc"); 

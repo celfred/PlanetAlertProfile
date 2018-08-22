@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
   include("./head.inc"); 
 
   $out = '';
@@ -14,7 +14,7 @@
   // Test player login
   if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if player has unlocked Memory helmet or Visualizer
-    if ($user->isSuperuser()) {
+    if ($user->isSuperuser() || $user->hasRole('teacher')) {
       $helmet = $pages->get("name=memory-helmet");
       $visualizer = $pages->get("name~=visualizer");
     } else {
@@ -27,20 +27,20 @@
       if ($helmet->image) {
         echo '<img class="" src="'.$helmet->image->getCrop('small')->url.'" alt="Helmet" />';
       }
-      echo ' <a href="'.$pages->get("name=underground-training")->url.'">Go to the Underground Training Zone !</a>   ';
+      echo ' <a href="'.$pages->get("name=underground-training")->url.'">'.__("Go to the Underground Training Zone").'</a>   ';
     } else {
       echo '<div class="well text-center">';
-      echo 'You must buy the Memory Helmet if you want to do Underground Training.';
+      echo __("You must buy the Memory Helmet if you want to do Underground Training.");
       echo '</div>';
     }
     if ($visualizer) {
       if ($visualizer->image) {
         echo '<img class="" src="'.$visualizer->image->getCrop('small')->url.'" alt="Visualizer" />';
       }
-      echo ' <a href="'.$pages->get("name=Visualizer")->url.'">Use the Electronic Visualizer</a> / ';
+      echo ' <a href="'.$pages->get("name=Visualizer")->url.'">'.__("Use the Electronic Visualizer").'</a> / ';
     } else {
       echo '<div class="well text-center">';
-      echo 'You must buy the Electronic Visualizer to detect ALL monsters.';
+      echo __("You must buy the Electronic Visualizer to detect ALL monsters.");
       echo '</div>';
     }
     echo '</h4>';
@@ -52,7 +52,7 @@
   }
 
 
-  if ($user->isSuperuser()) {
+  if ($user->isSuperuser() || $user->hasRole('teacher')) {
     $colIndex = 3;
   } else {
     $colIndex = 2;
@@ -72,18 +72,18 @@
   <thead>
     <tr>
     <?php
-    if ($user->isSuperuser()) {
+    if ($user->isSuperuser() || $user->hasRole('teacher')) {
       echo '<th></th>';
     }
     ?>
     <th></th>
-    <th>Name</th>
-    <th>Topic</th>
-    <th>Level</th>
+    <th><?php echo __('Name'); ?></th>
+    <th><?php echo __('Topic'); ?></th>
+    <th><?php echo __('Level'); ?></th>
     <!-- <th>Type</th> -->
-    <th>Summary</th>
-    <th># of words</th>
-    <th>Most trained player</th>
+    <th><?php echo __('Summary'); ?></th>
+    <th><?php echo __('# of words'); ?></th>
+    <th><?php echo __('Most trained player'); ?></th>
     </tr>
   </thead>
   <tbody>
@@ -95,7 +95,7 @@
         } else {
           $mini = '';
         }
-        if ($user->isSuperuser()) {
+        if ($user->isSuperuser() || $user->hasRole('teacher')) {
           $out .= '<td><a class="pdfLink btn btn-info" href="'.$page->url().'?id='.$m->id.'&pages2pdf=1">[PDF]</a></td>';
         }
         $out .= '<td>'. $mini .'</td>';
@@ -112,93 +112,37 @@
         $out .= '</td>';
         $out .= '<td>'.$m->level.'</td>';
         /* $out .= '<td>'.$m->type->title.'</td>'; */
-        $out .= '<td>'.$m->summary.' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$m->frenchSummary.'"></span></td>';
+        if ($user->language->name != 'french') {
+          $m->of(false);
+          $out .= '<td>'.$m->summary.' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$m->summary->getLanguageValue($french).'"></span></td>';
+        } else {
+          $out .= '<td>'.$m->summary.'</td>';
+        }
         // Count # of words
         $exData = $m->exData;
         $allLines = preg_split('/$\r|\n/', $exData);
         /* Unused because triggers a bug with tooltip display */
         /* $out .= '<td data-sort="'.count($allLines).'">'; */
         $out .= '<td>';
-        // Prepare list of French words
-        switch ($m->type->name) {
-          case 'translate' :
-            $out .= count($allLines).' words';
-            if (count($allLines)>15) {
-              $listWords = '<strong>15 first words :</strong><br />';
-              for($i=0; $i<15; $i++) {
-                list($left, $right) = preg_split('/,/', $allLines[$i]);
-                $listWords .= $right.'<br />';
-              }
-              $listWords .= '[...]';
-            } else {
-              $listWords = '';
-              foreach($allLines as $line) {
-                list($left, $right) = preg_split('/,/', $line);
-                $listWords .= $right.'<br />';
-              }
-            }
-            break;
-          case 'quiz' :
-            $out .= count($allLines).' questions';
-            if (count($allLines)>15) {
-              $listWords = '<strong>15 first questions :</strong><br />';
-              for($i=0; $i<15; $i++) {
-                list($left, $right) = preg_split('/::/', $allLines[$i]);
-                $listWords .= '- '.$left.'<br />';
-              }
-              $listWords .= '[...]';
-            } else {
-              $listWords = '';
-              foreach($allLines as $line) {
-                list($left, $right) = preg_split('/::/', $line);
-                $listWords .= '- '.$left.'<br />';
-              }
-            }
-            break;
-          case 'image-map' :
-            $out .= count($allLines).' words';
-            if (count($allLines)>15) {
-              $listWords = '<strong>15 first words :</strong><br />';
-              for($i=0; $i<15; $i++) {
-                list($left, $right) = preg_split('/::/', $allLines[$i]);
-                $listWords .= '- '.$right.'<br />';
-              }
-              $listWords .= '[...]';
-            } else {
-              $listWords = '';
-              foreach($allLines as $line) {
-                list($left, $right) = preg_split('/::/', $line);
-                $listWords .= '- '.$right.'<br />';
-              }
-            }
-            break;
-          case 'jumble' :
-            $out .= count($allLines).' sentences';
-            if (count($allLines)>15) {
-              $listWords = '<strong>15 first sentences :</strong><br />';
-              for($i=0; $i<15; $i++) {
-                $pattern = '/\$.*?\$/';
-                preg_match($pattern, $allLines[$i], $matches);
-                if ($matches) {
-                  $help = preg_replace('/\$/', '', $matches[0]);
-                }
-                $listWords .= '- '.$help.'<br />';
-              }
-              $listWords .= '[...]';
-            } else {
-              $listWords = '';
-              foreach($allLines as $line) {
-                $pattern = '/\$.*?\$/';
-                preg_match($pattern, $line, $matches);
-                $help = preg_replace('/\$/', '', $matches[0]);
-                $listWords .= '- '.$help.'<br />';
-              }
-            }
-            break;
-          default :
-            $listWords = '';
+        if ($m->type) {
+          $listWords = prepareListWords($allLines, $m->type->name);
+          switch ($m->type->name) {
+            case 'translate' :
+              $out .= count($allLines).' '.__("words");
+              break;
+            case 'quiz' :
+              $out .= count($allLines).' '.__("questions");
+              break;
+            case 'image-map' :
+              $out .= count($allLines).' '.__("words");
+              break;
+            case 'jumble' :
+              $out .= count($allLines).' '.__("sentences");
+              break;
+            default : continue;
         }
         $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
+        }
         $out .= '</td>';
         // Find best trained player on this monster
         if ($m->mostTrained) {

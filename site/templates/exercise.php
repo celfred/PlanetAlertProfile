@@ -36,7 +36,8 @@
       $out .= '</h3>';
     $out .= '</div>';
     $out .= '<div class="col-sm-8 text-left">';
-      $out .= '<p class="text-center"><h3>'.$page->summary.' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$page->frenchSummary.'"></i></h3></p>';
+      $page->of(false);
+      $out .= '<p class="text-center"><h3>'.$page->summary.' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$page->summary->getLanguageValue($french).'"></i></h3></p>';
       // Get player's stats
       if ($user->isLoggedin()) {
         $player = $pages->get("template='player', login=$user->name");

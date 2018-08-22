@@ -1,298 +1,1024 @@
-<?php /* adminActions template */
-namespace ProcessWire;
-  $out = '';
+<?php namespace ProcessWire;
+ 
   if (!$config->ajax) {
     include("./head.inc"); 
-    $allTeams = $pages->find("template=team")->sort("title");
-    if ($user->isSuperuser()) {
+    $out = '';
+    if ($user->isSuperuser() || $user->hasRole('teacher')) {
       $action = $input->urlSegment1;
-      $allPlayers = $pages->find("parent.name=players, template=player");
+      if ($user->hasRole('teacher')) {
+        $allTeams = $pages->find("template=team, teacher=$user")->sort("title");
+        $allPlayers = $pages->find("parent.name=players, template=player, team.teacher=$user");
+      } else {
+        $allTeams = $pages->find("template=team")->sort("title");
+        $allPlayers = $pages->find("parent.name=players, template=player");
+      }
       $allPlayers->sort("team.name, title");
-      $out .= '<div class="alert alert-warning text-center">Admin Actions : Be careful !</div>';
+      $out .= '<div class="alert alert-warning text-center">'.__("Admin Actions : Be VERY careful !").'</div>';
       switch ($action) {
-      case 'ut' :
-        $out .= '<p>⇒ Check if UT\'s hall of fame is correct.</p>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'ut-stats' :
-        $out .= '<section class="well">';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<section class="well">';
-        $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
-        $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
-        $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
-        $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
-        $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
-        $out .= '</section>';
-        $out .= '</section>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut-stats">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'fights-stats' :
-        $out .= '<section class="well">';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<section class="well">';
-        $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
-        $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
-        $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
-        $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
-        $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
-        $out .= '</section>';
-        $out .= '</section>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="fights-stats">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'task-report' :
-        $out .= '<section class="well">';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '<span>Select a task : </span>';
-        $out .= '<select id="taskId">';
-        $out .= '<option value="-1">Select a task</option>';
-        $allTasks = $pages->find("template=task, include=hidden, sort=title");
-        foreach($allTasks as $t) {
-          $out .= '<option value="'.$t.'">'.$t->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<section class="well">';
-        $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
-        $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
-        $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
-        $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
-        $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
-        $out .= '</section>';
-        $out .= '</section>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="task-report">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'reports' :
-        $out .= '<section class="well">';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</section>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="reports">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'recalculate' :
-        $out .= '<section class="well">';
-        $out .= '<div>';
-        $out .= '<span>Select a player : </span>';
-        $out .= '<select id="playerId">';
-        $out .= '<option value="-1">Select a player</option>';
-        $out .= '<option value="all">All players</option>';
-        foreach($allPlayers as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.' ['.$p->team->title.']</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<div class="text-right">';
-        $out .= '<a id="backendEditable" class="btn btn-success" href="" data-href="'.$config->urls->admin.'page/edit/?id=" data-id="-1">Edit player in backend</a>';
-        $out .= '</div>';
-        $out .= '</section>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="recalculate">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'team-options' :
-        $out .= '<section class="well">';
-        $out .= '<h3 class="text-center">';
-        $out .=   'Global options';
-        $out .= '</h3>';
-        $out .= '<div>';
-        $allPeriods = $pages->get("name=periods")->children();
-        if ($page->periods != false) {
-          $officialPeriod = $page->periods;
-        } else {
-          $officialPeriod = false;
-        }
-        $out .=   '<span>Official period : </span>';
-        $out .=   '<select id="periodId">';
-        $out .=     '<option value="-1">No official period (holidays ?)</option>';
-        foreach($allPeriods as $p) {
-          if ($officialPeriod != false) {
-            if ($p->id == $officialPeriod->id) {
-              $status = 'selected="selected"';
+        case 'ut' :
+          if ($user->isSuperuser()) {
+            $out .= '<p>⇒ Check if UT\'s hall of fame is correct.</p>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        case 'ut-stats' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<section class="well">';
+            $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
+            $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
+            $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
+            $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
+            $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
+            $out .= '</section>';
+            $out .= '</section>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut-stats">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        case 'fights-stats' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<section class="well">';
+            $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
+            $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
+            $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
+            $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
+            $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
+            $out .= '</section>';
+            $out .= '</section>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="fights-stats">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        case 'task-report' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '<span>Select a task : </span>';
+            $out .= '<select id="taskId">';
+            $out .= '<option value="-1">Select a task</option>';
+            $allTasks = $pages->find("template=task, include=hidden, sort=title");
+            foreach($allTasks as $t) {
+              $out .= '<option value="'.$t.'">'.$t->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<section class="well">';
+            $out .= '<p>Select limiting dates if needed (start empty = 01/01/2000, end empty = today). <span class="label label-danger">English format dates!</span></p>';
+            $out .= '<label for="startDate">From (mm/dd/yyyy) : </label>';
+            $out .= '<input id="startDate" name="startDate" type="text" size="10" value="" />  ';
+            $out .= '<label for="endDate">To (mm/dd/yyyy) : </label>';
+            $out .= '<input id="endDate" name="endDate" type="text" size="10" value="" />';
+            $out .= '</section>';
+            $out .= '</section>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="task-report">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        case 'reports' :
+          $out .= '<section class="well">';
+          if ($user->isSuperuser()) { // Old version, ALL teams
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="reports">Generate</button>';
+          } else { // Quick buttons for teacher's teams
+            $out .= '<ul class="list list-inline">';
+            foreach($allTeams as $p) {
+              $out .= '<li>';
+              $out .= '<a href="'.$page->url.'reports/'.$p->id.'?type=team" class="teamOption btn btn-success">'.$p->title.'</a>';
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+          }
+          $out .= '</section>';
+          $out .= '<section id="ajaxViewport" class="well"></section>';
+          break;
+        case 'recalculate' :
+          if ($user->isSuperuser()) {
+            $playerId = $input->urlSegment2;
+            $selectedPlayer = $pages->get($playerId);
+            $headTeacher = getHeadTeacher($selectedPlayer);
+            if ($selectedPlayer) {
+              $allEvents = $selectedPlayer->get("name=history")->children()->sort("date, created");
+              $out = '<p class="alert alert-danger">ALL ACTIONS ARE RECALCULATED FROM LATEST VALUES (MAY CAUSE CHANGES IF VALUES HAVE BEEN MODIFIED)</p>';
+              $out .= '<h3 class="text-center">'.$selectedPlayer->title.' ['.$selectedPlayer->team->title.'] → Recalculate scores from complete history ('. $allEvents->count.' events).</h3>';
+              // Keep initial scores for comparison
+              $initialPlayer = clone $selectedPlayer;
+              // Init scores
+              $selectedPlayer = initPlayer($selectedPlayer);
+              $out .= displayPlayerScores($selectedPlayer, 'reset', 'success');
+              $out .= '<table class="table table-condensed table-hover">';
+              $out .= '<tbody>';
+              foreach($allEvents as $e) {
+                // Keep previous values to check evolution
+                $oldPlayer = clone $selectedPlayer;
+                if ($selectedPlayer->coma == 1) {
+                  $comaClass = 'bg-warning';
+                } else {
+                  $comaClass = '';
+                }
+                $out .= '<tr><td class="text-left '.$comaClass.'">';
+                if ($e->date != '') {
+                  $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
+                } else {
+                  $out .= '▶ <span class="label label-danger">Date error!</span> - ';
+                  $dirty = true;
+                }
+                $out .= $e->title;
+                $comment = trim($e->summary);
+                if ($comment) {
+                  $out .= ' [comment:'.$comment.']';
+                }
+                if ($e->refPage) {
+                  $out .= ' [refPage:'.$e->refPage->title.']';
+                }
+                if ($e->linkedId) {
+                  $out .= ' [linkedId:'.$e->linkedId.']';
+                }
+                $out .= $e->feel();
+                if ($e->task) {
+                  if ($e->task->is("name=donation")) { // Player gave GC, increase his Donation
+                    preg_match("/\d+/", $comment, $matches);
+                    $diff = $selectedPlayer->GC - $matches[0];
+                    if ($diff < 0) { // Check for Donation bug
+                      $out .= ' <span class="label label-danger">Error';
+                      $out .= ' ⇒ Amount replaced : '.$selectedPlayer->GC.' [Edit and reload]';
+                      $out .= '</span>';
+                      $comment = preg_replace("/\d+/", $selectedPlayer->GC, $comment, 1);
+                      $dirty = true;
+                      /* // Change summary if saved */
+                      /* if ($input->urlSegment3 && $input->urlSegment3 == 1) { */
+                      /*   $e->summary = $comment; */
+                      /*   $e->of(false); */
+                      /*   $e->save(); */
+                      /* } */
+                    }
+                  }
+                  if ($e->task->is("name=wrong-invasion")) { // 3rd wrong invasion ?
+                    $wrongInvasions = $allEvents->find("task.name=wrong-invasion, refPage=$e->refPage, date<=$e->date, sort=-date");
+                    // Limit to events AFTER the last 'Free' action on the oarticular element
+                    $lastFree = $allEvents->get("task.name=free, refPage=$e->refPage, sort=-date");
+                    if ($lastFree->id) {
+                      $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
+                    }
+                    if ($wrongInvasions->count() >= 3) {
+                      if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
+                        $out .= '<span class="label label-success">Remove OK</span>';
+                      } else {
+                        $dirty = true;
+                        $out .= '<span class="label label-danger">Remove Error (3rd wrong invasion)</span>';
+                        // Button Add Remove action here
+                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-remove/'.$playerId.'/'.$e->id.'/'.$e->refPage->id.'">Add Remove action here?</button>';
+                      }
+                    } else {
+                      if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
+                        $dirty = true;
+                        $out .= '<span class="label label-danger">Error : Remove found but not 3 wrong invasion(s) before ? ('.$wrongInvasions->count().'?)</span>';
+                      }
+                    }
+                  }
+                  if ($e->task->is("name=buy|free|bought")) { // New equipment, place, people or potion, add it accordingly
+                    if ($e->refPage != false) {
+                      // Get item's data
+                      $newItem = $pages->get("$e->refPage");
+                      if ($newItem->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
+                        $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
+                        $dirty = true;
+                      }
+                      if ($newItem->level > $selectedPlayer->level) { // Check for Buy/Free bug (if a Death occurred, for example)
+                        $out .= ' <span class="label label-danger">Error : Wrong level.</span>';
+                        $dirty = true;
+                      }
+                      if ($newItem->parent->is("name=group-items")) {
+                        // Check if groups have been set
+                        $out .= '<ul class="list-inline">';
+                        $out .= '<li>Group item status → </li>';
+                        if ($selectedPlayer->group != '') {
+                          // Check if group members have [unlocked] item
+                          $members = $allPlayers->find("team=$selectedPlayer->team, group=$selectedPlayer->group");
+                          $boughtNb = 0;
+                          foreach ($members as $p) {
+                            $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
+                            if ($bought->id) {
+                              $boughtNb++;
+                              $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
+                            } else {
+                              $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
+                            }
+                          }
+                          if ($boughtNb != $members->count-1) {
+                            $dirty = true;
+                            $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
+                          }
+                          // [unlocked] or [bought] ?
+                          // task page should be set accordingly but prevention here for backward compatibility
+                          preg_match("/\[unlocked\]/", $comment, $matches);
+                          if (isset($matches[0]) && $e->task->is("name=buy")) {
+                            $dirty = true;
+                            $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
+                          }
+                          if (!isset($matches[0]) && $e->task->is("name=bought")) {
+                            $dirty = true;
+                            $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
+                          }
+                        } else { // No groups, item shoudn't be there
+                            $dirty = true;
+                            $out .= ' <span class="label label-danger">Error : No groups set. Item shouldn\'t be there.</span>';
+                        }
+                        $out .= '</ul>';
+                      }
+
+                      if ($newItem->name == 'health-potion' && $selectedPlayer->coma == 1) {
+                        $selectedPlayer->coma = 0;
+                        $out .= '<li><span class="label label-success">Leaving COMA STATE !</span></li>';
+                      }
+                    }
+                    if ($e->linkedId) {
+                      $discount = $pages->get("$e->linkedId");
+                      if ($discount->id && $discount->parent->is("name=specials")) {
+                        $out .= ' ['.$discount->title.'% discount]';
+                      }
+                    }
+                  }
+                  if ($e->task->is("name=death")) {
+                    $lastDeath = $e;
+                    // Set previousLevel
+                    preg_match("/\d+/", $e->summary, $matches);
+                    $previousLevel = (int) $matches[0];
+                    if ($previousLevel == 0) {
+                      if ($selectedPlayer->level>1) {
+                        $previousLevel = $selectedPlayer->level;
+                      } else {
+                        $previousLevel = 0;
+                      }
+                      $out .= ' <span class="label label-danger">Error : No former level, set to '.$previousLevel.'</span>';
+                      $dirty = true;
+                    }
+                    // Death recorded but HP>0
+                    if ($selectedPlayer->HP > 0) {
+                      $out .= ' <span class="label label-danger">Error → HP>0 ?</span>';
+                      $dirty = true;
+                    }
+                  }
+                  if ($e->task->is("name=team-death|group-death|death")) {
+                    if ($e->linkedId) {
+                      $out .= ' ['.$e->linkedId.']';
+                    }
+                  }
+                  if ($e->inClass == 1 && $e->task->is("name~=fight|ut-action")) {
+                    $out .= ' [in class]';
+                  }
+                  if ($e->refPage != false && $e->refPage->is("name=memory-potion") && $e->linkedId == 0) {
+                    $used = $allEvents->get("linkedId=$e->id");
+                    if (isset($used->id)) {
+                      $out .= ' [used on '.date('d/m', $used->date).' ?]';
+                    } else {
+                      $out .= ' <span class="label label-danger">Not used ?</span>';
+                    }
+                  }
+                  $e->task->comment = $comment;
+                  $e->task->refPage = $e->refPage;
+                  $e->task->linkedId = $e->linkedId;
+                  updateScore($selectedPlayer, $e->task, false);
+                  if ($e->task->is("name=death")) {
+                    $prevDeath = $allEvents->find('task.name=death')->getPrev($e);
+                    if (isset($prevDeath)) {
+                      // Set prevDeathLevel
+                      preg_match("/\d+/", $prevDeath->summary, $matches);
+                      $prevDeathLevel = (int) $matches[0];
+                      $out .= 'PrevDeath:'.$prevDeathLevel;
+                    }
+                    resetPlayer($selectedPlayer, $prevDeathLevel);
+                    if ($selectedPlayer->coma == 1) {
+                      $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
+                    } 
+                  }
+                  $out .= '<br />';
+                  // Show if teacher has customized task
+                  if ($e->task->mod) { $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-warning-sign"></i></span>'; }
+                  $out .= displayTrendScores($selectedPlayer, $oldPlayer);
+                  $out .= displayPlayerScores($selectedPlayer, 'new', 'success');
+                  $out .= '  ';
+                  // Test if player died
+                  if ($selectedPlayer->HP == 0 && $e->task->is("name!=death")) {
+                    if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'death') {
+                      $out .= '<span class="label label-success">Death OK</span>';
+                    } else {
+                      $dirty = true;
+                      // Ask only for the first Death
+                      if ($unique == true) {
+                        $out .= '<span class="label label-danger">Error : No Death after?</span>  ';
+                        // Button Add death here
+                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">Add death here?</button>';
+                        $unique = false;
+                      } else {
+                        $out .= '<span class="label label-danger">Previous Death?</span>';
+                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">Add death here?</button>';
+                      }
+                    }
+                  }
+                }
+                $out .='</td></tr>';
+              }
+              $out .= '</tbody>';
+              $out .= '</table>';
+              $out .= displayPlayerScores($initialPlayer, 'actual', 'danger');
+              $out .= '<br />';
+              $out .= '<h3>'.displayPlayerScores($selectedPlayer, 'Recalculated', 'primary').'</h3>';
+              // Check changes
+              $previousFingerprint = md5(displayPlayerScores($initialPlayer, 'actual', 'danger'));
+              $recalculatedFingerprint = md5(displayPlayerScores($selectedPlayer, 'actual', 'danger'));
+              if ($previousFingerprint === $recalculatedFingerprint) { 
+                $out .= '<h4 class="text-center"><span class="label label-success"><i class="glyphicon glyphicon-thumbs-up"></i> Scores are identical.</span></h4>';
+              } else {
+                $out .= '<h4 class="text-center"><span class="label label-danger"><i class="glyphicon glyphicon-thumbs-down"></i> Scores are different !</span></h4>';
+              }
+              $out .= '<br /><br />';
+              if (isset($dirty)) {
+                $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
+              }
+              if ($previousFingerprint !== $recalculatedFingerprint) { 
+                $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/1" data-reload="true">Save recalculated scores</button>';
+              }
+              if ($input->urlSegment3 && $input->urlSegment3 == 1) {
+                if ($selectedPlayer->team && $selectedPlayer->team->name != 'no-team') {
+                  if ($selectedPlayer->team->periods) {
+                    $currentPeriod = $selectedPlayer->team->periods;
+                    $mod = $currentPeriod->periodOwner->get("singleTeacher=$headTeacher"); // Get personalized infos if needed
+                    if ($mod->id) {
+                      $mod->dateStart != '' ? $dateStart = $mod->dateStart : $dateStart = $currentPeriod->dateStart;
+                      $mod->dateEnd != '' ? $dateEnd = $mod->dateEnd : $dateEnd = $currentPeriod->dateEnd;
+                    }
+                    $newCount = setHomework($selectedPlayer, $dateStart, $dateEnd);
+                    $lastPenalty = $allEvents->find("task.category.name=homework, date>=$dateStart, date<=$dateEnd")->sort("-date")->first(); // Get last Hk pb
+                    if ($lastPenalty && $lastPenalty->task->is("name=penalty")) {
+                      $newCount = 0;
+                    }
+                    $selectedPlayer->hkcount = $newCount;
+                  }
+                }
+                $selectedPlayer->of(false);
+                $selectedPlayer->save();
+              }
             } else {
-              $status = '';
+              $out .= 'You need to select 1 player.';
             }
           } else {
-            $status = '';
+            $out .= $noAuthMessage;
           }
-          $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.'</option>';
-        }
-        $out .= ' </select>';
-        $out .= '<button class="proceed btn btn-block btn-primary" data-href="'.$page->url.'" data-action="save-options">Save</button>';
-        $out .= '<div class="proceedFeedback"></div>';
-        $out .= '</div>';
-        $out .= '</section>';
-        $out .= '<section class="well">';
-        $out .= '<h3 class="text-center">';
-        $out .=   'Team options';
-        $out .= '</h3>';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="team-options">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'setCaptains' :
-        $out .= '<section class="well">';
-        $out .= '<h3 class="text-center">';
-        $out .=   'Set Captains';
-        $out .= '</h3>';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setCaptains">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'setKarma' :
-        $out .= '<section class="well">';
-        $out .= '<h3 class="text-center">';
-        $out .=   'Set karma';
-        $out .= '</h3>';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setKarma">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'setYearlyKarma' :
-        $out .= '<section class="well">';
-        $out .= '<h3 class="text-center">';
-        $out .=   'Set yearly karma';
-        $out .= '</h3>';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setYearlyKarma">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'setScores' :
-        $out .= '<section class="well">';
-        $out .= '<h3 class="text-center">';
-        $out .=   'Set scores';
-        $out .= '</h3>';
-        $out .= '<div>';
-        $out .= '<span>Select a team : </span>';
-        $out .= '<select id="teamId">';
-        $out .= '<option value="-1">Select a team</option>';
-        foreach($allTeams as $p) {
-          $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-        }
-        $out .= '</select>';
-        $out .= '</div>';
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setScores">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        break;
-      case 'users' :
-        $allPlayers = $pages->find("parent.name=players, template=player")->sort("title");
-        $out .= '<section class="well">';
-        $out .= '<p><span class="glyphicon glyphicon-alert"></span> 1 player / line → Name [,lastName] [,rank =6emes,5emes,4emes,3emes)] [,team]</p>';
-        $out .= '<textarea id="newPlayers" name="newPlayers" rows="5" cols="50"></textarea>';
-        $out .= '<button class="addUsers btn btn-primary btn-block" data-href="'.$page->url.'" data-action="addUsers">Add new players</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-        $out .= '<p>There are currently '.$allPlayers->count().' players.</p>';
-        $out .= '<table class="table table-condensed table-hover">';
-        $out .= '<th>Player</th>';
-        $out .= '<th>Team</th>';
-        $out .= '<th>User</th>';
-        $out .= '<th>Edit</th>';
-        $out .= '<th>Archive</th>';
-        $out .= '<th>Delete</th>';
-        $allUsers = $users->find("name!=admin|guest");
-        foreach ($allPlayers as $p) {
-          $u = $users->get("name=$p->login");
-          $out .= '<tr>';
-          $out .= '<td>'.$p->title.'</td>';
-          $out .= '<td>'.$p->team->title.'</td>';
-          $out .= '<td>'.$u->name.'</td>';
-          $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</td>';
-          $history = $p->child("name=history");
-          if ($history->id) {
-            $out .= '<td><button class="confirm btn btn-xs btn-danger" data-href="'.$page->url.'archivePlayer/'.$p->id.'/1">Archive Player</button></td>';
+          break;
+        case 'team-options' :
+          $out .= '<section class="well">';
+          $out .= '<h3 class="text-center">';
+          $out .=   __('Team options');
+          $out .= '</h3>';
+          $out .= '<div>';
+          if ($user->isSuperuser()) { // Old version, ALL teams
+            $out .= '<span>'.__("Select a team").' : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">'.__("Select a team").'</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="team-options">'.__("Generate").'</button>';
+          } else { // Quick buttons for teacher's teams
+            $out .= '<ul class="list list-inline">';
+            foreach($allTeams as $p) {
+              $out .= '<li>';
+              $out .= '<a href="'.$page->url.'team-options/'.$p->id.'?type=team" class="teamOption btn btn-success">'.$p->title.'</a>';
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+          }
+          $out .= '</div>';
+          if ($allTeams->count() > 0) {
+            $out .= '<section id="ajaxViewport" class="well">'.__("Select a team.").'</section>';
           } else {
-            $out .= '<td>Nothing to archive.</td>';
+            $out .= '<p>'.__("You have no teams.").'</p>';
           }
-          $out .= '<td><button class="removeUser btn btn-xs btn-danger" data-href="'.$page->url.'" data-action="removeUser" data-playerId="'.$p->id.'">Delete Player/User</button></td>';
-          $out .= '</tr>';
-        }
-        $out .= '</table>';
-        $out .= '<div>';
-        break;
-      default :
-        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
-        $out .= '<section id="ajaxViewport" class="well"></section>';
-?>
-  <div>
-<?php
+          break;
+        case 'manage-periods' :
+          $out .= '<section class="well">';
+          $out .= '<h3 class="text-center">';
+          $out .=   __('Manage periods');
+          $out .= '</h3>';
+          if (!$user->isSuperuser()) {
+            $out .= '<p class="text-center">'.__("Contact the administrator if you want to operate changes in this list.").'</p>';
+          }
+          $out .= '<div>';
+          $allPeriods = $pages->get("name=periods")->children();
+          $teacherPeriods = $allPeriods->find("periodOwner.singleTeacher=$user");
+          $notTeacherPeriods = $allPeriods->find("periodOwner.singleTeacher!=$user");
+          if (!$user->isSuperuser()) {
+            $out .= '<h4><span>'.__("Your periods").'</span></h4>';
+            $out .= '<ul id="teacherElements">';
+            foreach($teacherPeriods as $p) {
+              $out .= '<li>';
+              $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+              $out .= '<span>'.$p->title.'</span> ';
+              $mod = $p->periodOwner->get("singleTeacher=$user"); // Get personalized infos if needed
+              $mod->dateStart != '' ? $out .= ' <span>('.__('From').' '.date("d/m/Y", $mod->dateStart).' ' : $out .= ' <span>('.__('From').' '.date("d/m/Y", $p->dateStart).' ';
+              $mod->dateEnd != '' ? $out .= __('to').' '.date("d/m/Y", $mod->dateEnd).')</span>' : $out .= __('to').' '.date("d/m/Y", $p->dateEnd).')</span>';
+              if ($user->isSuperuser()) {
+                $out .= $p->feel(array(
+                          "fields" => "title,dateStart,dateEnd"
+                        ));
+              } else {
+                $out .= $mod->feel(array(
+                          "text" => __('[Edit]'),
+                          "fields" => "dateStart,dateEnd"
+                        ));
+              }
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+          }
+          if ($user->isSuperuser()) {
+            $out .= '<button class="confirm btn btn-primary btn-sm" data-href="'.$page->url.'bumpYear">'.__("+1 year to ALL periods").'</button> ';
+            $out .= $pages->get("name=periods")->feel(array(
+              'mode' => 'page-add',
+              'text' => '[Add a new period]'
+            ));
+          }
+          $out .= '<h4><span>'.__("Available periods").'</span></h4>';
+          $out .= '<ul id="notTeacherElements">';
+          foreach($notTeacherPeriods as $p) {
+            $out .= '<li>';
+            if (!$user->isSuperuser()) {
+              $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+            }
+            $out .= '<span>'.$p->title.'</span> ';
+            $out .= ' <span>('.__('From').' '.date("d/m/Y", $p->dateStart).' ';
+            $out .= __('to').' '.date("d/m/Y", $p->dateEnd).')</span>';
+            if ($user->isSuperuser()) { $out .= $p->feel(); }
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+          $out .= '</div>';
+          break;
+        case 'manage-actions' :
+          $out .= '<section class="well">';
+          $out .= '<h3 class="text-center">';
+          $out .=   __('Manage actions');
+          $out .= '</h3>';
+          $out .= '<div>';
+          // Get actions
+          $adminActions = $pages->find("name!=tasks, template=task, adminOnly=1")->sort("title");
+          $notTeacherActions = $pages->find("name!=tasks, template=task, adminOnly=0")->not("owner.singleTeacher=$user")->sort("title");
+          $teacherActions = $pages->find("name!=tasks, template=task, adminOnly=0, owner.singleTeacher=$user")->sort("title, owner.title");
+          if (!$user->isSuperuser()) {
+            $out .= '<h4><span>'.__("Your actions").'</span></h4>';
+            $out .= '<ul id="teacherElements" class="list">';
+            foreach($teacherActions as $p) {
+              $out .= '<li>';
+              $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+              $mod = $p->owner->get("singleTeacher=$user"); // Get personalized infos if needed
+              $mod->title != '' ? $out .= '<span>'.$mod->title.'</span> ' : $out .= '<span>'.$p->title.'</span> ';
+              $mod->teacherTitle != '' ? $out .= '<span>[= '.$mod->teacherTitle.']</span> → ' : '';
+              if ($mod->teacherTitle == '' && $task->teacherTitle != '') { $out .= '<span>[= '.$p->teacherTitle.']</span> → '; }
+              $mod->summary != '' ? $out .= '<span>'.$mod->summary.'</span> ' : $out .= '<span>'.$p->summary.'</span> ';
+              $mod->HP == '' ? $HP = $p->HP : $HP = $mod->HP;
+              $mod->XP == '' ? $XP = $p->XP : $XP = $mod->XP;
+              $mod->GC == '' ? $GC = $p->GC : $GC = $mod->GC;
+              $out .= '<span class="label label-danger">'.$HP.'HP</span> ';
+              $out .= '<span class="label label-danger">'.$GC.'GC</span> ';
+              $out .= '<span class="label label-danger">'.$XP.'XP</span> ';
+              $out .= '<span class="label label-info">'.$p->category->title.'</span> ';
+              $out .= $mod->feel(array(
+                          "text" => __('[Edit]'),
+                          "fields" => "title,teacherTitle,summary,HP,XP,GC",
+                        ));
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+          }
+          if ($user->isSuperuser()) {
+            $out .= $pages->get("name=tasks")->feel(array(
+              'mode' => 'page-add',
+              'text' => '[Add a new action]'
+            ));
+          }
+          $out .= '<h4><span>'.__("Available actions").'</span></h4>';
+          $out .= '<ul id="notTeacherElements">';
+          foreach($notTeacherActions as $p) {
+            $out .= '<li>';
+            if (!$user->isSuperuser()) {
+              $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+            }
+            $out .= '<span>'.$p->title.'</span> → ';
+            $out .= '<span>'.$p->summary.'</span> ';
+            $out .= '<span class="label label-danger">'.$p->HP.'HP</span> ';
+            $out .= '<span class="label label-danger">'.$p->GC.'GC</span> ';
+            $out .= '<span class="label label-danger">'.$p->XP.'XP</span> ';
+            $out .= '<span class="label label-danger">'.$p->type.'</span> ';
+            $out .= '<span class="label label-info">'.$p->category->title.'</span> ';
+            if ($user->isSuperuser()) {
+              $out .= $p->feel();
+            }
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+          $out .= '<hr />';
+          $out .= '<h4><span>'.__("Planet Alert actions [for information]").'</span></h4>';
+          $out .= '<ul id="adminActions">';
+          foreach($adminActions as $p) {
+            $out .= '<li>';
+            $out .= '<span>'.$p->title.'</span> → ';
+            $out .= '<span>'.$p->summary.'</span> ';
+            $out .= '<span class="label label-danger">'.$p->HP.'HP</span> ';
+            $out .= '<span class="label label-danger">'.$p->GC.'GC</span> ';
+            $out .= '<span class="label label-danger">'.$p->XP.'XP</span> ';
+            $out .= '<span class="label label-danger">'.$p->type.'</span> ';
+            $out .= '<span class="label label-info">'.$p->category->title.'</span> ';
+            if ($user->isSuperuser()) {
+              $out .= $p->feel();
+            }
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+          $out .= '</div>';
+          break;
+        case 'manage-categories' :
+          $allCategories = $pages->get("name=categories")->children("template=category")->sort('title');
+          $out .= '<section class="well">';
+          $out .= '<h3 class="text-center">';
+          $out .=   __('View categories');
+          $out .= '</h3>';
+          if (!$user->isSuperuser()) {
+            $out .= '<p class="text-center">'.__("Contact the administrator if you want to operate changes in this list.").'</p>';
+          }
+          $out .= '<div>';
+          if ($user->isSuperuser()) {
+            $out .= $pages->get("name=categories")->feel(array(
+              'mode' => 'page-add',
+              'text' => '[Add a new category]'
+            ));
+          }
+          $out .= '<h4><span>'.__("All categories").'</span></h4>';
+          $out .= '<ul>';
+          foreach($allCategories as $p) {
+            $out .= '<li>';
+            $out .= '<span class="label label-primary">'.$p->title.'</span> → ';
+            $out .= '<span>'.$p->summary.'</span>';
+            if ($user->isSuperuser()) {
+              $out .= $p->feel();
+            }
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+          $out .= '</div>';
+          /* $out .= '<section id="ajaxViewport" class="well"></section>'; */
+          break;
+        case 'manage-lessons' :
+          $out .= '<section class="well">';
+          $out .= '<h3 class="text-center">';
+          $out .=   __('Manage lessons');
+          $out .= '</h3>';
+          if (!$user->isSuperuser()) {
+            $out .= '<p class="text-center">'.__("Contact the administrator if you want to delete items in this list.").'</p>';
+          }
+          $out .= $pages->get("name=book-knowledge")->feel(array(
+            'mode' => 'page-add',
+            'text' => __('[Add a new lesson]'),
+            'class' => 'button'
+          ));
+          $out .= '<div>';
+          if (!$user->isSuperuser()) {
+            $notTeacherEl = $pages->find("template=lesson, teacher!=$user, created_users_id!=$user->id")->sort("title");
+          } else {
+            $notTeacherEl = $pages->find("template=lesson, include=all")->sort("title");
+          }
+          $teacherEl = $pages->find("template=lesson, (teacher=$user), (created_users_id=$user->id), include=all")->sort("title");
+          if (!$user->isSuperuser()) {
+            $out .= '<h4><span>'.__("Your lessons").'</span></h4>';
+            $out .= '<ul id="teacherElements">';
+            foreach($teacherEl as $p) {
+              if ($p->created_users_id == $user->id || $user->name == 'flieutaud') { $userIsOwner = true; } else { $userIsOwner = false; }
+              $out .= '<li>';
+              if (!$userIsOwner) {
+                $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+              }
+              if ($p->isUnpublished()) {
+                $out .= '<span class="strikeText">'.$p->title.'</span>';
+                $out .= ' <a class="publishElement" href="'.$page->url.'publish-element/'.$user->id.'/'.$p->id.'?type=team">'.__('[Publish]').'</a>';
+              } else {
+                $out .= '<span>'.$p->title.'</span>';
+              }
+              if ($p->summary != '') {
+                $out .= ' → <span>'.$p->summary.'</span> ';
+              }
+              if ($p->topic) {
+                $out .= '<span class="label label-default">'.$p->topic->implode(', ', '{title}').'</span>';
+              }
+              if ($userIsOwner) {
+                $out .= $p->feel(array(
+                          "text" => __('[Edit]'),
+                          "fields" => "title,topic,level,summary,body,images,task,linkedMonsters"
+                        ));
+              }
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+          }
+          $out .= '<h4><span>'.__("Available lessons").'</span></h4>';
+          $out .= '<ul id="notTeacherElements">';
+          foreach($notTeacherEl as $p) {
+            $out .= '<li>';
+            if (!$user->isSuperuser()) {
+              $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+            }
+            $out .= '<span>'.$p->title.'</span> → ';
+            $out .= '<span>'.$p->summary.'</span> ';
+            if ($p->topic) {
+              $out .= '<span class="label label-default">'.$p->topic->implode(', ', '{title}').'</span>';
+            }
+            $out .= ' <a href="'.$p->url.'" data-toggle="tooltip" title="'.__("See a preview").'" target="blank"><span class="glyphicon glyphicon-eye-open"></span></a> ';
+            if ($user->isSuperuser() || $user->name == 'flieutaud') {
+              $out .= $p->feel(array(
+                        "text" => __('[Edit]'),
+                        "fields" => "title,topic,level,summary,body,images,task,linkedMonsters"
+                      ));
+            }
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+          $out .= '</div>';
+          break;
+        case 'manage-monsters' :
+          $out .= '<section class="well">';
+          $out .= '<h3 class="text-center">';
+          $out .=   __('Manage monsters');
+          $out .= '</h3>';
+          if (!$user->isSuperuser()) {
+            $out .= '<p class="text-center">'.__("Contact the administrator if you want to delete items in this list.").'</p>';
+          }
+          $out .= $pages->get("name=monsters")->feel(array(
+            'mode' => 'page-add',
+            'text' => __('[Add a new monster]'),
+            'class' => 'button'
+          ));
+          $out .= '<div>';
+          if (!$user->isSuperuser()) {
+            $notTeacherEl = $pages->find("template=exercise, teacher!=$user, created_users_id!=$user->id")->sort("title");
+          } else {
+            $notTeacherEl = $pages->find("template=exercise, include=all")->sort("title");
+          }
+          $teacherEl = $pages->find("template=exercise, (teacher=$user), (created_users_id=$user->id), include=all")->sort('title');
+          if (!$user->isSuperuser()) {
+            $out .= '<h4><span>'.__("Your monsters").'</span></h4>';
+            $out .= '<ul id="teacherElements">';
+            foreach($teacherEl as $p) {
+              if ($p->created_users_id == $user->id || $user->name == 'flieutaud') { $userIsOwner = true; } else { $userIsOwner = false; }
+              $out .= '<li>';
+              if (!$userIsOwner) {
+                $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+              }
+              if ($p->isUnpublished()) {
+                $out .= '<span class="strikeText">'.$p->title.'</span>';
+                $out .= ' <a class="publishElement" href="'.$page->url.'publish-element/'.$user->id.'/'.$p->id.'?type=team">'.__('[Publish]').'</a>';
+              } else {
+                $out .= '<span>'.$p->title.'</span>';
+              }
+              if ($p->summary != '') {
+                $out .= ' → <span>'.$p->summary.'</span> ';
+              }
+              if ($p->type && $p->type->name && $p->exData != '') {
+                $allLines = preg_split('/$\r|\n/', $p->exData);
+                $listWords = prepareListWords($allLines, $p->type->name);
+                $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span> ';
+                $out .= '<span class="label label-success">'.$p->type->title.'</span> ';
+              }
+              if ($userIsOwner) {
+                $out .= $p->feel(array(
+                          "text" => __('[Edit]'),
+                          "fields" => "title,summary,topic,level,type,image,exData"
+                        ));
+              }
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+          }
+          $out .= '<h4><span>'.__("Available monsters").'</span></h4>';
+          $out .= '<ul id="notTeacherElements">';
+          foreach($notTeacherEl as $p) {
+            $out .= '<li>';
+            if (!$user->isSuperuser()) {
+              $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+            }
+            $out .= '<span>'.$p->title.'</span> → ';
+            $out .= '<span>'.$p->summary.'</span> ';
+            if ($p->type && $p->type->name && $p->exData != '') {
+              $allLines = preg_split('/$\r|\n/', $p->exData);
+              $listWords = prepareListWords($allLines, $p->type->name);
+              $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span> ';
+              $out .= '<span class="label label-success">'.$p->type->title.'</span> ';
+            }
+            if ($user->isSuperuser() || $user->name == 'flieutaud') {
+              $out .= $p->feel();
+            }
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+          $out .= '</div>';
+          $out .= '</section>';
+          break;
+        case 'manage-shop' :
+          $out .= '<section class="well">';
+          $out .= '<h3 class="text-center">';
+          $out .=   __('Manage marketplace');
+          $out .= '</h3>';
+          if (!$user->isSuperuser()) {
+            $out .= '<p class="text-center">'.__("Contact the administrator if you want to operate changes in this list.").'</p>';
+            $notTeacherEl = $pages->find("template=item, teacher!=$user, created_users_id!=$user->id")->sort('title');
+          } else {
+            $notTeacherEl = $pages->find("template=item, include=all")->sort('title');
+          }
+          $out .= '<div>';
+          if (!$user->isSuperuser()) {
+            $teacherEl = $pages->find("template=item, (teacher=$user), (created_users_id=$user->id), include=all")->sort('title');
+            $out .= '<h4><span>'.__("Your items").'</span></h4>';
+            $out .= '<ul id="teacherElements">';
+            foreach($teacherEl as $p) {
+              if ($p->created_users_id == $user->id) { $userIsOwner = true; } else { $userIsOwner = false; } // Useless for the moment, teacher can't create items
+              $out .= '<li>';
+              if (!$userIsOwner) {
+                $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+              }
+              if ($p->isUnpublished()) { // Useless for the moment, teacher can't create items
+                $out .= '<span class="strikeText">'.$p->title.'</span>';
+                $out .= ' <a class="publishElement" href="'.$page->url.'publish-element/'.$user->id.'/'.$p->id.'?type=team">'.__('[Publish]').'</a>';
+              } else {
+                $out .= '<span><a href="'.$shop->url.'details/'.$p->name.'" target="blank">'.$p->title.'</a></span>';
+              }
+              if ($p->summary != '') {
+                $out .= ' → <span>'.$p->summary.'</span> ';
+              }
+              if ($p->category) {
+                $out .= ' <span class="label label-danger">'.$p->category->title.'</span>';
+              }
+              if ($p->created_users_id == $user->id || $user->name == 'flieutaud') { // Useless for the moment : teacher can't create items
+                $out .= $p->feel(array(
+                          "text" => __('[Edit]'),
+                        ));
+              }
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+          }
+          $out .= '<h4><span>'.__("Available items").'</span></h4>';
+          $out .= '<ul id="notTeacherElements">';
+          foreach($notTeacherEl as $p) {
+            $out .= '<li>';
+            if (!$user->isSuperuser()) {
+              $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+            }
+            $out .= '<span><a href="'.$shop->url.'details/'.$p->name.'" target="blank">'.$p->title.'</a></span> → ';
+            $out .= '<span>'.$p->summary.'</span> ';
+            if ($p->category) {
+              $out .= ' <span class="label label-danger">'.$p->category->title.'</span>';
+            }
+            if ($user->isSuperuser() || $user->name == 'flieutaud') {
+              $out .= $p->feel(array(
+                        "text" => __('[Edit]'),
+                      ));
+            }
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+          $out .= '<h4><span>'.__("Planet Alert equipment [for information]").'</span></h4>';
+          $allEquipments = $pages->find("template=equipment")->sort("category.title, title");
+          foreach($allEquipments as $p) {
+            $out .= '<li>';
+            $out .= '<span><a href="'.$shop->url.'details/'.$p->name.'" target="blank">'.$p->title.'</a></span> → ';
+            $out .= '<span>'.$p->summary.'</span> ';
+            $out .= '<span class="label label-danger">'.$p->category->title.'</span> ';
+            if ($user->isSuperuser() || $user->name == 'flieutaud') {
+              $out .= $p->feel(array(
+                        "text" => __('[Edit]'),
+                      ));
+            }
+            $out .= '</li>';
+          }
+          $out .= '<ul>';
+          $out .= '</ul>';
+          $out .= '</div>';
+          $out .= '</section>';
+          break;
+        case 'setCaptains' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<h3 class="text-center">';
+            $out .=   'Set Captains';
+            $out .= '</h3>';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setCaptains">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        case 'setKarma' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<h3 class="text-center">';
+            $out .=   'Set karma';
+            $out .= '</h3>';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setKarma">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        case 'setYearlyKarma' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<h3 class="text-center">';
+            $out .=   'Set yearly karma';
+            $out .= '</h3>';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setYearlyKarma">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        case 'setScores' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<h3 class="text-center">';
+            $out .=   'Set scores';
+            $out .= '</h3>';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setScores">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        case 'users' :
+          if ($user->isSuperuser()) {
+            $allPlayers = $pages->find("parent.name=players, template=player")->sort("title");
+            $allTeachers = $pages->find("parent.name=teachers, template=teacherProfile")->sort("title");
+            $out .= '<section class="well">';
+            $out .= '<p><span class="glyphicon glyphicon-alert"></span> 1 player / line → Name [,lastName] [,rank = 4=CM1,5=CM2,6=6emes,7=5emes,8=4emes...)] [,team] [,teacher\'s login]</p>';
+            $out .= '<textarea id="newPlayers" name="newPlayers" rows="5" cols="200"></textarea>';
+            $out .= '<button class="addUsers btn btn-primary btn-block" data-href="'.$page->url.'" data-action="addUsers">Add new players</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+            if ($user->isSuperuser()) {
+              $allTeachers = $users->find("roles=teacher");
+              $out .= '<p>There are currently '.$allTeachers->count().' teachers. (Go to backend to add a new teacher, i.e. new user with teacher role)</p>';
+              $out .= '<table class="table table-condensed table-hover">';
+              $out .= '<th>Teacher (user page)</th>';
+              $out .= '<th>Email</th>';
+              $out .= '<th>Teacher profile page</th>';
+              $out .= '<th>Associated teams</th>';
+              foreach ($allTeachers as $p) {
+                $out .= '<tr>';
+                $out .= '<td>'.$p->name.$p->feel().'</td>';
+                $out .= '<td>'.$p->email.' '.$p->feel(array('fields'=>'email')).'</td>';
+                $profilePage = $pages->get("name=teachers")->get("singleTeacher=$p");
+                if ($profilePage->id) {
+                  $out .= '<td><span class="label label-success">OK</span> '.$profilePage->feel().'</td>';
+                } else {
+                  $out .= '<td><span class="label label-danger">No page !</span>'.$pages->get("name=teachers")->feel(array('text'=>'[Create profile page]', 'mode' => 'page-add')).'</td>';
+                }
+                $teacherTeams = $pages->find("template=team, teacher=$p")->implode(', ', '{title}');
+                $out .= '<td>'.$teacherTeams.'</td>';
+                $out .= '</tr>';
+              }
+              $out .= '</table>';
+              $out .= '<hr />';
+            }
+            $out .= '<p>There are currently '.$allPlayers->count().' players.</p>';
+            $out .= '<table class="table table-condensed table-hover">';
+            $out .= '<th>Player</th>';
+            $out .= '<th>Team</th>';
+            $out .= '<th>User name / Login</th>';
+            $out .= '<th>Head teacher</th>';
+            $out .= '<th>History</th>';
+            $out .= '<th>Archive</th>';
+            $out .= '<th>Delete</th>';
+            foreach ($allPlayers as $p) {
+              $u = $users->get("name=$p->login");
+              $out .= '<tr>';
+              $out .= '<td>'.$p->title.$p->feel().'</td>';
+              $out .= '<td>'.$p->team->title.'</td>';
+              $out .= '<td>'.$u->name.' / '.$p->login.'</td>';
+              $headTeacher = getHeadTeacher($p);
+              if ($headTeacher) {
+                $out .= '<td>'.$headTeacher->name.'</td>';
+              } else {
+                $out .= '<td>-</td>';
+              }
+              /* $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</a></td>'; */
+              $out .= '<td><a target="blank" class="btn btn-xs btn-danger" href="'.$adminActions->url.'recalculate/'.$p->id.'">Check history</a></td>';
+              $history = $p->child("name=history");
+              if ($history->id) {
+                $out .= '<td><button class="confirm btn btn-xs btn-danger" data-href="'.$page->url.'archivePlayer/'.$p->id.'/1">Archive Player</button></td>';
+              } else {
+                $out .= '<td>Nothing to archive.</td>';
+              }
+              $out .= '<td><button class="removeUser btn btn-xs btn-danger" data-href="'.$page->url.'" data-action="removeUser" data-playerId="'.$p->id.'">Delete Player/User</button></td>';
+              $out .= '</tr>';
+            }
+            $out .= '</table>';
+            $out .= '<div>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
+        default :
+          $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
+          $out .= '<section id="ajaxViewport" class="well"></section>';
+          $out .= '<div>';
+      }
+    } else { // End if admin/teacher
+      $out .= $noAuthMessage;
     }
-  } else { // End if admin
-    $out .= 'Admin only.';
-  }
-  $out .= '</div>';
-  echo $out;
-  include("./foot.inc"); 
-  if ($user->isSuperuser()) {
+    $out .= '</div>';
+    echo $out;
+    include("./foot.inc"); 
     echo '<script>';
     echo '$(".addUsers").click( function() { var myData = $(\'#newPlayers\').val(); var action=$(this).attr("data-action"); var href=$(this).attr("data-href")+action; var that=$(this); if (confirm("Proceed?")) {$.post(href, {newPlayers:myData}, function(data) { $("#ajaxViewport").html(data); }) };});';
     echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
     echo '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); }) };});';
     echo '</script>';
-  }
   } else { // Ajax call, display requested information
+    $out = '';
     $allPlayers = $pages->find("parent.name=players, template=player")->sort("team.name, title");
     $action = $input->urlSegment1;
     $playerId = $input->urlSegment2;
@@ -312,7 +1038,7 @@ namespace ProcessWire;
       $endDate = $endDate.' 23:59:59';
     }
 
-    $teamActions = ['toggle-lock', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp'];
+    $teamActions = ['toggle-lock', 'savePeriod', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp'];
     if (in_array($action, $teamActions)) {
       $type = 'team';
     }
@@ -353,12 +1079,22 @@ namespace ProcessWire;
         /*   $p->of(false); */
         /*   $p->save(); */
         /* } */
+        
+        /* // Add player role to all users (but admin and teachers */
+        /* foreach($users as $u) { */
+        /*   if ($u->is('roles!=teacher') && $u->is('roles!=superuser') && $u->name!='guest') { */
+        /*     $u->of(false); */
+        /*     $u->addRole('player'); */
+        /*     $u->save(); */
+        /*   } */
+        /* } */
         break;
       case 'reports' :
         $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
         if ($selectedTeam && $selectedTeam != '-1') {
           $allPeriods = $pages->get("name=periods")->children();
-          $officialPeriod = $pages->get("name=admin-actions")->periods;
+          /* $officialPeriod = $pages->get("name=admin-actions")->periods; */
+          $officialPeriod = $selectedTeam->periods;
           $allPlayers = $allPlayers->find("team.name=$selectedTeam->name");
           $out .= '<section class="well">';
           $out .= '<div>';
@@ -471,6 +1207,15 @@ namespace ProcessWire;
             $p->skills->remove($role);
           }
           $p->of(false);
+          $p->save();
+        }
+        break;
+      case 'bumpYear' :
+        $allPeriods = $pages->find("template=period");
+        foreach($allPeriods as $p) {
+          $p->of(false);
+          $p->dateStart = strtotime('+1 year', $p->dateStart);
+          $p->dateEnd = strtotime('+1 year', $p->dateEnd);
           $p->save();
         }
         break;
@@ -744,256 +1489,6 @@ namespace ProcessWire;
           $out .= '<p>Titles seem to be clean.</p>';
         }
         break;
-      case 'recalculate' :
-        if ($selectedPlayer) {
-          $allEvents = $selectedPlayer->get("name=history")->children()->sort("date, created");
-          $out = '<h3>'.$selectedPlayer->title.' ['.$selectedPlayer->team->title.'] → Recalculate scores from complete history ('. $allEvents->count.' events).</h3>';
-          // Keep initial scores for comparison
-          $initialPlayer = clone $selectedPlayer;
-          // Init scores
-          $selectedPlayer = initPlayer($selectedPlayer);
-          $out .= displayPlayerScores($selectedPlayer);
-          $out .= '<table class="table table-condensed table-hover">';
-          foreach($allEvents as $e) {
-            // Keep previous values to check evolution
-            $oldPlayer = clone $selectedPlayer;
-            $out .= '<tbody>';
-            if ($selectedPlayer->coma == 1) {
-              $comaClass = 'bg-warning';
-            } else {
-              $comaClass = '';
-            }
-            $out .= '<tr><td class="text-left '.$comaClass.'">';
-            if ($e->date != '') {
-              $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
-            } else {
-              $out .= '▶ <span class="label label-danger">Date error!</span> - ';
-              $dirty = true;
-            }
-            $out .= $e->title;
-            $comment = trim($e->summary);
-            if ($comment) {
-              $out .= ' [comment:'.$comment.']';
-            }
-            if ($e->refPage) {
-              $out .= ' [refPage:'.$e->refPage->title.']';
-            }
-            if ($e->linkedId) {
-              $out .= ' [linkedId:'.$e->linkedId.']';
-            }
-            if ($e->task) {
-              if ($e->task->is("name=donation")) { // Player gave GC, increase his Donation
-                preg_match("/\d+/", $comment, $matches);
-                $diff = $selectedPlayer->GC - $matches[0];
-                if ($diff < 0) { // Check for Donation bug
-                  $out .= ' <span class="label label-danger">Error';
-                  $out .= ' ⇒ Amount replaced : '.$selectedPlayer->GC.' [Edit and reload]';
-                  $out .= '</span>';
-                  $comment = preg_replace("/\d+/", $selectedPlayer->GC, $comment, 1);
-                  $dirty = true;
-                  /* // Change summary if saved */
-                  /* if ($input->urlSegment3 && $input->urlSegment3 == 1) { */
-                  /*   $e->summary = $comment; */
-                  /*   $e->of(false); */
-                  /*   $e->save(); */
-                  /* } */
-                }
-              }
-              if ($e->task->is("name=wrong-invasion")) { // 3rd wrong invasion ?
-                $wrongInvasions = $allEvents->find("task.name=wrong-invasion, refPage=$e->refPage, date<=$e->date, sort=-date");
-                // Limit to events AFTER the last 'Free' action on the oarticular element
-                $lastFree = $allEvents->get("task.name=free, refPage=$e->refPage, sort=-date");
-                if ($lastFree->id) {
-                  $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
-                }
-                if ($wrongInvasions->count() >= 3) {
-                  if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
-                    $out .= '<span class="label label-success">Remove OK</span>';
-                  } else {
-                    $dirty = true;
-                    $out .= '<span class="label label-danger">Remove Error (3rd wrong invasion)</span>';
-                    // Button Add Remove action here
-                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-remove/'.$playerId.'/'.$e->id.'/'.$e->refPage->id.'">Add Remove action here?</button>';
-                  }
-                } else {
-                  if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
-                    $dirty = true;
-                    $out .= '<span class="label label-danger">Error : Remove found but not 3 wrong invasion(s) before ? ('.$wrongInvasions->count().'?)</span>';
-                  }
-                }
-              }
-              if ($e->task->is("name=buy|free|bought")) { // New equipment, place, people or potion, add it accordingly
-                if ($e->refPage != false) {
-                  // Get item's data
-                  $newItem = $pages->get("$e->refPage");
-                  if ($newItem->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
-                    $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
-                    $dirty = true;
-                  }
-                  if ($newItem->level > $selectedPlayer->level) { // Check for Buy/Free bug (if a Death occurred, for example)
-                    $out .= ' <span class="label label-danger">Error : Wrong level.</span>';
-                    $dirty = true;
-                  }
-                  if ($newItem->parent->is("name=group-items")) {
-                    // Check if groups have been set
-                    $out .= '<ul class="list-inline">';
-                    $out .= '<li>Group item status → </li>';
-                    if ($selectedPlayer->group != '') {
-                      // Check if group members have [unlocked] item
-                      $members = $allPlayers->find("team=$selectedPlayer->team, group=$selectedPlayer->group");
-                      $boughtNb = 0;
-                      foreach ($members as $p) {
-                        $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
-                        if ($bought->id) {
-                          $boughtNb++;
-                          $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
-                        } else {
-                          $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
-                        }
-                      }
-                      if ($boughtNb != $members->count-1) {
-                        $dirty = true;
-                        $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
-                      }
-                      // [unlocked] or [bought] ?
-                      // task page should be set accordingly but prevention here for backward compatibility
-                      preg_match("/\[unlocked\]/", $comment, $matches);
-                      if (isset($matches[0]) && $e->task->is("name=buy")) {
-                        $dirty = true;
-                        $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
-                      }
-                      if (!isset($matches[0]) && $e->task->is("name=bought")) {
-                        $dirty = true;
-                        $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
-                      }
-                    } else { // No groups, item shoudn't be there
-                        $dirty = true;
-                        $out .= ' <span class="label label-danger">Error : No groups set. Item shouldn\'t be there.</span>';
-                    }
-                    $out .= '</ul>';
-                  }
-
-                  if ($newItem->name == 'health-potion' && $selectedPlayer->coma == 1) {
-                    $selectedPlayer->coma = 0;
-                    $out .= '<li><span class="label label-success">Leaving COMA STATE !</span></li>';
-                  }
-                }
-                if ($e->linkedId) {
-                  $discount = $pages->get("$e->linkedId");
-                  if ($discount->id && $discount->parent->is("name=specials")) {
-                    $out .= ' ['.$discount->title.'% discount]';
-                  }
-                }
-              }
-              if ($e->task->is("name=death")) {
-                $lastDeath = $e;
-                // Set previousLevel
-                preg_match("/\d+/", $e->summary, $matches);
-                $previousLevel = (int) $matches[0];
-                if ($previousLevel == 0) {
-                  if ($selectedPlayer->level>1) {
-                    $previousLevel = $selectedPlayer->level;
-                  } else {
-                    $previousLevel = 0;
-                  }
-                  $out .= ' <span class="label label-danger">Error : No former level, set to '.$previousLevel.'</span>';
-                  $dirty = true;
-                }
-                // Death recorded but HP>0
-                if ($selectedPlayer->HP > 0) {
-                  $out .= ' <span class="label label-danger">Error → HP>0 ?</span>';
-                  $dirty = true;
-                }
-              }
-              if ($e->task->is("name=team-death|group-death|death")) {
-                if ($e->linkedId) {
-                  $out .= ' ['.$e->linkedId.']';
-                }
-              }
-              if ($e->inClass == 1 && $e->task->is("name~=fight|ut-action")) {
-                $out .= ' [in class]';
-              }
-              if ($e->refPage != false && $e->refPage->is("name=memory-potion") && $e->linkedId == 0) {
-                $used = $allEvents->get("linkedId=$e->id");
-                if (isset($used->id)) {
-                  $out .= ' [used on '.date('d/m', $used->date).' ?]';
-                } else {
-                  $out .= ' <span class="label label-danger">Not used ?</span>';
-                }
-              }
-              $e->task->comment = $comment;
-              $e->task->refPage = $e->refPage;
-              $e->task->linkedId = $e->linkedId;
-              updateScore($selectedPlayer, $e->task, false);
-              if ($e->task->is("name=death")) {
-                $prevDeath = $allEvents->find('task.name=death')->getPrev($e);
-                if (isset($prevDeath)) {
-                  // Set prevDeathLevel
-                  preg_match("/\d+/", $prevDeath->summary, $matches);
-                  $prevDeathLevel = (int) $matches[0];
-                  $out .= 'PrevDeath:'.$prevDeathLevel;
-                }
-                resetPlayer($selectedPlayer, $prevDeathLevel);
-                if ($selectedPlayer->coma == 1) {
-                  $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
-                } 
-              }
-              $out .= '<br />';
-              $out .= displayTrendScores($selectedPlayer, $oldPlayer);
-              $out .= displayPlayerScores($selectedPlayer);
-              $out .= '  ';
-              // Direct link to manually edit page
-              $out .= ' <a class="btn btn-xs btn-primary" href="'.$config->urls->admin.'page/edit/?id='.$e->id.'" target="_blank">Edit page in Backend</a>';
-              // Delete event link
-              $out .= '  <button class="delete btn btn-xs btn-danger" data-href="'.$page->url.'" data-playerId="'.$selectedPlayer->id.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
-              // Test if player died
-              if ($selectedPlayer->HP == 0 && $e->task->is("name!=death")) {
-                if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'death') {
-                  $out .= '<span class="label label-success">Death OK</span>';
-                } else {
-                  $dirty = true;
-                  // Ask only for the first Death
-                  if ($unique == true) {
-                    $out .= '<span class="label label-danger">Error : No Death after?</span>  ';
-                    // Button Add death here
-                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">Add death here?</button>';
-                    $unique = false;
-                  } else {
-                    $out .= '<span class="label label-danger">Previous Death?</span>';
-                    $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">Add death here?</button>';
-                  }
-                }
-              }
-            }
-            $out .='</td></tr>';
-          }
-          $out .= '</tbody>';
-          $out .= '</table>';
-          $out .= displayPlayerScores($initialPlayer, 'previous');
-          $out .= '<br />';
-          $out .= displayPlayerScores($selectedPlayer);
-          $out .= '<br /><br />';
-          if (isset($dirty)) {
-            $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
-          }
-          if ($input->urlSegment3 && $input->urlSegment3 == 1) {
-            $officialPeriod = $pages->get("name=admin-actions")->periods;
-            $newCount = setHomework($selectedPlayer, $officialPeriod->dateStart, $officialPeriod->dateEnd);
-            $lastPenalty = $allEvents->find("task.category.name=homework, date>=$officialPeriod->dateStart, date<=$officialPeriod->dateEnd")->sort("-date")->first(); // Get last Hk pb
-            if ($lastPenalty && $lastPenalty->task->is("name=penalty")) {
-              $newCount = 0;
-            }
-            $selectedPlayer->hkcount = $newCount;
-            $selectedPlayer->of(false);
-            $selectedPlayer->save();
-            /* $out .= '<div class="well">New scores saved !</div>'; */
-          } else {
-            $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/1">Recalculate scores</button>';
-          }
-        } else {
-          $out .= 'You need to select 1 player.';
-        }
-        break;
       case 'remove-equipment' :
         $item = $pages->get($input->urlSegment3);
         $player = $pages->get($playerId);
@@ -1156,6 +1651,66 @@ namespace ProcessWire;
         }
         $team->save();
         break;
+      case 'savePeriod':
+        $team = $pages->get("$selectedTeam");
+        if ($confirm != -1) {
+          $period = $pages->get($confirm); // urlSegment3 used for periodId
+        } else {
+          $period = false;
+        }
+        $team->of(false);
+        if ($period && $period->is("template=period")) {
+          $team->periods = $period;
+        } else {
+          $team->periods = false;
+        }
+        $team->save();
+        break;
+      case 'select-element':
+        $teacher = $users->get("$selectedTeam"); // urlSegment2 used for teacherId
+        $element = $pages->get($confirm); // urlSegment3 used for elementId
+        if ($element->id) { // Add/Remove page in correct repeater field or simple teacher field
+          switch($element->template) {
+            case 'task' : 
+              $already = $element->owner->get("singleTeacher=$user");
+              if ($already->id) {
+                $element->owner->remove($already);
+              } else {
+                $new = $element->owner->getNew();
+                $new->singleTeacher = $user;
+                $element->owner->add($new);
+              }
+              break;
+            case 'period' : 
+              $already = $element->periodOwner->get("singleTeacher=$user");
+              if ($already->id) {
+                $element->periodOwner->remove($already);
+              } else {
+                $new = $element->periodOwner->getNew();
+                $new->singleTeacher = $user;
+                $element->periodOwner->add($new);
+              }
+              break;
+            default : // Add/Remove teacher in teacher field
+              if ($element->teacher->has($user)) {
+                $element->teacher->remove($user);
+              } else {
+                $element->teacher->add($user);
+              }
+          }
+        }
+        $element->of(false);
+        $element->save();
+        break;
+      case 'publish-element':
+        $teacher = $users->get("$selectedTeam"); // urlSegment2 used for teacherId
+        $element = $pages->get($confirm); // urlSegment3 used for elementId
+        if ($element->id && ($element->created_users_id == $teacher->id || $user->isSuperuser() || $user->name == 'flieutaud')) {
+          $element->of(false);
+          $element->status([]);
+          $element->save();
+        }
+        break;
       case 'forceHelmet':
         $team = $pages->get("$selectedTeam");
         $team->of(false);
@@ -1231,14 +1786,11 @@ namespace ProcessWire;
         $p->coma = 0;
         $p->team = $noteam;
         $p->group = '';
-        switch ($p->rank->name) {
-          case '6emes' : $p->rank = $pages->get("name=ranks")->child("name=5emes"); break;
-          case '5emes' : $p->rank = $pages->get("name=ranks")->child("name=4emes"); break;
-          case '4emes' : $p->rank = $pages->get("name=ranks")->child("name=3emes"); break;
-          case '3emes' : break;
-          default : $p->rank = '';
-        }
+        $nextRank = $p->rank->index+1;
+        if ($nextRank > 11) { $nextRank = 11; }
+        $p->rank = $pages->get("name=ranks")->child("index=$nextRank");
         $p->save();
+        break;
       case 'archive':
         $allPlayers = $pages->find("template=player, parent.name=players, team=$selectedTeam");
         $noteam = $pages->get("template=team, name=no-team");
@@ -1281,12 +1833,9 @@ namespace ProcessWire;
           $p->team = $noteam;
           $p->group = '';
           $p->skills->remove($captain);
-          switch ($p->rank) {
-            case '6emes' : $p->rank = '5emes'; break;
-            case '5emes' : $p->rank = '4emes'; break;
-            case '4emes' : $p->rank = '3emes'; break;
-            default : $p->rank = '';
-          }
+          $nextRank = $p->rank->index+1;
+          if ($nextRank > 11) { $nextRank = 11; }
+          $p->rank = $pages->get("name=ranks")->child("index=$nextRank");
           $p->save();
         }
         // Archive team scores and delete team
@@ -1503,74 +2052,107 @@ namespace ProcessWire;
         if ($selectedTeam && $selectedTeam != '-1') {
           $out .= '</div>';
           $out .= '<h4 class="text-center">';
-          $out .=   'Team options for '.$selectedTeam->title;
+          $out .= sprintf(__('Team options for %1$s'), $selectedTeam->title);
           $out .= '</h4>';
           $out .= '<ul>';
-          // Force Memory Helmet
-          $lock = $pages->get("$selectedTeam")->forceHelmet;
-          if ($lock == 1) {
-            $status = 'checked="checked"';
-          } else {
-            $status = '';
-          }
-          $out .= '<li><label for="forceHelmet"><input type="checkbox" id="forceHelmet" '.$status.'> Force Memory Helmet</label> ';
-          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceHelmet/'.$selectedTeam.'/1">Save</button>';
-          $out .= '</li>';
-          // Force Visualizer
-          $lock = $pages->get("$selectedTeam")->forceVisualizer;
-          if ($lock == 1) {
-            $status = 'checked="checked"';
-          } else {
-            $status = '';
-          }
-          $out .= '<li><label for="forceVisualizer"><input type="checkbox" id="forceVisualizer" '.$status.'> Force Visualizer</label> ';
-          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceVisualizer/'.$selectedTeam.'/1">Save</button>';
-          $out .= '</li>';
-          // Force Book of Knowledge
-          $lock = $pages->get("$selectedTeam")->forceKnowledge;
-          if ($lock == 1) {
-            $status = 'checked="checked"';
-          } else {
-            $status = '';
-          }
-          $out .= '<li><label for="forceKnowledge"><input type="checkbox" id="forceKnowledge" '.$status.'> Force the Book of Knowledge</label> ';
-          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceKnowledge/'.$selectedTeam.'/1">Save</button>';
-          $out .= '</li>';
-          // Lock Fights (Training but no 'tests')
-          $lock = $pages->get("$selectedTeam")->lockFights;
-          if ($lock == 1) {
-            $status = 'checked="checked"';
-          } else {
-            $status = '';
-          }
-          $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> Lock fights</label> ';
-          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">Save</button>';
-          $out .= '</li>';
-          // 'Class activity' tag (ignored for 'motivation' statistic)
-          $lock = $pages->get("$selectedTeam")->classActivity;
-          if ($lock == 1) {
-            $status = 'checked="checked"';
-          } else {
-            $status = '';
-          }
-          $out .= '<li><label for="classActivity"><input type="checkbox" id="classActivity" '.$status.'> Class activity tag</label> ';
-          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'classActivity/'.$selectedTeam.'/1">Save</button>';
-          $out .= '</li>';
-          // Archive team
-          $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> Archive</label> ';
-          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">Save</button>';
-          $out .= '</li>';
-          // Reset streak
-          $out .= '<li><label for="resetStreaks"><input type="checkbox" id="reset-streaks"> Reset streaks</label> ';
-          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'reset-streaks/'.$selectedTeam.'/1">Save</button>';
-          $out .= '</li>';
-          // Recalculate tmp page
-          $out .= '<li><label for="recalculateTmpPage"><input type="checkbox" id="recalculate-tmp"> Recalculate tmpPage</label> ';
-          $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'recalculate-tmp/'.$selectedTeam.'/1">Save</button>';
-          $out .= '</li>';
+            // Team Official Period
+            if ($user->hasRole('teacher')) {
+              $allPeriods = $pages->find("template=period, periodOwner.singleTeacher=$user");
+            } else {
+              $allPeriods = $pages->find("template=period");
+            }
+            if ($selectedTeam->periods != false) {
+              $officialPeriod = $selectedTeam->periods;
+            } else {
+              $officialPeriod = false;
+            }
+            $out .= '<li>';
+            $out .=   '<label for="periodId">'.__("Official period").' :&nbsp;</label>';
+            $out .=   '<select id="periodId">';
+            $out .=     '<option value="-1">'.__("No official period (holidays ?)").'</option>';
+            foreach($allPeriods as $p) {
+              if ($officialPeriod != false) {
+                if ($p->id == $officialPeriod->id) {
+                  $status = 'selected="selected"';
+                } else {
+                  $status = '';
+                }
+              } else {
+                $status = '';
+              }
+              $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.'</option>';
+            }
+            $out .= ' </select>';
+            $out .= '&nbsp;';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'savePeriod/'.$selectedTeam.'">'.__("Save").'</button>';
+            $out .= '</li>';
+            // Force Memory Helmet
+            $lock = $pages->get("$selectedTeam")->forceHelmet;
+            if ($lock == 1) {
+              $status = 'checked="checked"';
+            } else {
+              $status = '';
+            }
+            $out .= '<li><label for="forceHelmet"><input type="checkbox" id="forceHelmet" '.$status.'> '.__("Force Memory Helmet").'</label> ';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceHelmet/'.$selectedTeam.'/1">'.__("Save").'</button>';
+            $out .= '</li>';
+            // Force Visualizer
+            $lock = $pages->get("$selectedTeam")->forceVisualizer;
+            if ($lock == 1) {
+              $status = 'checked="checked"';
+            } else {
+              $status = '';
+            }
+            $out .= '<li><label for="forceVisualizer"><input type="checkbox" id="forceVisualizer" '.$status.'> '.__("Force Visualizer").'</label> ';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceVisualizer/'.$selectedTeam.'/1">'.__("Save").'</button>';
+            $out .= '</li>';
+            // Force Book of Knowledge
+            $lock = $pages->get("$selectedTeam")->forceKnowledge;
+            if ($lock == 1) {
+              $status = 'checked="checked"';
+            } else {
+              $status = '';
+            }
+            $out .= '<li><label for="forceKnowledge"><input type="checkbox" id="forceKnowledge" '.$status.'> '.__("Force the Book of Knowledge").'</label> ';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceKnowledge/'.$selectedTeam.'/1">'.__("Save").'</button>';
+            $out .= '</li>';
+            // Lock Fights (Training but no 'tests')
+            $lock = $pages->get("$selectedTeam")->lockFights;
+            if ($lock == 1) {
+              $status = 'checked="checked"';
+            } else {
+              $status = '';
+            }
+            $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> '.__("Lock fights").'</label> ';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">'.__("Save").'</button>';
+            $out .= '</li>';
+            // 'Class activity' tag (ignored for 'motivation' statistic)
+            $lock = $pages->get("$selectedTeam")->classActivity;
+            if ($lock == 1) {
+              $status = 'checked="checked"';
+            } else {
+              $status = '';
+            }
+            $out .= '<li><label for="classActivity"><input type="checkbox" id="classActivity" '.$status.'> '.__("Class activity tag").'</label> ';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'classActivity/'.$selectedTeam.'/1">'.__("Save").'</button>';
+            $out .= '</li>';
+            if ($user->isSuperuser()) {
+              // Archive team
+              $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> '.__("Archive").'</label> ';
+              $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">'.__("Save").'</button>';
+              $out .= '</li>';
+            };
+            // Reset streak
+            $out .= '<li><label for="resetStreaks"><input type="checkbox" id="reset-streaks"> '.__("Reset streaks").'</label> ';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'reset-streaks/'.$selectedTeam.'/1">'.__("Save").'</button>';
+            $out .= '</li>';
+            // Recalculate tmp page
+            $out .= '<li><label for="recalculateTmpPage"><input type="checkbox" id="recalculate-tmp"> '.__("Recalculate tmpPage").'</label> ';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'recalculate-tmp/'.$selectedTeam.'/1">'.__("Save").'</button>';
+            $out .= '</li>';
           $out .= '</ul>';
         } else {
-          $out .= '<p>You need to select a team for more options.</p>';
+          $out .= '<p>'.__("You need to select a team for more options.").'</p>';
         }
         break;
       case 'addUsers' :
@@ -1579,7 +2161,7 @@ namespace ProcessWire;
         $out = '';
         foreach($newUserLines as $l) {
           $newUser = array_map('trim', explode(',', $l));
-          list($title, $lastName, $rank, $team) = $newUser;
+          list($title, $lastName, $rank, $team, $teacher) = $newUser;
           if ($title && $title != '') {
             // Generate a random password
             $pass = '';
@@ -1593,21 +2175,36 @@ namespace ProcessWire;
             $p->title = $title;
             $p->lastName = $lastName;
             if ($rank && $rank != '') {
-              $r = $pages->get("parent.name=ranks, name=$rank");
+              if ($rank == 0 || $rank > 11) { $rank = 11; }
+              $r = $pages->get("parent.name=ranks, index=$rank");
               if ($r->id) {
                 $p->rank = $r;
               }
             }
             if ($team && $team != '') {
-              $t = $pages->get("template=team, name=$team");
-              if ($t->id) {
-                $p->team = $t;
+              $team = $pages->get("template=team, name=$team");
+              if ($team->id) {
+                $p->team = $team;
+                if ($teacher && $teacher != '') { // Add teacher
+                  $t = $users->get("name=$teacher");
+                  if ($t->id) {
+                    $team->of(false);
+                    $team->teacher->add($t);
+                    $team->save();
+                  }
+                }
               } else { // Create new team
                 $newTeam = new Page();
                 $newTeam->template = team;
                 $newTeam->parent = $pages->get("name=teams");
                 $newTeam->title = strtoupper($team);
                 if ($p->rank) { $newTeam->rank = $p->rank; }
+                if ($teacher && $teacher != '') { // Add teacher
+                  $t = $users->get("name=$teacher");
+                  if ($t->id) {
+                    $newTeam->teacher->add($t);
+                  }
+                }
                 $newTeam->save();
                 $p->team= $newTeam;
               }
@@ -1618,16 +2215,16 @@ namespace ProcessWire;
             $p->save();
             initPlayer($p);
             $p->login = $p->name;
-            $p->save(login);
+            $p->save();
             // Create user (if he doesn't exit)
             $u = $users->get($p->login);
             if ($u == '') { // User does not exist
               $u = $wire->users->add($p->login); // Add new user
               $u->pass = $pass;
-              $u->addRole('guest');
+              $u->addRole('player');
               $u->save();
             } else {
-              $out .= $title.' : <span class="label label-danger">Error</span>';
+              $out .= $title.' : <span class="label label-danger">Error (user already exists ?)</span>';
             }
           }
           // Display login/passwords pairs (for admin recup)
@@ -1638,13 +2235,13 @@ namespace ProcessWire;
         }
         break;
       default :
-        $out = 'Problem detected.';
+        $out = __('Problem detected.');
     }
 
     $out .= '<script>';
     $out .= '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.hide(); $("button[data-action=recalculate]").click(); }) };});';
     $out .= '$(".remove").click( function() { var itemId=$(this).attr("data-itemId"); var action = $(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ itemId; var that=$(this).parents("li"); if (confirm("Remove item?")) {$.get(href, function(data) { that.hide(); }) };});';
-    $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); $("button[data-action=recalculate]").click(); }) };});';
+    $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); var $urlSeg3 = $("#periodId").val(); if ($urlSeg3) { href = href+"/"+$urlSeg3; }; if (confirm("Proceed?" + href)) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); $("button[data-action=recalculate]").click(); }) };});';
     $out .= '$(".death").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Please reload!"); $("button[data-action=recalculate]").click();}) };});';
     $out .= '</script>';
 
