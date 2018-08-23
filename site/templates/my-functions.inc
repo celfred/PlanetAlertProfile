@@ -91,6 +91,14 @@ function resetPlayer($player, $previousLevel) {
   }
 }
 
+function deletePlayer($player) {
+  $u = wire('users')->get("name=$player->login");
+  wire('pages')->trash($player);
+  if ($u && $u->hasRole('player')) {
+    wire('users')->delete($u);
+  }
+}
+
 function periodNotification($team, $teacher = false) {
   $out = '';
   $currentPeriod = $team->periods;
@@ -119,7 +127,7 @@ function periodNotification($team, $teacher = false) {
 }
 
 function updateScore($player, $task, $real = true) {
-  $task = checkModTask($task, false,$player); // Get personalized values according to logged in user
+  $task = checkModTask($task, false, $player); // Get personalized values according to logged in user
   if ($task->is("name!=death")) {
     // Task details to calculate new score
     $tXP = $task->XP;
@@ -602,30 +610,51 @@ function emptyTmp(HookEvent $e) { // Empty /tmp subtree
 
 function checkActivity(HookEvent $e) {
   $pages = wire('pages');
-  $allPlayers = $pages->find("template=player, team.name=no-team, name!=test"); // Limit to no-team players, avoid 'test'
   $refPage = $pages->get("name=inactivity");
+  $allPlayers = $pages->findMany("parent.name=players, template=player, team.name=no-team, name!=test"); // Limit to no-team players, avoid 'test'
   foreach ($allPlayers as $player) {
-    if ($player->GC > 0) { // Only players having GC
-      $lastActivityCount = lastActivity($player);
-      if ($lastActivityCount > 30) { // 30 days of inactivity
-        $task = $pages->get("name=inactivity");
+    $lastEvent = lastEvent($player);
+    if ($lastEvent) {
+      $lastActivityCount = daysFromToday($lastEvent);
+    } else {
+      createHistoryPage($player);
+      $lastActivityCount = -1;
+    }
+    if ($lastActivityCount > 30 && $lastActivityCount <= 365) { // 30 days of inactivity
+      if ($lastEvent->name != 'inactivity') {
+        $task = $refPage;
         $task->comment = $lastActivityCount.' days of inactivity.';
         $task->refPage = $refPage;
         $task->linkedId = false;
         updateScore($player, $task, true);
         // No need to checkDeath, inactivity can't cause death
       }
+    } else if ($lastActivityCount > 365 ) { // 1 year of inactivity, delete player/user
+      if ($player->rank > 9) { // Don't delete middle-school players
+        deletePlayer($player);
+      }
     }
   }
 }
 
-function lastActivity($player) {
-  $historyPage = $player->get("name=history");
-  $lastEvent = $historyPage->children()->findOne("sort=-date");
-  if ($lastEvent) {
+function lastEvent($player) {
+  $historyPage = $player->children("name=history")->sort('date')->last();
+  if ($historyPage) {
+    $lastEvent = $historyPage->children()->last();
+    if ($lastEvent) {
+      return $lastEvent;
+    } else { // No events in historyPage, go back on e
+      $lastEvent = $historyPage->prev()->children()->last();
+      return $lastEvent;
+    }
+  }
+}
+
+function daysFromToday($event) {
+  if ($event) {
     // Find # of days compared to today
     $date1 = new \DateTime("today");
-    $date2 = new \DateTime(date("Y-m-d", $lastEvent->created));
+    $date2 = new \DateTime(date("Y-m-d", $event->created));
     $interval = $date1->diff($date2);
     return $interval->days;
   } else {

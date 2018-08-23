@@ -987,7 +987,7 @@
               /* $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</a></td>'; */
               $out .= '<td><a target="blank" class="btn btn-xs btn-danger" href="'.$adminActions->url.'recalculate/'.$p->id.'">Check history</a></td>';
               $history = $p->child("name=history");
-              if ($history->id) {
+              if ($history->id && $history->children()->count() > 0) {
                 $out .= '<td><button class="confirm btn btn-xs btn-danger" data-href="'.$page->url.'archivePlayer/'.$p->id.'/1">Archive Player</button></td>';
               } else {
                 $out .= '<td>Nothing to archive.</td>';
@@ -1837,6 +1837,13 @@
           if ($nextRank > 11) { $nextRank = 11; }
           $p->rank = $pages->get("name=ranks")->child("index=$nextRank");
           $p->save();
+          // Prepare a new history page
+          $history = new Page();
+          $history->parent = $p;
+          $history->template = 'archive';
+          $history->name = 'history';
+          $history->title = 'history';
+          $history->save();
         }
         // Archive team scores and delete team
         $teamScores = $pages->get("name=teams");

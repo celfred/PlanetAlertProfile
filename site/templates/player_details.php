@@ -38,7 +38,8 @@
     $hkCount = '<span class="label label-danger">Private!</span>';
   }
   // Get last activity # of days
-  $lastActivityCount = lastActivity($playerPage);
+  $lastEvent = lastEvent($playerPage);
+  $lastActivityCount = daysFromToday($lastEvent);
 ?>
 
 <?php
