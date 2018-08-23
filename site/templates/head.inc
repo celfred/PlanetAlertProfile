@@ -401,7 +401,7 @@
           $out .= '</div>';
           $out .= '<div class="btn-group">';
             $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : "";
-            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-globe"></span> - '.__("The World").'<span class="caret"> </span></button>';
+            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The World").'<span class="caret"> </span></button>';
             $out .= '<ul class="dropdown-menu">';
               $class = $page->name == 'shop' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$shop->url}'>{$shop->title}</a></li>";
