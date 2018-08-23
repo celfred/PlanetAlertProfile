@@ -681,6 +681,8 @@ $(document).ready(function() {
 		var $this = $(this);
 		var $itemId = $this.attr("data-id");
 		if ($this.hasClass("buy")) {
+			var $playerGC = parseInt($('#playerGC').text());
+			var $todayItemsCount = parseInt($('#todayItemsCount').text());
 			var $url = $('#showInfo').attr('data-href') + '?id=buy&pageId=' + $itemId;
 			var $submit = $this.attr('data-href');
 			var $formData = "buyFormSubmit=on&playerId="+$this.attr('data-playerId')+"&item="+$this.attr('data-id');
@@ -689,7 +691,11 @@ $(document).ready(function() {
 				onOpen: function() {
 					swal.showLoading();
 					$.get($url, function(data) { 
-						var $myContent = data;
+						if ($todayItemsCount < 3) {
+							var $myContent = data;
+						} else {
+							var $myContent = "Error : Limit reached.";
+						}
 						swal({
 							title: 'Buy this item ?',
 							html: $myContent,
@@ -709,10 +715,28 @@ $(document).ready(function() {
 										showConfirmButton: false
 									}).then( function() {}, function(dismiss) {
 										if (dismiss === 'timer') {
-											window.location.reload();
-											// TODO JS update to avoid reloading
-											// $this.remove(); // Remove newly bought item
-											// TODO : Update miniProfile
+											// JS update to avoid reloading
+											// window.location.reload();
+											// Set new player GC
+											$itemGC = $this.attr('data-gc');
+											$("playerGC").text(parseInt($playerGC-$itemGC));
+										  // Remove newly bought item
+											$this.parent('li').remove();
+											// Increase limit of today's items ad update lists
+											$todayNewCount = $todayItemsCount+1;
+											$('#todayItemsCount').text($todayNewCount);
+											if ($todayNewCount < 3) {
+												$('li.possibleItems').each(function() {
+													if ($(this).attr('data-gc') > $playerGC) {
+														$(this).remove();
+													}
+												});
+											} else {
+												$('p.label-primary').remove();
+												$('.possibleItems').remove();
+											}
+										  // Display update message (for miniProfile)
+											$('.reloadRequired').removeClass('hidden');
 										}
 									});
 								});

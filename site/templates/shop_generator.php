@@ -26,9 +26,16 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
     $todayItemsCount = $player->get("name=history")->find("date>=$limitDate, task.name=buy|free")->count();
 
     $out .= '<div class="row text-center">';
-    $out .= "<h2>{$page->title}</h2>";
-    $out .= miniProfile($player, 'equipment');
+      $out .= "<h2>{$page->title}</h2>";
+      $out .= '<p class="reloadRequired alert alert-warning hidden">'.__("Values will be updated after reloading.").'</p>';
+      $out .= miniProfile($player, 'equipment');
+      if ($todayItemsCount < 3 ) {
+        $out .= '<p class="alert alert-warning">'.__("Items bought today").' : <span id="todayItemsCount">'.$todayItemsCount.'</span> ';
+        $out .= __("(limited to 3 !)").'</p>';
+      }
     $out .= '</div>';
+
+    $out .= "<p class='text-center alert alert-warning hidden'>You have reached the 3 items limit for today ! Come back tomorrow !</p>";
 
     if ($player->coma == 0 && $todayItemsCount < 3) {
       // Available Places
@@ -37,11 +44,11 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
         $out .= '<ul class="list-unstyled list-inline">';
         foreach ($pPlaces as $item) {
           if ($item->photo) { $mini = $item->photo->eq(0)->getCrop("thumbnail"); }
-          $out .= '<li><a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a></li>';
+          $out .= '<li class="possibleItems" data-gc="'.$item->GC.'"><a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a></li>';
         }
         $out .= '</ul>';
       } else {
-        $out .= '<p>'.__("Nothing available.").'</p>';
+        $out .= '<p class="possibleItems">'.__("Nothing available.").'</p>';
       }
       
       // Available People
@@ -51,11 +58,11 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
           $out .= '<ul class="list-unstyled list-inline">';
           foreach ($pPeople as $item) {
             if ($item->photo) { $mini = $item->photo->eq(0)->getCrop("thumbnail"); }
-            $out .= '<li><a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a></li>';
+            $out .= '<li class="possibleItems" data-gc="'.$item->GC.'"><a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a></li>';
           }
           $out .= '</ul>';
         } else {
-          $out .= '<p>'.__("Nothing available.").'</p>';
+          $out .= '<p class="possibleItems">'.__("Nothing available.").'</p>';
         }
       }
 
@@ -65,11 +72,11 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
         $out .= '<ul class="list-unstyled list-inline">';
         foreach ($pEquipment as $item) {
           if ($item->image) { $mini = $item->image->getCrop("thumbnail"); }
-          $out .= '<li><a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a></li>';
+          $out .= '<li class="possibleItems" data-gc="'.$item->GC.'"><a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a></li>';
         }
         $out .= '</ul>';
       } else {
-        $out .= '<p>'.__("Nothing available.").'</p>';
+        $out .= '<p class="possibleItems">'.__("Nothing available.").'</p>';
       }
      
       // Available Group items
@@ -78,13 +85,13 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
         $out .= '<ul class="list-unstyled list-inline">';
         foreach ($pItems as $item) {
           if ($item->image) { $mini = $item->image->getCrop("thumbnail"); }
-          $out .= '<li>';
+          $out .= '<li class="possibleItems" data-gc="'.$item->GC.'">';
           $out .= '<a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a>';
           $out .='</li>';
         }
         $out .= '</ul>';
       } else {
-        $out .= '<p>'.__("Nothing available.").'</p>';
+        $out .= '<p class="possibleItems">'.__("Nothing available.").'</p>';
       }
 
       // Available Potions
@@ -93,13 +100,13 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
         $out .= '<ul class="list-unstyled list-inline">';
         foreach ($pPotions as $item) {
           if ($item->image) { $mini = $item->image->getCrop("small"); }
-          $out .= '<li>';
+          $out .= '<li class="possibleItems" data-gc="'.$item->GC.'">';
           $out .= '<a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a>';
           $out .='</li>';
         }
         $out .= '</ul>';
       } else {
-        $out .= '<p>'.__("Nothing available.").'</p>';
+        $out .= '<p class="possibleItems">'.__("Nothing available.").'</p>';
       }
       if ($lockedItems->count() > 0 && $player->team->name != 'no-team') {
         $out .= '<p class="label label-warning">Locked potions (bought within 15 days)</p>';
