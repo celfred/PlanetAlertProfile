@@ -2340,7 +2340,7 @@ function getProfile($teacher) {
 function miniProfile($player, $type = '') {
   $config = wire('config');
   $pages = wire('pages');
-  $out = '<div class="lead well">';
+  $out = '<div class="lead well miniProfile">';
   $out .= '<ul class="list-unstyled list-inline">';
   if ($type == 'profile') {
     $out .= '<span>'.__("Your scores").' : </span>';
@@ -2364,7 +2364,7 @@ function miniProfile($player, $type = '') {
     $out .= ' <span class="label label-default" data-toggle="tooltip" title="Fighting Power">'.$player->fighting_power.' '.__('FP').'</span>';
     $out .= '</li>';
     $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Health Points').'"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> '.$player->HP.'</span>';
-    $out .= ' <span class="label label-default" data-toggle="tooltip" title="'.__('Gold Coins').'"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$player->GC.'</span></li>';
+    $out .= ' <span id="playerGC" class="label label-default" data-toggle="tooltip" title="'.__('Gold Coins').'"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$player->GC.'</span></li>';
 
     // Display according to $type
     switch ($type) {
