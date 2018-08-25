@@ -36,12 +36,12 @@ switch ($m->type->name) {
       if ($left != '') {
         // Basic marker replacements
         // TODO : Add random choice from list
-        $left = str_replace("%fname%", "Mike", $left);
-        $left = str_replace("%fnamef%", "Sarah", $left);
-        $left = str_replace("%fnamem%", "John", $left);
-        $left = str_replace("%name%", "Simon Keats", $left);
+        $left = str_replace("%fname%", __("Mike"), $left);
+        $left = str_replace("%fnamef%", __("Sarah"), $left);
+        $left = str_replace("%fnamem%", __("John"), $left);
+        $left = str_replace("%name%", __("Simon Keats"), $left);
         $left = str_replace("%age%", "13", $left);
-        $left = str_replace("%nationality%", "American", $left);
+        $left = str_replace("%nationality%", __("American"), $left);
         array_push($listWords, $left);
       }
     }
@@ -53,12 +53,12 @@ switch ($m->type->name) {
       $l = preg_replace('/\$.+?\$/', "", $l);
       // Replace %...% with data
       // TODO : Random data from a list
-      $l = str_replace("%fname%", "Mike", $l);
-      $l = str_replace("%fnamef%", "Sarah", $l);
-      $l = str_replace("%fnamem%", "John", $l);
-      $l = str_replace("%name%", "Simon Keats", $l);
+      $l = str_replace("%fname%", __("Mike"), $l);
+      $l = str_replace("%fnamef%", __("Sarah"), $l);
+      $l = str_replace("%fnamem%", __("John"), $l);
+      $l = str_replace("%name%", __("Simon Keats"), $l);
       $l = str_replace("%age%", "13", $l);
-      $l = str_replace("%nationality%", "American", $l);
+      $l = str_replace("%nationality%", __("American"), $l);
       // Split chunks
       $allWords = explode('|', $l);
       // Jumble words
@@ -80,8 +80,10 @@ switch ($m->type->name) {
 $out = '';
 $out .= '<img style="float: left;" src="'.$logo->url.'" width="45" />';
 $out .= $mini;
-$out .= '<h2 style="text-align: center;">Monster Fight vs '.$m->title.'</h2>';
-$out .= '<h5 class="text-left;">Name (Class) : _______________________________________ &nbsp;&nbsp;&nbsp; Date : ___________________________________</h5>';
+$out .= '<h2 style="text-align: center;">'.__("Monster Fight vs").' '.$m->title.'</h2>';
+$out .= '<h5 style="text-align: left;">'.__("Name (Class)").' : _______________________________________ &nbsp;&nbsp;&nbsp;';
+$out .= __('Date').' : ___________________________________</h5>';
+$out .= '<p style="text-align: left;">'.$m->instructions.'</p>';
 
 if (count($allLines) > 24) {
   $nb = 24;
@@ -136,9 +138,9 @@ $out .= '<table class="table">';
   }
 $out .= '</table>';
 $out .= '<p class="text-center" style="margin: 0pt;">';
-$out .= '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⇒ Successful Fight - Won fight - Lost fight - Disastrous Fight </span>';
+$out .= '<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⇒ '.__("Successful Fight - Won fight - Lost fight - Disastrous Fight").'</span>';
 if (count($allLines) > 24) {
-  $out .= '<span style="font-size:8pt;">&nbsp;&nbsp;&nbsp;[Selection of 25 words out of '.count($allLines).']</span>';
+  $out .= '<span style="font-size:8pt;">&nbsp;&nbsp;&nbsp;['.("Selection of 25 words out of").' '.count($allLines).']</span>';
 }
 $out .= '</p>';
 

@@ -3,15 +3,30 @@
 
   $out = '';
 
-  if ($user->isSuperuser()) {
-    $allMonsters = $page->children("include=all")->sort("level, name");
-  } else {
+  if ($user->isGuest()) {
     $allMonsters = $page->children->sort("level, name");
+  } else {
+    if ($user->isSuperuser()) {
+      $allMonsters = $page->children("include=all")->sort("level, name");
+    }
+    if ($user->hasRole('teacher')) {
+      $allMonsters = $page->children("(created_users_id=$user->id), (teacher=$user), include=all")->sort("level, name");
+    }
+    if ($user->hasRole('player')) {
+      $allMonsters = $page->children("(created_users_id=$headTeacher->id), (teacher=$headTeacher)")->sort("level, name");
+    }
   }
 
-  $allCategories = $pages->find("parent.name=topics, sort=name");
+  $allCategories = new PageArray();
+  foreach ($allMonsters as $m) {
+    if ($m->topic->count() > 0) {
+      foreach($m->topic as $t) {
+        $allCategories->add($t);
+      }
+    }
+    $allCategories->sort("title");
+  }
 
-  // Test player login
   if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
     // Test if player has unlocked Memory helmet or Visualizer
     if ($user->isSuperuser() || $user->hasRole('teacher')) {
@@ -96,7 +111,7 @@
           $mini = '';
         }
         if ($user->isSuperuser() || $user->hasRole('teacher')) {
-          $out .= '<td><a class="pdfLink btn btn-info" href="'.$page->url().'?id='.$m->id.'&pages2pdf=1">[PDF]</a></td>';
+          $out .= '<td><a class="pdfLink btn btn-info btn-xs" href="'.$page->url.'?id='.$m->id.'&pages2pdf=1">[PDF]</a></td>';
         }
         $out .= '<td>'. $mini .'</td>';
         $out .= '<td>';

@@ -7,10 +7,6 @@
     echo '</div>';
   }
 
-  if ($user->isSuperuser() || $user->hasRole('teacher')) {
-    echo '<a class="pdfLink btn btn-info" href="'. $page->url.'all?pages2pdf=1">'.__("Get PDF [The Map]").'</a>';
-  }
-
   // Get any limiting elements in URL
   $type = $input->get->type;
   $name = $input->get->name;
@@ -36,16 +32,21 @@
   $pageNum = $input->pageNum;
   
   // Count ALL places in the game (for information)
-  $totalCount = $pages->find("template=place, name!='places'")->count();
+  $totalCount = $pages->find("template=place")->count();
   // Get all cities having places
   $cities = $pages->find("template=city, children.count>0, sort=title");
   // Get all countries having places
-    $countries = $pages->find("template=country, children.count>0,sort=title");
+  $countries = $pages->find("template=country, children.count>0,sort=title");
 
   if (!$type) {
     $type = 'All places';
     $name = $totalCount.' places in '.$cities->count().' cities, in '.$countries->count().' different countries.';
   }
+
+  if ($user->isSuperuser() || $user->hasRole('teacher')) {
+    echo '<a class="pdfLink btn btn-info" href="'. $selectedPlaces->first()->url.'all?pages2pdf=1">'.__("Get PDF [Places catalogue]").'</a>';
+  }
+
   ?>
   <div class="row">
     <div class="text-center">
@@ -101,11 +102,11 @@
     <table id="mapTable" class="table table-condensed table-hover">
       <thead>
       <tr>
-        <th>Name</th>
-        <th>Country</th>
-        <th>City</th>
-        <th>GC</th>
-        <th>Level</th>
+        <th><?php echo __("Name"); ?></th>
+        <th><?php echo __("Country"); ?></th>
+        <th><?php echo __("City"); ?></th>
+        <th><?php echo __("GC"); ?></th>
+        <th><?php echo __("Level"); ?></th>
       </tr>
       </thead>
       <tbody>
@@ -128,7 +129,7 @@
 
   <?php 
     if ($user->hasRole('player')) {
-      echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
+      echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">'.__("Go to the marketplace").'</a>';
     }
   ?>
 </div>
