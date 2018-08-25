@@ -80,7 +80,7 @@
           $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date");
         } else {
           if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teachers and Admin gets all published news
-            $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=5")->sort("-date");
+            $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=3")->sort("-date");
           }
           if ($user->hasRole('player')) { // Player gets public and ranked news
             if ($currentPlayer->rank) {
@@ -101,11 +101,23 @@
         $out .= '</ul>';
         $out .= '</p>';
         // Recent public news (30 previous days)
-        $excluded = $pages->get("template=player, name=test");
-        // Find last events
-        $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+        if ($user->isGuest()) { // Guests get public news only
+          $excluded = $pages->get("template=player, name=test");
+        } else {
+          if ($user->hasRole('teacher')) { // Teachers gets his players public news
+            $excluded = $pages->find("template=player, team.teacher!=$user");
+          }
+          if ($user->hasRole('player')) { // Player gets teacher's teams public news
+            $excluded = $pages->find("template=player, team.teacher!=$headTeacher");
+          }
+        }
+        if (!$user->isSuperuser()) { // Take excluded pages into account
+          $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+        } else { // Admin gets all public news
+          $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv");
+        }
+        $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("New public activity !").'</h4>';
         if ($news->count() > 0) {
-          $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("New public activity !").'</h4>';
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {
             $currentPlayer = $n->parent('template=player');
@@ -146,7 +158,7 @@
           }
           $out .= '</ul>';
         } else {
-          echo '<h4 class="well">'.__("No public news within the last 30 days... :(").'</h4>';
+          $out .= '<h4>'.__("No public news within the last 30 days... :(").'</h4>';
         }
         break;
       case 'admin-work' :
