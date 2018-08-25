@@ -195,9 +195,7 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= __('My Avatar');
   $out .= '</td>';
   $out .= '<td style="width:8cm; background-color: #C366FF; border-right: 0px;">';
-  $out .= '<h1>';
-  $out .= sprintf(__("Player's profile page for %s"), $player->title);
-  $out .= '</h1>';
+  $out .= '<h1>'.__("Player's profile page").'</h1>';
   $out .= '</td>';
   $out .= '<td style="background-color: #C366FF; border-left: 0px; padding: 0px;">';
   $out .= '<img src="'.$logo.'" width="100" height="100" /> ';
