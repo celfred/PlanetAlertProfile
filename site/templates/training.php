@@ -223,26 +223,28 @@
             }
             $out .= '</h3> ';
             $out .= '<div class="col-sm-3">';
-            $out .= '<h3><span ng-class="{label:true, \'label-primary\':true}">Training session <span class="blink">started</span></span></h3>';
+            $out .= '<h3><span ng-class="{label:true, \'label-primary\':true}">'.__("Training session");
+            $out .= ' <span class="blink">'.__("started").'</span></span></h3>';
             $out .= '<br />';
-            $out .= '<h4><span ng-class="{label:true, \'label-primary\':true}">Current counter: {{counter}}</span> → <span class="label label-primary">+{{result}}UT</span></h4>';
-            $out .= '<span class="glyphicon glyphicon-info-sign"></span> 10 words/sentences = +1UT';
+            $out .= '<h4><span ng-class="{label:true, \'label-primary\':true}">'.__("Current counter").': {{counter}}</span> → ';
+            $out .= '<span class="label label-primary">+{{result}}'.__("UT").'</span></h4>';
+            $out .= '<span class="glyphicon glyphicon-info-sign"></span> '.__("10 words/sentences = +1UT");
             $out .= '<br /><br />';
             $out .= '<div class="panel panel-success">';
             $out .= '<div class="panel-heading">';
-            $out .= '<h4 class="panel-title"><span class="glyphicon glyphicon-education"></span> Current record</h4>';
+            $out .= '<h4 class="panel-title"><span class="glyphicon glyphicon-education"></span> '.__("Current record").'</h4>';
             $out .= '</div>';
             $out .= '<div class="panel-body">';
             if ($monster->mostTrained && $monster->mostTrained->id) {
-              $out .= '<h4 class="text-center">'.$monster->best.'UT by '.$monster->mostTrained->title.' ['.$monster->mostTrained->team->title.']</h4>';
+              $out .= '<h4 class="text-center">'.$monster->best.__('UT by ').$monster->mostTrained->title.' ['.$monster->mostTrained->team->title.']</h4>';
             } else {
-              $out .= '<h4 class="text-center">No record yet.</h4>';
+              $out .= '<h4 class="text-center">'.__("No record yet.").'</h4>';
             }
             $out .= '</div>';
             $out .= '<div class="panel-footer">';
-            if (!$user->isSuperuser()) {
+            if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
               list($utGain, $inClassUtGain) = utGain($monster, $player);
-              $out .= '<p>Your global UT for this monster: '.($utGain+$inClassUtGain).'</p>';
+              $out .= '<p>'.__("Your global UT for this monster").': '.($utGain+$inClassUtGain).'</p>';
             }
             $out .= '</div>';
             $out .= '</div>';
@@ -259,9 +261,9 @@
               $out .= '<div class=""><img src="'.$monster->imageMap->url.'" max-width="400" alt="Image" /></div>';
             }
             if ($monster->type->name == 'jumble') {
-              $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Click on the words to build a correct sentence. If you make a mistake, use the \'Try again\' button. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+              $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.__("Click on the words to build a correct sentence. If you make a mistake, use the 'Try again' button. If you're wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information.").'"></span>';
             } else {
-              $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Type your answer. If you don\'t know, just hover on the glasses to see the mixed letters. If you\'re wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information."></span>';
+              $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.__("Type your answer. If you don't know, just hover on the glasses to see the mixed letters. If you're wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information.").'"></span>';
             }
             $out .= '<div class="bubble-right">';
             if ($monster->type->name == 'jumble') {
@@ -271,25 +273,25 @@
               $out .= '</h2>';
               $out .= '</div>';
               $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
-              $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">Try again</button>';
-              $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
-              $out .= '<span id="clue">{{mixedWord}}</span>';
+              $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">'.__("Try again").'</button>';
+              $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
+              $out .= '<span id="clue" ng-show="showClue">{{mixedWord}}</span>';
               $out .= '<br /><br />';
               $out .= '<h3 id="" ng-bind="playerAnswer"></h3>';
             } else {
               $out .= '<div class="text-center">';
               $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
-              $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
-              $out .= '<span id="clue">{{mixedWord}}</span>';
+              $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
+              $out .= '<span id="clue" ng-show="showClue">{{mixedWord}}</span>';
               $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> <span ng-bind-html="showCorrection|underline"></span> {{feedBack}}</span></h3> ';
               $out .= '</div>';
               $out .= '<br />';
               $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
             }
             $out .= '<br />';
-            $out .= '<button ng-click="attack()" class="btn btn-success">Stimulate!</button>';
+            $out .= '<button ng-click="attack()" class="btn btn-success">'.__("Stimulate !").'</button>';
             $out .= '&nbsp;&nbsp;';
-            $out .= '<button ng-click="dodge()" class="btn btn-danger">I don\'t know</button>';
+            $out .= '<button ng-click="dodge()" class="btn btn-danger">'.__("I don't know").'</button>';
             $out .= '<span class="pull-right">';
             $out .= '<span class="avatarContainer">';
             if (isset($player) && $player->avatar) {
@@ -301,13 +303,13 @@
             $out .= '</span>';
             $out .= '</span>';
             $out .= '</div>';
-            $out .= '<button ng-click="stopSession()" class="btn btn-danger" ng-disabled="">Take the helmet off (Stop training session)</button>';
+            $out .= '<button ng-click="stopSession()" class="btn btn-danger" ng-disabled="">'.__("Take the helmet off (Stop training session)").'</button>';
             $out .= '</div>';
             $out .= '</div>';
             $out .= '</div>';
 
           } else {
-            $out .= 'Sorry, but a problem occured. Please try again. If the problem still exists, contact the administrator.';
+            $out .= __("Sorry, but a problem occured. Please try again. If the problem still exists, contact the administrator.");
           }
         }
       }

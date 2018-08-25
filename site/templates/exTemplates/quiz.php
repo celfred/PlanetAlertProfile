@@ -3,14 +3,18 @@
   if ($user->isSuperuser()) {
     $player->title = 'ADMIN';
   } else {
-    $player = $pages->get("template=player, login=$user->name");
+    if ($user->hasRole('teacher')) {
+      $player->title = __('TEACHER');
+    } else {
+      $player = $pages->get("template=player, login=$user->name");
+    }
   }
 
   $redirectUrl = $player->url;
   $out = '<div ng-controller="FightCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
 
   $out .= '<h2 class="row well text-center">';
-  $out .= '<span class="label label-default">Monster fight</span>';
+  $out .= '<span class="label label-default">'.__('Monster fight').'</span>';
   $out .= '<span class="">  ';
   $out .= '<img class="pull-left" src="'.$page->image->url.'" alt="Avatar" />';
   $out .= $page->title;
@@ -71,7 +75,7 @@
   }
   $out .= '</div>';
   $out .= '<div class="col-sm-6">';
-  $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="Health points">';
+  $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="'.__("Health points").'">';
   $out .= '<div class="progress-bar progress-bar-striped progress-bar-success active" role="progressbar" aria-valuenow="{{playerHP}}" aria-valuemin="0" aria-valuemax="100" style="width:{{playerHP}}%">';
   $out .= '</div>';
   $out .= '</div>';
@@ -86,17 +90,21 @@
   $out .= '<strong><span class="glyphicon glyphicon-hand-up"></span> '.$page->type->summary.'</strong>';
   $out .= '<span class="glyphicon glyphicon-question-sign pull-right" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
   $out .= '<br /><br />';
-  $out .= '<a role="button" class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
-  $out .= '<div class="collapse" id="collapseDiv"><div class="well">';
-  if ($page->type->frenchSummary != '') {
-    $out .= $page->type->frenchSummary;
-  } else {
-    $out .= 'French version in preparation, sorry ;)';
+  if ($user->language->name != 'french') {
+    $page->of(false);
+    if ($page->type->getLanguageValue($french) != '') {
+      echo '<a class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
+      echo '<div class="collapse" id="collapseDiv">';
+      echo '<div class="well">';
+      echo nl2br($page->type->getLanguageValue($french));
+      echo '</div>';
+      echo '</div>';
+    }
   }
   $out .= '</div>';
   $out .= '</div>';
   $out .= '<br /><br />';
-  $out .= '<button class="btn btn-primary btn-lg btn-block text-center" ng-disabled="waitForStart" ng-click="startFight()" id="startFight">I understand. Start the fight ! </button>';
+  $out .= '<button class="btn btn-primary btn-lg btn-block text-center" ng-disabled="waitForStart" ng-click="startFight()" id="startFight">'.__("I understand. Start the fight !").'</button>';
   $out .= '</h3>';
 
   $out .= '<div id="fightForm" class="row">';
@@ -117,9 +125,9 @@
   $out .= '<div class="bubble-right">';
   $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
   $out .= '&nbsp;';
-  $out .= '<button ng-click="attack()" class="btn btn-success">Attack!</button>';
+  $out .= '<button ng-click="attack()" class="btn btn-success">'.__("Attack !").'</button>';
   $out .= '&nbsp;';
-  $out .= '<button ng-click="dodge()" class="btn btn-info">Dodge</button>';
+  $out .= '<button ng-click="dodge()" class="btn btn-info">'.__("Dodge").'</button>';
   $out .= '&nbsp;';
   $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
   $out .='</div>';
@@ -146,4 +154,3 @@
 
   echo $out;
 ?>
-

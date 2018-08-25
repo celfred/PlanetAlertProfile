@@ -663,6 +663,11 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		}
 		// Init new question
     $scope.wrong = false;
+		if (($scope.mixedWord).length < 4) { // Don't help on very short words
+			$scope.showClue = false;
+		} else {
+			$scope.showClue = true;
+		}
     $scope.showCorrection = '';
 		if ($scope.exType != 'jumble') {
 			// Set focus on input field
@@ -746,7 +751,6 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
       },function(dismiss) {
 				if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 			});
-;
     }
   }
 
