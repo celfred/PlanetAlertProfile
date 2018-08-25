@@ -150,6 +150,7 @@
         }
         break;
       case 'admin-work' :
+        $today = new \DateTime("today");
         $allConcernedPlayers = $pages->find("parent.name=players, team.teacher=$user"); // Limit to teacher's students
         $news = $pages->find("parent.name=history, template=event, publish=1");
         $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|ambush")->sort('-created');
@@ -159,24 +160,30 @@
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {
             $currentPlayer = $n->parent('template=player');
-            if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
+            if ($currentPlayer->team->name == 'no-team') { 
+              $team = '';
+              $name = $currentPlayer->title.' '.$currentPlayer->lastName;
+            } else { 
+              $team = '['.$currentPlayer->team->title.']';
+              $name = $currentPlayer->title;
+            }
             $out .= '<li class="">';
             $out .=strftime("%d %b (%A)", $n->date).' : ';
             $out .= '<span>';
             switch ($n->task->name) {
               case 'free' : 
                 if ($n->refPage->template == 'place') {
-                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 }
                 if ($n->refPage->template == 'people') {
-                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 }
                 break;
               case 'buy' :
-                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
               case 'ambush' :
-                $out .= '<span class="">'.__("Penalty for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                $out .= '<span class="">'.__("Penalty for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : $out .= $n->task->name. ': '.__("todo");
             }
@@ -189,20 +196,19 @@
           $out .= '<p>'.__("Nothing to do.").'</p>';
         }
         $out .= '</div>';
-        $unusedConcerned = $allConcernedPlayers->find("usabledItems.count>0")->sort("-team.name, name");
         $out .= '<div class="col-sm-6">';
-        if ($unusedConcerned->count > 0) {
-          $date1 = new \DateTime("today");
-          $out .= '<p class="label label-primary">'.__("Potion Planner").'</p>';
+        $unusedConcerned = $allConcernedPlayers->find("usabledItems.count>0")->sort("-team.name, name");
+        $out .= '<p class="label label-primary">'.__("Potion Planner").'</p>';
+        if ($unusedConcerned->count() > 0) {
           $out .= '<ul class="list-unstyled">';
           foreach ($unusedConcerned as $p) {
             foreach ($p->usabledItems as $item) {
                 $historyPage = $p->get("name=history")->find("refPage=$item")->last();
                 if ($historyPage) {
-                  $out .= '<li class="">';
+                  $out .= '<li>';
                   // Find # of days compared to today
                   $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
-                  $interval = $date1->diff($date2);
+                  $interval = $today->diff($date2);
                   if ($interval->days > 21) {
                     $out .= ' <span class="badge">!</span> ';
                   }
@@ -217,25 +223,35 @@
                     $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="memory" data-result="bad" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$failedId.'"><i class="glyphicon glyphicon-thumbs-down"></i></button>';
                   }
                   $out .= '</li>';
+                } else { // Old unused potions
+                  $historyPage = $p->get("name~=history")->find("refPage=$item")->last();
+                  // Find # of days compared to today
+                  $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
+                  $interval = $today->diff($date2);
+                  $out .= '<li>';
+                  $out .= ' <span class="badge">!</span> ';
+                  $out .= '<span>'.$p->title.' '.$p->lastName.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                  $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("remove").'</label>';
+                  $out .= '</li>';
                 }
             }
           }
           $out .= '</ul>';
         } else {
-          $out .= '<hr /><p class="">'.__("No Potion to be used.").'</p>';
+          $out .= '<p>'.__("No Potion to be used.").'</p>';
         }
         $book = $pages->get("name=book-knowledge");
         $pendings = $book->pending;
         $pendings->filter("player=$allConcernedPlayers");
+        $out .= '<hr />';
+        $out .= '<p class="label label-primary">'.__("Copy work").'</p>';
         if (count($pendings) > 0) {
-          $date1 = new \DateTime("today");
-          $out .= '<p class="label label-primary">Copy work</p>';
           $out .= '<ul class="list-unstyled">';
           foreach ($pendings as $p) {
             $out .= '<li class="">';
             // Find # of days compared to today
             $date2 = new \DateTime(date("Y-m-d", $p->date));
-            $interval = $date1->diff($date2);
+            $interval = $today->diff($date2);
             if ($interval->days > 21) {
               $out .= ' <span class="badge">!</span> ';
             }
@@ -246,7 +262,7 @@
           }
           $out .= '</ul>';
         } else {
-          $out .= '<hr /><p class="">'.__("No lessons to be validated.").'</p>';
+          $out .= '<p>'.__("No lessons to be validated.").'</p>';
         }
         break;
       case 'decision' :
