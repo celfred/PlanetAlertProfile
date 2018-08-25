@@ -1,10 +1,10 @@
-<?php
+<?php namespace ProcessWire;
   // Get user info
   if ($user->isSuperuser()) {
-    $player->title = 'ADMIN';
+    $player = $pages->get("template=player, name=test");
   } else {
     if ($user->hasRole('teacher')) {
-      $player->title = __('TEACHER');
+      $player = $pages->get("template=player, name=test");
     } else {
       $player = $pages->get("template=player, login=$user->name");
     }
@@ -101,8 +101,6 @@
       echo '</div>';
     }
   }
-  $out .= '</div>';
-  $out .= '</div>';
   $out .= '<br /><br />';
   $out .= '<button class="btn btn-primary btn-lg btn-block text-center" ng-disabled="waitForStart" ng-click="startFight()" id="startFight">'.__("I understand. Start the fight !").'</button>';
   $out .= '</h3>';
@@ -115,7 +113,7 @@
   } else {
     $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getCrop('thumbnail')->url.'" alt="Antenna" />';
   }
-  $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}HP</span>';
+  $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}'.__("HP").'</span>';
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
   $out .= '<h3 class="inline" ng-bind-html="word"></h3>&nbsp;';
   $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span></h2>  ';
@@ -125,15 +123,15 @@
   $out .= '<div class="bubble-right">';
   $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
   $out .= '&nbsp;';
-  $out .= '<button ng-click="attack()" class="btn btn-success">'.__("Attack !").'</button>';
+  $out .= '<button ng-click="attack()" ng-disabled="waitForStart" class="btn btn-success">'.__("Attack !").'</button>';
   $out .= '&nbsp;';
-  $out .= '<button ng-click="dodge()" class="btn btn-info">'.__("Dodge").'</button>';
+  $out .= '<button ng-click="dodge()" ng-disabled="waitForStart" class="btn btn-info">'.__("Dodge").'</button>';
   $out .= '&nbsp;';
-  $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
+  $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.__("Attack = I know!<br />Dodge = I don't know.<br />Tip : Use 'Enter' to play faster ;)").'"></span>';
   $out .='</div>';
   $out .='</h3>';
   $out .= '<span class="pull-right">';
-  $out .= '<span ng-class="{damage:true, blink: true, hidden: hidePlayerDamage}">- {{playerDamage}}HP</span>';
+  $out .= '<span ng-class="{damage:true, blink: true, hidden: hidePlayerDamage}">- {{playerDamage}}'.__("HP").'</span>';
   $out .= '<span class="avatarContainer">';
   if ($player->avatar) {
     $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';

@@ -1,16 +1,20 @@
-<?php
+<?php namespace ProcessWire;
   // Get user info
   if ($user->isSuperuser()) {
-    $player->title = 'ADMIN';
+    $player = $pages->get("template=player, name=test");
   } else {
-    $player = $pages->get("template=player, login=$user->name");
+    if ($user->hasRole('teacher')) {
+      $player = $pages->get("template=player, name=test");
+    } else {
+      $player = $pages->get("template=player, login=$user->name");
+    }
   }
 
   $redirectUrl = $player->url;
   $out = '<div ng-controller="FightCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
 
   $out .= '<h2 class="row well text-center">';
-  $out .= '<span class="label label-default">Monster fight</span>';
+  $out .= '<span class="label label-default">'.__('Monster fight').'</span>';
   $out .= '<span class="">  ';
   $out .= '<img ng-class="{\'pull-left\':true, hidden:started}" src="'.$page->image->url.'" alt="Avatar" />';
   $out .= $page->title;
@@ -53,7 +57,7 @@
   }
   $out .= '</div>';
   $out .= '<div class="col-sm-6">';
-  $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="Health points">';
+  $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="'.__("Health points").'">';
   $out .= '<div class="progress-bar progress-bar-striped progress-bar-danger active" role="progressbar" aria-valuenow="{{monsterHP}}" aria-valuemin="0" aria-valuemax="100" style="width:{{monsterHP}}%">';
   $out .= '</div>';
   $out .= '</div>';
@@ -91,17 +95,19 @@
   $out .= '<strong><span class="glyphicon glyphicon-hand-up"></span> '.$indications.'</strong>';
   $out .= '<span class="glyphicon glyphicon-question-sign pull-right" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
   $out .= '<br /><br />';
-  $out .= '<a role="button" class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">[French version]</a>';
-  $out .= '<div class="collapse" id="collapseDiv"><div class="well">';
-  if ($page->type->frenchSummary != '') {
-    $out .= $page->type->frenchSummary;
-  } else {
-    $out .= 'French version in preparation, sorry ;)';
+  if ($user->language->name != 'french') {
+    $page->of(false);
+    if ($page->type->getLanguageValue($french) != '') {
+      echo '<a class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
+      echo '<div class="collapse" id="collapseDiv">';
+      echo '<div class="well">';
+      echo nl2br($page->type->getLanguageValue($french));
+      echo '</div>';
+      echo '</div>';
+    }
   }
-  $out .= '</div>';
-  $out .= '</div>';
   $out .= '<br /><br />';
-  $out .= '<button class="btn btn-primary btn-lg btn-block text-center" ng-disabled="waitForStart" ng-click="startFight()" id="startFight">I understand. Start the fight ! </button>';
+  $out .= '<button class="btn btn-primary btn-lg btn-block text-center" ng-disabled="waitForStart" ng-click="startFight()" id="startFight">'.__("I understand. Start the fight !").'</button>';
   $out .= '</h3>';
 
   $out .= '<div id="fightForm" ng-class="{row:true, hidden: wonFight}">';
@@ -111,7 +117,7 @@
   } else {
     $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getCrop('thumbnail')->url.'" alt="Antenna" />';
   }
-  $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}HP</span>';
+  $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}'.__("HP").'</span>';
   if ($page->type->name == 'image-map') {
     $out .= '<div class="pull-right"><img class="imageMap longBlink" src="'.$page->imageMap->url.'" max-width="800" alt="Image" /></div>';
   }
@@ -124,15 +130,15 @@
   $out .= '<div class="bubble-right">';
   $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
   $out .= '&nbsp;';
-  $out .= '<button ng-click="attack()" ng-disabled="waitForStart" class="btn btn-success">Attack!</button>';
+  $out .= '<button ng-click="attack()" ng-disabled="waitForStart" class="btn btn-success">'.__("Attack !").'</button>';
   $out .= '&nbsp;';
-  $out .= '<button ng-click="dodge()" ng-disabled="waitForStart" class="btn btn-info">Dodge</button>';
+  $out .= '<button ng-click="dodge()" ng-disabled="waitForStart" class="btn btn-info">'.__("Dodge").'</button>';
   $out .= '&nbsp;';
-  $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
+  $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.__("Attack = I know!<br />Dodge = I don't know.<br />Tip : Use 'Enter' to play faster ;)").'"></span>';
   $out .='</div>';
   $out .='</h3>';
   $out .= '<span class="pull-right">';
-  $out .= '<span ng-class="{damage:true, blink: true, hidden: hidePlayerDamage}">- {{playerDamage}}HP</span>';
+  $out .= '<span ng-class="{damage:true, blink: true, hidden: hidePlayerDamage}">- {{playerDamage}}'.__("HP").'</span>';
   $out .= '<span class="avatarContainer">';
   if ($player->avatar) {
     $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';

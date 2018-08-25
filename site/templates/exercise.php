@@ -7,12 +7,12 @@
       // Get player's equipment to set scores alternatives
       $weaponRatio = 0;
       $protectionRatio = 0;
-      if (!$user->isSuperuser()) {
+      if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
         $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
         $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
       }
-      if ($bestWeapon->id) { $weaponRatio = $bestWeapon->XP; }
-      if ($bestProtection->id) { $protectionRatio = $bestProtection->HP; }
+      if (isset($bestWeapon)) { $weaponRatio = $bestWeapon->XP; }
+      if (isset($bestProtection)) { $protectionRatio = $bestProtection->HP; }
 
       // Get exercise type
       include('./exTemplates/'.$page->type->name.'.php');
@@ -41,7 +41,7 @@
       // Get player's stats
       if ($user->isLoggedin()) {
         $player = $pages->get("template='player', login=$user->name");
-        if (!$user->isSuperuser()) {
+        if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
           $page = setMonster($player, $page);
           if ($page->fightNb > 0) {
           } else {

@@ -735,6 +735,9 @@
                           "fields" => "title,summary,topic,level,type,image,exData"
                         ));
               }
+              // Possibility to test monster
+              $out .= ' <a href="'.$pages->get("name=underground-training")->url.'?id='.$p->id.'" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
+              $out .= ' <a href="'.$p->url.'" data-toggle="tooltip" title="'.__("Test fight").'">[<i class="glyphicon glyphicon-flash"></i>]</a>'; // Fight link
               $out .= '</li>';
             }
             $out .= '</ul>';
@@ -743,20 +746,23 @@
           $out .= '<ul id="notTeacherElements">';
           foreach($notTeacherEl as $p) {
             $out .= '<li>';
-            if (!$user->isSuperuser()) {
-              $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
-            }
-            $out .= '<span>'.$p->title.'</span> → ';
-            $out .= '<span>'.$p->summary.'</span> ';
-            if ($p->type && $p->type->name && $p->exData != '') {
-              $allLines = preg_split('/$\r|\n/', $p->exData);
-              $listWords = prepareListWords($allLines, $p->type->name);
-              $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span> ';
-              $out .= '<span class="label label-success">'.$p->type->title.'</span> ';
-            }
-            if ($user->isSuperuser() || $user->name == 'flieutaud') {
-              $out .= $p->feel();
-            }
+              if (!$user->isSuperuser()) {
+                $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+              }
+              $out .= '<span>'.$p->title.'</span> → ';
+              $out .= '<span>'.$p->summary.'</span> ';
+              if ($p->type && $p->type->name && $p->exData != '') {
+                $allLines = preg_split('/$\r|\n/', $p->exData);
+                $listWords = prepareListWords($allLines, $p->type->name);
+                $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span> ';
+                $out .= '<span class="label label-success">'.$p->type->title.'</span> ';
+              }
+              if ($user->isSuperuser() || $user->name == 'flieutaud') {
+                $out .= $p->feel();
+              }
+              // Possibility to test monster
+              $out .= ' <a href="'.$pages->get("name=underground-training")->url.'?id='.$p->id.'" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
+              $out .= ' <a href="'.$p->url.'" data-toggle="tooltip" title="'.__("Test fight").'">[<i class="glyphicon glyphicon-flash"></i>]</a>'; // Fight link
             $out .= '</li>';
           }
           $out .= '</ul>';

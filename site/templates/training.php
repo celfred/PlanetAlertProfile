@@ -1,10 +1,10 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
-  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     // or if admin has forced it in Team options
-    if ($user->isSuperuser() || $player->team->forceHelmet == 1) {
+    if ($user->isSuperuser() || $user->hasRole('teacher') || $player->team->forceHelmet == 1) {
       $helmet = $pages->get("name=memory-helmet");
     } else {
       $helmet = $player->equipment->get('memory-helmet');
@@ -13,7 +13,7 @@
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
         // Set all available monsters
-        if ($user->isSuperuser()) {
+        if ($user->isSuperuser() || $user->hasRole('teacher')) {
           $allMonsters = $pages->find('template=exercise, sort=name, include=all');
         } else {
           // Check if player has the Visualizer (or forced by admin)
@@ -195,7 +195,7 @@
         // Test if player is allowed to do the training session today
         $monster = $pages->get($input->get->id);
         $redirectUrl = $pages->get('name=underground-training')->url;
-        if (!$user->isSuperuser()) {
+        if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
           setMonster($player, $monster);
         } else { // Never trained (for admin)
           $monster->isTrainable = 1;

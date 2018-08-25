@@ -2,7 +2,7 @@
   include("./head.inc"); 
 
   $out = '';
-  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) {
     if ($user->hasRole('player')) {
       $lock = $pages->get("$player->team")->lockFights;
     } else {
@@ -13,6 +13,7 @@
     } else { // Fights are allowed
       // Set all available monsters
       if (!$user->isSuperuser()) {
+        // TODO Manage teacher list ???
         // Check if player has the Visualizer (or forced by admin)
         if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
           $allMonsters = $pages->find("template=exercise, sort=level, sort=name");
