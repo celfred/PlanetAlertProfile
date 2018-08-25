@@ -31,8 +31,15 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Allow multiple teachers
 
 ## v1.0.0 - [Unreleased]
+
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
+
+## [v0.2.1] - Unreleased
+
+### Added
+- Planet Alert News in 'recent activity' on Newsboard : list of less-than-30-days-old place/people/lesson/equipment/exercise for information. The list is contextual : a player sees his head teacher's new items. A teacher sees his own news and admin news, admin sees everything. The list is not displayed if empty and is limited to 10 elements.
+
 
 ## [v0.2.0] - 2018-08-19
 

@@ -4,74 +4,95 @@
     if (!$user->isSuperuser()) {
       $headTeacher = getHeadTeacher($user);
       $user->language = $headTeacher->language;
+      if ($user->hasRole('player')) {
+        $currentPlayer = $pages->get("parent.name=players, template=player, login=$user->name");
+      }
     }
     switch ($input->get('id')) {
       case 'lastEvents' : // Public activity
-        // TODO : Limit to logged in players contextual news
-        $adminId = $users->get("name=admin")->id;
-        $lastMonsters = $pages->find("template=exercise, created_users_id=$adminId, sort=-published, limit=3");
-        $lastLessons = $pages->find("template=lesson, created_users_id=$adminId, sort=-published, limit=3");
-        $lastUpdatedLessons = $pages->find("template=lesson, modified_users_id=$adminId, sort=-modified, limit=3");
-        // Last 3 published monsters
-        $out .= '<ul class="list-inline">&nbsp;';
-        $out .= '<li class="label label-success"><span class="glyphicon glyphicon-headphones"></span> '.__("New monsters !").'</li>';
-        foreach($lastMonsters as $m) {
-          if ($m->image) {
-            $mini = "<img data-toggle='tooltip' src='".$m->image->getCrop('mini')->url."' alt='image' />";
-          } else {
-            $mini = '';
+        $today = new \DateTime("today");
+        $interval = new \DateInterval('P30D');
+        $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
+        // Planet Alert news
+        if ($user->isGuest()) { // Guests get admin news only
+          $adminId = $users->get("name=admin")->id;
+          $newItems = $pages->find("template=exercise|equipment|item|lesson, created_users_id=$adminId, published>$limitDate, sort=-published, limit=10");
+        } else {
+          if ($user->isSuperuser()) { // Admin gets ALL news
+            $adminId = $users->get("name=admin")->id;
+            $newItems = $pages->find("template=exercise|equipment|item|lesson, published>$limitDate, sort=-published, limit=10");
           }
-          $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$m->summary.'">'.$mini.' '.$m->title.'</li>  ';
-        }
-        if ($user->isLoggedin() && $user->hasRole("player")) {
-          $currentPlayer = $pages->get("template=player, login=$user->name");
-          $helmet = $currentPlayer->equipment->get("name=memory-helmet");
-          if (isset($helmet)) {
-            $out .= '<li>→ <a href="'.$pages->get("name=underground-training")->url.'">'.__("Go to the Underground Training Zone !").'</a></li>';
-          } else {
-            $out .= '<li>→ '.__("You need to buy the Memory Helmet to fight monsters !").'</a></li>';
+          if ($user->hasRole('teacher')) { // Teachers get admin news + personal news
+            $adminId = $users->get("name=admin")->id;
+            $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
+            $newItems = $pages->find("template=exercise|equipment|item|lesson, (created_users_id=$adminId, published>$limitDate), (teacher=$user, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
+          }
+          if ($user->hasRole('player')) { // Player gets headTeacher news
+            $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
+            $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
           }
         }
-        $out .= '</ul>';
-        // Last 3 published lessons
-        $out .= '<ul class="list-inline">&nbsp;';
-        $out .= '<li class="label label-success"><span class="glyphicon glyphicon-book"></span> '.__("New lessons !").'</li>';
-        foreach($lastLessons as $l) {
-          $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$l->summary.'">'.$l->title.'</li>  ';
+        $extra = $newItems->getTotal() - $newItems->getLimit();
+        if ($extra > 0) { $limitReached = '<li>['.$extra.' '.__("more results").']</li>'; } else { $limitReached = ''; }
+        // Updated news are commented out for the moment (not very useful ?)
+        /* $updatedItems = $pages->find("template=exercise|equipment|item|lesson, created_users_id=$adminId, modified>$limitDate, sort=-modified, limit=3"); */
+        $book = $pages->get("name=book-knowledge-item");
+        if ($newItems->count() > 0) {
+          $out .= '<p class="label label-danger"><span class="glyphicon glyphicon-hand-up"></span> '.__("Planet Alert News !").'</p>';
         }
-        // Last updated lessons
-        foreach($lastUpdatedLessons as $l) {
-          if ($lastLessons->has($l) == false) {
-            $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$l->summary.'">'.$l->title.' <span class="badge">'.__("Updated !").'</span></li>  ';
-          }
+        if ($newItems->count() > 0) {
+          $out .= '<ul class="list-inline">';
+            foreach($newItems as $n) {
+              if ($n->image) {
+                $mini = "<img data-toggle='tooltip' src='".$n->image->getCrop('mini')->url."' alt='image' />";
+              } else {
+                $mini = '';
+              }
+              if ($n->is("template=lesson")) {
+                $mini = '<img src="'.$book->image->getCrop('mini')->url.'" alt="image">';
+              }
+              $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$n->summary.'">'.$mini.' '.$n->title.' <span class="badge">New</span>';
+              if ($user->isSuperuser()) {
+                $out .= $n->feel();
+              }
+              $out .= '</li>  ';
+            }
+          $out .= $limitReached;
+          $out .= '</ul>';
         }
-        if ($user->isLoggedin() && $user->hasRole("player")) {
-          $currentPlayer = $pages->get("template=player, login=$user->name");
-          $book = $currentPlayer->equipment->get("name~=book-knowledge");
-          if (isset($book)) {
-            $out .= '<li>→ <a href="'.$pages->get("name=book-knowledge")->url.'">'.__("Read my Book of Knowledge").'</a></li>';
-          } else {
-            $out .= '<li>→ '.__("You need to buy the Book of Knowledge to see the lessons !").'</a></li>';
-          }
-        }
-        $out .= '</ul>';
+        /* if ($updatedItems->count() > 0) { */
+        /*   $out .= '<ul class="list-inline">'; */
+        /*     foreach($updatedItems as $n) { */
+        /*       if ($n->image) { */
+        /*         $mini = "<img data-toggle='tooltip' src='".$n->image->getCrop('mini')->url."' alt='image' />"; */
+        /*       } else { */
+        /*         $mini = ''; */
+        /*       } */
+        /*       if ($n->is("template=lesson")) { */
+        /*         $mini = '<img src="'.$book->image->getCrop('mini')->url.'" alt="image">'; */
+        /*       } */
+        /*       $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$n->summary.'">'.$mini.' '.$n->title.' <span class="badge">Updated</span></li>  '; */
+        /*     } */
+        /*   $out .= '</ul>'; */
+        /* } */
         // Last admin announcements
         if ($user->isGuest()) { // Guests get public news only
-          $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=5")->sort("-date");
+          $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date");
         } else {
           if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teachers and Admin gets all published news
             $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=5")->sort("-date");
           }
           if ($user->hasRole('player')) { // Player gets public and ranked news
             if ($currentPlayer->rank) {
-              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$currentPlayer->rank, limit=5")->sort("-date");
+              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$currentPlayer->rank, limit=3")->sort("-date");
             } else { // Public news only (no rank)
-              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=5")->sort("-date");
+              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date");
             }
           }
         }
         $out .= '<p>';
         $out .= '<span class="label label-success"><span class="glyphicon glyphicon-hand-up"></span> '.__("Last official announcements !").'</span>';
+        $out .= ' <span><a href="'.$pages->get("name=blog")->url.'">'.__("[Read all official announcements]").'<</a></span>';
         $out .= '<ul class="">';
         $blogUrl = $pages->get("name=blog")->url;
         foreach($newsAdmin as $n) {
@@ -81,9 +102,6 @@
         $out .= '</p>';
         // Recent public news (30 previous days)
         $excluded = $pages->get("template=player, name=test");
-        $today = new \DateTime("today");
-        $interval = new \DateInterval('P30D');
-        $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
         // Find last events
         $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
         if ($news->count() > 0) {
