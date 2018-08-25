@@ -693,7 +693,7 @@
           if (!$user->isSuperuser()) {
             $out .= '<p class="text-center">'.__("Contact the administrator if you want to delete items in this list.").'</p>';
           }
-          $out .= $pages->get("name=monsters")->feel(array(
+          $out .= $pages->get("template=monsters")->feel(array(
             'mode' => 'page-add',
             'text' => __('[Add a new monster]'),
             'class' => 'button'
