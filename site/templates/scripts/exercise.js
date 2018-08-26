@@ -182,12 +182,12 @@ exerciseApp.service('myData', function($http) {
 			if (allWords.length > 1) {
 				question['word'] = chance.pick(allWords);
 				if (exerciseData['exType'] == 'image-map') {
-					question['word'] = 'What\'s number '+question['word']+' ?';
+					question['word'] = lang.whatNumber+question['word']+" ?";
 				}
 			} else {
 				question['word'] = allWords[0];
 				if (exerciseData['exType'] == 'image-map') {
-					question['word'] = 'What\'s number '+question['word']+' ?';
+					question['word'] = lang.whatNumber+question['word']+" ?";
 				}
 				if (exerciseData['exType'] == 'jumble') {
 					this.shuffleArray(chunks);
@@ -310,7 +310,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 
 	$window.addEventListener("beforeunload", function (e) {
 		if (!$scope.waitForStart) {
-			var confirmationMessage = "Do you really want to quit the page?";
+			var confirmationMessage = lang.quit;
 
 			(e || window.event).returnValue = confirmationMessage; //Gecko + IE
 			return confirmationMessage;                            //Webkit, Safari, Chrome
@@ -500,18 +500,18 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		$scope.waitForStart = true;
 		$scope.quality = Math.round(100-(($scope.shownWords/$scope.nbAttacks)*100));
 		if ($scope.quality > 90) {
-			var feedback = 'successful (VV)';
+			var feedback = lang.success;
 			$scope.result = 'VV';
 		} else {
-			var feedback = 'won (V)';
+			var feedback = lang.won;
 			$scope.result = 'V';
 		}
     $scope.saveData();
     swal({
-      title: "Congratulations !",
-      html: "The monster ran away ! You have repelled "+ $scope.nbAttacks +" words with a quality of "+ $scope.quality +"%.<br />This is a <span class='label label-primary'>"+ feedback +"</span> fight !",
+      title: lang.congratulations,
+      html: lang.ranAway1 + $scope.nbAttacks + lang.ranAway2 + $scope.quality + lang.ranAway3 + feedback + lang.ranAway4,
       type: "success",
-      confirmButtonText: "Let's see my updated profile !"
+      confirmButtonText: lang.seeProfile
     }).then( function() {
 			$timeout($scope.redirect($scope.redirectUrl), 200);
     });
@@ -524,18 +524,18 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		$scope.waitForStart = true;
 		$scope.quality = Math.round(100-(($scope.shownWords/$scope.nbAttacks)*100));
 		if ($scope.monsterHP < 50) {
-			var feedback = 'lost (R)';
+			var feedback = lang.lost;
 			$scope.result = 'R';
 		} else {
-			var feedback = 'disastrous (RR)';
+			var feedback = lang.disastrous;
 			$scope.result = 'RR';
 		}
     $scope.saveData();
     swal({
-      title: "Sorry !",
-      html: "You need to revise more and fight back against this monster ! Don't give up !<br />This is a <span class='label label-primary'>"+feedback+"</span> fight.",
+      title: lang.sorry,
+      html: lang.revise1 + feedback + lang.revise2,
       type: "error",
-      confirmButtonText: "Ok, I'll do better next time..."
+      confirmButtonText: lang.better
     }).then( function() {
 			$timeout($scope.redirect($scope.redirectUrl), 200);
     });
@@ -554,8 +554,8 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		}).then(function(data, status, headers, config){ //make a get request to mock json file.
       $scope.saved = 'Result saved!';
     }, function(data, status, headers, config) {
-			swal("Sorry, but an error occurred.", "Please, contact the admin.", "error");
-      $scope.saved = 'Error! Please contact the administrator.';
+			swal(lang.error2, lang.contactAdmin, "error");
+      $scope.saved = lang.error2+lang.contactAdmin;
     })
   }
 
@@ -593,7 +593,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 
 	$window.addEventListener("beforeunload", function (e) {
 		if (!$scope.waitForStart) {
-			var confirmationMessage = "Do you really want to quit the page?";
+			var confirmationMessage = lang.quit;
 
 			(e || window.event).returnValue = confirmationMessage; //Gecko + IE
 			return confirmationMessage;                            //Webkit, Safari, Chrome
@@ -689,8 +689,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 				// Get number of words
 				if (Math.floor($scope.counter/10) < $scope.result+1) {
 					swal({
-						title: "Correct !",
-						html: "+1 word !",
+						title: lang.correct,
+						html: lang.plus1word,
 						type: "success",
 						showConfirmButton: false,
 						timer: 1000
@@ -707,8 +707,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			$scope.initQuestion();
     } else { // Wrong answer
 			swal({
-				title: "Wrong !",
-				html: "Copy the correction !",
+				title: lang.wrong,
+				html: lang.copyCorrection,
 				type: "error",
 				showConfirmButton: false,
 				timer: 1000
@@ -725,12 +725,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.stopSession = function() {
     if ($scope.result >= 1) {
       swal({
-        title: "Stop training ?",
-        html: "You've won <span class='label label-success'>+"+$scope.result+" UT</span> ! (<span class='label label-success'>"+$scope.counter+" words set in your brain)</span>",
+        title: lang.stop,
+        html: lang.stop1 + $scope.result + lang.stop2 + $scope.counter + lang.stop3,
         type: "success",
         showCancelButton : true,
-        cancelButtonText: "Continue",
-        confirmButtonText: "Stop & Save"
+        cancelButtonText: lang.continue,
+        confirmButtonText: lang.stopSave
       }).then( function() {
         // Save and redirect
 				$scope.saveData(true);
@@ -740,12 +740,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			});
     } else {
       swal({
-        title: "Stop training ?",
-        text: "You didn't use the memory helmet enough to record words in your brain.",
+        title: lang.stop,
+        text: lang.stop4,
         type: "warning",
         showCancelButton : true,
-        cancelButtonText: "Continue",
-        confirmButtonText: "Stop"
+        cancelButtonText: lang.continue,
+        confirmButtonText: lang.stopOrder
       }).then( function() { // DO not save, but redirect
 				$timeout($scope.redirect($scope.redirectUrl), 200);
       },function(dismiss) {
@@ -766,11 +766,11 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         result : $scope.result
       })
     }).then(function(data, status, headers, config){ //make a get request to mock json file.
-      $scope.saved = 'Result saved!';
+      $scope.saved = lang.saved;
 			if (data["data"] == '1') {
 				swal({
-					title: "Congratulations !",
-					html: "You've just set a new training record !<br /><br /><small>This message should disappear in 2 seconds. If not, click 'OK' below :)</small>",
+					title: lang.congratulations,
+					html: lang.training,
 					type: "success",
 					timer: 2000
 				}).then( function() {
@@ -786,8 +786,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 				}
 			}
     }, function(data, status, headers, config) {
-			swal("Sorry, but an error occurred.", "Please, contact the admin.", "error");
-      $scope.saved = 'Error! Please contact the administrator.';
+			swal(lang.error2, lang.contactAdmin, "error");
+      $scope.saved = lang.error2+lang.contactAdmin;
     })
   }
 

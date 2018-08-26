@@ -57,7 +57,14 @@
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/chance/dist/chance.min.js'></script>
     <!-- Set the game logic !-->
     <script type='text/javascript' src='<?php echo $config->urls->templates?>scripts/exercise.js'></script>
-  <?php } ?>
+  <?php }
+    if ($user->language->name == 'french') {
+      echo '<script src="'.$config->urls->templates.'scripts/dataTables.french.lang.js"></script>';
+      echo '<script src="'.$config->urls->templates.'scripts/lang.fr.js"></script>';
+    } else {
+      echo '<script src="'.$config->urls->templates.'scripts/lang.en.js"></script>';
+    }
+  ?>
   <script src="<?php echo $config->urls->templates?>scripts/main.js"></script>
 </body>
 </html>

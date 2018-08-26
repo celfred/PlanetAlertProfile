@@ -88,9 +88,9 @@
   if ($input->urlSegment1 != 'no-team') {
     $captains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
     if (strlen($captains) == 0) { 
-      $captains = 'Nobody.';
+      $captains = __('Nobody.');
     }
-    echo '<p class="text-center"><span class="label label-primary"><span class="glyphicon glyphicon-star"></span> Group Captains</span> → '.$captains.'</p>';
+    echo '<p class="text-center"><span class="label label-primary"><span class="glyphicon glyphicon-star"></span> '.__("Group Captains").'</span> → '.$captains.'</p>';
   }
 
   // echo $outGroups;
