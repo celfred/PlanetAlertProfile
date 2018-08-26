@@ -13,10 +13,11 @@
   $redirectUrl = $player->url;
   $out = '<div ng-controller="FightCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
 
+  $out .= '<div id="exHeader">';
   $out .= '<h2 class="row well text-center">';
-  $out .= '<span class="label label-default">'.__('Monster fight').'</span>';
+  $out .= '<span class="label label-default">'.__("Monster fight").'</span>';
   $out .= '<span class="">  ';
-  $out .= '<img class="pull-left" src="'.$page->image->url.'" alt="Avatar" />';
+  $out .= '<img class="pull-left" src="'.$page->image->getCrop("thumbnail")->url.'" alt="Monster" />';
   $out .= $page->title;
   $out .= ' vs. ';
   $out .= $player->title;
@@ -43,26 +44,28 @@
   $out .= '</span>';
   $out .= '</span>';
   $out .= '</h2>';
-  $out .= '<h3 id="exTitle" class="row well text-center">';
+  $out .= '<h3 class="row well text-center">';
   $out .= $page->summary;
   $out .= '</h3>';
+  $out .= '</div>';
 
   // Scoring table
-  $out .= '<div id="energyDiv" class="row text-center">';
+  $out .= '<div id="energyDiv" class="row text-center well">';
   // Monster's health points
   $out .= '<div class="row text-center">';
   $out .= '<div class="col-sm-3">';
   if ($page->image) {
-    $out .= '<img class="pull-right" src="'.$page->image->getCrop("mini")->url.'" alt="Avatar" />';
+    $out .= '<img class="pull-right" src="'.$page->image->getCrop("mini")->url.'" alt="Monster" />';
   }
   $out .= '</div>';
   $out .= '<div class="col-sm-6">';
-  $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="Health points">';
+  $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="'.__("Health points").'">';
   $out .= '<div class="progress-bar progress-bar-striped progress-bar-danger active" role="progressbar" aria-valuenow="{{monsterHP}}" aria-valuemin="0" aria-valuemax="100" style="width:{{monsterHP}}%">';
   $out .= '</div>';
   $out .= '</div>';
   $out .= '</div>';
-  $out .= '<div class="col-sm-3">';
+  $out .= '<div class="col-sm-3 text-left">';
+  $out .= '<span class="label label-primary">'.$page->title.'</span>';
   $out .= '</div>';
   $out .= '</div>';
   // Player's health points
@@ -80,7 +83,8 @@
   $out .= '</div>';
   $out .= '</div>';
   $out .= '</div>';
-  $out .= '<div class="col-sm-3">';
+  $out .= '<div class="col-sm-3 text-left">';
+  $out .= '<span class="label label-primary">'.$player->title.'</span>';
   $out .= '</div>';
   $out .= '</div>';
   $out .= '</div>';
@@ -105,11 +109,10 @@
   $out .= '<button class="btn btn-primary btn-lg btn-block text-center" ng-disabled="waitForStart" ng-click="startFight()" id="startFight">'.__("I understand. Start the fight !").'</button>';
   $out .= '</h3>';
 
-  $out .= '<div id="fightForm" class="row">';
+  $out .= '<div id="fightForm" ng-class="{row:true, hidden: wonFight}">';
   $out .= '<div class="text-left">';
-  /* $out .= 'Monsterpower : {{monsterPower}} / playerPower:{{playerPower}}'; */
   if ($page->image) {
-    $out .= '<img class="pull-left squeeze" src="'.$page->image->url.'" alt="Avatar" />';
+    $out .= '<img class="pull-left squeeze" src="'.$page->image->getCrop('thumbnail')->url.'" alt="Monster" />';
   } else {
     $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getCrop('thumbnail')->url.'" alt="Antenna" />';
   }
@@ -121,7 +124,7 @@
   $out .= '</div>';
   $out .= '<div class="text-right">';
   $out .= '<div class="bubble-right">';
-  $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
+  $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="'.__("Your answer").'" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
   $out .= '&nbsp;';
   $out .= '<button ng-click="attack()" ng-disabled="waitForStart" class="btn btn-success">'.__("Attack !").'</button>';
   $out .= '&nbsp;';
@@ -147,6 +150,7 @@
   $out .= '</span>';
   $out .= '</span>';
   $out .='</div>';
+  $out .= '<h3 class="text-center">'.$page->instructions.'</h3>';
   $out .= '</div>';
   $out .= '</div>';
 

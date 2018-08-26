@@ -10,13 +10,14 @@
     }
   }
 
-  $redirectUrl = $pages->get("name=fighting-zone")->url;
+  $redirectUrl = $player->url;
   $out = '<div ng-controller="FightCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$page->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$weaponRatio.'\', \''.$protectionRatio.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
 
+  $out .= '<div id="exHeader">';
   $out .= '<h2 class="row well text-center">';
-  $out .= '<span class="label label-default">'.__('Monster fight').'</span>';
+  $out .= '<span class="label label-default">'.__("Monster fight").'</span>';
   $out .= '<span class="">  ';
-  $out .= '<img ng-class="{\'pull-left\':true, hidden:started}" src="'.$page->image->url.'" alt="Avatar" />';
+  $out .= '<img class="pull-left" src="'.$page->image->getCrop("thumbnail")->url.'" alt="Monster" />';
   $out .= $page->title;
   $out .= ' vs. ';
   $out .= $player->title;
@@ -24,36 +25,37 @@
   $out .= '<span class="pull-right">';
   $out .= '<span class="avatarContainer">';
   if ($player->avatar) {
-    $out .= '<img ng-class="{hidden:started}" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
+    $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
   } else {
     $out .= '<Avatar>';
   }
   if ($weaponRatio > 0) { // Player has weapons
     $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
     if ($bestWeapon->id && $bestWeapon->image) {
-        $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct, hidden:started}" src="'.$bestWeapon->image->getCrop("small")->url.'" alt="'.$bestWeapon->title.'" />';
+        $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getCrop("small")->url.'" alt="'.$bestWeapon->title.'" />';
     }
   }
   if ($protectionRatio > 0) { // Player has protections
     $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
     if ($bestProtection->id && $bestProtection->image) {
-        $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong, hidden:started}" src="'.$bestProtection->image->getCrop("small")->url.'" alt="'.$bestProtection->title.'" />';
+        $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong}" src="'.$bestProtection->image->getCrop("small")->url.'" alt="'.$bestProtection->title.'" />';
     }
   }
   $out .= '</span>';
   $out .= '</span>';
   $out .= '</h2>';
-  $out .= '<h3 id="exTitle" class="row well text-center">';
+  $out .= '<h3 class="row well text-center">';
   $out .= $page->summary;
   $out .= '</h3>';
+  $out .= '</div>';
 
   // Scoring table
-  $out .= '<div id="energyDiv" class="row text-center">';
+  $out .= '<div id="energyDiv" class="row text-center well">';
   // Monster's health points
   $out .= '<div class="row text-center">';
   $out .= '<div class="col-sm-3">';
   if ($page->image) {
-    $out .= '<img class="pull-right" src="'.$page->image->getCrop("mini")->url.'" alt="Avatar" />';
+    $out .= '<img class="pull-right" src="'.$page->image->getCrop("mini")->url.'" alt="Monster" />';
   }
   $out .= '</div>';
   $out .= '<div class="col-sm-6">';
@@ -62,7 +64,8 @@
   $out .= '</div>';
   $out .= '</div>';
   $out .= '</div>';
-  $out .= '<div class="col-sm-3">';
+  $out .= '<div class="col-sm-3 text-left">';
+  $out .= '<span class="label label-primary">'.$page->title.'</span>';
   $out .= '</div>';
   $out .= '</div>';
   // Player's health points
@@ -75,24 +78,20 @@
   }
   $out .= '</div>';
   $out .= '<div class="col-sm-6">';
-  $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="Health points">';
+  $out .= '<div class="progress progress-lg" data-toggle="tooltip" title="'.__("Health points").'">';
   $out .= '<div class="progress-bar progress-bar-striped progress-bar-success active" role="progressbar" aria-valuenow="{{playerHP}}" aria-valuemin="0" aria-valuemax="100" style="width:{{playerHP}}%">';
   $out .= '</div>';
   $out .= '</div>';
   $out .= '</div>';
-  $out .= '<div class="col-sm-3">';
+  $out .= '<div class="col-sm-3 text-left">';
+  $out .= '<span class="label label-primary">'.$player->title.'</span>';
   $out .= '</div>';
   $out .= '</div>';
   $out .= '</div>';
 
   // First step : Display exercise summary to prepare the activity
   $out .= '<h3 class="alert alert-info" role="alert">';
-  if ($page->type->summary != '') {
-    $indications = $page->type->summary;
-  } else {
-    $indications = 'No indications';
-  }
-  $out .= '<strong><span class="glyphicon glyphicon-hand-up"></span> '.$indications.'</strong>';
+  $out .= '<strong><span class="glyphicon glyphicon-hand-up"></span> '.$page->type->summary.'</strong>';
   $out .= '<span class="glyphicon glyphicon-question-sign pull-right" data-toggle="tooltip" data-html="true" title="Attack = I know!<br />Dodge = I don\'t know.<br />Tip : Use \'Enter\' to play faster ;)"></span>';
   $out .= '<br /><br />';
   if ($user->language->name != 'french') {
@@ -113,9 +112,9 @@
   $out .= '<div id="fightForm" ng-class="{row:true, hidden: wonFight}">';
   $out .= '<div class="text-left">';
   if ($page->image) {
-    $out .= '<img class="pull-left squeeze" src="'.$page->image->url.'" alt="Avatar" />';
+    $out .= '<img class="pull-left squeeze" src="'.$page->image->getCrop('thumbnail')->url.'" alt="Monster" />';
   } else {
-    $out .= '<img class="squeeze" src="'.$config->urls->templates.'img/antenna.png" alt="Antenna" />';
+    $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getCrop('thumbnail')->url.'" alt="Antenna" />';
   }
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}'.__("HP").'</span>';
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
@@ -154,6 +153,7 @@
   $out .= '</span>';
   $out .= '</span>';
   $out .='</div>';
+  $out .= '<h3 class="text-center">'.$page->instructions.'</h3>';
   $out .= '</div>';
   $out .= '</div>';
 

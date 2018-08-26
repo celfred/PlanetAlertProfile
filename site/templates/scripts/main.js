@@ -46,6 +46,26 @@ $(document).ready(function() {
     return false; 
 	});
 
+	$('.deleteFromId').on('click', function() {
+		$this = $(this);
+		swal({
+			title: "Are you sure ?",
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes!",
+		}).then( function(isConfirm) {
+			var href = $this.attr('data-href');
+			$('<span>Saving...</span>').insertAfter($this);
+			$.get(href, function(data) { 
+				$this.parent('li').remove();
+			}); 
+		}, function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		});
+	});
+
 	$('.teamOption').on('click', function() {
     $("#ajaxViewport").html("<p>Loading...</p>"); 
 		var href = $(this).attr('href');
@@ -949,10 +969,12 @@ $(document).ready(function() {
 
   $('#startFight').on('click', function() {
     // TODO : Move function into exercise.js?
-    $(this).parents('.alert').hide();
-    $('#fightForm').show();
-    $('#exTitle').hide();
-    $('#energyDiv').show();
+		var $this = $(this);
+		$('#exHeader').hide('slow', function() {
+			$this.parents('.alert').hide();
+			$('#energyDiv').show('slow');
+			$('#fightForm').show();
+		});
     // Start exercise
     // TODO : Record session start...
   });

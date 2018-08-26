@@ -700,11 +700,11 @@
           ));
           $out .= '<div>';
           if (!$user->isSuperuser()) {
-            $notTeacherEl = $pages->find("template=exercise, teacher!=$user, created_users_id!=$user->id")->sort("title");
+            $notTeacherEl = $pages->find("parent.name=monsters, template=exercise, teacher!=$user, created_users_id!=$user->id")->sort("title");
           } else {
-            $notTeacherEl = $pages->find("template=exercise, include=all")->sort("title");
+            $notTeacherEl = $pages->find("parent.name=monsters, template=exercise, include=all")->sort("title");
           }
-          $teacherEl = $pages->find("template=exercise, (teacher=$user), (created_users_id=$user->id), include=all")->sort('title');
+          $teacherEl = $pages->find("parent.name=monsters, template=exercise, (teacher=$user), (created_users_id=$user->id), include=all")->sort('title');
           if (!$user->isSuperuser()) {
             $out .= '<h4><span>'.__("Your monsters").'</span></h4>';
             $out .= '<ul id="teacherElements">';
@@ -713,6 +713,11 @@
               $out .= '<li>';
               if (!$userIsOwner) {
                 $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+              }
+              if ($p->image) {
+                $out .= '<img src="'.$p->image->getCrop("mini")->url.'" alt="Image" /> ';
+              } else {
+                $out .= '[-] ';
               }
               if ($p->isUnpublished()) {
                 $out .= '<span class="strikeText">'.$p->title.'</span>';
@@ -729,11 +734,18 @@
                 $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span> ';
                 $out .= '<span class="label label-success">'.$p->type->title.'</span> ';
               }
+              if ($p->topic->count() > 0) {
+                $listTopics = $p->topic->implode(', ', '{title}');
+                $out .= '<span class="label label-danger">'.$listTopics.'</span>';
+              }
               if ($userIsOwner) {
                 $out .= $p->feel(array(
                           "text" => __('[Edit]'),
-                          "fields" => "title,summary,topic,level,type,image,exData"
+                          "fields" => "title,image,summary,instructions,topic,level,type,imageMap,exData"
                         ));
+                if ($p->teacher->count() == 0) { // Monster is not shared, owner can delete
+                  $out .= '<a href="#" class="deleteFromId" data-href="'.$page->url.'deleteFromId/'.$user->id.'/'.$p->id.'?type=team">'.__("[Delete]").'</a>';
+                }
               }
               // Possibility to test monster
               $out .= ' <a href="'.$pages->get("name=underground-training")->url.'?id='.$p->id.'" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
@@ -2246,6 +2258,10 @@
           $out .= 'Password : '. $pass.'</p>';
           $out .= '<br />';
         }
+        break;
+      case 'deleteFromId' :
+        $id = $pages->get($confirm); // urlSegment3 used for element's id
+        $pages->trash($id);
         break;
       default :
         $out = __('Problem detected.');

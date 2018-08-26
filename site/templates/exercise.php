@@ -19,7 +19,7 @@
 
       echo '</div>';
     } else {
-      echo '<div class="well"><p>You have to log in to see this page.</p></div>';
+      echo $noAuthMessage;
     }
 
     include("./foot.inc"); 

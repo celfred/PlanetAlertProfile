@@ -193,11 +193,16 @@
         $out .= '</table>';
       } else { // Training session
         // Test if player is allowed to do the training session today
-        $monster = $pages->get($input->get->id);
+        if ($user->isSuperuser() || $user->hasRole('teacher')) {
+        } else {
+        }
         $redirectUrl = $pages->get('name=underground-training')->url;
         if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
+          $monster = $pages->get($input->get->id);
           setMonster($player, $monster);
         } else { // Never trained (for admin)
+          $monsterId = $input->get->id;
+          $monster = $pages->get("id=$monsterId, include=all");
           $monster->isTrainable = 1;
           $monster->lastTrainingInterval = -1;
         }
@@ -286,7 +291,7 @@
               $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> <span ng-bind-html="showCorrection|underline"></span> {{feedBack}}</span></h3> ';
               $out .= '</div>';
               $out .= '<br />';
-              $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Type your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
+              $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="'.__("Type your answer").'" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
             }
             $out .= '<br />';
             $out .= '<button ng-click="attack()" class="btn btn-success">'.__("Stimulate !").'</button>';
@@ -307,7 +312,6 @@
             $out .= '</div>';
             $out .= '</div>';
             $out .= '</div>';
-
           } else {
             $out .= __("Sorry, but a problem occured. Please try again. If the problem still exists, contact the administrator.");
           }
