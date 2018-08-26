@@ -26,7 +26,7 @@
   }
 
   // Set details according to user profile
-  if ($user->isSuperuser() || ($user->hasRole('teacher') && ($playerPage->team->teacher->has("id=$user->id") || $playerPage->name == 'test')) || ($user->isLoggedin() && $user->name == $playerPage->login)) {
+  if ($user->isSuperuser() || ($user->hasRole('teacher') && $playerPage->team->teacher->has("id=$user->id")) || ($user->isLoggedin() && $user->name == $playerPage->login)) {
     $showDetails = true;
   } else {
     $showDetails = false;
