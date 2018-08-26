@@ -64,10 +64,10 @@
     if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teacher or Superuser is logged
       $profilePage = $pages->get("parent.name=teachers, singleTeacher=$user");
       if ($user->isSuperuser()) { // All teams for Admin
-        $allTeams = $pages->find("template=team")->sort("title");
+        $allTeams = $pages->find("template=team, sort=title");
         $allPlayers = $pages->find("template=player, parent.name=players, team.name!=no-team")->sort("team->name, title");
       } else { // Restrict to logged in Teacher's teams
-        $allTeams = $pages->find("template=team, teacher=$user")->sort("title");
+        $allTeams = $pages->find("template=team, teacher=$user, sort=title");
         $allPlayers = $pages->find("template=player, parent.name=players, team.name!=no-team, (teacher=$user), (team.teacher=$user)")->sort("team->name, title");
       }
 
@@ -232,7 +232,7 @@
     if ($user->hasRole('player')) { // Player's menu
       $player = $pages->get("template='player', login=$user->name");
       $user->language = $headTeacher->language; // Teacher chooses the language for his students
-      $allTeams = $pages->find("template=team")->sort("title");
+      $allTeams = $pages->find("template=team, teacher=$headTeacher, sort=title");
       if ($player->team->name != 'no-team') {
         $allPlayers = $pages->find("parent.name=players, template=player, team=$player->team");
       }
@@ -379,7 +379,7 @@
     }
 
     if (!$user->isLoggedin()) { // Guest menu
-      $allTeams = $pages->find("template=team")->sort("title");
+      $allTeams = $pages->find("template=team, sort=title");
       $allPlayers = $pages->find("parent.name=players, template=player");
       $out .= '<ul>';
         $out .= '<div class="btn-group" role="group" aria-label="...">';

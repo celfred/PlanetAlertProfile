@@ -92,7 +92,7 @@
         }
         $out .= '<p>';
         $out .= '<span class="label label-success"><span class="glyphicon glyphicon-hand-up"></span> '.__("Last official announcements !").'</span>';
-        $out .= ' <span><a href="'.$pages->get("name=blog")->url.'">'.__("[Read all official announcements]").'<</a></span>';
+        $out .= ' <span><a href="'.$pages->get("name=blog")->url.'">'.__("[Read all official announcements]").'</a></span>';
         $out .= '<ul class="">';
         $blogUrl = $pages->get("name=blog")->url;
         foreach($newsAdmin as $n) {
@@ -660,6 +660,9 @@
         $out .= '    <th>Category</th>';
         $out .= '    <th>Title</th>';
         $out .= '    <th>Comment</th>';
+        if ($user->isSuperuser() || $user->hasRole('teacher')) {
+          $out .= '    <th></th>';
+        }
         $out .= '  </tr>';
         $out .= '  </thead>';
         $out .= '  <tbody>';
@@ -703,6 +706,9 @@
           $out .= '</td>';
           $event->summary == '' ? $event->summary = '-' : '';
           $out .= '<td>'.$event->summary.'</td>';
+          if ($user->isSuperuser() || $user->hasRole('teacher')) {
+            $out .= '<td>'.$event->feel().'</td>';
+          }
           $out .= '</tr>';
         }
         $out .= ' </tbody>';
