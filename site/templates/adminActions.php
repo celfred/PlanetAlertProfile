@@ -709,7 +709,7 @@
             $out .= '<h4><span>'.__("Your monsters").'</span></h4>';
             $out .= '<ul id="teacherElements">';
             foreach($teacherEl as $p) {
-              if ($p->created_users_id == $user->id || $user->name == 'flieutaud') { $userIsOwner = true; } else { $userIsOwner = false; }
+              if ($p->created_users_id == $user->id) { $userIsOwner = true; } else { $userIsOwner = false; }
               $out .= '<li>';
               if (!$userIsOwner) {
                 $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';

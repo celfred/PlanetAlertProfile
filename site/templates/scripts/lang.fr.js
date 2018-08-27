@@ -35,7 +35,7 @@ lang = {
 	noCheck	: "Non, je vérifie encore une fois...",
 	yesSave	: "Oui, j'enregistre !",
 	redirecting	: "Redirection...",
-	saveForm	: "<p>Engresitrement du formulaire, merci de patienter...</p>",
+	saveForm	: "<p>Enregistrement du formulaire, merci de patienter...</p>",
 	itemsTosave	: "éléments restants.",
 	all	: "Tous",
 	ok	: "Ok",

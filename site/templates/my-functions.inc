@@ -630,7 +630,7 @@ function checkActivity(HookEvent $e) {
         // No need to checkDeath, inactivity can't cause death
       }
     } else if ($lastActivityCount > 365 ) { // 1 year of inactivity, delete player/user
-      if ($player->rank > 9) { // Don't delete middle-school players
+      if ($player->rank >= 9) { // Don't delete middle-school players
         deletePlayer($player);
       }
     }
