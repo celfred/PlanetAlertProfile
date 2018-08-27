@@ -595,7 +595,7 @@
               'text' => '[Add a new category]'
             ));
           }
-          $out .= '<h4><span>'.__("All categories").'</span></h4>';
+          $out .= '<h4><span>'.__("All categories").'</span> '.__("[Categories are not editable]").'</h4>';
           $out .= '<ul>';
           foreach($allCategories as $p) {
             $out .= '<li>';
@@ -608,7 +608,24 @@
           }
           $out .= '</ul>';
           $out .= '</div>';
-          /* $out .= '<section id="ajaxViewport" class="well"></section>'; */
+          $allTopics = $pages->find("parent.name=topics, template=topic")->sort('title');
+          $out .= '<h3 class="text-center">';
+          $out .=   __('Manage topics');
+          $out .= '</h3>';
+          $out .= '<h4><span>'.__("All topics").'</span> ';
+          $out .= $pages->get("name=topics")->feel(array(
+            'mode' => 'page-add',
+            'text' => '[Add a new topic]'
+          ));
+          $out .= '</h4>';
+          $out .= '<ul>';
+          foreach ($allTopics as $p) {
+            $out .= '<li>'.$p->title;
+            if ($p->summary != '') { $out .= ' → '.$p->summary; }
+            $out .= $p->feel(); // Only if permission is set in backend
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
           break;
         case 'manage-lessons' :
           $out .= '<section class="well">';

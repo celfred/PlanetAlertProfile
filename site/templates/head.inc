@@ -175,7 +175,7 @@
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-actions' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/manage-actions/'><span class='glyphicon glyphicon-flash'></span> - ".__('Manage actions')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-categories' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-categories/'><span class='glyphicon glyphicon-tag'></span> - ".__('View categories')."</a></li>";
+                $out .= "<li><a$class href='{$adminActions->url}/manage-categories/'><span class='glyphicon glyphicon-tag'></span> - ".__('Manage categories and topics')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-lessons' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/manage-lessons/'><span class='glyphicon glyphicon-file'></span> - ".__('Manage lessons')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-monsters' ? " class='selected-left'" : "";
