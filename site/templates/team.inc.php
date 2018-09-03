@@ -219,7 +219,7 @@
     }
 
     if ($player->avatar) {
-      $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$player->avatar->getCrop('mini')->url."' alt='avatar' />";
+      $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img class=\"tipList-light\" src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$player->avatar->getCrop('mini')->url."' alt='avatar' />";
     } else {
       $mini = '';
     }

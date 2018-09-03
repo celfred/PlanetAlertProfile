@@ -1010,8 +1010,8 @@
             foreach ($allPlayers as $p) {
               $u = $users->get("name=$p->login");
               $out .= '<tr>';
-              $out .= '<td>'.$p->title.$p->feel().'</td>';
-              $out .= '<td>'.$p->team->title.'</td>';
+              $out .= '<td>'.$p->title.' '.$p->lastName.$p->feel().'</td>';
+              $out .= '<td>'.$p->team->title.$p->feel(array('text'=>'[Change]', 'fields'=>'team')).'</td>';
               $out .= '<td>'.$u->name.' / '.$p->login.'</td>';
               $headTeacher = getHeadTeacher($p);
               if ($headTeacher) {
