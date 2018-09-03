@@ -1836,7 +1836,6 @@
           $counter = $p->children("name~=history")->count();
           if ($counter > 0 && $currentHistory) {
             $currentHistory->of(false);
-            
             // Save scores
             $currentHistory->name = 'history-'.$counter;
             $currentHistory->title = 'history-'.$counter;
@@ -2224,20 +2223,20 @@
               }
             }
             if ($team && $team != '') {
-              $team = $pages->get("template=team, name=$team");
-              if ($team->id) {
-                $p->team = $team;
+              $newTeam = $pages->get("template=team, name=$team");
+              if ($newTeam->id) {
+                $p->team = $newTeam;
                 if ($teacher && $teacher != '') { // Add teacher
                   $t = $users->get("name=$teacher");
                   if ($t->id) {
-                    $team->of(false);
-                    $team->teacher->add($t);
-                    $team->save();
+                    $newTeam->of(false);
+                    $newTeam->teacher->add($t);
+                    $newTeam->save();
                   }
                 }
               } else { // Create new team
                 $newTeam = new Page();
-                $newTeam->template = team;
+                $newTeam->template = 'team';
                 $newTeam->parent = $pages->get("name=teams");
                 $newTeam->title = strtoupper($team);
                 if ($p->rank) { $newTeam->rank = $p->rank; }

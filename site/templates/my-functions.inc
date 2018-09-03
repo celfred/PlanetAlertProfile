@@ -617,11 +617,10 @@ function checkActivity(HookEvent $e) {
     if ($lastEvent) {
       $lastActivityCount = daysFromToday($lastEvent);
     } else {
-      createHistoryPage($player);
       $lastActivityCount = -1;
     }
     if ($lastActivityCount > 30 && $lastActivityCount <= 365) { // 30 days of inactivity
-      if ($lastEvent->name != 'inactivity') {
+      if (!isset($lastEvent) || $lastEvent->name != 'inactivity') {
         $task = $refPage;
         $task->comment = $lastActivityCount.' days of inactivity.';
         $task->refPage = $refPage;
@@ -643,8 +642,8 @@ function lastEvent($player) {
     $lastEvent = $historyPage->children()->last();
     if ($lastEvent) {
       return $lastEvent;
-    } else { // No events in historyPage, go back on e
-      $lastEvent = $historyPage->prev()->children()->last();
+    } else { // No events in historyPage, go back one history page
+      $lastEvent = $historyPage->prev("name~=history")->children()->sort("date")->last();
       return $lastEvent;
     }
   }
