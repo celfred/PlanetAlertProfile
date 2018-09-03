@@ -1072,6 +1072,13 @@ $(document).ready(function() {
 	if ($('table').length > 0) { initTables(); }
 }); 
 
+var FEEL = {
+    onBeforeReload: function (o) {
+        if($('#usersTable').length) {
+        	return false;
+        }
+    }
+};
 // Tables init
 var initTables = function() {
   $('#mapTable').DataTable({

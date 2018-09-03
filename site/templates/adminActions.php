@@ -999,7 +999,7 @@
               $out .= '<hr />';
             }
             $out .= '<p>There are currently '.$allPlayers->count().' players.</p>';
-            $out .= '<table class="table table-condensed table-hover">';
+            $out .= '<table id="usersTable" class="table table-condensed table-hover">';
             $out .= '<th>Player</th>';
             $out .= '<th>Team</th>';
             $out .= '<th>User name / Login</th>';
@@ -2199,6 +2199,7 @@
       case 'addUsers' :
         $newPlayers = $input->post->newPlayers;
         $newUserLines = preg_split("/[\r\n]+/", $newPlayers, -1, PREG_SPLIT_NO_EMPTY);
+        $parentPage =  $pages->get('name=players');
         $out = '';
         foreach($newUserLines as $l) {
           $newUser = array_map('trim', explode(',', $l));
@@ -2212,7 +2213,7 @@
             // Create player
             $p = new Page();
             $p->template = 'player';
-            $p->parent = $pages->get('name=players');
+            $p->parent = $parentPage;
             $p->title = $title;
             $p->lastName = $lastName;
             if ($rank && $rank != '') {
