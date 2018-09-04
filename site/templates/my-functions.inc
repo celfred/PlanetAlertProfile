@@ -608,11 +608,13 @@ function emptyTmp(HookEvent $e) { // Empty /tmp subtree
   }
 }
 
-function checkActivity(HookEvent $e) {
+/* function checkActivity(HookEvent $e) { */
+function checkActivity() {
   $pages = wire('pages');
   $refPage = $pages->get("name=inactivity");
-  $allPlayers = $pages->findMany("parent.name=players, template=player, team.name=no-team, name!=test"); // Limit to no-team players, avoid 'test'
+  $allPlayers = $pages->findMany("parent.name=players, template=player, name!=test"); // Limit to no-team players, avoid 'test'
   foreach ($allPlayers as $player) {
+    // TODO : Manage history-1... in a better way !
     $lastEvent = lastEvent($player);
     if ($lastEvent) {
       $lastActivityCount = daysFromToday($lastEvent);
@@ -623,7 +625,7 @@ function checkActivity(HookEvent $e) {
       if (!isset($lastEvent) || $lastEvent->name != 'inactivity') {
         $task = $refPage;
         $task->comment = $lastActivityCount.' days of inactivity.';
-        $task->refPage = $refPage;
+        $task->refPage = false;
         $task->linkedId = false;
         updateScore($player, $task, true);
         // No need to checkDeath, inactivity can't cause death
@@ -2350,7 +2352,7 @@ function getHeadTeacher($player) {
     }
   }
   if ($playerPage) {
-    if ($playerPage->team->teacher->first()) {
+    if ($playerPage->team && $playerPage->team->teacher->first()) {
       $headTeacher = $playerPage->team->teacher->first();
     } else {
       $headTeacher = false;
