@@ -608,20 +608,19 @@ function emptyTmp(HookEvent $e) { // Empty /tmp subtree
   }
 }
 
-/* function checkActivity(HookEvent $e) { */
-function checkActivity() {
+function checkActivity(HookEvent $e) {
   $pages = wire('pages');
   $refPage = $pages->get("name=inactivity");
-  $allPlayers = $pages->findMany("parent.name=players, template=player, name!=test"); // Limit to no-team players, avoid 'test'
+  $allPlayers = $pages->findMany("parent.name=players, template=player, team.name=no-team, name!=test"); // Limit to no-team players, avoid 'test'
   foreach ($allPlayers as $player) {
-    // TODO : Manage history-1... in a better way !
     $lastEvent = lastEvent($player);
     if ($lastEvent) {
       $lastActivityCount = daysFromToday($lastEvent);
     } else {
       $lastActivityCount = -1;
     }
-    if ($lastActivityCount > 30 && $lastActivityCount <= 365) { // 30 days of inactivity
+    bd($player->name.':'.$lastActivityCount);
+    if ($lastActivityCount > 30 && $lastActivityCount <= 1365) { // # of days of inactivity
       if (!isset($lastEvent) || $lastEvent->name != 'inactivity') {
         $task = $refPage;
         $task->comment = $lastActivityCount.' days of inactivity.';
@@ -631,7 +630,7 @@ function checkActivity() {
         // No need to checkDeath, inactivity can't cause death
       }
     } else if ($lastActivityCount > 365 ) { // 1 year of inactivity, delete player/user
-      if ($player->rank >= 9) { // Don't delete middle-school players
+      if ($player->rank->index > 9) { // Don't delete middle-school players
         deletePlayer($player);
       }
     }
@@ -639,16 +638,18 @@ function checkActivity() {
 }
 
 function lastEvent($player) {
-  $historyPage = $player->children("name=history")->sort('date')->last();
+  $historyPages = $player->children("name~=history")->sort('date');
+  $historyPage = $historyPages->last();
   if ($historyPage) {
     $lastEvent = $historyPage->children()->last();
     if ($lastEvent) {
       return $lastEvent;
     } else { // No events in historyPage, go back one history page
-      $lastEvent = $historyPage->prev("name~=history")->children()->sort("date")->last();
+      $lastEvent = $historyPage->prev()->children()->last();
       return $lastEvent;
     }
   }
+  return false;
 }
 
 function daysFromToday($event) {

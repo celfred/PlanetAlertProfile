@@ -143,7 +143,7 @@
       $lastEvent = $player->child("name=history")->child("sort=-date");
       $prevDay = date("m/d/Y", $lastEvent->date); // Get all events on same day
       $prevDate = $prevDay.' 0:0:0'; // Select events for the whole day
-      $prevEvents = $player->child("name='history'")->children("date>=$prevDate");
+      $prevEvents = $player->child("name=history")->children("template=event, date>=$prevDate");
       $trend = '';
       foreach ($prevEvents as $event) {
         $event->task = checkModTask($event->task, $headTeacher, $player);

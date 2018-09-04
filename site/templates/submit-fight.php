@@ -4,7 +4,7 @@
       '::1'
   );
 
-  if ($user->hasRole('player')) {
+  if ($user->isLoggedin() && $user->isSuperuser() == false) {
     $player = $pages->get("template=player, login=$user->name");
     $monster = $pages->get($input->post->exerciseId);
     $result = $input->post->result;

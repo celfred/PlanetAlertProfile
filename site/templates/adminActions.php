@@ -515,8 +515,9 @@
               $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
               $mod = $p->owner->get("singleTeacher=$user"); // Get personalized infos if needed
               $mod->title != '' ? $out .= '<span>'.$mod->title.'</span> ' : $out .= '<span>'.$p->title.'</span> ';
-              $mod->teacherTitle != '' ? $out .= '<span>[= '.$mod->teacherTitle.']</span> → ' : '';
-              if ($mod->teacherTitle == '' && $task->teacherTitle != '') { $out .= '<span>[= '.$p->teacherTitle.']</span> → '; }
+              $mod->teacherTitle != '' ? $out .= '<span>[= '.$mod->teacherTitle.']</span>' : '';
+              if ($mod->teacherTitle == '' && $p->teacherTitle != '') { $out .= '<span>[= '.$p->teacherTitle.']</span>'; }
+              $out .= ' → ';
               $mod->summary != '' ? $out .= '<span>'.$mod->summary.'</span> ' : $out .= '<span>'.$p->summary.'</span> ';
               $mod->HP == '' ? $HP = $p->HP : $HP = $mod->HP;
               $mod->XP == '' ? $XP = $p->XP : $XP = $mod->XP;
