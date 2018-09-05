@@ -151,8 +151,9 @@ $(document).ready(function() {
 	});
 
 	$('.basicConfirm').on('click', function() {
-		$this = $(this);
-		$reload = $this.attr("data-reload");
+		var $this = $(this);
+		var $href = $this.attr('data-href');
+		var $reload = $this.attr("data-reload");
 		swal({
 			title: lang.sure,
 			type: "warning",
@@ -161,17 +162,16 @@ $(document).ready(function() {
 			confirmButtonText: lang.yes,
 			cancelButtonText: lang.no,
 		}).then( function(isConfirm) {
-			var href = $this.attr('data-href');
 			$this.next('.proceedFeedback').html(lang.saving);
 			$('.notification').remove();
 			if ($reload == 'false') {
-				$.get(href, function(data) { 
+				$.get($href, function(data) { 
 					$this.next('.proceedFeedback').html(lang.saved);
 					$('#wrap').prepend(data);
 					setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
 				}); 
 			} else {
-				window.location.href = href;
+				window.location.href = $href;
 			}
 		}, function(dismiss) {
 			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }

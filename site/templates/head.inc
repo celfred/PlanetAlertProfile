@@ -194,12 +194,12 @@
               $out .= '</li>';
               $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$adminActions->url}/reports/'><span class='glyphicon glyphicon-file'></span> - ".__('Reports')."</a></li>";
+              $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$adminActions->url}/users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
               
               // Add Admin Zone
               if ($user->isSuperuser()) {
                 $out .= "<li role='separator' class='divider'></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/users'><span class='glyphicon glyphicon-user'></span> - Users / History</a></li>";
                 $class = $page->name == 'statistics' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
                 $out .= "<li role='separator' class='divider'></li>";

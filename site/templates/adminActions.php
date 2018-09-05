@@ -1,5 +1,4 @@
 <?php namespace ProcessWire;
- 
   if (!$config->ajax) {
     include("./head.inc"); 
     $out = '';
@@ -134,7 +133,7 @@
           $out .= '<section id="ajaxViewport" class="well"></section>';
           break;
         case 'recalculate' :
-          if ($user->isSuperuser()) {
+          if ($user->isSuperuser() || $user->hasRole('teacher')) {
             $playerId = $input->urlSegment2;
             $selectedPlayer = $pages->get($playerId);
             $headTeacher = getHeadTeacher($selectedPlayer);
@@ -198,7 +197,7 @@
                     $wrongInvasions = $allEvents->find("task.name=wrong-invasion, refPage=$e->refPage, date<=$e->date, sort=-date");
                     // Limit to events AFTER the last 'Free' action on the oarticular element
                     $lastFree = $allEvents->get("task.name=free, refPage=$e->refPage, sort=-date");
-                    if ($lastFree->id) {
+                    if ($lastFree) {
                       $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
                     }
                     if ($wrongInvasions->count() >= 3) {
@@ -374,12 +373,6 @@
                 $out .= '<h4 class="text-center"><span class="label label-danger"><i class="glyphicon glyphicon-thumbs-down"></i> Scores are different !</span></h4>';
               }
               $out .= '<br /><br />';
-              if (isset($dirty)) {
-                $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
-              }
-              if ($previousFingerprint !== $recalculatedFingerprint) { 
-                $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/1" data-reload="true">Save recalculated scores</button>';
-              }
               if ($input->urlSegment3 && $input->urlSegment3 == 1) {
                 if ($selectedPlayer->team && $selectedPlayer->team->name != 'no-team') {
                   if ($selectedPlayer->team->periods) {
@@ -399,6 +392,16 @@
                 }
                 $selectedPlayer->of(false);
                 $selectedPlayer->save();
+                $out = '<h3>New scores for '.$selectedPlayer->title.' '.$selectedPlayer->lastName.' ['.$selectedPlayer->team->title.']</h3>';
+                $out .= '<h3>'.displayPlayerScores($selectedPlayer, 'Recalculated', 'primary').'</h3>';
+                $out .= '<h4 class="text-center"><span class="label label-danger">New scores have been saved.';
+              } else {
+                if (isset($dirty)) {
+                  $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
+                }
+                if ($previousFingerprint !== $recalculatedFingerprint) { 
+                  $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/1" data-reload="true">Save recalculated scores</button>';
+                }
               }
             } else {
               $out .= 'You need to select 1 player.';
@@ -504,9 +507,9 @@
           $out .= '</h3>';
           $out .= '<div>';
           // Get actions
-          $adminActions = $pages->find("name!=tasks, template=task, adminOnly=1")->sort("title");
-          $notTeacherActions = $pages->find("name!=tasks, template=task, adminOnly=0")->not("owner.singleTeacher=$user")->sort("title");
-          $teacherActions = $pages->find("name!=tasks, template=task, adminOnly=0, owner.singleTeacher=$user")->sort("title, owner.title");
+          $adminActions = $pages->find("template=task, adminOnly=1")->sort("title");
+          $notTeacherActions = $pages->find("template=task, adminOnly=0")->not("owner.singleTeacher=$user")->sort("title");
+          $teacherActions = $pages->find("template=task, adminOnly=0, owner.singleTeacher=$user")->sort("title, owner.title");
           if (!$user->isSuperuser()) {
             $out .= '<h4><span>'.__("Your actions").'</span></h4>';
             $out .= '<ul id="teacherElements" class="list">';
@@ -966,15 +969,19 @@
           }
           break;
         case 'users' :
-          if ($user->isSuperuser()) {
-            $allPlayers = $pages->find("parent.name=players, template=player")->sort("title");
-            $allTeachers = $pages->find("parent.name=teachers, template=teacherProfile")->sort("title");
+          if ($user->isSuperuser() || $user->hasRole('teacher')) {
+            if ($user->hasRole('teacher')) {
+              $allPlayers = $pages->find("parent.name=players, template=player, team.teacher=$user")->sort("title");
+            } else {
+              $allPlayers = $pages->find("parent.name=players, template=player")->sort("title");
+              $allTeachers = $pages->find("parent.name=teachers, template=teacherProfile")->sort("title");
+            }
             $out .= '<section class="well">';
-            $out .= '<p><span class="glyphicon glyphicon-alert"></span> 1 player / line → Name [,lastName] [,rank = 4=CM1,5=CM2,6=6emes,7=5emes,8=4emes...)] [,team] [,teacher\'s login]</p>';
-            $out .= '<textarea id="newPlayers" name="newPlayers" rows="5" cols="200"></textarea>';
-            $out .= '<button class="addUsers btn btn-primary btn-block" data-href="'.$page->url.'" data-action="addUsers">Add new players</button>';
-            $out .= '<section id="ajaxViewport" class="well"></section>';
             if ($user->isSuperuser()) {
+              $out .= '<p><span class="glyphicon glyphicon-alert"></span> 1 player / line → Name [,lastName] [,rank = 4=CM1,5=CM2,6=6emes,7=5emes,8=4emes...)] [,team] [,teacher\'s login]</p>';
+              $out .= '<textarea id="newPlayers" name="newPlayers" rows="5" cols="200"></textarea>';
+              $out .= '<button class="addUsers btn btn-primary btn-block" data-href="'.$page->url.'" data-action="addUsers">Add new players</button>';
+              $out .= '<section id="ajaxViewport" class="well"></section>';
               $allTeachers = $users->find("roles=teacher");
               $out .= '<p>There are currently '.$allTeachers->count().' teachers. (Go to backend to add a new teacher, i.e. new user with teacher role)</p>';
               $out .= '<table class="table table-condensed table-hover">';
@@ -1006,12 +1013,18 @@
             $out .= '<th>User name / Login</th>';
             $out .= '<th>Head teacher</th>';
             $out .= '<th>History</th>';
-            $out .= '<th>Archive</th>';
-            $out .= '<th>Delete</th>';
+            if ($user->isSuperuser()) {
+              $out .= '<th>Archive</th>';
+              $out .= '<th>Delete</th>';
+            }
             foreach ($allPlayers as $p) {
               $u = $users->get("name=$p->login");
               $out .= '<tr>';
-              $out .= '<td>'.$p->title.' '.$p->lastName.$p->feel().'</td>';
+              $out .= '<td>'.$p->title.' '.$p->lastName;
+              if ($user->isSuperuser()) {
+                $out .= $p->feel();
+              }
+              $out .= '</td>';
               if ($p->team) {
                 $out .= '<td>'.$p->team->title.$p->feel(array('text'=>'[Change]', 'fields'=>'team,rank')).'</td>';
               } else {
@@ -1026,17 +1039,19 @@
               }
               /* $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</a></td>'; */
               $out .= '<td><a target="blank" class="btn btn-xs btn-danger" href="'.$adminActions->url.'recalculate/'.$p->id.'">Check history</a></td>';
-              $history = $p->child("name=history");
-              if ($history->id && $history->children()->count() > 0) {
-                $out .= '<td><button class="confirm btn btn-xs btn-danger" data-href="'.$page->url.'archivePlayer/'.$p->id.'/1">Archive Player</button></td>';
-              } else {
-                $out .= '<td>Nothing to archive.</td>';
+              if ($user->isSuperuser()) {
+                $history = $p->child("name=history");
+                if ($history->id && $history->children()->count() > 0) {
+                  $out .= '<td><button class="confirm btn btn-xs btn-danger" data-href="'.$page->url.'archivePlayer/'.$p->id.'/1">Archive Player</button></td>';
+                } else {
+                  $out .= '<td>Nothing to archive.</td>';
+                }
+                $out .= '<td><button class="removeUser btn btn-xs btn-danger" data-href="'.$page->url.'" data-action="removeUser" data-playerId="'.$p->id.'">Delete Player/User</button></td>';
               }
-              $out .= '<td><button class="removeUser btn btn-xs btn-danger" data-href="'.$page->url.'" data-action="removeUser" data-playerId="'.$p->id.'">Delete Player/User</button></td>';
               $out .= '</tr>';
             }
             $out .= '</table>';
-            $out .= '<div>';
+            $out .= '</section>';
           } else {
             $out .= $noAuthMessage;
           }
