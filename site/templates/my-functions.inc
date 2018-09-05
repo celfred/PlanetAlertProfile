@@ -2316,7 +2316,7 @@ function checkModTask($task, $headTeacher = false, $player = false) {
       }
     }
   }
-  $mod = $task->owner->get("singleTeacher=$headTeacher"); // Get personalized infos if needed
+  $mod = $task->owner->get("singleTeacher=$headTeacher, include=hidden"); // Get personalized infos if needed
   if ($mod) {
     $task->mod = true;
     $mod->title != '' ? $task->title = $mod->title : '';
