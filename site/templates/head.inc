@@ -213,8 +213,8 @@
                 $out .= "<li><a$class href='{$adminActions->url}/ut/'>UT Hall of fame</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setScores' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/setScores/'>Set scores</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setKarma' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/setKarma/'>Set karmas</a></li>";
+                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setReputation' ? " class='selected-left'" : "";
+                $out .= "<li><a$class href='{$adminActions->url}/setReputation/'>Set karmas</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setYearlyKarma' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/setYearlyKarma/'>Set yearly karmas</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCaptains' ? " class='selected-left'" : "";

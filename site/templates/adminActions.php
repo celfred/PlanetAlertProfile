@@ -905,7 +905,7 @@
             $out .= $noAuthMessage;
           }
           break;
-        case 'setKarma' :
+        case 'setReputation' :
           if ($user->isSuperuser()) {
             $out .= '<section class="well">';
             $out .= '<h3 class="text-center">';
@@ -920,7 +920,7 @@
             }
             $out .= '</select>';
             $out .= '</div>';
-            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setKarma">Generate</button>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setReputation">Generate</button>';
             $out .= '<section id="ajaxViewport" class="well"></section>';
           } else {
             $out .= $noAuthMessage;
@@ -1608,7 +1608,7 @@
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveCaptains/'.$selectedTeam->id.'/1">Save new captains</button>';
         }
         break;
-      case 'setKarma':
+      case 'setReputation':
         if ($selectedTeam && $selectedTeam != '-1') {
           $allPlayers = $allPlayers->find("team=$selectedTeam");
           $out .= '</div>';
@@ -1618,7 +1618,7 @@
           $out .= '<section>';
           $out .= '<ul><span class="label label-default">Actual karmas</span>';
           foreach($allPlayers as $p) {
-            $newKarma = setKarma($p);
+            $newKarma = setReputation($p);
             $out .= '<li>'.$p->title.' : '.$p->karma.' → '.$newKarma.'</li>';
           }
           $out .= '</ul>';
@@ -1677,7 +1677,7 @@
         $selectedTeam = $pages->get("$input->urlSegment2");
         $allPlayers = $allPlayers->find("team=$selectedTeam");
         foreach($allPlayers as $p) {
-          $p->karma = setKarma($p);
+          $p->karma = setReputation($p);
           $p->of(false);
           $p->save();
         }

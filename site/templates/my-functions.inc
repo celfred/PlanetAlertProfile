@@ -168,7 +168,7 @@ function updateScore($player, $task, $real = true) {
 
     if ($player->coma == 0) {
       setLevel($player); // Check if new level
-      $player->karma = setKarma($player); // Set karma (and store for cache)
+      $player->karma = setReputation($player); // Set karma (and store for cache)
       if (!isset($tmpEvent)) { // Make a temporary event page to calculate new yearly Karma
         $tmpEvent = new Page();
         $tmpEvent->template = 'event';
@@ -766,7 +766,7 @@ function setCaptains($team, $real = true) {
   }
 }
 
-function setKarma($player) {
+function setReputation($player) {
   // Karma calculated from all values (except GC and Donations)
   $levelKarma = 0;
   if ($player->level > 1) {
