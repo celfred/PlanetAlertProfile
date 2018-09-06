@@ -147,7 +147,7 @@
       $trend = '';
       foreach ($prevEvents as $event) {
         $event->task = checkModTask($event->task, $headTeacher, $player);
-        if (($user->hasRole('teacher') || $user->isSuperuser()) && $event->task->is("name=penalty|death|inactivity")) { $class = ' class="selected"'; }
+        if (($user->hasRole('teacher') || $user->isSuperuser()) && $event->task->is("name=penalty|death")) { $class = ' class="selected"'; }
         $HP = $event->task->HP;
         $title = $event->task->title;
         $HP < 0 || $event->task->is("name=inactivity") ? $trendClass = 'negativeTrend' : $trendClass = 'positiveTrend';

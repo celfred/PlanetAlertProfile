@@ -909,7 +909,7 @@
           if ($user->isSuperuser()) {
             $out .= '<section class="well">';
             $out .= '<h3 class="text-center">';
-            $out .=   'Set karma';
+            $out .=   'Set reputation';
             $out .= '</h3>';
             $out .= '<div>';
             $out .= '<span>Select a team : </span>';
