@@ -44,6 +44,7 @@ function initPlayer($player) {
     $player->fighting_power = $prevScores->fighting_power;
     $player->hkcount = $prevScores->hkcount;
     $player->coma = 0;
+    $player->streak = 0;
   } else {
     $player->karma = 0;
     $player->yearlyKarma = 0;
@@ -59,6 +60,7 @@ function initPlayer($player) {
     $player->places->removeAll();
     $player->people->removeAll();
     $player->coma = 0;
+    $player->streak = 0;
   }
   createTmpCache($player);
   createHistoryPage($player);
@@ -269,6 +271,7 @@ function taskExtraAction($player, $task, $real) {
   }
   if ($task->is("name=inactivity")) { // Lose all GC
     $player->GC = 0;
+    $player->streak = 0;
   }
   if ($task->is("name=donation")) {
     preg_match("/\d+/", $task->comment, $matches);
@@ -551,7 +554,7 @@ function getLevelThreshold($level) {
 function setStreak($player, $task) {
   $pages = wire('pages');
   if ($task->is("name!=donation|donated|absent")) {
-    if ($task->HP>=0) {
+    if ($task->HP>=0 && $task->is("name!=inactivity")) {
       $player->streak++;
     } else {
       $player->streak = 0;

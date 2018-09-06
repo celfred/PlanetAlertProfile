@@ -150,7 +150,7 @@
         if (($user->hasRole('teacher') || $user->isSuperuser()) && $event->task->is("name=penalty|death|inactivity")) { $class = ' class="selected"'; }
         $HP = $event->task->HP;
         $title = $event->task->title;
-        $HP < 0 ? $trendClass = 'negativeTrend' : $trendClass = 'positiveTrend';
+        $HP < 0 || $event->task->is("name=inactivity") ? $trendClass = 'negativeTrend' : $trendClass = 'positiveTrend';
         $event->summary !== '' ? $summary = ' ('.$event->summary.')' : $summary = '';
         $trend .= '<span class="'.$trendClass.'" data-toggle="tooltip" data-html="true" title="'.strftime("%d/%m", $event->date).': '.$title.$summary.'">&nbsp;</span>';
       }
