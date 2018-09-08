@@ -19,10 +19,10 @@
     ?>
       <div class="panel panel-success">
         <div class="panel-heading">
-        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
+        <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=reputation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
         <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
         </div>
-        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="karma">
+        <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="reputation">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
         </div>
       </div>
