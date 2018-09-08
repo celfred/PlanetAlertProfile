@@ -1613,17 +1613,17 @@
           $allPlayers = $allPlayers->find("team=$selectedTeam");
           $out .= '</div>';
           $out .= '<h4 class="text-center">';
-          $out .=   'Set Karma for '.$selectedTeam->title;
+          $out .=   'Set reputations for '.$selectedTeam->title;
           $out .= '</h4>';
           $out .= '<section>';
-          $out .= '<ul><span class="label label-default">Actual karmas</span>';
+          $out .= '<ul><span class="label label-default">Actual reputations</span>';
           foreach($allPlayers as $p) {
-            $newKarma = setReputation($p);
-            $out .= '<li>'.$p->title.' : '.$p->karma.' → '.$newKarma.'</li>';
+            $newReputation = setReputation($p);
+            $out .= '<li>'.$p->title.' : '.$p->reputation.' → '.$newReputation.'</li>';
           }
           $out .= '</ul>';
           $out .= '</section>';
-          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveKarma/'.$selectedTeam->id.'/1">Save new karmas</button>';
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveReputation/'.$selectedTeam->id.'/1">Save new reputation</button>';
         }
         break;
       case 'setYearlyKarma':
@@ -1673,11 +1673,11 @@
         $allPlayers = $allPlayers->find("team=$selectedTeam");
         setCaptains($selectedTeam, true);
         break;
-      case 'saveKarma':
+      case 'saveReputation':
         $selectedTeam = $pages->get("$input->urlSegment2");
         $allPlayers = $allPlayers->find("team=$selectedTeam");
         foreach($allPlayers as $p) {
-          $p->karma = setReputation($p);
+          $p->reputation = setReputation($p);
           $p->of(false);
           $p->save();
         }
@@ -1822,7 +1822,7 @@
           $currentHistory->title = 'history-'.$counter;
           $currentHistory->team = $p->team;
           $currentHistory->rank = $p->rank;
-          $currentHistory->karma = $p->karma;
+          $currentHistory->reputation = $p->reputation;
           $currentHistory->level = $p->level;
           $currentHistory->HP = $p->HP;
           $currentHistory->XP = $p->XP;
@@ -1861,7 +1861,7 @@
             $currentHistory->title = 'history-'.$counter;
             $currentHistory->team = $p->team;
             $currentHistory->rank = $p->rank;
-            $currentHistory->karma = $p->karma;
+            $currentHistory->reputation = $p->reputation;
             $currentHistory->yearlyKarma = $p->yearlyKarma;
             $currentHistory->level = $p->level;
             $currentHistory->HP = $p->HP;

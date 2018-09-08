@@ -38,9 +38,9 @@
       $group->karma = $group->nbBonus*30;
 
       // Add individual karmas
-      foreach( $players as $player) {
+      foreach($players as $player) {
         // Karma is divided by number of players in the group to be fair with smaller groups
-        $groupKarma = round($player->karma/$players->count);
+        $groupKarma = round($player->yearlyKarma/$players->count);
         (int) $group->karma += $groupKarma;
         $group->details .= '- '.$player->title.' ('.$groupKarma.'k - '.$player->nbEl.'el)<br />';
       }
@@ -248,7 +248,7 @@
     $out .= '<td>'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';
     $out .= '<td>'. $player->level .'</td>';
-    $out .= '<td>'. $player->karma .'</td>';
+    $out .= '<td>'. $player->reputation .'</td>';
     if ($player->coma == true) { $player->HP = 0; }
     $out .= '<td data-order="'.$player->HP.'" data-toggle="tooltip" title="'.$player->HP.'/50" data-placement="top">';
     if ($player->coma == false) {

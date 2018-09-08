@@ -93,7 +93,7 @@
       <div class="col-sm-6">
         <ul class="player-details">
         <li><?php echo __("Karma"); ?> : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
-        <li><?php echo __("Reputation"); ?> : <span class="label label-default"><?php echo $playerPage->karma; ?></span></li>
+        <li><?php echo __("Reputation"); ?> : <span class="label label-default"><?php echo $playerPage->reputation; ?></span></li>
         <li><?php echo __("Level"); ?> : <?php echo $playerPage->level; ?></li>
         <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC.' '.__("GC"); ?></span></li>
         <?php 
@@ -281,18 +281,18 @@
     <div class="panel-body">
       <ul>
       <?php 
-        // Most influential (karma)
-        list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'karma');
+        // Most influential (reputation)
+        list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'reputation');
         if ($playerPos) {
           if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
           echo '<li>';
           echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
+          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=reputation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
           echo __('Most influential').' : '.$playerPos.'/'.$totalPlayers.' '.$star.'</p></li>';
         } else {
           echo '<li>';
           echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
+          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=reputation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
           echo __('Most influential').' : ';
           echo __('No ranking.');
           echo '</p></li>';

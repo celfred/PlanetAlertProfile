@@ -319,7 +319,7 @@
           $out .= '<ul class="list-unstyled">';
           if ($p->coma == 0) {
             $out .= '<li><span class="label label-success">Karma : '.$p->yearlyKarma.'</span></li>';
-            $out .= '<li><span class="label label-success">Reputation : '.$p->karma.'</span></li>';
+            $out .= '<li><span class="label label-success">Reputation : '.$p->reputation.'</span></li>';
             $out .= '<li><span class="label label-default"><span class="glyphicon glyphicon-signal"></span> '.$p->level.'</span>';
             $threshold = getLevelThreshold($p->level);
             $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$p->XP.'/'.$threshold.'</span></li>';
@@ -350,7 +350,7 @@
             $out .= '<p class="text-center"><span class="label label-primary">'.$p->title.'</span></p>';
             $out .= '<ul class="list-unstyled list-inline text-left">';
             $donatorId = $groupPlayers->sort('-GC')->first()->id;
-            $groupPlayers->sort('-karma');
+            $groupPlayers->sort('-reputation');
             foreach($groupPlayers as $gp) {
               $nbFreeEl = $gp->places->count();
               if ($gp->team->rank && $gp->team->rank->is("index>=8")) {
@@ -362,7 +362,7 @@
             $out .= '<span>';
             $out .= $gp->title;
             if ($gp->coma == 0) {
-              $out .= ' <span class="badge">'.$gp->karma.'K.</span>';
+              $out .= ' <span class="badge">'.$gp->reputation.'K.</span>';
               $out .= ' <span class="badge"><span class="glyphicon glyphicon-wrench"></span>'.$gp->equipment->count().'</span>';
               $out .= ' <span class="badge"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
               $out .= ' <span class="badge">'.$gp->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';

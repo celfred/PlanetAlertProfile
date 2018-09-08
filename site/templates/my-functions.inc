@@ -30,7 +30,7 @@ function initPlayer($player) {
   // Get previous score from last archived page
   $prevScores = $player->get("template=archive, name!=history, sort=-date");
   if ($prevScores->id) {
-    $player->karma = $prevScores->karma;
+    $player->reputation = $prevScores->reputation;
     $player->yearlyKarma = $prevScores->yearlyKarma;
     $player->HP = 50;
     $player->GC = $prevScores->GC;
@@ -46,7 +46,7 @@ function initPlayer($player) {
     $player->coma = 0;
     $player->streak = 0;
   } else {
-    $player->karma = 0;
+    $player->reputation = 0;
     $player->yearlyKarma = 0;
     $player->HP = 50;
     $player->GC = 0;
@@ -79,7 +79,7 @@ function resetPlayer($player, $previousLevel) {
     if ($previousLevel == 1) { // 2nd death at level 1, set Coma state !
       $player->coma = 1;
       $player->XP = 0;
-      $player->karma = 0;
+      $player->reputation = 0;
       $player->yearlyKarma = 0;
     } else {
       $player->XP = round($player->XP/2); // Cut previous XP
@@ -168,7 +168,7 @@ function updateScore($player, $task, $real = true) {
 
     if ($player->coma == 0) {
       setLevel($player); // Check if new level
-      $player->karma = setReputation($player); // Set karma (and store for cache)
+      $player->reputation = setReputation($player); // Set reputation (and store for cache)
       if (!isset($tmpEvent)) { // Make a temporary event page to calculate new yearly Karma
         $tmpEvent = new Page();
         $tmpEvent->template = 'event';
@@ -397,7 +397,6 @@ function removeTaskRecalculate($player, $task) {
   // Limit to 'easy' tasks (extra-training for the moment)
   if ($task->is("name=extra-homework|intensive-extra-homework")) {
     setDelta($player, $task);
-
     $player->XP = (int) $player->XP-($task->XP+$player->deltaXP);
     $player->GC = (int) $player->GC-$task->GC;
     $player->streak--;
@@ -688,9 +687,9 @@ function displayTrendScores($player, $old) {
   $trendLevel = $player->level-$old->level;
   if ($trendLevel > 0) { $out .= '<li>+'.$trendLevel.'lvl→'.$player->level.'</li>'; }
   if ($trendLevel < 0) { $out .= '<li>'.$trendLevel.'lvl→'.$player->level.'</li>'; }
-  $trendKarma = $player->karma-$old->karma;
-  if ($trendKarma > 0) { $out .= '<li>+'.$trendKarma.'R.→'.$player->karma.'</li>'; }
-  if ($trendKarma < 0) { $out .= '<li>'.$trendKarma.'R.→'.$player->karma.'</li>'; }
+  $trendKarma = $player->reputation-$old->karma;
+  if ($trendKarma > 0) { $out .= '<li>+'.$trendKarma.'R.→'.$player->reputation.'</li>'; }
+  if ($trendKarma < 0) { $out .= '<li>'.$trendKarma.'R.→'.$player->reputation.'</li>'; }
   $trendHP = $player->HP-$old->HP;
   if ($trendHP > 0) { $out .= '<li>+'.$trendHP.'HP→'.$player->HP.'</li>'; }
   if ($trendHP < 0) { $out .= '<li>'.$trendHP.'HP→'.$player->HP.'</li>'; }
@@ -725,7 +724,7 @@ function displayPlayerScores($player, $label, $class) {
   $out .= '<li>'.$player->yearlyKarma.'K.</li>';
   $out .= '<li>'.$player->GC.'GC</li>';
   $out .= '<li>'.$player->level.'lvl</li>';
-  $out .= '<li>'.$player->karma.'R.</li>';
+  $out .= '<li>'.$player->reputation.'R.</li>';
   $out .= '<li>'.$player->HP.'HP</li>';
   $out .= '<li>'.$player->XP.'XP</li>';
   $out .= '<li>'.$player->places->count.'Pl.</li>';
@@ -787,6 +786,7 @@ function setYearlyKarma($player) {
   $karma = 0;
   foreach ($history->children() as $e) {
     $karma += eventKarma($e);
+    if ($karma < 0) { $karma = 0; }
   }
   if ($karma < 0 || $player->coma == 1) { $karma = 0; }
   return $karma;
@@ -797,20 +797,21 @@ function eventKarma($e) {
   if ($e->task->is("name=free")) { // Free action
     $karma += 8;
     $karma += $e->refPage->level;
-  }
-  if ($e->task->is("name=buy")) { // Buy action
+  } else if ($e->task->is("name=buy")) { // Buy action
     $karma += 4;
     $karma += $e->refPage->level;
-  }
-  if ($e->task->is("name!=buy|free") && $e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
+  } else if ($e->task->is("name=donation|donated|bought|buy-pdf")) { // 'Manual' positive actions
+    $karma += 1;
+  } else if ($e->task->is("name=remove")) { // 'Manual' negative actions
+    $karma -= 3;
+  } else if ($e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
     $karma += 2;
     if ($e->task->HP>=5 || $e->task->GC>=5 || $e->task->XP>=5) {
       $karma += 2;
     } else {
       $karma += 0;
     }
-  }
-  if ($e->task->is("name!=buy|free") && $e->task->HP<0 || $e->task->GC<0 || $e->task->XP<0) { // Negative action
+  } else if ($e->task->HP<0 || $e->task->GC<0 || $e->task->XP<0) { // Negative action
     $karma -= 2;
     if ($e->task->HP<=-5 || $e->task->GC<=-5 || $e->task->XP<=-5) {
       $karma -= 2;
@@ -1458,32 +1459,32 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
     $team = '';
   }
   switch ($field) {
-    case 'karma' :
-      $allPlayers = $pages->find("template=player, name!=test $team, sort=-karma, karma>0");
+    case 'reputation' :
+      $allPlayers = $pages->find("template=player, name!=test $team, sort=-reputation, reputation>0");
       break;
     case 'places' :
-      $allPlayers = $pages->find("template=player, name!=test $team, sort=-places.count, sort=-karma, places.count>0");
+      $allPlayers = $pages->find("template=player, name!=test $team, sort=-places.count, sort=-reputation, places.count>0");
       break;
     case 'people' :
-      $allPlayers = $pages->find("template=player, name!=test $team, sort=-people.count, sort=-karma, people.count>0");
+      $allPlayers = $pages->find("template=player, name!=test $team, sort=-people.count, sort=-reputation, people.count>0");
       break;
     case 'fighting_power' :
-      $allPlayers = $pages->find('template=player, name!=test $team, sort=-fighting_power, sort=-karma, fighting_power>0');
+      $allPlayers = $pages->find('template=player, name!=test $team, sort=-fighting_power, sort=-reputation, fighting_power>0');
       break;
     case 'equipment' :
-      $allPlayers = $pages->find('template=player, name!=test $team, sort=-equipment.count, sort=-karma, equipment.count>0');
+      $allPlayers = $pages->find('template=player, name!=test $team, sort=-equipment.count, sort=-reputation, equipment.count>0');
       break;
     case 'donation' :
-      $allPlayers = $pages->find('template=player, name!=test $team, sort=-donation, sort=-karma, donation>0');
+      $allPlayers = $pages->find('template=player, name!=test $team, sort=-donation, sort=-reputation, donation>0');
       break;
     case 'underground_training' :
-      $allPlayers = $pages->find('template=player, name!=test $team, sort=-underground_training, sort=-karma, underground_training>0');
+      $allPlayers = $pages->find('template=player, name!=test $team, sort=-underground_training, sort=-reputation, underground_training>0');
       break;
     case 'group' :
       $allPlayers = $pages->find('template=player, name!=test $team');
       $allGroups = $pages->get('/groups')->children();
       $index = 0;
-      foreach( $allGroups as $group) {
+      foreach($allGroups as $group) {
         // Find selected players
         $players = $allPlayers->find("group=$group");
         // Get rid of unused groups
@@ -1492,14 +1493,14 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
         }
         $index++;
       }
-      foreach( $allGroups as $group) {
+      foreach($allGroups as $group) {
         $players = $allPlayers->find("group=$group");
         // Check for group bonus
         $group->nbBonus = groupBonus($players);
         $group->yearlyKarma = $group->nbBonus*30;
 
         // Add individual karmas
-        foreach( $players as $p) {
+        foreach($players as $p) {
           // Karma is divided by number of players in the group to be fair with smaller groups
           $groupYearlyKarma = round($p->yearlyKarma/$players->count);
           (int) $group->yearlyKarma = $group->yearlyKarma + $groupYearlyKarma;
@@ -1684,7 +1685,7 @@ function prepareListWords($allLines, $type) {
       }
       break;
     case 'quiz' :
-      if (count($allLines)>15) {
+      if (count($allLines)>14) {
         $listWords = '<strong>'.__("15 first questions").' :</strong><br />';
         for($i=0; $i<15; $i++) {
           list($left, $right) = preg_split('/::/', $allLines[$i]);
@@ -2064,7 +2065,7 @@ function pma($player) {
   $out .= '<span class="pull-right">';
   $out .= '<span class="label label-success">Karma : '.$player->yearlyKarma.'</span>';
   $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-success">Reputation : '.$player->karma.'</span>';
+  $out .= '<span class="label label-success">Reputation : '.$player->reputation.'</span>';
   $out .= '&nbsp;&nbsp;';
   if ($player->coma == 0) {
     $out .= '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
@@ -2309,6 +2310,7 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
 }
 
 function checkModTask($task, $headTeacher = false, $player = false) {
+  $modTask = clone $task;
   $user = wire('user');
   if (!$headTeacher) {
     if ($player) {
@@ -2322,14 +2324,14 @@ function checkModTask($task, $headTeacher = false, $player = false) {
   $mod = $task->owner->get("singleTeacher=$headTeacher, include=hidden"); // Get personalized infos if needed
   if ($mod) {
     $task->mod = true;
-    $mod->title != '' ? $task->title = $mod->title : '';
-    $mod->teacherTitle != '' ? $task->teacherTitle = $mod->teacherTitle : '';
-    $mod->summary != '' ? $task->summary = $mod->summary : '';
-    $mod->HP != '' ? $task->HP = $mod->HP : '';
-    $mod->XP != '' ? $task->XP = $mod->XP : '';
-    $mod->GC != '' ? $task->GC = $mod->GC : '';
+    $mod->title != '' ? $modTask->title = $mod->title : $modTask->title = $task->title;
+    $mod->teacherTitle != '' ? $modTask->teacherTitle = $mod->teacherTitle : $modTask->teacherTitle = $task->teacherTitle;
+    $mod->summary != '' ? $modTask->summary = $mod->summary : $modTask->summary = $task->summary;
+    $mod->HP != '' ? $modTask->HP = $mod->HP : $modTask->HP = $task->HP;
+    $mod->XP != '' ? $modTask->XP = $mod->XP : $modTask->XP = $task->XP;
+    $mod->GC != '' ? $modTask->GC = $mod->GC : $modTask->GC = $task->GC;
   }
-  return $task;
+  return $modTask;
 }
 
 function getHeadTeacher($player) {
@@ -2382,7 +2384,7 @@ function miniProfile($player, $type = '') {
   if ($player->coma == 0) {
     // Display scores
     $out .= '<li><span class="label label-success">'.__("Karma").' : '.$player->yearlyKarma.'</span></li>';
-    $out .= '<li><span class="label label-success">'.__("Reputation").' : '.$player->karma.'</span></li>';
+    $out .= '<li><span class="label label-success">'.__("Reputation").' : '.$player->reputation.'</span></li>';
     $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span> '.$player->level.'</span>';
     $threshold = getLevelThreshold($player->level);
     $out .= ' <span class="label label-default" data-toggle="tooltip" title="XP"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$player->XP.'/'.$threshold.'</span></li>';

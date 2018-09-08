@@ -261,7 +261,7 @@
           $player->HP = $tempPlayer->HP;
           $player->GC = $tempPlayer->GC;
           $player->level = $tempPlayer->level;
-          $player->karma = $tempPlayer->karma;
+          $player->reputation = $tempPlayer->reputation;
           $player->yearlyKarma = $tempPlayer->yearlyKarma;
         }
         setCaptains($player->team);

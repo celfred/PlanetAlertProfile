@@ -36,7 +36,7 @@
 
   <?php
     foreach($allPlayers as $player) {
-      $teamKarma += $player->karma;
+      $teamKarma += $player->reputation;
       echo '<tr>';
       echo '<th>';
       if (!$input->get['pages2pdf']) {
@@ -47,7 +47,7 @@
       echo '</th>';
 
       echo '<td>';
-      echo $player->karma;
+      echo $player->reputation;
       echo '</td>';
       echo '<td class="text-center">';
       echo $player->level;

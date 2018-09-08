@@ -10,7 +10,7 @@ $out = '';
   <?php
     if ($user->hasRole('teacher') || $user->isSuperuser()) {
       if ($user->isSuperuser()) {
-        $allTasks = $pages->get("/tasks/")->find("template=task, name!=manual|free|buy, sort='title'");
+        $allTasks = $pages->get("/tasks/")->find("template=task, sort='title'");
         $headTeacher = false;
       } else {
         $allTasks = $pages->get("/tasks/")->find("template=task, name!=manual|free|buy, (owner.singleTeacher=$user), (adminOnly=1), sort=title");
