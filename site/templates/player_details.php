@@ -87,71 +87,75 @@
       </h1>
     </div>
     <div class="panel-body">
-      <div class="text-center col-sm-6">
-        <img src="<?php if ($playerPage->avatar) echo $playerPage->avatar->url; ?>" alt="No avatar" />
-      </div>
-      <div class="col-sm-6">
-        <ul class="player-details">
-        <li><?php echo __("Karma"); ?> : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
-        <li><?php echo __("Reputation"); ?> : <span class="label label-default"><?php echo $playerPage->reputation; ?></span></li>
-        <li><?php echo __("Level"); ?> : <?php echo $playerPage->level; ?></li>
-        <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC.' '.__("GC"); ?></span></li>
-        <?php 
-          if ($playerPage->rank && $playerPage->rank->index >= 6 || $playerPage->team->rank->index >= 6) {
-            echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '. __("Hk count") .' : '.$hkCount.'</li>';
-          }
-          if ($lastActivityCount >= 0 && $lastActivityCount < 30) { // Active players
-            echo '<li><span class="glyphicon glyphicon-thumbs-up"></span> '.__("Active player !").'</li>';
-          } else { // 30 days of inactivity > lose all GC
-            if ($lastActivityCount >= 20 && $lastActivityCount <= 30) { // Warning 10 days before losing GC
-              $delay = 31-$lastActivityCount;
-              echo '<li>';
-              echo '<span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' '.__("days of inactivity.");
-              echo printf(_n("%d day before losing all GC !", "%d days before losing all GC !", $delay), $delay);
-              echo '</li>';
-            } else {
-              if ($lastActivityCount != -1) {
-                echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.sprintf(__("%d days of inactivity."), $lastActivityCount);
-              } else {
-                echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.__("Long inactivity period");
-              }
-              echo ' → '.__("All GC have been lost !").'</li>';
+      <div class="row">
+        <div class="text-center col-sm-6">
+          <img src="<?php if ($playerPage->avatar) echo $playerPage->avatar->url; ?>" alt="No avatar" height="200" />
+        </div>
+        <div class="col-sm-6">
+          <ul class="player-details">
+          <li><?php echo __("Karma"); ?> : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
+          <li><?php echo __("Reputation"); ?> : <span class="label label-default"><?php echo $playerPage->reputation; ?></span></li>
+          <li><?php echo __("Level"); ?> : <?php echo $playerPage->level; ?></li>
+          <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC.' '.__("GC"); ?></span></li>
+          <?php 
+            if ($playerPage->rank && $playerPage->rank->index >= 6 || $playerPage->team->rank->index >= 6) {
+              echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '. __("Hk count") .' : '.$hkCount.'</li>';
             }
-          }
-        ?>
-        </ul>
-      </div>
-      <?php if ($playerPage->coma == 0) { ?>
-        <div class="col-sm-2 text-right">
-          <span class="badge"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="HP" /> <?php echo $playerPage->HP; ?>/50</span>
-        </div>
-        <div class="col-sm-10">
-          <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="<?php echo __("Health points"); ?>">
-            <div class="progress-bar progress-bar-danger" role="progressbar" style="width:<?php echo 2*$playerPage->HP; ?>%">
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-2 text-right">
-          <?php
-          if ($playerPage->level <= 4) {
-            $delta = 40+($playerPage->level*10);
-          } else {
-            $delta = 90;
-          }
-          $threshold = ($playerPage->level*10)+$delta;
+            if ($lastActivityCount >= 0 && $lastActivityCount < 30) { // Active players
+              echo '<li><span class="glyphicon glyphicon-thumbs-up"></span> '.__("Active player !").'</li>';
+            } else { // 30 days of inactivity > lose all GC
+              if ($lastActivityCount >= 20 && $lastActivityCount <= 30) { // Warning 10 days before losing GC
+                $delay = 31-$lastActivityCount;
+                echo '<li>';
+                echo '<span class="glyphicon glyphicon-exclamation-sign"></span> '.$lastActivityCount.' '.__("days of inactivity.");
+                echo printf(_n("%d day before losing all GC !", "%d days before losing all GC !", $delay), $delay);
+                echo '</li>';
+              } else {
+                if ($lastActivityCount != -1) {
+                  echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.sprintf(__("%d days of inactivity."), $lastActivityCount);
+                } else {
+                  echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '.__("Long inactivity period");
+                }
+                echo ' → '.__("All GC have been lost !").'</li>';
+              }
+            }
           ?>
-          <span class="badge"><img src="<?php echo $config->urls->templates; ?>/img/star.png" alt="XP" /> <?php echo $playerPage->XP; ?>/<?php echo $threshold; ?></span>
+          </ul>
         </div>
-        <div class="col-sm-10">
-          <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="<?php echo sprintf(__("Experience (Level %d)"), $playerPage->level); ?>">
-            <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo round((100*$playerPage->XP)/$threshold); ?>%">
+      </div>
+      <div class="row">
+        <?php if ($playerPage->coma == 0) { ?>
+          <div class="col-sm-2 text-right">
+            <span class="badge"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="HP" /> <?php echo $playerPage->HP; ?>/50</span>
+          </div>
+          <div class="col-sm-10">
+            <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="<?php echo __("Health points"); ?>">
+              <div class="progress-bar progress-bar-danger" role="progressbar" style="width:<?php echo 2*$playerPage->HP; ?>%">
+              </div>
             </div>
           </div>
-        </div>
-      <?php } else { ?> // Coma state 
-        <h4 class="text-center"><span class="label label-danger"><?php echo __("You're in a COMA !"); ?></span></h4>
-        <h4 class="text-center"><span><?php echo __("Buy a healing potion to go back to normal state !"); ?></span></h4>
-      <?php } ?>
+          <div class="col-sm-2 text-right">
+            <?php
+            if ($playerPage->level <= 4) {
+              $delta = 40+($playerPage->level*10);
+            } else {
+              $delta = 90;
+            }
+            $threshold = ($playerPage->level*10)+$delta;
+            ?>
+            <span class="badge"><img src="<?php echo $config->urls->templates; ?>/img/star.png" alt="XP" /> <?php echo $playerPage->XP; ?>/<?php echo $threshold; ?></span>
+          </div>
+          <div class="col-sm-10">
+            <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="<?php echo sprintf(__("Experience (Level %d)"), $playerPage->level); ?>">
+              <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo round((100*$playerPage->XP)/$threshold); ?>%">
+              </div>
+            </div>
+          </div>
+        <?php } else { ?> // Coma state 
+          <h4 class="text-center"><span class="label label-danger"><?php echo __("You're in a COMA !"); ?></span></h4>
+          <h4 class="text-center"><span><?php echo __("Buy a healing potion to go back to normal state !"); ?></span></h4>
+        <?php } ?>
+      </div>
     </div>
   </div>
 

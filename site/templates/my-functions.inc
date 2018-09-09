@@ -621,7 +621,6 @@ function checkActivity(HookEvent $e) {
     } else {
       $lastActivityCount = -1;
     }
-    bd($player->name.':'.$lastActivityCount);
     if ($lastActivityCount > 30 && $lastActivityCount <= 1365) { // # of days of inactivity
       if (!isset($lastEvent) || $lastEvent->name != 'inactivity') {
         $task = $refPage;
