@@ -972,6 +972,7 @@
           if ($user->isSuperuser() || $user->hasRole('teacher')) {
             if ($user->hasRole('teacher')) {
               $allPlayers = $pages->find("parent.name=players, template=player, team.teacher=$user")->sort("title");
+              // TODO : use urlSegment3 to add/remove no-team players for flieutaud ?
             } else {
               $allPlayers = $pages->find("parent.name=players, template=player")->sort("title");
               $allTeachers = $pages->find("parent.name=teachers, template=teacherProfile")->sort("title");
@@ -1008,20 +1009,25 @@
             }
             $out .= '<p>There are currently '.$allPlayers->count().' players.</p>';
             $out .= '<table id="usersTable" class="table table-condensed table-hover">';
+            $out .= '<thead>';
             $out .= '<th>Player</th>';
             $out .= '<th>Team</th>';
             $out .= '<th>User name / Login</th>';
             $out .= '<th>Head teacher</th>';
+            $out .= '<th>Inactivity</th>';
             $out .= '<th>History</th>';
             if ($user->isSuperuser()) {
               $out .= '<th>Archive</th>';
               $out .= '<th>Delete</th>';
             }
+            $out .= '</thead>';
+            $out .= '<tbody>';
             foreach ($allPlayers as $p) {
               $u = $users->get("name=$p->login");
               $out .= '<tr>';
               $out .= '<td>'.$p->title.' '.$p->lastName;
-              if ($user->isSuperuser()) {
+              $out .= ' <a class="btn btn-xs btn-danger" href="'.$p->url.'">Profile page</a> ';
+              if ($user->isSuperuser() || $user->hasRole('teacher')) {
                 $out .= $p->feel();
               }
               $out .= '</td>';
@@ -1037,6 +1043,17 @@
               } else {
                 $out .= '<td>-</td>';
               }
+              if ($p->team->name == 'no-team') {
+                $lastEvent = lastEvent($p);
+                if ($lastEvent) {
+                  $lastActivityCount = daysFromToday($lastEvent);
+                } else {
+                  $lastActivityCount = -1;
+                }
+              } else {
+                $lastActivityCount = -1;
+              }
+              $out .= '<td>'.$lastActivityCount.'</td>';
               /* $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</a></td>'; */
               $out .= '<td><a target="blank" class="btn btn-xs btn-danger" href="'.$adminActions->url.'recalculate/'.$p->id.'">Check history</a></td>';
               if ($user->isSuperuser()) {
@@ -1050,6 +1067,7 @@
               }
               $out .= '</tr>';
             }
+            $out .= '</tbody>';
             $out .= '</table>';
             $out .= '</section>';
           } else {

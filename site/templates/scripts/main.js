@@ -1073,14 +1073,17 @@ $(document).ready(function() {
 }); 
 
 var FEEL = {
-    onBeforeReload: function (o) {
-        if($('#usersTable').length) {
-        	return false;
-        }
-    }
+	onBeforeReload: function (o) {
+			if($('#usersTable').length) {
+				return false;
+			}
+	}
 };
 // Tables init
 var initTables = function() {
+  var usersTable = $('#usersTable').DataTable({
+    lengthMenu: [ [30, 50, -1], [30, 50, "All"] ]
+  });
   $('#mapTable').DataTable({
     dom: 'ft',
     paging: false,
