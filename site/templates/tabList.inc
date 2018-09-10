@@ -6,7 +6,9 @@
   $currentPeriod = $team->periods;
 
   $out .= '<ul class="tabList list-inline">';
-
+  $team->freeActs == '' ? $team->freeActs = 0 : '';
+  $team->freeWorld == '' ? $team->freeWorld = 0 : '';
+  $out .= '<li><span class="label label-primary">'.$team->title.' : '.$team->freeActs.' ('.$team->freeWorld.'%)</span></li>';
   $class = $page->is("template=main-office") ? "active" : "";
   $out .= '<li class="'.$class.'"><a href="'.$office->url.$team->name.'">'.$office->title.'</a></li>';
   $class = $page->is("name=players") ? "active" : "";
@@ -27,7 +29,6 @@
       $out .= '<li><a target="_blank" href="'.$homepage->url.'report_generator/participation/'.$team->id.'/'.$currentPeriod->id.'?sort=title">'.__("Current period participation").'</a></li>';
     }
   }
-
   $out .= '</ul>';
 
   echo $out;
