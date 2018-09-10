@@ -170,7 +170,7 @@
       $hkCount = '';
     }
     // Set HP progressbar
-    $HPwidth = 150*$player->HP/50;
+    $HPwidth = round(150*$player->HP/50);
     // Set XP progressbar
     if ($player->level <= 4) {
       $delta = 40+($player->level*10);
@@ -178,7 +178,7 @@
       $delta = 90;
     }
     $threshold = ($player->level*10)+$delta;
-    $XPwidth = 150*$player->XP/($threshold);
+    $XPwidth = round(150*$player->XP/($threshold));
     // Places list
     $tooltipPlaces = '';
     if ($player->places->count() > 0) {
