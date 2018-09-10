@@ -465,7 +465,7 @@ img.superpose {
 span.glyphicon {
   cursor: pointer;
 }
-#clue, .tooltip-inner, .tipList, .tipList-light {
+#clue, .tooltip-inner {
   border: 2px solid #FFF;
   border-radius: 10px;
   background: #313131;
@@ -486,10 +486,6 @@ span.glyphicon {
 .tooltip ul li {
   list-style-type: square;
   text-align: left;
-}
-.tooltip img {
-  position: relative;
-  border: 5px solid #000;
 }
 .trend {
   position: relative;
@@ -513,10 +509,7 @@ span.glyphicon {
 }
 .tipList-light {
   color: #000;
-  background: #FFCCE5;
-}
-.tipList {
-  padding: 5px;
+  background: #FFFFFF;
 }
 .selected {
   border-bottom: 1px solid #000;
