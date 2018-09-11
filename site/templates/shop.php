@@ -113,7 +113,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
             $out .= '</p>';
             break;
           case 'helmet' : 
-            $out .= '<p class="lead">You must buy the <a href="'.$page->url.'details/memory-helmet">Memory Helmet</a> first before buying this item.</p>';
+            $out .= '<p class="lead">'.__-"You must buy the Memory helmet first before buying this item.").'</p>';
             break;
           case 'already' : 
             $out .= "<p class='lead'>".__("You already have this item.")."</p>";

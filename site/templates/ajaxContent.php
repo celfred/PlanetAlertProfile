@@ -498,9 +498,6 @@
       case 'buy' :
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
-        // TODO : use $currentPlayer ?
-        // bd()
-        /* $player = $pages->get("template=player, login=$user->name"); */
         if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('big')->url.'" alt="Photo" />'; }
         if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="Photo" />'; }
         $out .= '<h3><span class="label label-primary">'.$p->title.'</span>';

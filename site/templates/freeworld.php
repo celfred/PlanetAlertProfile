@@ -89,7 +89,7 @@
         } else {
           $ownerList = '';
         }
-        $title .= '<h4>'.__("Freed by ").'<span class=\'label label-success\'>'.$el->teamOwners->count().'</span> players '.$ownerList.'</h4>';
+        $title .= '<h4>'.__("Freed by").' <span class=\'label label-success\'>'.$el->teamOwners->count().'</span> players '.$ownerList.'</h4>';
         if ($el->completed != 1) {
           $left = $teamRate - $el->teamOwners->count();
           $title .= '<br /><h4><span class=\'label label-primary\'>'.$left.' '.__('more needed !').'</span></h4>';

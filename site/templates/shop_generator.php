@@ -122,9 +122,9 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
       }
     } else {
       if ($todayItemsCount >= 3) {
-        $out .= "<p class='text-center alert alert-warning'>You have reached the 3 items limit for today ! Come back tomorrow !</p>";
+        $out .= "<p class='text-center alert alert-warning'>".__("You have reached the 3 items limit for today ! Come back tomorrow !")."</p>";
       } else {
-        $out .= "<p class='badge badge-danger'>Your player is in a COMA state. Get the Healing potion as soon as possible !</p>";
+        $out .= "<p class='badge badge-danger'>".__("Your player is in a COMA state. Get the Healing potion as soon as possible !")."</p>";
         $healingPotion = $pages->get("name=health-potion");
         if ($player->GC >= $healingPotion->GC) {
           $out .= '<ul class="list-unstyled list-inline">';
@@ -138,7 +138,7 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
 
     $out .= '</div>';
   } else {
-    $out .= '<p class="alert alert-warning">You need to log in to access this page. Contact the administrator if you think this is an error.</p> ';
+    $out .= '<p class="alert alert-warning">'.__("You need to log in to access this page. Contact the administrator if you think this is an error.").'</p> ';
   }
 } else { // Teacher / Admin's marketPlace
   $out .= '<div class="row well">';

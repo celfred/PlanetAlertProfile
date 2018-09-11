@@ -25,7 +25,7 @@ $form = array(
 if($input->post->submit) {
   // determine if any fields were ommitted or didn't validate
   foreach($form as $key => $value) {
-    if ($value != 'email') {
+    if ($key != 'email') {
       if(empty($value)) $error = "<p class='error'>".__("An error occurred.<br />Please check that all fields have been completed.")."</p>";
     }
   }
@@ -39,7 +39,7 @@ if($input->post->submit) {
       mail($emailTo, "Contact Form", $msg, "From: $form[email]");
 
       // populate body with success message, or pull it from another PW field
-      $page->body = '<h2 class="text-center">'.__("Thank you! Your message has been sent.").'</h2>'; 
+      $feedback = '<h2 class="text-center">'.__("Thank you! Your message has been sent.").'</h2>'; 
       $sent = true;
   }
 }
@@ -55,10 +55,8 @@ include ('./head.inc');
 
 echo $error;
 
-echo $page->body;
-
 if (!$sent) {
-  $out = '';
+  $out = '<h4>'.__("Do you want to ask a question? To tell about a bug? Feel free to contact the Admin !").'</h4>';
   $out .= '<form role="form" class="form-horizontal" action="./" method="post">';
   $out .= '<div class="form-group">';
   $out .= '<label for="fullname" class="col-sm-2 control-label">'.__("First AND last name").' *</label>';
@@ -90,8 +88,10 @@ if (!$sent) {
   $out .= '<input type="submit" name="submit" class="btn btn-block btn-primary" value="'.__("Send message").'" />';
   $out .= '</div>';
   $out .= '</form>';
-  echo $out;
+} else {
+  $out .= $feedback;
 }
+echo $out;
 
 include ('./foot.inc');
 ?>

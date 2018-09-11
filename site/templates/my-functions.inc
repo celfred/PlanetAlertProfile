@@ -2112,9 +2112,9 @@ function pma($player) {
     }
   } else {
     if ($player->team->forceHelmet == 1) {
-      $out .= 'Special access to the Underground Training Zone !';
+      $out .= __('Special access to the Underground Training Zone !');
     } else {
-      $out .= 'You have no possible training today.';
+      $out .= __('You have no possible training today.');
     }
   }
   $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -2142,9 +2142,9 @@ function pma($player) {
       }
     } else {
       if ($player->team->forceHelmet == 1) {
-        $out .= 'Special access to the Fighting Zone !';
+        $out .= __('Special access to the Fighting Zone !');
       } else {
-        $out .= 'You have no possible fights today.';
+        $out .= __('You have no possible fights today.');
       }
     }
   }
@@ -2413,7 +2413,7 @@ function miniProfile($player, $type = '') {
           }
           $out .= '</ul>';
         } else {
-          $out .= '<p>'.("You don't have any equipment for the moment.").'</p>';
+          $out .= '<p>'.__("You don't have any equipment for the moment.").'</p>';
         }
         break;
       case 'places' :
