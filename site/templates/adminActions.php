@@ -1742,25 +1742,28 @@
       case 'select-element':
         $teacher = $users->get("$selectedTeam"); // urlSegment2 used for teacherId
         $element = $pages->get($confirm); // urlSegment3 used for elementId
-        if ($element->id) { // Add/Remove page in correct repeater field or simple teacher field
-          switch($element->template) {
+        if ($element->id) {
+          switch($element->template) { // Add/Remove page in correct repeater field or simple teacher field
             case 'task' : 
               $already = $element->owner->get("singleTeacher=$user");
-              if ($already->id) {
+              bd($already);
+              if (isset($already)) {
                 $element->owner->remove($already);
               } else {
                 $new = $element->owner->getNew();
                 $new->singleTeacher = $user;
+                $new->save();
                 $element->owner->add($new);
               }
               break;
             case 'period' : 
               $already = $element->periodOwner->get("singleTeacher=$user");
-              if ($already->id) {
+              if (isset($already)) {
                 $element->periodOwner->remove($already);
               } else {
                 $new = $element->periodOwner->getNew();
                 $new->singleTeacher = $user;
+                $new->save();
                 $element->periodOwner->add($new);
               }
               break;
@@ -1771,9 +1774,10 @@
                 $element->teacher->add($user);
               }
           }
+          $element->of(false);
+          $element->save();
+          bd('After:'.count($element->owner));
         }
-        $element->of(false);
-        $element->save();
         break;
       case 'publish-element':
         $teacher = $users->get("$selectedTeam"); // urlSegment2 used for teacherId
