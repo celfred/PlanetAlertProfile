@@ -498,7 +498,9 @@
       case 'buy' :
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
-        $player = $pages->get("template=player, login=$user->name");
+        // TODO : use $currentPlayer ?
+        // bd()
+        /* $player = $pages->get("template=player, login=$user->name"); */
         if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('big')->url.'" alt="Photo" />'; }
         if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="Photo" />'; }
         $out .= '<h3><span class="label label-primary">'.$p->title.'</span>';
@@ -516,7 +518,7 @@
             if ($p->is("template=place|people")) {
               // Find element's # of owners
               $out .= '<div class="alert alert-info">';
-              $p = setOwners($p, $player);
+              $p = setOwners($p, $currentPlayer);
               $out .= '<span class="">'.__("Free rate").' : ['.$p->owners->count().'/'.$p->teamRate.']</span> ';
               $out .= progressbar($p->owners->count(), $p->teamRate);
               if ($p->completed == 1) { $out .= '<span class="badge">'.__("Congratulations !").'</span>'; }
@@ -533,9 +535,9 @@
         $out .= '<div class="row">';
           $out .= '<span class="alert alert-info">'.__("This item costs");
           $out .= ' '.$p->GC.__('GC');
-          $out .= ' ('.sprintf(__("You have %d GC"), $player->GC).')</span>';
+          $out .= ' ('.sprintf(__("You have %d GC"), $currentPlayer->GC).')</span>';
         $out .= '</div>';
-        if (!isset($player->group->id) && $p->is("template=item") && $p->category->name == 'group-items') {
+        if (!isset($currentPlayer->group->id) && $p->is("template=item") && $p->category->name == 'group-items') {
           $out .= '<br /><br />';
           $out .= '<span class="alert alert-warning">'.__("No groups are set. This item will be individual !").'</span>';
         }

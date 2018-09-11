@@ -130,7 +130,7 @@ $(document).ready(function() {
 		$this = $(this);
 		var $url = $this.attr('data-href');
 		swal({
-			title: 'Loading info...',
+			title: lang.loading,
 			onOpen: function() {
 				swal.showLoading();
 				$.get($url, function(data) { 
@@ -448,7 +448,7 @@ $(document).ready(function() {
     return true;
     // Go to report_generator
     /*
-    $("#reportDiv").html("<p>Loading...</p>"); 
+    $("#reportDiv").html("<p>"+lang.loading+"</p>"); 
     $.get(reportUrl, function(data) { 
         $("#reportDiv").html(data); 
     }); 
@@ -716,7 +716,7 @@ $(document).ready(function() {
 							var $myContent = lang.errorLimit;
 						}
 						swal({
-							title: lang.bug,
+							title: lang.buy,
 							html: $myContent,
 							showConfirmButton: true,
 							confirmButtonText : lang.yes,
