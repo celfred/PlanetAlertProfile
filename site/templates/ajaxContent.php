@@ -705,8 +705,11 @@
           $out .= '</td>';
           $event->summary == '' ? $event->summary = '-' : '';
           $out .= '<td>'.$event->summary.'</td>';
-          if ($user->isSuperuser() || $user->hasRole('teacher')) {
+          if ($user->isSuperuser()) {
             $out .= '<td>'.$event->feel().'</td>';
+          }
+          if ($user->hasRole('teacher')) {
+            $out .= '<td><a href="'.$config->urls->admin.'page/edit/?id='.$event->id.'" target="blank">'.__("[Edit]").'</a></td>';
           }
           $out .= '</tr>';
         }
