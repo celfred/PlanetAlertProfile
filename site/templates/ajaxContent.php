@@ -129,6 +129,7 @@
               $mini = '';
             }
             $out .= '<li>';
+            $out .=strftime("%d %b (%A)", $n->date).' : ';
             $out .= $mini;
             $out .= '<span>';
             switch ($n->task->name) {
