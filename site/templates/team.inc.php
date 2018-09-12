@@ -236,12 +236,12 @@
       $out .= '<td><span class="trend">'.$trend.'</span></td>';
     }
     if ($player->skills->has("name=captain")) {
-      $showSkills = '<span class="label label-primary" data-toggle="tooltip" title="Captain">C</span>';
+      $showSkills = '<span class="label label-primary" data-toggle="tooltip" title="'.__("Captain").'">C</span>';
     } else {
       $showSkills = '';
     }
     if ($player->skills->has("name=ambassador")) {
-      $showSkills .= '<span class="label label-success" data-toggle="tooltip" title="Ambassador">A</span>';
+      $showSkills .= '<span class="label label-success" data-toggle="tooltip" title="'.__("Ambassador").'">A</span>';
     } else {
       $showSkills .= '<span class="label label-info">'.$player->streak.'</span>';
     }
