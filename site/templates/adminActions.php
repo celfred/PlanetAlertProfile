@@ -971,8 +971,11 @@
         case 'users' :
           if ($user->isSuperuser() || $user->hasRole('teacher')) {
             if ($user->hasRole('teacher')) {
-              $allPlayers = $pages->find("parent.name=players, template=player, team.teacher=$user")->sort("title");
-              // TODO : use urlSegment3 to add/remove no-team players for flieutaud ?
+              if ($input->urlSegment2 == 'no-team' && $user->name == 'flieutaud') {
+                $allPlayers = $pages->find("parent.name=players, template=player, team.teacher=$user")->sort("title");
+              } else {
+                $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team, team.teacher=$user")->sort("title");
+              }
             } else {
               $allPlayers = $pages->find("parent.name=players, template=player")->sort("title");
               $allTeachers = $pages->find("parent.name=teachers, template=teacherProfile")->sort("title");
@@ -1007,15 +1010,24 @@
               $out .= '</table>';
               $out .= '<hr />';
             }
-            $out .= '<p>There are currently '.$allPlayers->count().' players.</p>';
+            $out .= '<p>';
+            $out .= sprintf(__('There are currently %d players.'), $allPlayers->count());
+            if ($user->name == 'flieutaud') {
+              if ($input->urlSegment2 == 'no-team') {
+                $out .= ' <a class="btn btn-xs btn-primary" href="'.$page->url.'users">'.__("Reload WITHOUT no-team players").'</a>';
+              } else {
+                $out .= ' <a class="btn btn-xs btn-primary" href="'.$page->url.'users/no-team">'.__("Reload WITH no-team players").'</a>';
+              }
+            }
+            $out .= '</p>';
             $out .= '<table id="usersTable" class="table table-condensed table-hover">';
             $out .= '<thead>';
-            $out .= '<th>Player</th>';
-            $out .= '<th>Team</th>';
-            $out .= '<th>User name / Login</th>';
-            $out .= '<th>Head teacher</th>';
-            $out .= '<th>Inactivity</th>';
-            $out .= '<th>History</th>';
+            $out .= '<th>'.__("Player").'</th>';
+            $out .= '<th>'.__("Team").'</th>';
+            $out .= '<th>'.__("User name / Login").'</th>';
+            $out .= '<th>'.__("Head teacher").'</th>';
+            $out .= '<th>'.__("Inactivity").'</th>';
+            $out .= '<th>'.__("History").'</th>';
             if ($user->isSuperuser()) {
               $out .= '<th>Archive</th>';
               $out .= '<th>Delete</th>';
