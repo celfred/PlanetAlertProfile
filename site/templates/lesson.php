@@ -88,7 +88,8 @@
             $out .= '<div class="text-center">';
             $out .= '<a href="'.$page->url.'" class="btn btn-primary buyPdf" data-url="'.$pages->get("name=submitforms")->url.'?form=buyPdf" data-playerId="'.$player->id.'" data-lessonId="'.$page->id.'">'.__("Buy PDF to print").' ('.abs($buyPdf->GC).'GC)</a>';
             $out .= '<p class="text-center feedback"></p>';
-            $out .= '<p>'.sprintf(__("(No XP, no GC gained and you would have <span class='label label-danger'>%d GC</span> left)", $player->GC+$buyPdf->GC)).'</p>';
+            $remaining = '<span class="label label-danger">'.($player->GC+$buyPdf->GC).' GC</span>';
+            $out .= '<p>'.sprintf(__('(No XP, no GC gained and you would have %s left)'), $remaining).'</p>';
             $out .= '</div>';
           } else {
             $out .= '<div class="text-center">';
