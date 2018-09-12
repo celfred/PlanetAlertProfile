@@ -201,7 +201,7 @@
               if ($user->isSuperuser()) {
                 $out .= "<li role='separator' class='divider'></li>";
                 $class = $page->name == 'statistics' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
+                $out .= "<li><a$class href='{$pages->get("name=statistics")->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
                 $out .= "<li role='separator' class='divider'></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/ut-stats/'>UT Stats</a></li>";

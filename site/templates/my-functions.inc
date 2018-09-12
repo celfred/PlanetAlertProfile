@@ -1519,20 +1519,22 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
       $playerPos = false;
     }
   } else {
-    if (isset($player->group)  && $allGroups->getItemKey($player->group) != 0) {
-      $playerPos = $allPlayers->getItemKey($player->group);
+    if (isset($player->group)) {
+      if ($allGroups->getItemKey($player->group) != 0) {
+        $playerPos = $allPlayers->getItemKey($player->group);
+      }
+      $pos = 1;
+      foreach($allGroups as $g) {
+        if ($g == $player->group) {
+          $playerPos = $pos;
+          $g->focus = 1;
+        } else {
+          $g->focus = 0;
+          $pos++;
+        }
+      }
     } else {
       $playerPos = false;
-    }
-    $pos = 1;
-    foreach($allGroups as $g) {
-      if ($g == $player->group) {
-        $playerPos = $pos;
-        $g->focus = 1;
-      } else {
-        $g->focus = 0;
-        $pos++;
-      }
     }
   }
   if ($playerPos && $limit != -1) { // Player is in the charts
