@@ -1026,7 +1026,10 @@
             $out .= '<th>'.__("Team").'</th>';
             $out .= '<th>'.__("User name / Login").'</th>';
             $out .= '<th>'.__("Head teacher").'</th>';
-            $out .= '<th>'.__("Inactivity").'</th>';
+            $out .= '<th>'.__("Last visit").'</th>';
+            if ($user->isSuperuser()) {
+              $out .= '<th>'.__("Inactivity").'</th>';
+            }
             $out .= '<th>'.__("History").'</th>';
             if ($user->isSuperuser()) {
               $out .= '<th>Archive</th>';
@@ -1055,17 +1058,27 @@
               } else {
                 $out .= '<td>-</td>';
               }
-              if ($p->team->name == 'no-team') {
-                $lastEvent = lastEvent($p);
-                if ($lastEvent) {
-                  $lastActivityCount = daysFromToday($lastEvent);
+              $query = $database->prepare("SELECT login_timestamp FROM process_login_history WHERE username = :username AND login_was_successful=1 ORDER BY login_timestamp DESC LIMIT 1");   
+              $query->execute(array(':username' => $p->login));
+              $lastvisit = $query->fetchColumn();
+              if ($lastvisit) {
+                $out .= '<td data-sort="'.strtotime($lastvisit).'">'.strftime("%d/%m/%Y", strtotime($lastvisit)).'</td>';
+              } else {
+                $out .= '<td data-sort="0">-</td>';
+              }
+              if ($user->isSuperuser()) {
+                if ($p->team->name == 'no-team') {
+                  $lastEvent = lastEvent($p);
+                  if ($lastEvent) {
+                    $lastActivityCount = daysFromToday($lastEvent);
+                  } else {
+                    $lastActivityCount = -1;
+                  }
                 } else {
                   $lastActivityCount = -1;
                 }
-              } else {
-                $lastActivityCount = -1;
+                $out .= '<td>'.$lastActivityCount.'</td>';
               }
-              $out .= '<td>'.$lastActivityCount.'</td>';
               /* $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</a></td>'; */
               $out .= '<td><a target="blank" class="btn btn-xs btn-danger" href="'.$adminActions->url.'recalculate/'.$p->id.'">Check history</a></td>';
               if ($user->isSuperuser()) {
