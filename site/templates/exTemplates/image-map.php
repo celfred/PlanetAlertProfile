@@ -118,7 +118,7 @@
   }
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}'.__("HP").'</span>';
   if ($page->type->name == 'image-map') {
-    $out .= '<div class="pull-right"><img class="imageMap longBlink" src="'.$page->imageMap->url.'" max-width="800" alt="Image" /></div>';
+    $out .= '<div class="pull-right"><img class="imageMap longBlink" src="'.$page->imageMap->first()->url.'" max-width="800" alt="Image" /></div>';
   }
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
   $out .= '<h3 class="inline" ng-bind-html="word"></h3>&nbsp;';
