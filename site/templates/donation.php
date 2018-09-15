@@ -19,7 +19,7 @@ $out = '';
 if ($user->isSuperuser()) {
   $globalPlayers = $pages->find("template=player, name!=test")->sort('team.name, title');
 } else {
-  $globalPlayers = $pages->find("template=player, team=$team")->sort('team.name, title');
+  $globalPlayers = $pages->find("template=player, team.teacher=$headTeacher")->sort('title');
 }
 
 if ($user->isLoggedin() || $user->isSuperuser()) {
@@ -84,7 +84,7 @@ if ($user->isLoggedin() || $user->isSuperuser()) {
     foreach ($globalPlayers as $plyr) {
       if ($plyr->id != $playerId) {
         if ($plyr->team->name != 'no-team') { $team = ' ['.$plyr->team->title.']'; } else { $team = ''; }
-        $out .= '<option value="'.$plyr->id.'">'.$plyr->title.$team.' ('.$plyr->GC.' GC)</option>';
+        $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' '.$plyr->lastName.$team.' ('.$plyr->GC.' GC)</option>';
       }
     }
   $out .= '</select>';
