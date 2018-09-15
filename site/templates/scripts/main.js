@@ -274,6 +274,7 @@ $(document).ready(function() {
 			confirmButtonText: lang.yes
 		}).then( function() {
 			$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId+'&taskId='+$taskId;
+			$this.remove();
 			$.get($url, function(data) { 
 				swal({
 					title: lang.saved,
