@@ -31,7 +31,7 @@ function initPlayer($player) {
   $prevScores = $player->get("template=archive, name!=history, sort=-date");
   if ($prevScores->id) {
     $player->reputation = $prevScores->reputation;
-    $player->yearlyKarma = $prevScores->yearlyKarma;
+    $player->yearlyKarma = 0;
     $player->HP = 50;
     $player->GC = $prevScores->GC;
     $player->XP = $prevScores->XP;
