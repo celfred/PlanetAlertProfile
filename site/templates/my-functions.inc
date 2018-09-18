@@ -1615,7 +1615,7 @@ function setMonster($player, $monster) {
   // Prepare monster from player's Cache page
   $tmpCache = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
   if ($tmpCache) {
-    // Sets inUt, outUt, lastFightDate.... ofr $monster
+    // Sets inUt, outUt, lastFightDate.... for $monster
     foreach ($tmpCache->fields as $f) {
       if ($f->name != 'monster') {
         $monster->$f = $tmpCache->$f;
@@ -1643,7 +1643,11 @@ function setMonster($player, $monster) {
       $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
       $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
     } else {
-      $monster->waitForFight = false; 
+      if ($monster->utGain >= 20) {
+        $monster->waitForFight = -1; 
+      } else {
+        $monster->waitForFight = 0; 
+      }
       $monster->lastFightInterval = -1;
     }
     if ($monster->waitForFight < 0) {

@@ -27,7 +27,7 @@
     $allCategories->sort("title");
   }
 
-  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) {
     // Test if player has unlocked Memory helmet or Visualizer
     if ($user->isSuperuser() || $user->hasRole('teacher')) {
       $helmet = $pages->get("name=memory-helmet");
@@ -52,11 +52,15 @@
       if ($visualizer->image) {
         echo '<img class="" src="'.$visualizer->image->getCrop('small')->url.'" alt="Visualizer" />';
       }
-      echo ' <a href="'.$pages->get("name=Visualizer")->url.'">'.__("Use the Electronic Visualizer").'</a> / ';
+      echo ' <a href="'.$pages->get("name=Visualizer")->url.'">'.__("Use the Electronic Visualizer").'</a>   ';
     } else {
       echo '<div class="well text-center">';
       echo __("You must buy the Electronic Visualizer to detect ALL monsters.");
       echo '</div>';
+    }
+    if ($user->hasRole('teacher') || $user->isSuperuser()) {
+      echo '<span class="glyphicon glyphicon-flash"></span> ';
+      echo ' <a href="'.$pages->get("name=fighting-zone")->url.'">'.__("Go to the Fighting zone").'</a>   ';
     }
     echo '</h4>';
     echo '</div>';

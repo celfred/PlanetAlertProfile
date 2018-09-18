@@ -12,21 +12,26 @@
       echo '<p class="alert alert-warning">'.__("Your teacher has disabled this option for the moment.").'</p> ';
     } else { // Fights are allowed
       // Set all available monsters
-      if (!$user->isSuperuser()) {
-        // TODO Manage teacher list ???
-        // Check if player has the Visualizer (or forced by admin)
+      if (!isset($player)) {
+        $playerId = $input->urlSegment1;
+        if ($playerId && $playerId != '') { // Teacher wants to see a player's fighting eone
+          $player = $pages->get($playerId);
+        } else { // All monsters are available for superUsers or teachers (debugging mode)
+          $allMonsters = $pages->find("template=exercise, include=all")->sort("level, name");
+          $availableFights = $allMonsters;
+        }
+      }
+      // Check if player has the Visualizer (or forced by admin)
+      if (isset($player)) {
         if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
           $allMonsters = $pages->find("template=exercise, sort=level, sort=name");
         } else { // Limit to visible monsters
           $allMonsters = $pages->find("template=exercise, sort=level, sort=name, special=0");
           $hiddenMonstersNb = $pages->count("template=exercise, special=1");
         }
-      } else {
-        $allMonsters = $pages->find("template=exercise, sort=level, sort=name, include=all");
-        $availableFights = $allMonsters;
       }
 
-      if ($user->hasRole('player')) {
+      if (isset($player)) {
         // Prepare player's fighting possibilities
         foreach($allMonsters as $m) {
           setMonster($player, $m);
@@ -37,7 +42,11 @@
       }
 
       $out .= '<div class="well">';
-        $out .= '<h2 class="text-center">'.$page->title.'</h2>';
+        $out .= '<h2 class="text-center">'.$page->title;
+        if (($user->isSuperuser() || $user->hasRole('teacher')) && isset($playerId) && $playerId != '') {
+          $out .= ' ('.$player->title.')';
+        }
+        $out .= '</h2>';
         $out .= $page->summary;
         $page->of(false);
         if ($page->summary->getLanguageValue($french) != '') {

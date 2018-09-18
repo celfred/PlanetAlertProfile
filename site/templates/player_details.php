@@ -436,7 +436,7 @@
       <?php
         if ($playerPage->equipment->get("name=memory-helmet")) {
           echo '<p><a href="'.$pages->get('name=underground-training')->url.'">→ '.__("Use the Memory Helmet (Training Zone)").'</a>.</p>';
-          echo '<p><a href="'.$pages->get('name=fighting-zone')->url.'">→ '.__("Go to the Fighting Zone").'</a>.</p>';
+          echo '<p><a href="'.$pages->get('name=fighting-zone')->url.$playerPage->id.'">→ '.__("Go to the Fighting Zone").'</a>.</p>';
         } else {
           $link = '<a href="'.$pages->get('name=shop')->url.'details/memory-helmet">'.$pages->get("template=item, name~=helmet")->title.'</a>';
           echo sprintf(__("Sorry, but at least one member in your group needs to buy the %s to be able to access the Underground Training zone."), $link);

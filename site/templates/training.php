@@ -70,7 +70,7 @@
           $out .= '<tbody>';
         $today = new \DateTime("today");
         foreach($allMonsters as $m) {
-          if (!$user->isSuperuser()) {
+          if ($user->hasRole('player')) {
             // Prepare player's training possibilities
             setMonster($player, $m);
           } else { // Never trained (for admin)

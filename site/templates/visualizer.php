@@ -2,10 +2,10 @@
 
 include("./head.inc"); 
 
-if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) { // Test player login
+if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) { // Test player login
   // Test if group has unlocked Electronic Visualizer
   // or if admin has forced it in Team options
-  if ($user->isSuperuser() || $player->team->forceVisualizer == 1) {
+  if ($user->isSuperuser() || (isset($player) && $player->team->forceVisualizer == 1) || $user->hasRole('teacher')) {
     $visualizer = $pages->get("name=electronic-visualizer");
   } else {
     $visualizer = $player->equipment->get('electronic-visualizer');
