@@ -112,7 +112,7 @@
           }
         }
         if (!$user->isSuperuser()) { // Take excluded pages into account
-          $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+          $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv")->not("has_parent=$excluded");
         } else { // Admin gets all public news
           $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv");
         }
