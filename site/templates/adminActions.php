@@ -1772,7 +1772,6 @@
           switch($element->template) { // Add/Remove page in correct repeater field or simple teacher field
             case 'task' : 
               $already = $element->owner->get("singleTeacher=$user");
-              bd($already);
               if (isset($already)) {
                 $element->owner->remove($already);
               } else {
@@ -1802,7 +1801,6 @@
           }
           $element->of(false);
           $element->save();
-          bd('After:'.count($element->owner));
         }
         break;
       case 'publish-element':

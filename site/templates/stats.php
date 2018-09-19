@@ -83,10 +83,8 @@ if ($user->isSuperuser()) {
 
 // Training sessions stats
 $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
-t();
 $totalTrainingSessions = $allPlayers->find("template=event, task.name=ut-action-v|ut-action-vv");
 $todayTrainingSessions = $totalTrainingSessions->find("date>=$today");
-bd(t());
 $totalUt = 0;
 $todayTrainedPlayers = [];
 foreach( $todayTrainingSessions as $t) {
