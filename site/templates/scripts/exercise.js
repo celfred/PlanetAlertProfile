@@ -213,16 +213,16 @@ exerciseApp.service('myData', function($http) {
 		parseCorrections : function(allCorrections) {
 			var newCorrections = [];
 			var tempCorrections = [];
-			var feedBack = '';
+			var feedback = '';
 			for (i=0; i<allCorrections.length; i++) {
 				// Get rid of feedback
 				var pattern = /\$(.*?)\$/i;
 				var str = allCorrections[i];
 				if (str.search(pattern) != -1 ) {
 					allCorrections[i] = str.replace(pattern, "");
-					feedBack = str.match(pattern, "$1")[1];
+					feedback = str.match(pattern, "$1")[1];
 				} else {
-					feedBack = '';
+					feedback = '';
 				}
 				// Add optional text functionality : (...) only 1/line for the moment
 				pattern = /\((.*?)\)/i;
@@ -248,9 +248,7 @@ exerciseApp.service('myData', function($http) {
 				allCorrections.push(newCorrections[j]);
 			}
 			newCorrections = [];
-			
-			allCorrections['feedBack'] = feedBack;
-
+			allCorrections['feedback'] = feedback;
 			return allCorrections;
 		},
 
@@ -653,13 +651,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		$timeout($scope.focusInput, 300);
   }
 
-
 	$scope.initQuestion = function() {
 		$scope.word = $scope.question['word'];
 		$scope.mixedWord = $scope.question['mixedWord'];
 		$scope.allCorrections = $scope.question['allCorrections'];
-		if ($scope.allCorrections['feedback'] == '') {
-			$scope.feedBack = '['+$scope.allCorrections['feedBack']+']';
+		if ($scope.allCorrections['feedback'] != '') {
+			$scope.feedback = '['+$scope.allCorrections['feedback']+']';
 		}
 		// Init new question
     $scope.wrong = false;

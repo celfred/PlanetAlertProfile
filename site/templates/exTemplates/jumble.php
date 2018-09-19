@@ -121,7 +121,7 @@
   $out .= '<h2 class="jumbleW inline" ng-repeat="w in word track by $index">';
   $out .= '<span class="label label-primary" ng-click="pickWord(w, $index)">{{w}}</span>';
   $out .= '</h2>';
-  $out .= ' <h3><span class="label label-danger blink" ng-show="showCorrection">{{showCorrection}} {{feedBack}}</span></h3> ';
+  $out .= ' <h3><span class="label label-danger blink" ng-show="showCorrection">{{showCorrection}} {{feedback}}</span></h3> ';
   $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">'.__("Try again").'</button>';
   $out .= '</div>';
   $out .= '</div>';

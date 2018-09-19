@@ -122,7 +122,7 @@
   }
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
   $out .= '<h3 class="inline" ng-bind-html="word"></h3>&nbsp;';
-  $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span><span>{{feedBack}}</span></h2>  ';
+  $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span><span>{{feedback}}</span></h2>  ';
   $out .= '</div>';
   $out .= '</div>';
   $out .= '<div class="text-right">';

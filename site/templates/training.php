@@ -277,7 +277,7 @@
               $out .= '<span ng-class="{\'label\':true, \'label-primary\':selectedItems.indexOf($index) === -1, \'label-warning\':selectedItems.indexOf($index) !== -1}" ng-click="pickWord(w, $index)">{{w}}</span>';
               $out .= '</h2>';
               $out .= '</div>';
-              $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedBack}}</span></h3> ';
+              $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedback}}</span></h3> ';
               $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">'.__("Try again").'</button>';
               $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
               $out .= '<span id="clue" ng-show="showClue">{{mixedWord}}</span>';
@@ -288,7 +288,7 @@
               $out .= '<h2 class="inline" ng-bind-html="word"></h2>   ';
               $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
               $out .= '<span id="clue" ng-show="showClue">{{mixedWord}}</span>';
-              $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> <span ng-bind-html="showCorrection|underline"></span> {{feedBack}}</span></h3> ';
+              $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> <span ng-bind-html="showCorrection|underline"></span> {{feedback}}</span></h3> ';
               $out .= '</div>';
               $out .= '<br />';
               $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="'.__("Type your answer").'" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
