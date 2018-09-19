@@ -453,6 +453,14 @@
           $allPeriods = $pages->get("name=periods")->children();
           $teacherPeriods = $allPeriods->find("periodOwner.singleTeacher=$user");
           $notTeacherPeriods = $allPeriods->find("periodOwner.singleTeacher!=$user");
+          if ($user->isSuperuser()) {
+            $out .= '<button class="confirm btn btn-primary btn-sm" data-href="'.$page->url.'bumpYear">'.__("+1 year to ALL periods").'</button> ';
+            $out .= $pages->get("name=periods")->feel(array(
+              'mode' => 'page-add',
+              'text' => '[Add a new period]',
+              'class' => 'button'
+            ));
+          }
           if (!$user->isSuperuser()) {
             $out .= '<h4><span>'.__("Your periods").'</span></h4>';
             $out .= '<ul id="teacherElements">';
@@ -461,8 +469,8 @@
               $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
               $out .= '<span>'.$p->title.'</span> ';
               $mod = $p->periodOwner->get("singleTeacher=$user"); // Get personalized infos if needed
-              $mod->dateStart != '' ? $out .= ' <span>('.__('From').' '.date("d/m/Y", $mod->dateStart).' ' : $out .= ' <span>('.__('From').' '.date("d/m/Y", $p->dateStart).' ';
-              $mod->dateEnd != '' ? $out .= __('to').' '.date("d/m/Y", $mod->dateEnd).')</span>' : $out .= __('to').' '.date("d/m/Y", $p->dateEnd).')</span>';
+              $mod->dateStart != '' ? $out .= ' <span>('.__('From').' '.date("d/m/Y H:i:s", $mod->dateStart).' ' : $out .= ' <span>('.__('From').' '.date("d/m/Y H:i:s", $p->dateStart).' ';
+              $mod->dateEnd != '' ? $out .= __('to').' '.date("d/m/Y H:i:s", $mod->dateEnd).')</span>' : $out .= __('to').' '.date("d/m/Y H:i:s", $p->dateEnd).')</span>';
               if ($user->isSuperuser()) {
                 $out .= $p->feel(array(
                           "fields" => "title,dateStart,dateEnd"
@@ -477,13 +485,6 @@
             }
             $out .= '</ul>';
           }
-          if ($user->isSuperuser()) {
-            $out .= '<button class="confirm btn btn-primary btn-sm" data-href="'.$page->url.'bumpYear">'.__("+1 year to ALL periods").'</button> ';
-            $out .= $pages->get("name=periods")->feel(array(
-              'mode' => 'page-add',
-              'text' => '[Add a new period]'
-            ));
-          }
           $out .= '<h4><span>'.__("Available periods").'</span></h4>';
           $out .= '<ul id="notTeacherElements">';
           foreach($notTeacherPeriods as $p) {
@@ -492,8 +493,8 @@
               $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
             }
             $out .= '<span>'.$p->title.'</span> ';
-            $out .= ' <span>('.__('From').' '.date("d/m/Y", $p->dateStart).' ';
-            $out .= __('to').' '.date("d/m/Y", $p->dateEnd).')</span>';
+            $out .= ' <span>('.__('From').' '.date("d/m/Y H:i:s", $p->dateStart).' ';
+            $out .= __('to').' '.date("d/m/Y H:i:s", $p->dateEnd).')</span>';
             if ($user->isSuperuser()) { $out .= $p->feel(); }
             $out .= '</li>';
           }
