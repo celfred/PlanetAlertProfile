@@ -969,7 +969,7 @@ function pick_question($player) {
           $quiz['answer'] = sprintf(__('From %s'), $randEl->country->title);
           break;
         case 'nationality' :
-          $quiz['question'] = $sanitizer->entitiesMarkdown(sprintf(__('What is %s\'s **nationality** ?'), $randEl->title));
+          $quiz['question'] = $sanitizer->entitiesMarkdown(sprintf(__('What is the **nationality** of %s ?'), $randEl->title));
           $quiz['answer'] = sprintf(__('%1$s (from %2$s)'), $randEl->nationality, $randEl->country->title);
           break;
         case 'photo' :
