@@ -28,6 +28,8 @@
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result. ' - Training not allowed!';
           $log->save('underground-training', $logText);
         } else {
+          $best = __('No');
+          $previousUt = $player->underground_training;
           updateScore($player, $task, true);
           // No need to checkDeath, Underground Training can't cause death
           // Set group captains
@@ -37,6 +39,7 @@
           $newUtGain = $utGain+$inClassGain;
           if ($utGain > $monster->best) {
             setBestPlayer($monster, $player, $newUtGain);
+            $best = __('Yes');
             echo '1';
           }
           
@@ -44,18 +47,30 @@
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result;
           $log->save('underground-training', $logText);
 
-          // Notify admin
-          $msg = "Player : ". $player->title."\r\n";
-          $msg .= "Team : ". $player->team->title."\r\n";
-          $msg .= "Training : ". $monster->title."\r\n";
-          $msg .= "Result : ". $result;
+          // Notify teacher (or admin)
+          $subject = _('Underground Training ').' : ';
+          $subject .= $player->title. ' ['.$player->team->title.']';
+          $subject .= ' → +'.$result.__("UT");
+          $subject .= ' ['.$monster->title.']';
+          $msg = __("Player")." : ". $player->title." "[".$player->team->title."]"\r\n";
+          $msg .= __("Monster")." : ". $monster->title."\r\n";
+          $msg .= __("Result")." : +". $result.__("UT")."\r\n";
+          $msg .= __("Player's total training on this monster")." : ". $utGain."\r\n";
+          $msg .= __("New best player")." :  ". $best." (".$monster->mostTrained->title.":".$monster->best.")\r\n";
+          $msg .= __("Player's global UT")." : ". $player->underground_training."\r\n";
 
           if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-            if ($headTeacher && $headTeacher->email != '') {
-              mail($headTeacher->email, "submitTraining", $msg, "From: planetalert@tuxfamily.org");
+            $adminMail = $users->get("name=admin")->email;
+            $mail = wireMail();
+            $mail->from($adminMail);
+            $mail->subject($subject);
+            $mail->body($msg);
+            if (isset($headTeacher) && $headTeacher->email != '') {
+              $mail->to($headTeacher->email, 'Planet Alert');
             } else {
-              mail($users->get("name=admin")->email, "submitTraining", $msg, "From: planetalert@tuxfamily.org");
+              $mail->to($adminMail, 'Planet Alert');
             }
+            $numSent = $mail->send();
           }
         }
       }
@@ -100,13 +115,36 @@
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
           $log->save('monster-fights', $logText);
 
-          // Notify admin
+          // Notify teacher (or admin)
+          $subject = _('Monster fight ').' : ';
+          $subject .= $player->title. ' ['.$player->team->title.']';
+          $subject .= ' → '.$result;
+          $subject .= ' ['.$monster->title.']';
+          $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+          $msg .= __("Monster")." : ". $monster->title."\r\n";
+          $msg .= __("Result")." : ". $result;
+          $msg .= ' ['.__("Quality")." : ".$quality."]\r\n";
+          $msg .= __("New player global FP")." : ". $player->fighting_power."\r\n";
+
+          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+            $adminMail = $users->get("name=admin")->email;
+            $mail = wireMail();
+            $mail->from($adminMail);
+            $mail->subject($subject);
+            $mail->body($msg);
+            if (isset($headTeacher) && $headTeacher->email != '') {
+              $mail->to($headTeacher->email, 'Planet Alert');
+            } else {
+              $mail->to($adminMail, 'Planet Alert');
+            }
+            $numSent = $mail->send();
+          }
           $msg = "Player : ". $player->title."\r\n";
           $msg .= "Team : ". $player->team->title."\r\n";
           $msg .= "Fight : ". $monster->title."\r\n";
           $msg .= "Result : ". $result;
           if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-            if ($headTeacher && $headTeacher->email != '') {
+            if (isset($headTeacher) && $headTeacher->email != '') {
               mail($headTeacher->email, "submitFight", $msg, "From: planetalert@tuxfamily.org");
             } else {
               mail($users->get("name=admin")->email, "submitFight", $msg, "From: planetalert@tuxfamily.org");

@@ -332,18 +332,21 @@
                 $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
                 $out .= "<span class='strikeText'>".__("Read the Book of Knowledge")."</span></li>";
               }
+              // Contact teacher
+              $class = $page->name == 'contact' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__("Contact my teacher")."</a></li>";
               // Hall of Fame
               $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$hall->url}'><span class='glyphicon glyphicon-eye-open'></span> - ".__("Visit the Hall of Fame")."</a></li>";
             $out .= '</ul>';
           $out .= '</div>';
           $out .= '<div class="btn-group">';
-            $class = $page->is("name=blog|documentation|contact") ? "on" : "";
+            $class = $page->is("name=blog|documentation") ? "on" : "";
             $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>';
             $out .= '<ul class="dropdown-menu">';
               $out .= '<li class="dropdown-submenu">';
                 $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : "";
-                $out .= '<a class="'.$class.'" href="'.$places->url.'"><span class="glyphicon glyphicon-globe"></span> - '.__("The World").'</span></a>';
+                $out .= '<a class="'.$class.'" href="'.$places->url.'"><span class="glyphicon glyphicon-globe"></span> - '.__("Discover Planet Alert World").'</span></a>';
                 $out .= '<ul class="dropdown-menu">';
                   $class = $page->name == 'shop' ? " class='selected-left'" : "";
                   $out .= "<li><a$class href='{$shop->url}'>{$shop->title}</a></li>";
@@ -365,8 +368,6 @@
                   $out .= "<li><a$class href='{$book->url}'>{$book->title}</a></li>";
                 $out .= '</ul>';
               $out .= '</li>';
-              $class = $page->name == 'contact' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - {$contact->title}</a></li>";
               $class = $page->name == 'blog' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
               $class = $page->name == 'documentation' ? " class='selected-left'" : "";
@@ -431,6 +432,9 @@
               $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
               $class = $page->name == 'documentation' ? " class='selected-left'" : "";
               $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - {$documentation->title}</a></li>";
+              // Contact admin
+              $class = $page->name == 'contact' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__("Contact")."</a></li>";
           $out .= '</ul>';
           $out .= '</div>';
           $class = $page->is("name=loginform") ? "on" : "";
