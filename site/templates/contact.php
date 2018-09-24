@@ -43,6 +43,11 @@
         default :
           $subject = __("Other");
         }
+        $subject .= ' ['.$form['fullname'];
+        if ($form['playerClass'] != '') {
+          $subject .= ' - '.$form['playerClass'];
+        }
+        $subject .= ']';
       }
     }
 
@@ -52,7 +57,7 @@
       $mail->to($emailTo, 'Planet Alert');
       $mail->from("flenglish@tuxfamily.org");
       $mail->fromName($form['fullname']);
-      $mail->subject($subject.' ['.$form['fullname'].']');
+      $mail->subject($subject);
       $mail->body($form['message']);
       $numSent = $mail->send();
       if ($numSent == 1) {
