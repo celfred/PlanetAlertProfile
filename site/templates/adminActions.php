@@ -112,14 +112,14 @@
         case 'reports' :
           $out .= '<section class="well">';
           if ($user->isSuperuser()) { // Old version, ALL teams
-            $out .= '<span>Select a team : </span>';
+            $out .= '<span>'.__("Select a team").' : </span>';
             $out .= '<select id="teamId">';
-            $out .= '<option value="-1">Select a team</option>';
+            $out .= '<option value="-1">'.__("Select a team").'</option>';
             foreach($allTeams as $p) {
               $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
             }
             $out .= '</select>';
-            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="reports">Generate</button>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="reports">'.__("Generate").'</button>';
           } else { // Quick buttons for teacher's teams
             $out .= '<ul class="list list-inline">';
             foreach($allTeams as $p) {
@@ -1192,23 +1192,23 @@
         $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
         if ($selectedTeam && $selectedTeam != '-1') {
           $allPeriods = $pages->get("name=periods")->children();
-          /* $officialPeriod = $pages->get("name=admin-actions")->periods; */
           $officialPeriod = $selectedTeam->periods;
           $allPlayers = $allPlayers->find("team.name=$selectedTeam->name");
           $out .= '<section class="well">';
           $out .= '<div>';
-          $out .= '<span>Report category : </span>';
-          $out .= '<label for="allCat"><input type="radio" value="all" id="allCat" name="reportCat" checked="checked" class="reportCat"> All</input></label> &nbsp;&nbsp;';
-          $out .= '<label for="participation"><input type="radio" value="participation" id="participation" name="reportCat" class="reportCat"> Participation</input></label> &nbsp;&nbsp;';
+          $out .= '<span>'.__("Report category").' : </span>';
+          $out .= '<label for="allCat"><input type="radio" value="all" id="allCat" name="reportCat" checked="checked" class="reportCat"> '.__("All").'</input></label> &nbsp;&nbsp;';
+          $out .= '<label for="participation"><input type="radio" value="participation" id="participation" name="reportCat" class="reportCat"> '.__("Participation").'</input></label> &nbsp;&nbsp;';
           $out .= '<label for="planetAlert"><input type="radio" value="planetAlert" id="planetAlert" name="reportCat" class="reportCat"> Planet Alert</input></label> &nbsp;&nbsp;';
+          $out .= '<label for="cm1"><input type="radio" value="cm1" id="cm1" name="reportCat" class="reportCat"> CM1</input></label> &nbsp;&nbsp;';
           $out .= '</div>';
           $out .= '<div>';
-          $out .= '<span>Ordering by : </span>';
-          $out .= '<label for="firstName"><input type="radio" class="reportSort" id="firstName" name="order" checked="checked" value="title"> First name</input></label> &nbsp;&nbsp;';
-          $out .= '<label for="lastName"><input type="radio" class="reportSort" id="lastName" name="order" value="lastName"> Last name</input></label>';
+          $out .= '<span>'.__("Ordering by").' : </span>';
+          $out .= '<label for="firstName"><input type="radio" class="reportSort" id="firstName" name="order" checked="checked" value="title"> '.__("First name").'</input></label> &nbsp;&nbsp;';
+          $out .= '<label for="lastName"><input type="radio" class="reportSort" id="lastName" name="order" value="lastName"> '.__("Last name").'</input></label>';
           $out .= '</div>';
           $out .= '<div>';
-          $out .= '<span>Period : </span>';
+          $out .= '<span>'.__("Period").' : </span>';
           $out .= '<select id="periodId">';
           foreach($allPeriods as $period) {
             if ($period->id == $officialPeriod->id) {$selected = 'selected="selected"';} else {$selected = '';};
@@ -1217,19 +1217,19 @@
           $out .= '</select>';
           $out .= '</div>';
           $out .= '<div>';
-          $out .= '<span>Select a player : </span>';
+          $out .= '<span>'.__("Select a player").' : </span>';
           $out .= '<select id="reportPlayer">';
-          $out .= '<option value="'.$selectedTeam->id.'">The whole team</option>';
+          $out .= '<option value="'.$selectedTeam->id.'">'.__("The whole team").'</option>';
           foreach($allPlayers as $player) {
             $out .= '<option value="'.$player->id.'">'.$player->title.'</option>';
           }
           $out .= '</select>';
           // reportUrl is based on url segments : all|category/team|player/periodId?sort=title|lastName
-          $out .= '<p class="text-center"><a id="reportUrl_button" class="btn btn-primary" href="'. $pages->get('/report_generator')->url .'" data-reportUrl="'. $pages->get('/report_generator')->url .'" target="_blank">Generate report</a></p>';
+          $out .= '<p class="text-center"><a id="reportUrl_button" class="btn btn-primary" href="'. $pages->get('/report_generator')->url .'" data-reportUrl="'. $pages->get('/report_generator')->url .'" target="_blank">'.__("Generate report").'</a></p>';
           $out .= '</div>';
           $out .= '</section>';
         } else {
-          $out .= 'You need to select a team.';
+          $out .= __('You need to select a team.');
         }
         break;
       case 'refPage' :

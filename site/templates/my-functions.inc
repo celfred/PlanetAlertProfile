@@ -2549,4 +2549,10 @@ function displayGroups($allPlayers, $button = 0) {
   $outGroups .= '</div>';
   return $outGroups;
 }
+
+function pluralize($count, $singular, $plural = false) {
+  if (!$plural) $plural = $singular . 's';
+  return ($count == 1 || $count == 0 ? $singular : $plural) ;
+}
+
 ?>

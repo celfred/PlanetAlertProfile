@@ -681,6 +681,15 @@ img.align_right {
 .notification {
 	float: right;
 }
+table.cm1Table td {
+	padding: 3px;
+	border : 2px solid #000;
+	font-size: 16px;
+}
+table.cm1Table td.empty {
+	border: 0px;
+}
+
 table.adminTable > thead > tr > th {
   padding: 0;
 }

@@ -1,7 +1,7 @@
-<?php
+<?php namespace ProcessWire;
 
 $selected = $pages->get("id=$input->urlSegment2");
-if ($user->isSuperuser() || $user->isLoggedin()) {
+if ($user->isLoggedin()) {
   if (!$config->ajax) {
     include("./head_report.inc"); 
   }
@@ -14,7 +14,7 @@ if ($user->isSuperuser() || $user->isLoggedin()) {
   $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat|oublis|group-items");
 
   if ($selected->template == 'player') { // Player's report
-    if ($user->isSuperuser() || $selected->login == $user->name) {
+    if ($user->isSuperuser() || $user->hasRole('teacher') || $selected->login == $user->name) {
       $player = $selected;
       $global = false;
       $reportTitle = '';
@@ -25,6 +25,7 @@ if ($user->isSuperuser() || $user->isLoggedin()) {
         switch ($category) {
           case 'participation' : $reportType = 'participation'; break;
           case 'planetAlert' : $reportType = 'planetAlert'; break;
+          case 'cm1' : $reportType = 'cm1'; break;
           default: $reportType =  'test';
         }
       }
@@ -47,6 +48,7 @@ if ($user->isSuperuser() || $user->isLoggedin()) {
       switch ($category) {
         case 'participation' : $reportType = 'participation'; break;
         case 'planetAlert' : $reportType = 'planetAlert'; break;
+          case 'cm1' : $reportType = 'cm1'; break;
         default: break;
       }
     }
@@ -57,11 +59,12 @@ if ($user->isSuperuser() || $user->isLoggedin()) {
   }
    
   // PDF Download link
-  if (!$input->get['pages2pdf'] && $user->isSuperuser()) {
+  if (!$input->get['pages2pdf'] && ($user->isSuperuser() || $user->hasRole('teacher'))) {
     echo '<a class="pdfLink btn btn-info" href="' . $page->url.$input->urlSegment1.'/'.$input->urlSegment2.'/'.$input->urlSegment3. '?sort='.$sort.'&pages2pdf=1">Get PDF</a>';
+    echo '<div class="row"></div>';
   }
 
-  if (!$global) { // Single Player report
+  if (!isset($global)) { // Single Player report
     $player = $selected;
     switch($reportType) {
       default: 
@@ -71,6 +74,7 @@ if ($user->isSuperuser() || $user->isLoggedin()) {
     switch($reportType) {
       case 'participation': include('./globalReport_participation.inc'); break;
       case 'planetAlert': include('./globalReport_planetAlert.inc'); break;
+      case 'cm1': include('./globalReport_cm1.inc'); break;
       default: include('./globalReport_default.inc');
     }
   }
