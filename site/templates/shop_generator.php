@@ -179,7 +179,7 @@ if (!$user->hasRole('teacher') && !$user->isSuperuser()) {
   }
   // Add group items
   if (!isset($player->group->id)) {
-    $warning = ' <span class="label label-warning">'.("No groups are set. This item will be individual !").'</span>';
+    $warning = ' <span class="label label-warning">'.__("No groups are set. This item will be individual !").'</span>';
   } else {
     $warning = '';
   }
