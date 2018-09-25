@@ -52,7 +52,7 @@
           $subject .= $player->title. ' ['.$player->team->title.']';
           $subject .= ' → +'.$result.__("UT");
           $subject .= ' ['.$monster->title.']';
-          $msg = __("Player")." : ". $player->title." "[".$player->team->title."]"\r\n";
+          $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
           $msg .= __("Monster")." : ". $monster->title."\r\n";
           $msg .= __("Result")." : +". $result.__("UT")."\r\n";
           $msg .= __("Player's total training on this monster")." : ". $utGain."\r\n";

@@ -166,7 +166,7 @@
         $today = new \DateTime("today");
         $allConcernedPlayers = $pages->find("parent.name=players, team.teacher=$user"); // Limit to teacher's students
         $news = $pages->find("parent.name=history, template=event, publish=1");
-        $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|ambush")->sort('-created');
+        $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|penalty")->sort('-created');
         $out .= '<div class="col-sm-6">';
         if ($news->count() > 0) {
           $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
@@ -195,7 +195,7 @@
               case 'buy' :
                 $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'ambush' :
+              case 'penalty' :
                 $out .= '<span class="">'.__("Penalty for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : $out .= $n->task->name. ': '.__("todo");

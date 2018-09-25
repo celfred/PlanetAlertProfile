@@ -90,7 +90,23 @@
     if (strlen($captains) == 0) { 
       $captains = __('Nobody.');
     }
-    echo '<p class="text-center"><span class="label label-primary"><span class="glyphicon glyphicon-star"></span> '.__("Group Captains").'</span> → '.$captains.'</p>';
+    echo '<p class="text-center">';
+      // Any new serious injuries ? (personal workflow)
+      if ($user->name == 'flieutaud' || $user->isSuperuser()) {
+        $penalty = $pages->find("has_parent=$allPlayers, template=event, publish=1, task.name=penalty, sort=-date");
+        if (count($penalty) > 0) {
+          echo '<span class="pull-left label label-danger">';
+          echo '<span class="glyphicon glyphicon-warning-sign"></span> ';
+          echo sprintf(_n("Serious injury", "Serious injuries", count($penalty)), count($penalty)).' : ';
+          $players = $penalty->implode(', ', '{parent.parent.title}');
+          echo $players;
+          echo '</span>';
+        }
+      }
+
+      echo '<span class="label label-primary"><span class="glyphicon glyphicon-star"></span> '.__("Group Captains").'</span> → '.$captains;
+    echo '</p>';
+
   }
 
   // echo $outGroups;
@@ -147,7 +163,7 @@
       $trend = '';
       foreach ($prevEvents as $event) {
         $event->task = checkModTask($event->task, $headTeacher, $player);
-        if (($user->hasRole('teacher') || $user->isSuperuser()) && $event->task->is("name=penalty|death")) { $class = ' class="selected"'; }
+        if (($user->hasRole('teacher') || $user->isSuperuser()) && $event->task->is("name=penalty|death")) { $class = 'selected'; }
         $HP = $event->task->HP;
         $title = $event->task->title;
         $HP < 0 || $event->task->is("name=inactivity") ? $trendClass = 'negativeTrend' : $trendClass = 'positiveTrend';
