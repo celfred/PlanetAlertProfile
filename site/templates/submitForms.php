@@ -224,10 +224,10 @@
         updateScore($player, $task, true);
         // No need to checkDeath, Donation can't cause death
         // Notify admin
-        $subject = _('Donation from ').' : ';
-        $subject .= $player->title. ' ['.$player->team->title.']';
-        $subject .= ' → '.$amount.__("GC");
-        $subject .= ' '.__("to").' '.$receiver->title.' ['.$receiver->team->title.']';
+        $subject = __('Donation').' : ';
+        $subject .= $amount.__("GC");
+        $subject .= ' '.$player->title. ' ['.$player->team->title.']';
+        $subject .= ' → '.$receiver->title.' ['.$receiver->team->title.']';
         $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
         $msg .= __("Donation amount")." : ". $amount."\r\n";
         $msg .= __("Donated to")." : ". $receiver->title." [".$receiver->team->title."]\r\n";
