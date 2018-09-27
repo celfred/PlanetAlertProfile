@@ -139,7 +139,7 @@
         }
         // Count # of words
         $exData = $m->exData;
-        $allLines = preg_split('/$\r|\n/', $exData);
+        $allLines = preg_split('/$\r|\n/', $sanitizer->entitiesMarkdown($exData));
         /* Unused because triggers a bug with tooltip display */
         /* $out .= '<td data-sort="'.count($allLines).'">'; */
         $out .= '<td>';

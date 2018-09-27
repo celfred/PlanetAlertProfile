@@ -24,10 +24,10 @@
       // Check if player has the Visualizer (or forced by admin)
       if (isset($player)) {
         if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
-          $allMonsters = $pages->find("template=exercise, sort=level, sort=name");
+          $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher)")->sort("level, name");
         } else { // Limit to visible monsters
-          $allMonsters = $pages->find("template=exercise, sort=level, sort=name, special=0");
-          $hiddenMonstersNb = $pages->count("template=exercise, special=1");
+          $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher), special=0")->sort("level, name");
+          $hiddenMonstersNb = $pages->count("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher), special=1");
         }
       }
 

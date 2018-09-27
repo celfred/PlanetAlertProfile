@@ -1651,7 +1651,7 @@ function setMonster($player, $monster) {
       $monster->lastFightInterval = -1;
     }
     if ($monster->waitForFight < 0) {
-      if ($player->equipment->has("name~=visualizer") || $monster->special == 0) {
+      if ($player->equipment->has("name~=visualizer") || $monster->special == 0 || $player->team->forceVisualizer == 1) {
         $monster->isFightable = 1;
       } else {
         $monster->isFightable = 0;
@@ -1693,8 +1693,10 @@ function prepareListWords($allLines, $type) {
       if (count($allLines)>14) {
         $listWords = '<strong>'.__("15 first questions").' :</strong><br />';
         for($i=0; $i<15; $i++) {
-          list($left, $right) = preg_split('/::/', $allLines[$i]);
-          $listWords .= '- '.$left.'<br />';
+          if (strpos($allLines[$i], "::") !== false) {
+            list($left, $right) = preg_split('/::/', $allLines[$i]);
+            $listWords .= '- '.$left.'<br />';
+          }
         }
         $listWords .= '[...]';
       } else {
