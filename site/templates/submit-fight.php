@@ -139,17 +139,6 @@
             }
             $numSent = $mail->send();
           }
-          $msg = "Player : ". $player->title."\r\n";
-          $msg .= "Team : ". $player->team->title."\r\n";
-          $msg .= "Fight : ". $monster->title."\r\n";
-          $msg .= "Result : ". $result;
-          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-            if (isset($headTeacher) && $headTeacher->email != '') {
-              mail($headTeacher->email, "submitFight", $msg, "From: planetalert@tuxfamily.org");
-            } else {
-              mail($users->get("name=admin")->email, "submitFight", $msg, "From: planetalert@tuxfamily.org");
-            }
-          }
         }
       }
     }
