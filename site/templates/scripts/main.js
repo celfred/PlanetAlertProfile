@@ -1082,7 +1082,7 @@ $(document).ready(function() {
 	}
 	function getContentFromAjax(url, el) {
 		var id = el.attr('data-id');
-    $.get(url+'?id='+id, function(data) { 
+    $.get(url+'?id='+id+'&randSeed='+Math.random(), function(data) { 
 			el.html(data); 
 			el.children('[data-toggle="tooltip"]').tooltip();
 			initTables();

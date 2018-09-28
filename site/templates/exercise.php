@@ -1,25 +1,28 @@
 <?php namespace ProcessWire;
   if (!$config->ajax) {
     include("./head.inc"); 
-
-    if ($user->isLoggedin() || $user->isSuperuser()) {
-      echo '<div ng-app="exerciseApp">';
-      // Get player's equipment to set scores alternatives
-      $weaponRatio = 0;
-      $protectionRatio = 0;
-      if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
-        $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
-        $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
-      }
-      if (isset($bestWeapon)) { $weaponRatio = $bestWeapon->XP; }
-      if (isset($bestProtection)) { $protectionRatio = $bestProtection->HP; }
-
-      // Get exercise type
-      include('./exTemplates/'.$page->type->name.'.php');
-
-      echo '</div>';
+    if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
+      echo $wrongBrowserMessage;
     } else {
-      echo $noAuthMessage;
+      if (!$user->isLoggedin()) {
+        echo $noAuthMessage;
+      } else {
+        echo '<div ng-app="exerciseApp">';
+        // Get player's equipment to set scores alternatives
+        $weaponRatio = 0;
+        $protectionRatio = 0;
+        if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
+          $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+          $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
+        }
+        if (isset($bestWeapon)) { $weaponRatio = $bestWeapon->XP; }
+        if (isset($bestProtection)) { $protectionRatio = $bestProtection->HP; }
+
+        // Get exercise type
+        include('./exTemplates/'.$page->type->name.'.php');
+
+        echo '</div>';
+      }
     }
 
     include("./foot.inc"); 

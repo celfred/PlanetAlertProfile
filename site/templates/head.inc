@@ -450,3 +450,8 @@
   <div class="container-fluid">
     <div class="row">
       <div id="content" class="col-sm-12">
+      <?php
+        if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
+          echo $ieAlert;
+        }
+      ?>
