@@ -35,7 +35,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
-## [v0.2.1] - Unreleased
+## [v0.2.1] - 2018-09-29
 
 A lot of minor bug fixes, but also new CM1 report type, and new small adjustements for a better user experience : more teacher's management possibilities, easier contact form for players... Details below. Maybe the lists are a little long. I should commit minor versions more often for better readability :) 
 
