@@ -2,7 +2,7 @@
   include("./head.inc"); 
 
   $out = '';
-  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) {
     if ($user->hasRole('player')) {
       $lock = $pages->get("$player->team")->lockFights;
     } else {
@@ -12,20 +12,26 @@
       echo '<p class="alert alert-warning">'.__("Your teacher has disabled this option for the moment.").'</p> ';
     } else { // Fights are allowed
       // Set all available monsters
-      if (!$user->isSuperuser()) {
-        // Check if player has the Visualizer (or forced by admin)
-        if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
-          $allMonsters = $pages->find("template=exercise, sort=level, sort=name");
-        } else { // Limit to visible monsters
-          $allMonsters = $pages->find("template=exercise, sort=level, sort=name, special=0");
-          $hiddenMonstersNb = $pages->count("template=exercise, special=1");
+      if (!isset($player)) {
+        $playerId = $input->urlSegment1;
+        if ($playerId && $playerId != '') { // Teacher wants to see a player's fighting eone
+          $player = $pages->get($playerId);
+        } else { // All monsters are available for superUsers or teachers (debugging mode)
+          $allMonsters = $pages->find("template=exercise, include=all")->sort("level, name");
+          $availableFights = $allMonsters;
         }
-      } else {
-        $allMonsters = $pages->find("template=exercise, sort=level, sort=name, include=all");
-        $availableFights = $allMonsters;
+      }
+      // Check if player has the Visualizer (or forced by admin)
+      if (isset($player)) {
+        if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
+          $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher)")->sort("level, name");
+        } else { // Limit to visible monsters
+          $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher), special=0")->sort("level, name");
+          $hiddenMonstersNb = $pages->count("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher), special=1");
+        }
       }
 
-      if ($user->hasRole('player')) {
+      if (isset($player)) {
         // Prepare player's fighting possibilities
         foreach($allMonsters as $m) {
           setMonster($player, $m);
@@ -36,7 +42,11 @@
       }
 
       $out .= '<div class="well">';
-        $out .= '<h2 class="text-center">'.$page->title.'</h2>';
+        $out .= '<h2 class="text-center">'.$page->title;
+        if (($user->isSuperuser() || $user->hasRole('teacher')) && isset($playerId) && $playerId != '') {
+          $out .= ' ('.$player->title.')';
+        }
+        $out .= '</h2>';
         $out .= $page->summary;
         $page->of(false);
         if ($page->summary->getLanguageValue($french) != '') {
@@ -46,7 +56,7 @@
         $out .= sprintf(__("There are currently %d monsters detected."), $allMonsters->count());
         if (isset($hiddenMonstersNb)) {
           $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
-          $out .= '<p>('.sprintf(__("%1$s monsters are absent because you don't have the %2$s."), $hiddenMonstersNb, $link).')</p>';
+          $out .= '<p>('.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).')</p>';
         } else {
           $out .= '<p>('.__("All monsters are visible thanks to your Electronic Visualizer.").')</p>';
         }

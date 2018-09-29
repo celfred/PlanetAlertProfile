@@ -21,7 +21,7 @@ $(document).ready(function() {
 	$('.publishElement').on('click', function() {
 		var href = $(this).attr('href');
 		var $this = $(this);
-    $this.html("<p>Saving...</p>"); 
+    $this.html("<p>'+lang.saving+'</p>"); 
     $.get(href, function(data) { 
 			$this.prev().removeClass('strikeText');
 			$this.remove();
@@ -30,7 +30,7 @@ $(document).ready(function() {
 	});
 
 	$('.selectElement').on('click', function() {
-    $("#ajaxViewport").html("<p>Saving...</p>"); 
+    $("#ajaxViewport").html("<p>"+lang.saving+"</p>"); 
 		var href = $(this).attr('href');
 		$el = $(this).parent('li');
 		var $this = $(this);
@@ -46,8 +46,28 @@ $(document).ready(function() {
     return false; 
 	});
 
+	$('.deleteFromId').on('click', function() {
+		$this = $(this);
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
+		}).then( function(isConfirm) {
+			var href = $this.attr('data-href');
+			$('<span>Saving...</span>').insertAfter($this);
+			$.get(href, function(data) { 
+				$this.parent('li').remove();
+			}); 
+		}, function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		});
+	});
+
 	$('.teamOption').on('click', function() {
-    $("#ajaxViewport").html("<p>Loading...</p>"); 
+    $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
 		var href = $(this).attr('href');
     $.get(href, function(data) { 
 			$("#ajaxViewport").html(data); 
@@ -56,7 +76,7 @@ $(document).ready(function() {
   }); 
 
   $(".adminAction").on('click', function() {
-    $("#ajaxViewport").html("<p>Loading...</p>"); 
+    $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
 		var playerId = $('#playerId').val();
 		if (playerId == '-1' || playerId == null) {
 			var teamId = $('#teamId').val(); 
@@ -110,14 +130,14 @@ $(document).ready(function() {
 		$this = $(this);
 		var $url = $this.attr('data-href');
 		swal({
-			title: 'Loading info...',
+			title: lang.loading,
 			onOpen: function() {
 				swal.showLoading();
 				$.get($url, function(data) { 
 					var $myContent = data;
 					swal({
 						html: $myContent,
-						cancelButtonText : 'Ok',
+						cancelButtonText : lang.ok,
 						showConfirmButton: false,
 						showCancelButton: true,
 						allowOutsideClick: true,
@@ -131,27 +151,27 @@ $(document).ready(function() {
 	});
 
 	$('.basicConfirm').on('click', function() {
-		$this = $(this);
-		$reload = $this.attr("data-reload");
+		var $this = $(this);
+		var $href = $this.attr('data-href');
+		var $reload = $this.attr("data-reload");
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes!",
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
 		}).then( function(isConfirm) {
-			var href = $this.attr('data-href');
-			$this.next('.proceedFeedback').html("Saving...");
+			$this.next('.proceedFeedback').html(lang.saving);
 			$('.notification').remove();
 			if ($reload == 'false') {
-				$.get(href, function(data) { 
-					$this.next('.proceedFeedback').html("Saved!");
+				$.get($href, function(data) { 
+					$this.next('.proceedFeedback').html(lang.saved);
 					$('#wrap').prepend(data);
 					setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
 				}); 
 			} else {
-				window.location.href = href;
+				window.location.href = $href;
 			}
 		}, function(dismiss) {
 			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
@@ -161,18 +181,18 @@ $(document).ready(function() {
 	$('.proceed').on('click', function() {
 		$this = $(this);
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes!",
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
 		}).then( function(isConfirm) {
 			var href = $this.attr('data-href') + "/save-options/" + $('#periodId').val() + "/1";
-			$this.next('.proceedFeedback').html("Saving...");
+			$this.next('.proceedFeedback').html(lang.saving);
 			$('.notification').remove();
 			$.get(href, function(data) { 
-				$this.next('.proceedFeedback').html("Saved!");
+				$this.next('.proceedFeedback').html(lang.saved);
 				$('#wrap').prepend(data);
 				setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
 			}); 
@@ -192,7 +212,7 @@ $(document).ready(function() {
 			window.location.href = url;
 			return false;
 		} else {
-			window.alert("Please, select a player first.");
+			window.alert(lang.pleaseSelect);
 		}
 	})
 
@@ -206,12 +226,12 @@ $(document).ready(function() {
 		e.preventDefault();
     $this = $(this);
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "question",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes",
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes,
 		}).then( function() { // Send Ajax request
 			$.get($this.attr('data-url'), function(data) { 
 				$tr = $this.parents("tr");
@@ -231,7 +251,7 @@ $(document).ready(function() {
   }); 
 
   $(".ajax").click(function() {
-    $("#reportDiv").html("<p>Loading...</p>"); 
+    $("#reportDiv").html("<p>"+lang.loading+"</p>"); 
     $.get($(this).attr('href'), function(data) { 
         $("#reportDiv").html(data); 
     }); 
@@ -245,19 +265,20 @@ $(document).ready(function() {
 		var $lessonId = $this.attr('data-lessonId');
 		var $taskId = $this.attr('data-taskId');
 		swal({
-			title: "Are you sure?",
-			html: "This action will alert your teacher.<br />A fake alert will cost you a <span class='label label-danger'>civil disobedience</span> !",
+			title: lang.sure,
+			html: lang.teacherAlert,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes"
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes
 		}).then( function() {
 			$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId+'&taskId='+$taskId;
+			$this.remove();
 			$.get($url, function(data) { 
 				swal({
-					title: "Saved !",
-					text: "Thanks for your participation in Planet Alert !",
+					title: lang.saved,
+					text: lang.thanks,
 					timer: 1000,
 					showConfirmButton: false
 				}).catch(swal.noop);
@@ -276,17 +297,17 @@ $(document).ready(function() {
 		var $playerId = $this.attr('data-playerId');
 		var $lessonId = $this.attr('data-lessonId');
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes"
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes
 		}).then( function() {
 			$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId;
 			$.get($url, function(data) { 
 				// Display PDF Link
-				$this.next(".feedback").html('<a href="'+$this.attr("href")+'" class="btn btn-lg btn-primary">Cliclk here to download PDF</a>');
+				$this.next(".feedback").html('<a href="'+$this.attr("href")+'" class="btn btn-lg btn-primary">'+lang.getPdf+'</a>');
 				// Remove Buy button
 				$this.remove();
 			});
@@ -301,13 +322,13 @@ $(document).ready(function() {
   $(document).on('click', '.del', (function() {
     var $this = $(this);
 		swal({
-			title: "Are you sure?",
-			text: "This action will permanently delete the notification !",
+			title: lang.sure,
+			text: lang.noReturn,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes"
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes
 		}).then( function() {
 			$this.parent('li').remove();
 			$.get($this.attr('href'), function(data) { 
@@ -327,7 +348,6 @@ $(document).ready(function() {
   })); 
 
   $(document).on('click', '.ajaxUnpublish', (function() {
-    //$(this).parent().next(".feedback").html("<p>Loading...</p>"); 
 		$delLink = $(this).parent().next('a.del');
 		if ($delLink) { $delLink.toggle(); }
     $(this).parents('li').toggleClass('strikeText');
@@ -343,26 +363,26 @@ $(document).ready(function() {
 		var $playerId = $this.attr('data-playerId');
 		var $url = $this.attr('data-url');
 		switch($result) {
-			case 'good': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> Sucessful action ! Good job !'; break;
-			case 'bad': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> Failed action...'; break;
+			case 'good': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+lang.good; break;
+			case 'bad': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+lang.bad; break;
 			default: var $text='';
 		}
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "question",
 			html: $text,
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes",
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes,
 		}).then( function() { // Send form
 			// Send form (via Ajax)
 			var $data = 'result='+$result+'&playerId='+$playerId;
 			$.post($url, $data, function(data) {
 				data = data;
 				swal({
-					title: "Saved !",
-					text: "Thanks for your participation in Planet Alert !",
+					title: lang.saved,
+					text: lang.thanks,
 					timer: 1000,
 					showConfirmButton: false
 				}).then( function() {}, function(dismiss) {
@@ -429,7 +449,7 @@ $(document).ready(function() {
     return true;
     // Go to report_generator
     /*
-    $("#reportDiv").html("<p>Loading...</p>"); 
+    $("#reportDiv").html("<p>"+lang.loading+"</p>"); 
     $.get(reportUrl, function(data) { 
         $("#reportDiv").html(data); 
     }); 
@@ -532,12 +552,12 @@ $(document).ready(function() {
 		e.preventDefault();
 		var $this = $(this).parents("form");
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "question",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes",
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes,
 		}).then( function() { // Send form
 			// Send form (via Ajax)
 			var $data = $this.serialize()+'&buyFormSubmit=save';
@@ -552,6 +572,30 @@ $(document).ready(function() {
 		});
 	});
 
+  $('#contactFormSubmit').on( "click", function(e) {
+		e.preventDefault();
+		// var $this = $("#contactForm");
+		var $this = $(this).parents("form");
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes,
+		}).then( function() { // Send form
+			$('#contactFormSubmit').prop('disabled', true);
+			// Send form (via Ajax)
+			var $data = $this.serialize()+'&submit=true';
+			var $formUrl = $this.attr('action');
+			$.post($formUrl, $data, function(data) {
+				$this.html(data);
+			});
+		}, function(dismiss) { // Don't send form
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		});
+	});
+
   $('#donateFormSubmit').on( "click", function(e) {
 		e.preventDefault();
 		var $this = $(this).parents("form");
@@ -560,20 +604,20 @@ $(document).ready(function() {
       return false;
     }
     if ($('#receiver').val() == 0 ) {
-      swal('You must select a player!');
+      swal(lang.pleaseSelect);
       return false;
     }
     if ($('#amount').val() == 0 || $('#amount').val() == '') {
-			swal("Invalid amount !");
+			swal(lang.invalidAmount);
       return false;
     } 
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes",
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes,
 		}).then( function() { // Send form
 			$('#donateFormSubmit').prop('disabled', true);
 			// Send form (via Ajax)
@@ -672,7 +716,7 @@ $(document).ready(function() {
 			}
 		});
 		if (noChecked == true && $('#quizMenu').is(':visible')) { // No checked players
-			alert('Please, select at least 1 player!');
+			alert(lang.pleaseSelect);
 			return false;
 		}
   });
@@ -687,21 +731,21 @@ $(document).ready(function() {
 			var $submit = $this.attr('data-href');
 			var $formData = "buyFormSubmit=on&playerId="+$this.attr('data-playerId')+"&item="+$this.attr('data-id');
 			swal({
-				title: 'Loading info...',
+				title: lang.loading,
 				onOpen: function() {
 					swal.showLoading();
 					$.get($url, function(data) { 
 						if ($todayItemsCount < 3) {
 							var $myContent = data;
 						} else {
-							var $myContent = "Error : Limit reached.";
+							var $myContent = lang.errorLimit;
 						}
 						swal({
-							title: 'Buy this item ?',
+							title: lang.buy,
 							html: $myContent,
 							showConfirmButton: true,
-							confirmButtonText : 'Yes',
-							cancelButtonText : 'No',
+							confirmButtonText : lang.yes,
+							cancelButtonText : lang.no,
 							showCancelButton: true,
 							allowOutsideClick: true,
 							width: 800
@@ -709,8 +753,8 @@ $(document).ready(function() {
 								swal.showLoading();
 								$.post($submit, $formData, function(data) { 
 									swal({
-										title: "Saved !",
-										text: "Thanks for your participation in Planet Alert !",
+										title: lang.saved,
+										text: lang.thanks,
 										timer: 1000,
 										showConfirmButton: false
 									}).then( function() {}, function(dismiss) {
@@ -757,7 +801,7 @@ $(document).ready(function() {
 							title: '',
 							html: $myContent,
 							showConfirmButton: false,
-							cancelButtonText : 'Close',
+							cancelButtonText : lang.close,
 							showCancelButton: true,
 							allowOutsideClick: true,
 							width: 800
@@ -778,17 +822,17 @@ $(document).ready(function() {
 		var $news = $('#newsList li').length;
 		var $url = $('#ajaxDecision').attr('data-href') + '?id=' + $('#ajaxDecision').attr('data-id')+'&pageId='+$pageId+'&news='+$news+$team;
 		swal({
-			title: 'Decision time for...',
+			title: lang.decision,
 			onOpen: function () {
 				swal.showLoading()
 				$.get($url, function(data) { 
 					var $myContent = data;
 					swal({
-						title: '<h3>What do you want to do ?</h3>',
+						title: lang.whatDo,
 						html: $myContent,
 						width: 800,
 						showConfirmButton: false,
-						cancelButtonText : 'Do nothing',
+						cancelButtonText : lang.nothing,
 						showCancelButton: true,
 						allowOutsideClick: true,
 					});
@@ -808,25 +852,25 @@ $(document).ready(function() {
 		if ($type == 'memory') {
 			var $result = $this.attr('data-result');
 			switch($result) {
-				case 'good': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> Sucessful action ! Good job !'; break;
-				case 'bad': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> Failed action...'; break;
+				case 'good': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+lang.good; break;
+				case 'bad': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+lang.bad; break;
 				default: var $text='';
 			}
 			swal({
-				title: "Are you sure ?",
+				title: lang.sure,
 				type: "question",
 				html: $text,
 				showCancelButton : true,
 				allowOutsideClick : true,
-				cancelButtonText: "No",
-				confirmButtonText: "Yes"
+				confirmButtonText: lang.yes,
+				cancelButtonText: lang.no,
 			}).then( function() {
 				var $url = $this.attr('data-url');
 				$.get($url, function(data) { 
 					$this.parents("li").remove();
 					swal({
-						title: "Saved !",
-						text: "Thanks for your participation in Planet Alert !",
+						title: lang.saved,
+						text: lang.thanks,
 						timer: 1000,
 						showConfirmButton: false
 					}).catch(swal.noop);
@@ -839,19 +883,19 @@ $(document).ready(function() {
 		}
 		if ($type == 'initiative') {
 			swal({
-				title: "Let me tell you about [...]",
+				title: lang.tell,
 				type: "info",
-				html: "<ul class='list-unstyled'><li>About 2 minutes</li><li>Others may ask questions</li></ul>",
+				html: lang.talkIndications,
 				showCancelButton : true,
 				allowOutsideClick : false,
-				cancelButtonText: "Not enough",
-				confirmButtonText: "Good job !"
+				cancelButtonText: lang.enough,
+				confirmButtonText: lang.goodJob,
 			}).then( function() {
 				var $url = $this.attr('data-url');
 				$.get($url, function(data) { 
 					swal({
-						title: "Saved !",
-						text: "Thanks for your participation in Planet Alert !",
+						title: lang.saved,
+						text: lang.thanks,
 						timer: 1000,
 						showConfirmButton: false
 					}).catch(swal.noop);
@@ -865,8 +909,8 @@ $(document).ready(function() {
 		if ($type == 'teamNews') {
 			var $teamNews = $('#newsList').html();
 			swal({
-				title: "Team news",
-				text: "Choose a news in the list.",
+				title: lang.teamNews,
+				text: lang.teamNewsIndications,
 				timer: 2000,
 				showConfirmButton : false,
 			}).catch(swal.noop);
@@ -875,18 +919,18 @@ $(document).ready(function() {
 		if ($type == 'discount') {
 			var $discount = $('#discount').html();
 			swal({
-				title: "Looking for a discount ?",
-				text: "Please, wait...",
+				title: lang.discountSearch,
+				text: lang.wait,
 				timer: 2000,
 				showConfirmButton : false,
 				onClose : () => {
 					swal({
-						title: "Get a discount ?",
+						title: lang.discount,
 						html: $discount,
 						showConfirmButton : false,
 						showCancelButton : true,
 						allowOutsideClick : false,
-						cancelButtonText: "Nevermind..."
+						cancelButtonText: lang.nevermind
 					});
 				}
 			}).catch(swal.noop);
@@ -896,7 +940,7 @@ $(document).ready(function() {
 			var $itemId = $this.attr("data-id");
 			var $url = $('#showInfo').attr('data-href') + '?id=showInfo&pageId=' + $itemId;
 			swal({
-				title: 'Loading info...',
+				title: lang.loading,
 				onOpen: function() {
 					swal.showLoading()
 					$.get($url, function(data) { 
@@ -919,12 +963,12 @@ $(document).ready(function() {
 	$(document).on('click', '.buyBtn', function() {
 		var $this = $(this);
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes"
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
 		}).then( function() {
 			var $url = $this.attr('data-url');
 			var $type = $this.attr('data-type');
@@ -933,8 +977,8 @@ $(document).ready(function() {
 			}
 			$.get($url, function(data) { 
 				swal({
-					title: "Saved !",
-					text: "Thanks for your participation in Planet Alert !",
+					title: lang.saved,
+					text: lang.thnks,
 					timer: 1000,
 					showConfirmButton: false
 				}).catch(swal.noop);
@@ -949,10 +993,12 @@ $(document).ready(function() {
 
   $('#startFight').on('click', function() {
     // TODO : Move function into exercise.js?
-    $(this).parents('.alert').hide();
-    $('#fightForm').show();
-    $('#exTitle').hide();
-    $('#energyDiv').show();
+		var $this = $(this);
+		$('#exHeader').hide('slow', function() {
+			$this.parents('.alert').hide();
+			$('#energyDiv').show('slow');
+			$('#fightForm').show();
+		});
     // Start exercise
     // TODO : Record session start...
   });
@@ -962,12 +1008,12 @@ $(document).ready(function() {
 		var $redirectUrl = '';
 		e.preventDefault();
 		swal({
-			title: "Are you sure?",
+			title: lang.sure,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
-			cancelButtonText: "No, let me check again...",
-			confirmButtonText: "Yes, save it!",
+			cancelButtonText: lang.noCheck,
+			confirmButtonText: lang.yesSave,
 		}).then( function(isConfirm) {
 			// Send adminTableForm (via Ajax)
 			$("#adminTableForm :submit").prop('disabled', true);
@@ -985,7 +1031,7 @@ $(document).ready(function() {
 							$alreadySaved = parseInt($('#progress').text());
 							$('#progress').text($alreadySaved + data.saved+' saved.');
 						}).fail( function() {
-							$('#progress').text('ERROR !!!');
+							$('#progress').text(lang.error);
 						});
 						$toSave = 'adminTableSubmit=Save&';
 					}
@@ -997,18 +1043,18 @@ $(document).ready(function() {
 							$('#progress').text($alreadySaved + data.saved +' saved.');
 							$redirectUrl = data.url;
 						}).fail( function() {
-							$('#progress').text('ERROR !!!');
+							$('#progress').text(lang.error);
 						});
 					}
 				}
 			}
 			$(document).ajaxStop(function() {
 				window.location.href = $redirectUrl;
-				setTimeout( function(){ $('#progress').text('Redirecting...'); }, 1000);
+				setTimeout( function(){ $('#progress').text(lang.redirecting); }, 1000);
 			})
 			swal({
 				title: '<span id="progress">0 saved.</span>',
-				html: "<p>Saving form, please wait...</p><p>("+$checked.length+" items to save.)</p>",
+				html: lang.saveForm+"<p>("+$checked.length+" "+lang.itemsTosave+")</p>",
 				showConfirmButton: false
 			});
 		}, function(dismiss) {
@@ -1036,7 +1082,7 @@ $(document).ready(function() {
 	}
 	function getContentFromAjax(url, el) {
 		var id = el.attr('data-id');
-    $.get(url+'?id='+id, function(data) { 
+    $.get(url+'?id='+id+'&randSeed='+Math.random(), function(data) { 
 			el.html(data); 
 			el.children('[data-toggle="tooltip"]').tooltip();
 			initTables();
@@ -1051,8 +1097,18 @@ $(document).ready(function() {
 	if ($('table').length > 0) { initTables(); }
 }); 
 
+var FEEL = {
+	onBeforeReload: function (o) {
+			if($('#usersTable').length) {
+				return false;
+			}
+	}
+};
 // Tables init
 var initTables = function() {
+  var usersTable = $('#usersTable').DataTable({
+    lengthMenu: [ [30, 50, -1], [30, 50, "All"] ]
+  });
   $('#mapTable').DataTable({
     dom: 'ft',
     paging: false,
@@ -1086,7 +1142,7 @@ var initTables = function() {
     searching: false,
     columnDefs: [{ "orderable": false, "targets": 1 },
       { "orderable": false, "targets": 4}],
-    order: [[ 3, "desc" ]]
+    order: [[ 3, "desc" ]],
   });
   var adminTable = $('#adminTable').DataTable({
     dom: 't',
@@ -1097,21 +1153,21 @@ var initTables = function() {
     "columnDefs": [ {
       "targets": "task",
       "orderable": false
-    } ]
+    } ],
   });
   var monstersTable = $('#monstersTable').DataTable({
-    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+    lengthMenu: [ [25, 50, -1], [25, 50, lang.all] ],
     order: [[ 2, "asc"], [0, "asc"]],
     orderCellsTop: true
   });
   var loggedTable = $('#loggedTable').DataTable({
-    lengthMenu: [ [25, 50, -1], [25, 50, 75, 100, "All"] ],
+    lengthMenu: [ [25, 50, -1], [25, 50, 75, 100, lang.all] ],
     order: [[ 1, "desc"]],
     orderCellsTop: true
   });
   var lessonsTable = $('#lessonsTable').DataTable({
     paging: false,
-    lengthMenu: [ [25, 50, -1], [25, 50, 75, 100, "All"] ],
+    lengthMenu: [ [25, 50, -1], [25, 50, 75, 100, lang.all] ],
     order: [[ 0, "asc"], [1, "asc"]],
     orderCellsTop: true
   });
@@ -1293,12 +1349,12 @@ $('#marketPlaceForm :submit').on('click', function(e){
 	var $this = $(this).parents("form");
 	e.preventDefault();
 	swal({
-		title: "Are you sure?",
+		title: lang.sure,
 		type: "warning",
 		showCancelButton : true,
 		allowOutsideClick : true,
-		cancelButtonText: "No, let me check again...",
-		confirmButtonText: "Yes, save it!",
+		cancelButtonText: lang.noCheck,
+		confirmButtonText: lang.yesSave,
 	}).then( function() { // Send form
 		// Send form (via Ajax)
 		$("#marketPlaceForm :submit").prop('disabled', true);

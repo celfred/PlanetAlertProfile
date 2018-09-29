@@ -31,8 +31,87 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Allow multiple teachers
 
 ## v1.0.0 - [Unreleased]
+
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
+
+## [v0.2.1] - Unreleased
+
+A lot of minor bug fixes, but also new CM1 report type, and new small adjustements for a better user experience : more teacher's management possibilities, easier contact form for players... Details below. Maybe the lists are a little long. I should commit minor versions more often for better readability :) 
+
+### Added
+- CM1 report type
+- Planet Alert News in 'recent activity' on Newsboard : list of less-than-30-days-old place/people/lesson/equipment/exercise for information. The list is contextual : a player sees his head teacher's new items. A teacher sees his own news and admin news, admin sees everything. The list is not displayed if empty and is limited to 10 elements, date is added...
+- IE users : warning message, no training, no fights, no marketplace, random seed for Ajax GET request : Not the best practice for IE users, but Planet Alert is only tested with Firefox for the moment (Help needed !).
+- Team name and scores are now visible in tabList
+- Pending serious injuries are now displayed at the top of team list
+- 'My Actions' menu : 'Contact my teacher' for logged-in player
+- Hours are added to periods management
+- Teacher's possibility to test fighting zone, underground training zone and visualizer page in mosters' list and in monster's management
+- Teacher's access to his or her users list (usersTable) with more possibilities : last visit date, quic edit link, access to profile page, Javascript interactivity...
+- No-team players switch button for users list for my own teacher account
+- Add 'rank' to quickly edit team/rank for admin in users list
+- Quick edit link for teachers in player's history
+- Javascript interactivity for player's marketplace
+- Automatically delete no-team players/users after 1 year of inactivity out of middle-school (rank > 9)
+- Teachers can manage his or her own monsters (exercises)
+- Teachers can manage his or her topics 
+- French PDF files
+- Add teacher's access to 'test' player's profile page
+- Add JS french translation
+
+### Changed
+- Mail notifications (for teachers and admin) : more readable, use the WireMail() class
+- Contact form now has JS user confirmation before sending
+- Donation is possible to any player belonging to headTeacher's teams, and not limited to player's team
+- New elements in recent public news : replace new monsters / New lessons indications and add places, people, equipments to the list, contextual to the teacher's teams, better display
+- Hide clues for very small words during training (sunglasses showing jumble letters)
+- Limit players scores to head teacher's teams
+- Avoid reloading after front editing players/users for faster edition
+- Code : Optimize public news request
+- Code : Change 'karma' to 'reputation' to avoid confusion with yearlyKarma
+- Design : Tooltip CSS (clear background)
+- Design : French version icons
+- Design : Monster fights design
+- Design : Add quick scroll arrows for teachers (used to be only for admin)
+
+### Fixed
+- Monsters list was messed up because of quotes in Quiz data
+- Hidden monsters were still hidden even though force visualizer was used
+- Monsters list : restricted to logged in teacher (or head teacher for players)
+- Forgotten translations
+- Wrong task name for penalties
+- Global reports fatal error because of namespace
+- Training monsters list limited to logged teacher
+- Imagemap exercise type (the image was not displayed)
+- Variable name for team->freeworld (issue due to wikiCase spelling)
+- Wrong character encoding during monster invasions (workaround with a sentence avoiding apostrohes)
+- Exercises feedback
+- Setting fightable monsters
+- Recalculate action based on a non-empty yearly-karma during player initialization
+- Display of remaining GC when buying a PDF
+- Statistics url in admin's menu
+- Scoreboard when no groups are set
+- Selecting or deselecting a task or a period did not work correctly for the teacher
+- Progress bars width required rounding resulting value
+- setYearlyKarma()
+- checkStreak() to avoid counting inactivity
+- checkActivity()
+- Guest header menu icons
+- Potion planner : old unused potions are displayed, forgotten translation, cleaner display
+- Add last name indication for no team players in Teacher's work
+- Anonymize empty PDF for new players
+- PDF access 
+- Inactivity was displayed as a negative task in team list
+- Reset streak when inactivity is recorded
+- History display was wrong after recalculating
+- Fix 'Manage tasks' display
+- Fix adding new users' team
+- Save fights/trainings only for logged-in players
+
+### Removed
+- Useless files remaining from previous dev
+
 
 ## [v0.2.0] - 2018-08-19
 
@@ -211,3 +290,4 @@ Initial official release.
 [v0.1.4]: https://framagit.org/celfred/planetAlert/tags/v0.1.4
 [v0.1.5]: https://framagit.org/celfred/planetAlert/tags/v0.1.5
 [v0.2.0]: https://framagit.org/celfred/planetAlert/tags/v0.2.0
+[v0.2.1]: https://framagit.org/celfred/planetAlert/tags/v0.2.1

@@ -9,11 +9,8 @@ $out = '';
 <div>
   <?php
     if ($user->hasRole('teacher') || $user->isSuperuser()) {
-      echo '<a class="pdfLink btn btn-sm btn-info" href="<?php echo $page->url; ?>?pages2pdf=1">'.__("Get PDF").'</a>';
-      echo '<br /><br />';
-
       if ($user->isSuperuser()) {
-        $allTasks = $pages->get("/tasks/")->find("template=task, name!=manual|free|buy, sort='title'");
+        $allTasks = $pages->get("/tasks/")->find("template=task, sort='title'");
         $headTeacher = false;
       } else {
         $allTasks = $pages->get("/tasks/")->find("template=task, name!=manual|free|buy, (owner.singleTeacher=$user), (adminOnly=1), sort=title");
@@ -24,6 +21,10 @@ $out = '';
         $allCategories->add($task->category);
         $allCategories->sort("title");
       }
+
+      echo '<a class="pdfLink btn btn-sm btn-info" href="'.$page->url.'?pages2pdf=1">'.__("Get PDF").'</a>';
+      echo '<br /><br />';
+
     } else {
       if ($user->hasRole('player')) { // Limit to main teacher's tasks
         $allTasks = $pages->find("template=task, (owner.singleTeacher=$teacher), (adminOnly=1), name!=manual|free|buy, sort=title");

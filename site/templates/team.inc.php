@@ -38,9 +38,9 @@
       $group->karma = $group->nbBonus*30;
 
       // Add individual karmas
-      foreach( $players as $player) {
+      foreach($players as $player) {
         // Karma is divided by number of players in the group to be fair with smaller groups
-        $groupKarma = round($player->karma/$players->count);
+        $groupKarma = round($player->yearlyKarma/$players->count);
         (int) $group->karma += $groupKarma;
         $group->details .= '- '.$player->title.' ('.$groupKarma.'k - '.$player->nbEl.'el)<br />';
       }
@@ -88,9 +88,25 @@
   if ($input->urlSegment1 != 'no-team') {
     $captains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
     if (strlen($captains) == 0) { 
-      $captains = 'Nobody.';
+      $captains = __('Nobody.');
     }
-    echo '<p class="text-center"><span class="label label-primary"><span class="glyphicon glyphicon-star"></span> Group Captains</span> → '.$captains.'</p>';
+    echo '<p class="text-center">';
+      // Any new serious injuries ? (personal workflow)
+      if ($user->name == 'flieutaud' || $user->isSuperuser()) {
+        $penalty = $pages->find("has_parent=$allPlayers, template=event, publish=1, task.name=penalty, sort=-date");
+        if (count($penalty) > 0) {
+          echo '<span class="pull-left label label-danger">';
+          echo '<span class="glyphicon glyphicon-warning-sign"></span> ';
+          echo sprintf(_n("Serious injury", "Serious injuries", count($penalty)), count($penalty)).' : ';
+          $players = $penalty->implode(', ', '{parent.parent.title}');
+          echo $players;
+          echo '</span>';
+        }
+      }
+
+      echo '<span class="label label-primary"><span class="glyphicon glyphicon-star"></span> '.__("Group Captains").'</span> → '.$captains;
+    echo '</p>';
+
   }
 
   // echo $outGroups;
@@ -143,14 +159,14 @@
       $lastEvent = $player->child("name=history")->child("sort=-date");
       $prevDay = date("m/d/Y", $lastEvent->date); // Get all events on same day
       $prevDate = $prevDay.' 0:0:0'; // Select events for the whole day
-      $prevEvents = $player->child("name='history'")->children("date>=$prevDate");
+      $prevEvents = $player->child("name=history")->children("template=event, date>=$prevDate");
       $trend = '';
       foreach ($prevEvents as $event) {
         $event->task = checkModTask($event->task, $headTeacher, $player);
-        if (($user->hasRole('teacher') || $user->isSuperuser()) && $event->task->is("name=penalty|death|inactivity")) { $class = ' class="selected"'; }
+        if (($user->hasRole('teacher') || $user->isSuperuser()) && $event->task->is("name=penalty|death")) { $class = 'selected'; }
         $HP = $event->task->HP;
         $title = $event->task->title;
-        $HP < 0 ? $trendClass = 'negativeTrend' : $trendClass = 'positiveTrend';
+        $HP < 0 || $event->task->is("name=inactivity") ? $trendClass = 'negativeTrend' : $trendClass = 'positiveTrend';
         $event->summary !== '' ? $summary = ' ('.$event->summary.')' : $summary = '';
         $trend .= '<span class="'.$trendClass.'" data-toggle="tooltip" data-html="true" title="'.strftime("%d/%m", $event->date).': '.$title.$summary.'">&nbsp;</span>';
       }
@@ -170,7 +186,7 @@
       $hkCount = '';
     }
     // Set HP progressbar
-    $HPwidth = 150*$player->HP/50;
+    $HPwidth = round(150*$player->HP/50);
     // Set XP progressbar
     if ($player->level <= 4) {
       $delta = 40+($player->level*10);
@@ -178,7 +194,7 @@
       $delta = 90;
     }
     $threshold = ($player->level*10)+$delta;
-    $XPwidth = 150*$player->XP/($threshold);
+    $XPwidth = round(150*$player->XP/($threshold));
     // Places list
     $tooltipPlaces = '';
     if ($player->places->count() > 0) {
@@ -219,7 +235,7 @@
     }
 
     if ($player->avatar) {
-      $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$player->avatar->getCrop('mini')->url."' alt='avatar' />";
+      $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img class=\"tipList-light\" src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$player->avatar->getCrop('mini')->url."' alt='avatar' />";
     } else {
       $mini = '';
     }
@@ -236,19 +252,19 @@
       $out .= '<td><span class="trend">'.$trend.'</span></td>';
     }
     if ($player->skills->has("name=captain")) {
-      $showSkills = '<span class="label label-primary" data-toggle="tooltip" title="Captain">C</span>';
+      $showSkills = '<span class="label label-primary" data-toggle="tooltip" title="'.__("Captain").'">C</span>';
     } else {
       $showSkills = '';
     }
     if ($player->skills->has("name=ambassador")) {
-      $showSkills .= '<span class="label label-success" data-toggle="tooltip" title="Ambassador">A</span>';
+      $showSkills .= '<span class="label label-success" data-toggle="tooltip" title="'.__("Ambassador").'">A</span>';
     } else {
       $showSkills .= '<span class="label label-info">'.$player->streak.'</span>';
     }
     $out .= '<td>'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';
     $out .= '<td>'. $player->level .'</td>';
-    $out .= '<td>'. $player->karma .'</td>';
+    $out .= '<td>'. $player->reputation .'</td>';
     if ($player->coma == true) { $player->HP = 0; }
     $out .= '<td data-order="'.$player->HP.'" data-toggle="tooltip" title="'.$player->HP.'/50" data-placement="top">';
     if ($player->coma == false) {

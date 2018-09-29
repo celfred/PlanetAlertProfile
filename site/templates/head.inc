@@ -64,10 +64,10 @@
     if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teacher or Superuser is logged
       $profilePage = $pages->get("parent.name=teachers, singleTeacher=$user");
       if ($user->isSuperuser()) { // All teams for Admin
-        $allTeams = $pages->find("template=team")->sort("title");
+        $allTeams = $pages->find("template=team, sort=title");
         $allPlayers = $pages->find("template=player, parent.name=players, team.name!=no-team")->sort("team->name, title");
       } else { // Restrict to logged in Teacher's teams
-        $allTeams = $pages->find("template=team, teacher=$user")->sort("title");
+        $allTeams = $pages->find("template=team, teacher=$user, sort=title");
         $allPlayers = $pages->find("template=player, parent.name=players, team.name!=no-team, (teacher=$user), (team.teacher=$user)")->sort("team->name, title");
       }
 
@@ -175,7 +175,7 @@
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-actions' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/manage-actions/'><span class='glyphicon glyphicon-flash'></span> - ".__('Manage actions')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-categories' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-categories/'><span class='glyphicon glyphicon-tag'></span> - ".__('View categories')."</a></li>";
+                $out .= "<li><a$class href='{$adminActions->url}/manage-categories/'><span class='glyphicon glyphicon-tag'></span> - ".__('Manage categories and topics')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-lessons' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/manage-lessons/'><span class='glyphicon glyphicon-file'></span> - ".__('Manage lessons')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-monsters' ? " class='selected-left'" : "";
@@ -193,15 +193,15 @@
                 $out .= '</ul>';
               $out .= '</li>';
               $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$adminActions->url}/reports/'><span class='glyphicon glyphicon-file'></span> - ".__('Reports')."</a></li>";
+              $out .= "<li><a$class href='{$adminActions->url}reports/'><span class='glyphicon glyphicon-file'></span> - ".__('Reports')."</a></li>";
+              $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$adminActions->url}users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
               
               // Add Admin Zone
               if ($user->isSuperuser()) {
                 $out .= "<li role='separator' class='divider'></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/users'><span class='glyphicon glyphicon-user'></span> - Users / History</a></li>";
                 $class = $page->name == 'statistics' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
+                $out .= "<li><a$class href='{$pages->get("name=statistics")->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
                 $out .= "<li role='separator' class='divider'></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/ut-stats/'>UT Stats</a></li>";
@@ -213,8 +213,8 @@
                 $out .= "<li><a$class href='{$adminActions->url}/ut/'>UT Hall of fame</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setScores' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/setScores/'>Set scores</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setKarma' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/setKarma/'>Set karmas</a></li>";
+                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setReputation' ? " class='selected-left'" : "";
+                $out .= "<li><a$class href='{$adminActions->url}/setReputation/'>Set reputation</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setYearlyKarma' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/setYearlyKarma/'>Set yearly karmas</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCaptains' ? " class='selected-left'" : "";
@@ -232,7 +232,7 @@
     if ($user->hasRole('player')) { // Player's menu
       $player = $pages->get("template='player', login=$user->name");
       $user->language = $headTeacher->language; // Teacher chooses the language for his students
-      $allTeams = $pages->find("template=team")->sort("title");
+      $allTeams = $pages->find("template=team, teacher=$headTeacher, sort=title");
       if ($player->team->name != 'no-team') {
         $allPlayers = $pages->find("parent.name=players, template=player, team=$player->team");
       }
@@ -332,18 +332,21 @@
                 $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
                 $out .= "<span class='strikeText'>".__("Read the Book of Knowledge")."</span></li>";
               }
+              // Contact teacher
+              $class = $page->name == 'contact' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__("Contact my teacher")."</a></li>";
               // Hall of Fame
               $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$hall->url}'><span class='glyphicon glyphicon-eye-open'></span> - ".__("Visit the Hall of Fame")."</a></li>";
             $out .= '</ul>';
           $out .= '</div>';
           $out .= '<div class="btn-group">';
-            $class = $page->is("name=blog|documentation|contact") ? "on" : "";
+            $class = $page->is("name=blog|documentation") ? "on" : "";
             $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>';
             $out .= '<ul class="dropdown-menu">';
               $out .= '<li class="dropdown-submenu">';
                 $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : "";
-                $out .= '<a class="'.$class.'" href="'.$places->url.'"><span class="glyphicon glyphicon-globe"></span> - '.__("The World").'</span></a>';
+                $out .= '<a class="'.$class.'" href="'.$places->url.'"><span class="glyphicon glyphicon-globe"></span> - '.__("Discover Planet Alert World").'</span></a>';
                 $out .= '<ul class="dropdown-menu">';
                   $class = $page->name == 'shop' ? " class='selected-left'" : "";
                   $out .= "<li><a$class href='{$shop->url}'>{$shop->title}</a></li>";
@@ -365,8 +368,6 @@
                   $out .= "<li><a$class href='{$book->url}'>{$book->title}</a></li>";
                 $out .= '</ul>';
               $out .= '</li>';
-              $class = $page->name == 'contact' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - {$contact->title}</a></li>";
               $class = $page->name == 'blog' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
               $class = $page->name == 'documentation' ? " class='selected-left'" : "";
@@ -379,7 +380,7 @@
     }
 
     if (!$user->isLoggedin()) { // Guest menu
-      $allTeams = $pages->find("template=team")->sort("title");
+      $allTeams = $pages->find("template=team, sort=title");
       $allPlayers = $pages->find("parent.name=players, template=player");
       $out .= '<ul>';
         $out .= '<div class="btn-group" role="group" aria-label="...">';
@@ -431,6 +432,9 @@
               $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
               $class = $page->name == 'documentation' ? " class='selected-left'" : "";
               $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - {$documentation->title}</a></li>";
+              // Contact admin
+              $class = $page->name == 'contact' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__("Contact")."</a></li>";
           $out .= '</ul>';
           $out .= '</div>';
           $class = $page->is("name=loginform") ? "on" : "";
@@ -446,3 +450,8 @@
   <div class="container-fluid">
     <div class="row">
       <div id="content" class="col-sm-12">
+      <?php
+        if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
+          echo $ieAlert;
+        }
+      ?>

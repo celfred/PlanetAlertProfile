@@ -4,7 +4,9 @@
   $homepage = $pages->get("/"); 
   $loginUrl = $pages->get("name=loginform")->url;
   $french = $languages->get('french');
-  $noAuthMessage = '<p class="alert alert-warning">'.sprintf(__("Sorry, but you don't have access to this page (%d). If you think this is an error. Please, contact the administrator."), $page->name).'</p>';
+  $noAuthMessage = '<p class="alert alert-warning">'.sprintf(__("Sorry, but you don't have access to this page (%d). If you think this is an error, please contact the administrator."), $page->name).'</p>';
+  $ieAlert = '<p class="alert alert-warning">'.__("You are using Internet Explorer. Planet Alert is tested only with Firefox for the moment. Please, think of changing browser for a better user experience.").'</p>';
+  $wrongBrowserMessage = '<p class="alert alert-warning">'.sprintf(__("Sorry, but this page (%d) is not accessible with your browser. Planet Alert is tested only with Firefox for the moment. If you think this is an error, please contact the administrator."), $page->name).'</p>';
 
   $wire->addHook('LazyCron::everyDay', null, 'checkActivity'); // Check all players activity
   $wire->addHook('LazyCron::everyDay', null, 'randomSpecial'); // Set random special monsters

@@ -20,6 +20,9 @@ table td {
   text-align: center;
   padding: 5px;
 }
+table td.text-left {
+	text-align: left;
+}
 span.text-left {
   text-align: left;
 }

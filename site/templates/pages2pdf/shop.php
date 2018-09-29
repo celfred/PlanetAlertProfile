@@ -71,16 +71,17 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $out .= '<table class="">';
       $out .= '<tr>';
       $out .= '<th width="50%">';
-      $out .= '<h2>Memory Potion : Text n°'.$text->index.'</h2>';
+      $out .= '<h2>'.__("Memory Potion").' : '.$text->title.'</h2>';
       $out .= '<br />';
-      $out .= '<p>Player : _______________________________ (___________) </p>';
+      $out .= '<p>'.__("Player").' : _______________________________ (___________) </p>';
       $out .= '</th>';
       $out .= '<th>';
       $out .= '<img style="" src="'.$logo.'" width="75" height="75" />';
       $out .= '</th>';
       $out .= '</tr>';
       $out .= '<tr>';
-      if (strlen($text->frenchSummary) > 0) {
+      $text->of(false);
+      if (strlen($text->getLanguageValue($french)) > 0) {
         $out .= '<td>';
       } else {
         $out .= '<td colspan="2">';
@@ -89,15 +90,16 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $out .= '<h2>'.$text->title.'</h2>';
       $out .= '<p style="font-size: 16px;">'.nl2br($text->summary).'</p>';
       $out .= '</td>';
-      if (strlen($text->frenchSummary) > 0) {
+      if (strlen($text->getLanguageValue($french)) > 0) {
         $out .= '<td>';
         $out .= '<p><img style="" src="'.$config->urls->templates.'img/flag_fr.png" alt="French" /></p>';
-        $out .= '<p style="font-size:16px;">'.nl2br($text->frenchSummary).'</p>';
+        $out .= '<p style="font-size:16px;">'.nl2br($text->getLanguageValue($french)).'</p>';
         $out .= '</td>';
       }
       $out .= '</tr>';
       $out .= '<tr>';
-      $out .= '<td colspan="2"><p>Given date : ______________________________  Due date : ______________________________ </p></td>';
+      $out .= '<td colspan="2"><p>'.__("Given date").' : ______________________________  ';
+      $out .= __("Due date").' : ______________________________ </p></td>';
       $out .= '</tr>';
       $out .= '</table>';
       $out .= '<br /><br />';
@@ -105,20 +107,20 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
   } else {
     $out .= '<img style="float: left;" src="'.$logo.'" width="100" height="100" />';
     $out .= '<img style="float: right;" src="'.$logo.'" width="100" height="100" />';
-    $out .= '<h1 style="text-align: center; text-decoration : underline;">The Shop</h1>';
+    $out .= '<h1 style="text-align: center; text-decoration : underline;">'.__("The Marketplace").'</h1>';
 
     $out .= '<table class="">';
 
     $out .= '<tr>';
-    $out .= '<th colspan="7"><h2>Weapons ('. $weapons->count.' items)</h2></th>';
+    $out .= '<th colspan="7"><h2>'.__("Weapons").' ('. $weapons->count.' items)</h2></th>';
     $out .= '</tr>';
     $out .= '<tr>';
-    $out .= '<th>Minimum level</th>';
-    $out .= '<th>GC</th>';
-    $out .= '<th>XP</th>';
-    $out .= '<th>Name</th>';
+    $out .= '<th>'.__("Minimum level").'</th>';
+    $out .= '<th>'.__("GC").'</th>';
+    $out .= '<th>'.__("XP").'</th>';
+    $out .= '<th>'.__("Name").'</th>';
     $out .= '<th>&nbsp;</th>';
-    $out .= '<th colspan="2">Summary</th>';
+    $out .= '<th colspan="2">'.__("Summary").'</th>';
     $out .= '</tr>';
     foreach($weapons as $weapon) {
       $thumbImage = $weapon->image->getCrop('mini');
@@ -133,13 +135,13 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
     }
 
     $out .= '<tr>';
-    $out .= '<th colspan="7"><h2>Protections ('. $protections->count.' items)</h2></th>';
+    $out .= '<th colspan="7"><h2>'.__("Protections").' ('. $protections->count.' items)</h2></th>';
     $out .= '</tr>';
     $out .= '<tr>';
-    $out .= '<th>Minimum level</th>';
-    $out .= '<th>GC</th>';
-    $out .= '<th>HP</th>';
-    $out .= '<th>Name</th>';
+    $out .= '<th>'.__("Minimum level").'</th>';
+    $out .= '<th>'.__("GC").'</th>';
+    $out .= '<th>'.__("HP").'</th>';
+    $out .= '<th>'.__("Name").'</th>';
     $out .= '<th>&nbsp;</th>';
     $out .= '<th colspan="2">Summary</th>';
     $out .= '</tr>';
@@ -150,20 +152,20 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $out .= '<td>'.$protection->GC.'</td>';
       $out .= '<td>+'.$protection->HP.'</td>';
       $out .= '<td>'.$protection->title.'</td>';
-      $out .= '<td><img src="'.$thumbImage.'" /></td>';
+      $out .= '<td><img src="'.$thumbImage->url.'" /></td>';
       $out .= '<td colspan="2">'.$protection->summary.'</td>';
       $out .= '</tr>';
     }
 
     $out .= '<tr>';
-    $out .= '<th colspan="7"><h2>Potions ('. $items->count .' items)</th>';
+    $out .= '<th colspan="7"><h2>'.__("Potions").' ('. $items->count .' items)</th>';
     $out .= '</tr>';
     $out .= '<tr>';
-    $out .= '<th>Minimum level</th>';
-    $out .= '<th>GC</th>';
-    $out .= '<th>HP</th>';
-    $out .= '<th>XP</th>';
-    $out .= '<th>Name</th>';
+    $out .= '<th>'.__("Minimum level").'</th>';
+    $out .= '<th>'.__("GC").'</th>';
+    $out .= '<th>'.__("HP").'</th>';
+    $out .= '<th>'.__("XP").'</th>';
+    $out .= '<th>'.__("Name").'</th>';
     $out .= '<th>&nbsp;</th>';
     $out .= '<th>Summary</th>';
     $out .= '</tr>';
@@ -196,6 +198,4 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
 
 echo $out;
 
-
 ?>
-

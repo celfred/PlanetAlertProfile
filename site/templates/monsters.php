@@ -3,16 +3,31 @@
 
   $out = '';
 
-  if ($user->isSuperuser()) {
-    $allMonsters = $page->children("include=all")->sort("level, name");
-  } else {
+  if ($user->isGuest()) {
     $allMonsters = $page->children->sort("level, name");
+  } else {
+    if ($user->isSuperuser()) {
+      $allMonsters = $page->children("include=all")->sort("level, name");
+    }
+    if ($user->hasRole('teacher')) {
+      $allMonsters = $page->children("(created_users_id=$user->id), (teacher=$user), include=all")->sort("level, name");
+    }
+    if ($user->hasRole('player')) {
+      $allMonsters = $page->children("(created_users_id=$headTeacher->id), (teacher=$headTeacher)")->sort("level, name");
+    }
   }
 
-  $allCategories = $pages->find("parent.name=topics, sort=name");
+  $allCategories = new PageArray();
+  foreach ($allMonsters as $m) {
+    if ($m->topic->count() > 0) {
+      foreach($m->topic as $t) {
+        $allCategories->add($t);
+      }
+    }
+    $allCategories->sort("title");
+  }
 
-  // Test player login
-  if (isset($player) && $user->isLoggedin() || $user->isSuperuser()) {
+  if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) {
     // Test if player has unlocked Memory helmet or Visualizer
     if ($user->isSuperuser() || $user->hasRole('teacher')) {
       $helmet = $pages->get("name=memory-helmet");
@@ -37,11 +52,15 @@
       if ($visualizer->image) {
         echo '<img class="" src="'.$visualizer->image->getCrop('small')->url.'" alt="Visualizer" />';
       }
-      echo ' <a href="'.$pages->get("name=Visualizer")->url.'">'.__("Use the Electronic Visualizer").'</a> / ';
+      echo ' <a href="'.$pages->get("name=Visualizer")->url.'">'.__("Use the Electronic Visualizer").'</a>   ';
     } else {
       echo '<div class="well text-center">';
       echo __("You must buy the Electronic Visualizer to detect ALL monsters.");
       echo '</div>';
+    }
+    if ($user->hasRole('teacher') || $user->isSuperuser()) {
+      echo '<span class="glyphicon glyphicon-flash"></span> ';
+      echo ' <a href="'.$pages->get("name=fighting-zone")->url.'">'.__("Go to the Fighting zone").'</a>   ';
     }
     echo '</h4>';
     echo '</div>';
@@ -96,7 +115,7 @@
           $mini = '';
         }
         if ($user->isSuperuser() || $user->hasRole('teacher')) {
-          $out .= '<td><a class="pdfLink btn btn-info" href="'.$page->url().'?id='.$m->id.'&pages2pdf=1">[PDF]</a></td>';
+          $out .= '<td><a class="pdfLink btn btn-info btn-xs" href="'.$page->url.'?id='.$m->id.'&pages2pdf=1">[PDF]</a></td>';
         }
         $out .= '<td>'. $mini .'</td>';
         $out .= '<td>';
@@ -120,7 +139,7 @@
         }
         // Count # of words
         $exData = $m->exData;
-        $allLines = preg_split('/$\r|\n/', $exData);
+        $allLines = preg_split('/$\r|\n/', $sanitizer->entitiesMarkdown($exData));
         /* Unused because triggers a bug with tooltip display */
         /* $out .= '<td data-sort="'.count($allLines).'">'; */
         $out .= '<td>';

@@ -42,16 +42,17 @@ $out .= '<td>';
 $out .= '<img style="" src="'.$logo->url.'" />';
 $out .= '</td>';
 $out .= '<td colspan="3">';
-$out .= '<h1 style="text-align: center; text-decoration : underline;">Free Places (Team:'.strtoupper($input->urlSegment1).')</h1>';
+$out .= '<h1 style="text-align: center; text-decoration : underline;">'.__("Free Places").' (';
+$out .= __("Team").':'.strtoupper($input->urlSegment1).')</h1>';
 //$out .= '<h1 style="text-align: center;">'.$freedomRate.'% of the world is free!</h1>';
 $out .= '</td>';
 $out .= '</tr>';
 
 $out .= '<tr>';
-$out .= '<td># of owners</td>';
-$out .= '<td>Level</td>';
-$out .= '<td>GC</td>';
-$out .= '<td>Place</td>';
+$out .= '<td>'.__("# of owners").'</td>';
+$out .= '<td>'.__("Level").'</td>';
+$out .= '<td>'.__("GC").'</td>';
+$out .= '<td>'.__("Place").'</td>';
 $out .= '</tr>';
 
 // Display free places (by level)
@@ -59,7 +60,7 @@ for ($i=1; $i<11; $i++) {
   if (in_array($i, $completedLevels) == false) {
     foreach($isOwned[$i] as $place) { // Level not completed, display free places
       $out .= '<tr class="negative">';
-      $out .= '<td>FREE!</td>';
+      $out .= '<td>'.__("FREE!").'</td>';
       $out .= '<td>'.$place->level.'</td>';
       $out .= '<td>'.$place->GC.'</td>';
       $out .= '<td><h2>'.$place->title.' ('.$place->city->title.', '.$place->country->title.')</h2></td>';
@@ -67,7 +68,7 @@ for ($i=1; $i<11; $i++) {
     } 
   } else { // Level completed
     $out .= '<tr class="complete">';
-    $out .= '<td colspan="4"><h1 style="font-variant: small-caps;">Level '.$i.' complete!</h1></td>';
+    $out .= '<td colspan="4"><h1 style="font-variant: small-caps;">'.sprintf(__("Level %d complete !"), $i).'</h1></td>';
     $out .= '</tr>';
   }
 }
@@ -109,6 +110,4 @@ $out .= '</table>';
 
 echo $out;
 
-
 ?>
-

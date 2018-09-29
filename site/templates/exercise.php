@@ -1,25 +1,28 @@
 <?php namespace ProcessWire;
   if (!$config->ajax) {
     include("./head.inc"); 
-
-    if ($user->isLoggedin() || $user->isSuperuser()) {
-      echo '<div ng-app="exerciseApp">';
-      // Get player's equipment to set scores alternatives
-      $weaponRatio = 0;
-      $protectionRatio = 0;
-      if (!$user->isSuperuser()) {
-        $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
-        $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
-      }
-      if ($bestWeapon->id) { $weaponRatio = $bestWeapon->XP; }
-      if ($bestProtection->id) { $protectionRatio = $bestProtection->HP; }
-
-      // Get exercise type
-      include('./exTemplates/'.$page->type->name.'.php');
-
-      echo '</div>';
+    if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
+      echo $wrongBrowserMessage;
     } else {
-      echo '<div class="well"><p>You have to log in to see this page.</p></div>';
+      if (!$user->isLoggedin()) {
+        echo $noAuthMessage;
+      } else {
+        echo '<div ng-app="exerciseApp">';
+        // Get player's equipment to set scores alternatives
+        $weaponRatio = 0;
+        $protectionRatio = 0;
+        if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
+          $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+          $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
+        }
+        if (isset($bestWeapon)) { $weaponRatio = $bestWeapon->XP; }
+        if (isset($bestProtection)) { $protectionRatio = $bestProtection->HP; }
+
+        // Get exercise type
+        include('./exTemplates/'.$page->type->name.'.php');
+
+        echo '</div>';
+      }
     }
 
     include("./foot.inc"); 
@@ -41,7 +44,7 @@
       // Get player's stats
       if ($user->isLoggedin()) {
         $player = $pages->get("template='player', login=$user->name");
-        if (!$user->isSuperuser()) {
+        if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
           $page = setMonster($player, $page);
           if ($page->fightNb > 0) {
           } else {

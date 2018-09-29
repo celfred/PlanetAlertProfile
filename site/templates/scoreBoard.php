@@ -7,7 +7,7 @@
     if (!isset($player)) { $player = ''; }
     list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, -1);
     switch ($field) {
-      case 'karma' :
+      case 'reputation' :
         $title = 'Most influential';
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
@@ -63,8 +63,8 @@
           <?php
             foreach($topPlayers as $player) {
               switch ($field) {
-                case 'karma' :
-                  $indicator = $player->karma;
+                case 'reputation' :
+                  $indicator = $player->reputation;
                   $tag = 'rep.';
                   break;
                 case 'places' :
@@ -92,7 +92,7 @@
                   $tag = 'U.T.';
                   break;
                 case 'group' :
-                  $indicator = $player->karma;
+                  $indicator = $player->reputation;
                   $tag = 'rep.';
                   break;
                 default : 
@@ -150,8 +150,8 @@
           }
           if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
           switch($field) {
-            case 'karma':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' rep.</span></li>';
+            case 'reputation':
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' rep.</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
@@ -197,8 +197,8 @@
           }
           if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
           switch($field) {
-            case 'karma':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' rep.</span></li>';
+            case 'reputation':
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' rep.</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
@@ -242,8 +242,8 @@
         }
         if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
         switch($field) {
-          case 'karma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->karma.' rep.</span></li>';
+          case 'reputation':
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' rep.</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {

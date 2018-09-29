@@ -9,14 +9,14 @@ $out .= '<div class="frenchVersion">';
 if ($user->language->name == 'default') {
   $page->of(false);
   $out .= $page->body->getLanguageValue($french);
-  $out .= '<p class="text-center"><a href="#" class="frenchVersion">[<i class="glyphicon glyphicon-eye-close"></i> '.__("Close").']</a></p>';
+  $out .= '<p class="text-center"><a href="#" class="frenchVersion">[<i class="glyphicon glyphicon-remove"></i> '.__("Close").']</a></p>';
 }
 $out .= '</div>';
 
 $out .= $page->body;
 
 if ($user->language->name == 'default') {
-  $out .= '<a href="#" class="frenchVersion">[<i class="glyphicon glyphicon-eye-open"></i> French version]</a>';
+  $out .= '<a href="#" class="frenchVersion">[<img src="'.$urls->templates.'img/flag_fr.png" /> French version]</a>';
 }
 
 echo $out;

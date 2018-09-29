@@ -4,74 +4,95 @@
     if (!$user->isSuperuser()) {
       $headTeacher = getHeadTeacher($user);
       $user->language = $headTeacher->language;
+      if ($user->hasRole('player')) {
+        $currentPlayer = $pages->get("parent.name=players, template=player, login=$user->name");
+      }
     }
     switch ($input->get('id')) {
       case 'lastEvents' : // Public activity
-        // TODO : Limit to logged in players contextual news
-        $adminId = $users->get("name=admin")->id;
-        $lastMonsters = $pages->find("template=exercise, created_users_id=$adminId, sort=-published, limit=3");
-        $lastLessons = $pages->find("template=lesson, created_users_id=$adminId, sort=-published, limit=3");
-        $lastUpdatedLessons = $pages->find("template=lesson, modified_users_id=$adminId, sort=-modified, limit=3");
-        // Last 3 published monsters
-        $out .= '<ul class="list-inline">&nbsp;';
-        $out .= '<li class="label label-success"><span class="glyphicon glyphicon-headphones"></span> '.__("New monsters !").'</li>';
-        foreach($lastMonsters as $m) {
-          if ($m->image) {
-            $mini = "<img data-toggle='tooltip' src='".$m->image->getCrop('mini')->url."' alt='image' />";
-          } else {
-            $mini = '';
+        $today = new \DateTime("today");
+        $interval = new \DateInterval('P30D');
+        $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
+        // Planet Alert news
+        if ($user->isGuest()) { // Guests get admin news only
+          $adminId = $users->get("name=admin")->id;
+          $newItems = $pages->find("template=exercise|equipment|item|lesson, created_users_id=$adminId, published>$limitDate, sort=-published, limit=10");
+        } else {
+          if ($user->isSuperuser()) { // Admin gets ALL news
+            $adminId = $users->get("name=admin")->id;
+            $newItems = $pages->find("template=exercise|equipment|item|lesson, published>$limitDate, sort=-published, limit=10");
           }
-          $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$m->summary.'">'.$mini.' '.$m->title.'</li>  ';
-        }
-        if ($user->isLoggedin() && $user->hasRole("player")) {
-          $currentPlayer = $pages->get("template=player, login=$user->name");
-          $helmet = $currentPlayer->equipment->get("name=memory-helmet");
-          if (isset($helmet)) {
-            $out .= '<li>→ <a href="'.$pages->get("name=underground-training")->url.'">'.__("Go to the Underground Training Zone !").'</a></li>';
-          } else {
-            $out .= '<li>→ '.__("You need to buy the Memory Helmet to fight monsters !").'</a></li>';
+          if ($user->hasRole('teacher')) { // Teachers get admin news + personal news
+            $adminId = $users->get("name=admin")->id;
+            $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
+            $newItems = $pages->find("template=exercise|equipment|item|lesson, (created_users_id=$adminId, published>$limitDate), (teacher=$user, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
+          }
+          if ($user->hasRole('player')) { // Player gets headTeacher news
+            $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
+            $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
           }
         }
-        $out .= '</ul>';
-        // Last 3 published lessons
-        $out .= '<ul class="list-inline">&nbsp;';
-        $out .= '<li class="label label-success"><span class="glyphicon glyphicon-book"></span> '.__("New lessons !").'</li>';
-        foreach($lastLessons as $l) {
-          $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$l->summary.'">'.$l->title.'</li>  ';
+        $extra = $newItems->getTotal() - $newItems->getLimit();
+        if ($extra > 0) { $limitReached = '<li>['.$extra.' '.__("more results").']</li>'; } else { $limitReached = ''; }
+        // Updated news are commented out for the moment (not very useful ?)
+        /* $updatedItems = $pages->find("template=exercise|equipment|item|lesson, created_users_id=$adminId, modified>$limitDate, sort=-modified, limit=3"); */
+        $book = $pages->get("name=book-knowledge-item");
+        if ($newItems->count() > 0) {
+          $out .= '<p class="label label-danger"><span class="glyphicon glyphicon-hand-up"></span> '.__("Planet Alert News !").'</p>';
         }
-        // Last updated lessons
-        foreach($lastUpdatedLessons as $l) {
-          if ($lastLessons->has($l) == false) {
-            $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$l->summary.'">'.$l->title.' <span class="badge">'.__("Updated !").'</span></li>  ';
-          }
+        if ($newItems->count() > 0) {
+          $out .= '<ul class="list-inline">';
+            foreach($newItems as $n) {
+              if ($n->image) {
+                $mini = "<img data-toggle='tooltip' src='".$n->image->getCrop('mini')->url."' alt='image' />";
+              } else {
+                $mini = '';
+              }
+              if ($n->is("template=lesson")) {
+                $mini = '<img src="'.$book->image->getCrop('mini')->url.'" alt="image">';
+              }
+              $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$n->summary.'">'.$mini.' '.$n->title.' <span class="badge">New</span>';
+              if ($user->isSuperuser()) {
+                $out .= $n->feel();
+              }
+              $out .= '</li>  ';
+            }
+          $out .= $limitReached;
+          $out .= '</ul>';
         }
-        if ($user->isLoggedin() && $user->hasRole("player")) {
-          $currentPlayer = $pages->get("template=player, login=$user->name");
-          $book = $currentPlayer->equipment->get("name~=book-knowledge");
-          if (isset($book)) {
-            $out .= '<li>→ <a href="'.$pages->get("name=book-knowledge")->url.'">'.__("Read my Book of Knowledge").'</a></li>';
-          } else {
-            $out .= '<li>→ '.__("You need to buy the Book of Knowledge to see the lessons !").'</a></li>';
-          }
-        }
-        $out .= '</ul>';
+        /* if ($updatedItems->count() > 0) { */
+        /*   $out .= '<ul class="list-inline">'; */
+        /*     foreach($updatedItems as $n) { */
+        /*       if ($n->image) { */
+        /*         $mini = "<img data-toggle='tooltip' src='".$n->image->getCrop('mini')->url."' alt='image' />"; */
+        /*       } else { */
+        /*         $mini = ''; */
+        /*       } */
+        /*       if ($n->is("template=lesson")) { */
+        /*         $mini = '<img src="'.$book->image->getCrop('mini')->url.'" alt="image">'; */
+        /*       } */
+        /*       $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$n->summary.'">'.$mini.' '.$n->title.' <span class="badge">Updated</span></li>  '; */
+        /*     } */
+        /*   $out .= '</ul>'; */
+        /* } */
         // Last admin announcements
         if ($user->isGuest()) { // Guests get public news only
-          $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=5")->sort("-date");
+          $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date");
         } else {
           if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teachers and Admin gets all published news
-            $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=5")->sort("-date");
+            $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=3")->sort("-date");
           }
           if ($user->hasRole('player')) { // Player gets public and ranked news
             if ($currentPlayer->rank) {
-              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$currentPlayer->rank, limit=5")->sort("-date");
+              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$currentPlayer->rank, limit=3")->sort("-date");
             } else { // Public news only (no rank)
-              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=5")->sort("-date");
+              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date");
             }
           }
         }
         $out .= '<p>';
         $out .= '<span class="label label-success"><span class="glyphicon glyphicon-hand-up"></span> '.__("Last official announcements !").'</span>';
+        $out .= ' <span><a href="'.$pages->get("name=blog")->url.'">'.__("[Read all official announcements]").'</a></span>';
         $out .= '<ul class="">';
         $blogUrl = $pages->get("name=blog")->url;
         foreach($newsAdmin as $n) {
@@ -80,14 +101,23 @@
         $out .= '</ul>';
         $out .= '</p>';
         // Recent public news (30 previous days)
-        $excluded = $pages->get("template=player, name=test");
-        $today = new \DateTime("today");
-        $interval = new \DateInterval('P30D');
-        $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
-        // Find last events
-        $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv, has_parent!=$excluded");
+        if ($user->isGuest()) { // Guests get public news only
+          $excluded = $pages->get("template=player, name=test");
+        } else {
+          if ($user->hasRole('teacher')) { // Teachers gets his players public news
+            $excluded = $pages->find("template=player, team.teacher!=$user");
+          }
+          if ($user->hasRole('player')) { // Player gets teacher's teams public news
+            $excluded = $pages->find("template=player, team.teacher!=$headTeacher");
+          }
+        }
+        if (!$user->isSuperuser()) { // Take excluded pages into account
+          $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv")->not("has_parent=$excluded");
+        } else { // Admin gets all public news
+          $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv");
+        }
+        $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("New public activity !").'</h4>';
         if ($news->count() > 0) {
-          $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("New public activity !").'</h4>';
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {
             $currentPlayer = $n->parent('template=player');
@@ -99,6 +129,7 @@
               $mini = '';
             }
             $out .= '<li>';
+            $out .=strftime("%d %b (%A)", $n->date).' : ';
             $out .= $mini;
             $out .= '<span>';
             switch ($n->task->name) {
@@ -128,37 +159,44 @@
           }
           $out .= '</ul>';
         } else {
-          echo '<h4 class="well">'.__("No public news within the last 30 days... :(").'</h4>';
+          $out .= '<h4>'.__("No public news within the last 30 days... :(").'</h4>';
         }
         break;
       case 'admin-work' :
+        $today = new \DateTime("today");
         $allConcernedPlayers = $pages->find("parent.name=players, team.teacher=$user"); // Limit to teacher's students
         $news = $pages->find("parent.name=history, template=event, publish=1");
-        $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|ambush")->sort('-created');
+        $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|penalty")->sort('-created');
         $out .= '<div class="col-sm-6">';
         if ($news->count() > 0) {
           $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
           $out .= '<ul class="list-unstyled">';
           foreach($news as $n) {
             $currentPlayer = $n->parent('template=player');
-            if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
+            if ($currentPlayer->team->name == 'no-team') { 
+              $team = '';
+              $name = $currentPlayer->title.' '.$currentPlayer->lastName;
+            } else { 
+              $team = '['.$currentPlayer->team->title.']';
+              $name = $currentPlayer->title;
+            }
             $out .= '<li class="">';
             $out .=strftime("%d %b (%A)", $n->date).' : ';
             $out .= '<span>';
             switch ($n->task->name) {
               case 'free' : 
                 if ($n->refPage->template == 'place') {
-                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 }
                 if ($n->refPage->template == 'people') {
-                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 }
                 break;
               case 'buy' :
-                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'ambush' :
-                $out .= '<span class="">'.__("Penalty for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+              case 'penalty' :
+                $out .= '<span class="">'.__("Penalty for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : $out .= $n->task->name. ': '.__("todo");
             }
@@ -171,20 +209,19 @@
           $out .= '<p>'.__("Nothing to do.").'</p>';
         }
         $out .= '</div>';
-        $unusedConcerned = $allConcernedPlayers->find("usabledItems.count>0")->sort("-team.name, name");
         $out .= '<div class="col-sm-6">';
-        if ($unusedConcerned->count > 0) {
-          $date1 = new \DateTime("today");
-          $out .= '<p class="label label-primary">'.__("Potion Planner").'</p>';
+        $unusedConcerned = $allConcernedPlayers->find("usabledItems.count>0")->sort("-team.name, name");
+        $out .= '<p class="label label-primary">'.__("Potion Planner").'</p>';
+        if ($unusedConcerned->count() > 0) {
           $out .= '<ul class="list-unstyled">';
           foreach ($unusedConcerned as $p) {
             foreach ($p->usabledItems as $item) {
                 $historyPage = $p->get("name=history")->find("refPage=$item")->last();
                 if ($historyPage) {
-                  $out .= '<li class="">';
+                  $out .= '<li>';
                   // Find # of days compared to today
                   $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
-                  $interval = $date1->diff($date2);
+                  $interval = $today->diff($date2);
                   if ($interval->days > 21) {
                     $out .= ' <span class="badge">!</span> ';
                   }
@@ -199,25 +236,35 @@
                     $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="memory" data-result="bad" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$failedId.'"><i class="glyphicon glyphicon-thumbs-down"></i></button>';
                   }
                   $out .= '</li>';
+                } else { // Old unused potions
+                  $historyPage = $p->get("name~=history")->find("refPage=$item")->last();
+                  // Find # of days compared to today
+                  $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
+                  $interval = $today->diff($date2);
+                  $out .= '<li>';
+                  $out .= ' <span class="badge">!</span> ';
+                  $out .= '<span>'.$p->title.' '.$p->lastName.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                  $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("remove").'</label>';
+                  $out .= '</li>';
                 }
             }
           }
           $out .= '</ul>';
         } else {
-          $out .= '<hr /><p class="">'.__("No Potion to be used.").'</p>';
+          $out .= '<p>'.__("No Potion to be used.").'</p>';
         }
         $book = $pages->get("name=book-knowledge");
         $pendings = $book->pending;
         $pendings->filter("player=$allConcernedPlayers");
+        $out .= '<hr />';
+        $out .= '<p class="label label-primary">'.__("Copy work").'</p>';
         if (count($pendings) > 0) {
-          $date1 = new \DateTime("today");
-          $out .= '<p class="label label-primary">Copy work</p>';
           $out .= '<ul class="list-unstyled">';
           foreach ($pendings as $p) {
             $out .= '<li class="">';
             // Find # of days compared to today
             $date2 = new \DateTime(date("Y-m-d", $p->date));
-            $interval = $date1->diff($date2);
+            $interval = $today->diff($date2);
             if ($interval->days > 21) {
               $out .= ' <span class="badge">!</span> ';
             }
@@ -228,7 +275,7 @@
           }
           $out .= '</ul>';
         } else {
-          $out .= '<hr /><p class="">'.__("No lessons to be validated.").'</p>';
+          $out .= '<p>'.__("No lessons to be validated.").'</p>';
         }
         break;
       case 'decision' :
@@ -273,7 +320,7 @@
           $out .= '<ul class="list-unstyled">';
           if ($p->coma == 0) {
             $out .= '<li><span class="label label-success">Karma : '.$p->yearlyKarma.'</span></li>';
-            $out .= '<li><span class="label label-success">Reputation : '.$p->karma.'</span></li>';
+            $out .= '<li><span class="label label-success">Reputation : '.$p->reputation.'</span></li>';
             $out .= '<li><span class="label label-default"><span class="glyphicon glyphicon-signal"></span> '.$p->level.'</span>';
             $threshold = getLevelThreshold($p->level);
             $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$p->XP.'/'.$threshold.'</span></li>';
@@ -304,7 +351,7 @@
             $out .= '<p class="text-center"><span class="label label-primary">'.$p->title.'</span></p>';
             $out .= '<ul class="list-unstyled list-inline text-left">';
             $donatorId = $groupPlayers->sort('-GC')->first()->id;
-            $groupPlayers->sort('-karma');
+            $groupPlayers->sort('-reputation');
             foreach($groupPlayers as $gp) {
               $nbFreeEl = $gp->places->count();
               if ($gp->team->rank && $gp->team->rank->is("index>=8")) {
@@ -316,7 +363,7 @@
             $out .= '<span>';
             $out .= $gp->title;
             if ($gp->coma == 0) {
-              $out .= ' <span class="badge">'.$gp->karma.'K.</span>';
+              $out .= ' <span class="badge">'.$gp->reputation.'K.</span>';
               $out .= ' <span class="badge"><span class="glyphicon glyphicon-wrench"></span>'.$gp->equipment->count().'</span>';
               $out .= ' <span class="badge"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
               $out .= ' <span class="badge">'.$gp->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
@@ -452,7 +499,6 @@
       case 'buy' :
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
-        $player = $pages->get("template=player, login=$user->name");
         if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('big')->url.'" alt="Photo" />'; }
         if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="Photo" />'; }
         $out .= '<h3><span class="label label-primary">'.$p->title.'</span>';
@@ -470,7 +516,7 @@
             if ($p->is("template=place|people")) {
               // Find element's # of owners
               $out .= '<div class="alert alert-info">';
-              $p = setOwners($p, $player);
+              $p = setOwners($p, $currentPlayer);
               $out .= '<span class="">'.__("Free rate").' : ['.$p->owners->count().'/'.$p->teamRate.']</span> ';
               $out .= progressbar($p->owners->count(), $p->teamRate);
               if ($p->completed == 1) { $out .= '<span class="badge">'.__("Congratulations !").'</span>'; }
@@ -487,9 +533,9 @@
         $out .= '<div class="row">';
           $out .= '<span class="alert alert-info">'.__("This item costs");
           $out .= ' '.$p->GC.__('GC');
-          $out .= ' ('.sprintf(__("You have %d GC"), $player->GC).')</span>';
+          $out .= ' ('.sprintf(__("You have %d GC"), $currentPlayer->GC).')</span>';
         $out .= '</div>';
-        if (!isset($player->group->id) && $p->is("template=item") && $p->category->name == 'group-items') {
+        if (!isset($currentPlayer->group->id) && $p->is("template=item") && $p->category->name == 'group-items') {
           $out .= '<br /><br />';
           $out .= '<span class="alert alert-warning">'.__("No groups are set. This item will be individual !").'</span>';
         }
@@ -614,6 +660,9 @@
         $out .= '    <th>Category</th>';
         $out .= '    <th>Title</th>';
         $out .= '    <th>Comment</th>';
+        if ($user->isSuperuser() || $user->hasRole('teacher')) {
+          $out .= '    <th></th>';
+        }
         $out .= '  </tr>';
         $out .= '  </thead>';
         $out .= '  <tbody>';
@@ -657,6 +706,12 @@
           $out .= '</td>';
           $event->summary == '' ? $event->summary = '-' : '';
           $out .= '<td>'.$event->summary.'</td>';
+          if ($user->isSuperuser()) {
+            $out .= '<td>'.$event->feel().'</td>';
+          }
+          if ($user->hasRole('teacher')) {
+            $out .= '<td><a href="'.$config->urls->admin.'page/edit/?id='.$event->id.'" target="blank">'.__("[Edit]").'</a></td>';
+          }
           $out .= '</tr>';
         }
         $out .= ' </tbody>';

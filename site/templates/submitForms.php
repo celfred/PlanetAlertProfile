@@ -18,16 +18,24 @@
       $task->comment = 'Buy PDF ('.$lesson->title.')';
       $task->refPage = $lesson;
       updateScore($player, $task, true);
-      // Notify admin
-      // TODO : Notify main teacher
+      // Notify teacher or admin
+      $subject = _('Buy PDF ').' : ';
+      $subject .= $player->title. ' ['.$player->team->title.']';
+      $subject .= ' → '.$lesson->title;
       $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
       $msg .= "Buy PDF : ". $lesson->title."\r\n";
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+        $adminMail = $users->get("name=admin")->email;
+        $mail = wireMail();
+        $mail->from($adminMail);
+        $mail->subject($subject);
+        $mail->body($msg);
         if ($headTeacher && $headTeacher->email != '') {
-          mail($headTeacher->email, "buyPdf", $msg, "From: planetalert@tuxfamily.org");
+          $mail->to($headTeacher->email, 'Planet Alert');
         } else {
-          mail($users->get("name=admin")->email, "buyPdf", $msg, "From: planetalert@tuxfamily.org");
+          $mail->to($adminMail, 'Planet Alert');
         }
+        $numSent = $mail->send();
       }
     }
 
@@ -44,15 +52,24 @@
         if (!$already || !$already->isTrash()) {
           savePendingLesson($player, $task);
         }
-        // Notify admin
+        // Notify teacher or admin
+        $subject = _('Copied lesson ').' : ';
+        $subject .= $player->title. ' ['.$player->team->title.']';
+        $subject .= ' → '.$refPage->title;
         $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
         $msg .= __("Copied lesson")." : ". $refPage->title."\r\n";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+          $adminMail = $users->get("name=admin")->email;
+          $mail = wireMail();
+          $mail->from($adminMail);
+          $mail->subject($subject);
+          $mail->body($msg);
           if ($headTeacher && $headTeacher->email != '') {
-            mail($headTeacher->email, "bookForm", $msg, "From: planetalert@tuxfamily.org");
+            $mail->to($headTeacher->email, 'Planet Alert');
           } else {
-            mail($users->get("name=admin")->email, "bookForm", $msg, "From: planetalert@tuxfamily.org");
+            $mail->to($adminMail, 'Planet Alert');
           }
+          $numSent = $mail->send();
         }
       }
     }
@@ -104,12 +121,21 @@
         $msg .= "Item : ". $newItem->title."\r\n";
         $msg .= "An error has occurred.";
       }
+      $subject = _('Buy form ').' : ';
+      $subject .= $player->title. ' ['.$player->team->title.']';
+      $subject .= ' → '.$newItem->title;
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+        $adminMail = $users->get("name=admin")->email;
+        $mail = wireMail();
+        $mail->from($adminMail);
+        $mail->subject($subject);
+        $mail->body($msg);
         if ($headTeacher && $headTeacher->email != '') {
-          mail($headTeacher->email, "buyForm", $msg, "From: planetalert@tuxfamily.org");
+          $mail->to($headTeacher->email, 'Planet Alert');
         } else {
-          mail($users->get("name=admin")->email, "buyForm", $msg, "From: planetalert@tuxfamily.org");
+          $mail->to($adminMail, 'Planet Alert');
         }
+        $numSent = $mail->send();
       }
     }
 
@@ -157,16 +183,25 @@
           updateScore($player, $task, true);
           // No need to checkDeath, MarketPlace can't cause death
           // Notify admin
+          $subject = _('Buy form ').' : ';
+          $subject .= $player->title. ' ['.$player->team->title.']';
+          $subject .= ' → '.$newItem->title;
           $msg = "Player : ". $player->title."\r\n";
           $msg .= "Team : ". $player->team->title."\r\n";
           $msg .= "Item : ". $newItem->title;
           /* $msg .= "Item : ". $newItem->title.$error; */
           if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+            $adminMail = $users->get("name=admin")->email;
+            $mail = wireMail();
+            $mail->from($adminMail);
+            $mail->subject($subject);
+            $mail->body($msg);
             if ($headTeacher && $headTeacher->email != '') {
-              mail($headTeacher->email, "buyForm", $msg, "From: planetalert@tuxfamily.org");
+              $mail->to($headTeacher->email, 'Planet Alert');
             } else {
-              mail($users->get("name=admin")->email, "buyForm", $msg, "From: planetalert@tuxfamily.org");
+              $mail->to($adminMail, 'Planet Alert');
             }
+            $numSent = $mail->send();
           }
         }
       }
@@ -189,15 +224,26 @@
         updateScore($player, $task, true);
         // No need to checkDeath, Donation can't cause death
         // Notify admin
-        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
-        $msg .= "Donation amount : ". $amount."\r\n";
-        $msg .= "Donated to : ". $receiver->title." [".$receiver->team->title."]";
+        $subject = __('Donation').' : ';
+        $subject .= $amount.__("GC");
+        $subject .= ' '.$player->title. ' ['.$player->team->title.']';
+        $subject .= ' → '.$receiver->title.' ['.$receiver->team->title.']';
+        $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+        $msg .= __("Donation amount")." : ". $amount."\r\n";
+        $msg .= __("Donated to")." : ". $receiver->title." [".$receiver->team->title."]\r\n";
+        $msg .= __("Player global donation indicator")." : ". $player->donation."\r\n";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+          $adminMail = $users->get("name=admin")->email;
+          $mail = wireMail();
+          $mail->from($adminMail);
+          $mail->subject($subject);
+          $mail->body($msg);
           if ($headTeacher && $headTeacher->email != '') {
-            mail($headTeacher->email, "donationForm", $msg, "From: planetalert@tuxfamily.org");
+            $mail->to($headTeacher->email, 'Planet Alert');
           } else {
-            mail($users->get("name=admin")->email, "donationForm", $msg, "From: planetalert@tuxfamily.org");
+            $mail->to($adminMail, 'Planet Alert');
           }
+          $numSent = $mail->send();
         }
       }
     }
@@ -261,7 +307,7 @@
           $player->HP = $tempPlayer->HP;
           $player->GC = $tempPlayer->GC;
           $player->level = $tempPlayer->level;
-          $player->karma = $tempPlayer->karma;
+          $player->reputation = $tempPlayer->reputation;
           $player->yearlyKarma = $tempPlayer->yearlyKarma;
         }
         setCaptains($player->team);

@@ -70,24 +70,29 @@
     $notCompleted = $allElements->find("completed!=1");
     $allElements->sort("level, title");
     $out .= '<section class="freeWorld col-sm-6">';
-    $out .= '<h2><span class="label label-danger"><i class="glyphicon glyphicon-thumbs-down"></i> '.$notCompleted->count().' '.__("incomplete elements").'</span></h2>';
+    if ($notCompleted->count() != 0) {
+      $out .= '<h2><span class="label label-danger"><i class="glyphicon glyphicon-thumbs-down"></i> '.sprintf(_n("%d incomplete element", "%d incomplete elements", $notCompleted->count()), $notCompleted->count()).'</span></h2>';
+    } else {
+      $out .= '<h2><span class="label label-danger"><i class="glyphicon glyphicon-thumbs-down"></i> '.__("No  more incomplete elements.").'</span></h2>';
+    }
     foreach($notCompleted as $el) {
       if ($el->photo) {
         $thumbImage = $el->photo->eq(0)->getCrop('thumbnail')->url;
       }
       $out .= '<div>';
       $title = '<h3>'.$el->title.'</h3>';
-      $title .= '<h4>Level '.$el->level.', '.$el->GC.'GC</h4>';
+      $title .= '<h4>'.__("Level").' '.$el->level;
+      $title .= ', '.$el->GC.__("GC").'</h4>';
       if ($team->name != 'no-team') {
         if ($el->teamOwners->count() > 0 && $el->teamOwners->count() < 10) {
           $ownerList = '['.$el->teamOwners->implode(', ', '{title}').']';
         } else {
           $ownerList = '';
         }
-        $title .= '<h4>Freed by <span class=\'label label-success\'>'.$el->teamOwners->count().'</span> players '.$ownerList.'</h4>';
+        $title .= '<h4>'.__("Freed by").' <span class=\'label label-success\'>'.$el->teamOwners->count().'</span> players '.$ownerList.'</h4>';
         if ($el->completed != 1) {
           $left = $teamRate - $el->teamOwners->count();
-          $title .= '<br /><h4><span class=\'label label-primary\'>'.$left.' more needed !</span></h4>';
+          $title .= '<br /><h4><span class=\'label label-primary\'>'.$left.' '.__('more needed !').'</span></h4>';
         }
       }
       $out .= '<a href="'.$el->url.'" class=""><img class="'.$el->cssClass.'" src="'.$thumbImage.'" data-toggle="tooltip" data-html="true" title="'.$title.'" /></a>';
@@ -95,7 +100,11 @@
     }
     $out .= '</section>';
     $out .= '<section class="freeWorld">';
-    $out .= '<h2><span class="label label-success"><i class="glyphicon glyphicon-thumbs-up"></i> '.$allCompleted->count().' '.__("Completed elements").'</span></h2>';
+    if ($allCompleted->count() != 0) {
+      $out .= '<h2><span class="label label-success"><i class="glyphicon glyphicon-thumbs-up"></i> '.sprintf(_n("%d complete element", "%d complete elements", $allCompleted->count()), $allCompleted->count()).'</span></h2>';
+    } else {
+      $out .= '<h2><span class="label label-success"><i class="glyphicon glyphicon-thumbs-up"></i> '.__("No free elements.").'</span></h2>';
+    }
     foreach($allCompleted as $el) {
       if ($el->photo) {
         $thumbImage = $el->photo->eq(0)->getCrop('thumbnail')->url;
@@ -103,7 +112,8 @@
       $out .= '<div>';
       if ($team->name != 'no-team') {
         $title = '<h3>'.$el->title.'</h3>';
-        $title .= '<h4>Level '.$el->level.', '.$el->GC.'GC</h4>';
+        $title .= '<h4>'.__("Level").' '.$el->level;
+        $title .= ', '.$el->GC.__("GC").'</h4>';
         if ($el->teamOwners->count() > 0 && $el->teamOwners->count() < 10) {
           $ownerList = '['.$el->teamOwners->implode(', ', '{title}').']';
         } else {

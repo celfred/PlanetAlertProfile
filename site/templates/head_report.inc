@@ -36,7 +36,7 @@
   <div id="wrap">
 
 	<?php
-		if (!$input->get['pages2pdf'] && $user->isSuperuser()) {
+		if (!$input->get['pages2pdf'] && ($user->isSuperuser() || $user->hasRole('teacher'))) {
 	?>
     <div id="masthead" class="masthead">
       <span id="bgtitle">Planet Alert</span>

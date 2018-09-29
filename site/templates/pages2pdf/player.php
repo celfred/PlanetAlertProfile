@@ -3,7 +3,7 @@ $out = '';
 $logo = 'http://download.tuxfamily.org/planetalert/logo.png';
 $favicon = 'http://download.tuxfamily.org/planetalert/favicon.png';
 $worldMap = 'http://download.tuxfamily.org/planetalert/map/worldMap-numbers.png';
-
+$footer = '<div style="text-align:center;"><img src="'.$favicon.'" alt="Planet Alert" /> https://planetalert.tuxfamily.org - '.__("Tested on Firefox").'</div>';
 
 $pageNumber = $input->get->index;
 $player = $pages->get("name=$page->name");
@@ -21,7 +21,7 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</td>';
   $out .= '<td rowspan="2" style="width:8cm; background-color: #C366FF; border-right: 0px;">';
   $out .= '<h1>';
-  $out .= 'Player\'s profile page for '.$player->title;
+  $out .= sprintf(__("Player's profile page for %s"), $player->title);
   $out .= '</h1>';
   $out .= '</td>';
   $out .= '<td rowspan="2" style="background-color: #C366FF; border-left: 0px; padding: 0px;">';
@@ -29,7 +29,8 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</td>';
   $out .= '</tr>>';
   $out .= '<tr><td>';
-  $out .= 'Login: '.$player->login.' / Password : _________________';
+  $out .= __('Login').': '.$player->login.' / ';
+  $out .= __("Password").' : _________________';
   $out .= '</td>';
   $out .= '<tr>';
   $out .= '</table>';
@@ -37,7 +38,7 @@ if ($pageNumber == 0) { // Player's equipment
   $allEquipment = $player->equipment->sort("category.name");
   $out .= '<div style="margin-top: 10px; text-align: center; background-color: #C366FF; padding: 5px;">';
   $out .= '<div style="padding: 0px; background-color: #FFF; border-radius: 20px 20px 0px 0px;">';
-  $out .= '<h3 style="margin: 0px;">My Equipment</h3>';
+  $out .= '<h3 style="margin: 0px;">'.__("My Equipment").'</h3>';
   $out .= '<table style="border: 0px; margin-top: 0px;">';
   $index = 0;
   for ($line=0; $line<3; $line++) {
@@ -69,8 +70,7 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '<br /><br />';
   $out .= '<img src="'.$worldMap.'" height="400" />';
   
-  // Footer
-  $out .= '<div style="text-align:center;"><img src="'.$favicon.'" alt="Planet Alert" /> https://planetalert.tuxfamily.org - Tested on Firefox</div>';
+  $out .= $footer;
 } else if ($pageNumber > 0) { // Player's Free Elements
   $allElements = $player->people;
   $allElements = $allElements->add($player->places);
@@ -82,7 +82,7 @@ if ($pageNumber == 0) { // Player's equipment
 
   $out .= '<div style="margin-top: 10px; text-align: center; background-color: #C366FF; padding: 5px;">';
   $out .= '<div style="padding: 0px; background-color: #FFF; border-radius: 20px 20px 0px 0px;">';
-  $out .= '<h3 style="margin: 0px;">My Acts of Freedom - '.$player->title.' ['.$player->team->title.']</h3>';
+  $out .= '<h3 style="margin: 0px;">'.__("My Acts of Freedom").' - '.$player->title.' ['.$player->team->title.']</h3>';
   // 5 lines to fill the page
   $out .= '<table>';
   for ($line=0; $line<5; $line++) {
@@ -187,18 +187,15 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</div>';
   $out .= '</div>';
 
-  // Footer
-  $out .= '<div style="text-align:center;"><img src="'.$favicon.'" alt="Planet Alert" /> https://planetalert.tuxfamily.org - Tested on Firefox</div>';
+  $out .= $footer;
 } else { // New empty PDF
   // First page
   $out .= '<table>';
   $out .= '<tr><td style="height:4cm; width:8cm;">';
-  $out .= 'My Avatar';
+  $out .= __('My Avatar');
   $out .= '</td>';
   $out .= '<td style="width:8cm; background-color: #C366FF; border-right: 0px;">';
-  $out .= '<h1>';
-  $out .= 'Player\'s profile page for ____________________';
-  $out .= '</h1>';
+  $out .= '<h1>'.__("Player's profile page").'</h1>';
   $out .= '</td>';
   $out .= '<td style="background-color: #C366FF; border-left: 0px; padding: 0px;">';
   $out .= '<img src="'.$logo.'" width="100" height="100" /> ';
@@ -206,16 +203,16 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</tr>';
   $out .= '<tr>';
   $out .= '<td colspan="3">';
-  $out .= '← Login ';
+  $out .= '← '.__("Login").' ';
   $out .= '&nbsp;|&nbsp;';
-  $out .= 'Password  →';
+  $out .= __('Password').'  →';
   $out .= '</td>';
   $out .= '</tr>';
   $out .= '</table>';
 
   $out .= '<div style="margin-top: 10px; text-align: center; background-color: #C366FF; padding: 5px;">';
   $out .= '<div style="padding: 0px; background-color: #FFF; border-radius: 20px 20px 0px 0px;">';
-  $out .= '<h3 style="margin: 0px;">My Equipment</h3>';
+  $out .= '<h3 style="margin: 0px;">'.__("My Equipment").'</h3>';
   $out .= '<table style="border: 0px; margin-top: 0px;">';
   $index = 0;
   for ($line=0; $line<3; $line++) {
@@ -231,14 +228,13 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '<br />';
   $out .= '<img src="'.$worldMap.'" height="400" />';
   
-  // Footer
-  $out .= '<div style="text-align:center;"><img src="'.$favicon.'" alt="Planet Alert" /> https://planetalert.tuxfamily.org - Tested on Firefox</div>';
+  $out .= $footer;
 
   // Second page
   $out .= '<pagebreak>';
   $out .= '<div style="margin-top: 10px; text-align: center; background-color: #C366FF; padding: 5px;">';
   $out .= '<div style="padding: 0px; background-color: #FFF; border-radius: 20px 20px 0px 0px;">';
-  $out .= '<h3 style="margin: 0px;">My Acts of Freedom</h3>';
+  $out .= '<h3 style="margin: 0px;">'.__("My Acts of Freedom").'</h3>';
   // 5 lines to fill the page
   $out .= '<table style="border:0px;">';
   for ($line=0; $line<5; $line++) {
@@ -250,8 +246,7 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</div>';
   $out .= '</div>';
   
-  // Footer
-  $out .= '<div style="text-align:center; margin:5px;"><img src="'.$favicon.'" alt="Planet Alert" /> https://planetalert.tuxfamily.org - Tested on Firefox</div>';
+  $out .= $footer;
 }
 
 
