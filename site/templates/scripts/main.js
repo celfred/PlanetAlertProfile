@@ -757,21 +757,23 @@ $(document).ready(function() {
 										text: lang.thanks,
 										timer: 1000,
 										showConfirmButton: false
-									}).then( function() {}, function(dismiss) {
+									}).then(function() {}, function(dismiss) {
 										if (dismiss === 'timer') {
 											// JS update to avoid reloading
 											// window.location.reload();
 											// Set new player GC
-											$itemGC = $this.attr('data-gc');
-											$("playerGC").text(parseInt($playerGC-$itemGC));
+											$itemGC = parseInt($this.parent('li').attr('data-gc'));
+											$playerNewGC = $playerGC-$itemGC;
+											$("#playerGC").text($playerNewGC);
 										  // Remove newly bought item
 											$this.parent('li').remove();
 											// Increase limit of today's items ad update lists
-											$todayNewCount = $todayItemsCount+1;
-											$('#todayItemsCount').text($todayNewCount);
-											if ($todayNewCount < 3) {
+											$todayItemsCount++;
+											$('#todayItemsCount').text($todayItemsCount);
+											if ($todayItemsCount < 3) {
 												$('li.possibleItems').each(function() {
-													if ($(this).attr('data-gc') > $playerGC) {
+													$itemGC = parseInt($(this).attr('data-gc'));
+													if ($itemGC > $playerNewGC) {
 														$(this).remove();
 													}
 												});
