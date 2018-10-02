@@ -112,7 +112,7 @@
           $out .= '</td>';
           // Count # of words
           $exData = $m->exData;
-          $allLines = preg_split('/$\r|\n/', $exData);
+          $allLines = preg_split('/$\r|\n/', $sanitizer->entitiesMarkdown($exData));
           /* Unused because triggers a bug with tooltip display */
           /* $out .= '<td data-sort="'.count($allLines).'">'; */
           $out .= '<td>';
@@ -266,7 +266,7 @@
               $out .= '</div>';
               $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
               if ($monster->type->name == 'image-map') {
-                $out .= '<div class=""><img src="'.$monster->imageMap->url.'" max-width="400" alt="Image" /></div>';
+                $out .= '<div class=""><img src="'.$monster->imageMap->first()->url.'" max-width="800" alt="Image" /></div>';
               }
               if ($monster->type->name == 'jumble') {
                 $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.__("Click on the words to build a correct sentence. If you make a mistake, use the 'Try again' button. If you're wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information.").'"></span>';
