@@ -102,17 +102,17 @@
         $out .= '</p>';
         // Recent public news (30 previous days)
         if ($user->isGuest()) { // Guests get public news only
-          $excluded = $pages->get("template=player, name=test");
+          $concernedPlayers = $pages->find("template=player, name!=test");
         } else {
           if ($user->hasRole('teacher')) { // Teachers gets his players public news
-            $excluded = $pages->find("template=player, team.teacher!=$user");
+            $concernedPlayers = $pages->find("template=player, team.teacher=$user");
           }
           if ($user->hasRole('player')) { // Player gets teacher's teams public news
-            $excluded = $pages->find("template=player, team.teacher!=$headTeacher");
+            $concernedPlayers = $pages->find("template=player, team.teacher=$headTeacher");
           }
         }
         if (!$user->isSuperuser()) { // Take excluded pages into account
-          $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv")->not("has_parent=$excluded");
+          $news = $pages->find("has_parent=$concernedPlayers, template=event, parent.name=history, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv");
         } else { // Admin gets all public news
           $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv");
         }
