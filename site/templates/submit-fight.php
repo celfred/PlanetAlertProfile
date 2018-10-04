@@ -9,6 +9,8 @@
     $monster = $pages->get($input->post->exerciseId);
     $result = $input->post->result;
     $training = $input->post->training;
+    $headTeacher = getHeadTeacher($user);
+    $user->language = $headTeacher->language;
 
     if ($training == true) { // Training session
       if ($result>=1 && $result <=5) {
