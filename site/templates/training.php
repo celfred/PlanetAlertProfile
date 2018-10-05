@@ -22,10 +22,10 @@
         if ($user->hasRole('player')) {
           // Check if player has the Visualizer (or forced by admin)
           if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
-            $allMonsters = $pages->find("template=exercise, teacher=$headTeacher, sort=name");
+            $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher), (teacher=$headTeacher), sort=name");
           } else {
-            $allMonsters = $pages->find("template=exercise, teacher=$headTeacher, special=0, sort=name");
-            $hiddenMonstersNb = $pages->count("template=exercise, special=1");
+            $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher), (teacher=$headTeacher), special=0, sort=name");
+            $hiddenMonstersNb = $pages->count("template=exercise, (created_users_id=$headTeacher), (teacher=$headTeacher), special=1");
           }
         }
         $out .= '<br />';
