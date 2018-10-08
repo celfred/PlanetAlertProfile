@@ -35,6 +35,23 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Added
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
+
+## [v0.2.2] - 2018-10-08
+
+### Changed
+- Refactor exercises scoring : 1 file included to share progress bars
+
+### Fixed
+- Fights when player had no weapons or no protections : progress bars emptied at once and fight could not be ended
+- ImageMap not displayed in training
+- Messed-up word list because of quotes (fixed in v0.2.1 but forgotten on Memory helmet page)
+- Marketplace bug : calculate left GC after purchase and update possible items
+- Monsters list depending on head teacher's monsters
+- Recent news display : sorting issue solved so a teacher can see his or her players
+- Teacher's mail notification after training or fight
+- Typo in inactivity number of days limit
+
+
 ## [v0.2.1] - 2018-09-29
 
 A lot of minor bug fixes, but also new CM1 report type, and new small adjustements for a better user experience : more teacher's management possibilities, easier contact form for players... Details below. Maybe the lists are a little long. I should commit minor versions more often for better readability :) 
@@ -291,3 +308,4 @@ Initial official release.
 [v0.1.5]: https://framagit.org/celfred/planetAlert/tags/v0.1.5
 [v0.2.0]: https://framagit.org/celfred/planetAlert/tags/v0.2.0
 [v0.2.1]: https://framagit.org/celfred/planetAlert/tags/v0.2.1
+[v0.2.2]: https://framagit.org/celfred/planetAlert/tags/v0.2.2
