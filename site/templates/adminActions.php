@@ -1600,47 +1600,6 @@
         $player->equipment->remove($item);
         $player->save();
         break;
-      case 'save-options':
-        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team");
-        $id = $input->urlSegment2;
-        if ($id != '-1') {
-          $officialPeriod = $pages->get("id=$id");
-          $page->periods = $officialPeriod;
-        } else {
-          $page->periods = false;
-        }
-        $page->of(false);
-        $page->save();
-        // Feedback
-        echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> ';
-        echo $allPlayers->count();
-        echo '</div>';
-        // Set hkCount for newly selected period
-        // Might be too long to recalculate hkcount over a long period with many events...
-        if ($id != -1) { 
-          $now = time();
-          if ($now < $officialPeriod->dateStart || $now > $officialPeriod->dateEnd) {
-            echo '<div class="notification alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> Today\'s date is OUT OF the official period dates !</div>';
-          }
-          foreach($allPlayers as $p) {
-            $newCount = setHomework($p, $officialPeriod->dateStart, $officialPeriod->dateEnd);
-            if ($newCount != $p->hkcount) {
-              $p->hkcount = $newCount;
-              $p->of(false);
-              $p->save();
-            }
-          }
-        } else {
-          foreach($allPlayers as $p) {
-            $newCount = 0;
-            if ($newCount != $p->hkcount) {
-              $p->hkcount = $newCount;
-              $p->of(false);
-              $p->save();
-            }
-          }
-        }
-        break;
       case 'setCaptains':
         if ($selectedTeam && $selectedTeam != '-1') {
           $oldCaptains = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=captain")->implode(', ', '{title}');
@@ -1769,6 +1728,28 @@
           $team->periods = false;
         }
         $team->save();
+        // Set hkCount for newly selected period
+        // Might be too long to recalculate hkcount over a long period with many events...
+        if ($user->name == 'flieutaud') {
+          $allPlayers = $pages->find("parent.name=players, team=$team");
+          $now = time();
+          if ($now < $period->dateStart || $now > $period->dateEnd) {
+            foreach($allPlayers as $p) {
+              $p->hkcount = 0;
+              $p->of(false);
+              $p->save();
+            }
+          } else {
+            foreach($allPlayers as $p) {
+              $newCount = setHomework($p, $period->dateStart, $period->dateEnd);
+              if ($newCount != $p->hkcount) {
+                $p->hkcount = $newCount;
+                $p->of(false);
+                $p->save();
+              }
+            }
+          }
+        }
         break;
       case 'select-element':
         $teacher = $users->get("$selectedTeam"); // urlSegment2 used for teacherId
