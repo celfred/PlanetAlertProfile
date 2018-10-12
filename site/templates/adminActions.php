@@ -175,6 +175,8 @@
                   $out .= ' [linkedId:'.$e->linkedId.']';
                 }
                 $out .= $e->feel();
+                // Delete event link
+                $out .= '  <button class="delete btn btn-xs btn-danger" data-href="'.$page->url.'" data-playerId="'.$selectedPlayer->id.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
                 if ($e->task) {
                   if ($e->task->is("name=donation")) { // Player gave GC, increase his Donation
                     preg_match("/\d+/", $comment, $matches);
@@ -326,6 +328,8 @@
                       preg_match("/\d+/", $prevDeath->summary, $matches);
                       $prevDeathLevel = (int) $matches[0];
                       $out .= 'PrevDeath:'.$prevDeathLevel;
+                    } else {
+                      $prevDeathLevel = 0;
                     }
                     resetPlayer($selectedPlayer, $prevDeathLevel);
                     if ($selectedPlayer->coma == 1) {
@@ -1112,6 +1116,7 @@
     echo $out;
     include("./foot.inc"); 
     echo '<script>';
+    echo '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.after("<span class=\"label label-danger\">'.__("Please reload page to recalculate scores").'</span>"); that.hide(); }) };});';
     echo '$(".addUsers").click( function() { var myData = $(\'#newPlayers\').val(); var action=$(this).attr("data-action"); var href=$(this).attr("data-href")+action; var that=$(this); if (confirm("Proceed?")) {$.post(href, {newPlayers:myData}, function(data) { $("#ajaxViewport").html(data); }) };});';
     echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
     echo '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); }) };});';
