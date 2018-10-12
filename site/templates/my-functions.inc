@@ -74,6 +74,7 @@ function resetPlayer($player, $previousLevel) {
     $player->level = $player->level - 1; // Lose 1 level
     $threshold = getLevelThreshold($player->level);
     $player->XP = $threshold-5; // Set XP just below previous level
+    $player->reputation = setReputation($player);
   } else { // Player is already on level 1
     $player->level = 1; // Stay on level 1
     if ($previousLevel == 1) { // 2nd death at level 1, set Coma state !
@@ -83,6 +84,7 @@ function resetPlayer($player, $previousLevel) {
       $player->yearlyKarma = 0;
     } else {
       $player->XP = round($player->XP/2); // Cut previous XP
+      $player->reputation = setReputation($player);
     }
   }
   // Lose all equipment but group-items
@@ -207,7 +209,7 @@ function updateScore($player, $task, $real = true) {
       }
       resetPlayer($player, $previousLevel);
       $task->eDate = date('m/d/Y H:i:s', time()+60);
-      if ($player->coma == 1) { $task->comment .= ' [Enter Coma state]'; }
+      if ($player->coma == 1) { $task->comment .= ' '.__("[Enter Coma state]"); }
       $historyPage = saveHistory($player, $task, 1);
       $player->of(false);
       $player->save();
@@ -504,7 +506,7 @@ function checkDeath($player, $real=true) {
   $pages = wire('pages');
   if ($player->HP <= 0) {
     $task = $pages->get("name=death");
-    $task->comment = 'Player died. [former level:'.$player->level.']';
+    $task->comment = sprintf(__('Player died. [former level:%d]'), $player->level);
     $task->refPage = false;
     $task->linkedId = false;
     $historyPageId = updateScore($player, $task, $real);
@@ -520,21 +522,26 @@ function updateTeamDeath($player, $linkedId) {
   $pages = wire('pages');
   $teamPlayers = $pages->find("template=player, team=$player->team, id!=$player->id");
   $teamDeath = $pages->get("name=team-death");
-  $teamDeath->comment = 'Team member died! ['.$player->title.']';
+  $teamDeath->comment = sprintf(__('Team member died! [%s]'), $player->title);
   $teamDeath->refPage = $player;
   $teamDeath->linkedId = $linkedId;
-  $groupMembers = $teamPlayers->find("group=$player->group");
-  $groupDeath = $pages->get("name=group-death");
-  $groupDeath->comment = 'Group member died! ['.$player->title.']';
-  $groupDeath->refPage = $player;
-  $groupDeath->linkedId = $linkedId;
-  // Each group member suffers
-  foreach($groupMembers as $p) {
-    updateScore($p, $groupDeath, true);
-    // No need to checkDeath because dying because of others is impossible
+  if ($player->group->id) {
+    $groupMembers = $teamPlayers->find("group=$player->group");
+    $groupDeath = $pages->get("name=group-death");
+    $groupDeath->comment = sprintf(__('Group member died! [%s]'), $player->title);
+    $groupDeath->refPage = $player;
+    $groupDeath->linkedId = $linkedId;
+    // Each group member suffers
+    foreach($groupMembers as $p) {
+      updateScore($p, $groupDeath, true);
+      // No need to checkDeath because dying because of others is impossible
+    }
+    // Each team member suffers
+    $teamMembers = $teamPlayers->find("group!=$player->group");
+  } else {
+    // All team members suffer
+    $teamMembers = $teamPlayers;
   }
-  // Each team member suffers
-  $teamMembers = $teamPlayers->find("group!=$player->group");
   foreach($teamMembers as $p) {
     updateScore($p, $teamDeath, true);
     // No need to checkDeath because dying because of others is impossible
@@ -624,7 +631,7 @@ function checkActivity(HookEvent $e) {
     if ($lastActivityCount > 30 && $lastActivityCount <= 365) { // # of days of inactivity
       if (!isset($lastEvent) || $lastEvent->name != 'inactivity') {
         $task = $refPage;
-        $task->comment = $lastActivityCount.' days of inactivity.';
+        $task->comment = sprintf(__('%d days of inactivity.'), $lastActivityCount);
         $task->refPage = false;
         $task->linkedId = false;
         updateScore($player, $task, true);
@@ -765,18 +772,18 @@ function setCaptains($team, $real = true) {
 }
 
 function setReputation($player) {
-  // Karma calculated from all values (except GC and Donations)
-  $levelKarma = 0;
+  // Reputation calculated from all values (except GC, Donations and HP)
+  $levelReputation = 0;
   if ($player->level > 1) {
     for ($i=1; $i<=$player->level; $i++) {
-      $levelKarma = $levelKarma + ($i*10)+90;
+      $levelReputation = $levelReputation + ($i*10)+90;
     }
-    $karma = $levelKarma + $player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
+    $reputation = $levelReputation + $player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
   } else {
-    $karma = ($player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10) - ((50-$player->HP)*5);
+    $reputation = ($player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10);
   }
-  if ($karma < 0 || $player->coma == 1) { $karma = 0; }
-  return $karma;
+  if ($reputation < 0 || $player->coma == 1) { $reputation = 0; }
+  return $reputation;
 }
 
 function setYearlyKarma($player) {
