@@ -26,11 +26,11 @@
   }
 
   if ($allPlayers->count() > 0) {
+    $dangerPlayers = $pages->find("parent.name=players, team=$team, (HP<=15), (coma=1)")->sort("coma, HP");
     $out .= '<div class="col-sm-4">';
       // Help needed
       $out .= '<div id="" class="board panel panel-primary">';
       $out .= '<div class="panel-heading">';
-        $dangerPlayers = $allPlayers->find("(HP<=15), (coma=1)")->sort("coma, HP");
         $out .= '<p class="panel-title">'.__("Help needed !").'</p>';
       $out .= '</div>';
       $out .= '<div class="panel-body">';
@@ -54,10 +54,10 @@
             $out .= '<caption class="text-center">';
             $out .= $p->title;
             $out .= ' <span class="badge">'.$label.'</span><br />';
-            if ($user->isSuperuser()) {
+            if ($user->isSuperuser() || $user->hasRole('teacher')) {
               $out .= '<span class="badge">'.$p->GC.'GC</span>';
               if ($p->GC >= $healingPotion->GC) {
-                $out .= ' <a href="#" class="btn btn-xs btn-link buyBtn" data-type="heal" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$healingPotion->id.'">→ Heal?</a>';
+                $out .= ' <a href="#" class="btn btn-xs btn-link buyBtn" data-type="heal" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$healingPotion->id.'">→ '.__("Heal ?").'</a>';
               }
             }
             $out .= '</caption>';
@@ -71,7 +71,7 @@
       $out .= '</div>';
       $out .= '<div class="panel-footer text-right">';
         if ($dangerPlayers->count() != 0 && $healingPotion->id) {
-          $out .= 'Healing potion costs '.$healingPotion->GC.'GC';
+          $out .= sprintf(__('Healing potion costs %d GC'), $healingPotion->GC);
         }
       $out .= '</div>';
       $out .= '</div>';
