@@ -307,7 +307,7 @@
 
     // Work statistics for logged player if team, period and rank>6
     if ($user->hasRole('player')) {
-      if ($player->team->name != 'no-team' && $player->team->rank > 6) {
+      if ($player->team->name != 'no-team' && $player->team->rank->is("index>=6")) {
         $currentPeriod = $player->team->periods;
         if ($currentPeriod != false) {
           $dateStart = $currentPeriod->dateStart;
