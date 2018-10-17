@@ -45,8 +45,10 @@
             }
           }
           $out .= '<li>'.$mT->refPage->title.' → <span class="label label-success">'.($outUt+$inUt).' '.__('UT').'</span>';
-          $out .=	' ['.$inUt.' '.__("in class").'] - ';
-          $out .= sprintf(_n("%d session", "%d sessions", $mTrainings->count()), $mTrainings->count()).'</li>';
+          $out .= ' - '.sprintf(_n("%d session", "%d sessions", $mTrainings->count()), $mTrainings->count()).'</li>';
+          if ($inUt > 0) {
+            $out .= ' - ['.$inUt.' '.__("in class").']';
+          }
           $out .= '</ul>';
         }
       }

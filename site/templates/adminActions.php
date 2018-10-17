@@ -1206,12 +1206,12 @@
             $out .= '<legend><span class="glyphicon glyphicon-file"></span> '.__("Report type").'</legend>';
             $out .= '<label for="allCat"><input type="radio" value="all" id="allCat" name="reportCat" class="reportCat"> '.__("Complete").'</input></label> &nbsp;&nbsp;';
             $out .= '<label for="participation"><input type="radio" value="participation" id="participation" name="reportCat" class="reportCat"> '.__("Participation").'</input></label> &nbsp;&nbsp;';
-            $out .= '<label for="planetAlert"><input type="radio" value="planetAlert" id="planetAlert" name="reportCat" class="reportCat"> '.__("Planet Alert").'</input></label> &nbsp;&nbsp;';
-            $out .= '<label for="cm1"><input type="radio" value="cm1" id="cm1" name="reportCat" class="reportCat"> '.__("CM1").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="category"><input type="radio" value="category" id="category" name="reportCat" class="reportCat" data-reportId="categoryReport"> '.__("Category").'</input></label> &nbsp;&nbsp;';
             $out .= '<label for="task"><input type="radio" value="task" id="task" name="reportCat" class="reportCat" data-reportId="taskReport"> '.__("Task").'</input></label> &nbsp;&nbsp;';
             $out .= '<label for="ut"><input type="radio" value="ut" id="ut" name="reportCat" class="reportCat" data-reportId="utReport"> '.__("UT").'</input></label> &nbsp;&nbsp;';
             $out .= '<label for="fight"><input type="radio" value="fight" id="fight" name="reportCat" class="reportCat" data-reportId="fightReport"> '.__("Fight").'</input></label> &nbsp;&nbsp;';
-            $out .= '<label for="category"><input type="radio" value="category" id="category" name="reportCat" class="reportCat" data-reportId="categoryReport"> '.__("Category").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="planetAlert"><input type="radio" value="planetAlert" id="planetAlert" name="reportCat" class="reportCat"> '.__("Planet Alert").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="cm1"><input type="radio" value="cm1" id="cm1" name="reportCat" class="reportCat"> '.__("CM1").'</input></label> &nbsp;&nbsp;';
           $out .= '</fieldset>';
           $out .= '<div id="allOptions">';
             $out .= '<fieldset class="specificOption" id="taskReport">';

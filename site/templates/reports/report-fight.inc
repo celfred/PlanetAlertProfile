@@ -48,7 +48,9 @@
         $out_03 .= '</ul>';
         $out_02 = '<li><strong>'.$p->title.'</strong> : ';
         $out_02 .= '<span class="label label-success">'.sprintf(_n('%d fight', '%d fights', $allTests->count()), $allTests->count()).'</span>';
-        $out_02 .= ' ['.sprintf(__('%d in class'), $inClassAllTestsCount).']</li>';
+        if ($inClassAllTestsCount > 0) {
+          $out_02 .= ' ['.sprintf(__('%d in class'), $inClassAllTestsCount).']</li>';
+        }
         $out .= $out_02.$out_03;
       }
     }
