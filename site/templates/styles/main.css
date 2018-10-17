@@ -814,19 +814,6 @@ table.adminTable > thead > tr > th {
   border-radius: 10px;
   z-index: 11;
 }
-#reportDiv {
-  margin: 5px;
-  border: 2px solid #000;
-  background-color: #FFF;
-}
-#reportDiv .absent {
-  margin: 0 10px;
-}
-#reportDiv .label.participation {
-  display: inline-block;
-  width: 25px;
-  padding: 5px;
-}
 #marketPlaceForm ul li {
   list-style: none;
 }
@@ -851,6 +838,18 @@ header {
 }
 .shown {
   display: block;
+}
+#reportForm label {
+	cursor: pointer;
+}
+h3.report {
+	text-align: center;
+	padding: 10px;
+	border: 1px solid #000;
+	border-radius: 10px;
+}
+h3.report img  {
+	float: left;
 }
 .utReport {
 	padding: 10px;
@@ -1009,6 +1008,21 @@ img.showInfo {
 }
 
 #discount { display: none; }
+
+fieldset {
+	margin: 5px;
+	border: 1px solid #000;
+	padding: 5px;    
+	border-radius: 4px;
+}
+
+legend {
+	padding: 2px;    
+	width: auto;
+}
+#allOptions {
+	display: none;
+}
 
 /* Large desktop */
 @media (min-width: 1200px) { 

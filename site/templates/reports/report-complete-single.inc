@@ -1,15 +1,19 @@
-<table class="report table">
-  <tr>
-    <td>
-      <?php echo '<img class="" src="'.$player->avatar->url.'" width="95" alt="No avatar" />'; ?>
-    </td>
-    <th>
-      <h1><?php echo $reportTitle; ?></h1>
-    </th>
-  </tr>
-
 <?php
-  $allEvents = $player->find("template=event, date>=$period->dateStart, date<=$period->dateEnd");
+  $categories = $pages->find("parent='/categories/',sort=sort")->not("name=shop|potions|protections|place|weapons|manual-cat|oublis|group-items");
+
+  $out = '';
+  $out .= '<table class="report table">';
+  $out .= '<tr>';
+  $out .= '<td>';
+  if (isset($selected->avatar)) {
+    $out .= '<img src="'.$selected->avatar->url.'" width="95" alt="No avatar" />';
+  }
+  $out .= '</td>';
+  $out .= '<th>';
+  $out .= '<h1>'.$reportTitle.'</h1>';
+  $out .= '</th>';
+  $out .= '</tr>';
+  $allEvents = $selected->find("template=event, date>=$period->dateStart, date<=$period->dateEnd");
   // Get events
   foreach($categories as $category) {
     $globalData[$category->name] = $allEvents->find("task.category=$category, sort=-date");
@@ -18,8 +22,6 @@
   $specialData['noSigned'] = $allEvents->find("task.name=signature, sort=-date");
   $specialData['noMaterial'] = $allEvents->find("task.name=material, sort=-date");
   $specialData['xtHk'] = $allEvents->find("task.name=extra-homework, sort=-date");
-  $out = '';
-  
   foreach($globalData as $category=>$events) {
     $nbEvents = $events->count();
     $out .= '<tr><td colspan="2">';
@@ -40,8 +42,8 @@
         } else {
           $out .= '<span class=""> Aucun travail supplémentaire (optionnel) fait, c\'est dommage...</span>';
         }
-				// Forgotten
-				$out .= '<br />';
+        // Forgotten
+        $out .= '<br />';
         $noSigned = $events->find("task.name=signature, sort=-date");
         $noMaterial = $events->find("task.name=material, sort=-date");
         if ($noSigned->count() > 0 || $noMaterial->count() > 0) {
@@ -68,25 +70,25 @@
         $rr = 0;
         if ($nbEvents > 0) {
           foreach ($events as $index=>$event) {
-						$task = $pages->get("$event->task");
-						if ($task->HP <= -5) {
-							$rr += 1;
-						}
-						if ($task->HP > -5 && $task->HP < 0) {
-							$r += 1;
-						}
-						if ($task->GC > 0 && $task->GC < 5) {
-							$v += 1;
-						}
-						if ($task->GC >= 5) {
-							$vv += 1;
-						}
-						if ($task->name == 'absent') {
-							$abs += 1;
-							$nbEvents -= 1;
-						}
-						$ratio = (int) round(((($vv*2)+($v*1.6)-$rr)*100)/($nbEvents*2));
-						if ( $ratio < 0) { $ratio = 0; }
+            $task = $pages->get("$event->task");
+            if ($task->HP <= -5) {
+              $rr += 1;
+            }
+            if ($task->HP > -5 && $task->HP < 0) {
+              $r += 1;
+            }
+            if ($task->GC > 0 && $task->GC < 5) {
+              $v += 1;
+            }
+            if ($task->GC >= 5) {
+              $vv += 1;
+            }
+            if ($task->name == 'absent') {
+              $abs += 1;
+              $nbEvents -= 1;
+            }
+            $ratio = (int) round(((($vv*2)+($v*1.6)-$rr)*100)/($nbEvents*2));
+            if ( $ratio < 0) { $ratio = 0; }
           }
           $out .= '<span>Moyenne sur la période : </span>';
           if (is_int($ratio)) {
@@ -107,13 +109,12 @@
           if (is_int($ratio)) {
             $out .= ' <span data-toggle="tooltip" title="% de qualité">'.$ratio.'%</span>';
           }
-					$inClassEventsCount = $allEvents->find("inClass=1")->count();
-					if ($inClassEventsCount > 0) {
-						$out .= ' - <span>'.$nbEvents.' évaluations ('.$inClassEventsCount.' en classe)</span> ';
-					} else {
-						$out .= ' - <span>'.$nbEvents.' évaluations</span> ';
-					}
-
+          $inClassEventsCount = $allEvents->find("inClass=1")->count();
+          if ($inClassEventsCount > 0) {
+            $out .= ' - <span>'.$nbEvents.' évaluations ('.$inClassEventsCount.' en classe)</span> ';
+          } else {
+            $out .= ' - <span>'.$nbEvents.' évaluations</span> ';
+          }
           if (!$input->get['pages2pdf']) {
             $out .= ' [ <span data-toggle="tooltip" title="Positif (V+VV)">'.($v+$vv).' <i class="glyphicon glyphicon-thumbs-up"></i></span> <span data-toggle="tooltip" title="Négatif (R+RR)">'.($r+$rr).' <i class="glyphicon glyphicon-thumbs-down"></i></span> ]';
           } else {
@@ -127,7 +128,6 @@
           $out .= ' <span class="">Pas de données sur la période.</span>';
         }
     }
-
     if ($nbEvents > 0) {
       // List all events
       $out .= '<ul class="text-left">';
@@ -183,9 +183,9 @@
               $out .= strftime("%d/%m", $event->date). ' : ' . $eventTitle;
               if ($event->summary !== '') {
                 $out .= ' ['.$event->summary.']';
-								if ($event->inClass == 1 && $event->task->is("name~=fight|ut-action")) {
-									$out .= ' [en classe]';
-								}
+                if ($event->inClass == 1 && $event->task->is("name~=fight|ut-action")) {
+                  $out .= ' [en classe]';
+                }
               }
               $out .= '</li>';
             }
@@ -196,6 +196,7 @@
     $out .= '</div>';
     $out .= '</td></tr>';
   }
+  $out .= '</table>';
+
   echo $out;
 ?>
-</table>

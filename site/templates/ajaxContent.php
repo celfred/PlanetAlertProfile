@@ -767,7 +767,7 @@
         $out = '';
         setParticipation($player);
         $out .= '<p>';
-        $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Compétence SACoche : Je participe en classe." onmouseenter="$(this).tooltip(\'show\');"></span> Communication ';
+        $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Compétence SACoche : Je participe en classe." onmouseenter="$(this).tooltip(\'show\');"></span> '.__('Communication').' ';
         $out .= ' ⇒ ';
         switch ($player->participation) {
           case 'NN' : $class='primary';
@@ -802,7 +802,7 @@
         }
         $out .=  '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 0/0.5 problems<br /><span class=\'label label-success\'>V</span> 1/1.5 problems<br /><span class=\'label label-danger\'>R</span> 2/2.5 problems<br /><span class=\'label label-danger\'>RR</span> 3/+ problems" class="label label-'.$class.'">'.$player->homework.'</span> ';
         // Forgotten material
-        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Affaires oubliées<br />Compétence SACoche : J\'ai mon matériel."></span> Forgotten material : ';
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Affaires oubliées<br />Compétence SACoche : J\'ai mon matériel."></span> '.__('Forgotten material').' : ';
         $out .= '<span>'.$player->noMaterial->count().'</span>';
         $out .= ' ⇒ ';
         switch ($player->materialLabel) {
@@ -817,9 +817,9 @@
         $out .= '</p>';
         // Extra-hk
         $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Travail supplémentaire HORS-CLASSE : extra-homework, personal initiative, underground training...<br />Compétence SACoche : Je prend une initiative particulière."></span> Personal motivation :';
-        $out .= ' <span> ['.$player->extraHk->count().' extra - </span>';
-        $out .= ' <span>'.$player->initiative->count().' initiatives - </span>';
-        $out .= ' <span>'.$player->outClassActivity.' UT/FP session]</span>';
+        $out .= ' <span> ['.sprintf(__('%d extra'), $player->extraHk->count()).' - </span>';
+        $out .= ' <span>'.sprintf(__('%d initiative'), $player->initiative->count()).' - </span>';
+        $out .= ' <span>'.sprintf(__('%d UT/FP sessions'), $player->outClassActivity).']</span>';
         $out .= ' ⇒ ';
         $out .= '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 9xtHk/init. AND 47→49 UT/FP<br /><span class=\'label label-success\'>VV</span> 10xtHk/init. OR 50→+ UT/FP<br /><span class=\'label label-success\'>V</span> 4xtHk/init. AND 18→19 UT/FP<br /><span class=\'label label-success\'>V</span> 5xtHK/init. OR 20→49 UT/FP" class="label label-'.$class.'">'.$player->motivation.'</span> ';
         $out .= '</p>';
@@ -834,15 +834,15 @@
         $pb->add($ambush);
         $pb->add($noisy);
         $pb->add($late);
-        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Soucis avec l\'attitude<br />Compétence SACoche : J\'adopte une attitude d\'élève."></span> Attitude problems :';
+        $out .= '<p><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="Soucis avec l\'attitude<br />Compétences SACoche : respect / attention en classe..."></span> '.__("Attitude problems").' :';
         $attPb = $disobedience->count()+$ambush->count()+$noisy->count();
-        $out .= ' <span> ['.$attPb.' problems - </span>';
-        $out .= ' <span>'.$late->count().' slow moves]</span>';
+        $out .= ' <span>['.sprintf(__('%d problems'), $attPb).' - </span>';
+        $out .= ' <span>'.sprintf(__('%d slow moves'), $late->count()).']</span>';
         $out .= ' ⇒ ';
         if ($pb->count() == 0) {
           $out .= '<span data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="<span class=\'label label-success\'>VV</span> 0 problems<br /><span class=\'label label-success\'>V</span> <span class=\'label label-danger\'>R</span> <span class=\'label label-danger\'>RR</span> Ask your teacher" class="label label-success">VV</span>';
         } else {
-          $out .= '<span data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="">Ask your teacher.</span>';
+          $out .= '<span>'.__("Ask your teacher.").'</span>';
         }
         $out .= '</p>';
         break;

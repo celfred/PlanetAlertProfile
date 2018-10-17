@@ -250,14 +250,6 @@ $(document).ready(function() {
     return false; 
   }); 
 
-  $(".ajax").click(function() {
-    $("#reportDiv").html("<p>"+lang.loading+"</p>"); 
-    $.get($(this).attr('href'), function(data) { 
-        $("#reportDiv").html(data); 
-    }); 
-    return false; 
-  }); 
-
 	$(document).on('click', '#copied', (function() {
 		var $this = $(this);
 		var $url = $this.attr('data-url');
@@ -410,121 +402,25 @@ $(document).ready(function() {
     $('#detailedPlacesList').toggle();
   });
 
-  $('#report_button').click( function() {
-    var url = $('#players_list').val();
+  $('button.popup').click( function(e) {
+		e.preventDefault();
+		$(this).closest('form').attr('target', '_blank').submit(); // Open form in new tab/window
+	});
 
-    $.get(url, function(data) { 
-        $("#reportDiv").html(data); 
-    }); 
-
-    return false; 
-  });
-
-  $('#reportPlayer').change( function() {
-    if ($(this)[0].selectedIndex > 0) {
-      $('#allCat').prop('checked', true);
-      $('#participation').attr('disabled', true);
-      $('#planetAlert').attr('disabled', true);
-    } else {
-      $('#participation').attr('disabled', false);
-      $('#planetAlert').attr('disabled', false);
-    }
-  });
-  $('#reportUrl_button').click( function() {
-    var reportUrl = $(this).attr('data-reportUrl');
-    // Add report category
-    reportUrl += $('.reportCat:checked').val()+'/';
-    // Add report team or player
-    if ($('#reportPlayer').val() == '') { // No single player selected
-				reportUrl += $('.reportTeam:checked').val()+'/';
-    } else {
-      reportUrl += $('#reportPlayer').val()+'/';
-    }
-    // Add period Id
-    reportUrl += $('#periodId').val()+'/';
-    // Add sorting GET parameter
-    reportUrl += '?sort='+$('.reportSort:checked').val();
-
-    $(this).attr('href', reportUrl);
-    return true;
-    // Go to report_generator
-    /*
-    $("#reportDiv").html("<p>"+lang.loading+"</p>"); 
-    $.get(reportUrl, function(data) { 
-        $("#reportDiv").html(data); 
-    }); 
-    */
-  });
-
-  $('#participation').click( function() {
-    var limitCheckbox = $('#limit10');
-    if ($(this).is(':checked')) {
-      limitCheckbox.removeAttr('disabled'); // Enable limit
-      $('a.reportButton').each( function() {
-        var href = $(this).attr('href');
-        if ($('#lastName').is(':checked')) { // Remove from the URL
-          href = href.replace(/\?sort=lastName/g, "");
-        }
-        href = href+'/participation'; // Add urlSegment
-        if ($('#lastName').is(':checked')) { // Append to the URL
-          href = href+'?sort=lastName';
-        }
-        $(this).attr('href', href);
-      });
-    } else {
-      $('a.reportButton').each( function() {
-        var href = $(this).attr('href');
-        href = href.replace(/\/participation(\/10)?/g, "");
-        $(this).attr('href', href);
-      });
-      limitCheckbox.attr('checked', false);
-      limitCheckbox.attr('disabled', true); // Disabled limit
-    }
-  });
-
-  $('#limit10').click( function() {
-    if ($(this).is(':checked')) {
-      $('a.reportButton').each( function() {
-        var href = $(this).attr('href');
-        if ($('#lastName').is(':checked')) {
-          href = href.replace(/\?sort=lastName/g, "");
-        }
-        href = href+'/10';
-        if ($('#lastName').is(':checked')) {
-          href = href+'?sort=lastName';
-        }
-        $(this).attr('href', href);
-      });
-    } else {
-      $('a.reportButton').each( function() {
-        var href = $(this).attr('href');
-        href = href.replace(/\/10/g, "");
-        $(this).attr('href', href);
-      });
-    }
-  });
-
-  $('#period_list').change( function() {
-    $('a.reportButton').each( function() {
-      var href = $(this).attr('href');
-    });
-  });
-
-  $('#lastName').click( function() {
-    $('a.reportButton').each( function() {
-      var href = $(this).attr('href');
-      href = href+'?sort=lastName';
-      $(this).attr('href', href);
-    });
-  });
-  $('#firstName').click( function() {
-    $('a.reportButton').each( function() {
-      var href = $(this).attr('href');
-      // Remove sort GET variable from URL
-      href = href.replace(/\?sort=lastName/g, "");
-      $(this).attr('href', href);
-    });
-  });
+  $('#periodId').focus( function() {
+		$('#selectedPeriod').click();
+	});
+  $('#startDate, #endDate').focus( function() {
+		$('#customDates').click();
+	});
+  $('.reportCat').click( function() {
+		var $reportId = $(this).attr("data-reportId");
+		$('#allOptions').show("blind");
+		$(".specificOption").hide("blind");
+		if ($reportId) {
+			$('#'+$reportId).show("blind");
+		}
+	});
 
   $('#quizForm').submit( function(event) {
     //event.preventDefault();

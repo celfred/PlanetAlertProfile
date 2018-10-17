@@ -72,7 +72,7 @@
       }
 
       // Official period is checked only when viewing a team page
-      if ($page->is("name=main-office|players|quiz|adminTable|world|donation|reports")) {
+      if ($page->is("name=main-office|players|quiz|adminTable|world|donation")) {
         $team = $pages->get("parent.name=teams, name=$input->urlSegment1");
         $headTeacher = $team->teacher->first();
         $out .= periodNotification($team, $headTeacher);
@@ -203,12 +203,6 @@
                 $class = $page->name == 'statistics' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$pages->get("name=statistics")->url}'><span class='glyphicon glyphicon-stats'></span> - Statistics</a></li>";
                 $out .= "<li role='separator' class='divider'></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut-stats' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/ut-stats/'>UT Stats</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'fights-stats' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/fights-stats/'>Fights Stats</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'task-report' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/task-report/'>Task report</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/ut/'>UT Hall of fame</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setScores' ? " class='selected-left'" : "";
