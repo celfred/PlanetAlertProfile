@@ -1172,26 +1172,6 @@
 
     switch ($action) {
       case 'script' :
-        /* $allPlayers = $pages->find("parent.name=players, template=player"); */
-        /* $ambassador = $pages->get("name=ambassador"); */
-        /* foreach($allPlayers as $p) { */
-        /*   $p->streak = 0; */
-        /*   $allEvents = $p->get("name=history")->children("template=event, task.name!=donation|donated|absent, sort=-date, limit=10")->sort('date'); */
-        /*   foreach($allEvents as $e) { */
-        /*     setStreak($p, $e->task); */
-        /*   } */
-        /*   $p->of(false); */
-        /*   $p->save(); */
-        /* } */
-        
-        /* // Add player role to all users (but admin and teachers */
-        /* foreach($users as $u) { */
-        /*   if ($u->is('roles!=teacher') && $u->is('roles!=superuser') && $u->name!='guest') { */
-        /*     $u->of(false); */
-        /*     $u->addRole('player'); */
-        /*     $u->save(); */
-        /*   } */
-        /* } */
         break;
       case 'reports' :
         $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';

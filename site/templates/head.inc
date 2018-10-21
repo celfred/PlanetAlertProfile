@@ -28,10 +28,6 @@
   <!--[if IE]>
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/ie.css" />
   <![endif]-->	
-
-  <?php if (($page->template == 'place' && $page->name!='places') || $page->name == 'map') { ?>
-    <script type='text/javascript' src='https://maps.googleapis.com/maps/api/js?sensor=false'></script>
-  <?php } ?>
 </head>
 
 <body>
