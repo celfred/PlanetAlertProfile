@@ -1200,38 +1200,94 @@
           $officialPeriod = $selectedTeam->periods;
           $allPlayers = $allPlayers->find("team.name=$selectedTeam->name");
           $out .= '<section class="well">';
-          $out .= '<div>';
-          $out .= '<span>'.__("Report category").' : </span>';
-          $out .= '<label for="allCat"><input type="radio" value="all" id="allCat" name="reportCat" checked="checked" class="reportCat"> '.__("All").'</input></label> &nbsp;&nbsp;';
-          $out .= '<label for="participation"><input type="radio" value="participation" id="participation" name="reportCat" class="reportCat"> '.__("Participation").'</input></label> &nbsp;&nbsp;';
-          $out .= '<label for="planetAlert"><input type="radio" value="planetAlert" id="planetAlert" name="reportCat" class="reportCat"> Planet Alert</input></label> &nbsp;&nbsp;';
-          $out .= '<label for="cm1"><input type="radio" value="cm1" id="cm1" name="reportCat" class="reportCat"> CM1</input></label> &nbsp;&nbsp;';
+          $out .= '<h3 class="text-center">'.__("Report").' - '.$selectedTeam->title.'</h3>';
+          $out .= '<form id="reportForm" name="reportForm" action="'.$pages->get("name=reports")->url.'" method="post">';
+          $out .= '<fieldset>';
+            $out .= '<legend><span class="glyphicon glyphicon-file"></span> '.__("Report type").'</legend>';
+            $out .= '<label for="allCat"><input type="radio" value="all" id="allCat" name="reportCat" class="reportCat"> '.__("Complete").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="participation"><input type="radio" value="participation" id="participation" name="reportCat" class="reportCat"> '.__("Participation").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="category"><input type="radio" value="category" id="category" name="reportCat" class="reportCat" data-reportId="categoryReport"> '.__("Category").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="task"><input type="radio" value="task" id="task" name="reportCat" class="reportCat" data-reportId="taskReport"> '.__("Task").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="ut"><input type="radio" value="ut" id="ut" name="reportCat" class="reportCat" data-reportId="utReport"> '.__("UT").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="fight"><input type="radio" value="fight" id="fight" name="reportCat" class="reportCat" data-reportId="fightReport"> '.__("Fight").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="planetAlert"><input type="radio" value="planetAlert" id="planetAlert" name="reportCat" class="reportCat"> '.__("Planet Alert").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="cm1"><input type="radio" value="cm1" id="cm1" name="reportCat" class="reportCat"> '.__("CM1").'</input></label> &nbsp;&nbsp;';
+          $out .= '</fieldset>';
+          $out .= '<div id="allOptions">';
+            $out .= '<fieldset class="specificOption" id="taskReport">';
+              $out .= '<legend><span class="glyphicon glyphicon-cog"></span> '.__("Specific options").'</legend>';
+              $out .= '<span>'.__("Select a task").' : </span>';
+              $out .= '<select id="taskId" name="taskId">';
+              $out .= '<option value="-1">'.__("Select a task").'</option>';
+              $allTasks = $pages->find("template=task, include=hidden, sort=title");
+              foreach($allTasks as $t) {
+                $out .= '<option value="'.$t.'">'.$t->title.'</option>';
+              }
+              $out .= '</select>';
+            $out .= '</fieldset>';
+            $out .= '<fieldset class="specificOption" id="fightReport">';
+              $out .= '<legend><span class="glyphicon glyphicon-cog"></span> '.__("Specific options").'</legend>';
+              $out .= '<span>'.__("Select a monster").' → </span>';
+              $out .= '<select id="monsterId" name="monsterId">';
+              $out .= '<option value="-1">'.__("All monsters").'</option>';
+              // TODO : Limit to logged in teacher
+              $allPages = $pages->find("template=exercise, include=hidden, sort=title");
+              foreach($allPages as $p) {
+                $out .= '<option value="'.$p.'">'.$p->title.'</option>';
+              }
+              $out .= '</select>';
+            $out .= '</fieldset>';
+            $out .= '<fieldset class="specificOption" id="categoryReport">';
+              $out .= '<legend><span class="glyphicon glyphicon-cog"></span> '.__("Specific options").'</legend>';
+              $out .= '<span>'.__("Select a category").' → </span>';
+              $out .= '<select id="categoryId" name="categoryId">';
+              $out .= '<option value="-1">'.__("Select a category").'</option>';
+              // TODO : Limit to logged in teacher
+              $allPages = $pages->find("template=category, sort=title");
+              foreach($allPages as $p) {
+                $out .= '<option value="'.$p.'">'.$p->title.'</option>';
+              }
+              $out .= '</select>';
+            $out .= '</fieldset>';
+            $out .= '<fieldset>';
+              $out .= '<legend><span class="glyphicon glyphicon-calendar"></span> '.__("Report dates").'</legend>';
+              $out .= '<label for="selectedPeriod"><input type="radio" value="period" id="selectedPeriod" name="reportPeriod" class="dateCat" checked="checked"></input>'.__('Official period').' → </label>&nbsp;&nbsp;';
+              $out .= '<select id="periodId" name="reportPeriod">';
+              $out .= '<option value="-1">'.__("Select a period").'</option>';
+              foreach($allPeriods as $period) {
+                if ($period->id == $officialPeriod->id) {$selected = 'selected="selected"';} else {$selected = '';};
+                $out .= '<option value="'.$period->id.'" '.$selected.'>'.$period->title.'</option>';
+              }
+              $out .= '</select>';
+              $out .= '<br />';
+              $out .= '<label for="customDates"><input type="radio" value="customDates" id="customDates" name="reportPeriod" class="dateCat" />'.__("Custom dates").' → &nbsp;&nbsp;';
+              $out .= '</label>';
+              $today = date('Y-m-d');
+              $out .= '<label for="startDate">'.__("From").'</label> ';
+              $out .= '<input id="startDate" name="startDate" type="date" size="10" max="'.$today.'" value="" />&nbsp;&nbsp;&nbsp;';
+              $out .= '<label for="endDate">'.__("To").'</label> ';
+              $out .= '<input id="endDate" name="endDate" type="date" size="10" max="'.$today.'" value="" />  ';
+              /* $out .= ' <span class="label label-danger">'.__("English format dates!").'</span>'; */
+              $out .= '<p><span class="glyphicon glyphicon-info-sign"></span> '.__("Limiting dates as needed (empty start = 01/01/2000, empty end = today).").'</p>';
+            $out .= '</fieldset>';
+            $out .= '<fieldset>';
+              $out .= '<legend><span class="glyphicon glyphicon-user"></span> '.__("Selected players").'</legend>';
+              $out .= '<select id="reportSelected" name="reportSelected">';
+              $out .= '<option value="'.$selectedTeam->id.'">'.__("The whole team").'</option>';
+              foreach($allPlayers as $player) {
+                $out .= '<option value="'.$player->id.'">'.$player->title.'</option>';
+              }
+              $out .= '</select>';
+              $out .= '<p><span class="glyphicon glyphicon-info-sign"></span> '.__("Only complete report is available if you select a single player.").'</p>';
+            $out .= '</fieldset>';
+            $out .= '<fieldset>';
+              $out .= '<legend><span class="glyphicon glyphicon-sort-by-alphabet"></span> '.__("Sorting").'</legend>';
+              $out .= '<label for="firstName"><input type="radio" class="reportSort" id="firstName" name="reportSort" checked="checked" value="title"> '.__("First name").'</input></label> &nbsp;&nbsp;';
+              $out .= '<label for="lastName"><input type="radio" class="reportSort" id="lastName" name="reportSort" value="lastName"> '.__("Last name").'</input></label>';
+            $out .= '</fieldset>';
+            $out .= '<button type="submit" class="popup btn btn-primary btn-block">'.__("Generate report").'</button>';
           $out .= '</div>';
-          $out .= '<div>';
-          $out .= '<span>'.__("Ordering by").' : </span>';
-          $out .= '<label for="firstName"><input type="radio" class="reportSort" id="firstName" name="order" checked="checked" value="title"> '.__("First name").'</input></label> &nbsp;&nbsp;';
-          $out .= '<label for="lastName"><input type="radio" class="reportSort" id="lastName" name="order" value="lastName"> '.__("Last name").'</input></label>';
-          $out .= '</div>';
-          $out .= '<div>';
-          $out .= '<span>'.__("Period").' : </span>';
-          $out .= '<select id="periodId">';
-          foreach($allPeriods as $period) {
-            if ($period->id == $officialPeriod->id) {$selected = 'selected="selected"';} else {$selected = '';};
-            $out .= '<option value="'.$period->id.'" '.$selected.'>'.$period->title.'</option>';
-          }
-          $out .= '</select>';
-          $out .= '</div>';
-          $out .= '<div>';
-          $out .= '<span>'.__("Select a player").' : </span>';
-          $out .= '<select id="reportPlayer">';
-          $out .= '<option value="'.$selectedTeam->id.'">'.__("The whole team").'</option>';
-          foreach($allPlayers as $player) {
-            $out .= '<option value="'.$player->id.'">'.$player->title.'</option>';
-          }
-          $out .= '</select>';
-          // reportUrl is based on url segments : all|category/team|player/periodId?sort=title|lastName
-          $out .= '<p class="text-center"><a id="reportUrl_button" class="btn btn-primary" href="'. $pages->get('/report_generator')->url .'" data-reportUrl="'. $pages->get('/report_generator')->url .'" target="_blank">'.__("Generate report").'</a></p>';
-          $out .= '</div>';
+          $out .= '</form>';
           $out .= '</section>';
         } else {
           $out .= __('You need to select a team.');
@@ -1981,164 +2037,6 @@
         $u = $users->get("name=$playerPage->login");
         $users->delete($u);
         $pages->trash($playerPage);
-        break;
-      case 'ut-stats' :
-        if ($selectedPlayer) { // TODO : Unused for the moment ?
-          $out .= '<h3>';
-          $out .= 'UT Stats for '.$selectedPlayer->title.' ['.$selectedPlayer->team->title.']   ';
-          $out .= 'from '.$startDate.' ';
-          $out .= 'to '.$endDate;
-          $out .= '</h3>';
-          $allMonsters = $pages->find("template=exercise")->sort("level, title");
-          foreach($allMonsters as $m) {
-            list($playerUt, $inClassUtGain) = calculatedUt($m, $selectedPlayer, $startDate, $endDate);
-            if ($playerUt > 0) {
-              $out .= $m->title.' [Level '.$m->level.'] → ';
-              $out .= $playerUt.' UT';
-              $out .= '<br />';
-            } else if ($inClassUtGain > 0) {
-              $out .= $m->title.' [Level '.$m->level.'] → ';
-              $out .= $playerUt.' UT [in class]';
-              $out .= '<br />';
-            }
-          }
-        } else if ($selectedTeam && $selectedTeam != '-1') {
-          $out .= '<h3 class="text-center">';
-          $out .= 'UT Stats for '.$selectedTeam->title .'   ';
-          $out .= 'from '.$startDate.' ';
-          $out .= 'to '.$endDate;
-          $out .= '</h3>';
-          $allMonstersIds = $pages->findIds("parent.name=monsters");
-          $allPlayers = $pages->find("parent.name=players, team=$selectedTeam")->sort("title");
-          $teamUt = 0;
-          foreach($allPlayers as $p) {
-            $playersTrainings = $pages->find("has_parent=$p, template=event, task.name~=ut-action, refPage!='', date>=$startDate, date<=$endDate");
-            $outUt = 0; // Out of class UT
-            $inUt= 0; // in class UT
-            $out .= '<ul>';
-            $out .= '<li>'.$p->title.' : '.$playersTrainings->count().' sessions.</li>';
-            foreach($allMonstersIds as $mId) {
-              $mTrainings  = $playersTrainings->find("refPage.id=$mId")->sort("refPage->title");
-              if ($mTrainings->count() > 0) {
-                $out .= '<ul>';
-                foreach($mTrainings as $mT) {
-                  preg_match("/\[\+([\d]+)U\.T\.\]/", $mT->summary, $matches);
-                  if (!$matches) {
-                    if ($mT->inClass == 0) {
-                      $outUt++;
-                    } else {
-                      $inUt++;
-                    }
-                  } else {
-                    if ($mT->inClass == 0) {
-                      $outUt = $outUt+$matches[1];
-                    } else {
-                      $inUt = $inUt+$matches[1];
-                    }
-                  }
-                }
-                $out .= '<li>'.$mT->refPage->title.' → '.($outUt+$inUt).' UT ['.$inUt.' in class] - '.$mTrainings->count().' session·s</li>';
-                $out .= '</ul>';
-              }
-            }
-            $teamUt += ($inUt+$outUt);
-            $out .= '</ul>';
-          }
-          $out .= '<p class="label label-success">Total : +'.$teamUt.' UT for the team</p>';
-        } else {
-          $out .= 'You need to select 1 player or 1 team.';
-        }
-        break;
-      case 'fights-stats' :
-        if ($selectedTeam && $selectedTeam != '-1') {
-          $out .= '<h3 class="text-center">';
-          $out .= 'Fights Stats for '.$selectedTeam->title .'   ';
-          $out .= 'from '.$startDate.' ';
-          $out .= 'to '.$endDate;
-          $out .= '</h3>';
-          $allPlayers = $allPlayers->find("team=$selectedTeam");
-          $out .= '<ul>';
-          foreach($allPlayers as $p) {
-            $allTests = $p->find("template=event, task.name~=fight, refPage!='', date>=$startDate, date<=$endDate, sort=refPage, sort=date");
-            $inClassAllTestsCount = $allTests->find("inClass=1")->count();
-            if ($allTests->count() > 0) {
-              $out_03 = '<ul>';
-              $prevDate = '';
-              $prevName = '';
-              foreach($allTests as $t) {
-                switch ($t->task->name) {
-                  case 'fight-vv' : $class="success"; $result="VV";
-                    break;
-                  case 'fight-v' : $class="success"; $result="V";
-                    break;
-                  case 'fight-r' : $class="danger"; $result="R";
-                    break;
-                  case 'fight-rr' : $class="danger"; $result="RR";
-                    break;
-                  default: $class = ""; $result = "";
-                }
-                if ($prevDate == date('Y-m-d', $t->date) && $prevName == $t->refPage->name) {
-                  $error = 'Error detected ?';
-                } else {
-                  $error = '';
-                }
-                $out_03 .= '<li>';
-                $out_03 .= date('d/m', $t->date).' → '.$t->refPage->title.' [lvl '.$t->refPage->level.'] <span class="label label-'.$class.'">'.$result.'</span> <span class="label label-danger">'.$error.'</span>';
-                if ($t->inClass == 1) {
-                  $out_03 .= ' [in class]';
-                } else {
-                  $out_03 .= ' [not in class]';
-                }
-                $out_03 .='</li>';
-                $prevDate = date('Y-m-d', $t->date);
-                $prevName = $t->refPage->name;
-              }
-              $out_03 .= '</ul>';
-              $out_02 = '<li><strong>'.$p->title.'</strong> → <span class="label label-success">'.$allTests->count().' fights</span> ['.$inClassAllTestsCount.' in class]</li>';
-              $out .= $out_02.$out_03;
-            }
-          }
-          $out .= '</ul>';
-        } else {
-          $out .= 'You need to select 1 team.';
-        }
-        break;
-      case 'task-report' :
-        $taskId = $input->get['taskId'];
-        $task = $pages->get("id=$taskId");
-        $taskCount = 0;
-        if ($selectedTeam && $selectedTeam != '-1' && $taskId!= -1) {
-          $out .= '<h3 class="text-center">';
-          $out .= '['.$task->title.'] report for '.$selectedTeam->title .'   ';
-          $out .= 'from '.$startDate.' ';
-          $out .= 'to '.$endDate;
-          $out .= '</h3>';
-          # TODO : Select a period
-          $allPlayers = $allPlayers->find("team=$selectedTeam");
-          $out .= '<ul>';
-          foreach($allPlayers as $p) {
-            $prevTask = $p->find("template=event,task=$task, date>$startDate, date<$endDate, sort=-date");
-            if ($prevTask->count() > 0) {
-              $taskCount += $prevTask->count();
-              $out .= '<li>'.$p->title. ': Task found '.$prevTask->count().' time(s).</li>';
-              $out .= '<ul>';
-              foreach($prevTask as $t) {
-                $tDate = strftime("%d/%m/%y", $t->date).' - ';
-                $out .= '<li>';
-                $out .= $tDate. $t->summary;
-                if ($t->inClass == 1) {
-                  $out .= ' [in class]';
-                }
-                $out .= '</li>';
-              }
-              $out .= '</ul>';
-            }
-          }
-          $out .= '</ul>';
-          $out .= '<p class="label label-primary">Total count : '.$taskCount.'</p>';
-        } else {
-          $out .= 'You need to select a team and a task.';
-        }
         break;
       case 'team-options' :
         $out = '';

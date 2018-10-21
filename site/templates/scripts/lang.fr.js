@@ -39,7 +39,7 @@ lang = {
 	itemsTosave	: "éléments restants.",
 	all	: "Tous",
 	ok	: "Ok",
-	whatNumber	: "À quoi correspond le numéro ",
+	whatNumber	: "À quoi correspond le ",
 	quit	: "Souhaitez-vous vraiment quitter la page ?",
 	success : "victoire écrasante (VV)",
 	won : "victoire (V)",

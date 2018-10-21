@@ -330,7 +330,7 @@
               $out .= '<p class="text-center"><img src="'.$config->urls->templates.'img/hourglass.gif"></p>';
           $out .= '</div>';
           $out .= '<div class="panel-footer text-right">';
-          $out .= '<p class=""><a href="'.$homepage->url.'report_generator/singlePlayer/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$currentPeriod->title.': from '.date("M. j, Y", $dateStart).' to '.date("M. j, Y", $dateEnd).'</p>';
+          $out .= '<p class=""><a href="'.$pages->get("name=reports")->url.'all/'.$player->id.'/'.$currentPeriod->id.'/?sort=title">[ See my report <i class="glyphicon glyphicon-file"></i> ]</a>&nbsp;&nbsp;'.$currentPeriod->title.': from '.date("M. j, Y", $dateStart).' to '.date("M. j, Y", $dateEnd).'</p>';
             $out .= '</div>';
           $out .= '</div>';
         } else {

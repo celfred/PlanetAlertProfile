@@ -8,5 +8,6 @@
 /site/assets/*/*
 /site/templates/bower_components/*
 /site/templates/Session.vim
+/site/templates/*.swp
 /site/modules/*
 /site/config.php
