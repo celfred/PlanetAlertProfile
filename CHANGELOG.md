@@ -36,6 +36,16 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.3.1] - [Unreleased]
+
+### Added
+- Failed logins stats over the last 7 days
+- Last 30 days training stats
+
+### Changed
+- Statistics display only unique visitors (more readable)
+- Global Statistics are reserved for admin
+
 ## [v0.3.0] - [2018-10-21]
 
 Reports are now available for teachers. Statsistics as well. And as usual, a few bugfixes.
