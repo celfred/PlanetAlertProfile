@@ -36,6 +36,35 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.3.0] - [2018-10-21]
+
+Reports are now available for teachers. Statsistics as well. And as usual, a few bugfixes.
+
+### Added
+- 'Reports' menu for teachers now gives access to all reports
+- New report type : category report
+- Statistics access for teachers
+- Contextual statistics according to logged-in teacher
+
+### Changed
+- Admin links (reports, stats, users/history) open in new tab
+- Reputation calculation now avoids HP points
+- 'Delete' button is back when checking history : faster removing of linked actions (ie, death)
+- Team and individual reports are available for all types
+- HTML5 datepicker for custom dates
+
+### Fixed
+- Remove teachers from statistics
+- Show logged player's work statistics
+- Recalculate hkCount after updating official period (limited to myself because it is a personal functionality)
+- Death bugs : reputation calculation, when no group were set, everyone suffered a 'group member died'
+- Detecting low HP players on Newsboard
+
+### Removed
+- Admin options that are now included in reports
+- Clean no longer needed files
+
+
 ## [v0.2.2] - 2018-10-08
 
 ### Changed
@@ -309,3 +338,4 @@ Initial official release.
 [v0.2.0]: https://framagit.org/celfred/planetAlert/tags/v0.2.0
 [v0.2.1]: https://framagit.org/celfred/planetAlert/tags/v0.2.1
 [v0.2.2]: https://framagit.org/celfred/planetAlert/tags/v0.2.2
+[v0.3.0]: https://framagit.org/celfred/planetAlert/tags/v0.3.0
