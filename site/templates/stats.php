@@ -90,8 +90,8 @@ if ($user->isSuperuser() || $user->hasRole('teacher')) {
     }
     $out .= '</p>';
     if (count($todayUnique) > 0 ) {
+      $out .= '<span class="label label-primary">'.__("Today's players").'</span>';
       $out .= '<ul class="list-inline list-unstyled">';
-      $out .= '<span class="label label-primary">'.__("Today's players").' : </span>';
       foreach($todayUnique as $login) {
         $player = $allPlayers->get("template=player, login=$login");
         if ($player) {
@@ -103,7 +103,7 @@ if ($user->isSuperuser() || $user->hasRole('teacher')) {
       $out .= '</ul>';
     }
     if (count($yesterdayUnique) > 0 ) {
-      $out .= '<span class="label label-primary">'.__("Yesterday's players").' : </span>';
+      $out .= '<span class="label label-primary">'.__("Yesterday's players").'</span>';
       $out .= '<ul class="list-inline list-unstyled">';
       foreach($yesterdayUnique as $login) {
         $player = $allPlayers->get("template=player, login=$login");
