@@ -36,15 +36,26 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
-## [v0.3.1] - [Unreleased]
+## [v0.4.0] - [Unreleased]
+Google maps is replaced with Open Street Map :) And a new 'categorize' exercise type appears along with Planet Alert basic tags support.
+
+### Backend
+- FieldtypeLeafletMapMarker is now required
+- mapMarker field is replaced with map field (Leaflet Inputfield)
+- Add categorize exercise type
 
 ### Added
 - Failed logins stats over the last 7 days
 - Last 30 days training stats
+- New exercise type : Categorize
+- Planet Alert basic tags support in exercises : _string_ is underlined, *string* is framed, \string\ is italicized
 
 ### Changed
 - Statistics display only unique visitors (more readable)
 - Global Statistics are reserved for admin
+
+### Removed
+- Google API is no longer needed for maps
 
 ## [v0.3.0] - [2018-10-21]
 
