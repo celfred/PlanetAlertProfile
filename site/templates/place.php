@@ -82,9 +82,11 @@ include("./head.inc");
       </td>
     <tr>
       <td colspan="3" class="col-sm-12">
-        <?php
-          $map = $modules->get('MarkupGoogleMap');
-          echo $map->render($page, 'mapMarker'); 
+        <?php 
+          $map = $modules->get('MarkupLeafletMap');
+          echo $map->getLeafletMapHeaderLines();
+          $options = array('markerIcon' => 'flag', 'markerColour' => 'red');
+          echo $map->render($page, 'map', $options); 
         ?>
       </td>
     </tr>
