@@ -36,7 +36,11 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
-## [v0.3.1] - [Unreleased]
+## [v0.4.0] - [Unreleased]
+
+### Backend
+- FieldtypeLeafletMapMarker is now required
+- mapMarker field is replaced with map field (Leaflet Inputfield)
 
 ### Added
 - Failed logins stats over the last 7 days
@@ -45,6 +49,9 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 ### Changed
 - Statistics display only unique visitors (more readable)
 - Global Statistics are reserved for admin
+
+### Removed
+- Google API is no longer needed for maps
 
 ## [v0.3.0] - [2018-10-21]
 
