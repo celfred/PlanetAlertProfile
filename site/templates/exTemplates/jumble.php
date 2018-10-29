@@ -82,7 +82,7 @@
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}'.__("HP").'</span>';
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
   $out .= '<h2 class="jumbleW inline" ng-repeat="w in word track by $index">';
-  $out .= '<span class="label label-primary" ng-click="pickWord(w, $index)">{{w}}</span>';
+  $out .= '<span class="label label-primary" ng-click="pickWord(w, $index)" ng-bind-html="w|paTags"></span>';
   $out .= '</h2>';
   $out .= ' <h3><span class="label label-danger blink" ng-show="showCorrection">{{showCorrection}} {{feedback}}</span></h3> ';
   $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">'.__("Try again").'</button>';

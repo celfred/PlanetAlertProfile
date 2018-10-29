@@ -99,13 +99,17 @@ exerciseApp.service('myData', function($http) {
 			var question = [];
 			// Pick a random line
 			// Different from previous line
-			var randNum = Math.floor(Math.random()*allLines.length);
-			if ( lineHistory.length >= 1) {
-				while ( randNum == lineHistory[lineHistory.length-1] ) {
-					var randNum = Math.floor(Math.random()*allLines.length);
+			if (allLines.length > 1) {
+				var randNum = Math.floor(Math.random()*allLines.length);
+				if (lineHistory.length >= 1) {
+					while (randNum == lineHistory[lineHistory.length-1]) {
+						randNum = Math.floor(Math.random()*allLines.length);
+					}
 				}
+				lineHistory.push(randNum);
+			} else {
+				randNum = 0;
 			}
-			lineHistory.push(randNum);
 			// console.log(type);
 			var randLine = allLines[randNum];
 			// Test if training or fight
@@ -134,6 +138,20 @@ exerciseApp.service('myData', function($http) {
 					}
 					var allCorrections = randWords[randOpp].split("|");
 					question['allCorrections'] = this.parseCorrections(allCorrections);
+					break;
+				case 'categorize' :
+					// Question will be allWords[0]
+					var quiz = randLine.split("::");
+					var allWords = quiz[0].split("|");
+					// Get categories (correct answer is first)
+					var allCategories = quiz[1].split(",");
+					// Trim eventual extra spaces
+					for (i=0; i<allCategories.length; i++) {
+						allCategories[i] = allCategories[i].trim();
+					}
+					question['allCorrections'] = allCategories[0];
+					this.shuffleArray(allCategories);
+					question['allCategories'] = allCategories;
 					break;
 				case 'quiz' :
 					// Question will be allWords[0]
@@ -210,14 +228,21 @@ exerciseApp.service('myData', function($http) {
 			return question;
 		},
 
+		cleanTags : function(str) {
+			if (str) {
+				str = str.replace(/[\*\/_]/g, '');
+			}
+			return str;
+		},
+
 		parseCorrections : function(allCorrections) {
 			var newCorrections = [];
 			var tempCorrections = [];
 			var feedback = '';
 			for (i=0; i<allCorrections.length; i++) {
+				var str = allCorrections[i];
 				// Get rid of feedback
 				var pattern = /\$(.*?)\$/i;
-				var str = allCorrections[i];
 				if (str.search(pattern) != -1 ) {
 					allCorrections[i] = str.replace(pattern, "");
 					feedback = str.match(pattern, "$1")[1];
@@ -249,10 +274,16 @@ exerciseApp.service('myData', function($http) {
 			}
 			newCorrections = [];
 			allCorrections['feedback'] = feedback;
+			// Clean paTags
+			for (var j=0; j<allCorrections.length; j++) {
+				allCorrections[j] = this.cleanTags(allCorrections[j]);
+			}
 			return allCorrections;
 		},
 
 		shuffle : function(str) {
+			// Remove paTags
+			str = this.cleanTags(str);
       var a = str.split(""),
           n = a.length;
       for(var i = n - 1; i > 0; i--) {
@@ -345,6 +376,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
 		$scope.word = $scope.question['word'];
 		$scope.mixedWord = $scope.question['mixedWord'];
 		$scope.allCorrections = $scope.question['allCorrections'];
+		$scope.categories = $scope.question['allCategories'];
     // End animation
     $timeout(function() { $scope.correct = false; }, 1000);
 		// Init new question
@@ -469,6 +501,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
   }
 
 	$scope.pickWord = function(w, i){
+		w = myData.cleanTags(w);
 		if(!$scope.selectedItems){
        $scope.selectedItems = [];
     }
@@ -482,6 +515,12 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
        $scope.selectedItems.splice(index, 1);
        $scope.playerAnswer = $scope.playerAnswer.replace(w, "");
     }
+	}
+
+	$scope.pickCategory = function(c, i){
+		c = myData.cleanTags(c);
+	  $scope.playerAnswer = c;
+		$scope.attack();
 	}
 
 	$scope.clear = function(){
@@ -618,12 +657,11 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   }
 
 	$scope.pickWord = function(w, i){
+		w = myData.cleanTags(w);
 		if(!$scope.selectedItems){
        $scope.selectedItems = [];
     }
-
     var index = $scope.selectedItems.indexOf(i);
-
     if(index === -1) {   // not selected already and add
        $scope.selectedItems.push(i);
        $scope.playerAnswer += w;
@@ -631,6 +669,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
        $scope.selectedItems.splice(index, 1);
        $scope.playerAnswer = $scope.playerAnswer.replace(w, "");
     }
+	}
+
+	$scope.pickCategory = function(c, i){
+		c = myData.cleanTags(c);
+	  $scope.playerAnswer = c;
+		$scope.attack();
 	}
 
 	$scope.clear = function(){
@@ -654,6 +698,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 	$scope.initQuestion = function() {
 		$scope.word = $scope.question['word'];
 		$scope.mixedWord = $scope.question['mixedWord'];
+		$scope.categories = $scope.question['allCategories'];
 		$scope.allCorrections = $scope.question['allCorrections'];
 		if ($scope.allCorrections['feedback'] != '') {
 			$scope.feedback = '['+$scope.allCorrections['feedback']+']';
@@ -811,6 +856,29 @@ exerciseApp.directive('syncFocusWith', function($timeout, $rootScope) {
 					$element[0].blur();
 				}
 			})
+		}
+	}
+});
+
+exerciseApp.filter('paTags', function () {
+	return function(input) {
+		if (input) {
+			var pattern = /\*+(.*?)\*+/ig;
+			if (input.search(pattern) != -1 ) {
+				var sub = '<span class="paTagFramed">$1</span>';
+				input = input.replace(pattern, sub);
+			}
+			var pattern = /_+(.*?)_+/ig;
+			if (input.search(pattern) != -1 ) {
+				var sub = '<span class="paTagUnderlined">$1</span>';
+				input = input.replace(pattern, sub);
+			}
+			var pattern = /\\+(.*?)\\+/ig;
+			if (input.search(pattern) != -1 ) {
+				var sub = '<span class="paTagItalicised">$1</span>';
+				input = input.replace(pattern, sub);
+			}
+			return input;
 		}
 	}
 });
