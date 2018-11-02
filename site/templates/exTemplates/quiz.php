@@ -81,7 +81,7 @@
   }
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}'.__("HP").'</span>';
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
-  $out .= '<h3 class="inline" ng-bind-html="word"></h3>&nbsp;';
+  $out .= '<h3 class="inline" ng-bind-html="word|paTags"></h3>&nbsp;';
   $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span></h2>  ';
   $out .= '</div>';
   $out .= '</div>';

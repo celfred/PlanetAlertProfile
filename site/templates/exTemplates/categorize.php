@@ -17,7 +17,9 @@
   $out .= '<h2 class="row well text-center">';
   $out .= '<span class="label label-default">'.__("Monster fight").'</span>';
   $out .= '<span class="">  ';
-  $out .= '<img class="pull-left" src="'.$page->image->getCrop("thumbnail")->url.'" alt="Monster" />';
+  if ($page->image) {
+    $out .= '<img class="pull-left" src="'.$page->image->getCrop("thumbnail")->url.'" alt="Monster" />';
+  }
   $out .= $page->title;
   $out .= ' vs. ';
   $out .= $player->title;
@@ -80,23 +82,16 @@
     $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getCrop('thumbnail')->url.'" alt="Antenna" />';
   }
   $out .= '<span ng-class="{damage:true, blink: true, hidden: hideMonsterDamage}">- {{monsterDamage}}'.__("HP").'</span>';
-  if ($page->type->name == 'image-map') {
-    $out .= '<div class="pull-right"><img class="imageMap longBlink" src="'.$page->imageMap->first()->url.'" max-width="800" alt="Image" /></div>';
-  }
   $out .= '<div ng-class="{\'bubble-left\': true, explode: correct}">';
-  $out .= '<h3 class="inline" ng-bind-html="word|paTags"></h3>&nbsp;';
-  $out .= '<h2 class="inline"><span class="label label-danger blink" ng-bind-html="showCorrection"></span><span>{{feedback}}</span></h2>  ';
+  $out .= '<h2 ng-bind-html="word|paTags"></h2>';
+  $out .= ' <h3><span class="label label-danger blink" ng-show="showCorrection">{{showCorrection}} {{feedback}}</span></h3> ';
   $out .= '</div>';
   $out .= '</div>';
   $out .= '<div class="text-right">';
-  $out .= '<div class="bubble-right">';
-  $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="Your answer" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
-  $out .= '&nbsp;';
-  $out .= '<button ng-click="attack()" ng-disabled="waitForStart" class="btn btn-success">'.__("Attack !").'</button>';
-  $out .= '&nbsp;';
-  $out .= '<button ng-click="dodge()" ng-disabled="waitForStart" class="btn btn-info">'.__("Dodge").'</button>';
-  $out .= '&nbsp;';
-  $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.__("Attack = I know!<br />Dodge = I don't know.<br />Tip : Use 'Enter' to play faster ;)").'"></span>';
+  $out .= '<div class="bubble-right" style="width: 50%; text-align: left;">';
+  $out .= '<h2 class="category inline" ng-repeat="c in categories">';
+  $out .= '<span ng-click="pickCategory(c)" ng-bind-html="c|paTags"></span>';
+  $out .= '</h2>';
   $out .='</div>';
   $out .='</h3>';
   $out .= '<span class="pull-right">';
