@@ -960,6 +960,17 @@ h3.report img  {
 	cursor: pointer;
 	margin: 0px 5px;
 }
+.category {
+	cursor : crosshair;
+	margin: 0px 3px;
+	border-radius: 15px;
+	border: 2px solid #000;
+	padding: 3px;
+}
+.category:hover {
+	background-color: blue;
+	color: #FFF;
+}
 
 img.showInfo {
 	max-width: 150px;
@@ -1022,6 +1033,15 @@ legend {
 }
 #allOptions {
 	display: none;
+}
+span.paTagUnderlined {
+	text-decoration : underline;
+}
+span.paTagFramed {
+	border: 1px solid #000;
+}
+span.paTagItalicised {
+	font-style: oblique;
 }
 
 /* Large desktop */

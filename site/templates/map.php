@@ -1,8 +1,8 @@
 <?php
   include("./head.inc");
 
-  $places = $pages->find("template=place, mapMarker!='', name!=places, sort=title");
-  $map = $modules->get('MarkupGoogleMap');
+  $places = $pages->find("template=place, map.lat!='', name!=places, sort=title");
+  $map = $modules->get('MarkupLeafletMap');
   $totalPlacesCount = count($places);
 ?>
 <div class="row">
@@ -14,7 +14,9 @@
   </div>
   <div class="col-sm-12">
   <?php
-    echo $map->render($places, 'mapMarker', array('height' => '600px')); 
+    echo $map->getLeafletMapHeaderLines();
+    $options = array('height' => '600px', 'markerIcon' => 'flag', 'markerColour' => 'red');
+    echo $map->render($places, 'map', $options); 
   ?>
   </div>
 </div>
