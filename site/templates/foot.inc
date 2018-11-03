@@ -13,7 +13,7 @@
 <?php } ?>
 
 <footer class="text-center">
-  <p>Planet Alert v0.4.0
+  <p>Planet Alert v0.4.1
     &nbsp;&copy; <?php echo date("Y"); ?> FL 
     &nbsp;-&nbsp;
     Powered by <a href="http://processwire.com">ProcessWire</a> CMS (v<?php echo $config->version; ?>)
