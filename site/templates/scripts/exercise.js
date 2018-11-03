@@ -230,7 +230,7 @@ exerciseApp.service('myData', function($http) {
 
 		cleanTags : function(str) {
 			if (str) {
-				str = str.replace(/[\*\/_]/g, '');
+				str = str.replace(/[\*\\_]/g, '');
 			}
 			return str;
 		},
