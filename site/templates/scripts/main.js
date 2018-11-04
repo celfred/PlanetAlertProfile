@@ -468,30 +468,6 @@ $(document).ready(function() {
 		});
 	});
 
-  $('#contactFormSubmit').on( "click", function(e) {
-		e.preventDefault();
-		// var $this = $("#contactForm");
-		var $this = $(this).parents("form");
-		swal({
-			title: lang.sure,
-			type: "warning",
-			showCancelButton : true,
-			allowOutsideClick : true,
-			cancelButtonText: lang.no,
-			confirmButtonText: lang.yes,
-		}).then( function() { // Send form
-			$('#contactFormSubmit').prop('disabled', true);
-			// Send form (via Ajax)
-			var $data = $this.serialize()+'&submit=true';
-			var $formUrl = $this.attr('action');
-			$.post($formUrl, $data, function(data) {
-				$this.html(data);
-			});
-		}, function(dismiss) { // Don't send form
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
-		});
-	});
-
   $('#donateFormSubmit').on( "click", function(e) {
 		e.preventDefault();
 		var $this = $(this).parents("form");

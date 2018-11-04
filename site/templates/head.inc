@@ -422,9 +422,6 @@
               $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
               $class = $page->name == 'documentation' ? " class='selected-left'" : "";
               $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - {$documentation->title}</a></li>";
-              // Contact admin
-              $class = $page->name == 'contact' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__("Contact")."</a></li>";
           $out .= '</ul>';
           $out .= '</div>';
           $class = $page->is("name=loginform") ? "on" : "";
