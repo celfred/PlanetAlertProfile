@@ -36,7 +36,14 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
-## [v0.4.0] - [Unreleased]
+## [v0.4.1] - [11/03/2018]
+### Fixed
+- Wrong Planet Alert tag in cleanTag function
+- Forgotten release date in CHANGELOG for v0.4.0
+- Forgotten v0.4.0 link in CHANGELOG
+
+
+## [v0.4.0] - [11/02/2018]
 Google maps is replaced with Open Street Map :) And a new 'categorize' exercise type appears along with Planet Alert basic tags support.
 
 ### Backend
@@ -56,6 +63,7 @@ Google maps is replaced with Open Street Map :) And a new 'categorize' exercise 
 
 ### Removed
 - Google API is no longer needed for maps
+
 
 ## [v0.3.0] - [2018-10-21]
 
@@ -361,3 +369,4 @@ Initial official release.
 [v0.2.2]: https://framagit.org/celfred/planetAlert/tags/v0.2.2
 [v0.3.0]: https://framagit.org/celfred/planetAlert/tags/v0.3.0
 [v0.3.1]: https://framagit.org/celfred/planetAlert/tags/v0.3.1
+[v0.4.0]: https://framagit.org/celfred/planetAlert/tags/v0.4.0
