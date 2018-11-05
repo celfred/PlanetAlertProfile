@@ -36,6 +36,17 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.4.3] - [11/05/2018]
+### Added
+- Basic anti-spam for guest contact form
+
+### Changed
+- Contact form validation is now managed with basic HTML5 tools
+
+### Fixed
+- Guests had a double 'Contact' entry in menu
+
+
 ## [v0.4.2] - [11/05/2018]
 UT report was fixed and slightly modified.
 
