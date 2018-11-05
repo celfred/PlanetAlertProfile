@@ -36,6 +36,16 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.4.2] - [11/05/2018]
+UT report was fixed and slightly modified.
+
+### Fixed
+- Team UT and monster UT were wrong in UT report
+
+### Added
+- Total UT over the selected period is now indicated for each player
+
+
 ## [v0.4.1] - [11/03/2018]
 ### Fixed
 - Wrong Planet Alert tag in cleanTag function
