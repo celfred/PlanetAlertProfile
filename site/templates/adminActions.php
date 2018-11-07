@@ -1104,6 +1104,15 @@
             $out .= $noAuthMessage;
           }
           break;
+        case 'announcements' :
+          $out .= 'Announcements';
+          // TODO
+          // new backend announcement template
+          // allow teacher to add children to team template
+          // Add an announcement button
+          // Choose a team, add the text, choose to publish or not
+          // List all teacher's announcements (with publish checkbox) and delete button
+          break;
         default :
           $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
           $out .= '<section id="ajaxViewport" class="well"></section>';

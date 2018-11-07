@@ -162,6 +162,8 @@
             $out .= '<ul class="dropdown-menu">';
               $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'team-options' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$adminActions->url}/team-options/'><span class='glyphicon glyphicon-cog'></span> - ".__('Team options')."</a></li>";
+              $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'announcements' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$adminActions->url}announcements/'><span class='glyphicon glyphicon-comment'></span> - ".__('Announcements')."</a></li>";
               $out .= '<li class="dropdown-submenu">';
                 $class = $page->is("name=admin-actions") && strpos($input->urlSegment1, 'manage') !== false ? "selected-left" : "";
                 $out .= '<a class="'.$class.'" href=""><span class="glyphicon glyphicon-cog"></span> - '.__("Planet Alert Settings").'</a>';
