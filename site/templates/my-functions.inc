@@ -177,8 +177,17 @@ function updateScore($player, $task, $real = true) {
       }
       $tmpEvent->task = $task;
       if ($task->refPage) { $tmpEvent->refPage = $task->refPage; };
-      $player->yearlyKarma += eventKarma($tmpEvent);
-      if ($player->yearlyKarma < 0) { $player->yearlyKarma = 0; }
+      // Set date for correct sorting
+      setEventDate($task);
+      if ($task->name == 'donation') {
+        if (!once($tmpEvent, $player->id)) { // Check if event has already been recorded on the same day
+          $player->yearlyKarma += eventKarma($tmpEvent);
+          if ($player->yearlyKarma < 0) { $player->yearlyKarma = 0; }
+        }
+      } else {
+        $player->yearlyKarma += eventKarma($tmpEvent);
+        if ($player->yearlyKarma < 0) { $player->yearlyKarma = 0; }
+      }
     }
 
     if ($real == true) { // Save player's new scores if necessary
@@ -188,8 +197,6 @@ function updateScore($player, $task, $real = true) {
       } else {
         $newsBoard = 0;
       }
-      // Set date for correct sorting
-      setEventDate($task);
       // Save history
       $historyPage = saveHistory($player, $task, $newsBoard);
       $player->of(false);
@@ -796,6 +803,22 @@ function setYearlyKarma($player) {
   }
   if ($karma < 0 || $player->coma == 1) { $karma = 0; }
   return $karma;
+}
+
+function once($e, $playerId) {
+  $pages = wire('pages');
+  if ($e->task->name == 'donation') {
+    $eDate = date("d m Y", strtotime($e->task->eDate));
+    // Check if task is already recorded on the same day
+    $already = $pages->get("id=$playerId")->get("name=history")->get("template=event,task=$e->task, sort=-date");
+    if ($already->id) {
+      $lastDate = date("d m Y", $already->date);
+      if ($eDate == $lastDate) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function eventKarma($e) {
