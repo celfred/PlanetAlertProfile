@@ -65,6 +65,24 @@ $(document).ready(function() {
 			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 		});
 	});
+	$('.togglePublish').on('click', function() {
+		$this = $(this);
+		var href = $this.attr('data-href');
+		$('.tooltip').hide();
+		$('<span>Saving...</span>').insertAfter($this);
+		$.get(href, function(data) { 
+			if ($this.text() == '✓') {
+				$this.text('✗');
+				$this.attr("class", "label label-danger");
+				$this.attr("title", "Publish");
+			} else {
+				$this.text('✓');
+				$this.attr("class", "label label-success");
+				$this.attr("title", "Unpublish");
+			}
+			$this.next('span').remove();
+		});
+	});
 
 	$('.teamOption').on('click', function() {
     $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
