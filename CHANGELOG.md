@@ -36,6 +36,11 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.4.4] - [11/09/2018]
+### Changed
+- Donations influence karma only once a day : this is to prevent players from making many 1GC donations in a row only to get ahead of other players
+
+
 ## [v0.4.3] - [11/05/2018]
 ### Added
 - Basic anti-spam for guest contact form
