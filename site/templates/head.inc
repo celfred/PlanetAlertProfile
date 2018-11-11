@@ -453,6 +453,11 @@
               echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
               echo '<span class="badge"><span class="glyphicon glyphicon-comment"></span> '.__("Teacher's message").'</span> ';
               echo $a->body;
+              if ($page->is("name!=contact")) {
+                echo '<p class="text-right">';
+                echo '<a href="'.$contact->url.'" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-envelope"></span> - '.__("Reply to my teacher").'</a>';
+                echo '</p>';
+              }
               echo '</div>';
             }
           }

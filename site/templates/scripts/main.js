@@ -65,6 +65,7 @@ $(document).ready(function() {
 			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 		});
 	});
+
 	$('.togglePublish').on('click', function() {
 		$this = $(this);
 		var href = $this.attr('data-href');
