@@ -1137,45 +1137,47 @@
           } else {
             $allAnnouncements = $pages->find("template=announcement, created_users_id=$user->id")->sort("team.name, title");
           }
-          $out .= '<ul class="list">';
-          $out .= __("Click ✓ or ✗ to quickly publish/unpublish announcements");
-          foreach ($allAnnouncements as $a) {
-            $out .= '<li>';
-            if ($a->publish) {
-              $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublish/'.$user->id.'/'.$a->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
-            } else {
-              if ($a->body != '') {
-                $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublish/'.$user->id.'/'.$a->id.'?type=team"><span class="label label-danger" data-toggle="tooltip" title="'.__('Publish').'">✗</span></a> ';
+          if ($allAnnouncements->count() > 0) {
+            $out .= '<ul class="list">';
+            $out .= __("Click ✓ or ✗ to quickly publish/unpublish announcements");
+            foreach ($allAnnouncements as $a) {
+              $out .= '<li>';
+              if ($a->publish) {
+                $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublish/'.$user->id.'/'.$a->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
+              } else {
+                if ($a->body != '') {
+                  $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublish/'.$user->id.'/'.$a->id.'?type=team"><span class="label label-danger" data-toggle="tooltip" title="'.__('Publish').'">✗</span></a> ';
+                }
               }
+              if ($a->selectPlayers) {
+                $selectedPlayers = $a->playersList->implode(', ', '{title}');
+              } else {
+                $selectedPlayers = '';
+              }
+              $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.$selectedPlayers.'">';
+              $out .= $a->parent->title;
+              if ($a->selectPlayers) {
+                $out .= '*';
+              }
+              $out .= '</span>&nbsp;';
+              $out .= $a->title.' ';
+              if ($a->body == '') {
+                $out .= '<span class="glyphicon glyphicon-warning-sign" data-toggle="tooltip" title="'.__("Empty message").'"></span>';
+              } else {
+                $out .= '<span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="'.$sanitizer->entities($a->body).'"></span>';
+              }
+              if (!$user->isSuperuser()) {
+                $out .= $a->feel(array(
+                          "text" => __('[Edit]'),
+                        ));
+              } else {
+                $out .= $a->feel();
+              }
+              $out .= '<a href="#" class="deleteFromId" data-href="'.$page->url.'deleteFromId/'.$user->id.'/'.$a->id.'?type=team">'.__("[Delete]").'</a>';
+              $out .= '</li>';
             }
-            if ($a->selectPlayers) {
-              $selectedPlayers = $a->playersList->implode(', ', '{title}');
-            } else {
-              $selectedPlayers = '';
-            }
-            $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.$selectedPlayers.'">';
-            $out .= $a->parent->title;
-            if ($a->selectPlayers) {
-              $out .= '*';
-            }
-            $out .= '</span>&nbsp;';
-            $out .= $a->title.' ';
-            if ($a->body == '') {
-              $out .= '<span class="glyphicon glyphicon-warning-sign" data-toggle="tooltip" title="'.__("Empty message").'"></span>';
-            } else {
-              $out .= '<span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="'.$sanitizer->entities($a->body).'"></span>';
-            }
-            if (!$user->isSuperuser()) {
-              $out .= $a->feel(array(
-                        "text" => __('[Edit]'),
-                      ));
-            } else {
-              $out .= $a->feel();
-            }
-            $out .= '<a href="#" class="deleteFromId" data-href="'.$page->url.'deleteFromId/'.$user->id.'/'.$a->id.'?type=team">'.__("[Delete]").'</a>';
-            $out .= '</li>';
+            $out .= '</ul>';
           }
-          $out .= '</ul>';
           $out .= '</div>';
           $out .= '</section>';
           break;
