@@ -451,7 +451,7 @@
             foreach($announcements as $a) {
               echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$player->id.'">';
               echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-              echo '<span class="badge"><span class="glyphicon glyphicon-comment"></span> '.__("Teacher's message").'</span> ';
+              echo '<span class="label label-danger"><span class="glyphicon glyphicon-comment"></span> '.__("Teacher's message").' : '.$a->title.'</span>';
               echo $a->body;
               if ($page->is("name!=contact")) {
                 echo '<p class="text-right">';
