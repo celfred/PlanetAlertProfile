@@ -115,7 +115,10 @@
           $mini = '';
         }
         if ($user->isSuperuser() || $user->hasRole('teacher')) {
-          $out .= '<td><a class="pdfLink btn btn-info btn-xs" href="'.$page->url.'?id='.$m->id.'&pages2pdf=1">[PDF]</a></td>';
+          $out .= '<td>';
+          $out .= '<a class="pdfLink btn btn-info btn-xs" href="'.$page->url.'?id='.$m->id.'&pages2pdf=1">[PDF Fight]</a>';
+          $out .= '<a class="pdfLink btn btn-info btn-xs" href="'.$page->url.'?id='.$m->id.'&thumbnail=1&pages2pdf=1">[PDF Image]</a>';
+          $out .= '</td>';
         }
         $out .= '<td>'. $mini .'</td>';
         $out .= '<td>';
