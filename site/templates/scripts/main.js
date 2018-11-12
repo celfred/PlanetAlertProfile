@@ -85,6 +85,26 @@ $(document).ready(function() {
 		});
 	});
 
+	$('.announcement').on('close.bs.alert', function(e) {
+		e.preventDefault();
+		var $this = $(this);
+		var $href = $this.attr('data-href')
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
+		}).then( function(isConfirm) {
+			$.get($href, function(data) { 
+				$this.remove();
+			}); 
+		}, function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		});
+	});
+
 	$('.teamOption').on('click', function() {
     $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
 		var href = $(this).attr('href');
