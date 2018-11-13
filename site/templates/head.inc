@@ -444,7 +444,7 @@
           echo $ieAlert;
         }
         // Any announcements ?
-        if ($user->hasRole('player')) {
+        if ($user->hasRole('player') && $page->is("template!=exercise")) {
           $adminId = $users->get("name=admin")->id;
           $announcements = $pages->find("template=announcement, publish=1, (parent=$player->team, created_users_id=$adminId), (parent=$player->team, selectPlayers=0), (parent=$player->team, selectPlayers=1, playersList=$player)")->sort("-date");
           if ($announcements->count()>0) {

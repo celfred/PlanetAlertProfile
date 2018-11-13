@@ -7,21 +7,23 @@
       if (!$user->isLoggedin()) {
         echo $noAuthMessage;
       } else {
-        echo '<div ng-app="exerciseApp">';
-        // Get player's equipment to set scores alternatives
-        $weaponRatio = 0;
-        $protectionRatio = 0;
-        if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
-          $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
-          $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
+        if (utGain($page, $player)[0] >= 20) {
+          echo '<div ng-app="exerciseApp">';
+          // Get player's equipment to set scores alternatives
+          $weaponRatio = 0;
+          $protectionRatio = 0;
+          if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
+            $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
+            $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
+          }
+          if ($bestWeapon->id) { $weaponRatio = $bestWeapon->XP; }
+          if ($bestProtection->id) { $protectionRatio = $bestProtection->HP; }
+          // Get exercise type
+          include('./exTemplates/'.$page->type->name.'.php');
+          echo '</div>';
+        } else {
+          echo '<p class="alert alert-danger">'.__("You need to get 20UT on this monster before being able to fight it !").'</p>';
         }
-        if ($bestWeapon->id) { $weaponRatio = $bestWeapon->XP; }
-        if ($bestProtection->id) { $protectionRatio = $bestProtection->HP; }
-
-        // Get exercise type
-        include('./exTemplates/'.$page->type->name.'.php');
-
-        echo '</div>';
       }
     }
 
