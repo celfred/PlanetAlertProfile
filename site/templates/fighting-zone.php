@@ -72,7 +72,7 @@
             } else {
               $mini = '';
             }
-            $out .= '<li><a href="'.$m->url.'" class="btn btn-primary" data-toggle="tooltip" data-html="true" title="'.$m->summary.'">'.$mini.' '.$m->title.'</a></li>';
+            $out .= '<li><a href="'.$m->url.'fight" class="btn btn-primary" data-toggle="tooltip" data-html="true" title="'.$m->summary.'">'.$mini.' '.$m->title.'</a></li>';
           }
           $out .= '</ul>';
         } else {

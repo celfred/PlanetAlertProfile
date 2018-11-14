@@ -167,7 +167,7 @@
           $out .= '</td>';
           $out .= '<td>';
           if ($m->isTrainable == 1) {
-            $out .= ' <a class="btn btn-primary" href="'.$page->url.'?id='.$m->id.'"><i class="glyphicon glyphicon-headphones"></i> '.__("Put the helmet on !").'</a>';
+            $out .= ' <a class="btn btn-primary" href="'.$m->url.'train"><i class="glyphicon glyphicon-headphones"></i> '.__("Put the helmet on !").'</a>';
           } else {
             if ($m->waitForTrain == 1) { // Trained today
               $out .= __('Come back tomorrow ;)');
