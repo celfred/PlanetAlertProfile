@@ -774,8 +774,8 @@
                 }
               }
               // Possibility to test monster
-              $out .= ' <a href="'.$pages->get("name=underground-training")->url.'?id='.$p->id.'" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
-              $out .= ' <a href="'.$p->url.'" data-toggle="tooltip" title="'.__("Test fight").'">[<i class="glyphicon glyphicon-flash"></i>]</a>'; // Fight link
+              $out .= ' <a href="'.$p->url.'train" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
+              $out .= ' <a href="'.$p->url.'fight" data-toggle="tooltip" title="'.__("Test fight").'">[<i class="glyphicon glyphicon-flash"></i>]</a>'; // Fight link
               $out .= '</li>';
             }
             $out .= '</ul>';
@@ -799,8 +799,8 @@
                 $out .= $p->feel();
               }
               // Possibility to test monster
-              $out .= ' <a href="'.$pages->get("name=underground-training")->url.'?id='.$p->id.'" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
-              $out .= ' <a href="'.$p->url.'" data-toggle="tooltip" title="'.__("Test fight").'">[<i class="glyphicon glyphicon-flash"></i>]</a>'; // Fight link
+              $out .= ' <a href="'.$p->url.'train" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
+              $out .= ' <a href="'.$p->url.'/fight" data-toggle="tooltip" title="'.__("Test fight").'">[<i class="glyphicon glyphicon-flash"></i>]</a>'; // Fight link
             $out .= '</li>';
           }
           $out .= '</ul>';
