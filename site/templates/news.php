@@ -36,6 +36,12 @@
           $teamPlayers = $pages->findMany("parent.name=players, template=player");
           $team = '';
         }
+        if ($player->GC > 50) {
+          $helpAlert = true;
+          $helpTitle = sprintf(__("You have %dGC !"), $player->GC);
+          $helpMessage = '<h4>'.__("Why not use them (free item, buy a potion, help a friend...)?").'</h4>';
+        }
+        include("./helpAlert.inc.php"); 
       } else {
         $player = false;
         $teamPlayers = $pages->find("parent.name=players, template=player");
@@ -164,7 +170,7 @@
                 // Help needed
                 $out .= '<div id="" class="board panel panel-danger">';
                   $out .= '<div class="panel-heading">';
-                    $dangerPlayers = $allPlayers->find('(coma=1), (HP<=15>)')->sort("coma, HP");
+                    $dangerPlayers = $allPlayers->find('(coma=1), (HP<=15)')->sort("coma, HP");
                     $out .= '<p class="panel-title">'.$team.' '.__("Help needed!").'</p>';
                   $out .= '</div>';
                   $out .= '<div class="panel-body">';

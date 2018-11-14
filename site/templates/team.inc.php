@@ -50,7 +50,7 @@
     // Prepare group display
     $allGroups->sort('-karma');
     $outGroups .= '<ul class="list-inline">';
-    foreach( $allGroups as $group) {
+    foreach($allGroups as $group) {
       $outGroups .= '<li>';
       $outGroups .= '<p class="label label-default" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
       $outGroups .= $group->title.' <span class="bg-primary">'.$group->karma.'</span>';
@@ -95,12 +95,16 @@
       if ($user->name == 'flieutaud' || $user->isSuperuser()) {
         $penalty = $pages->find("has_parent=$allPlayers, template=event, publish=1, task.name=penalty, sort=-date");
         if (count($penalty) > 0) {
+          $players = $penalty->implode(', ', '{parent.parent.title}');
           echo '<span class="pull-left label label-danger">';
           echo '<span class="glyphicon glyphicon-warning-sign"></span> ';
           echo sprintf(_n("Serious injury", "Serious injuries", count($penalty)), count($penalty)).' : ';
-          $players = $penalty->implode(', ', '{parent.parent.title}');
           echo $players;
           echo '</span>';
+          $helpAlert = true;
+          $helpTitle =  '<span class="glyphicon glyphicon-warning-sign"></span>&nbsp;';
+          $helpTitle .= sprintf(_n("Serious injury", "Serious injuries", count($penalty)), count($penalty)).' !';
+          $helpMessage = '<h4>'.$players.'</h4>';
         }
       }
 
@@ -297,6 +301,18 @@
   $out .= '</tbody>';
   $out .= '</table>';
   if (isset($pagination)) { $out .= $pagination;}
+
+  // helpAlert
+  if ($user->hasRole('player')) {
+    $dangerPlayers = $allPlayers->find('(coma=1), (HP<=15)')->sort("coma, HP");
+    if ($dangerPlayers->count() > 0) {
+      $helpAlert = true;
+      $helpTitle = __("Some team mates need help !");
+      $helpMessage = __("Low HP !");
+    }
+  }
+
+  include("./helpAlert.inc.php");
 
   echo $out;
 ?>

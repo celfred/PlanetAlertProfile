@@ -1008,6 +1008,17 @@ $(document).ready(function() {
 	
 	// Init tables if needed
 	if ($('table').length > 0) { initTables(); }
+
+	if ($('#helpAlert').length > 0) {
+		swal({
+			position: 'top',
+			backdrop: false,
+			title: $('#helpTitle').html(),
+			html: $('#helpMessage').html(),
+			showConfirmButton : false,
+			timer: 5000
+		});
+	}
 }); 
 
 var FEEL = {

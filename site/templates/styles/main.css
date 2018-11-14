@@ -1048,6 +1048,8 @@ span.paTagItalicised {
 	border: 1px solid #000;
 }
 
+#helpAlert { display: none; }
+
 /* Large desktop */
 @media (min-width: 1200px) { 
 }
