@@ -1015,8 +1015,9 @@ $(document).ready(function() {
 			backdrop: false,
 			title: $('#helpTitle').html(),
 			html: $('#helpMessage').html(),
-			showConfirmButton : false,
-			timer: 5000
+			showCloseButton: true,
+			showConfirmButton: false,
+			timer: 8000
 		});
 	}
 }); 

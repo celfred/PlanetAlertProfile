@@ -40,9 +40,14 @@
   // Get last activity # of days
   $lastEvent = lastEvent($playerPage);
   $lastActivityCount = daysFromToday($lastEvent);
-?>
+  if ($lastActivityCount > 20 && lastActivityCount < 30) {
+    $helpAlert = true;
+    $helpTitle = __("Watch out for inactivity !");
+    $helpMessage = '<h4>'.__("You will lose all your GC if you don't do anything (UT, fight, donation, ...) before 30 days of inactivity !").'</h4>'; 
+  }
 
-<?php
+  // helpAlert
+
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
     echo '<div class="row">';
     $tmpCache = $playerPage->children()->get("name=tmp");

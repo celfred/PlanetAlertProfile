@@ -2413,8 +2413,7 @@ function getProfile($teacher) {
 function miniProfile($player, $type = '') {
   $config = wire('config');
   $pages = wire('pages');
-  $out = '<div class="lead well miniProfile">';
-  $out .= '<ul class="list-unstyled list-inline">';
+  $out = '<ul class="list-unstyled list-inline">';
   if ($type == 'profile') {
     $out .= '<span>'.__("Your scores").' : </span>';
   }
@@ -2484,7 +2483,6 @@ function miniProfile($player, $type = '') {
     $out .= '<li class="label label-danger">Coma !</li>';
   }
   $out .= '</ul>';
-  $out .= '</div>';
   return $out;
 }
 

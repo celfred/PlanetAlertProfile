@@ -5,34 +5,47 @@ include("./head.inc");
 
   // Test if a player is connected
   if ($user->hasRole('player')) { // Show player's mini-profile
-    echo '<div class="row well text-center">';
+    echo '<div class="row well lead text-center">';
       echo miniProfile($player, 'places');
       $item = possibleElement($player, $page);
+      // helpAlerts
       switch($item->pb) {
         case 'possible' : 
-          echo "<p class='lead'>You can buy this item.</p>";
-          echo  '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">Go to the marketplace</a>';
+          $helpAlert = true;
+          $helpTitle = __("You can buy this item !");
           break;
         case 'helmet' : 
-          echo '<p class="lead">You must buy the <a href="'.$pages->get("name=memory-helmet")->url.'">Memory Helmet</a> first before buying this item.</p>';
+          $helpAlert = true;
+          $helpTitle = __("Memory helmet required !");
+          $link = '<a href="'.$pages->get("name=memory-helmet")->url.'">Memory Helmet</a>';
+          $helpMessage = sprintf(__('You must buy the %s first before buying this item'), $link);
           break;
         case 'already' : 
-          echo "<p class='lead'>".__("You already own this item.")."</p>";
+          $helpAlert = true;
+          $helpTitle = __("You already own this item !");
           break;
         case 'freeActs' : 
           $nbEl = $player->places->count()+$player->people->count();
-          echo "<p class='lead'>".sprintf(__("This item requires %1$s free elements ! You have only %2$s free elements."), $item->freeActs, $nbEl)."</p>";
+          $helpAlert = true;
+          $helpTitle = __("More free elements required !");
+          $helpMessage = sprintf(__('This item requires %1$s free elements ! You have only %2$s free elements.'), $item->freeActs, $nbEl);
           break;
         case 'GC' : 
-          echo "<p class='lead'>This item requires ".$item->GC."GC ! You have only ".$player->GC."GC.</p>";
+          $helpAlert = true;
+          $helpTitle = __("Not enoigh GC !");
+          $helpMessage =  sprintf(__('This item requires %1$s GC ! You have only %2$sGC !'), $item->GC, $player->GC);
           break;
         case 'level' : 
-          echo "<p class='lead'>This item requires a level ".$item->level." ! You are only at level ".$player->level.".</p>";
+          $helpAlert = true;
+          $helpTitle = __("Not enough GC !");
+          $helpMessage =  sprintf(__('This item requires a level %1$s ! You are only at level %2$sGC !'), $item->level, $player->level);
           break;
         default: 
-          echo "<p class='lead'>You can't buy this item for the moment. Sorry.</p>";
+          $helpAlert = true;
+          $helpTitle = __("You can't buy this item for the moment. Sorry.");
       }
     echo '</div>';
+    include("./helpAlert.inc.php");
   }
 
   echo '<h4 class="text-center"><a href="http://download.tuxfamily.org/planetalert/map/worldMap-numbers.png" target="_blank" data-toggle="tooltip" title="'.__("This map should be in your copybook.").'">';

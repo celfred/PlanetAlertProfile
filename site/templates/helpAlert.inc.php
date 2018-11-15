@@ -1,12 +1,16 @@
 <?php
   if (isset($helpAlert)) {
-    $out .= '<section id="helpAlert">';
-    $out .= '<div id="helpTitle">';
-    $out .= $helpTitle;
-    $out .= '</div>';
-    $out .= '<div id="helpMessage">';
-    $out .= $helpMessage;
-    $out .= '</div>';
-    $out .= '</section>';
+    echo '<section id="helpAlert">';
+    if (isset($helpTitle)) {
+      echo '<div id="helpTitle">';
+      echo $helpTitle;
+      echo '</div>';
+    }
+    if (isset($helpMessage)) {
+      echo '<div id="helpMessage">';
+      echo $helpMessage;
+      echo '</div>';
+    }
+    echo '</section>';
   }
 ?>

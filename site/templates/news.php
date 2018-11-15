@@ -36,10 +36,10 @@
           $teamPlayers = $pages->findMany("parent.name=players, template=player");
           $team = '';
         }
-        if ($player->GC > 50) {
+        if ($player->GC > 80) {
           $helpAlert = true;
           $helpTitle = sprintf(__("You have %dGC !"), $player->GC);
-          $helpMessage = '<h4>'.__("Why not use them (free item, buy a potion, help a friend...)?").'</h4>';
+          $helpMessage = '<h4>'.__("Why not use them (free item, buy a potion, help a friend...) ?").'</h4>';
         }
         include("./helpAlert.inc.php"); 
       } else {
