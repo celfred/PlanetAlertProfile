@@ -1567,7 +1567,7 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
       $playerPos = false;
     }
   }
-  if ($playerPos && $limit != -1) { // Player is in the charts
+  if (isset($playerPos) && $limit != -1) { // Player is in the charts
     if ($playerPos <= 8) { // Good position, get Top 10
       $topPlayers = $allPlayers->slice(0, 10);
       $prevPlayers = false;
@@ -1577,6 +1577,7 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
       $prevPlayers = $allPlayers->slice($prevIndex, $limit);
     }
   } else { // No ranking (or complete scoreboard)
+    $playerPos = false;
     if ($limit == -1) {
       $topPlayers = $allPlayers; // Complete scoreboard
     } else {
