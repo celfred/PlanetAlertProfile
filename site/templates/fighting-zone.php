@@ -14,10 +14,15 @@
       // Set all available monsters
       if (!isset($player)) {
         $playerId = $input->urlSegment1;
-        if ($playerId && $playerId != '') { // Teacher wants to see a player's fighting eone
+        if ($playerId && $playerId != '') { // Teacher wants to see a player's fighting zone
           $player = $pages->get($playerId);
         } else { // All monsters are available for superUsers or teachers (debugging mode)
-          $allMonsters = $pages->find("template=exercise, include=all")->sort("level, name");
+          if ($user->hasRole('teacher')) {
+            $allMonsters = $pages->find("template=exercise, (created_users_id=$user->id), (teacher=$user), include=all")->sort("level, name");
+          }
+          if ($user->isSuperuser()) {
+            $allMonsters = $pages->find("template=exercise, include=all")->sort("level, name");
+          }
           $availableFights = $allMonsters;
         }
       }
@@ -46,19 +51,19 @@
         if (($user->isSuperuser() || $user->hasRole('teacher')) && isset($playerId) && $playerId != '') {
           $out .= ' ('.$player->title.')';
         }
-        $out .= '</h2>';
-        $out .= $page->summary;
+        $out .= '<span class="pull-left glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="right" title="'.$page->summary.'"></span>';
         $page->of(false);
         if ($page->summary->getLanguageValue($french) != '') {
-          $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->summary->getLanguageValue($french).'"></span>';
+          $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="left" title="'.$page->summary->getLanguageValue($french).'"></span>';
         }
+        $out .= '</h2>';
         $out .= '<h4 class="text-center">';
         $out .= sprintf(__("There are currently %d monsters detected."), $allMonsters->count());
         if (isset($hiddenMonstersNb)) {
           $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
-          $out .= '<p>('.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).')</p>';
+          /* $out .= '<p>('.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).')</p>'; */
         } else {
-          $out .= '<p>('.__("All monsters are visible thanks to your Electronic Visualizer.").')</p>';
+          /* $out .= '<p>('.__("All monsters are visible thanks to your Electronic Visualizer.").')</p>'; */
         }
         $out .= '</h4>';
 
@@ -72,7 +77,7 @@
             } else {
               $mini = '';
             }
-            $out .= '<li><a href="'.$m->url.'" class="btn btn-primary" data-toggle="tooltip" data-html="true" title="'.$m->summary.'">'.$mini.' '.$m->title.'</a></li>';
+            $out .= '<li><a href="'.$m->url.'fight" class="btn btn-primary" data-toggle="tooltip" data-html="true" title="'.$m->summary.'">'.$mini.' '.$m->title.'</a></li>';
           }
           $out .= '</ul>';
         } else {
@@ -117,6 +122,32 @@
           $out .= '</ul>';
         }
       $out .= '</div>';
+
+      // helpAlert
+      if ($user->hasRole('player')) {
+        if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
+          if (isset($impossibleFights) && $impossibleFights->count() > 0) {
+            $helpAlert = true;
+            $helpTitle = sprintf(__("%d monsters are out of reach !"), $impossibleFights->count());
+            $helpMessage = '<h4>'.__("You need to have at least 20UT to be able to fight them.").'</h4>';
+          }
+        } else {
+          $helpAlert = true;
+          $helpTitle = __("Some monsters are absent !");
+          $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="image" /> ';
+          $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
+        }
+      } else {
+        $helpAlert = true;
+        if (isset($player)) {
+          $helpTitle = sprintf(__("Viewing Fighting zone of %s !"), $player->title);;
+          $helpMessage = '<h4>'.__("Available monsters depend on player's training.").'</h4>';
+        } else {
+          $helpTitle = __("Teacher access !");
+          $helpMessage = '<h4>'.__('All monsters are fightable for testing.').'</h4>';
+        }
+      }
+        include("./helpAlert.inc.php"); 
 
       echo $out;
     }

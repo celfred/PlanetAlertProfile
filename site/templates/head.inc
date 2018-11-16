@@ -162,6 +162,8 @@
             $out .= '<ul class="dropdown-menu">';
               $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'team-options' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$adminActions->url}/team-options/'><span class='glyphicon glyphicon-cog'></span> - ".__('Team options')."</a></li>";
+              $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'announcements' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$adminActions->url}announcements/'><span class='glyphicon glyphicon-comment'></span> - ".__('Announcements')."</a></li>";
               $out .= '<li class="dropdown-submenu">';
                 $class = $page->is("name=admin-actions") && strpos($input->urlSegment1, 'manage') !== false ? "selected-left" : "";
                 $out .= '<a class="'.$class.'" href=""><span class="glyphicon glyphicon-cog"></span> - '.__("Planet Alert Settings").'</a>';
@@ -440,5 +442,24 @@
       <?php
         if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
           echo $ieAlert;
+        }
+        // Any announcements ?
+        if ($user->hasRole('player') && $page->is("template!=exercise")) {
+          $adminId = $users->get("name=admin")->id;
+          $announcements = $pages->find("template=announcement, publish=1, (parent=$player->team, created_users_id=$adminId), (parent=$player->team, selectPlayers=0), (parent=$player->team, selectPlayers=1, playersList=$player)")->sort("-date");
+          if ($announcements->count()>0) {
+            foreach($announcements as $a) {
+              echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$player->id.'">';
+              echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+              echo '<span class="label label-danger"><span class="glyphicon glyphicon-comment"></span> '.__("Teacher's message").' : '.$a->title.'</span>';
+              echo $a->body;
+              if ($page->is("name!=contact")) {
+                echo '<p class="text-right">';
+                echo '<a href="'.$contact->url.'" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-envelope"></span> - '.__("Reply to my teacher").'</a>';
+                echo '</p>';
+              }
+              echo '</div>';
+            }
+          }
         }
       ?>

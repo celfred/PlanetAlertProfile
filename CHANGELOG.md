@@ -26,14 +26,37 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 	- 'Backend' for changes in backend fields/templates
 
 
-## Unreleased
-### Added
-- Allow multiple teachers
-
 ## v1.0.0 - [Unreleased]
+- Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
+
+
+## [v0.5.0] - [Unreleased]
+Teacher's announcements are now possible. Another important change is the helpAlerts notifications.
+
+### Backend
+- New announcement template (teachers can edit and delete their own page)
+- New fields : selectPlayers (checkbox), playersList (Page)
+- Changes : teachers can add children to team template (with announcement template)
+- Changes : exercise template now allows url segments to quickly link to train or fight versions
 
 ### Added
-- Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
+- Teacher's messages to a team or individual players
+- helpAlerts notifications to better guide players and teachers through options : a simple message show up on page load during 8 seconds to remind user about a particular option (lots of GC, no visualizer, help needed, ...)
+
+### Changed
+- Train or fight monsters are now accessible via url segments : this allows easy linking in teacher's announcements.
+- Update Sweetalert2 library
+
+### Fixed
+- Minimum 20UT is checked before a fight
+- PHP errors because of missing isset()
+
+### Added
+- Teacher's announcements : the Teacher zone allows a teacher to see his or her announcements, add new announcements to either a team or individual players
+
+### Changed
+- Alert messages now have a thin border to be more visible
+- CHANGELOG offers only 'major' versions links to avoid clutter : second parameter in version number corresponds to versions causing backend changes
 
 
 ## [v0.4.4] - [11/09/2018]
@@ -385,14 +408,7 @@ Initial official release.
 
 [Unreleased]: https://framagit.org/celfred/planetAlert/compare/v0.1.0...master
 [v0.1.0]: https://framagit.org/celfred/planetAlert/tags/v0.1.0
-[v0.1.1]: https://framagit.org/celfred/planetAlert/tags/v0.1.1
-[v0.1.2]: https://framagit.org/celfred/planetAlert/tags/v0.1.2
-[v0.1.3]: https://framagit.org/celfred/planetAlert/tags/v0.1.3
-[v0.1.4]: https://framagit.org/celfred/planetAlert/tags/v0.1.4
-[v0.1.5]: https://framagit.org/celfred/planetAlert/tags/v0.1.5
 [v0.2.0]: https://framagit.org/celfred/planetAlert/tags/v0.2.0
-[v0.2.1]: https://framagit.org/celfred/planetAlert/tags/v0.2.1
-[v0.2.2]: https://framagit.org/celfred/planetAlert/tags/v0.2.2
 [v0.3.0]: https://framagit.org/celfred/planetAlert/tags/v0.3.0
-[v0.3.1]: https://framagit.org/celfred/planetAlert/tags/v0.3.1
 [v0.4.0]: https://framagit.org/celfred/planetAlert/tags/v0.4.0
+[v0.5.0]: https://framagit.org/celfred/planetAlert/tags/v0.5.0

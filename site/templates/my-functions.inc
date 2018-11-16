@@ -1567,7 +1567,7 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
       $playerPos = false;
     }
   }
-  if ($playerPos && $limit != -1) { // Player is in the charts
+  if (isset($playerPos) && $limit != -1) { // Player is in the charts
     if ($playerPos <= 8) { // Good position, get Top 10
       $topPlayers = $allPlayers->slice(0, 10);
       $prevPlayers = false;
@@ -1577,6 +1577,7 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
       $prevPlayers = $allPlayers->slice($prevIndex, $limit);
     }
   } else { // No ranking (or complete scoreboard)
+    $playerPos = false;
     if ($limit == -1) {
       $topPlayers = $allPlayers; // Complete scoreboard
     } else {
@@ -2413,8 +2414,7 @@ function getProfile($teacher) {
 function miniProfile($player, $type = '') {
   $config = wire('config');
   $pages = wire('pages');
-  $out = '<div class="lead well miniProfile">';
-  $out .= '<ul class="list-unstyled list-inline">';
+  $out = '<ul class="list-unstyled list-inline">';
   if ($type == 'profile') {
     $out .= '<span>'.__("Your scores").' : </span>';
   }
@@ -2484,7 +2484,6 @@ function miniProfile($player, $type = '') {
     $out .= '<li class="label label-danger">Coma !</li>';
   }
   $out .= '</ul>';
-  $out .= '</div>';
   return $out;
 }
 

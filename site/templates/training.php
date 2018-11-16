@@ -31,21 +31,20 @@
         $out .= '<br />';
         $out .= '<div class="well">';
         $out .= '<h2 class="text-center">'.$page->title;
+        $out .= '<span class="pull-left glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->summary.'"></span>';
         if ($helmet->image) {
           $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
         }
         $out .= '</h2>';
-        $out .= '<p class="text-center">'.$page->summary.'</p>';
-
-        $out .= '<h4 class="text-center">';
-        $out .= sprintf(__("There are currently %d monsters detected."), $allMonsters->count());
-        if (isset($hiddenMonstersNb)) {
+        if (isset($hiddenMonstersNb)) { // Display helpAlert for Electronic visualizer
+          $helpAlert = true;
           $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
-          $out .= '<p>('.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).')</p>';
-        } else {
-          $out .= '<p>('.__("All monsters are visible thanks to your Electronic Visualizer.").')</p>';
+          $helpTitle = __("Some monsters are absent !");
+          $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="image" /> ';
+          $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
         }
-        $out .= '</h4>';
+
+        include("./helpAlert.inc.php"); 
 
         $allCategories = $pages->find("parent.name=topics, sort=name");
         $out .= '<div id="Filters" data-fcolindex="1" class="text-center">';
@@ -167,7 +166,7 @@
           $out .= '</td>';
           $out .= '<td>';
           if ($m->isTrainable == 1) {
-            $out .= ' <a class="btn btn-primary" href="'.$page->url.'?id='.$m->id.'"><i class="glyphicon glyphicon-headphones"></i> '.__("Put the helmet on !").'</a>';
+            $out .= ' <a class="btn btn-primary" href="'.$m->url.'train"><i class="glyphicon glyphicon-headphones"></i> '.__("Put the helmet on !").'</a>';
           } else {
             if ($m->waitForTrain == 1) { // Trained today
               $out .= __('Come back tomorrow ;)');

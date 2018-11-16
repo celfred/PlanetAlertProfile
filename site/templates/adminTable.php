@@ -26,6 +26,17 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
     $allTasks = $pages->find("parent.name=tasks, owner.singleTeacher=$user")->sort("category.name, HP, XP");
     $allPlayers = $allPlayers->find("team=$team, team.teacher=$user");
   }
+  // helpAlert for players having a high hccount
+  if ($user->name == 'flieutaud' || $user->isSuperuser()) {
+    $dangerPlayers = $allPlayers->find("hkcount>=1.5,sort=title");
+    if (count($dangerPlayers) > 0) {
+      $players = $dangerPlayers->implode(', ', '{title}');
+      $helpAlert = true;
+      $helpTitle =  '<span class="glyphicon glyphicon-warning-sign"></span> ';
+      $helpTitle .= sprintf(__("Watch out for %s !"), $players);
+    }
+    include("./helpAlert.inc.php");
+  }
 }
 
   if ($allTasks->count() > 0) {

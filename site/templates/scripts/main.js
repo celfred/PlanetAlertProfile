@@ -66,6 +66,45 @@ $(document).ready(function() {
 		});
 	});
 
+	$('.togglePublish').on('click', function() {
+		$this = $(this);
+		var href = $this.attr('data-href');
+		$('.tooltip').hide();
+		$('<span>Saving...</span>').insertAfter($this);
+		$.get(href, function(data) { 
+			if ($this.text() == '✓') {
+				$this.text('✗');
+				$this.attr("class", "label label-danger");
+				$this.attr("title", "Publish");
+			} else {
+				$this.text('✓');
+				$this.attr("class", "label label-success");
+				$this.attr("title", "Unpublish");
+			}
+			$this.next('span').remove();
+		});
+	});
+
+	$('.announcement').on('close.bs.alert', function(e) {
+		e.preventDefault();
+		var $this = $(this);
+		var $href = $this.attr('data-href')
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
+		}).then( function(isConfirm) {
+			$.get($href, function(data) { 
+				$this.remove();
+			}); 
+		}, function(dismiss) {
+			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		});
+	});
+
 	$('.teamOption').on('click', function() {
     $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
 		var href = $(this).attr('href');
@@ -969,6 +1008,18 @@ $(document).ready(function() {
 	
 	// Init tables if needed
 	if ($('table').length > 0) { initTables(); }
+
+	if ($('#helpAlert').length > 0) {
+		swal({
+			position: 'top',
+			backdrop: false,
+			title: $('#helpTitle').html(),
+			html: $('#helpMessage').html(),
+			showCloseButton: true,
+			showConfirmButton: false,
+			timer: 8000
+		});
+	}
 }); 
 
 var FEEL = {

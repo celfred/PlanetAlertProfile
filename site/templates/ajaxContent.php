@@ -14,16 +14,14 @@
         $interval = new \DateInterval('P30D');
         $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
         // Planet Alert news
+        $adminId = $users->get("name=admin")->id;
         if ($user->isGuest()) { // Guests get admin news only
-          $adminId = $users->get("name=admin")->id;
           $newItems = $pages->find("template=exercise|equipment|item|lesson, created_users_id=$adminId, published>$limitDate, sort=-published, limit=10");
         } else {
           if ($user->isSuperuser()) { // Admin gets ALL news
-            $adminId = $users->get("name=admin")->id;
             $newItems = $pages->find("template=exercise|equipment|item|lesson, published>$limitDate, sort=-published, limit=10");
           }
           if ($user->hasRole('teacher')) { // Teachers get admin news + personal news
-            $adminId = $users->get("name=admin")->id;
             $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
             $newItems = $pages->find("template=exercise|equipment|item|lesson, (created_users_id=$adminId, published>$limitDate), (teacher=$user, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
           }
@@ -111,10 +109,11 @@
             $concernedPlayers = $pages->find("template=player, team.teacher=$headTeacher");
           }
         }
-        if (!$user->isSuperuser()) { // Take excluded pages into account
-          $news = $pages->find("has_parent=$concernedPlayers, template=event, parent.name=history, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv");
-        } else { // Admin gets all public news
-          $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv");
+        // All public news
+        $news = $pages->find("template=event, parent.name=history, date>=$limitDate, sort=-date, limit=20, task.name=free|buy|ut-action-v|ut-action-vv");
+        if (!$user->isSuperuser()) {
+          // Limit to teacher's players
+          $news->filter("has_parent=$concernedPlayers, task.name=free|buy|ut-action-v|ut-action-vv, limit=20");
         }
         $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("New public activity !").'</h4>';
         if ($news->count() > 0) {
@@ -166,7 +165,7 @@
         $today = new \DateTime("today");
         $allConcernedPlayers = $pages->find("parent.name=players, team.teacher=$user"); // Limit to teacher's students
         $news = $pages->find("parent.name=history, template=event, publish=1");
-        $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|penalty")->sort('-created');
+        $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|penalty|fight-vv")->sort('-created');
         $out .= '<div class="col-sm-6">';
         if ($news->count() > 0) {
           $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
@@ -197,6 +196,9 @@
                 break;
               case 'penalty' :
                 $out .= '<span class="">'.__("Penalty for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                break;
+              case 'fight-vv' :
+                $out .= '<span class="">'.__("Successful fight for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.$sanitizer->entities($n->summary).'</span>';
                 break;
               default : $out .= $n->task->name. ': '.__("todo");
             }
@@ -845,6 +847,29 @@
           $out .= '<span>'.__("Ask your teacher.").'</span>';
         }
         $out .= '</p>';
+        break;
+      case 'unPublish' : // Unpublish announcement
+        $announcementId = $input->get("announcementId");
+        $playerId = $input->get("playerId");
+        if ($announcementId != '' && $playerId != '') {
+          $announcement = $pages->get($announcementId);
+          $player = $pages->get($playerId);
+          bd($announcement->playersList);
+          if ($announcement->selectPlayers == 1) { // Untick player
+            $announcement->playersList->remove($player);
+            if ($announcement->playersList->count() == 0) { // No more ticked players, unpublish
+              $announcement->publish = 0;
+            }
+          } else { // Team announcement, make it individual
+            $announcement->selectPlayers = 1;
+            $teamPlayers = $pages->find("template=player, team=$player->team")->not($player);
+            foreach ($teamPlayers as $p) {
+              $announcement->playersList->add($p);
+            }
+          }
+          $announcement->of(false);
+          $announcement->save();
+        }
         break;
       default :
         $out = __("todo");

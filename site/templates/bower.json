@@ -30,7 +30,7 @@
     "masonry": "^4.1.1",
     "chance": "^1.0.4",
     "svg-pan-zoom": "^3.3.0",
-    "sweetalert2": "^6.9.1"
+    "sweetalert2": "7.29.0"
   },
   "resolutions": {
     "datatables": ">=1.7.0",
