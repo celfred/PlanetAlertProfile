@@ -30,8 +30,8 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
-## [v0.5.0] - [Unreleased]
-Teacher's announcements are now possible. Another important change is the helpAlerts notifications.
+## [v0.5.0] - [11/16/2018]
+Teacher's announcements are now possible. Another important changes are the helpAlerts notifications and possibility to print monsters' thumbnails.
 
 ### Backend
 - New announcement template (teachers can edit and delete their own page)
@@ -40,23 +40,20 @@ Teacher's announcements are now possible. Another important change is the helpAl
 - Changes : exercise template now allows url segments to quickly link to train or fight versions
 
 ### Added
-- Teacher's messages to a team or individual players
+- Teacher's announcements to a team or individual players
 - helpAlerts notifications to better guide players and teachers through options : a simple message show up on page load during 8 seconds to remind user about a particular option (lots of GC, no visualizer, help needed, ...)
+- Ability to print monsters for teachers to give an image to players making successful fights
 
 ### Changed
+- Alert messages now have a thin border to be more visible
 - Train or fight monsters are now accessible via url segments : this allows easy linking in teacher's announcements.
 - Update Sweetalert2 library
+- CHANGELOG offers only 'major' versions links to avoid clutter : second parameter in version number corresponds to versions causing backend changes
+- Successful fights are displayed on Newsboard so teacher can prepare monster's thumbnail and give it in class
 
 ### Fixed
 - Minimum 20UT is checked before a fight
 - PHP errors because of missing isset()
-
-### Added
-- Teacher's announcements : the Teacher zone allows a teacher to see his or her announcements, add new announcements to either a team or individual players
-
-### Changed
-- Alert messages now have a thin border to be more visible
-- CHANGELOG offers only 'major' versions links to avoid clutter : second parameter in version number corresponds to versions causing backend changes
 
 
 ## [v0.4.4] - [11/09/2018]
