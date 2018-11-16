@@ -31,12 +31,25 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 
 
 ## [v0.5.0] - [Unreleased]
-Teacher's announcements are now possible
+Teacher's announcements are now possible. Another important change is the helpAlerts notifications.
 
 ### Backend
 - New announcement template (teachers can edit and delete their own page)
 - New fields : selectPlayers (checkbox), playersList (Page)
 - Changes : teachers can add children to team template (with announcement template)
+- Changes : exercise template now allows url segments to quickly link to train or fight versions
+
+### Added
+- Teacher's messages to a team or individual players
+- helpAlerts notifications to better guide players and teachers through options : a simple message show up on page load during 8 seconds to remind user about a particular option (lots of GC, no visualizer, help needed, ...)
+
+### Changed
+- Train or fight monsters are now accessible via url segments : this allows easy linking in teacher's announcements.
+- Update Sweetalert2 library
+
+### Fixed
+- Minimum 20UT is checked before a fight
+- PHP errors because of missing isset()
 
 ### Added
 - Teacher's announcements : the Teacher zone allows a teacher to see his or her announcements, add new announcements to either a team or individual players
