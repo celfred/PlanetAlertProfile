@@ -11,7 +11,20 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasR
     $visualizer = $player->equipment->get('electronic-visualizer');
   }
   if ($visualizer) {
-    $allMonsters = $pages->find("template=exercise");
+    // Limit to player/teacher's monsters
+    if ($user->isSuperuser()) {
+      $allMonsters = $pages->find('template=exercise, include=all');
+    }
+    if ($user->hasRole('teacher')) {
+      $allMonsters = $pages->find("template=exercise, (created_users_id=$user->id), (teacher=$user), include=all")->sort("name");
+    }
+    if ($user->hasRole('player')) {
+      // Check if player has the Visualizer (or forced by admin)
+      $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher), (teacher=$headTeacher), sort=name");
+    }
+    $helpAlert = true;
+    $helpTitle = sprintf(__("There are %d available monsters !"), $allMonsters->count());
+    include("./helpAlert.inc.php"); 
 
     $out = '';
 
