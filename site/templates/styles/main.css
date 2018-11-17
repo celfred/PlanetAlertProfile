@@ -1,6 +1,7 @@
 html, body {
   height: 100%;
   background: #FFCCE5;
+	font-size: 1em;
 }
 .navigate {
 	position: fixed;
@@ -12,14 +13,6 @@ html, body {
 	display: block;
 	font-size: 2em;
 }
-/*
-body {
-  background: url('../img/logo_03.png');
-  background-repeat: no-repeat;
-  background-position: 90% 80%;
-  background-size: contain;
-}
-*/
 
 div.frenchVersion {
 	display: none;
