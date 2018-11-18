@@ -158,6 +158,11 @@
             $out .= '<div class="thumbnail">';
             if ($n->task->is("name~=fight")) {
               $out .= '<span class="label label-primary"><i class="glyphicon glyphicon-flash"></i> '.$n->refPage->title.'</span>';
+              // Show result
+              if ($n->task->is("name=fight-vv")) { $out .= ' <span class="label label-success">VV</span>'; }
+              if ($n->task->is("name=fight-v")) { $out .= ' <span class="label label-success">V</span>'; }
+              if ($n->task->is("name=fight-r")) { $out .= ' <span class="label label-danger">R</span>'; }
+              if ($n->task->is("name=fight-rr")) { $out .= ' <span class="label label-danger">RR</span>'; }
             }
             if ($n->refPage->photo) {
               $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
@@ -180,11 +185,11 @@
       $out .= '</div>';
       $out .= '<div class="panel-footer text-center">';
       if (isset($teamRecentUt) && $teamRecentUt->count() > 0) {
-        $out .= '<p>';
-          $out .= '<span class="badge"><i class="glyphicon glyphicon-headphones"></i> '.$teamRecentUt->count().' UT sessions → '.$utPlayersList.' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
-        $out .= '</p>';
+        $out .= '<h3>';
+          $out .= '<span class="label label-success"><i class="glyphicon glyphicon-headphones"></i> '.$teamRecentUt->count().' UT sessions → '.$utPlayersList.' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
+        $out .= '</h3>';
       } else {
-        $out .= '<p>'.__("No recent UT training :(").'</p>';
+        $out .= '<h3>'.__("No recent UT training :(").'</h3>';
       }
       $out .= '</div>';
       $out .= '</div>';
