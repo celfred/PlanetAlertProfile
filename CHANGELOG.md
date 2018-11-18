@@ -30,6 +30,20 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.5.1] - [11/18/2018]
+External libraries update
+
+### Changed
+- All external libraries have been updated. bower.json manages updates
+- Alert messages when saving Team options now use Sweetalert2 style
+- Add helpAlert with players risking a penalty when loading adminTable (personal workflow)
+- Clean code and libraries (remove deprecated things)
+
+### Fixed
+- Notifications positioning sometimes messed up menu display.
+- Limit monsters to headteacher's monsters when using the Electronic visualizer
+
+
 ## [v0.5.0] - [11/16/2018]
 Teacher's announcements are now possible. Another important changes are the helpAlerts notifications and possibility to print monsters' thumbnails.
 

@@ -352,11 +352,11 @@
                       if ($unique == true) {
                         $out .= '<span class="label label-danger">Error : No Death after?</span>  ';
                         // Button Add death here
-                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">Add death here?</button>';
+                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">'.__("Add death here ?").'</button>';
                         $unique = false;
                       } else {
-                        $out .= '<span class="label label-danger">Previous Death?</span>';
-                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">Add death here?</button>';
+                        $out .= '<span class="label label-danger">'.__("Previous Death ?").'</span>';
+                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">'.__("Add death here ?").'</button>';
                       }
                     }
                   }
@@ -1108,13 +1108,6 @@
           $out .= '<section class="well">';
           $out .= '<h3 class="text-center">'.__("Announcements").'</h3>';
           $out .= '<div>';
-          // TODO
-          // new backend announcement template (and some fields)
-          // allow teacher to add children to team template
-          // Add an announcement button
-          // Choose a team, add the text, choose to publish or not
-          // List all teacher's announcements (with publish checkbox) and delete button
-
           // Get teacher's teams to quickly add an announcement
           if ($user->hasRole('teacher')) {
             $allTeams = $pages->find("template=team, teacher=$user")->sort("title");
@@ -1184,21 +1177,20 @@
         default :
           $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
           $out .= '<section id="ajaxViewport" class="well"></section>';
-          $out .= '<div>';
+          $out .= '</div>';
       }
     } else { // End if admin/teacher
       $out .= $noAuthMessage;
     }
-    $out .= '</div>';
     echo $out;
     include("./foot.inc"); 
     echo '<script>';
     echo '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.after("<span class=\"label label-danger\">'.__("Please reload page to recalculate scores").'</span>"); that.hide(); }) };});';
     echo '$(".addUsers").click( function() { var myData = $(\'#newPlayers\').val(); var action=$(this).attr("data-action"); var href=$(this).attr("data-href")+action; var that=$(this); if (confirm("Proceed?")) {$.post(href, {newPlayers:myData}, function(data) { $("#ajaxViewport").html(data); }) };});';
-    echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
-    echo '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); }) };});';
+    echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed ?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
     echo '</script>';
   } else { // Ajax call, display requested information
+    echo '<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
     $out = '';
     $allPlayers = $pages->find("parent.name=players, template=player")->sort("team.name, title");
     $action = $input->urlSegment1;
@@ -2132,7 +2124,7 @@
             }
             $out .= ' </select>';
             $out .= '&nbsp;';
-            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'savePeriod/'.$selectedTeam.'">'.__("Save").'</button>';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'savePeriod/'.$selectedTeam.'" disabled="disabled">'.__("Save").'</button>';
             $out .= '</li>';
             // Force Memory Helmet
             $lock = $pages->get("$selectedTeam")->forceHelmet;
@@ -2305,7 +2297,7 @@
     $out .= '<script>';
     $out .= '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.hide(); $("button[data-action=recalculate]").click(); }) };});';
     $out .= '$(".remove").click( function() { var itemId=$(this).attr("data-itemId"); var action = $(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ itemId; var that=$(this).parents("li"); if (confirm("Remove item?")) {$.get(href, function(data) { that.hide(); }) };});';
-    $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); var $urlSeg3 = $("#periodId").val(); if ($urlSeg3) { href = href+"/"+$urlSeg3; }; if (confirm("Proceed?" + href)) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); $("button[data-action=recalculate]").click(); }) };});';
+    /* $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); var $urlSeg3 = $("#periodId").val(); if ($urlSeg3) { href = href+"/"+$urlSeg3; }; if (confirm("Proceed?" + href)) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); $("button[data-action=recalculate]").click(); }) };});'; */
     $out .= '$(".death").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Please reload!"); $("button[data-action=recalculate]").click();}) };});';
     $out .= '</script>';
 

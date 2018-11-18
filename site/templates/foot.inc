@@ -13,7 +13,7 @@
 <?php } ?>
 
 <footer class="text-center">
-  <p>Planet Alert v0.5.0
+  <p>Planet Alert v0.5.1
     &nbsp;&copy; <?php echo date("Y"); ?> FL 
     &nbsp;-&nbsp;
     Powered by <a href="http://processwire.com">ProcessWire</a> CMS (v<?php echo $config->version; ?>)
@@ -37,8 +37,7 @@
   <script src="<?php echo $config->urls->templates?>bower_components/jquery/dist/jquery.min.js"></script>
   <script src="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <?php if ($page->template != 'newsboard') { ?>
-		<script src="<?php echo $config->urls->templates?>bower_components/DataTables/media/js/jquery.dataTables.min.js"></script>
-		<script src="<?php echo $config->urls->templates?>bower_components/datatables-plugins-bootstrap3/dist/js/datatables-plugins-bootstrap3.min.js"></script>
+		<script src="<?php echo $config->urls->templates?>bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 		<script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.min.js'></script>
 		<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.css">
   <?php } ?>
@@ -50,7 +49,7 @@
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/chance/dist/chance.min.js'></script>
 
   <?php } ?>
-  <?php if ($page->template == 'exercise' || $page->name == 'underground-training') { ?>
+  <?php if ($page->template == 'exercise') { ?>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular/angular.min.js'></script>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular-animate/angular-animate.min.js'></script>
     <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/angular-sanitize/angular-sanitize.min.js'></script>

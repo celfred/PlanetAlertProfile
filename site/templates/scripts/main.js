@@ -54,15 +54,17 @@ $(document).ready(function() {
 			showCancelButton : true,
 			allowOutsideClick : true,
 			confirmButtonText: lang.yes,
-			cancelButtonText: lang.no,
-		}).then( function(isConfirm) {
-			var href = $this.attr('data-href');
-			$('<span>Saving...</span>').insertAfter($this);
-			$.get(href, function(data) { 
-				$this.parent('li').remove();
-			}); 
-		}, function(dismiss) {
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+			cancelButtonText: lang.no
+		}).then( result => {
+			if (result.value) {
+				var href = $this.attr('data-href');
+				$('<span>Saving...</span>').insertAfter($this);
+				$.get(href, function(data) { 
+					$this.parent('li').remove();
+				}); 
+			} else { 
+				return false;
+			}
 		});
 	});
 
@@ -96,12 +98,14 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			confirmButtonText: lang.yes,
 			cancelButtonText: lang.no,
-		}).then( function(isConfirm) {
-			$.get($href, function(data) { 
-				$this.remove();
-			}); 
-		}, function(dismiss) {
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		}).then( result => {
+			if (result.value) {
+				$.get($href, function(data) { 
+					$this.remove();
+				}); 
+			} else {
+				return false;
+			}
 		});
 	});
 
@@ -181,7 +185,7 @@ $(document).ready(function() {
 						showCancelButton: true,
 						allowOutsideClick: true,
 						width: 800
-					}).then( function(dismiss) {
+					}).then( result => {
 							return;
 					});
 				});
@@ -200,20 +204,45 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			confirmButtonText: lang.yes,
 			cancelButtonText: lang.no,
-		}).then( function(isConfirm) {
-			$this.next('.proceedFeedback').html(lang.saving);
-			$('.notification').remove();
-			if ($reload == 'false') {
-				$.get($href, function(data) { 
-					$this.next('.proceedFeedback').html(lang.saved);
-					$('#wrap').prepend(data);
-					setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
+		}).then( result => {
+			if (result.value) {
+				$this.next('.proceedFeedback').html(lang.saving);
+				$('.notification').remove();
+				if ($reload == 'false') {
+					$.get($href, function(data) { 
+						$this.next('.proceedFeedback').html(lang.saved);
+						$('#wrap').prepend(data);
+						setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
+					}); 
+				} else {
+					window.location.href = $href;
+				}
+			} else {
+				return false;
+			}
+		});
+	});
+
+	$('.confirm').on('click', function() {
+		$this = $(this);
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
+		}).then(result => {
+			if (result.value) {
+				var href = $this.attr('data-href');
+				$('<span> '+lang.saving+'</span>').insertAfter($this);
+				$.get(href, function(data) { 
+					$this.next('span').html(' '+lang.saved);
+					setTimeout( function() { $this.next('span').remove(); }, 1000);
 				}); 
 			} else {
-				window.location.href = $href;
+				return false;
 			}
-		}, function(dismiss) {
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
 		});
 	});
 
@@ -226,17 +255,19 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			confirmButtonText: lang.yes,
 			cancelButtonText: lang.no,
-		}).then( function(isConfirm) {
-			var href = $this.attr('data-href') + "/save-options/" + $('#periodId').val() + "/1";
-			$this.next('.proceedFeedback').html(lang.saving);
-			$('.notification').remove();
-			$.get(href, function(data) { 
-				$this.next('.proceedFeedback').html(lang.saved);
-				$('#wrap').prepend(data);
-				setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
-			}); 
-		}, function(dismiss) {
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		}).then(result => {
+			if (result.value) {
+				var href = $this.attr('data-href') + "/save-options/" + $('#periodId').val() + "/1";
+				$this.next('.proceedFeedback').html(lang.saving);
+				$('.notification').remove();
+				$.get(href, function(data) { 
+					$this.next('.proceedFeedback').html(lang.saved);
+					$('#wrap').prepend(data);
+					setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
+				}); 
+			} else {
+				return false;
+			}
 		});
 	});
 
@@ -271,20 +302,22 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: lang.no,
 			confirmButtonText: lang.yes,
-		}).then( function() { // Send Ajax request
-			$.get($this.attr('data-url'), function(data) { 
-				$tr = $this.parents("tr");
-				$tr.removeClass('negative');
-				$tr.find("input[type=checkbox]").each( function() {
-						$(this).prop('disabled', 0);
-				});
-				$tr.find("a.toggleEnabled").each( function() {
-					$(this).remove();
-				});
-				$this.remove();
-			}); 
-		}, function(dismiss) { // Don't send form
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		}).then( result => {
+			if (result.value) {
+				$.get($this.attr('data-url'), function(data) { 
+					$tr = $this.parents("tr");
+					$tr.removeClass('negative');
+					$tr.find("input[type=checkbox]").each( function() {
+							$(this).prop('disabled', 0);
+					});
+					$tr.find("a.toggleEnabled").each( function() {
+						$(this).remove();
+					});
+					$this.remove();
+				}); 
+			} else {
+				return false;
+			}
 		}); 
     return false; 
   }); 
@@ -303,22 +336,22 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: lang.no,
 			confirmButtonText: lang.yes
-		}).then( function() {
-			$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId+'&taskId='+$taskId;
-			$this.remove();
-			$.get($url, function(data) { 
-				swal({
-					title: lang.saved,
-					text: lang.thanks,
-					timer: 1000,
-					showConfirmButton: false
-				}).catch(swal.noop);
-			});
-		}), function(dismiss) {
-			if (dismiss === 'cancel' || dismiss == 'overlay') {
-				return;
+		}).then( result => {
+			if (result.value) {
+				$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId+'&taskId='+$taskId;
+				$this.remove();
+				$.get($url, function(data) { 
+					swal({
+						title: lang.saved,
+						text: lang.thanks,
+						timer: 1000,
+						showConfirmButton: false
+					}).catch(swal.noop);
+				});
+			} else {
+				return false;
 			}
-		};
+		});
 		return false;
 	}));
 
@@ -334,19 +367,19 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: lang.no,
 			confirmButtonText: lang.yes
-		}).then( function() {
-			$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId;
-			$.get($url, function(data) { 
-				// Display PDF Link
-				$this.next(".feedback").html('<a href="'+$this.attr("href")+'" class="btn btn-lg btn-primary">'+lang.getPdf+'</a>');
-				// Remove Buy button
-				$this.remove();
-			});
-		}), function(dismiss) {
-			if (dismiss === 'cancel' || dismiss == 'overlay') {
-				return;
+		}).then( result => {
+			if (result.value) {
+				$url = $url + '&playerId=' + $playerId + '&lessonId='+$lessonId;
+				$.get($url, function(data) { 
+					// Display PDF Link
+					$this.next(".feedback").html('<a href="'+$this.attr("href")+'" class="btn btn-lg btn-primary">'+lang.getPdf+'</a>');
+					// Remove Buy button
+					$this.remove();
+				});
+			} else {
+				return false;
 			}
-		};
+		});
 		return false;
 	}));
 
@@ -360,21 +393,21 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: lang.no,
 			confirmButtonText: lang.yes
-		}).then( function() {
-			$this.parent('li').remove();
-			$.get($this.attr('href'), function(data) { 
-				swal({
-					title: "Saved !",
-					text: "",
-					timer: 1000,
-					showConfirmButton: false
-				}).catch(swal.noop);
-			}); 
-		}), function(dismiss) {
-			if (dismiss === 'cancel' || dismiss == 'overlay') {
-				return;
+		}).then( result => {
+			if (result.value) {
+				$this.parent('li').remove();
+				$.get($this.attr('href'), function(data) { 
+					swal({
+						title: "Saved !",
+						text: "",
+						timer: 1000,
+						showConfirmButton: false
+					}).catch(swal.noop);
+				}); 
+			} else {
+				return false;
 			}
-		};
+		});
 		return false;
   })); 
 
@@ -406,24 +439,26 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: lang.no,
 			confirmButtonText: lang.yes,
-		}).then( function() { // Send form
-			// Send form (via Ajax)
-			var $data = 'result='+$result+'&playerId='+$playerId;
-			$.post($url, $data, function(data) {
-				data = data;
-				swal({
-					title: lang.saved,
-					text: lang.thanks,
-					timer: 1000,
-					showConfirmButton: false
-				}).then( function() {}, function(dismiss) {
-					if (dismiss === 'timer') {
-						$this.remove();
-					}
+		}).then( result => {
+			if (result.value) {
+				// Send form (via Ajax)
+				var $data = 'result='+$result+'&playerId='+$playerId;
+				$.post($url, $data, function(data) {
+					data = data;
+					swal({
+						title: lang.saved,
+						text: lang.thanks,
+						timer: 1000,
+						showConfirmButton: false
+					}).then( result => {
+						if (result.dismiss === swal.DismissReason.timer) {
+							$this.remove();
+						}
+					});
 				});
-			});
-		}, function(dismiss) { // Don't send form
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+			} else {
+				return false;
+			}
 		});
     return false; 
   })); 
@@ -448,6 +483,12 @@ $(document).ready(function() {
 
   $('#periodId').focus( function() {
 		$('#selectedPeriod').click();
+	});
+  $('#periodId').on('change', function() {
+		$confirmButton = $(this).next('button');
+		$href = $(this).next('button').attr('data-href');
+		$confirmButton.attr('data-href', $href+'/'+$(this).val());
+		$confirmButton.prop('disabled', false);
 	});
   $('#startDate, #endDate').focus( function() {
 		$('#customDates').click();
@@ -493,17 +534,19 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: lang.no,
 			confirmButtonText: lang.yes,
-		}).then( function() { // Send form
-			// Send form (via Ajax)
-			var $data = $this.serialize()+'&buyFormSubmit=save';
-			var $formUrl = $this.attr('action');
-			$.post($formUrl, $data, function(data) {
-				data = JSON.parse(data);
-				$redirectUrl = data.url;
-				window.location.href = $redirectUrl;
-			});
-		}, function(dismiss) { // Don't send form
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		}).then( result => {
+			if (result.value) {
+				// Send form (via Ajax)
+				var $data = $this.serialize()+'&buyFormSubmit=save';
+				var $formUrl = $this.attr('action');
+				$.post($formUrl, $data, function(data) {
+					data = JSON.parse(data);
+					$redirectUrl = data.url;
+					window.location.href = $redirectUrl;
+				});
+			} else {
+				return false;
+			}
 		});
 	});
 
@@ -529,19 +572,21 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: lang.no,
 			confirmButtonText: lang.yes,
-		}).then( function() { // Send form
-			$('#donateFormSubmit').prop('disabled', true);
-			// Send form (via Ajax)
-			var $data = $this.serialize()+'&donateFormSubmit=save';
-			var $formUrl = $this.attr('action');
-			// var $redirectUrl = $('#redirectUrl').val();
-			$.post($formUrl, $data, function(data) {
-				data = JSON.parse(data);
-				$redirectUrl = data.url;
-				window.location.href = $redirectUrl;
-			});
-		}, function(dismiss) { // Don't send form
-			if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+		}).then( result => { // Send form
+			if (result.value) {
+				$('#donateFormSubmit').prop('disabled', true);
+				// Send form (via Ajax)
+				var $data = $this.serialize()+'&donateFormSubmit=save';
+				var $formUrl = $this.attr('action');
+				// var $redirectUrl = $('#redirectUrl').val();
+				$.post($formUrl, $data, function(data) {
+					data = JSON.parse(data);
+					$redirectUrl = data.url;
+					window.location.href = $redirectUrl;
+				});
+			} else { // Don't send form
+				return false;
+			}
 		});
 	});
 	var checkAmount = function(amount) {
@@ -660,7 +705,8 @@ $(document).ready(function() {
 							showCancelButton: true,
 							allowOutsideClick: true,
 							width: 800
-						}).then( function(){ // Buy item
+						}).then( result => { // Buy item
+							if (result.value) {
 								swal.showLoading();
 								$.post($submit, $formData, function(data) { 
 									swal({
@@ -668,8 +714,8 @@ $(document).ready(function() {
 										text: lang.thanks,
 										timer: 1000,
 										showConfirmButton: false
-									}).then(function() {}, function(dismiss) {
-										if (dismiss === 'timer') {
+									}).then(result => {
+										if (result.dismiss === swal.DismissReason.timer) {
 											// JS update to avoid reloading
 											// window.location.reload();
 											// Set new player GC
@@ -697,8 +743,9 @@ $(document).ready(function() {
 										}
 									});
 								});
-							}, function(dismiss) {
+							} else {
 								return;
+							}
 						});
 					});
 			}});
@@ -777,22 +824,22 @@ $(document).ready(function() {
 				allowOutsideClick : true,
 				confirmButtonText: lang.yes,
 				cancelButtonText: lang.no,
-			}).then( function() {
-				var $url = $this.attr('data-url');
-				$.get($url, function(data) { 
-					$this.parents("li").remove();
-					swal({
-						title: lang.saved,
-						text: lang.thanks,
-						timer: 1000,
-						showConfirmButton: false
-					}).catch(swal.noop);
-				});
-			}), function(dismiss) {
-				if (dismiss === 'cancel' || dismiss == 'overlay') {
-					return;
+			}).then( result => {
+				if (result.value) {
+					var $url = $this.attr('data-url');
+					$.get($url, function(data) { 
+						$this.parents("li").remove();
+						swal({
+							title: lang.saved,
+							text: lang.thanks,
+							timer: 1000,
+							showConfirmButton: false
+						}).catch(swal.noop);
+					});
+				} else {
+					return false;
 				}
-			};
+			});
 		}
 		if ($type == 'initiative') {
 			swal({
@@ -803,21 +850,21 @@ $(document).ready(function() {
 				allowOutsideClick : false,
 				cancelButtonText: lang.enough,
 				confirmButtonText: lang.goodJob,
-			}).then( function() {
-				var $url = $this.attr('data-url');
-				$.get($url, function(data) { 
-					swal({
-						title: lang.saved,
-						text: lang.thanks,
-						timer: 1000,
-						showConfirmButton: false
-					}).catch(swal.noop);
-				});
-			}), function(dismiss) {
-				if (dismiss === 'cancel' || dismiss == 'overlay') {
-					return;
+			}).then( result => {
+				if (result.value) {
+					var $url = $this.attr('data-url');
+					$.get($url, function(data) { 
+						swal({
+							title: lang.saved,
+							text: lang.thanks,
+							timer: 1000,
+							showConfirmButton: false
+						}).catch(swal.noop);
+					});
+				} else {
+					return false;
 				}
-			};
+			});
 		}
 		if ($type == 'teamNews') {
 			var $teamNews = $('#newsList').html();
@@ -882,25 +929,25 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			confirmButtonText: lang.yes,
 			cancelButtonText: lang.no,
-		}).then( function() {
-			var $url = $this.attr('data-url');
-			var $type = $this.attr('data-type');
-			if ($type == 'heal')  {
-				$this.parents("div.thumbnail").remove();
+		}).then( result => {
+			if (result.value) {
+				var $url = $this.attr('data-url');
+				var $type = $this.attr('data-type');
+				if ($type == 'heal')  {
+					$this.parents("div.thumbnail").remove();
+				}
+				$.get($url, function(data) { 
+					swal({
+						title: lang.saved,
+						text: lang.thnks,
+						timer: 1000,
+						showConfirmButton: false
+					}).catch(swal.noop);
+				});
+			} else {
+				return false;
 			}
-			$.get($url, function(data) { 
-				swal({
-					title: lang.saved,
-					text: lang.thnks,
-					timer: 1000,
-					showConfirmButton: false
-				}).catch(swal.noop);
-			});
-		}), function(dismiss) {
-			if (dismiss === 'cancel' || dismiss == 'overlay') {
-				return;
-			}
-		};
+		});
 		return false;
 	});
 
@@ -927,56 +974,55 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			cancelButtonText: lang.noCheck,
 			confirmButtonText: lang.yesSave,
-		}).then( function(isConfirm) {
-			// Send adminTableForm (via Ajax)
-			$("#adminTableForm :submit").prop('disabled', true);
-			var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment');
-			var $toSave = 'adminTableSubmit=Save&';
-			var $formUrl = $this.attr('action');
-			for (var i=0; i<$checked.length; i++) {
-				var $customId = $checked.eq(i).attr('data-customId');
-				var $comment = $("input:text[name*="+$customId+"]");
-				$toSave += $checked.eq(i).attr('name')+'=on&'+$comment.attr('name')+'='+$comment.val()+'&';
-				if ($checked.length-i > 5) {
-					if (i>0 && i % 5 == 0) {
-						$.post($formUrl, $toSave, function(data) {
-							data = JSON.parse(data);
-							$alreadySaved = parseInt($('#progress').text());
-							$('#progress').text($alreadySaved + data.saved+' saved.');
-						}).fail( function() {
-							$('#progress').text(lang.error);
-						});
-						$toSave = 'adminTableSubmit=Save&';
-					}
-				} else { // In the 5 last
-					if (i == $checked.length-1) {
-						$.post($formUrl, $toSave, function(data) {
-							data = JSON.parse(data);
-							$alreadySaved = parseInt($('#progress').text());
-							$('#progress').text($alreadySaved + data.saved +' saved.');
-							$redirectUrl = data.url;
-						}).fail( function() {
-							$('#progress').text(lang.error);
-						});
+		}).then( result => {
+			if (result.value) {
+				// Send adminTableForm (via Ajax)
+				$("#adminTableForm :submit").prop('disabled', true);
+				var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment');
+				var $toSave = 'adminTableSubmit=Save&';
+				var $formUrl = $this.attr('action');
+				for (var i=0; i<$checked.length; i++) {
+					var $customId = $checked.eq(i).attr('data-customId');
+					var $comment = $("input:text[name*="+$customId+"]");
+					$toSave += $checked.eq(i).attr('name')+'=on&'+$comment.attr('name')+'='+$comment.val()+'&';
+					if ($checked.length-i > 5) {
+						if (i>0 && i % 5 == 0) {
+							$.post($formUrl, $toSave, function(data) {
+								data = JSON.parse(data);
+								$alreadySaved = parseInt($('#progress').text());
+								$('#progress').text($alreadySaved + data.saved+' saved.');
+							}).fail( function() {
+								$('#progress').text(lang.error);
+							});
+							$toSave = 'adminTableSubmit=Save&';
+						}
+					} else { // In the 5 last
+						if (i == $checked.length-1) {
+							$.post($formUrl, $toSave, function(data) {
+								data = JSON.parse(data);
+								$alreadySaved = parseInt($('#progress').text());
+								$('#progress').text($alreadySaved + data.saved +' saved.');
+								$redirectUrl = data.url;
+							}).fail( function() {
+								$('#progress').text(lang.error);
+							});
+						}
 					}
 				}
-			}
-			$(document).ajaxStop(function() {
-				window.location.href = $redirectUrl;
-				setTimeout( function(){ $('#progress').text(lang.redirecting); }, 1000);
-			})
-			swal({
-				title: '<span id="progress">0 saved.</span>',
-				html: lang.saveForm+"<p>("+$checked.length+" "+lang.itemsTosave+")</p>",
-				showConfirmButton: false
-			});
-		}, function(dismiss) {
-			// Don't send adminForm
-			if (dismiss === 'cancel' || dismiss == 'overlay') {
+				$(document).ajaxStop(function() {
+					window.location.href = $redirectUrl;
+					setTimeout( function(){ $('#progress').text(lang.redirecting); }, 1000);
+				})
+				swal({
+					title: '<span id="progress">0 saved.</span>',
+					html: lang.saveForm+"<p>("+$checked.length+" "+lang.itemsTosave+")</p>",
+					showConfirmButton: false
+				});
+			} else { // Don't send adminForm
 				return false;
-		 	}
+			}
 		});
-	})
+	});
 
 	if ($('div.ajaxContent')) {
 		var timerFast = 0;
@@ -1017,6 +1063,7 @@ $(document).ready(function() {
 			html: $('#helpMessage').html(),
 			showCloseButton: true,
 			showConfirmButton: false,
+			allowOutsideClick : false,
 			timer: 8000
 		});
 	}
@@ -1280,21 +1327,22 @@ $('#marketPlaceForm :submit').on('click', function(e){
 		allowOutsideClick : true,
 		cancelButtonText: lang.noCheck,
 		confirmButtonText: lang.yesSave,
-	}).then( function() { // Send form
-		// Send form (via Ajax)
-		$("#marketPlaceForm :submit").prop('disabled', true);
-		var $data = $this.serialize()+'&marketPlaceSubmit=save';
-		var $formUrl = $this.attr('action');
-		$.post($formUrl, $data, function(data) {
-			console.log(data);
-			data = JSON.parse(data);
-			$redirectUrl = data.url;
-			window.location.href = $redirectUrl;
-		});
-	}, function(dismiss) { // Don't send form
-		if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+	}).then( result => { // Send form
+		if (result.value) { // Send form (via Ajax)
+			$("#marketPlaceForm :submit").prop('disabled', true);
+			var $data = $this.serialize()+'&marketPlaceSubmit=save';
+			var $formUrl = $this.attr('action');
+			$.post($formUrl, $data, function(data) {
+				console.log(data);
+				data = JSON.parse(data);
+				$redirectUrl = data.url;
+				window.location.href = $redirectUrl;
+			});
+		} else { // Don't send form
+			return false;
+		}
 	});
-})
+});
 
 var marketPlaceSelect = function(obj, playerId) {
   var type = obj.className;
