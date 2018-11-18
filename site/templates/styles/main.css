@@ -835,6 +835,9 @@ header {
 #reportForm label {
 	cursor: pointer;
 }
+label {
+	cursor: pointer;
+}
 h3.report {
 	text-align: center;
 	padding: 10px;

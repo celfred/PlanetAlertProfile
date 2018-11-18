@@ -223,6 +223,29 @@ $(document).ready(function() {
 		});
 	});
 
+	$('.confirm').on('click', function() {
+		$this = $(this);
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
+		}).then(result => {
+			if (result.value) {
+				var href = $this.attr('data-href');
+				$('<span> '+lang.saving+'</span>').insertAfter($this);
+				$.get(href, function(data) { 
+					$this.next('span').html(' '+lang.saved);
+					setTimeout( function() { $this.next('span').remove(); }, 1000);
+				}); 
+			} else {
+				return false;
+			}
+		});
+	});
+
 	$('.proceed').on('click', function() {
 		$this = $(this);
 		swal({
@@ -232,7 +255,7 @@ $(document).ready(function() {
 			allowOutsideClick : true,
 			confirmButtonText: lang.yes,
 			cancelButtonText: lang.no,
-		}).then( result => {
+		}).then(result => {
 			if (result.value) {
 				var href = $this.attr('data-href') + "/save-options/" + $('#periodId').val() + "/1";
 				$this.next('.proceedFeedback').html(lang.saving);
@@ -460,6 +483,12 @@ $(document).ready(function() {
 
   $('#periodId').focus( function() {
 		$('#selectedPeriod').click();
+	});
+  $('#periodId').on('change', function() {
+		$confirmButton = $(this).next('button');
+		$href = $(this).next('button').attr('data-href');
+		$confirmButton.attr('data-href', $href+'/'+$(this).val());
+		$confirmButton.prop('disabled', false);
 	});
   $('#startDate, #endDate').focus( function() {
 		$('#customDates').click();
