@@ -30,6 +30,12 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.5.2] - [11/18/2018]
+### Changed
+- Fight's results are displayed in recent news (on Main Office)
+- Bigger font-size for UT activity in recent news (on Main Office)
+
+
 ## [v0.5.1] - [11/18/2018]
 External libraries update
 
