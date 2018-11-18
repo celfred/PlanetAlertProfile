@@ -549,7 +549,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
       html: lang.ranAway1 + $scope.nbAttacks + lang.ranAway2 + $scope.quality + lang.ranAway3 + feedback + lang.ranAway4,
       type: "success",
       confirmButtonText: lang.seeProfile
-    }).then( function() {
+		}).then(result => {
 			$timeout($scope.redirect($scope.redirectUrl), 200);
     });
   }
@@ -573,7 +573,7 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
       html: lang.revise1 + feedback + lang.revise2,
       type: "error",
       confirmButtonText: lang.better
-    }).then( function() {
+		}).then(result => {
 			$timeout($scope.redirect($scope.redirectUrl), 200);
     });
   }
@@ -773,12 +773,13 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         showCancelButton : true,
         cancelButtonText: lang.continue,
         confirmButtonText: lang.stopSave
-      }).then( function() {
-        // Save and redirect
-				$scope.saveData(true);
-				$scope.waitForStart = true;
-			},function(dismiss) {
-				if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+			}).then(result => {
+				if (result.value) { // Save and redirect
+					$scope.saveData(true);
+					$scope.waitForStart = true;
+				} else { // Continue session
+					return false;
+				}
 			});
     } else {
       swal({
@@ -788,16 +789,17 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         showCancelButton : true,
         cancelButtonText: lang.continue,
         confirmButtonText: lang.stopOrder
-      }).then( function() { // DO not save, but redirect
-				$timeout($scope.redirect($scope.redirectUrl), 200);
-      },function(dismiss) {
-				if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
+			}).then( result => { // DO not save, but redirect
+				if (result.value) {
+					$timeout($scope.redirect($scope.redirectUrl), 200);
+				} else {
+					return false;
+				}
 			});
     }
   }
 
-  $scope.saveData = function (redirect) {
-    // Save result
+  $scope.saveData = function (redirect) { // Save result
     $http({
       url: $scope.submitUrl,
       method: 'POST',
@@ -815,13 +817,13 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 					html: lang.training,
 					type: "success",
 					timer: 2000
-				}).then( function() {
+				}).then(result => {
 					if (redirect === true) {
 						$timeout($scope.redirect($scope.redirectUrl), 200);
+					} else {
+						return false;
 					}
-				}), function(dismiss) {
-					if (dismiss === 'cancel' || dismiss == 'overlay') { return false; }
-				};
+				});
 			} else {
 				if (redirect === true) {
 					$timeout($scope.redirect($scope.redirectUrl), 200);
