@@ -1108,13 +1108,6 @@
           $out .= '<section class="well">';
           $out .= '<h3 class="text-center">'.__("Announcements").'</h3>';
           $out .= '<div>';
-          // TODO
-          // new backend announcement template (and some fields)
-          // allow teacher to add children to team template
-          // Add an announcement button
-          // Choose a team, add the text, choose to publish or not
-          // List all teacher's announcements (with publish checkbox) and delete button
-
           // Get teacher's teams to quickly add an announcement
           if ($user->hasRole('teacher')) {
             $allTeams = $pages->find("template=team, teacher=$user")->sort("title");
@@ -1184,12 +1177,11 @@
         default :
           $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
           $out .= '<section id="ajaxViewport" class="well"></section>';
-          $out .= '<div>';
+          $out .= '</div>';
       }
     } else { // End if admin/teacher
       $out .= $noAuthMessage;
     }
-    $out .= '</div>';
     echo $out;
     include("./foot.inc"); 
     echo '<script>';

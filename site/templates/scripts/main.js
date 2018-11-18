@@ -54,7 +54,7 @@ $(document).ready(function() {
 			showCancelButton : true,
 			allowOutsideClick : true,
 			confirmButtonText: lang.yes,
-			cancelButtonText: lang.no,
+			cancelButtonText: lang.no
 		}).then( result => {
 			if (result.value) {
 				var href = $this.attr('data-href');
