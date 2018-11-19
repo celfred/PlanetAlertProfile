@@ -1185,7 +1185,7 @@ function taskCount($taskName, $allEvents) {
 function setHomework($player, $dateStart='', $dateEnd='') {
   $pages = wire('pages');
   // Get official period
-  $period = $pages->get("name=admin-actions")->periods;
+  $period = $player->team->periods;
   if ($dateStart == '') { $dateStart = $period->dateStart; }
   if ($dateEnd == '') { $dateEnd = $period->dateEnd; }
   // Select homework tasks over the period
@@ -1196,7 +1196,7 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $player->inClassUtCount = $player->ut->find("inClass=1")->count();
   $player->outClassUtCount = $player->ut->find("inClass=0")->count();
   $player->inClassFpCount = $player->fp->find("inClass=1")->count();
-  $player->outClassFpCount = $player->fp->find("inClass=0")->count();
+  $player->outClassFpCount = $player->fp->find("inClass=0, (name~=fight)")->count();
   $player->inClassActivity = $player->inClassUtCount + $player->inoutClassFpCount;
   $player->outClassActivity = $player->outClassUtCount + $player->outClassFpCount;
   $player->nbHk = $allHk->count();
@@ -2317,7 +2317,7 @@ function possibleElement($player, $item) {
 function setParticipation($player, $dateStart='', $dateEnd='') {
   $pages = wire('pages');
   // Get official period
-  $period = $pages->get("name=admin-actions")->periods;
+  $period = $player->team->periods;
   if ($dateStart == '') { $dateStart = $period->dateStart; }
   if ($dateEnd == '') { $dateEnd = $period->dateEnd; }
   $pages = wire('pages');
