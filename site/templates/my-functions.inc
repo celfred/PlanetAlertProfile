@@ -207,10 +207,13 @@ function updateScore($player, $task, $real = true) {
   } else { // Player died
     if ($real == true) { // Save player's death if necessary
       if ($player->level == 1) { // Check if 2nd death in a row on level 1
-        $prevDeath = $player->get("name=history")->get("template=event, sort=-date, task.name=death, limit=1");
-        $prevDeath->of(false);
-        preg_match("/\d+/", $prevDeath->summary, $matches);
-        $previousLevel = (int) $matches[0];
+        $prevDeath = $player->get("name=history")->get("template=event, sort=-date, task.name=death");
+        if (isset($prevDeath)) {
+          preg_match("/\d+/", $prevDeath->summary, $matches);
+          $previousLevel = (int) $matches[0];
+        } else {
+          $previousLevel = 0;
+        }
       } else {
         $previousLevel = $player->level;
       }
