@@ -3,6 +3,7 @@
     include("./head.inc"); 
     $out = '';
     if ($user->isSuperuser() || $user->hasRole('teacher')) {
+      $unique = true;
       $action = $input->urlSegment1;
       if ($user->hasRole('teacher')) {
         $allTeams = $pages->find("template=team, teacher=$user")->sort("title");
@@ -352,11 +353,11 @@
                       if ($unique == true) {
                         $out .= '<span class="label label-danger">Error : No Death after?</span>  ';
                         // Button Add death here
-                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">'.__("Add death here ?").'</button>';
+                        $out .= '<button class="confirm btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$selectedPlayer->level.'">'.__("Add death here ?").'</button>';
                         $unique = false;
                       } else {
                         $out .= '<span class="label label-danger">'.__("Previous Death ?").'</span>';
-                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$previousLevel.'">'.__("Add death here ?").'</button>';
+                        $out .= '<button class="confirm btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$selectedPlayer->level.'">'.__("Add death here ?").'</button>';
                       }
                     }
                   }
@@ -1469,11 +1470,16 @@
           // DO NOT use updateScore(...,true), it would touch the equipment for real !!!
           // Find previous death, check former level and act accordingly
           $prevDeath = $allEvents->sort("-date")->get("task.name=death, limit=1");
-          preg_match("/\d+/", $prevDeath->summary, $matches);
-          $previousLevel = (int) $matches[0];
-          if ($previousLevel == 1 && $currentLevel == 1) { // 2nd death in a row on Level 1 > Enter coma state
-            // Disabled on Edit history but no effect on other players
-            /* $selectedPlayer->coma = 1; */
+          if (isset($prevDeath)) {
+            preg_match("/\d+/", $prevDeath->summary, $matches);
+            $previousLevel = (int) $matches[0];
+          } else {
+            $previousLevel = false;
+          }
+          if (isset($previousLevel) && $previousLevel == 1 && $currentLevel == 1) { // 2nd death in a row on Level 1 > Enter coma state
+            $selectedPlayer->coma = 1;
+            $selectedPlayer->of(false);
+            $selectedPlayer->save();
           } else {
             // Each team member suffers from player's death
             // Disable to avoid recalculation nightmare ???
