@@ -223,6 +223,29 @@ $(document).ready(function() {
 		});
 	});
 
+	$(document).on('click', '.simpleAjax', function(e) {
+		$this = $(this);
+    $hide = $this.attr('data-hide-feedback');
+    $disable = $this.attr("data-disable");
+    var href = $this.attr('data-href');
+    if ($this.next().hasClass("ajaxFeedback")) {
+      $this.next().remove();
+    }
+    $that = $('<span class="ajaxFeedback"> '+lang.loading+'</span>').insertAfter($this);
+    $.get(href, function(data) { 
+      if (data) {
+        $that.html(data);
+      } else {
+        $that.html(' '+lang.saved);
+      }
+      if ($hide == 'true') {
+        setTimeout( function() { $that.remove(); }, 1000);
+      }
+      if ($disable == 'true') { $this.prop('disabled', true); }
+    }); 
+    return false;
+	});
+
 	$('.confirm').on('click', function() {
 		$this = $(this);
 		swal({

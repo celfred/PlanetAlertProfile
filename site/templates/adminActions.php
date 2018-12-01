@@ -17,9 +17,30 @@
       switch ($action) {
         case 'ut' :
           if ($user->isSuperuser()) {
-            $out .= '<p>⇒ Check if UT\'s hall of fame is correct.</p>';
-            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="ut">Generate</button>';
-            $out .= '<section id="ajaxViewport" class="well"></section>';
+            $out = '<section class="well">';
+            $out .= '<h2 class="text-center">Check UT\'s hall of fame</h2>';
+            $allMonsters = $pages->find("template=exercise")->sort("title, level");
+            $out .= '<h3>Best players among '.$allPlayers->count().' players.</h3>';
+            $out .= '<ul>';
+            foreach($allMonsters as $m) {
+              $out .= '<li>'.$m->title;
+              if ($m->mostTrained) {
+                $bestUt = $m->best;
+                $out .= ' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.'] : '.$bestUt.'UT]';
+              } else {
+                $out .= ' [-] ';
+              }
+              $options = [
+                'data' => [
+                  'id' => 'checkHighscore',
+                  'monsterId' => $m->id
+                ]
+              ];
+              $out .= ' <button class="simpleAjax btn btn-xs btn-primary" data-href="'.$pages->get("name=ajax-content")->url($options).'">Check</button>';
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+            $out .= '</section>';
           } else {
             $out .= $noAuthMessage;
           }
@@ -1609,62 +1630,6 @@
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'helmet/all/1">Clean now!</button>';
         } else {
           $out .= '<p>Memory helmets seem to be clean.</p>';
-        }
-        break;
-      case 'ut' :
-        $dirty = false;
-        $allMonsters = $pages->find("template=exercise")->sort("title, level");
-        $out .= '<h3>Best players among '.$allPlayers->count().' players.</h3>';
-        $out .= '<ul>';
-        // Get all ut-actions
-        $testPlayer = $allPlayers->get("name=test");
-        $allUt = $pages->findMany("task.name~=ut-action, has_parent!=$testPlayer");
-        $concernedMonster = [];
-        // Build monsters stats
-        foreach($allUt as $e) {
-          $utGain = 1;
-          $pId = $e->parent("template=player")->id;
-          $mId = $e->refPage->id;
-          if (!isset($concernedMonster[$mId][$pId])) {
-            $concernedMonster[$mId][$pId] = 0;
-          }
-          preg_match("/\[\+([\d]+)U\.T\.\]/", $e->summary, $matches);
-          if ($matches) {
-            $utGain = $matches[1];
-          }
-          $concernedMonster[$mId][$pId] += $utGain;
-        }
-        // Check best players
-        foreach($allMonsters as $m) {
-          $bestUt = $m->best;
-          if ($m->best && $m->mostTrained) {
-            $out .= '<li>'.$m->title.' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.'] : '.$bestUt.'UT]';
-          } else {
-            $out .= '<li>'.$m->title.' [Current best : Nobody.]';
-          }
-          if (isset($concernedMonster[$m->id])) {
-            $newBestUt = max($concernedMonster[$m->id]);
-            $newBestId = array_search(max($concernedMonster[$m->id]),$concernedMonster[$m->id]);
-          } else {
-            $newBestUt = $bestUt;
-          }
-          if ($newBestUt != $bestUt) {
-            $dirty = true;
-            $newBestPlayer = $allPlayers->get("id=$newBestId");
-            $out .= ' <span class="label label-danger">Error</span>';
-            $out .= ' - New best : '.$newBestPlayer->title.' ['.$newBestPlayer->team->title.'] ⇒'.$newBestUt.'UT';
-            if ($confirm == 1) { // Save new best players
-              $m->of(false);
-              $m->mostTrained = $newBestPlayer;
-              $m->best = $newBestUt;
-              $m->save();
-            }
-          } else {
-            $out .= ' <span class="label label-success">OK</span>';
-          }
-        }
-        if ($dirty) {
-          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'ut/all/1">Save now!</button>';
         }
         break;
       case 'clean-history' :
