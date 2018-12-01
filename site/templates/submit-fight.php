@@ -31,7 +31,6 @@
           $log->save('underground-training', $logText);
         } else {
           $best = __('No');
-          $previousUt = $player->underground_training;
           updateScore($player, $task, true);
           // No need to checkDeath, Underground Training can't cause death
           // Set group captains
@@ -39,7 +38,7 @@
           // Check if new record
           list($utGain, $inClassGain) = utGain($monster, $player);
           $newUtGain = $utGain+$inClassGain;
-          if ($utGain > $monster->best) {
+          if ($newUtGain > $monster->best) {
             setBestPlayer($monster, $player, $newUtGain);
             $best = __('Yes');
             echo '1';
