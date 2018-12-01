@@ -871,6 +871,61 @@
           $announcement->save();
         }
         break;
+      case 'checkHighscore' :
+        $monsterId = $input->get("monsterId");
+        $confirm = $input->get("confirm");
+        $m = $pages->get($monsterId);
+        $testPlayer = $pages->get("template=player, name=test");
+        $allUt = $pages->findMany("template=event, task.name~=ut-action, refPage=$m, has_parent!=$testPlayer");
+        $newBest = [];
+        foreach($allUt as $e) {
+          $utGain = 1;
+          $pId = $e->parent("template=player")->id;
+          if (!isset($newBest[$pId])) {
+            $newBest[$pId] = 0;
+          }
+          // Test also french field
+          if ($e->summary != '') {
+            preg_match("/\[\+([\d]+)U\.T\.\]/", $e->summary, $matches);
+          } else {
+            $e->of(false);
+            preg_match("/\[\+([\d]+)U\.T\.\]/", $e->summary->getLanguageValue($french), $matches);
+          }
+          if ($matches) {
+            $utGain = $matches[1];
+          }
+          $newBest[$pId] += $utGain;
+        }
+        if (count($newBest) > 0) {
+          $newBestUt = max($newBest);
+          $newBestId = array_search(max($newBest),$newBest);
+          $newBestPlayer = $pages->get($newBestId);
+        } else {
+          $newBestPlayer = false;
+        }
+        if (!$confirm) {
+          if (($m->mostTrained && ($newBestId == $m->mostTrained->id && $newBestUt == $m->best)) || (!$m->mostTrained && !$newBestPlayer)) {
+            $out = '&nbsp;<span class="label label-success">OK</span>';
+          } else {
+            $out = '&nbsp;<span class="label label-danger">Error</span> : '.$newBestPlayer->title.' → '.$newBestUt.'UT';
+            $options = [
+              'data' => [
+                'id' => 'checkHighscore',
+                'monsterId' => $monsterId,
+                'confirm' => 'true'
+              ]
+            ];
+            $out .= ' <button class="simpleAjax btn btn-xs btn-danger" data-href="'.$page->url($options).'" data-disable="true">Save ?</button> <span class="glyphicon glyphicon-alert"></span> ';
+          }
+        } else { // Saving new highscore
+          $m->of(false);
+          $m->mostTrained = $newBestPlayer;
+          $m->best = $newBestUt;
+          $m->save();
+          $out = '<span class="label label-success">✓ Saved !</span>';
+          $out .= 'New highscore : '.$newBestUt.'UT for '.$newBestPlayer->title;
+        }
+        break;
       default :
         $out = __("todo");
     }
