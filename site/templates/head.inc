@@ -24,6 +24,9 @@
 
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/main.css" />
 
+  <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css"> -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.css">
+
   <!--[if IE]>
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/ie.css" />
   <![endif]-->	
