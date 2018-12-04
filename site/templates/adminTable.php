@@ -112,9 +112,9 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
         <input style="display: none;" <?php echo $disabled; ?> type="text" data-customId="<?php echo $id.'_'.$taskId; ?>" class="cc_<?php echo $taskId; ?>" name="comment_<?php echo $id.'_'.$taskId; ?>" value="" placeholder="<?php echo __("comment"); ?>" />
         <?php 
           if ($abs && $task->is("name=absent|abs")) { 
-            echo "<a href='#' class='removeAbs' data-type='removeAbs' data-url='".$pages->get('name=submitforms')->url."?form=deleteForm&eventId=".$abs->id."'>[Remove]</a>"; 
+            echo "<a href='#' class='removeAbs' data-type='removeAbs' data-url='".$pages->get('name=submitforms')->url."?form=deleteForm&eventId=".$abs->id."'>[✗]</a>"; 
           } else {
-            if ($disabled == 'disabled') { echo "<a href='#' class='toggleEnabled'>[Toggle]</a>"; } 
+            if ($disabled == 'disabled') { echo "<a href='#' class='toggleEnabled'>[◑]</a>"; } 
           }
         ?>
       </td>
