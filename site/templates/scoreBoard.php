@@ -7,6 +7,10 @@
     if (!isset($player)) { $player = ''; }
     list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, -1);
     switch ($field) {
+      case 'yearlyKarma' :
+        $title = 'Most influential';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        break;
       case 'reputation' :
         $title = 'Most influential';
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
@@ -37,6 +41,7 @@
         break;
       case 'group' :
         $title = 'Most active groups';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       default : 
         $title = 'Error';
@@ -63,6 +68,10 @@
           <?php
             foreach($topPlayers as $player) {
               switch ($field) {
+                case 'yearlyKarma' :
+                  $indicator = $player->yearlyKarma;
+                  $tag = 'K.';
+                  break;
                 case 'reputation' :
                   $indicator = $player->reputation;
                   $tag = 'rep.';
@@ -128,7 +137,7 @@
     $field = $input->get('id');
     $player = $pages->get("login=$user->name");
     $limit = 5;
-    if ($user->hasRole('player') && !$user->isSuperuser()) {
+    if ($user->hasRole('player') || $user->isGuest()) {
       list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, false);
     } else {
       $player = '';
@@ -265,28 +274,18 @@
             $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' UT</span></li>';
             break;
           case 'group':
-            if ($p->focus == 1) {
+            if ($p == $player->group) {
               $focus = "class='focus'";
             } else {
               $focus = "";
             }
             $out .= '<li>';
-            $out .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$p->details.'">';
-            $out .= $p->title.' ['.$p->team->title.']</span> <span class="badge">'.$p->yearlyKarma.' K</span>';
-            // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
-            $starsGroups = floor($p->nbBonus/5);
-            if ( $starsGroups < 1) {
-              for ($i=0; $i<$p->nbBonus; $i++) {
-                $out .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-              }
-            } else {
-              for ($i=0; $i<$starsGroups; $i++) {
-                $out .= ' <span class="glyphicon glyphicon-star"></span>';
-              }
-              $p->nbBonus = $p->nbBonus - $starsGroups*5;
-              for ($i=0; $i<$p->nbBonus; $i++) {
-                $out .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-              }
+            $out .= '<span '.$focus.' data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="'.$p->members.'">';
+            $out .= $p->title.' ['.$p->team->title.']</span> <span class="badge">'.$p->karma.' K</span>';
+            // Display stars for bonus
+            if ($p->nbBonus > 0) {
+              $out .= '&nbsp;&nbsp;<span class="glyphicon glyphicon-star"></span>';
+              $out .= '<span class="badge">'.$p->nbBonus.'</span>';
             }
             $out .= '</p>';
             $out .= '</li>';
