@@ -18,10 +18,11 @@ $(document).ready(function() {
 		return false;
 	});
 
+  
 	$('.publishElement').on('click', function() {
 		var href = $(this).attr('href');
 		var $this = $(this);
-    $this.html("<p>'+lang.saving+'</p>"); 
+    $this.html(lang.saving); 
     $.get(href, function(data) { 
 			$this.prev().removeClass('strikeText');
 			$this.remove();
@@ -47,6 +48,7 @@ $(document).ready(function() {
 	});
 
 	$('.deleteFromId').on('click', function() {
+    e.preventDefault();
 		$this = $(this);
 		swal({
 			title: lang.sure,
@@ -68,20 +70,23 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.togglePublish').on('click', function() {
+	$('.togglePublish').on('click', function(e) {
+    e.preventDefault();
 		$this = $(this);
 		var href = $this.attr('data-href');
 		$('.tooltip').hide();
-		$('<span>Saving...</span>').insertAfter($this);
+		$('<span>'+lang.saving+'</span>').insertAfter($this);
 		$.get(href, function(data) { 
 			if ($this.text() == '✓') {
 				$this.text('✗');
 				$this.attr("class", "label label-danger");
 				$this.attr("title", "Publish");
+        $this.next().next('span').addClass('strikeText');
 			} else {
 				$this.text('✓');
 				$this.attr("class", "label label-success");
 				$this.attr("title", "Unpublish");
+        $this.next().next('span').removeClass('strikeText');
 			}
 			$this.next('span').remove();
 		});

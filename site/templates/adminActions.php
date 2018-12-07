@@ -768,9 +768,12 @@
                 $out .= '[-] ';
               }
               if ($p->isUnpublished()) {
+                $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublishFromId/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-danger" data-toggle="tooltip" title="'.__('Publish').'">✗</span></a> ';
                 $out .= '<span class="strikeText">'.$p->title.'</span>';
-                $out .= ' <a class="publishElement" href="'.$page->url.'publish-element/'.$user->id.'/'.$p->id.'?type=team">'.__('[Publish]').'</a>';
               } else {
+                if ($p->teacher->count() == 0) { // Monster is not shared, owner can unpublish)
+                  $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublishFromId/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
+                }
                 $out .= '<span>'.$p->title.'</span>';
               }
               if ($p->summary != '') {
@@ -2249,6 +2252,16 @@
       case 'deleteFromId' :
         $id = $pages->get($confirm); // urlSegment3 used for element's id
         $pages->trash($id);
+        break;
+      case 'togglePublishFromId' :
+        $id = $pages->get($confirm); // urlSegment3 used for element's id
+        $id->of();
+        if ($id->isUnpublished()) {
+          $id->status([]);
+        } else {
+          $id->addStatus("unpublished");
+        }
+        $id->save();
         break;
       case 'togglePublish' :
         $id = $pages->get($confirm); // urlSegment3 used for element's id
