@@ -144,7 +144,7 @@
               $out .= '</span>';
               $out .= '</span>';
               $out .= '</div>';
-              $out .= '<button ng-click="stopSession()" class="btn btn-danger" ng-disabled="">'.__("Take the helmet off (Stop training session)").'</button>';
+              $out .= '<p><button ng-click="stopSession()" class="btn btn-danger" ng-disabled="">'.__("Take the helmet off (Stop training session)").'</button></p>';
               $out .= '</div>';
               $out .= '</div>';
               $out .= '</div>';
