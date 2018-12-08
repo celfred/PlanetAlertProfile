@@ -47,7 +47,7 @@ $(document).ready(function() {
     return false; 
 	});
 
-	$('.deleteFromId').on('click', function() {
+	$('.deleteFromId').on('click', function(e) {
     e.preventDefault();
 		$this = $(this);
 		swal({
