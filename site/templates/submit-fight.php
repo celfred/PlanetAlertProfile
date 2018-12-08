@@ -54,7 +54,7 @@
           $subject .= ' → +'.$result.__("UT");
           $subject .= ' ['.$monster->title.']';
           $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-          $msg .= __("Monster")." : ". $monster->title."\r\n";
+          $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
           $msg .= __("Result")." : +". $result.__("UT")."\r\n";
           $msg .= __("Player's total training on this monster")." : ". $utGain."\r\n";
           $msg .= __("New best player")." :  ". $best." (".$monster->mostTrained->title.":".$monster->best.")\r\n";
@@ -122,7 +122,7 @@
           $subject .= ' → '.$result;
           $subject .= ' ['.$monster->title.']';
           $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-          $msg .= __("Monster")." : ". $monster->title."\r\n";
+          $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
           $msg .= __("Result")." : ". $result;
           $msg .= ' ['.__("Quality")." : ".$quality."]\r\n";
           $msg .= __("New player global FP")." : ". $player->fighting_power."\r\n";
