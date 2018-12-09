@@ -18,10 +18,10 @@
           $player = $pages->get($playerId);
         } else { // All monsters are available for superUsers or teachers (debugging mode)
           if ($user->hasRole('teacher')) {
-            $allMonsters = $pages->find("template=exercise, (created_users_id=$user->id), (teacher=$user), include=all")->sort("level, name");
+            $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$user")->sort("level, name");
           }
           if ($user->isSuperuser()) {
-            $allMonsters = $pages->find("template=exercise, include=all")->sort("level, name");
+            $allMonsters = $pages->find("parent.name=monsters, template=exercise, include=all")->sort("level, name");
           }
           $availableFights = $allMonsters;
         }
@@ -29,10 +29,10 @@
       // Check if player has the Visualizer (or forced by admin)
       if (isset($player)) {
         if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
-          $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher)")->sort("level, name");
+          $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, summary!=''")->sort("level, name");
         } else { // Limit to visible monsters
-          $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher), special=0")->sort("level, name");
-          $hiddenMonstersNb = $pages->count("template=exercise, (created_users_id=$headTeacher->id), (teacher=$headTeacher), special=1");
+          $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0, summary!=''")->sort("level, name");
+          $hiddenMonstersNb = $pages->count("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=1, summary!=''");
         }
       }
 
