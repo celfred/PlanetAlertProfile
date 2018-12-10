@@ -1812,7 +1812,7 @@
         if ($user->name == 'flieutaud') {
           $allPlayers = $pages->find("parent.name=players, team=$team");
           $now = time();
-          if ($now < $period->dateStart || $now > $period->dateEnd) {
+          if ($now < $period->dateStart || $now > $period->dateEnd) { // Today is out of newly selected period
             foreach($allPlayers as $p) {
               $p->hkcount = 0;
               $p->of(false);
@@ -1820,12 +1820,18 @@
             }
           } else {
             foreach($allPlayers as $p) {
-              $newCount = setHomework($p, $period->dateStart, $period->dateEnd);
-              if ($newCount != $p->hkcount) {
-                $p->hkcount = $newCount;
-                $p->of(false);
-                $p->save();
+              // Check if a penalty is still not signed (in that case, hkcount stays at 0)
+              $penalty = $pages->get("has_parent=$p, template=event, publish=1, task.name=penalty, sort=-date");
+              if (!($penalty->id)) {
+                $newCount = setHomework($p, $period->dateStart, $period->dateEnd);
+                if ($newCount != $p->hkcount) {
+                  $p->hkcount = $newCount;
+                }
+              } else {
+                $p->hkcount = 0;
               }
+              $p->of(false);
+              $p->save();
             }
           }
         }

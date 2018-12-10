@@ -318,10 +318,18 @@ function taskExtraAction($player, $task, $real) {
     $player->fighting_power = $player->fighting_power+2;
   }
   if ($task->is("name=no-homework")) {
-    $player->hkcount++;
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount++;
+    }
   }
   if ($task->is("name=homework-half-done|signature")) {
-    $player->hkcount += 0.5;
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount += 0.5;
+    }
   }
   if ($task->is("name=remove")) { // Remove element
     if ($task->refPage != false && $task->refPage->template == 'place') {
