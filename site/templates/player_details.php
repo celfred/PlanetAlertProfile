@@ -79,12 +79,12 @@
           ?>
         </span>
         <?php 
-          if ($playerPage->skills->has("name=captain")) {
+          if ($playerPage->skills && $playerPage->skills->has("name=captain")) {
             $showSkills = '<span class="label label-primary">Captain</span>';
           } else {
             $showSkills = '';
           }
-          if ($playerPage->skills->has("name=ambassador")) {
+          if ($playerPage->skills && $playerPage->skills->has("name=ambassador")) {
             $showSkills .= '<span class="label label-success">'.$playerPage->skills->get("name=ambassador")->title.'</span>';
           }
           echo $showSkills;
