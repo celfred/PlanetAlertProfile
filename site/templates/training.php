@@ -101,7 +101,8 @@
           $out .= $m->level;
           $out .= '</td>';
           $out .= '<td>';
-          $out .= $m->summary;
+          $m->summary == '' ? $summary = '-' : $summary = $m->summary;
+          $out .= $summary;
           if ($user->language->name != 'french') {
             $m->of(false);
             if ($m->summary->getLanguageValue($french) != '') {

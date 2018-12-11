@@ -133,10 +133,13 @@
         $out .= '<span class="label label-default">'.$m->topic->implode(', ', '{title}').'</span>';
         $out .= '</td>';
         $out .= '<td>'.$m->level.'</td>';
-        /* $out .= '<td>'.$m->type->title.'</td>'; */
         if ($user->language->name != 'french') {
           $m->of(false);
-          $out .= '<td>'.$m->summary.' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$m->summary->getLanguageValue($french).'"></span></td>';
+          $m->summary == '' ? $summary = '-' : $summary = $m->summary;
+          $out .= '<td>'.$summary;
+          if ($m->summary->getLanguageValue($french) != '') {
+            $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$m->summary->getLanguageValue($french).'"></span></td>';
+          }
         } else {
           $out .= '<td>'.$m->summary.'</td>';
         }
