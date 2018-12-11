@@ -824,12 +824,19 @@
                 $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
               }
               $out .= '<span>'.$p->title.'</span> → ';
-              $out .= '<span>'.$p->summary.'</span> ';
-              if ($p->type && $p->type->name && $p->exData != '') {
+              $p->summary == '' ? $summary = '-' : $summary = $p->summary;
+              $out .= '<span>'.$summary.'</span> ';
+              if ($p->exData != '') {
                 $allLines = preg_split('/$\r|\n/', $p->exData);
                 $listWords = prepareListWords($allLines, $p->type->name);
                 $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span> ';
+              }
+              if ($p->type) {
                 $out .= '<span class="label label-success">'.$p->type->title.'</span> ';
+              } 
+              if ($p->topic) {
+                $allTopics = $p->topic->sort('title')->implode(', ', '{title}');
+                $out .= '<span class="label label-danger">'.$allTopics.'</span>';
               }
               if ($user->isSuperuser() || $user->name == 'flieutaud') {
                 $out .= $p->feel();
