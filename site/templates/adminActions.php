@@ -738,9 +738,6 @@
           $out .= '<h3 class="text-center">';
           $out .=   __('Manage monsters');
           $out .= '</h3>';
-          if (!$user->isSuperuser()) {
-            $out .= '<p class="text-center">'.__("Contact the administrator if you want to delete items in this list.").'</p>';
-          }
           $out .= $pages->get("template=monsters")->feel(array(
             'mode' => 'page-add',
             'text' => __('[Add a new monster]'),
@@ -779,7 +776,9 @@
               } else {
                 $out .= '[-] ';
               }
-              $out .= '<span>'.$p->title.'</span>';
+              if (!isset($customParams) || $customParams->publish == 0) { $className = 'strikeText'; } else { $className = ''; }
+              if ($p->special == 1) { $out .= '*'; }
+              $out .= '<span class="toStrike '.$className.'">'.$p->title.'</span>';
               if ($p->summary != '') {
                 $out .= ' → <span>'.$p->summary.'</span> ';
               }
@@ -796,7 +795,7 @@
               if ($userIsOwner) {
                 $out .= $p->feel(array(
                           "text" => __('[Edit]'),
-                          "fields" => "title,image,summary,instructions,topic,level,type,imageMap,exData"
+                          "fields" => "title,special,image,summary,instructions,topic,level,type,imageMap,exData"
                         ));
                 if ($p->exerciseOwner->count() <= 1 || ($p->exerciseOwner->count() == 1 && $p->exerciseOwner->first()->singleTeacher == $user)) { // Monster is not shared, owner can delete
                   $out .= '<a href="#" class="deleteFromId" data-href="'.$page->url.'deleteFromId/'.$user->id.'/'.$p->id.'?type=team">'.__("[Delete]").'</a>';
@@ -823,6 +822,7 @@
               if (!$user->isSuperuser()) {
                 $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
               }
+              $out .= '<a href="#" class="togglePublish hidden" data-href="'.$page->url.'toggleMonster/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
               $out .= '<span>'.$p->title.'</span> → ';
               $p->summary == '' ? $summary = '-' : $summary = $p->summary;
               $out .= '<span>'.$summary.'</span> ';
@@ -1888,6 +1888,7 @@
               } else {
                 $new = $element->exerciseOwner->getNew();
                 $new->singleTeacher = $user;
+                $new->publish = 1;
                 $new->save();
                 $element->exerciseOwner->add($new);
               }
@@ -2300,10 +2301,10 @@
         break;
       case 'toggleMonster' :
         $monster = $pages->get($confirm); // urlSegment3 used for element's id
-        $teacherMod = $monster->exerciseOwner->get("singleteacherMod=$user");
+        $teacherMod = $monster->exerciseOwner->get("singleTeacher=$user");
         if (!isset($teacherMod)) {
           $teacherMod = $monster->exerciseOwner->getNew();
-          $teacherMod->singleteacher = $user;
+          $teacherMod->singleTeacher = $user;
         }
         // Toggle publish checkbox
         if ($teacherMod->publish == 0) {
