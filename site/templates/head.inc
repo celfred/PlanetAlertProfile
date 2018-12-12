@@ -10,7 +10,16 @@
       $session->redirect('./');
     }
   ?>
-  <title><?php echo $page->get("headline|title"); ?></title>
+  <title>
+    <?php
+      $allTeams = $pages->find("template=team")->implode(',', '{name}');
+      if (isset($input->urlSegment1) && stripos($allTeams, $input->urlSegment1)) {
+        echo $page->get("title").' '.strtoupper($input->urlSegment1);
+      } else {
+        echo $page->get("title");
+      }
+    ?>
+  </title>
 
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
