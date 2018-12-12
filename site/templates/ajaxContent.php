@@ -494,7 +494,7 @@
         $out .= '</div>';
         $out .= '<div class="col-sm-8 text-justify">';
           $out .= '<br/>';
-          $out .= '<p>'.$p->summary.'</p>';
+          $out .= '<p class="lead">'.$p->summary.'</p>';
         $out .= '</div>';
         $out .= '</div>';
         break;
