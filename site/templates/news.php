@@ -17,8 +17,125 @@
       $out .= '<div class="panel-heading">';
         $out .= '<h4 class="panel-title">'.__("Teacher's work").'</h4>';
       $out .= '</div>';
-      $out .= '<div class="panel-body ajaxContent" data-priority="1" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="admin-work">';
-      $out .= '<p class="text-center"><img src="'.$config->urls->templates.'img/hourglass.gif"></p>';
+      $out .= '<div class="panel-body">';
+        $today = new \DateTime("today");
+        $allConcernedPlayers = $pages->find("parent.name=players, team.teacher=$user"); // Limit to teacher's students
+        $news = $pages->find("parent.name=history, template=event, publish=1");
+        $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|penalty|fight-vv")->sort('-created');
+        $out .= '<div class="col-sm-6">';
+        if ($news->count() > 0) {
+          $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
+          $out .= '<ul class="list-unstyled">';
+          foreach($news as $n) {
+            $currentPlayer = $n->parent('template=player');
+            if ($currentPlayer->team->name == 'no-team') { 
+              $team = '';
+              $name = $currentPlayer->title.' '.$currentPlayer->lastName;
+            } else { 
+              $team = '['.$currentPlayer->team->title.']';
+              $name = $currentPlayer->title;
+            }
+            $out .= '<li class="">';
+            $out .=strftime("%d %b (%A)", $n->date).' : ';
+            $out .= '<span>';
+            switch ($n->task->name) {
+              case 'free' : 
+                if ($n->refPage->template == 'place') {
+                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
+                }
+                if ($n->refPage->template == 'people') {
+                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
+                }
+                break;
+              case 'buy' :
+                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                break;
+              case 'penalty' :
+                $out .= '<span class="">'.__("Penalty for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                break;
+              case 'fight-vv' :
+                $out .= '<span class="">'.__("Successful fight for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$pages->get("name=monsters")->url.'?id='.$n->refPage->id.'&thumbnail=1&pages2pdf=1">'.$sanitizer->entities($n->summary).'</a></span>';
+                break;
+              default : $out .= $n->task->name. ': '.__("todo");
+            }
+            $out .= '</span>';
+            $out .= ' <label for="unpublish_'.$n->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> '.__("Unpublish").'</label>';
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__("Nothing to do.").'</p>';
+        }
+        $out .= '</div>';
+        $out .= '<div class="col-sm-6">';
+        $unusedConcerned = $allConcernedPlayers->find("usabledItems.count>0")->sort("-team.name, name");
+        $out .= '<p class="label label-primary">'.__("Potion Planner").'</p>';
+        if ($unusedConcerned->count() > 0) {
+          $out .= '<ul class="list-unstyled">';
+          foreach ($unusedConcerned as $p) {
+            foreach ($p->usabledItems as $item) {
+                $historyPage = $p->get("name=history")->find("refPage=$item")->last();
+                if ($historyPage) {
+                  $out .= '<li>';
+                  // Find # of days compared to today
+                  $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
+                  $interval = $today->diff($date2);
+                  if ($interval->days > 21) {
+                    $out .= ' <span class="badge">!</span> ';
+                  }
+                  if ($historyPage->refPage->is("name!=memory-potion")) {
+                    $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                    $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("used today").'</label>';
+                  } else {
+                    $successId = $pages->get("template=memory-text, id=$historyPage->linkedId")->task->id;
+                    $failedId = $pages->get("name=solo-r")->id;
+                    $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->summary.' (bought '.$interval->days.' days ago)</span>';
+                    $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="memory" data-result="good" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$successId.'"><i class="glyphicon glyphicon-thumbs-up"></i></button>';
+                    $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="memory" data-result="bad" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$failedId.'"><i class="glyphicon glyphicon-thumbs-down"></i></button>';
+                  }
+                  $out .= '</li>';
+                } else { // Old unused potions
+                  $historyPage = $p->get("name~=history")->find("refPage=$item")->last();
+                  // Find # of days compared to today
+                  $date2 = new \DateTime(date("Y-m-d", $historyPage->date));
+                  $interval = $today->diff($date2);
+                  $out .= '<li>';
+                  $out .= ' <span class="badge">!</span> ';
+                  $out .= '<span>'.$p->title.' '.$p->lastName.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                  $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("remove").'</label>';
+                  $out .= '</li>';
+                }
+            }
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__("No Potion to be used.").'</p>';
+        }
+        $book = $pages->get("name=book-knowledge");
+        $pendings = $book->pending;
+        $pendings->filter("player=$allConcernedPlayers");
+        $out .= '<hr />';
+        $out .= '<p class="label label-primary">'.__("Copy work").'</p>';
+        if (count($pendings) > 0) {
+          $out .= '<ul class="list-unstyled">';
+          foreach ($pendings as $p) {
+            $out .= '<li class="">';
+            // Find # of days compared to today
+            $date2 = new \DateTime(date("Y-m-d", $p->date));
+            $interval = $today->diff($date2);
+            if ($interval->days > 21) {
+              $out .= ' <span class="badge">!</span> ';
+            }
+            $out .= '<span>'.$p->player->title.' ['.$p->player->team->title.'] : '.$p->refPage->title.' (warning '.$interval->days.' days ago)</span>';
+            $out .= ' <label for="unpublish_'.$p->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$p->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedPending='.$p->id.'" /> validated today</label>';
+            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&usedPending='.$p->id.'" class="del">[Delete]</a>';
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__("No lessons to be validated.").'</p>';
+        }
+        $out .= '</div>';
       $out .= '</div>';
     $out .= '</div>';
   }
