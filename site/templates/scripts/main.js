@@ -38,10 +38,17 @@ $(document).ready(function() {
 		$parentId = $el.parent().prop('id');
     $.get(href, function(data) { 
 			$("#ajaxViewport").html(''); 
+      var $publish = $el.children('.togglePublish');
 			if ($parentId == 'teacherElements') {
 				$('#notTeacherElements').append($el);
+        if ($publish.length > 0) {
+          $publish.addClass('hidden');
+        }
 			} else {
 				$('#teacherElements').append($el);
+        if ($publish.length > 0) {
+          $publish.removeClass('hidden');
+        }
 			}
     }); 
     return false; 
@@ -81,12 +88,12 @@ $(document).ready(function() {
 				$this.text('✗');
 				$this.attr("class", "label label-danger");
 				$this.attr("title", "Publish");
-        $this.next().next('span').addClass('strikeText');
+        $this.parent().find('span.toStrike').addClass('strikeText');
 			} else {
 				$this.text('✓');
 				$this.attr("class", "label label-success");
 				$this.attr("title", "Unpublish");
-        $this.next().next('span').removeClass('strikeText');
+        $this.parent().find('span.toStrike').removeClass('strikeText');
 			}
 			$this.next('span').remove();
 		});

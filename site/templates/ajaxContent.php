@@ -27,7 +27,7 @@
           }
           if ($user->hasRole('player')) { // Player gets headTeacher news
             $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
-            $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
+            $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
           }
         }
         $extra = $newItems->getTotal() - $newItems->getLimit();
@@ -565,7 +565,7 @@
               echo '<li>';
               echo '<span data-toggle="tooltip" title="'.$m->monster->summary.'" onmouseenter="$(this).tooltip(\'show\');" data-html="true">';
               if ($m->monster->isTrainable == 1) {
-                echo '<a href="'.$pages->get("name=underground-training")->url.'?id='.$m->monster->id.'">'.$m->monster->title.'</a>';
+                echo '<a href="'.$m->monster->url.'train">'.$m->monster->title.'</a>';
               } else {
                 echo $m->monster->title;
               }
@@ -600,7 +600,7 @@
               echo '<li>';
               echo '<span data-toggle="tooltip" title="'.$m->monster->summary.'" onmouseenter="$(this).tooltip(\'show\');" data-html="true">';
               if ($m->monster->isFightable == 1) {
-                echo '<a href="'.$m->monster->url.'">'.$m->monster->title.'</a>';
+                echo '<a href="'.$m->monster->url.'fight">'.$m->monster->title.'</a>';
               } else {
                 echo $m->monster->title;
               }

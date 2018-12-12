@@ -738,9 +738,6 @@
           $out .= '<h3 class="text-center">';
           $out .=   __('Manage monsters');
           $out .= '</h3>';
-          if (!$user->isSuperuser()) {
-            $out .= '<p class="text-center">'.__("Contact the administrator if you want to delete items in this list.").'</p>';
-          }
           $out .= $pages->get("template=monsters")->feel(array(
             'mode' => 'page-add',
             'text' => __('[Add a new monster]'),
@@ -748,11 +745,11 @@
           ));
           $out .= '<div>';
           if (!$user->isSuperuser()) {
-            $notTeacherEl = $pages->find("parent.name=monsters, template=exercise, teacher!=$user, created_users_id!=$user->id")->sort("title");
+            $teacherEl = $pages->find("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$user), (created_users_id=$user->id)")->sort('title');
+            $notTeacherEl = $pages->find("parent.name=monsters, template=exercise")->not("exerciseOwner.singleTeacher=$user")->not("created_users_id=$user->id")->sort("title");
           } else {
-            $notTeacherEl = $pages->find("parent.name=monsters, template=exercise, include=all")->sort("title");
+            $notTeacherEl = $pages->find("parent.name=monsters, kemplate=exercise, include=all")->sort("title");
           }
-          $teacherEl = $pages->find("parent.name=monsters, template=exercise, (teacher=$user), (created_users_id=$user->id), include=all")->sort('title');
           if (!$user->isSuperuser()) {
             $out .= '<h4><span>'.__("Your monsters").'</span></h4>';
             $out .= '<ul id="teacherElements">';
@@ -761,21 +758,27 @@
               $out .= '<li>';
               if (!$userIsOwner) {
                 $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
+              } else {
+                $out .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+              }
+              $customParams = $p->exerciseOwner->get("singleTeacher=$user");
+              if (isset($customParams)) {
+                if ($customParams->publish == 0) {
+                  $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'toggleMonster/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-danger" data-toggle="tooltip" title="'.__('Publish').'">✗</span></a> ';
+                } else {
+                  $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'toggleMonster/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
+                }
+              } else {
+                $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'toggleMonster/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-danger" data-toggle="tooltip" title="'.__('Publish').'">✗</span></a> ';
               }
               if ($p->image) {
                 $out .= '<img src="'.$p->image->getCrop("mini")->url.'" alt="Image" /> ';
               } else {
                 $out .= '[-] ';
               }
-              if ($p->isUnpublished()) {
-                $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublishFromId/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-danger" data-toggle="tooltip" title="'.__('Publish').'">✗</span></a> ';
-                $out .= '<span class="strikeText">'.$p->title.'</span>';
-              } else {
-                if ($p->teacher->count() == 0) { // Monster is not shared, owner can unpublish)
-                  $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublishFromId/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
-                }
-                $out .= '<span>'.$p->title.'</span>';
-              }
+              if (!isset($customParams) || $customParams->publish == 0) { $className = 'strikeText'; } else { $className = ''; }
+              if ($p->special == 1) { $out .= '*'; }
+              $out .= '<span class="toStrike '.$className.'">'.$p->title.'</span>';
               if ($p->summary != '') {
                 $out .= ' → <span>'.$p->summary.'</span> ';
               }
@@ -792,11 +795,18 @@
               if ($userIsOwner) {
                 $out .= $p->feel(array(
                           "text" => __('[Edit]'),
-                          "fields" => "title,image,summary,instructions,topic,level,type,imageMap,exData"
+                          "fields" => "title,special,image,summary,instructions,topic,level,type,imageMap,exData"
                         ));
-                if ($p->teacher->count() == 0) { // Monster is not shared, owner can delete
+                if ($p->exerciseOwner->count() <= 1 || ($p->exerciseOwner->count() == 1 && $p->exerciseOwner->first()->singleTeacher == $user)) { // Monster is not shared, owner can delete
                   $out .= '<a href="#" class="deleteFromId" data-href="'.$page->url.'deleteFromId/'.$user->id.'/'.$p->id.'?type=team">'.__("[Delete]").'</a>';
                 }
+              } else {
+                // TODO : Add custom title, level...
+                // publish is reachable through the front-end dedicated button, so temporarily commented out here
+                /* $out .= $customParams->feel(array( */
+                /*           "text" => __('[Edit]'), */
+                /*           "fields" => 'publish' */
+                /*         )); */
               }
               // Possibility to test monster
               $out .= ' <a href="'.$p->url.'train" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
@@ -812,13 +822,21 @@
               if (!$user->isSuperuser()) {
                 $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
               }
+              $out .= '<a href="#" class="togglePublish hidden" data-href="'.$page->url.'toggleMonster/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
               $out .= '<span>'.$p->title.'</span> → ';
-              $out .= '<span>'.$p->summary.'</span> ';
-              if ($p->type && $p->type->name && $p->exData != '') {
+              $p->summary == '' ? $summary = '-' : $summary = $p->summary;
+              $out .= '<span>'.$summary.'</span> ';
+              if ($p->exData != '') {
                 $allLines = preg_split('/$\r|\n/', $p->exData);
                 $listWords = prepareListWords($allLines, $p->type->name);
                 $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span> ';
+              }
+              if ($p->type) {
                 $out .= '<span class="label label-success">'.$p->type->title.'</span> ';
+              } 
+              if ($p->topic) {
+                $allTopics = $p->topic->sort('title')->implode(', ', '{title}');
+                $out .= '<span class="label label-danger">'.$allTopics.'</span>';
               }
               if ($user->isSuperuser() || $user->name == 'flieutaud') {
                 $out .= $p->feel();
@@ -1863,6 +1881,18 @@
                 $element->periodOwner->add($new);
               }
               break;
+            case 'exercise' : 
+              $already = $element->exerciseOwner->get("singleTeacher=$user");
+              if (isset($already)) {
+                $element->exerciseOwner->remove($already);
+              } else {
+                $new = $element->exerciseOwner->getNew();
+                $new->singleTeacher = $user;
+                $new->publish = 1;
+                $new->save();
+                $element->exerciseOwner->add($new);
+              }
+              break;
             default : // Add/Remove teacher in teacher field
               if ($element->teacher->has($user)) {
                 $element->teacher->remove($user);
@@ -2268,6 +2298,25 @@
           $id->addStatus("unpublished");
         }
         $id->save();
+        break;
+      case 'toggleMonster' :
+        $monster = $pages->get($confirm); // urlSegment3 used for element's id
+        $teacherMod = $monster->exerciseOwner->get("singleTeacher=$user");
+        if (!isset($teacherMod)) {
+          $teacherMod = $monster->exerciseOwner->getNew();
+          $teacherMod->singleTeacher = $user;
+        }
+        // Toggle publish checkbox
+        if ($teacherMod->publish == 0) {
+          $teacherMod->publish = 1;
+        } else {
+          $teacherMod->publish = 0;
+        }
+        $teacherMod->of(false);
+        $teacherMod->save();
+        $monster->of(false);
+        $monster->exerciseOwner->add($teacherMod);
+        $monster->save();
         break;
       case 'togglePublish' :
         $id = $pages->get($confirm); // urlSegment3 used for element's id
