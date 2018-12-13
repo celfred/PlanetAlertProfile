@@ -69,13 +69,21 @@
     $out .= '<div id="masthead" class="masthead">';
 
     if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teacher or Superuser is logged
+      // All teams for Admin (and cache for faster access)
+      $template = $templates->get("team");
+      $allTeams = $cache->get('allTeams', $template, function($pages) {
+        return $pages->find("template=team")->sort("title");
+      });
+      // All players Admin (and cache for faster access)
+      $template = $templates->get("player");
+      /* $cache->delete('allPlayers'); // In case we want to clean cache */
+      $allPlayers = $cache->get("allPlayers", $template, function($pages) {
+        return $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title");
+      });
       $profilePage = $pages->get("parent.name=teachers, singleTeacher=$user");
-      if ($user->isSuperuser()) { // All teams for Admin
-        $allTeams = $pages->find("template=team, sort=title");
-        $allPlayers = $pages->find("template=player, parent.name=players, team.name!=no-team")->sort("team->name, title");
-      } else { // Restrict to logged in Teacher's teams
-        $allTeams = $pages->find("template=team, teacher=$user, sort=title");
-        $allPlayers = $pages->find("template=player, parent.name=players, team.name!=no-team, (teacher=$user), (team.teacher=$user)")->sort("team->name, title");
+      if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
+        $allTeams->filter("teacher=$user");
+        $allPlayers->filter("team.teacher=$user");
       }
 
       // Official period is checked only when viewing a team page
