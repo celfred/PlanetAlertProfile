@@ -74,30 +74,30 @@
         /*   $out .= '</ul>'; */
         /* } */
         // Last admin announcements
-        if ($user->isGuest()) { // Guests get public news only
-          $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date");
-        } else {
-          if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teachers and Admin gets all published news
-            $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=3")->sort("-date");
-          }
-          if ($user->hasRole('player')) { // Player gets public and ranked news
-            if ($currentPlayer->rank) {
-              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$currentPlayer->rank, limit=3")->sort("-date");
-            } else { // Public news only (no rank)
-              $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date");
-            }
-          }
-        }
-        $out .= '<p>';
-        $out .= '<span class="label label-success"><span class="glyphicon glyphicon-hand-up"></span> '.__("Last official announcements !").'</span>';
-        $out .= ' <span><a href="'.$pages->get("name=blog")->url.'">'.__("[Read all official announcements]").'</a></span>';
-        $out .= '<ul class="">';
-        $blogUrl = $pages->get("name=blog")->url;
-        foreach($newsAdmin as $n) {
-          $out .= '<li>'.strftime("%d %b %Y", $n->created).' : <a href="'.$blogUrl.'">'.$n->title.'</a></li>';
-        }
-        $out .= '</ul>';
-        $out .= '</p>';
+        /* if ($user->isGuest()) { // Guests get public news only */
+        /*   $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date"); */
+        /* } else { */
+        /*   if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teachers and Admin gets all published news */
+        /*     $newsAdmin = $pages->get("/newsboard")->children("publish=0, limit=3")->sort("-date"); */
+        /*   } */
+        /*   if ($user->hasRole('player')) { // Player gets public and ranked news */
+        /*     if ($currentPlayer->rank) { */
+        /*       $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=0|1, ranks=''|$currentPlayer->rank, limit=3")->sort("-date"); */
+        /*     } else { // Public news only (no rank) */
+        /*       $newsAdmin = $pages->get("/newsboard")->children("publish=0, public=1, limit=3")->sort("-date"); */
+        /*     } */
+        /*   } */
+        /* } */
+        /* $out .= '<p>'; */
+        /* $out .= '<span class="label label-success"><span class="glyphicon glyphicon-hand-up"></span> '.__("Last official announcements !").'</span>'; */
+        /* $out .= ' <span><a href="'.$pages->get("name=blog")->url.'">'.__("[Read all official announcements]").'</a></span>'; */
+        /* $out .= '<ul class="">'; */
+        /* $blogUrl = $pages->get("name=blog")->url; */
+        /* foreach($newsAdmin as $n) { */
+        /*   $out .= '<li>'.strftime("%d %b %Y", $n->created).' : <a href="'.$blogUrl.'">'.$n->title.'</a></li>'; */
+        /* } */
+        /* $out .= '</ul>'; */
+        /* $out .= '</p>'; */
         // Recent public news (30 previous days)
         if ($user->isGuest()) { // Guests get public news only
           $concernedPlayers = $pages->find("template=player, name!=test");
