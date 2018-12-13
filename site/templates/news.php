@@ -20,8 +20,8 @@
       $out .= '<div class="panel-body">';
         $today = new \DateTime("today");
         $allConcernedPlayers = $pages->find("parent.name=players, team.teacher=$user"); // Limit to teacher's students
-        $news = $pages->find("parent.name=history, template=event, publish=1");
-        $news->filter("has_parent=$allConcernedPlayers, task.name=free|buy|penalty|fight-vv")->sort('-created');
+        $news = $pages->find("parent.name=history, template=event, task.name=free|buy|penalty|fight-vv, publish=1");
+        $news->filter("has_parent=$allConcernedPlayers")->sort('-created');
         $out .= '<div class="col-sm-6">';
         if ($news->count() > 0) {
           $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
