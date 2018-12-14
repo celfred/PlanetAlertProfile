@@ -12,8 +12,19 @@
   ?>
   <title>
     <?php
-      $allTeams = $pages->find("template=team")->implode(',', '{name}');
-      if (isset($input->urlSegment1) && stripos($allTeams, $input->urlSegment1)) {
+      // All teams (and cache for faster access)
+      $template = $templates->get("team");
+      $allTeams = $cache->get('allTeams', $template, function($pages) {
+        return $pages->find("template=team")->sort("title");
+      });
+      $allTeamsNames = $allTeams->implode(',', '{name}');
+      // All players (and cache for faster access)
+      $template = $templates->get("player");
+      $cache->delete('allPlayers'); // In case we want to clean cache
+      $allPlayers = $cache->get("allPlayers", $template, function($pages) {
+        return $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title");
+      });
+      if (isset($input->urlSegment1) && stripos($allTeamsNames, $input->urlSegment1)) {
         echo $page->get("title").' '.strtoupper($input->urlSegment1);
       } else {
         echo $page->get("title");
@@ -69,17 +80,6 @@
     $out .= '<div id="masthead" class="masthead">';
 
     if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teacher or Superuser is logged
-      // All teams for Admin (and cache for faster access)
-      $template = $templates->get("team");
-      $allTeams = $cache->get('allTeams', $template, function($pages) {
-        return $pages->find("template=team")->sort("title");
-      });
-      // All players Admin (and cache for faster access)
-      $template = $templates->get("player");
-      /* $cache->delete('allPlayers'); // In case we want to clean cache */
-      $allPlayers = $cache->get("allPlayers", $template, function($pages) {
-        return $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title");
-      });
       $profilePage = $pages->get("parent.name=teachers, singleTeacher=$user");
       if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
         $allTeams->filter("teacher=$user");
@@ -116,15 +116,22 @@
               } else {
                 $out .= "<a$class href='{$office->url}{$team->name}'>{$team->title}</a>";
               }
-              $out .= "<ul class='dropdown-menu'>";
+                $out .= "<ul class='dropdown-menu'>";
               $out .=  "<li><a href='{$office->url}{$team->name}'>{$team->title} {$office->title}</a>";
-              $out .=  "<li class='dropdown-submenu'><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
-              $out .= "<ul class='dropdown-menu'>";
-              foreach ($teamPlayers as $p) {
-                $out .= "<li><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/{$p->name}'>{$p->title}</a></li>";
+              if ($team->name != 'no-team') {
+                $out .=  "<li class='dropdown-submenu'>";
+                $out .=  "<a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
+                $out .= "<ul class='dropdown-menu'>";
+                foreach ($teamPlayers as $p) {
+                  $out .= "<li><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/{$p->name}'>{$p->title}</a></li>";
+                }
+                $out .= "</ul>";
+                $out .= "</li>";
+              } else {
+                $out .= "<li>";
+                $out .=  "<a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
+                $out .= "</li>";
               }
-              $out .= "</ul>";
-              $out .= "</li>";
               $out .= "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('marketplace')."</a></li>";
               $out .= "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('adminTable')."</a></li>";
               $out .= "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('monster invasions')."</a></li>";
@@ -249,9 +256,9 @@
     if ($user->hasRole('player')) { // Player's menu
       $player = $pages->get("parent.name=players, template=player, login=$user->name");
       $user->language = $headTeacher->language; // Teacher chooses the language for his students
-      $allTeams = $pages->find("template=team, teacher=$headTeacher, sort=title");
+      $allTeams = $allTeams->find("teacher=$headTeacher")->sort("title");
       if ($player->team->name != 'no-team') {
-        $allPlayers = $pages->find("parent.name=players, template=player, team=$player->team");
+        $allPlayers = $allPlayers->find("team=$player->team");
       }
       $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
       $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
@@ -409,8 +416,6 @@
     }
 
     if (!$user->isLoggedin()) { // Guest menu
-      $allTeams = $pages->find("template=team, sort=title");
-      $allPlayers = $pages->find("parent.name=players, template=player");
       $out .= '<ul>';
         $out .= '<div class="btn-group" role="group" aria-label="...">';
           $class = $page->name == 'home' ? "on" : "";

@@ -626,9 +626,9 @@
               if ($className == 'negative') {
                 $out .= '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'HP</span> ';
               }
-              $out .= $event->task->title;
+              $out .= $sanitizer->markupToText($event->task->title);
               if ($event->summary != '') {
-                $out .= ' ['.$event->summary.']';
+                $out .= ' ['.$sanitizer->markupToText($event->summary).']';
               }
               $out .= '</li>';
             };
@@ -735,7 +735,6 @@
         if ($announcementId != '' && $playerId != '') {
           $announcement = $pages->get($announcementId);
           $player = $pages->get($playerId);
-          bd($announcement->playersList);
           if ($announcement->selectPlayers == 1) { // Untick player
             $announcement->playersList->remove($player);
             if ($announcement->playersList->count() == 0) { // No more ticked players, unpublish

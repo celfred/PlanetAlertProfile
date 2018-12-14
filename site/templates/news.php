@@ -19,7 +19,7 @@
       $out .= '</div>';
       $out .= '<div class="panel-body">';
         $today = new \DateTime("today");
-        $allConcernedPlayers = $pages->find("parent.name=players, team.teacher=$user"); // Limit to teacher's students
+        $allConcernedPlayers = $allPlayers; // Already limited to teacher's students
         $news = $pages->find("parent.name=history, template=event, task.name=free|buy|penalty|fight-vv, publish=1");
         $news->filter("has_parent=$allConcernedPlayers")->sort('-created');
         $out .= '<div class="col-sm-6">';
@@ -145,12 +145,10 @@
   }
       if ($user->hasRole('player')) {
         if ($player->team->is("name!=no-team")) {
-          /* $teamPlayers = $allPlayers->filter("team=$player->team"); // Limit to logged player's team */
-          $teamPlayers = $pages->find("parent.name=players, team=$player->team"); // Limit to logged player's team
+          $teamPlayers = $allPlayers->find("team=$player->team"); // Limit to logged player's team
           $team = '['.$player->team->title.']';
         } else {
-          /* $teamPlayers = $pages->find("parent.name=players, template=player, team.name=no-team"); */
-          $teamPlayers = $pages->findMany("parent.name=players, template=player");
+          $teamPlayers = $pages->find("parent.name=players, template=player, name!=test");
           $team = '';
         }
         if ($player->GC > 80) {
@@ -161,7 +159,7 @@
         include("./helpAlert.inc.php"); 
       } else {
         $player = false;
-        $teamPlayers = $pages->find("parent.name=players, template=player");
+        $teamPlayers = $pages->find("parent.name=players, template=player, name!=test");
         $team = '';
       }
 
@@ -285,7 +283,7 @@
               $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$team.' '.__("Most influential").'</h4>';
               $out .= '  </div>';
               $out .= '  <div class="panel-body">';
-              $out .= displayTeamScoreboard($teamPlayers, $player, "-karma");
+              $out .= displayTeamScoreboard($teamPlayers, $player, "-reputation");
               $out .= '  </div>';
               $out .= '</div>';
 

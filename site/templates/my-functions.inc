@@ -1426,8 +1426,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
           case 'yearlyKarma':
             $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
             break;
-          case 'karma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' reputation</span></li>';
+          case 'reputation':
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' reputation</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {
@@ -1472,8 +1472,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
             case 'yearlyKarma':
               $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
               break;
-            case 'karma':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
+            case 'reputation':
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' rep.</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
@@ -1516,8 +1516,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
         case 'yearlyKarma':
           $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
           break;
-        case 'karma':
-          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
+        case 'reputation':
+          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' rep.</span></li>';
           break;
         case 'places':
           if ($p->places->count > 1) {
