@@ -620,9 +620,11 @@ function randomSpecial(HookEvent $e) { // Random monsters are hidden if player d
   $nb = round($allMonsters->count()/2); // 50% of monsters
   $specialMonsters = $allMonsters->findRandom($nb);
   foreach($specialMonsters as $m) {
-    $m->of(false);
-    $m->special = 1;
-    $m->save();
+    if ($m->alwaysDetected == 0) {
+      $m->of(false);
+      $m->special = 1;
+      $m->save();
+    }
   }
 }
 
