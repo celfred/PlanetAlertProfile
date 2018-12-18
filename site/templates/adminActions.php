@@ -748,7 +748,7 @@
             $teacherEl = $pages->find("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$user), (created_users_id=$user->id)")->sort('title');
             $notTeacherEl = $pages->find("parent.name=monsters, template=exercise")->not("exerciseOwner.singleTeacher=$user")->not("created_users_id=$user->id")->sort("title");
           } else {
-            $notTeacherEl = $pages->find("parent.name=monsters, kemplate=exercise, include=all")->sort("title");
+            $notTeacherEl = $pages->find("parent.name=monsters, template=exercise, include=all")->sort("title");
           }
           if (!$user->isSuperuser()) {
             $out .= '<h4><span>'.__("Your monsters").'</span></h4>';
