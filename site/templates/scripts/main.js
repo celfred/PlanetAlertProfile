@@ -1123,7 +1123,7 @@ var initTables = function() {
   });
   var trainingTable = $('#trainingTable').DataTable({
     lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
-    order: [[ 2, "asc"], [1, "asc"]]
+    order: [[ 0, "asc"], [2, "asc"]]
   });
   var historyTable = $('#historyTable').DataTable({
 		retrieve: true,
