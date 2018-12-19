@@ -455,9 +455,22 @@
           echo $ieAlert;
         }
         // Any announcements ?
+        if ($user->hasRole('teacher') && $page->is("template!=exercise")) {
+          $adminId = $users->get("name=admin")->id;
+          $announcements = $pages->find("template=announcement, publish=1, parent=$allTeams, created_users_id=$adminId")->sort("-date");
+          if ($announcements->count()>0) {
+            foreach($announcements as $a) {
+              echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$player->id.'">';
+              echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+              echo '<span class="label label-danger"><span class="glyphicon glyphicon-comment"></span> '.__("Admin's message").' : '.$a->title.'</span>';
+              echo $a->body;
+              echo '</div>';
+            }
+          }
+        }
         if ($user->hasRole('player') && $page->is("template!=exercise")) {
           $adminId = $users->get("name=admin")->id;
-          $announcements = $pages->find("template=announcement, publish=1, (parent=$player->team, created_users_id=$adminId), (parent=$player->team, selectPlayers=0), (parent=$player->team, selectPlayers=1, playersList=$player)")->sort("-date");
+          $announcements = $pages->find("template=announcement, publish=1, (parent=$player->team, selectPlayers=0, created_users_id!=$adminId), (parent=$player->team, selectPlayers=1, playersList=$player, created_users_id!=$adminId)")->sort("-date");
           if ($announcements->count()>0) {
             foreach($announcements as $a) {
               echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$player->id.'">';

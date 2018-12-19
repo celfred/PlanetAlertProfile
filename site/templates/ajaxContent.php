@@ -856,17 +856,20 @@
         if ($announcementId != '' && $playerId != '') {
           $announcement = $pages->get($announcementId);
           $player = $pages->get($playerId);
-          bd($announcement->playersList);
-          if ($announcement->selectPlayers == 1) { // Untick player
-            $announcement->playersList->remove($player);
-            if ($announcement->playersList->count() == 0) { // No more ticked players, unpublish
-              $announcement->publish = 0;
-            }
-          } else { // Team announcement, make it individual
-            $announcement->selectPlayers = 1;
-            $teamPlayers = $pages->find("template=player, team=$player->team")->not($player);
-            foreach ($teamPlayers as $p) {
-              $announcement->playersList->add($p);
+          if ($player->hasRole('teacher')) {
+            $announcement->publish = 0;
+          } else {
+            if ($announcement->selectPlayers == 1) { // Untick player
+              $announcement->playersList->remove($player);
+              if ($announcement->playersList->count() == 0) { // No more ticked players, unpublish
+                $announcement->publish = 0;
+              }
+            } else { // Team announcement, make it individual
+              $announcement->selectPlayers = 1;
+              $teamPlayers = $pages->find("template=player, team=$player->team")->not($player);
+              foreach ($teamPlayers as $p) {
+                $announcement->playersList->add($p);
+              }
             }
           }
           $announcement->of(false);
