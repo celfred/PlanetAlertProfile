@@ -179,7 +179,9 @@
         }
         $out .= '<td data-sort="'.$m->best.'">';
         if ($m->mostTrained) {
-          $out .= '<span class="label label-'.$class.'">'.$m->best.' UT - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
+          $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__('UT').' - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
+        } else {
+          $out .= '-';
         }
         $out .= '</td>';
         $out .= '</tr>';

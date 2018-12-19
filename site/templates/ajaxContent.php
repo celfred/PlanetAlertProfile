@@ -579,7 +579,9 @@
               }
               echo '</li>';
             }
-            echo '<li class="label label-danger">'.sprintf(__("You have NEVER trained on %d monsters"), $tmpPage->index).'</li>';
+            if ($tmpPage->index != 0) {
+              echo '<li class="label label-danger">'.sprintf(__("You have NEVER trained on %d monsters"), $tmpPage->index).'</li>';
+            }
             echo '</ul>';
           } else {
             echo "<p>".__("You have never used the Memory Helmet.")."</p>";
