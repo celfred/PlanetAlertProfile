@@ -195,6 +195,10 @@
             $currentPlayer = $n->parent('template=player');
             $out .= '<li>';
             $out .= '<div class="thumbnail">';
+            if ($n->task->is("name=buy-pdf")) {
+              $out .= '<p><span class="label label-success">'.__('Buy PDF').'</span></p>';
+              $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
+            }
             if ($n->task->is("name~=fight")) {
               $out .= '<span class="label label-primary"><i class="glyphicon glyphicon-flash"></i> '.$n->refPage->title.'</span>';
               // Show result
