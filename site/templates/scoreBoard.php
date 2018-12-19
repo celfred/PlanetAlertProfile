@@ -160,26 +160,26 @@
           if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
           switch($field) {
             case 'reputation':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' rep.</span></li>';
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' '.__('rep.').'</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' places</span></li>';
+                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('places').'</span></li>';
               } else {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' place</span></li>';
+                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('place').'</span></li>';
               }
               break;
             case 'people':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' people</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' '.__('people').'</span></li>';
               break;
             case 'fighting_power':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' '.__('FP').'</span></li>';
               break;
             case 'donation':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' GC</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' '.__('GC').'</span></li>';
               break;
             case 'underground_training':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' UT</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' '.__('UT').'</span></li>';
               break;
             case 'group':
               $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
@@ -207,26 +207,26 @@
           if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
           switch($field) {
             case 'reputation':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' rep.</span></li>';
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' '.__('rep.').'</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' places</span></li>';
+                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('places').'</span></li>';
               } else {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' place</span></li>';
+                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('place').'</span></li>';
               }
               break;
             case 'people':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' people</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' '.__('people').'</span></li>';
               break;
             case 'fighting_power':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' '.__('FP').'</span></li>';
               break;
             case 'donation':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' GC</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' '.__('GC').'</span></li>';
               break;
             case 'underground_training':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' UT</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' '.__('UT').'</span></li>';
               break;
             case 'group':
               $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
@@ -252,26 +252,26 @@
         if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
         switch($field) {
           case 'reputation':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' rep.</span></li>';
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' '.__('rep.').'</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' places</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('places').'</span></li>';
             } else {
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' place</span></li>';
+              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('place').'</span></li>';
             }
             break;
           case 'people':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' people</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' '.__('people').'</span></li>';
             break;
           case 'fighting_power':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' '.__('FP').'</span></li>';
             break;
           case 'donation':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' GC</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' '.__('GC').'</span></li>';
             break;
           case 'underground_training':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' UT</span></li>';
+            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' '.__('UT').'</span></li>';
             break;
           case 'group':
             if ($p == $player->group) {
