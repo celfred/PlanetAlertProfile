@@ -30,6 +30,51 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.6.0] - [19/12/2018]
+The main change is the publish/unpublish feature for teachers but as always, many bug fixes and some translation issues, along with many small additions.
+
+### Added
+- Add possibility to publish/unpublish monsters for teachers
+- Add indicator when no description is available for an exercise
+- Add topics to exercise list
+- Add 'Record an audio message' link to contact form (for logged in users)
+- Add admin's possibility to force a monster's visibility
+
+### Changed
+- Highscores recalculation are now made individually to avoid request timeout
+- Change 'toggle' and 'remove' symbols for better readability in adminTable
+- Change exercises access restrictions to take into account the new publish status
+- Show team name in page titles : hence better readability in browser's tabs
+- Button to take the Memory Helmet off is now underneath the exercise in all cases
+- Change bigger font for info popup
+- Change French messages to use inclusive writing
+- Change (personal workflow) : hkcount is not updated if a player has a penalty under way (not signed)
+- CDN include for dataTable stylesheet
+- Modules update/cleaning
+
+### Fixed
+- Fix finding period dates for work statistics
+- Fix UT/FP stats : in-class battles were taken into account
+- Fix player's first death
+- Fix monsters list from Infos menu
+- Fix announcements : Admin's messages are only shown to teachers
+- Fix list of monsters : multilanguage field didn't return the monsters having no English summary Sort monsters on training page according to the names
+- Fix monster image display during fights
+- Fix Add death button in admin actions when checking history
+- Fix UT highscores setting
+- Fix saving when new highscore is set
+- Fix group scoreboards
+- Fix deleteFromId function
+- Fix character encoding in tecahers' mails
+- Fix monsters' links on Profile page
+- Fix PHP warnings
+- Forgotten translations
+
+### Backend
+- exerciseOwner repeater added to 'exercise' template : this is necessary for the publish/unpublish feature
+- alwaysVisible field added to 'exercise' template : useful to force monster's visibility
+
+
 ## [v0.5.2] - [11/18/2018]
 ### Changed
 - Fight's results are displayed in recent news (on Main Office)
@@ -429,3 +474,4 @@ Initial official release.
 [v0.3.0]: https://framagit.org/celfred/planetAlert/tags/v0.3.0
 [v0.4.0]: https://framagit.org/celfred/planetAlert/tags/v0.4.0
 [v0.5.0]: https://framagit.org/celfred/planetAlert/tags/v0.5.0
+[v0.6.0]: https://framagit.org/celfred/planetAlert/tags/v0.6.0
