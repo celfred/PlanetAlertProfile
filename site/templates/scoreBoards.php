@@ -20,7 +20,7 @@
       <div class="panel panel-success">
         <div class="panel-heading">
         <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=reputation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most influential</h4>
+        <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> <?php echo __("Most influential"); ?></h4>
         </div>
         <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="reputation">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
@@ -30,7 +30,7 @@
       <div class="panel panel-success">
         <div class="panel-heading">
           <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> Greatest # of Places</h4>
+          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/globe.png" alt="" /> <?php echo __("Greatest # of Places"); ?></h4>
         </div>
         <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="places">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
@@ -54,7 +54,7 @@
       <div id="" class="panel panel-info">
         <div class="panel-heading">
           <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> Best donators</h4>
+          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/heart.png" alt="" /> <?php echo __("Best donators"); ?></h4>
         </div>
         <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="donation">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
@@ -69,7 +69,7 @@
       <div id="" class="panel panel-info">
         <div class="panel-heading">
           <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-          <h4 class="panel-title"><i class="glyphicon glyphicon-headphones"></i> Most trained</h4>
+          <h4 class="panel-title"><i class="glyphicon glyphicon-headphones"></i> <?php echo __("Most trained"); ?></h4>
         </div>
         <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="underground_training">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
@@ -79,7 +79,7 @@
       <div class="panel panel-info">
         <div class="panel-heading">
           <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-          <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> Best warriors</h4>
+          <h4 class="panel-title"><span class="glyphicon glyphicon-flash"></span> <?php echo __("Best warriors"); ?></h4>
         </div>
         <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="fighting_power">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
@@ -93,7 +93,7 @@
       <div id="" class="panel panel-success">
         <div class="panel-heading">
           <a class="pull-right" href="<?php echo $pages->get('name=scoreboard')->url; ?>?field=group"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>
-          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> Most active groups</h4>
+          <h4 class="panel-title"><img src="<?php echo $config->urls->templates; ?>img/star.png" alt="" /> <?php echo __("Most active groups"); ?></h4>
         </div>
         <div class="panel-body ajaxContent" data-href="<?php echo $pages->get('name=scoreboard')->url; ?>" data-id="group">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>

@@ -27,7 +27,7 @@
           }
           if ($user->hasRole('player')) { // Player gets headTeacher news
             $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
-            $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
+            $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
           }
         }
         $extra = $newItems->getTotal() - $newItems->getLimit();
@@ -494,7 +494,7 @@
         $out .= '</div>';
         $out .= '<div class="col-sm-8 text-justify">';
           $out .= '<br/>';
-          $out .= '<p>'.$p->summary.'</p>';
+          $out .= '<p class="lead">'.$p->summary.'</p>';
         $out .= '</div>';
         $out .= '</div>';
         break;
@@ -565,7 +565,7 @@
               echo '<li>';
               echo '<span data-toggle="tooltip" title="'.$m->monster->summary.'" onmouseenter="$(this).tooltip(\'show\');" data-html="true">';
               if ($m->monster->isTrainable == 1) {
-                echo '<a href="'.$pages->get("name=underground-training")->url.'?id='.$m->monster->id.'">'.$m->monster->title.'</a>';
+                echo '<a href="'.$m->monster->url.'train">'.$m->monster->title.'</a>';
               } else {
                 echo $m->monster->title;
               }
@@ -579,7 +579,9 @@
               }
               echo '</li>';
             }
-            echo '<li class="label label-danger">'.sprintf(__("You have NEVER trained on %d monsters"), $tmpPage->index).'</li>';
+            if ($tmpPage->index != 0) {
+              echo '<li class="label label-danger">'.sprintf(__("You have NEVER trained on %d monsters"), $tmpPage->index).'</li>';
+            }
             echo '</ul>';
           } else {
             echo "<p>".__("You have never used the Memory Helmet.")."</p>";
@@ -600,7 +602,7 @@
               echo '<li>';
               echo '<span data-toggle="tooltip" title="'.$m->monster->summary.'" onmouseenter="$(this).tooltip(\'show\');" data-html="true">';
               if ($m->monster->isFightable == 1) {
-                echo '<a href="'.$m->monster->url.'">'.$m->monster->title.'</a>';
+                echo '<a href="'.$m->monster->url.'fight">'.$m->monster->title.'</a>';
               } else {
                 echo $m->monster->title;
               }
@@ -854,17 +856,20 @@
         if ($announcementId != '' && $playerId != '') {
           $announcement = $pages->get($announcementId);
           $player = $pages->get($playerId);
-          bd($announcement->playersList);
-          if ($announcement->selectPlayers == 1) { // Untick player
-            $announcement->playersList->remove($player);
-            if ($announcement->playersList->count() == 0) { // No more ticked players, unpublish
-              $announcement->publish = 0;
-            }
-          } else { // Team announcement, make it individual
-            $announcement->selectPlayers = 1;
-            $teamPlayers = $pages->find("template=player, team=$player->team")->not($player);
-            foreach ($teamPlayers as $p) {
-              $announcement->playersList->add($p);
+          if ($player->hasRole('teacher')) {
+            $announcement->publish = 0;
+          } else {
+            if ($announcement->selectPlayers == 1) { // Untick player
+              $announcement->playersList->remove($player);
+              if ($announcement->playersList->count() == 0) { // No more ticked players, unpublish
+                $announcement->publish = 0;
+              }
+            } else { // Team announcement, make it individual
+              $announcement->selectPlayers = 1;
+              $teamPlayers = $pages->find("template=player, team=$player->team")->not($player);
+              foreach ($teamPlayers as $p) {
+                $announcement->playersList->add($p);
+              }
             }
           }
           $announcement->of(false);

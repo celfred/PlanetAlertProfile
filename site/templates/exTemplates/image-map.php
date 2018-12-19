@@ -17,7 +17,10 @@
   $out .= '<h2 class="row well text-center">';
   $out .= '<span class="label label-default">'.__("Monster fight").'</span>';
   $out .= '<span class="">  ';
-  $out .= '<img class="pull-left" src="'.$page->image->getCrop("thumbnail")->url.'" alt="Monster" />';
+  if ($page->image) {
+    $monsterImage .= '<img class="pull-left squeeze" ng-src="'.$page->image->getCrop("thumbnail")->url.'" alt="Monster" />';
+    $out .= $monsterImage;
+  }
   $out .= $page->title;
   $out .= ' vs. ';
   $out .= $player->title;
@@ -75,7 +78,7 @@
   $out .= '<div id="fightForm" ng-class="{row:true, hidden: wonFight}">';
   $out .= '<div class="text-left">';
   if ($page->image) {
-    $out .= '<img class="pull-left squeeze" src="'.$page->image->getCrop('thumbnail')->url.'" alt="Monster" />';
+    $out .= $monsterImage;
   } else {
     $out .= '<img class="squeeze" src="'.$page->type->photo->eq(0)->getCrop('thumbnail')->url.'" alt="Antenna" />';
   }

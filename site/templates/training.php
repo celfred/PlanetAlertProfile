@@ -14,18 +14,18 @@
       if (!$input->get->id) { // Display training catalogue
         // Set all available monsters
         if ($user->isSuperuser()) {
-          $allMonsters = $pages->find('template=exercise, sort=name, include=all');
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise, sort=name, include=all");
         }
         if ($user->hasRole('teacher')) {
-          $allMonsters = $pages->find("template=exercise, (created_users_id=$user->id), (teacher=$user), include=all")->sort("name");
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1, summary!='')")->sort("name");
         }
         if ($user->hasRole('player')) {
           // Check if player has the Visualizer (or forced by admin)
           if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
-            $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher), (teacher=$headTeacher), sort=name");
+            $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
           } else {
-            $allMonsters = $pages->find("template=exercise, (created_users_id=$headTeacher), (teacher=$headTeacher), special=0, sort=name");
-            $hiddenMonstersNb = $pages->count("template=exercise, (created_users_id=$headTeacher), (teacher=$headTeacher), special=1");
+            $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0")->sort("name");
+            $hiddenMonstersNb = $pages->count("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), special=1");
           }
         }
         $out .= '<br />';
@@ -101,7 +101,8 @@
           $out .= $m->level;
           $out .= '</td>';
           $out .= '<td>';
-          $out .= $m->summary;
+          $m->summary == '' ? $summary = '-' : $summary = $m->summary;
+          $out .= $summary;
           if ($user->language->name != 'french') {
             $m->of(false);
             if ($m->summary->getLanguageValue($french) != '') {

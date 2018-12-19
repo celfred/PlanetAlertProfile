@@ -132,11 +132,30 @@
                 $out .= '  <h4 class="panel-title">'.$team.' '.__("Most Active Groups").'</h4>';
                 $out .= '  </div>';
                 $out .= '  <div class="panel-body">';
-                $groups = displayTeamScoreboard($teamPlayers, $player, "group");
-                if (strlen($groups) == 9) { // Means empty <ol></ol>
-                  $out .= '<p class="text-center">'.__("No groups are set").'</p>';
+                $allGroups = groupScores($player->team);
+                if (isset($allGroups)) {
+                  $out .= '<ol class="">';
+                  foreach($allGroups as $group) {
+                    if (isset($player) && $player->group == $group) {
+                      $focus = 'focus';
+                    } else {
+                      $focus = '';
+                    }
+                    $out .= '<li>';
+                    $out .= '<p data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
+                    $out .= '<span class="'.$focus.'">'.$group->title.'</span>';
+                    $out .= ' <span class="badge">'.$group->karma.' K</span>';
+                    // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member)
+                    if ($group->nbBonus > 0) {
+                      $out .= '&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-star"></span>';
+                      $out .= '<span class="badge">'.$group->nbBonus.'</span>';
+                    }
+                    $out .= '</p>';
+                    $out .= '</li>';
+                  }
+                  $out .= '</ol>';
                 } else {
-                  $out .= $groups;
+                  $out .= '<p class="text-center">'.__("No groups are set").'</p>';
                 }
                 $out .= '  </div>';
                 $out .= '</div>';

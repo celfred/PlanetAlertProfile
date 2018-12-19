@@ -10,7 +10,16 @@
       $session->redirect('./');
     }
   ?>
-  <title><?php echo $page->get("headline|title"); ?></title>
+  <title>
+    <?php
+      $allTeams = $pages->find("template=team")->implode(',', '{name}');
+      if (isset($input->urlSegment1) && stripos($allTeams, $input->urlSegment1)) {
+        echo $page->get("title").' '.strtoupper($input->urlSegment1);
+      } else {
+        echo $page->get("title");
+      }
+    ?>
+  </title>
 
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,6 +32,9 @@
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/css/bootstrap-theme.min.css" />
 
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/main.css" />
+
+  <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css"> -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.css">
 
   <!--[if IE]>
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/ie.css" />
@@ -443,9 +455,22 @@
           echo $ieAlert;
         }
         // Any announcements ?
+        if ($user->hasRole('teacher') && $page->is("template!=exercise")) {
+          $adminId = $users->get("name=admin")->id;
+          $announcements = $pages->find("template=announcement, publish=1, parent=$allTeams, created_users_id=$adminId")->sort("-date");
+          if ($announcements->count()>0) {
+            foreach($announcements as $a) {
+              echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$player->id.'">';
+              echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+              echo '<span class="label label-danger"><span class="glyphicon glyphicon-comment"></span> '.__("Admin's message").' : '.$a->title.'</span>';
+              echo $a->body;
+              echo '</div>';
+            }
+          }
+        }
         if ($user->hasRole('player') && $page->is("template!=exercise")) {
           $adminId = $users->get("name=admin")->id;
-          $announcements = $pages->find("template=announcement, publish=1, (parent=$player->team, created_users_id=$adminId), (parent=$player->team, selectPlayers=0), (parent=$player->team, selectPlayers=1, playersList=$player)")->sort("-date");
+          $announcements = $pages->find("template=announcement, publish=1, (parent=$player->team, selectPlayers=0, created_users_id!=$adminId), (parent=$player->team, selectPlayers=1, playersList=$player, created_users_id!=$adminId)")->sort("-date");
           if ($announcements->count()>0) {
             foreach($announcements as $a) {
               echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$player->id.'">';

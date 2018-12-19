@@ -318,10 +318,18 @@ function taskExtraAction($player, $task, $real) {
     $player->fighting_power = $player->fighting_power+2;
   }
   if ($task->is("name=no-homework")) {
-    $player->hkcount++;
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount++;
+    }
   }
   if ($task->is("name=homework-half-done|signature")) {
-    $player->hkcount += 0.5;
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount += 0.5;
+    }
   }
   if ($task->is("name=remove")) { // Remove element
     if ($task->refPage != false && $task->refPage->template == 'place') {
@@ -612,9 +620,11 @@ function randomSpecial(HookEvent $e) { // Random monsters are hidden if player d
   $nb = round($allMonsters->count()/2); // 50% of monsters
   $specialMonsters = $allMonsters->findRandom($nb);
   foreach($specialMonsters as $m) {
-    $m->of(false);
-    $m->special = 1;
-    $m->save();
+    if ($m->alwaysDetected == 0) {
+      $m->of(false);
+      $m->special = 1;
+      $m->save();
+    }
   }
 }
 
@@ -857,16 +867,16 @@ function eventKarma($e) {
 function groupBonus($players) {
   $nbBonus = 0;
   // Sort players by nb of places
-  $players->sort('places.count');
+  $players->sort('nbEl');
   // Get min/max nb of places in the group
-  $min = $players->first()->places->count;
-  $max = $players->last()->places->count;
+  $min = $players->first()->nbEl;
+  $max = $players->last()->nbEl;
   if ($min == 0) { // 1 player has 0 places, so NO bonus possible
     return 0; 
   } else { // No player has 0 places, let's check if they all have 1,2,3... places
     for ($i=1; $i<=$min; $i++) {
-      $nbPlaces = $players->find("places.count>=$i")->count;
-      if ($nbPlaces == $players->count) {
+      $nbEl = $players->find("nbEl>=$i")->count;
+      if ($nbEl == $players->count) {
         $nbBonus++;
       }
     }
@@ -1188,7 +1198,7 @@ function taskCount($taskName, $allEvents) {
 function setHomework($player, $dateStart='', $dateEnd='') {
   $pages = wire('pages');
   // Get official period
-  $period = $pages->get("name=admin-actions")->periods;
+  $period = $player->team->periods;
   if ($dateStart == '') { $dateStart = $period->dateStart; }
   if ($dateEnd == '') { $dateEnd = $period->dateEnd; }
   // Select homework tasks over the period
@@ -1199,7 +1209,7 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $player->inClassUtCount = $player->ut->find("inClass=1")->count();
   $player->outClassUtCount = $player->ut->find("inClass=0")->count();
   $player->inClassFpCount = $player->fp->find("inClass=1")->count();
-  $player->outClassFpCount = $player->fp->find("inClass=0")->count();
+  $player->outClassFpCount = $player->fp->find("inClass=0, (name~=fight)")->count();
   $player->inClassActivity = $player->inClassUtCount + $player->inoutClassFpCount;
   $player->outClassActivity = $player->outClassUtCount + $player->outClassFpCount;
   $player->nbHk = $allHk->count();
@@ -1254,14 +1264,14 @@ function setScoreboard($allPlayers, $player, $field) {
     foreach($allPlayers as $p) {
       $allGroups->add($p->group);
     }
-    foreach( $allGroups as $group) {
+    foreach($allGroups as $group) {
       $players = $allPlayers->find("group=$group");
       // Check for group bonus
       $group->nbBonus = groupBonus($players);
       $group->karma = $group->nbBonus*30;
 
       // Add individual karmas
-      foreach( $players as $p) {
+      foreach($players as $p) {
         // Karma is divided by number of players in the group to be fair with smaller groups
         $groupYearlyKarma = round($p->yearlyKarma/$players->count);
         (int) $group->yearlyKarma = $group->yearlyKarma + $groupYearlyKarma;
@@ -1347,9 +1357,6 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
           case 'underground_training':
             $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
             break;
-          case 'group':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
-            break;
           default: $out .= 'Error.';
         }
       }
@@ -1396,9 +1403,6 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
             case 'underground_training':
               $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
               break;
-            case 'group':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
-              break;
             default: $out .= 'Error.';
           }
         }
@@ -1443,35 +1447,6 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
         case 'underground_training':
           $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
           break;
-        case 'group':
-          if ($player->team->name != 'no-team') {
-            if ($player && $player->group && $p->name == $player->group->name) {
-              $focus = "class='focus'";
-            } else {
-              $focus = "";
-            }
-          }
-          $out .= '<li>';
-          $out .= '<span '.$focus.' data-toggle="tooltip" data-html="true" title="'.$p->details.'">';
-          $out .= $p->title.'</span> <span class="badge">'.$p->yearlyKarma.' K</span>';
-          // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 place for each group member)
-          $starsGroups = floor($p->nbBonus/5);
-          if ( $starsGroups < 1) {
-            for ($i=0; $i<$p->nbBonus; $i++) {
-              $out .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-            }
-          } else {
-            for ($i=0; $i<$starsGroups; $i++) {
-              $out .= ' <span class="glyphicon glyphicon-star"></span>';
-            }
-            $p->nbBonus = $p->nbBonus - $starsGroups*5;
-            for ($i=0; $i<$p->nbBonus; $i++) {
-              $out .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-            }
-          }
-          $out .= '</p>';
-          $out .= '</li>';
-          break;
         default: $out .= 'Error.';
       }
     }
@@ -1491,57 +1466,32 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
     $team = '';
   }
   switch ($field) {
+    case 'yearlyKarma' :
+      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-yearlyKarma, yearlyKarma>0");
+      break;
     case 'reputation' :
-      $allPlayers = $pages->find("template=player, name!=test $team, sort=-reputation, reputation>0");
+      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-reputation, reputation>0");
       break;
     case 'places' :
-      $allPlayers = $pages->find("template=player, name!=test $team, sort=-places.count, sort=-reputation, places.count>0");
+      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-places.count, sort=-reputation, places.count>0");
       break;
     case 'people' :
-      $allPlayers = $pages->find("template=player, name!=test $team, sort=-people.count, sort=-reputation, people.count>0");
+      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-people.count, sort=-reputation, people.count>0");
       break;
     case 'fighting_power' :
-      $allPlayers = $pages->find('template=player, name!=test $team, sort=-fighting_power, sort=-reputation, fighting_power>0');
+      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-fighting_power, sort=-reputation, fighting_power>0');
       break;
     case 'equipment' :
-      $allPlayers = $pages->find('template=player, name!=test $team, sort=-equipment.count, sort=-reputation, equipment.count>0');
+      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-equipment.count, sort=-reputation, equipment.count>0');
       break;
     case 'donation' :
-      $allPlayers = $pages->find('template=player, name!=test $team, sort=-donation, sort=-reputation, donation>0');
+      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-donation, sort=-reputation, donation>0');
       break;
     case 'underground_training' :
-      $allPlayers = $pages->find('template=player, name!=test $team, sort=-underground_training, sort=-reputation, underground_training>0');
+      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-underground_training, sort=-reputation, underground_training>0');
       break;
     case 'group' :
-      $allPlayers = $pages->find('template=player, name!=test $team');
-      $allGroups = $pages->get('/groups')->children();
-      $index = 0;
-      foreach($allGroups as $group) {
-        // Find selected players
-        $players = $allPlayers->find("group=$group");
-        // Get rid of unused groups
-        if ($players->count() == 0) {
-          unset($allGroups[$index]);
-        }
-        $index++;
-      }
-      foreach($allGroups as $group) {
-        $players = $allPlayers->find("group=$group");
-        // Check for group bonus
-        $group->nbBonus = groupBonus($players);
-        $group->yearlyKarma = $group->nbBonus*30;
-
-        // Add individual karmas
-        foreach($players as $p) {
-          // Karma is divided by number of players in the group to be fair with smaller groups
-          $groupYearlyKarma = round($p->yearlyKarma/$players->count);
-          (int) $group->yearlyKarma = $group->yearlyKarma + $groupYearlyKarma;
-          $group->details .= $p->title.' - ';
-          $group->team = $p->team;
-        }
-      }
-      $allPlayers = $allGroups->sort('-yearlyKarma');
-      break;
+      $allGroups = groupScores();
     default : 
       $allPlayers = NULL;
   }
@@ -1551,33 +1501,23 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
     } else {
       $playerPos = false;
     }
-  } else {
-    if (isset($player->group)) {
-      if ($allGroups->getItemKey($player->group) != 0) {
-        $playerPos = $allPlayers->getItemKey($player->group);
-      }
-      $pos = 1;
-      foreach($allGroups as $g) {
-        if ($g == $player->group) {
-          $playerPos = $pos;
-          $g->focus = 1;
-        } else {
-          $g->focus = 0;
-          $pos++;
-        }
-      }
-    } else {
-      $playerPos = false;
-    }
+  } else { // Groups display (TODO : refactor...)
+    $playerPos = NULL;
+    $allPlayers = $allGroups;
   }
-  if (isset($playerPos) && $limit != -1) { // Player is in the charts
-    if ($playerPos <= 8) { // Good position, get Top 10
-      $topPlayers = $allPlayers->slice(0, 10);
+  if (isset($playerPos)) { // Player is in the charts
+    if ($limit == -1) { // Complete scoreboard
+      $topPlayers = $allPlayers; // Complete scoreboard
       $prevPlayers = false;
     } else {
-      $topPlayers = $allPlayers->slice(0, 3); // Get top 3 players
-      $prevIndex = $playerPos-round($limit/2);
-      $prevPlayers = $allPlayers->slice($prevIndex, $limit);
+      if ($playerPos <= 8) { // Good position, get Top 10
+        $topPlayers = $allPlayers->slice(0, 10);
+        $prevPlayers = false;
+      } else {
+        $topPlayers = $allPlayers->slice(0, 3); // Get top 3 players
+        $prevIndex = $playerPos-round($limit/2);
+        $prevPlayers = $allPlayers->slice($prevIndex, $limit);
+      }
     }
   } else { // No ranking (or complete scoreboard)
     $playerPos = false;
@@ -2320,7 +2260,7 @@ function possibleElement($player, $item) {
 function setParticipation($player, $dateStart='', $dateEnd='') {
   $pages = wire('pages');
   // Get official period
-  $period = $pages->get("name=admin-actions")->periods;
+  $period = $player->team->periods;
   if ($dateStart == '') { $dateStart = $period->dateStart; }
   if ($dateEnd == '') { $dateEnd = $period->dateEnd; }
   $pages = wire('pages');
@@ -2490,98 +2430,46 @@ function miniProfile($player, $type = '') {
   return $out;
 }
 
-function displayGroups($allPlayers, $button = 0) {
-  $rank = $allPlayers->first->team->rank->index;
-  $team = $allPlayers->first->team;
-  // Build allGroups
+function groupScores($team = NULL) {
+  $pages = wire('pages');
+  if (isset($team)) {
+    $allPlayers = $pages->find("parent.name=players, template=player, team=$team");
+  } else {
+    $allPlayers = $pages->find("parent.name=players, template=player, name!=test");
+  }
+  // Build all groups
   $allGroups = new PageArray();
   foreach($allPlayers as $p) {
     $nbEl = 0;
     if (!in_array($p->group, $allGroups->getArray())) {
       $allGroups->add($p->group);
     }
-    if ($rank >= 8) {
-      $nbEl = $p->places->count()+$p->people->count();
-    } else {
-      $nbEl = $p->places->count();
-    }
-    $p->nbEl = $nbEl;
+    $p->nbEl = $p->places->count()+$p->people->count();
   }
-  $outGroups = '';
-
-  // Calculate groups Karma
-  $index = 0;
-  foreach($allGroups as $group) {
-    $group->karma = 0;
-    $group->nbBonus = 0;
-    
-    // Find selected players
-    $players = $allPlayers->find("group=$group");
-    
-    // Check for group bonus
-    $group->nbBonus = groupBonus($players);
-    $group->karma = $group->nbBonus*30;
-
-    // Add individual karmas
-    foreach($players as $player) {
-      // Karma is divided by number of players in the group to be fair with smaller groups
-      $groupKarma = round($player->yearlyKarma/$players->count);
-      (int) $group->karma += $groupKarma;
-      $group->members = $players->implode('- ', '{title}');
-      /* $group->details .= '- '.$player->title.' ('.$groupKarma.'k - '.$player->nbEl.'el)<br />'; */
-    }
-    $index++;
-  }
-
-  // Prepare group display
-  $allGroups->sort('-karma');
-  $groupList = $allGroups->implode(', ', '{id}');
-  if ($groupList && $button == 1) {
-    $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'" data-team="'.$team.'">Pick 1!</a>';
-  } else {
-    $pickButton = '';
-  }
-  $outGroups .= '<div id="" class="board panel panel-primary">';
-  $outGroups .= '<div class="panel-heading">';
-  $outGroups .= '<h4><span class="label label-primary">'.__("Most active groups").'</span>'.$pickButton.'</h4>';
-  $outGroups .= '</div>';
-  $outGroups .= '<div class="panel-body">';
-  if ($groupList) {
-    $outGroups .= '<ol class="">';
+  if ($allGroups->count() > 0) {
+    // Calculate groups Karma
     foreach($allGroups as $group) {
-      $outGroups .= '<li>';
-      if ($button == 1) {
-        $outGroups .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');" data-team="'.$team.'">';
-      } else {
-        $outGroups .= '<p data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
+      $group->karma = 0;
+      $group->nbBonus = 0;
+      // Find selected players
+      $players = $allPlayers->find("group=$group");
+      // Check for group bonus
+      $group->nbBonus = groupBonus($players);
+      $group->karma = $group->nbBonus*30;
+      // Add individual karmas
+      foreach($players as $player) {
+        // Karma is divided by number of players in the group to be fair with smaller groups
+        $groupKarma = round($player->yearlyKarma/$players->count);
+        (int) $group->karma += $groupKarma;
+        $group->members = $players->implode(' - ', '{title} {yearlyKarma}K {nbEl}el.');
+        $group->team = $player->team;
       }
-      $outGroups .= $group->title;
-      $outGroups .= ' <span class="badge">'.$group->karma.' K</span>';
-      $outGroups .= '</p>';
-      /* // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member) */
-      /* $starsGroups = floor($group->nbBonus/5); */
-      /* if ( $starsGroups < 1) { */
-      /*   for ($i=0; $i<$group->nbBonus; $i++) { */
-      /*     $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>'; */
-      /*   } */
-      /* } else { */
-      /*   for ($i=0; $i<$starsGroups; $i++) { */
-      /*     $outGroups .= ' <span class="glyphicon glyphicon-star"></span>'; */
-      /*   } */
-      /*   $group->nbBonus = $group->nbBonus - $starsGroups*5; */
-      /*   for ($i=0; $i<$group->nbBonus; $i++) { */
-      /*     $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>'; */
-      /*   } */
-      /* } */
-      $outGroups .= '</li>';
     }
-    $outGroups .= '</ol>';
+    $allGroups->sort('-karma');
   } else {
-    $outGroups .= '<p>'.__("The groups aren't ready yet.").'</p>';
+    $allGroups = NULL;
   }
-  $outGroups .= '</div>';
-  $outGroups .= '</div>';
-  return $outGroups;
+  return $allGroups;
 }
 
 function pluralize($count, $singular, $plural = false) {

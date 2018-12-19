@@ -114,11 +114,50 @@
 
       // Groups
       if ($allPlayers->count() > 0 && $team->name != 'no-team') {
-        if ($user->isSuperuser() || $user->hasRole('teacher')) {
-            $out .= displayGroups($allPlayers, 1);
-        } else {
-          $out .= displayGroups($allPlayers, 0);
+        $allGroups = groupScores($team);
+        if (isset($allGroups)) {
+          $groupList = $allGroups->implode(', ', '{id}');
+          if ($groupList && ($user->isSuperuser() || $user->hasRole('teacher'))) {
+            $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'" data-team="'.$team.'">Pick 1!</a>';
+          } else {
+            $pickButton = '';
+          }
         }
+        $out .= '<div id="" class="board panel panel-primary">';
+        $out .= '<div class="panel-heading">';
+        $out .= '<h4><span class="label label-primary">'.__("Most active groups").'</span>'.$pickButton.'</h4>';
+        $out .= '</div>';
+        $out .= '<div class="panel-body">';
+        if ($groupList) {
+          $out .= '<ol class="">';
+          foreach($allGroups as $group) {
+            $out .= '<li>';
+            if ($user->isSuperuser() || $user->hasRole('teacher')) {
+              $out .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');" data-team="'.$team.'">';
+            } else {
+              $out .= '<p data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
+            }
+            if (isset($player) && $player->group == $group) {
+              $focus = 'focus';
+            } else {
+              $focus = '';
+            }
+            $out .= '<span class="'.$focus.'">'.$group->title.'</span>';
+            $out .= ' <span class="badge">'.$group->karma.' K</span>';
+            // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member)
+            if ($group->nbBonus > 0) {
+              $out .= '&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-star"></span>';
+              $out .= '<span class="badge">'.$group->nbBonus.'</span>';
+            }
+            $out .= '</p>';
+            $out .= '</li>';
+          }
+          $out .= '</ol>';
+        } else {
+          $out .= '<p>'.__("The groups aren't ready yet.").'</p>';
+        }
+        $out .= '</div>';
+        $out .= '</div>';
       }
     $out .= '</div>';
 
@@ -156,6 +195,10 @@
             $currentPlayer = $n->parent('template=player');
             $out .= '<li>';
             $out .= '<div class="thumbnail">';
+            if ($n->task->is("name=buy-pdf")) {
+              $out .= '<p><span class="label label-success">'.__('Buy PDF').'</span></p>';
+              $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
+            }
             if ($n->task->is("name~=fight")) {
               $out .= '<span class="label label-primary"><i class="glyphicon glyphicon-flash"></i> '.$n->refPage->title.'</span>';
               // Show result

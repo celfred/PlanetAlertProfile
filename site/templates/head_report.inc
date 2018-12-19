@@ -17,7 +17,17 @@
       $session->redirect('./');
     }
   ?>
-	<title><?php echo $page->get("headline|title"); ?></title>
+  <title>
+    <?php
+      if (count($input->post) > 0) {
+        $reportSelected = $input->post->reportSelected;
+      } else {
+        $reportSelected = $input->urlSegment2;
+      }
+      $selected = $pages->get("id=$reportSelected");
+      echo $page->get("title").' '.$selected->title;
+    ?>
+  </title>
 
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

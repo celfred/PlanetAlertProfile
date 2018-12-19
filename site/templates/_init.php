@@ -11,4 +11,19 @@
   $wire->addHook('LazyCron::everyDay', null, 'checkActivity'); // Check all players activity
   $wire->addHook('LazyCron::everyDay', null, 'randomSpecial'); // Set random special monsters
   $wire->addHook('LazyCron::everyDay', null, 'emptyTmp'); // Empty /tmp subtree every night
+
+  /* $wire->addHookAfter('Pages::saved', function(HookEvent $event) { // Actions after saving page */
+  /*   $page = $event->arguments("page"); */
+  /*   $user = wire('user'); */
+  /*   if ($page->template == 'exercise') { // Create teacher in exerciseOwner repeater */
+  /*     $already = $page->exerciseOwner->get("singleTeacher=$user"); */
+  /*     if (isset($already)) return; */
+  /*     $new = $page->exerciseOwner->getNew(); */
+  /*     $new->singleTeacher = $user; */
+  /*     $new->save(); */
+  /*     $page->exerciseOwner->add($new); */
+  /*     $page->of(false); */
+  /*     $page->save(); */
+  /*   } */
+  /* }); */
 ?>

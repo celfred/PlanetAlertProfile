@@ -18,10 +18,11 @@ $(document).ready(function() {
 		return false;
 	});
 
+  
 	$('.publishElement').on('click', function() {
 		var href = $(this).attr('href');
 		var $this = $(this);
-    $this.html("<p>'+lang.saving+'</p>"); 
+    $this.html(lang.saving); 
     $.get(href, function(data) { 
 			$this.prev().removeClass('strikeText');
 			$this.remove();
@@ -37,16 +38,24 @@ $(document).ready(function() {
 		$parentId = $el.parent().prop('id');
     $.get(href, function(data) { 
 			$("#ajaxViewport").html(''); 
+      var $publish = $el.children('.togglePublish');
 			if ($parentId == 'teacherElements') {
 				$('#notTeacherElements').append($el);
+        if ($publish.length > 0) {
+          $publish.addClass('hidden');
+        }
 			} else {
 				$('#teacherElements').append($el);
+        if ($publish.length > 0) {
+          $publish.removeClass('hidden');
+        }
 			}
     }); 
     return false; 
 	});
 
-	$('.deleteFromId').on('click', function() {
+	$('.deleteFromId').on('click', function(e) {
+    e.preventDefault();
 		$this = $(this);
 		swal({
 			title: lang.sure,
@@ -68,20 +77,23 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.togglePublish').on('click', function() {
+	$('.togglePublish').on('click', function(e) {
+    e.preventDefault();
 		$this = $(this);
 		var href = $this.attr('data-href');
 		$('.tooltip').hide();
-		$('<span>Saving...</span>').insertAfter($this);
+		$('<span>'+lang.saving+'</span>').insertAfter($this);
 		$.get(href, function(data) { 
 			if ($this.text() == '✓') {
 				$this.text('✗');
 				$this.attr("class", "label label-danger");
 				$this.attr("title", "Publish");
+        $this.parent().find('span.toStrike').addClass('strikeText');
 			} else {
 				$this.text('✓');
 				$this.attr("class", "label label-success");
 				$this.attr("title", "Unpublish");
+        $this.parent().find('span.toStrike').removeClass('strikeText');
 			}
 			$this.next('span').remove();
 		});
@@ -1111,7 +1123,7 @@ var initTables = function() {
   });
   var trainingTable = $('#trainingTable').DataTable({
     lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
-    order: [[ 2, "asc"], [1, "asc"]]
+    order: [[ 0, "asc"], [2, "asc"]]
   });
   var historyTable = $('#historyTable').DataTable({
 		retrieve: true,

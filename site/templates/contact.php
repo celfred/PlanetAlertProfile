@@ -102,10 +102,10 @@
     if ($user->isGuest() || $user->hasRole('teacher')) {
       $out .= '<h1 class="text-center">'.__("Contact Planet Alert admin !").'</h1>';
     } else {
-      $out .= '<h1 class="text-center">'.__("Contact your teacher !").'</h1>';
+      $out .= '<h2 class="text-center">'.__("Contact my teacher !").'</h2>';
     }
-    $out .= '<p><em>'.__("Please watch out your spelling and DO NOT use SMS syntax ;)").'</em></p>';
-    $out .= '<p>'.__("(* Fields MUST be filled !)").'</p>';
+    $out .= '<p><em>'.__("Please watch out your spelling and DO NOT use SMS syntax ;)").'</em>';
+    $out .= __("(* Fields MUST be filled !)").'</p>';
     $out .= '</section>';
     $out .= '<form id="contactForm" role="form" class="form-horizontal" action="'.$page->url.'" method="post">';
       if ($user->hasRole('player')) {
@@ -149,7 +149,10 @@
       $out .= '<div class="form-group">';
         $out .= '<label for="message" class="col-sm-2 control-label">'.__("Your message").' *</label>';
         $out .= '<div class="col-sm-8">';
-        $out .= '<textarea id="message" class="form-control" name="message" rows="13" required="required">'.$form['message'].'</textarea>';
+          $out .= '<textarea id="message" class="form-control" name="message" rows="11" required="required">'.$form['message'].'</textarea>';
+          if ($user->isLoggedin()) {
+            $out .= '<a class="btn btn-default" href="https://www.lelivrescolaire.fr/labo-langues" target="_blank">'.__("Record an audio message for my teacher").'</a> <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("Opens a webpage where you can click on the microphone and record yourself. Then, click on share and generate a URL. Copy the URL and paste it inside your message above. Send it to your teacher ! [Thank you to lelivrescolaire.fr !]").'"></span>';
+          }
         $out .= '</div>';
       $out .= '</div>';
       if ($user->isGuest()) {

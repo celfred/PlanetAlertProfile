@@ -81,7 +81,7 @@ include("./head.inc");
       <td class="col-sm-2">
         <div class="panel panel-success">
         <div class="panel-heading">
-          <h1 class="panel-title">Level : <?php echo $page->level; ?></h1>
+          <h1 class="panel-title"><?php echo __('Level').' : '.$page->level; ?></h1>
         </div>
         <div class="panel-body text-center">
           <h1><img style="float: left;" src="<?php  echo $config->urls->templates?>img/gold.png" alt="Value" width="50" height="50" /><span class="lead btn btn-default btn-lg"><?php echo $page->GC; ?></span></h1>
