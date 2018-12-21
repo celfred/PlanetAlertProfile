@@ -641,6 +641,7 @@
         $playerId = $input->get('playerId');
         $playerPage = $pages->get($playerId);
         $headTeacher = getHeadTeacher($playerPage);
+        if ($headTeacher->language->name == 'french') { $user->language = $french; }
         $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
         $allCategories = new PageArray();
         foreach ($allEvents as $e) {
@@ -672,7 +673,7 @@
         $out .= '  <tbody>';
         foreach($allEvents as $event) {
           $event->task = checkModTask($event->task, $headTeacher);
-          if ($event->task->XP > 0 || ($event->task->is("name=free|buy|positive-collective-alchemy"))) {
+          if ($event->task->XP > 0 || $event->task->GC > 0 || ($event->task->is("name=free|buy|positive-collective-alchemy"))) {
             $class = '+';
           } else {
             $class = '-';

@@ -159,6 +159,7 @@
             $playerId = $input->urlSegment2;
             $selectedPlayer = $pages->get($playerId);
             $headTeacher = getHeadTeacher($selectedPlayer);
+            if ($headTeacher->language->name == 'french') { $user->language = $french; }
             if ($selectedPlayer) {
               $allEvents = $selectedPlayer->get("name=history")->children()->sort("date, created");
               $out = '<p class="alert alert-danger">ALL ACTIONS ARE RECALCULATED FROM LATEST VALUES (MAY CAUSE CHANGES IF VALUES HAVE BEEN MODIFIED)</p>';
