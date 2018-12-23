@@ -532,9 +532,11 @@
                     $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-thumbs-down"></i> Scores are different !</span>';
                   }
                   $out .= '</h4>';
-                  if (!$cachedPage || (isset($previousFingerprint) && $previousFingerprint !== $recalculatedFingerprint)) { 
+                  if (!$cachedPage || $previousFingerprint !== $recalculatedFingerprint) { 
                     if ($curPage == $numPages) { // Last page, display global player scores
-                      $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/page'.$curPage.'?confirm=1" data-reload="true">'.__('Save new recalculated scores').'</button>';
+                      if ($previousFingerprint !== $recalculatedFingerprint) {
+                        $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/page'.$curPage.'?confirm=1" data-reload="true">'.__('Save new recalculated scores').'</button>';
+                      }
                     } else {
                       $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/page'.$curPage.'?confirm=1" data-reload="true">'.sprintf(__('Save new recalculated scores for page %d'), $curPage).'</button>';
                     }
