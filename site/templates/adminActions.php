@@ -161,274 +161,408 @@
             $headTeacher = getHeadTeacher($selectedPlayer);
             if ($headTeacher->language->name == 'french') { $user->language = $french; }
             if ($selectedPlayer) {
-              $allEvents = $selectedPlayer->get("name=history")->children()->sort("date, created");
-              $out = '<p class="alert alert-danger">ALL ACTIONS ARE RECALCULATED FROM LATEST VALUES (MAY CAUSE CHANGES IF VALUES HAVE BEEN MODIFIED)</p>';
-              $out .= '<h3 class="text-center">'.$selectedPlayer->title.' ['.$selectedPlayer->team->title.'] → Recalculate scores from complete history ('. $allEvents->count.' events).</h3>';
               // Keep initial scores for comparison
               $initialPlayer = clone $selectedPlayer;
+              $historyPage = $selectedPlayer->get("name=history");
+              // Paginate to avoid timeout issues
+              $limit = 50;
+              $allEvents = $historyPage->children("template=event, limit=$limit")->sort("date, created");
+              $numPages = ceil($allEvents->getTotal()/$limit);
+              $curPage = $input->pageNum();
+              $pagination = $allEvents->renderPager(array(
+                'nextItemLabel' => ">",
+                'previousItemLabel' => "<",
+                'listMarkup' => "<ul class='pagination pagination-sm'>{out}</ul>",
+                'currentItemClass' => "active",
+              ));
+              $out = '<p class="alert alert-danger">'.__("ALL ACTIONS ARE RECALCULATED FROM LATEST VALUES (MAY CAUSE CHANGES IF VALUES HAVE BEEN MODIFIED)").'</p>';
+              $out .= '<h3 class="text-center">'.$selectedPlayer->title.' ['.$selectedPlayer->team->title.'] → Recalculate/Check scores <span class="label label-danger">'.__("Experimental - Use with caution !").'</span></h3>';
+              $out .= '<h4 class="text-center">';
+                $out .= '<ul class="list list-inline label label-success">';
+                $out .= __("Actual global scores"). ' ⇒ ';
+                $out .= displayPlayerScores($selectedPlayer);
+                $out .= '</ul>';
+              $out .= '</h4>';
+              // Check from tmpScores
+              if ($numPages > 1) {
+                $out .= '<p class="text-center">';
+                for ($p = 0; $p<$numPages; $p++) {
+                  if ($p < $numPages-1 && !$historyPage->tmpScores->eq($p)) {
+                    $out .= ' <span class="label label-danger">▶ '.sprintf(__("No cache for page %d"), ($p+1)).' !</span>';
+                    $cachedPages[$p] = false;
+                  } else {
+                    $cachedPages[$p] = $historyPage->tmpScores->eq($p);
+                  }
+                }
+                $out .= '</p>';
+                $out .= '<p>'.$pagination.'</p>';
+              }
+              // Is preceding page cached ? If not, recalculation is impossible
+              if ($curPage > 1 && !isset($cachedPages[$curPage-2])) {
+                $out .= ' <h4 class="text-center">';
+                $out .= '<p><span class="label label-danger">'.__("Preceding page is NOT cached !").'</span> ';
+                $out .= __('You must cache it before recalculating').'</p>';
+                $out .= '</h4>';
+              }
+              // Is current page already cached ?
+              $cachedPage = $historyPage->tmpScores->eq($curPage-1);
               // Init scores
-              $selectedPlayer = initPlayer($selectedPlayer);
-              $out .= displayPlayerScores($selectedPlayer, 'reset', 'success');
-              $out .= '<table class="table table-condensed table-hover">';
-              $out .= '<tbody>';
-              foreach($allEvents as $e) {
-                // Keep previous values to check evolution
-                $oldPlayer = clone $selectedPlayer;
-                if ($selectedPlayer->coma == 1) {
-                  $comaClass = 'bg-warning';
+              if ($curPage == '1') { // Completely initialize player if page 1
+                $selectedPlayer = initPlayer($selectedPlayer);
+              } else { // Initaliaze from previous cache
+                $selectedPlayer = initPlayerFromCache($selectedPlayer, $cachedPages[$curPage-2]);
+              }
+              if ($selectedPlayer) {
+                if (!$cachedPage && $curPage < $numPages) {
+                  $out .= '<h4><span class="label label-danger">';
+                  $out .= __("This page is not cached !");
+                  $out .= '</span></h4>';
+                }
+                $out .= '<ul class="list list-inline label label-success">';
+                if ($curPage == '1') {
+                  $out .= sprintf(__("Reset scores for page %d"), $curPage). ' ⇒ ';
                 } else {
-                  $comaClass = '';
+                  $out .= sprintf(__("Reset scores from previous page cache"), $curPage). ' ⇒ ';
                 }
-                $out .= '<tr><td class="text-left '.$comaClass.'">';
-                if ($e->date != '') {
-                  $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
-                } else {
-                  $out .= '▶ <span class="label label-danger">Date error!</span> - ';
-                  $dirty = true;
-                }
-                $out .= $e->title;
-                $comment = trim($e->summary);
-                if ($comment) {
-                  $out .= ' [comment:'.$comment.']';
-                }
-                if ($e->refPage) {
-                  $out .= ' [refPage:'.$e->refPage->title.']';
-                }
-                if ($e->linkedId) {
-                  $out .= ' [linkedId:'.$e->linkedId.']';
-                }
-                $out .= $e->feel();
-                // Delete event link
-                $out .= '  <button class="delete btn btn-xs btn-danger" data-href="'.$page->url.'" data-playerId="'.$selectedPlayer->id.'" data-eventId="'.$e->id.'" data-action="trash">Delete</button>';
-                if ($e->task) {
-                  if ($e->task->is("name=donation")) { // Player gave GC, increase his Donation
-                    preg_match("/\d+/", $comment, $matches);
-                    $diff = $selectedPlayer->GC - $matches[0];
-                    if ($diff < 0) { // Check for Donation bug
-                      $out .= ' <span class="label label-danger">Error';
-                      $out .= ' ⇒ Amount replaced : '.$selectedPlayer->GC.' [Edit and reload]';
-                      $out .= '</span>';
-                      $comment = preg_replace("/\d+/", $selectedPlayer->GC, $comment, 1);
-                      $dirty = true;
-                      /* // Change summary if saved */
-                      /* if ($input->urlSegment3 && $input->urlSegment3 == 1) { */
-                      /*   $e->summary = $comment; */
-                      /*   $e->of(false); */
-                      /*   $e->save(); */
-                      /* } */
-                    }
+                $out .= displayPlayerScores($selectedPlayer);
+                $out .= '</ul>';
+                $out .= '</h3>';
+                $out .= '<table class="table table-condensed table-hover">';
+                $out .= '<tbody>';
+                foreach($allEvents as $e) {
+                  // Keep previous values to check evolution
+                  $oldPlayer = clone $selectedPlayer;
+                  if ($selectedPlayer->coma == 1) {
+                    $comaClass = 'bg-warning';
+                  } else {
+                    $comaClass = '';
                   }
-                  if ($e->task->is("name=wrong-invasion")) { // 3rd wrong invasion ?
-                    $wrongInvasions = $allEvents->find("task.name=wrong-invasion, refPage=$e->refPage, date<=$e->date, sort=-date");
-                    // Limit to events AFTER the last 'Free' action on the oarticular element
-                    $lastFree = $allEvents->get("task.name=free, refPage=$e->refPage, sort=-date");
-                    if ($lastFree) {
-                      $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
-                    }
-                    if ($wrongInvasions->count() >= 3) {
-                      if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
-                        $out .= '<span class="label label-success">Remove OK</span>';
-                      } else {
-                        $dirty = true;
-                        $out .= '<span class="label label-danger">Remove Error (3rd wrong invasion)</span>';
-                        // Button Add Remove action here
-                        $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-remove/'.$playerId.'/'.$e->id.'/'.$e->refPage->id.'">Add Remove action here?</button>';
-                      }
-                    } else {
-                      if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
-                        $dirty = true;
-                        $out .= '<span class="label label-danger">Error : Remove found but not 3 wrong invasion(s) before ? ('.$wrongInvasions->count().'?)</span>';
-                      }
-                    }
+                  $out .= '<tr><td class="text-left '.$comaClass.'">';
+                  if ($e->date != '') {
+                    $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
+                  } else {
+                    $out .= '▶ <span class="label label-danger">Date error!</span> - ';
+                    $dirty = true;
                   }
-                  if ($e->task->is("name=buy|free|bought")) { // New equipment, place, people or potion, add it accordingly
-                    if ($e->refPage != false) {
-                      // Get item's data
-                      $newItem = $pages->get("$e->refPage");
-                      if ($newItem->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
-                        $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
+                  $out .= $e->title;
+                  $comment = trim($e->summary);
+                  if ($comment) {
+                    $out .= ' [comment:'.$comment.']';
+                  }
+                  if ($e->refPage) {
+                    $out .= ' [refPage:'.$e->refPage->title.']';
+                  }
+                  if ($e->linkedId) {
+                    $out .= ' [linkedId:'.$e->linkedId.']';
+                  }
+                  $out .= $e->feel();
+                  // Delete event link
+                  $out .= '  <button class="basicConfirm btn btn-xs btn-danger" data-href="'.$page->url.'trash/'.$selectedPlayer->id.'/'.$e->id.'" data-toDelete="tr">Delete</button>';
+                  if ($e->task) {
+                    if ($e->task->is("name=donation")) { // Player gave GC, increase his Donation
+                      preg_match("/\d+/", $comment, $matches);
+                      $diff = $selectedPlayer->GC - $matches[0];
+                      if ($diff < 0) { // Check for Donation bug
+                        $out .= ' <span class="label label-danger">Error';
+                        $out .= ' ⇒ Amount replaced : '.$selectedPlayer->GC.' [Edit and reload]';
+                        $out .= '</span>';
+                        $comment = preg_replace("/\d+/", $selectedPlayer->GC, $comment, 1);
                         $dirty = true;
                       }
-                      if ($newItem->level > $selectedPlayer->level) { // Check for Buy/Free bug (if a Death occurred, for example)
-                        $out .= ' <span class="label label-danger">Error : Wrong level.</span>';
-                        $dirty = true;
+                    }
+                    if ($e->task->is("name=wrong-invasion")) { // 3rd wrong invasion ?
+                      $wrongInvasions = $allEvents->find("task.name=wrong-invasion, refPage=$e->refPage, date<=$e->date, sort=-date");
+                      // Limit to events AFTER the last 'Free' action on the oarticular element
+                      $lastFree = $allEvents->get("task.name=free, refPage=$e->refPage, sort=-date");
+                      if ($lastFree) {
+                        $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
                       }
-                      if ($newItem->parent->is("name=group-items")) {
-                        // Check if groups have been set
-                        $out .= '<ul class="list-inline">';
-                        $out .= '<li>Group item status → </li>';
-                        if ($selectedPlayer->group != '') {
-                          // Check if group members have [unlocked] item
-                          $members = $allPlayers->find("team=$selectedPlayer->team, group=$selectedPlayer->group");
-                          $boughtNb = 0;
-                          foreach ($members as $p) {
-                            $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
-                            if ($bought->id) {
-                              $boughtNb++;
-                              $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
-                            } else {
-                              $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
-                            }
-                          }
-                          if ($boughtNb != $members->count-1) {
-                            $dirty = true;
-                            $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
-                          }
-                          // [unlocked] or [bought] ?
-                          // task page should be set accordingly but prevention here for backward compatibility
-                          preg_match("/\[unlocked\]/", $comment, $matches);
-                          if (isset($matches[0]) && $e->task->is("name=buy")) {
-                            $dirty = true;
-                            $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
-                          }
-                          if (!isset($matches[0]) && $e->task->is("name=bought")) {
-                            $dirty = true;
-                            $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
-                          }
-                        } else { // No groups, item shoudn't be there
-                            $dirty = true;
-                            $out .= ' <span class="label label-danger">Error : No groups set. Item shouldn\'t be there.</span>';
+                      if ($wrongInvasions->count() >= 3) {
+                        if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
+                          $out .= '<span class="label label-success">Remove OK</span>';
+                        } else {
+                          $dirty = true;
+                          $out .= '<span class="label label-danger">Remove Error (3rd wrong invasion)</span>';
+                          // Button Add Remove action here
+                          $out .= '<button class="death btn btn-danger" data-href="'.$page->url.'add-remove/'.$playerId.'/'.$e->id.'/'.$e->refPage->id.'">Add Remove action here?</button>';
                         }
-                        $out .= '</ul>';
+                      } else {
+                        if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'remove') {
+                          $dirty = true;
+                          $out .= '<span class="label label-danger">Error : Remove found but not 3 wrong invasion(s) before ? ('.$wrongInvasions->count().'?)</span>';
+                        }
                       }
+                    }
+                    if ($e->task->is("name=buy|free|bought")) { // New equipment, place, people or potion, add it accordingly
+                      if ($e->refPage != false) {
+                        // Get item's data
+                        $newItem = $pages->get("$e->refPage");
+                        if ($newItem->GC > $selectedPlayer->GC && $e->task->is("name!=bought")) {
+                          $out .= ' <span class="label label-danger">Error : Not enough GC ('.$e->refPage->GC.' needed, '.$selectedPlayer->GC.' available).</span>';
+                          $dirty = true;
+                        }
+                        if ($newItem->level > $selectedPlayer->level) { // Check for Buy/Free bug (if a Death occurred, for example)
+                          $out .= ' <span class="label label-danger">Error : Wrong level.</span>';
+                          $dirty = true;
+                        }
+                        if ($newItem->parent->is("name=group-items")) {
+                          // Check if groups have been set
+                          $out .= '<ul class="list-inline">';
+                          $out .= '<li>Group item status → </li>';
+                          if ($selectedPlayer->group != '') {
+                            // Check if group members have [unlocked] item
+                            $members = $allPlayers->find("team=$selectedPlayer->team, group=$selectedPlayer->group");
+                            $boughtNb = 0;
+                            foreach ($members as $p) {
+                              $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
+                              if ($bought->id) {
+                                $boughtNb++;
+                                $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
+                              } else {
+                                $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
+                              }
+                            }
+                            if ($boughtNb != $members->count-1) {
+                              $dirty = true;
+                              $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
+                            }
+                            // [unlocked] or [bought] ?
+                            // task page should be set accordingly but prevention here for backward compatibility
+                            preg_match("/\[unlocked\]/", $comment, $matches);
+                            if (isset($matches[0]) && $e->task->is("name=buy")) {
+                              $dirty = true;
+                              $out .= ' <span class="label label-danger">Error : [unlocked] found, but task page set to "Buy" instead of "Bought".</span>';
+                            }
+                            if (!isset($matches[0]) && $e->task->is("name=bought")) {
+                              $dirty = true;
+                              $out .= ' <span class="label label-danger">Error : [unlocked] NOT found, but task page set to "Bought" instead of "Buy".</span>';
+                            }
+                          } else { // No groups, item shoudn't be there
+                              $dirty = true;
+                              $out .= ' <span class="label label-danger">Error : No groups set. Item shouldn\'t be there.</span>';
+                          }
+                          $out .= '</ul>';
+                        }
 
-                      if ($newItem->name == 'health-potion' && $selectedPlayer->coma == 1) {
-                        $selectedPlayer->coma = 0;
-                        $out .= '<li><span class="label label-success">Leaving COMA STATE !</span></li>';
+                        if ($newItem->name == 'health-potion' && $selectedPlayer->coma == 1) {
+                          $selectedPlayer->coma = 0;
+                          $out .= '<li><span class="label label-success">Leaving COMA STATE !</span></li>';
+                        }
+                      }
+                      if ($e->linkedId) {
+                        $discount = $pages->get("$e->linkedId");
+                        if ($discount->id && $discount->parent->is("name=specials")) {
+                          $out .= ' ['.$discount->title.'% discount]';
+                        }
                       }
                     }
-                    if ($e->linkedId) {
-                      $discount = $pages->get("$e->linkedId");
-                      if ($discount->id && $discount->parent->is("name=specials")) {
-                        $out .= ' ['.$discount->title.'% discount]';
+                    if ($e->task->is("name=death")) {
+                      $lastDeath = $e;
+                      // Set previousLevel
+                      preg_match("/\d+/", $e->summary, $matches);
+                      $previousLevel = (int) $matches[0];
+                      if ($previousLevel == 0) {
+                        if ($selectedPlayer->level>1) {
+                          $previousLevel = $selectedPlayer->level;
+                        } else {
+                          $previousLevel = 0;
+                        }
+                        $out .= ' <span class="label label-danger">Error : No former level, set to '.$previousLevel.'</span>';
+                        $dirty = true;
+                      }
+                      // Death recorded but HP>0
+                      if ($selectedPlayer->HP > 0) {
+                        $out .= ' <span class="label label-danger">Error → HP>0 ?</span>';
+                        $dirty = true;
                       }
                     }
-                  }
-                  if ($e->task->is("name=death")) {
-                    $lastDeath = $e;
-                    // Set previousLevel
-                    preg_match("/\d+/", $e->summary, $matches);
-                    $previousLevel = (int) $matches[0];
-                    if ($previousLevel == 0) {
-                      if ($selectedPlayer->level>1) {
-                        $previousLevel = $selectedPlayer->level;
+                    if ($e->task->is("name=team-death|group-death|death")) {
+                      if ($e->linkedId) {
+                        $out .= ' ['.$e->linkedId.']';
+                      }
+                    }
+                    if ($e->inClass == 1 && $e->task->is("name~=fight|ut-action")) {
+                      $out .= ' [in class]';
+                    }
+                    if ($e->refPage != false && $e->refPage->is("name=memory-potion") && $e->linkedId == 0) {
+                      $used = $allEvents->get("linkedId=$e->id");
+                      if (isset($used->id)) {
+                        $out .= ' [used on '.date('d/m', $used->date).' ?]';
                       } else {
-                        $previousLevel = 0;
+                        $out .= ' <span class="label label-danger">Not used ?</span>';
                       }
-                      $out .= ' <span class="label label-danger">Error : No former level, set to '.$previousLevel.'</span>';
-                      $dirty = true;
                     }
-                    // Death recorded but HP>0
-                    if ($selectedPlayer->HP > 0) {
-                      $out .= ' <span class="label label-danger">Error → HP>0 ?</span>';
-                      $dirty = true;
-                    }
-                  }
-                  if ($e->task->is("name=team-death|group-death|death")) {
-                    if ($e->linkedId) {
-                      $out .= ' ['.$e->linkedId.']';
-                    }
-                  }
-                  if ($e->inClass == 1 && $e->task->is("name~=fight|ut-action")) {
-                    $out .= ' [in class]';
-                  }
-                  if ($e->refPage != false && $e->refPage->is("name=memory-potion") && $e->linkedId == 0) {
-                    $used = $allEvents->get("linkedId=$e->id");
-                    if (isset($used->id)) {
-                      $out .= ' [used on '.date('d/m', $used->date).' ?]';
-                    } else {
-                      $out .= ' <span class="label label-danger">Not used ?</span>';
-                    }
-                  }
-                  $e->task->comment = $comment;
-                  $e->task->refPage = $e->refPage;
-                  $e->task->linkedId = $e->linkedId;
-                  updateScore($selectedPlayer, $e->task, false);
-                  if ($e->task->is("name=death")) {
-                    $prevDeath = $allEvents->find('task.name=death')->getPrev($e);
-                    if (isset($prevDeath)) {
-                      // Set prevDeathLevel
-                      preg_match("/\d+/", $prevDeath->summary, $matches);
-                      $prevDeathLevel = (int) $matches[0];
-                      $out .= 'PrevDeath:'.$prevDeathLevel;
-                    } else {
-                      $prevDeathLevel = 0;
-                    }
-                    resetPlayer($selectedPlayer, $prevDeathLevel);
-                    if ($selectedPlayer->coma == 1) {
-                      $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
-                    } 
-                  }
-                  $out .= '<br />';
-                  // Show if teacher has customized task
-                  if ($e->task->mod) { $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-warning-sign"></i></span>'; }
-                  $out .= displayTrendScores($selectedPlayer, $oldPlayer);
-                  $out .= displayPlayerScores($selectedPlayer, 'new', 'success');
-                  $out .= '  ';
-                  // Test if player died
-                  if ($selectedPlayer->HP == 0 && $e->task->is("name!=death")) {
-                    if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'death') {
-                      $out .= '<span class="label label-success">Death OK</span>';
-                    } else {
-                      $dirty = true;
-                      // Ask only for the first Death
-                      if ($unique == true) {
-                        $out .= '<span class="label label-danger">Error : No Death after?</span>  ';
-                        // Button Add death here
-                        $out .= '<button class="confirm btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$selectedPlayer->level.'">'.__("Add death here ?").'</button>';
-                        $unique = false;
+                    $e->task->comment = $comment;
+                    $e->task->refPage = $e->refPage;
+                    $e->task->linkedId = $e->linkedId;
+                    updateScore($selectedPlayer, $e->task, false);
+                    if ($e->task->is("name=death")) {
+                      $prevDeath = $allEvents->find('task.name=death')->getPrev($e);
+                      if (isset($prevDeath)) {
+                        // Set prevDeathLevel
+                        preg_match("/\d+/", $prevDeath->summary, $matches);
+                        $prevDeathLevel = (int) $matches[0];
+                        $out .= 'PrevDeath:'.$prevDeathLevel;
                       } else {
-                        $out .= '<span class="label label-danger">'.__("Previous Death ?").'</span>';
-                        $out .= '<button class="confirm btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$selectedPlayer->level.'">'.__("Add death here ?").'</button>';
+                        $prevDeathLevel = 0;
+                      }
+                      resetPlayer($selectedPlayer, $prevDeathLevel);
+                      if ($selectedPlayer->coma == 1) {
+                        $out .= '<span class="label label-danger">Entering COMA STATE !</span>';
+                      } 
+                    }
+                    $out .= '<br />';
+                    // Show if teacher has customized task
+                    if ($e->task->mod) { $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-warning-sign"></i></span>'; }
+                    $out .= displayTrendScores($selectedPlayer, $oldPlayer);
+                    $out .= '<ul class="list list-inline label label-success">';
+                    $out .= __("New scores"). ' ⇒ ';
+                    $out .= displayPlayerScores($selectedPlayer);
+                    $out .= '</ul>';
+                    $out .= '</h3>';
+                    $out .= '  ';
+                    // Test if player died
+                    if ($selectedPlayer->HP == 0 && $e->task->is("name!=death")) {
+                      if ($allEvents->getNext($e) && $allEvents->getNext($e)->task->name == 'death') {
+                        $out .= '<span class="label label-success">Death OK</span>';
+                      } else {
+                        $dirty = true;
+                        // Ask only for the first Death
+                        if ($unique == true) {
+                          $out .= '<span class="label label-danger">Error : No Death after?</span>  ';
+                          // Button Add death here
+                          $out .= '<button class="confirm btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$selectedPlayer->level.'">'.__("Add death here ?").'</button>';
+                          $unique = false;
+                        } else {
+                          $out .= '<span class="label label-danger">'.__("Previous Death ?").'</span>';
+                          $out .= '<button class="confirm btn btn-danger" data-href="'.$page->url.'add-death/'.$playerId.'/'.$e->id.'/'.$selectedPlayer->level.'">'.__("Add death here ?").'</button>';
+                        }
                       }
                     }
                   }
+                  $out .='</td></tr>';
                 }
-                $out .='</td></tr>';
-              }
-              $out .= '</tbody>';
-              $out .= '</table>';
-              $out .= displayPlayerScores($initialPlayer, 'actual', 'danger');
-              $out .= '<br />';
-              $out .= '<h3>'.displayPlayerScores($selectedPlayer, 'Recalculated', 'primary').'</h3>';
-              // Check changes
-              $previousFingerprint = md5(displayPlayerScores($initialPlayer, 'actual', 'danger'));
-              $recalculatedFingerprint = md5(displayPlayerScores($selectedPlayer, 'actual', 'danger'));
-              if ($previousFingerprint === $recalculatedFingerprint) { 
-                $out .= '<h4 class="text-center"><span class="label label-success"><i class="glyphicon glyphicon-thumbs-up"></i> Scores are identical.</span></h4>';
-              } else {
-                $out .= '<h4 class="text-center"><span class="label label-danger"><i class="glyphicon glyphicon-thumbs-down"></i> Scores are different !</span></h4>';
-              }
-              $out .= '<br /><br />';
-              if ($input->urlSegment3 && $input->urlSegment3 == 1) {
-                if ($selectedPlayer->team && $selectedPlayer->team->name != 'no-team') {
-                  if ($selectedPlayer->team->periods) {
-                    $currentPeriod = $selectedPlayer->team->periods;
-                    $mod = $currentPeriod->periodOwner->get("singleTeacher=$headTeacher"); // Get personalized infos if needed
-                    if ($mod->id) {
-                      $mod->dateStart != '' ? $dateStart = $mod->dateStart : $dateStart = $currentPeriod->dateStart;
-                      $mod->dateEnd != '' ? $dateEnd = $mod->dateEnd : $dateEnd = $currentPeriod->dateEnd;
+                $out .= '</tbody>';
+                $out .= '</table>';
+                if ($input->get->confirm == 1) {
+                  if ($selectedPlayer->team && $selectedPlayer->team->name != 'no-team') {
+                    if ($selectedPlayer->team->periods) {
+                      $currentPeriod = $selectedPlayer->team->periods;
+                      $mod = $currentPeriod->periodOwner->get("singleTeacher=$headTeacher"); // Get personalized infos if needed
+                      if ($mod->id) {
+                        $mod->dateStart != '' ? $dateStart = $mod->dateStart : $dateStart = $currentPeriod->dateStart;
+                        $mod->dateEnd != '' ? $dateEnd = $mod->dateEnd : $dateEnd = $currentPeriod->dateEnd;
+                      }
+                      $newCount = setHomework($selectedPlayer, $dateStart, $dateEnd);
+                      $lastPenalty = $allEvents->find("task.category.name=homework, date>=$dateStart, date<=$dateEnd")->sort("-date")->first(); // Get last Hk pb
+                      if ($lastPenalty && $lastPenalty->task->is("name=penalty")) {
+                        $newCount = 0;
+                      }
+                      $selectedPlayer->hkcount = $newCount;
                     }
-                    $newCount = setHomework($selectedPlayer, $dateStart, $dateEnd);
-                    $lastPenalty = $allEvents->find("task.category.name=homework, date>=$dateStart, date<=$dateEnd")->sort("-date")->first(); // Get last Hk pb
-                    if ($lastPenalty && $lastPenalty->task->is("name=penalty")) {
-                      $newCount = 0;
-                    }
-                    $selectedPlayer->hkcount = $newCount;
+                  }
+                  if ($curPage == $numPages) { // Save last page to selectedPlayer page 
+                    $selectedPlayer->of(false);
+                    $selectedPlayer->save();
+                    $title = $selectedPlayer->title.' '.$selectedPlayer->lastName.' ['.$selectedPlayer->team->title.']';
+                    $out = '<p>'.$pagination.'</p>';
+                    $out .= '<h3>'.sprintf(__("New scores for %s"), $title).'</h3>';
+                    $out .= '<h3>';
+                      $out .= '<ul class="list list-inline label label-primary">';
+                      $out .= ' ⇒ ';
+                      $out .= displayPlayerScores($selectedPlayer);
+                      $out .= '</ul>';
+                    $out .= '</h3>';
+                    $out .= '<h4 class="text-center"><span class="label label-danger">New scores have been saved.';
+                  } else { // Save to cache
+                    saveScoresForCache($selectedPlayer, $curPage);
+                    $out = '<p>'.$pagination.'</p>';
+                    $out .= '<h3>';
+                      $out .= '<ul class="list list-inline label label-primary">';
+                      $out .= sprintf(__("Recalculated scores for page %d"), $curPage). ' ⇒ ';
+                      $out .= displayPlayerScores($selectedPlayer);
+                      $out .= '</ul>';
+                    $out .= '</h3>';
+                    $out .= '<h4 class="text-center"><span class="label label-danger">New scores have been saved.';
+                  }
+                } else {
+                  if (isset($dirty)) {
+                    $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
                   }
                 }
-                $selectedPlayer->of(false);
-                $selectedPlayer->save();
-                $out = '<h3>New scores for '.$selectedPlayer->title.' '.$selectedPlayer->lastName.' ['.$selectedPlayer->team->title.']</h3>';
-                $out .= '<h3>'.displayPlayerScores($selectedPlayer, 'Recalculated', 'primary').'</h3>';
-                $out .= '<h4 class="text-center"><span class="label label-danger">New scores have been saved.';
-              } else {
-                if (isset($dirty)) {
-                  $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
+                if (!$input->get->confirm) {
+                  // Check changes with cached scores
+                  $out .= '<h3>';
+                    $out .= '<ul class="list list-inline label label-primary">';
+                    $out .= sprintf(__("Recalculated scores for page %d"), $curPage). ' ⇒ ';
+                    $newScore = displayPlayerScores($selectedPlayer);
+                    $out .= $newScore;
+                    $out .= '</ul>';
+                  $out .= '</h3>';
+                  if (!$cachedPage && $curPage < $numPages) {
+                    $out .= '<h4><span class="label label-danger">';
+                    $out .= __("This page is not cached !");
+                    $out .= '</span></h4>';
+                    $oldScore = '';
+                  } else {
+                    $out .= '<h3>';
+                    $out .= '<ul class="list list-inline label label-danger">';
+                    if ($curPage == $numPages) { // Last page, display global player scores
+                      $out .= __("Actual global scores").' ⇒ ';
+                      $oldScore = displayPlayerScores($initialPlayer);
+                      $out .= $oldScore;
+                    } else {
+                      $out .= sprintf(__("Cached scores for page %d"), $curPage). ' ⇒ ';
+                      $oldScore = displayPlayerScores($cachedPage);
+                      $out .= $oldScore;
+                    }
+                    $out .= '</ul>';
+                    $out .= '</h3>';
+                    if ($cachedPage) {
+                      $out .= __("Cache updated on");
+                      $out .= date(" Y-m-d H:m:s", $cachedPage->modified);
+                    }
+                  }
+                  $previousFingerprint = md5($oldScore);
+                  $recalculatedFingerprint = md5($newScore);
+                  $out .= '<h4 class="text-center">';
+                  if ($previousFingerprint === $recalculatedFingerprint) { 
+                    $out .= '<span class="label label-success"><i class="glyphicon glyphicon-thumbs-up"></i> Scores are identical.</span>';
+                  } else {
+                    $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-thumbs-down"></i> Scores are different !</span>';
+                  }
+                  $out .= '</h4>';
+                  if (!$cachedPage || (isset($previousFingerprint) && $previousFingerprint !== $recalculatedFingerprint)) { 
+                    if ($curPage == $numPages) { // Last page, display global player scores
+                      $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/page'.$curPage.'?confirm=1" data-reload="true">'.__('Save new recalculated scores').'</button>';
+                    } else {
+                      $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/page'.$curPage.'?confirm=1" data-reload="true">'.sprintf(__('Save new recalculated scores for page %d'), $curPage).'</button>';
+                    }
+                  }
                 }
-                if ($previousFingerprint !== $recalculatedFingerprint) { 
-                  $out .= '<button class="basicConfirm btn btn-block btn-primary" data-href="'.$page->url.'recalculate/'.$playerId.'/1" data-reload="true">Save recalculated scores</button>';
+              } else { // Just display events
+                $out .= '<table class="table table-condensed table-hover">';
+                $out .= '<tbody>';
+                foreach($allEvents as $e) {
+                  $out .= '<tr><td class="text-left">';
+                  if ($e->date != '') {
+                    $out .= '▶ '.strftime("%d/%m", $e->date).' - ';
+                  }
+                  $out .= $e->title;
+                  $comment = trim($e->summary);
+                  if ($comment) {
+                    $out .= ' [comment:'.$comment.']';
+                  }
+                  if ($e->refPage) {
+                    $out .= ' [refPage:'.$e->refPage->title.']';
+                  }
+                  if ($e->linkedId) {
+                    $out .= ' [linkedId:'.$e->linkedId.']';
+                  }
+                  $out .='</td></tr>';
                 }
+                $out .= '</tbody>';
+                $out .= '</table>';
               }
             } else {
               $out .= 'You need to select 1 player.';
@@ -1129,7 +1263,7 @@
                 $out .= '<td>'.$lastActivityCount.'</td>';
               }
               /* $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</a></td>'; */
-              $out .= '<td><a target="blank" class="btn btn-xs btn-danger" href="'.$adminActions->url.'recalculate/'.$p->id.'">Check history</a></td>';
+              $out .= '<td><a class="btn btn-xs btn-danger" href="'.$adminActions->url.'recalculate/'.$p->id.'">Check history</a></td>';
               if ($user->isSuperuser()) {
                 $history = $p->child("name=history");
                 if ($history->id && $history->children()->count() > 0) {
@@ -1229,7 +1363,6 @@
     echo $out;
     include("./foot.inc"); 
     echo '<script>';
-    echo '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.after("<span class=\"label label-danger\">'.__("Please reload page to recalculate scores").'</span>"); that.hide(); }) };});';
     echo '$(".addUsers").click( function() { var myData = $(\'#newPlayers\').val(); var action=$(this).attr("data-action"); var href=$(this).attr("data-href")+action; var that=$(this); if (confirm("Proceed?")) {$.post(href, {newPlayers:myData}, function(data) { $("#ajaxViewport").html(data); }) };});';
     echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed ?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
     echo '</script>';

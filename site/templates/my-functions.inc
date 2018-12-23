@@ -67,6 +67,27 @@ function initPlayer($player) {
   return $player;
 }
 
+function initPlayerFromCache($player, $cachedPage) {
+  bd($cachedPage);
+  if ($cachedPage) {
+    $player->yearlyKarma = $cachedPage->yearlyKarma;
+    $player->GC = $cachedPage->GC;
+    $player->level = $cachedPage->level;
+    $player->reputation = $cachedPage->reputation;
+    $player->HP = $cachedPage->HP;
+    $player->XP = $cachedPage->XP;
+    $player->places = $cachedPage->places;
+    $player->people = $cachedPage->people;
+    $player->equipment = $cachedPage->equipment;
+    $player->donation = $cachedPage->donation;
+    $player->underground_training = $cachedPage->underground_training;
+    $player->fighting_power = $cachedPage->fighting_power;
+    return $player;
+  } else {
+    return false;
+  }
+}
+
 function resetPlayer($player, $previousLevel) {
   $player->HP = 50; // Full HP
   $player->GC = 0; // Lose all Gold Coins
@@ -248,7 +269,6 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
   // TODO : Ignore fights ?
   if ($task->is("name!=ut-action-v|ut-action-vv|micro-solo-v")) {
     if ($player->equipment) {
-      $task = checkModTask($task, false, $player); // Get personalized values according to logged in user
       // Limit to the 2 best weapons
       $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
       foreach ($concerned_weapons as $item) {
@@ -410,17 +430,6 @@ function taskExtraAction($player, $task, $real) {
         }
       }
     }
-  }
-}
-
-function removeTaskRecalculate($player, $task) {
-  // Limit to 'easy' tasks (extra-training for the moment)
-  if ($task->is("name=extra-homework|intensive-extra-homework")) {
-    setDelta($player, $task);
-    $player->XP = (int) $player->XP-($task->XP+$player->deltaXP);
-    $player->GC = (int) $player->GC-$task->GC;
-    $player->streak--;
-    // Pb if level changed thanks to the task being removed...
   }
 }
 
@@ -741,25 +750,22 @@ function displayTrendScores($player, $old) {
   if ($trendFP > 0) { $out .= '<li>+'.$trendFP.'FP→'.$player->fighting_power.'</li>'; }
   if ($trendFP < 0) { $out .= '<li>'.$trendFP.'FP→'.$player->fighting_power.'</li>'; }
   $out .= '</ul>&nbsp;&nbsp;';
-
   return $out;
 }
 
-function displayPlayerScores($player, $label, $class) {
-  $out = '<ul class="list list-inline label label-'.$class.'">'.ucfirst($label).' scores ⇒ ';
-  $out .= '<li>'.$player->yearlyKarma.'K.</li>';
-  $out .= '<li>'.$player->GC.'GC</li>';
-  $out .= '<li>'.$player->level.'lvl</li>';
-  $out .= '<li>'.$player->reputation.'R.</li>';
-  $out .= '<li>'.$player->HP.'HP</li>';
-  $out .= '<li>'.$player->XP.'XP</li>';
-  $out .= '<li>'.$player->places->count.'Pl.</li>';
-  $out .= '<li>'.$player->people->count.'Peo.</li>';
-  $out .= '<li>'.$player->equipment->count.'Eq.</li>';
-  $out .= '<li>'.$player->donation.'Don.</li>';
-  $out .= '<li>'.$player->underground_training.'UT</li>';
-  $out .= '<li>'.$player->fighting_power.'FP</li>';
-  $out .= '</ul>';
+function displayPlayerScores($cachePage) {
+  $out = '<li>'.$cachePage->yearlyKarma.'K.</li>';
+  $out .= '<li>'.$cachePage->GC.'GC</li>';
+  $out .= '<li>'.$cachePage->level.'lvl</li>';
+  $out .= '<li>'.$cachePage->reputation.'R.</li>';
+  $out .= '<li>'.$cachePage->HP.'HP</li>';
+  $out .= '<li>'.$cachePage->XP.'XP</li>';
+  $out .= '<li>'.$cachePage->places->count.'Pl.</li>';
+  $out .= '<li>'.$cachePage->people->count.'Peo.</li>';
+  $out .= '<li>'.$cachePage->equipment->count.'Eq.</li>';
+  $out .= '<li>'.$cachePage->donation.'Don.</li>';
+  $out .= '<li>'.$cachePage->underground_training.'UT</li>';
+  $out .= '<li>'.$cachePage->fighting_power.'FP</li>';
   return $out;
 }
 
@@ -1125,6 +1131,34 @@ function teamFreeworld($team) {
   $allCompleted = $allElements->find("completed=1");
   $allElements->sort("-completed, level, title");
   return $allElements;
+}
+
+function saveScoresForCache($player, $index) {
+  // Check if previous cached exist
+  $historyPage = $player->get("name=history");
+  $tmpPage = $historyPage->tmpScores->eq($index-1);
+  if (!$tmpPage) { // Create cache page
+    $tmpPage = $historyPage->tmpScores->getNew();
+  }
+  $tmpPage->of(false);
+  if ($tmpPage) {
+    $tmpPage->yearlyKarma = $player->yearlyKarma;
+    $tmpPage->reputation = $player->reputation;
+    $tmpPage->level = $player->level;
+    $tmpPage->HP = $player->HP;
+    $tmpPage->XP = $player->XP;
+    $tmpPage->GC = $player->GC;
+    $tmpPage->underground_training = $player->underground_training;
+    $tmpPage->fighting_power = $player->fighting_power;
+    $tmpPage->donation = $player->donation;
+    $tmpPage->equipment = $player->equipment;
+    $tmpPage->places = $player->places;
+    $tmpPage->people = $player->people;
+    $tmpPage->coma = $player->coma;
+    $tmpPage->save();
+  }
+  $historyPage->of(false);
+  $historyPage->save();
 }
 
 function updateTeamScores($team) {
@@ -2294,25 +2328,29 @@ function checkModTask($task, $headTeacher = false, $player = false) {
   $modTask = clone $task;
   $user = wire('user');
   if (!$headTeacher) {
-    if ($player) {
-      $headTeacher = getHeadTeacher($player);
+    if ($user->hasRole('teacher')) {
+      $headTeacher = $user;
     } else {
-      if ($user->hasRole('teacher')) {
-        $headTeacher = $user;
+      if ($player) {
+        $headTeacher = getHeadTeacher($player);
       }
     }
   }
-  $mod = $task->owner->get("singleTeacher=$headTeacher, include=hidden"); // Get personalized infos if needed
-  if ($mod) {
-    $task->mod = true;
-    $mod->title != '' ? $modTask->title = $mod->title : $modTask->title = $task->title;
-    $mod->teacherTitle != '' ? $modTask->teacherTitle = $mod->teacherTitle : $modTask->teacherTitle = $task->teacherTitle;
-    $mod->summary != '' ? $modTask->summary = $mod->summary : $modTask->summary = $task->summary;
-    $mod->HP != '' ? $modTask->HP = $mod->HP : $modTask->HP = $task->HP;
-    $mod->XP != '' ? $modTask->XP = $mod->XP : $modTask->XP = $task->XP;
-    $mod->GC != '' ? $modTask->GC = $mod->GC : $modTask->GC = $task->GC;
+  if ($headTeacher) {
+    $mod = $task->owner->get("singleTeacher=$headTeacher"); // Get personalized infos if needed
+    if ($mod) {
+      $task->mod = true;
+      $mod->title != '' ? $modTask->title = $mod->title : $modTask->title = $task->title;
+      $mod->teacherTitle != '' ? $modTask->teacherTitle = $mod->teacherTitle : $modTask->teacherTitle = $task->teacherTitle;
+      $mod->summary != '' ? $modTask->summary = $mod->summary : $modTask->summary = $task->summary;
+      $mod->HP != '' ? $modTask->HP = $mod->HP : $modTask->HP = $task->HP;
+      $mod->XP != '' ? $modTask->XP = $mod->XP : $modTask->XP = $task->XP;
+      $mod->GC != '' ? $modTask->GC = $mod->GC : $modTask->GC = $task->GC;
+    }
+    return $modTask;
+  } else {
+    return $task;
   }
-  return $modTask;
 }
 
 function getHeadTeacher($player) {

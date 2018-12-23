@@ -21,6 +21,7 @@
         }
         $task = $page->task;
         // Calculate possible credit according to player's equipment
+        $task = checkModTask($task, $headTeacher, $player); // Get personalized values according to logged in user
         setDelta($player, $task);
         $out .= '<h3>'.__("Possible credit").' : ';
         $out .= '<span class="label label-primary">'.$task->title.'</span> → ';

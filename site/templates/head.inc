@@ -204,7 +204,7 @@
               $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$adminActions->url}reports/' target='_blank'><span class='glyphicon glyphicon-file'></span> - ".__('Reports')."</a></li>";
               $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$adminActions->url}users' target='_blank'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
+              $out .= "<li><a$class href='{$adminActions->url}users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
               $class = $page->name == 'statistics' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$pages->get("name=statistics")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Statistics')."</a></li>";
               

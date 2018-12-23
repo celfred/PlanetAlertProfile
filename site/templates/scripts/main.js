@@ -208,7 +208,16 @@ $(document).ready(function() {
 	$('.basicConfirm').on('click', function() {
 		var $this = $(this);
 		var $href = $this.attr('data-href');
-		var $reload = $this.attr("data-reload");
+    if ($this.attr("data-reload")) {
+      var $reload = $this.attr("data-reload");
+    } else {
+      var $reload = 'false';
+    }
+    if ($this.attr("data-toDelete")) {
+      var $toDelete = $this.parents($this.attr("data-toDelete"));
+    } else {
+      var $toDelete = '';
+    }
 		swal({
 			title: lang.sure,
 			type: "warning",
@@ -223,8 +232,15 @@ $(document).ready(function() {
 				if ($reload == 'false') {
 					$.get($href, function(data) { 
 						$this.next('.proceedFeedback').html(lang.saved);
-						$('#wrap').prepend(data);
+						// $('#wrap').prepend(data);
 						setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
+            if ($toDelete != '') { $toDelete.remove(); }
+            swal({
+              title: lang.reload,
+              showCancelButton : false,
+              showConfirmButton: false,
+              timer: 1000,
+            });
 					}); 
 				} else {
 					window.location.href = $href;
