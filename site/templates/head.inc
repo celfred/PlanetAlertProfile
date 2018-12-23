@@ -460,7 +460,7 @@
           $announcements = $pages->find("template=announcement, publish=1, parent=$allTeams, created_users_id=$adminId")->sort("-date");
           if ($announcements->count()>0) {
             foreach($announcements as $a) {
-              echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$player->id.'">';
+              echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$user->id.'">';
               echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
               echo '<span class="label label-danger"><span class="glyphicon glyphicon-comment"></span> '.__("Admin's message").' : '.$a->title.'</span>';
               echo $a->body;
