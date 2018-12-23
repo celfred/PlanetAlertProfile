@@ -80,7 +80,7 @@
         </span>
         <?php 
           if ($playerPage->skills && $playerPage->skills->has("name=captain")) {
-            $showSkills = '<span class="label label-primary">Captain</span>';
+            $showSkills = '<span class="label label-primary">'.$playerPage->skills->get("name=captain")->title.'</span>';
           } else {
             $showSkills = '';
           }
@@ -101,7 +101,9 @@
           <li><?php echo __("Karma"); ?> : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
           <li><?php echo __("Reputation"); ?> : <span class="label label-default"><?php echo $playerPage->reputation; ?></span></li>
           <li><?php echo __("Level"); ?> : <?php echo $playerPage->level; ?></li>
-          <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="Gold Coins"><?php echo $playerPage->GC.' '.__("GC"); ?></span></li>
+          <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="<?php echo __('Gold Coins'); ?>">
+            <?php echo $playerPage->GC.' '.__("GC"); ?>
+          </span></li>
           <?php 
             if ($playerPage->rank && $playerPage->rank->index >= 6 || $playerPage->team->rank->index >= 6) {
               echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '. __("Hk count") .' : '.$hkCount.'</li>';

@@ -1138,12 +1138,12 @@ var initTables = function() {
     order: [[ 0, "asc"]]
   });
   var trainingTable = $('#trainingTable').DataTable({
-    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+    lengthMenu: [ [25, 50, -1], [25, 50, lang.all] ],
     order: [[ 0, "asc"], [2, "asc"]]
   });
   var historyTable = $('#historyTable').DataTable({
 		retrieve: true,
-    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, lang.all] ],
     order: [[ 0, "desc"]]
   });
   var taskTable = $('#taskTable').DataTable({

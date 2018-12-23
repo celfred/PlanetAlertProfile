@@ -102,7 +102,7 @@
                 $out .= '</li>';
               }
               if ($news->count() == 0) {
-                $out .= '<p>No recent news.</p>';
+                $out .= '<p>'.__('No recent news.').'</p>';
               }
               $out .= '</ul>';
             $out .= '</div>';
