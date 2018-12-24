@@ -68,7 +68,6 @@ function initPlayer($player) {
 }
 
 function initPlayerFromCache($player, $cachedPage) {
-  bd($cachedPage);
   if ($cachedPage) {
     $player->yearlyKarma = $cachedPage->yearlyKarma;
     $player->GC = $cachedPage->GC;
@@ -471,7 +470,6 @@ function addGroupItem($player, $historyPage, $real) {
 
 function extraActionAfterSave($player, $historyPage, $real) {
   $pages = wire('pages');
-
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
       $task = $pages->get("template=task, name=penalty"); 
       $task->comment = 'Automatic homework penalty';
@@ -479,7 +477,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
       $task->linkedId = $historyPage->id;
       updateScore($player, $task, $real);
   }
-
   if ($historyPage->task->is("name=donation")) {  // Record the linked 'Donated' event
     $task = $pages->get("name=donated");
     preg_match("/\d+/", $historyPage->summary, $matches);
@@ -490,7 +487,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
     $task->linkedId = $historyPage->id;
     updateScore($receiverPlayer, $task, $real);
   }
-
   if ($historyPage->task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
     $wrongInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date");
     // Limit to events AFTER the last 'Free' action on the oarticular element
@@ -507,7 +503,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
       updateScore($player, $task, $real);
     }
   }
-  
   if ($historyPage->task->is("name=buy")) {
     if ($historyPage->refPage->parent->is("name=group-items") && isset($player->group->id)) { // Save group items for all group members 
       addGroupItem($player, $historyPage, $real);
@@ -517,7 +512,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
       addUsable($player, $historyPage, $real);
     }
   }
-
   // Save new team scores (for cache) if necessary
   if ($real == true) {
     if ($historyPage->task->is("name~=fight|ut-action")) { // Update tmpCache
@@ -525,6 +519,9 @@ function extraActionAfterSave($player, $historyPage, $real) {
     }
     if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
       updateTeamScores($player->team);
+    }
+    if (checkCache($player)) {
+      setCache($player->id, false);
     }
   }
 }
@@ -912,18 +909,14 @@ function saveHistory($player, $task, $newsBoard = 0) {
   $p->publish = $newsBoard;
   $p->linkedId = $task->linkedId;
   $p->save(); 
-  if (checkCache($player)) {
-    setCache($player->id);
-  }
   return $p;
 }
 
 function checkCache($player) {
   $limit=50;
   $nbEvents = $player->get("name=history")->numChildren();
-  $nbPages = ceil($nbEvents/$limit);
-  $toCache = $nbPages-1; // Skip last page
-  if ($nbPages > 1) {
+  $toCache = ceil($nbEvents/$limit)-1; // Skip last page
+  if ($toCache > 0) {
     $nbCached = $player->get("name=history")->tmpScores->count();
     if ($toCache != $nbCached) {
       return true;
@@ -935,17 +928,32 @@ function checkCache($player) {
   }
 }
 
-function setCache($playerId) {
+function setCache($playerId, $force = false) {
   $pages = wire('pages');
   $player = $pages->get($playerId);
-  $player = initPlayer($player);
   $allEvents = $player->get("name=history")->children()->sort("date");
   $limit = 50;
-  $nbAllEvents = $allEvents->count();
-  $nbEvents = 0;
   $curPage = 1;
+  $nbEvents = 0;
+  $nbAllEvents = $allEvents->count();
   $toCache = ceil($nbAllEvents/$limit)-1;
   if ($toCache > 0) {
+    if ($force) {
+      $player = initPlayer($player);
+      $curPage = 1;
+    } else { // Only add new cache page (if possible)
+      $allCached = $player->get("name=history")->tmpScores;
+      $nbCached = $allCached->count();
+      if ($toCache == ($nbCached+1) && $nbCached > 0) {
+        $player = initPlayerFromCache($player, $allCached->last());
+        $nbPrevious = $nbCached*$limit;
+        $curPage = $toCache;
+        $allEvents->filter("start=$nbPrevious, limit=$limit"); // Limit to 50 events starting after previous cached events
+      } else { // Error detected, force cache regeneration
+        setCache($playerId, true);
+        return false;
+      }
+    }
     foreach($allEvents as $e) {
       $e->task->comment = trim($e->summary);
       $e->task->refPage = $e->refPage;

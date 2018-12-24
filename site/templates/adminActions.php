@@ -209,7 +209,7 @@
               // Init scores
               if ($curPage == '1') { // Completely initialize player if page 1
                 $selectedPlayer = initPlayer($selectedPlayer);
-              } else { // Initaliaze from previous cache
+              } else { // Initialize from previous cache
                 $selectedPlayer = initPlayerFromCache($selectedPlayer, $cachedPages[$curPage-2]);
               }
               if ($selectedPlayer) {
@@ -520,7 +520,7 @@
                     $out .= '</h3>';
                     if ($cachedPage) {
                       $out .= __("Cache updated on");
-                      $out .= date(" Y-m-d H:m:s", $cachedPage->modified);
+                      $out .= date(" Y-m-d H:i:s", $cachedPage->modified);
                     }
                   }
                   $previousFingerprint = md5($oldScore);
@@ -1465,14 +1465,14 @@
                   $out .= ' <span class="label label-success">OK</span>';
                 }
                 $out .= ' → ';
-                $out .= ' <button class="basicConfirm btn btn-xs btn-danger" data-href="'.$page->url.'setCache/'.$p->id.'?confirm=1" data-toDelete="li">Regenerate cache</button>';
+                $out .= ' <button class="basicConfirm btn btn-xs btn-danger" data-href="'.$page->url.'setCache/'.$p->id.'?confirm=1" data-toDelete="li">Regenerate cache (forced)</button>';
               $out .= '</li>';
             }
           }
           $out .= '</ul>';
         } else if ($input->get->confirm) {
           $playerId = $input->urlSegment2;
-          setCache($playerId);
+          setCache($playerId, true);
         }
         break;
       case 'reports' :
