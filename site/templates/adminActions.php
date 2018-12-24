@@ -166,7 +166,7 @@
               $historyPage = $selectedPlayer->get("name=history");
               // Paginate to avoid timeout issues
               $limit = 50;
-              $allEvents = $historyPage->children("template=event, limit=$limit")->sort("date, created");
+              $allEvents = $historyPage->children("template=event, limit=$limit, sort=date, sort=created");
               $numPages = ceil($allEvents->getTotal()/$limit);
               $curPage = $input->pageNum();
               $pagination = $allEvents->renderPager(array(
@@ -1449,7 +1449,7 @@
           $out .= '<p>'.$allPlayers->count().' players</p>';
           $out .= '<ul>';
           foreach($allPlayers as $p) {
-            $nbEvents = $p->child("name=history")->find("template=event")->count();
+            $nbEvents = $p->get("name=history")->numChildren();
             $nbPages = ceil($nbEvents/$limit);
             $toCache = $nbPages-1;
             if ($nbPages > 1) {

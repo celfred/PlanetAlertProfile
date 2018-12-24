@@ -1061,7 +1061,7 @@ $(document).ready(function() {
 					}
 				}
 				$(document).ajaxStop(function() {
-					window.location.href = $redirectUrl;
+          window.location.href = $redirectUrl;
 					setTimeout( function(){ $('#progress').text(lang.redirecting); }, 1000);
 				})
 				swal({

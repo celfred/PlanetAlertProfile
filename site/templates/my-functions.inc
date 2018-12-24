@@ -912,7 +912,27 @@ function saveHistory($player, $task, $newsBoard = 0) {
   $p->publish = $newsBoard;
   $p->linkedId = $task->linkedId;
   $p->save(); 
+  if (checkCache($player)) {
+    setCache($player->id);
+  }
   return $p;
+}
+
+function checkCache($player) {
+  $limit=50;
+  $nbEvents = $player->get("name=history")->numChildren();
+  $nbPages = ceil($nbEvents/$limit);
+  $toCache = $nbPages-1; // Skip last page
+  if ($nbPages > 1) {
+    $nbCached = $player->get("name=history")->tmpScores->count();
+    if ($toCache != $nbCached) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
 }
 
 function setCache($playerId) {
@@ -2390,7 +2410,7 @@ function getHeadTeacher($player) {
       $playerPage = false;
     }
     if ($userPlayer->hasRole('player')) {
-      $playerPage = $pages->get("template=player, login=$userPlayer->name"); 
+      $playerPage = $pages->get("parent.name=players, login=$userPlayer->name"); 
     }
     if ($userPlayer->isGuest()) {
       $playerPage = false;
@@ -2403,7 +2423,7 @@ function getHeadTeacher($player) {
       $playerPage = false;
     }
   }
-  if ($playerPage) {
+  if ($playerPage != false) {
     if ($playerPage->team && $playerPage->team->teacher->first()) {
       $headTeacher = $playerPage->team->teacher->first();
     } else {
