@@ -222,6 +222,8 @@
                 $out .= "<li><a$class href='{$adminActions->url}/setYearlyKarma/'>Set yearly karmas</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCaptains' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/setCaptains/'>Set captains</a></li>";
+                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCache' ? " class='selected-left'" : "";
+                $out .= "<li><a$class href='{$adminActions->url}setCache/'>Set cache</a></li>";
                 $class = $page->name == 'script' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/script/'>Script</a></li>";
               }

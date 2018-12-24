@@ -1132,6 +1132,27 @@
             $out .= $noAuthMessage;
           }
           break;
+        case 'setCache' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<h3 class="text-center">';
+            $out .=   'Set cache';
+            $out .= '</h3>';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setCache">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
         case 'setScores' :
           if ($user->isSuperuser()) {
             $out .= '<section class="well">';
@@ -1420,6 +1441,39 @@
 
     switch ($action) {
       case 'script' :
+        break;
+      case 'setCache' :
+        if (isset($selectedTeam) && $selectedTeam != '-1') {
+          $allPlayers = $allPlayers->find("parent.name=players, team=$selectedTeam");
+          $limit = 50;
+          $out .= '<p>'.$allPlayers->count().' players</p>';
+          $out .= '<ul>';
+          foreach($allPlayers as $p) {
+            $nbEvents = $p->child("name=history")->find("template=event")->count();
+            $nbPages = ceil($nbEvents/$limit);
+            $toCache = $nbPages-1;
+            if ($nbPages > 1) {
+              $nbCached = $p->get("name=history")->tmpScores->count();
+              $out .= '<li>';
+                $out .= $p->title.' : '.$nbEvents.' events';
+                $out .= ' → ';
+                $out .= '<span>'.$nbCached.' out of '.$toCache.' cached </span>';
+                $out .= ' → ';
+                if ($toCache != $nbCached) {
+                  $out .= ' <span class="label label-danger">Error</span>';
+                } else {
+                  $out .= ' <span class="label label-success">OK</span>';
+                }
+                $out .= ' → ';
+                $out .= ' <button class="basicConfirm btn btn-xs btn-danger" data-href="'.$page->url.'setCache/'.$p->id.'?confirm=1" data-toDelete="li">Regenerate cache</button>';
+              $out .= '</li>';
+            }
+          }
+          $out .= '</ul>';
+        } else if ($input->get->confirm) {
+          $playerId = $input->urlSegment2;
+          setCache($playerId);
+        }
         break;
       case 'reports' :
         $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
@@ -1870,7 +1924,7 @@
       case 'setYearlyKarma':
         if ($selectedTeam && $selectedTeam != '-1') {
           $allPlayers = $allPlayers->find("team=$selectedTeam");
-          $out .= '</div>';
+          $out .= '<div>';
           $out .= '<h4 class="text-center">';
           $out .=   'Set yearly Karma for '.$selectedTeam->title;
           $out .= '</h4>';

@@ -239,7 +239,7 @@ $(document).ready(function() {
               title: lang.reload,
               showCancelButton : false,
               showConfirmButton: false,
-              timer: 1000,
+              timer: 500,
             });
 					}); 
 				} else {

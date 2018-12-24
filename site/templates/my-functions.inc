@@ -915,6 +915,33 @@ function saveHistory($player, $task, $newsBoard = 0) {
   return $p;
 }
 
+function setCache($playerId) {
+  $pages = wire('pages');
+  $player = $pages->get($playerId);
+  $player = initPlayer($player);
+  $allEvents = $player->get("name=history")->children()->sort("date");
+  $limit = 50;
+  $nbAllEvents = $allEvents->count();
+  $nbEvents = 0;
+  $curPage = 1;
+  $toCache = ceil($nbAllEvents/$limit)-1;
+  if ($toCache > 0) {
+    foreach($allEvents as $e) {
+      $e->task->comment = trim($e->summary);
+      $e->task->refPage = $e->refPage;
+      $e->task->linkedId = $e->linkedId;
+      updateScore($player, $e->task, false);
+      // Save new cache for each page
+      $nbEvents++;
+      if ($nbEvents == $limit) {
+        saveScoresForCache($player, $curPage);
+        $curPage++;
+        $nbEvents = 0;
+      }
+    }
+  }
+}
+
 function pick_question($player) {
   $sanitizer = wire('sanitizer');
   if ($player->team && $player->team->rank) {
