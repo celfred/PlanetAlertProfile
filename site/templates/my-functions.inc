@@ -199,7 +199,7 @@ function updateScore($player, $task, $real = true) {
       if ($task->refPage) { $tmpEvent->refPage = $task->refPage; };
       // Set date for correct sorting
       setEventDate($task);
-      if ($task->name == 'donation') {
+      if ($task->is("name=donation|ut-action-v|ut-action-vv")) {
         if (!once($tmpEvent, $player->id)) { // Check if event has already been recorded on the same day
           $player->yearlyKarma += eventKarma($tmpEvent);
           if ($player->yearlyKarma < 0) { $player->yearlyKarma = 0; }
@@ -794,16 +794,16 @@ function setCaptains($team, $real = true) {
   }
 }
 
-function setReputation($player) {
-  // Reputation calculated from all values (except GC, Donations and HP)
+function setReputation($player) { // Reputation calculated from all values (except GC, Donations and HP)
+  $free = 20;
+  $equipment = 10;
+  $reputation = (($player->places->count+$player->people->count)*$free) + ($player->equipment->count*$equipment) + $player->XP;
   $levelReputation = 0;
-  if ($player->level > 1) {
-    for ($i=1; $i<=$player->level; $i++) {
-      $levelReputation = $levelReputation + ($i*10)+90;
+  if ($player->level > 1) { // Add completed levels XP
+    for ($i=1; $i<$player->level; $i++) {
+      $levelReputation = $levelReputation + getLevelThreshold($i);
     }
-    $reputation = $levelReputation + $player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
-  } else {
-    $reputation = ($player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10);
+    $reputation += $levelReputation;
   }
   if ($reputation < 0 || $player->coma == 1) { $reputation = 0; }
   return $reputation;
@@ -837,7 +837,7 @@ function once($e, $playerId) {
   return false;
 }
 
-function eventKarma($e) {
+function eventKarma($e) { // Calculate karma evolution according to recorded event
   $karma = 0;
   if ($e->task->is("name=free")) { // Free action
     $karma += 8;
@@ -845,10 +845,12 @@ function eventKarma($e) {
   } else if ($e->task->is("name=buy")) { // Buy action
     $karma += 4;
     $karma += $e->refPage->level;
-  } else if ($e->task->is("name=donation|donated|bought|buy-pdf")) { // 'Manual' positive actions
+  } else if ($e->task->is("name=donation|bought")) { // 'Special' positive actions
     $karma += 1;
-  } else if ($e->task->is("name=remove")) { // 'Manual' negative actions
-    $karma -= 3;
+  } else if ($e->task->is("name=ut-action-v|donated|buy-pdf")) { // 'Neutralized' actions
+    $karma += 0;
+  } else if ($e->task->is("name=remove|death")) { // 'Special' negative actions
+    $karma -= 5;
   } else if ($e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
     $karma += 2;
     if ($e->task->HP>=5 || $e->task->GC>=5 || $e->task->XP>=5) {
