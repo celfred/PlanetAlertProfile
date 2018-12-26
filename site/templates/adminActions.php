@@ -1914,7 +1914,7 @@
           $out .= '<ul><span class="label label-default">Actual reputations</span>';
           foreach($allPlayers as $p) {
             $newReputation = setReputation($p);
-            $out .= '<li>'.$p->title.' : '.$p->reputation.' → '.$newReputation.'</li>';
+            $out .= '<li><a href="'.$page->url.'recalculate/'.$p->id.'">'.$p->title.'</a> : '.$p->reputation.' → '.$newReputation.'</li>';
           }
           $out .= '</ul>';
           $out .= '</section>';
@@ -1932,7 +1932,7 @@
           $out .= '<ul><span class="label label-default">Actual yearly karmas</span>';
           foreach($allPlayers as $p) {
             $newKarma = setYearlyKarma($p);
-            $out .= '<li>'.$p->title.' : '.$p->yearlyKarma.' → '.$newKarma.'</li>';
+            $out .= '<li><a href="'.$page->url.'recalculate/'.$p->id.'">'.$p->title.'</a> : '.$p->yearlyKarma.' → '.$newKarma.'</li>';
           }
           $out .= '</ul>';
           $out .= '</section>';
