@@ -4,6 +4,7 @@ lang = {
 	loading	: "Loading...",
 	yes			: "Yes",
 	no			: "No",
+  reload  : "Please reload the page !",
 	pleaseSelect : "You have to select a player .",
 	teacherAlert : "This action will alert your teacher.<br />A fake alert will cost you a <span class='label label-danger'>civil disobedience</span> !",
 	saved		: "Saved !",

@@ -67,6 +67,26 @@ function initPlayer($player) {
   return $player;
 }
 
+function initPlayerFromCache($player, $cachedPage) {
+  if ($cachedPage) {
+    $player->yearlyKarma = $cachedPage->yearlyKarma;
+    $player->GC = $cachedPage->GC;
+    $player->level = $cachedPage->level;
+    $player->reputation = $cachedPage->reputation;
+    $player->HP = $cachedPage->HP;
+    $player->XP = $cachedPage->XP;
+    $player->places = $cachedPage->places;
+    $player->people = $cachedPage->people;
+    $player->equipment = $cachedPage->equipment;
+    $player->donation = $cachedPage->donation;
+    $player->underground_training = $cachedPage->underground_training;
+    $player->fighting_power = $cachedPage->fighting_power;
+    return $player;
+  } else {
+    return false;
+  }
+}
+
 function resetPlayer($player, $previousLevel) {
   $player->HP = 50; // Full HP
   $player->GC = 0; // Lose all Gold Coins
@@ -179,7 +199,7 @@ function updateScore($player, $task, $real = true) {
       if ($task->refPage) { $tmpEvent->refPage = $task->refPage; };
       // Set date for correct sorting
       setEventDate($task);
-      if ($task->name == 'donation') {
+      if ($task->is("name=donation|ut-action-v|ut-action-vv")) {
         if (!once($tmpEvent, $player->id)) { // Check if event has already been recorded on the same day
           $player->yearlyKarma += eventKarma($tmpEvent);
           if ($player->yearlyKarma < 0) { $player->yearlyKarma = 0; }
@@ -248,7 +268,6 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
   // TODO : Ignore fights ?
   if ($task->is("name!=ut-action-v|ut-action-vv|micro-solo-v")) {
     if ($player->equipment) {
-      $task = checkModTask($task, false, $player); // Get personalized values according to logged in user
       // Limit to the 2 best weapons
       $concerned_weapons = $player->equipment->find("category.name=weapons, sort=-XP, limit=2");
       foreach ($concerned_weapons as $item) {
@@ -413,17 +432,6 @@ function taskExtraAction($player, $task, $real) {
   }
 }
 
-function removeTaskRecalculate($player, $task) {
-  // Limit to 'easy' tasks (extra-training for the moment)
-  if ($task->is("name=extra-homework|intensive-extra-homework")) {
-    setDelta($player, $task);
-    $player->XP = (int) $player->XP-($task->XP+$player->deltaXP);
-    $player->GC = (int) $player->GC-$task->GC;
-    $player->streak--;
-    // Pb if level changed thanks to the task being removed...
-  }
-}
-
 function addUsable($player, $historyPage, $real) {
   $player->of(false);
   if ($real == true) {
@@ -462,7 +470,6 @@ function addGroupItem($player, $historyPage, $real) {
 
 function extraActionAfterSave($player, $historyPage, $real) {
   $pages = wire('pages');
-
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
       $task = $pages->get("template=task, name=penalty"); 
       $task->comment = 'Automatic homework penalty';
@@ -470,7 +477,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
       $task->linkedId = $historyPage->id;
       updateScore($player, $task, $real);
   }
-
   if ($historyPage->task->is("name=donation")) {  // Record the linked 'Donated' event
     $task = $pages->get("name=donated");
     preg_match("/\d+/", $historyPage->summary, $matches);
@@ -481,7 +487,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
     $task->linkedId = $historyPage->id;
     updateScore($receiverPlayer, $task, $real);
   }
-
   if ($historyPage->task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
     $wrongInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date");
     // Limit to events AFTER the last 'Free' action on the oarticular element
@@ -498,7 +503,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
       updateScore($player, $task, $real);
     }
   }
-  
   if ($historyPage->task->is("name=buy")) {
     if ($historyPage->refPage->parent->is("name=group-items") && isset($player->group->id)) { // Save group items for all group members 
       addGroupItem($player, $historyPage, $real);
@@ -508,7 +512,6 @@ function extraActionAfterSave($player, $historyPage, $real) {
       addUsable($player, $historyPage, $real);
     }
   }
-
   // Save new team scores (for cache) if necessary
   if ($real == true) {
     if ($historyPage->task->is("name~=fight|ut-action")) { // Update tmpCache
@@ -516,6 +519,9 @@ function extraActionAfterSave($player, $historyPage, $real) {
     }
     if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
       updateTeamScores($player->team);
+    }
+    if (checkCache($player)) {
+      setCache($player->id, false);
     }
   }
 }
@@ -741,25 +747,22 @@ function displayTrendScores($player, $old) {
   if ($trendFP > 0) { $out .= '<li>+'.$trendFP.'FP→'.$player->fighting_power.'</li>'; }
   if ($trendFP < 0) { $out .= '<li>'.$trendFP.'FP→'.$player->fighting_power.'</li>'; }
   $out .= '</ul>&nbsp;&nbsp;';
-
   return $out;
 }
 
-function displayPlayerScores($player, $label, $class) {
-  $out = '<ul class="list list-inline label label-'.$class.'">'.ucfirst($label).' scores ⇒ ';
-  $out .= '<li>'.$player->yearlyKarma.'K.</li>';
-  $out .= '<li>'.$player->GC.'GC</li>';
-  $out .= '<li>'.$player->level.'lvl</li>';
-  $out .= '<li>'.$player->reputation.'R.</li>';
-  $out .= '<li>'.$player->HP.'HP</li>';
-  $out .= '<li>'.$player->XP.'XP</li>';
-  $out .= '<li>'.$player->places->count.'Pl.</li>';
-  $out .= '<li>'.$player->people->count.'Peo.</li>';
-  $out .= '<li>'.$player->equipment->count.'Eq.</li>';
-  $out .= '<li>'.$player->donation.'Don.</li>';
-  $out .= '<li>'.$player->underground_training.'UT</li>';
-  $out .= '<li>'.$player->fighting_power.'FP</li>';
-  $out .= '</ul>';
+function displayPlayerScores($cachePage) {
+  $out = '<li>'.$cachePage->yearlyKarma.'K.</li>';
+  $out .= '<li>'.$cachePage->GC.'GC</li>';
+  $out .= '<li>'.$cachePage->level.'lvl</li>';
+  $out .= '<li>'.$cachePage->reputation.'R.</li>';
+  $out .= '<li>'.$cachePage->HP.'HP</li>';
+  $out .= '<li>'.$cachePage->XP.'XP</li>';
+  $out .= '<li>'.$cachePage->places->count.'Pl.</li>';
+  $out .= '<li>'.$cachePage->people->count.'Peo.</li>';
+  $out .= '<li>'.$cachePage->equipment->count.'Eq.</li>';
+  $out .= '<li>'.$cachePage->donation.'Don.</li>';
+  $out .= '<li>'.$cachePage->underground_training.'UT</li>';
+  $out .= '<li>'.$cachePage->fighting_power.'FP</li>';
   return $out;
 }
 
@@ -791,16 +794,16 @@ function setCaptains($team, $real = true) {
   }
 }
 
-function setReputation($player) {
-  // Reputation calculated from all values (except GC, Donations and HP)
+function setReputation($player) { // Reputation calculated from all values (except GC, Donations and HP)
+  $free = 20;
+  $equipment = 10;
+  $reputation = (($player->places->count+$player->people->count)*$free) + ($player->equipment->count*$equipment) + $player->XP;
   $levelReputation = 0;
-  if ($player->level > 1) {
-    for ($i=1; $i<=$player->level; $i++) {
-      $levelReputation = $levelReputation + ($i*10)+90;
+  if ($player->level > 1) { // Add completed levels XP
+    for ($i=1; $i<$player->level; $i++) {
+      $levelReputation = $levelReputation + getLevelThreshold($i);
     }
-    $reputation = $levelReputation + $player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10 - ((50-$player->HP)*5);
-  } else {
-    $reputation = ($player->XP + $player->places->count*20 + $player->people->count*20 + $player->equipment->count*10);
+    $reputation += $levelReputation;
   }
   if ($reputation < 0 || $player->coma == 1) { $reputation = 0; }
   return $reputation;
@@ -834,7 +837,7 @@ function once($e, $playerId) {
   return false;
 }
 
-function eventKarma($e) {
+function eventKarma($e) { // Calculate karma evolution according to recorded event
   $karma = 0;
   if ($e->task->is("name=free")) { // Free action
     $karma += 8;
@@ -842,10 +845,12 @@ function eventKarma($e) {
   } else if ($e->task->is("name=buy")) { // Buy action
     $karma += 4;
     $karma += $e->refPage->level;
-  } else if ($e->task->is("name=donation|donated|bought|buy-pdf")) { // 'Manual' positive actions
+  } else if ($e->task->is("name=donation|bought")) { // 'Special' positive actions
     $karma += 1;
-  } else if ($e->task->is("name=remove")) { // 'Manual' negative actions
-    $karma -= 3;
+  } else if ($e->task->is("name=ut-action-v|donated|buy-pdf")) { // 'Neutralized' actions
+    $karma += 0;
+  } else if ($e->task->is("name=remove|death")) { // 'Special' negative actions
+    $karma -= 5;
   } else if ($e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
     $karma += 2;
     if ($e->task->HP>=5 || $e->task->GC>=5 || $e->task->XP>=5) {
@@ -907,6 +912,64 @@ function saveHistory($player, $task, $newsBoard = 0) {
   $p->linkedId = $task->linkedId;
   $p->save(); 
   return $p;
+}
+
+function checkCache($player) {
+  $limit=50;
+  $nbEvents = $player->get("name=history")->numChildren();
+  $toCache = ceil($nbEvents/$limit)-1; // Skip last page
+  if ($toCache > 0) {
+    $nbCached = $player->get("name=history")->tmpScores->count();
+    if ($toCache != $nbCached) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
+function setCache($playerId, $force = false) {
+  $pages = wire('pages');
+  $player = $pages->get($playerId);
+  $allEvents = $player->get("name=history")->children()->sort("date");
+  $limit = 50;
+  $curPage = 1;
+  $nbEvents = 0;
+  $nbAllEvents = $allEvents->count();
+  $toCache = ceil($nbAllEvents/$limit)-1;
+  if ($toCache > 0) {
+    if ($force) {
+      $player = initPlayer($player);
+      $curPage = 1;
+    } else { // Only add new cache page (if possible)
+      $allCached = $player->get("name=history")->tmpScores;
+      $nbCached = $allCached->count();
+      if ($toCache == ($nbCached+1) && $nbCached > 0) {
+        $player = initPlayerFromCache($player, $allCached->last());
+        $nbPrevious = $nbCached*$limit;
+        $curPage = $toCache;
+        $allEvents->filter("start=$nbPrevious, limit=$limit"); // Limit to 50 events starting after previous cached events
+      } else { // Error detected, force cache regeneration
+        setCache($playerId, true);
+        return false;
+      }
+    }
+    foreach($allEvents as $e) {
+      $e->task->comment = trim($e->summary);
+      $e->task->refPage = $e->refPage;
+      $e->task->linkedId = $e->linkedId;
+      updateScore($player, $e->task, false);
+      // Save new cache for each page
+      $nbEvents++;
+      if ($nbEvents == $limit) {
+        saveScoresForCache($player, $curPage);
+        $curPage++;
+        $nbEvents = 0;
+      }
+    }
+  }
 }
 
 function pick_question($player) {
@@ -1125,6 +1188,34 @@ function teamFreeworld($team) {
   $allCompleted = $allElements->find("completed=1");
   $allElements->sort("-completed, level, title");
   return $allElements;
+}
+
+function saveScoresForCache($player, $index) {
+  // Check if previous cached exist
+  $historyPage = $player->get("name=history");
+  $tmpPage = $historyPage->tmpScores->eq($index-1);
+  if (!$tmpPage) { // Create cache page
+    $tmpPage = $historyPage->tmpScores->getNew();
+  }
+  $tmpPage->of(false);
+  if ($tmpPage) {
+    $tmpPage->yearlyKarma = $player->yearlyKarma;
+    $tmpPage->reputation = $player->reputation;
+    $tmpPage->level = $player->level;
+    $tmpPage->HP = $player->HP;
+    $tmpPage->XP = $player->XP;
+    $tmpPage->GC = $player->GC;
+    $tmpPage->underground_training = $player->underground_training;
+    $tmpPage->fighting_power = $player->fighting_power;
+    $tmpPage->donation = $player->donation;
+    $tmpPage->equipment = $player->equipment;
+    $tmpPage->places = $player->places;
+    $tmpPage->people = $player->people;
+    $tmpPage->coma = $player->coma;
+    $tmpPage->save();
+  }
+  $historyPage->of(false);
+  $historyPage->save();
 }
 
 function updateTeamScores($team) {
@@ -2294,25 +2385,29 @@ function checkModTask($task, $headTeacher = false, $player = false) {
   $modTask = clone $task;
   $user = wire('user');
   if (!$headTeacher) {
-    if ($player) {
-      $headTeacher = getHeadTeacher($player);
+    if ($user->hasRole('teacher')) {
+      $headTeacher = $user;
     } else {
-      if ($user->hasRole('teacher')) {
-        $headTeacher = $user;
+      if ($player) {
+        $headTeacher = getHeadTeacher($player);
       }
     }
   }
-  $mod = $task->owner->get("singleTeacher=$headTeacher, include=hidden"); // Get personalized infos if needed
-  if ($mod) {
-    $task->mod = true;
-    $mod->title != '' ? $modTask->title = $mod->title : $modTask->title = $task->title;
-    $mod->teacherTitle != '' ? $modTask->teacherTitle = $mod->teacherTitle : $modTask->teacherTitle = $task->teacherTitle;
-    $mod->summary != '' ? $modTask->summary = $mod->summary : $modTask->summary = $task->summary;
-    $mod->HP != '' ? $modTask->HP = $mod->HP : $modTask->HP = $task->HP;
-    $mod->XP != '' ? $modTask->XP = $mod->XP : $modTask->XP = $task->XP;
-    $mod->GC != '' ? $modTask->GC = $mod->GC : $modTask->GC = $task->GC;
+  if ($headTeacher) {
+    $mod = $task->owner->get("singleTeacher=$headTeacher"); // Get personalized infos if needed
+    if ($mod) {
+      $task->mod = true;
+      $mod->title != '' ? $modTask->title = $mod->title : $modTask->title = $task->title;
+      $mod->teacherTitle != '' ? $modTask->teacherTitle = $mod->teacherTitle : $modTask->teacherTitle = $task->teacherTitle;
+      $mod->summary != '' ? $modTask->summary = $mod->summary : $modTask->summary = $task->summary;
+      $mod->HP != '' ? $modTask->HP = $mod->HP : $modTask->HP = $task->HP;
+      $mod->XP != '' ? $modTask->XP = $mod->XP : $modTask->XP = $task->XP;
+      $mod->GC != '' ? $modTask->GC = $mod->GC : $modTask->GC = $task->GC;
+    }
+    return $modTask;
+  } else {
+    return $task;
   }
-  return $modTask;
 }
 
 function getHeadTeacher($player) {
@@ -2325,7 +2420,7 @@ function getHeadTeacher($player) {
       $playerPage = false;
     }
     if ($userPlayer->hasRole('player')) {
-      $playerPage = $pages->get("template=player, login=$userPlayer->name"); 
+      $playerPage = $pages->get("parent.name=players, login=$userPlayer->name"); 
     }
     if ($userPlayer->isGuest()) {
       $playerPage = false;
@@ -2338,7 +2433,7 @@ function getHeadTeacher($player) {
       $playerPage = false;
     }
   }
-  if ($playerPage) {
+  if ($playerPage != false) {
     if ($playerPage->team && $playerPage->team->teacher->first()) {
       $headTeacher = $playerPage->team->teacher->first();
     } else {
@@ -2365,7 +2460,7 @@ function miniProfile($player, $type = '') {
     // Display scores
     $out .= '<li><span class="label label-success">'.__("Karma").' : '.$player->yearlyKarma.'</span></li>';
     $out .= '<li><span class="label label-success">'.__("Reputation").' : '.$player->reputation.'</span></li>';
-    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Level"><span class="glyphicon glyphicon-signal"></span> '.$player->level.'</span>';
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Level').'"><span class="glyphicon glyphicon-signal"></span> '.$player->level.'</span>';
     $threshold = getLevelThreshold($player->level);
     $out .= ' <span class="label label-default" data-toggle="tooltip" title="XP"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$player->XP.'/'.$threshold.'</span></li>';
     if ($player->places) {
@@ -2374,10 +2469,10 @@ function miniProfile($player, $type = '') {
     if ($player->team->rank && $player->team->rank->is('index>=8') && $player->people) {
       $nbFreeEl += $player->people->count();
     }
-    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Free Elements"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
-    $out .= ' <span class="label label-default" data-toggle="tooltip" title="Equipment"><span class="glyphicon glyphicon-wrench"></span> '.$player->equipment->count().'</span></li>';
-    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' '.__('UT').'</span>';
-    $out .= ' <span class="label label-default" data-toggle="tooltip" title="Fighting Power">'.$player->fighting_power.' '.__('FP').'</span>';
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Free Elements').'"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
+    $out .= ' <span class="label label-default" data-toggle="tooltip" title="'.__('Equipment').'"><span class="glyphicon glyphicon-wrench"></span> '.$player->equipment->count().'</span></li>';
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Underground Training').'">'.$player->underground_training.' '.__('UT').'</span>';
+    $out .= ' <span class="label label-default" data-toggle="tooltip" title="'.__('Fighting Power').'">'.$player->fighting_power.' '.__('FP').'</span>';
     $out .= '</li>';
     $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Health Points').'"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> '.$player->HP.'</span>';
     $out .= ' <span id="playerGC" class="label label-default" data-toggle="tooltip" title="'.__('Gold Coins').'"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$player->GC.'</span></li>';

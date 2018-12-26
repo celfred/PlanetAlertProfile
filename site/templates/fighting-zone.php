@@ -60,7 +60,7 @@
         $out .= '<h4 class="text-center">';
         $out .= sprintf(__("There are currently %d monsters detected."), $allMonsters->count());
         if (isset($hiddenMonstersNb)) {
-          $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
+          $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">'.__('Electronic Visualizer').'</a>';
           /* $out .= '<p>('.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).')</p>'; */
         } else {
           /* $out .= '<p>('.__("All monsters are visible thanks to your Electronic Visualizer.").')</p>'; */

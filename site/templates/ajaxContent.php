@@ -145,7 +145,13 @@
                 break;
               case 'ut-action-v' :
               case 'ut-action-vv' :
-                $out .= '<span class="">'.__("Underground Training for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                bd($user->language->name);
+                if ($user->language->name == 'default') {
+                  $summary = str_replace("U.T.", "UT", $n->summary);
+                } else {
+                  $summary = str_replace("U.T.", "ES", $n->summary);
+                }
+                $out .= '<span class="">'.__("Underground Training for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.$sanitizer->entities($summary).'</span>';
                 break;
               case 'donation' :
                 $out .= '<span class="">'.__("Generous attitude from").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.'] : '.html_entity_decode($n->summary).'</span>';
@@ -321,8 +327,8 @@
           $out .= '<div class="col-sm-6 text-left">';
           $out .= '<ul class="list-unstyled">';
           if ($p->coma == 0) {
-            $out .= '<li><span class="label label-success">Karma : '.$p->yearlyKarma.'</span></li>';
-            $out .= '<li><span class="label label-success">Reputation : '.$p->reputation.'</span></li>';
+            $out .= '<li><span class="label label-success">'.__('Karma').' : '.$p->yearlyKarma.'</span></li>';
+            $out .= '<li><span class="label label-success">'.__('Reputation').' : '.$p->reputation.'</span></li>';
             $out .= '<li><span class="label label-default"><span class="glyphicon glyphicon-signal"></span> '.$p->level.'</span>';
             $threshold = getLevelThreshold($p->level);
             $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$p->XP.'/'.$threshold.'</span></li>';
@@ -570,12 +576,12 @@
                 echo $m->monster->title;
               }
               echo '</span> : ';
-              echo '<span>'.$m->monster->utGain.'UT</span>';
+              echo '<span>'.$m->monster->utGain.__('UT').'</span>';
               if ($m->monster->isTrainable == 1) {
-                echo ' <span>[Last training : '.$m->monster->lastTrainingInterval.']</span>';
+                echo ' <span>['.__('Last training').' : '.$m->monster->lastTrainingInterval.']</span>';
               } else {
                 if ($m->monster->waitForTrain == 1) { $label = __('Available tomorrow !'); } else { $label = sprintf(__("Available in %d days"), $m->monster->waitForTrain); }
-                echo ' <span data-toggle="tooltip" title="'.$label.'" onmouseenter="$(this).tooltip(\'show\');">[Last training : '.$m->monster->lastTrainingInterval.']</span>';
+                echo ' <span data-toggle="tooltip" title="'.$label.'" onmouseenter="$(this).tooltip(\'show\');">['.__('Last training').' : '.$m->monster->lastTrainingInterval.']</span>';
               }
               echo '</li>';
             }
@@ -595,7 +601,7 @@
         if ($tmpPage->id && $tmpPage->tmpMonstersActivity) {
           $allConcernedMonsters = $tmpPage->tmpMonstersActivity->find("fightNb>0")->sort("lastFightDate");
           if ($allConcernedMonsters->count() > 0) {
-            echo '<p class="label label-success"> '.sprintf(__("You have fougth %d different monsters"), $allConcernedMonsters->count()).'</p>';
+            echo '<p class="label label-success"> '.sprintf(__("You have fought %d different monsters"), $allConcernedMonsters->count()).'</p>';
             echo '<ul class="utReport list-group list-unstyled">';
             foreach($allConcernedMonsters as $m) {
               setMonster($playerPage, $m->monster);
@@ -625,7 +631,7 @@
         $playerPage = $pages->get("id=$playerId");
         $allBattles = battleReport($playerPage);
         if ($allBattles->count() > 0) {
-          echo '<p class="label label-primary">You have faced '.$allBattles->count().' monster attacks.</p>';
+          echo '<p class="label label-primary">'.sprintf(_n('You have faced %d monster attack.', 'You have faced %d monster attacks.', $allBattles->count()), $allBattles->count()).'</p>';
             echo '<ul class="utReport list-group list-unstyled">';
             foreach ($allBattles as $m) {
               echo '<li>'.$m->result.' : '.$m->summary.'';
@@ -641,6 +647,7 @@
         $playerId = $input->get('playerId');
         $playerPage = $pages->get($playerId);
         $headTeacher = getHeadTeacher($playerPage);
+        if ($headTeacher->language->name == 'french') { $user->language = $french; }
         $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
         $allCategories = new PageArray();
         foreach ($allEvents as $e) {
@@ -672,7 +679,7 @@
         $out .= '  <tbody>';
         foreach($allEvents as $event) {
           $event->task = checkModTask($event->task, $headTeacher);
-          if ($event->task->XP > 0 || ($event->task->is("name=free|buy|positive-collective-alchemy"))) {
+          if ($event->task->XP > 0 || $event->task->GC > 0 || ($event->task->is("name=free|buy|positive-collective-alchemy"))) {
             $class = '+';
           } else {
             $class = '-';
