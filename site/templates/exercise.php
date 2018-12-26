@@ -1,11 +1,40 @@
 <?php namespace ProcessWire;
   if (!$config->ajax) { // Fight or train on monster
     include("./head.inc"); 
+    
+    // check for login before outputting markup
+    if($input->post->username && $input->post->pass) {
+      $userName = $sanitizer->pageName($input->post->username);
+      $pass = $input->post->pass; 
+      if($session->login($userName, $pass)) {
+        $session->redirect($page->url); // Redirect logged user to page to set up all variable
+      }
+    }
+
     if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
       echo $wrongBrowserMessage;
     } else {
       if (!$user->isLoggedin()) {
-        echo $noAuthMessage;
+        echo '<p class="well text-center">'.__("You MUST log in to access this page !").'</p>';
+        //echo $noAuthMessage;
+        echo '<div class="col-md-10 text-center">';
+        if($input->post->username || $input->post->pass) echo "<h3><span class='label label-danger'>Login failed... (check user name or password)</span></h3>";
+        echo '<form class="form-horizontal loginForm" action="'.$page->url.'" method="post">';
+        echo '<div class="form-group">';
+        echo '<label for="username" class="col-sm-4 control-label">User :</label>';
+        echo '<div class="col-sm-6">';
+        echo '<input class="form-control" type="text" name="username" id="username" placeholder="Username" />';
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="form-group">';
+        echo '<label for="pass" class="col-sm-4 control-label">Password :</label>';
+        echo '.<div class="col-sm-6">';
+        echo '.<input class="form-control" type="password" name="pass" id="pass" placeholder="Password" /></label></p>';
+        echo '</div>';
+        echo '</div>';
+        echo '<input type="submit" class="btn btn-info" name="submit" value="Connect" />';
+        echo '</form>';
+        echo '</div>';
       } else {
         // Check for publish state from exerciseOwner or created_users_id
         if ($user->isSuperuser() || $user->hasRole('teacher') || ($page->exerciseOwner->get("singleTeacher=$headTeacher") != NULL && $page->exerciseOwner->get("singleTeacher=$headTeacher")->publish == 1)) {

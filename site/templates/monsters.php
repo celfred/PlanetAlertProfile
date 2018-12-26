@@ -125,7 +125,7 @@
         if ($m->is(Page::statusUnpublished)) {
           $out .= '<span style="text-decoration: line-through">'.$m->title.'</span>';
         } else {
-          $out .= $m->title;
+          $out .= '<a href="'.$m->url.'train">'.$m->title.'</a>';
         }
         $out .= '';
         $out .= '</td>';

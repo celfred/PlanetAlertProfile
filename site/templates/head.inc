@@ -235,7 +235,7 @@
     }
 
     if ($user->hasRole('player')) { // Player's menu
-      $player = $pages->get("template='player', login=$user->name");
+      $player = $pages->get("parent.name=players, template=player, login=$user->name");
       $user->language = $headTeacher->language; // Teacher chooses the language for his students
       $allTeams = $pages->find("template=team, teacher=$headTeacher, sort=title");
       if ($player->team->name != 'no-team') {
