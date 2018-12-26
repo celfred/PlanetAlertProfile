@@ -30,6 +30,23 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.7.0] - [26/12/2018]
+Players' scores are now cached to avoid timed-out recalculation when players had many events in their history. 
+
+Underground Training impact on karma is limited in order to be more fair towards players not having an easy internet access.
+
+### Added
+- Cache management when recalculating history
+
+### Changed
+- Reputation recalculation rules are changed
+- Karma recalculation rules are changed : simple UT 
+- 3UT makes a training session excellent (used to be 5UT) : the goal is to encourage players to obtain +3UT instead of doing 3 sessions at +1UT.
+
+### Backend
+- tmpScores repeater added to 'archive' template
+
+
 ## [v0.6.0] - [19/12/2018]
 The main change is the publish/unpublish feature for teachers but as always, many bug fixes and some translation issues, along with many small additions.
 
@@ -475,3 +492,4 @@ Initial official release.
 [v0.4.0]: https://framagit.org/celfred/planetAlert/tags/v0.4.0
 [v0.5.0]: https://framagit.org/celfred/planetAlert/tags/v0.5.0
 [v0.6.0]: https://framagit.org/celfred/planetAlert/tags/v0.6.0
+[v0.7.0]: https://framagit.org/celfred/planetAlert/tags/v0.7.0

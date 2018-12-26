@@ -1,8 +1,10 @@
 <?php namespace ProcessWire;
   include('./my-functions.inc'); // Planet Alert PHP functions
 
-  $headTeacher = getHeadTeacher($user);
-  $user->language = $headTeacher->language;
+  if (!$user->isSuperuser()) {
+    $headTeacher = getHeadTeacher($user);
+    $user->language = $headTeacher->language;
+  }
 
   if ($user->hasRole('player')) {
     // Get logged in player

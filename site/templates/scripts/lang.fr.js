@@ -4,6 +4,7 @@ lang = {
 	loading	: "Chargement...",
 	yes			: "Oui",
 	no			: "Non",
+  reload  : "Pensez à actualiser la page !",
 	pleaseSelect : "Il faut sélectionner un·e joueu·r·se.",
 	teacherAlert : "Cette action alertera ton·a professeur·e.<br />Une fausse alerte te coûtera des points !",
 	saved		: "Enregistré !",

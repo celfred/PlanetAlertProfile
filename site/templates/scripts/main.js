@@ -208,7 +208,16 @@ $(document).ready(function() {
 	$('.basicConfirm').on('click', function() {
 		var $this = $(this);
 		var $href = $this.attr('data-href');
-		var $reload = $this.attr("data-reload");
+    if ($this.attr("data-reload")) {
+      var $reload = $this.attr("data-reload");
+    } else {
+      var $reload = 'false';
+    }
+    if ($this.attr("data-toDelete")) {
+      var $toDelete = $this.parents($this.attr("data-toDelete"));
+    } else {
+      var $toDelete = '';
+    }
 		swal({
 			title: lang.sure,
 			type: "warning",
@@ -223,8 +232,15 @@ $(document).ready(function() {
 				if ($reload == 'false') {
 					$.get($href, function(data) { 
 						$this.next('.proceedFeedback').html(lang.saved);
-						$('#wrap').prepend(data);
+						// $('#wrap').prepend(data);
 						setTimeout( function() { $this.next('.proceedFeedback').html(''); }, 3000);
+            if ($toDelete != '') { $toDelete.remove(); }
+            swal({
+              title: lang.reload,
+              showCancelButton : false,
+              showConfirmButton: false,
+              timer: 500,
+            });
 					}); 
 				} else {
 					window.location.href = $href;
@@ -1045,7 +1061,7 @@ $(document).ready(function() {
 					}
 				}
 				$(document).ajaxStop(function() {
-					window.location.href = $redirectUrl;
+          //window.location.href = $redirectUrl;
 					setTimeout( function(){ $('#progress').text(lang.redirecting); }, 1000);
 				})
 				swal({
@@ -1122,12 +1138,12 @@ var initTables = function() {
     order: [[ 0, "asc"]]
   });
   var trainingTable = $('#trainingTable').DataTable({
-    lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+    lengthMenu: [ [25, 50, -1], [25, 50, lang.all] ],
     order: [[ 0, "asc"], [2, "asc"]]
   });
   var historyTable = $('#historyTable').DataTable({
 		retrieve: true,
-    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, lang.all] ],
     order: [[ 0, "desc"]]
   });
   var taskTable = $('#taskTable').DataTable({

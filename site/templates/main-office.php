@@ -229,7 +229,7 @@
       $out .= '<div class="panel-footer text-center">';
       if (isset($teamRecentUt) && $teamRecentUt->count() > 0) {
         $out .= '<h3>';
-          $out .= '<span class="label label-success"><i class="glyphicon glyphicon-headphones"></i> '.$teamRecentUt->count().' UT sessions → '.$utPlayersList.' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
+          $out .= '<span class="label label-success"><i class="glyphicon glyphicon-headphones"></i> '.$teamRecentUt->count().' '.__('UT sessions').' → '.$utPlayersList.' <i class="glyphicon glyphicon-thumbs-up"></i></span>';
         $out .= '</h3>';
       } else {
         $out .= '<h3>'.__("No recent UT training :(").'</h3>';

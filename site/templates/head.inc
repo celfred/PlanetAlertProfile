@@ -204,7 +204,7 @@
               $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$adminActions->url}reports/' target='_blank'><span class='glyphicon glyphicon-file'></span> - ".__('Reports')."</a></li>";
               $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$adminActions->url}users' target='_blank'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
+              $out .= "<li><a$class href='{$adminActions->url}users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
               $class = $page->name == 'statistics' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$pages->get("name=statistics")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Statistics')."</a></li>";
               
@@ -222,6 +222,8 @@
                 $out .= "<li><a$class href='{$adminActions->url}/setYearlyKarma/'>Set yearly karmas</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCaptains' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/setCaptains/'>Set captains</a></li>";
+                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCache' ? " class='selected-left'" : "";
+                $out .= "<li><a$class href='{$adminActions->url}setCache/'>Set cache</a></li>";
                 $class = $page->name == 'script' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/script/'>Script</a></li>";
               }
@@ -460,7 +462,7 @@
           $announcements = $pages->find("template=announcement, publish=1, parent=$allTeams, created_users_id=$adminId")->sort("-date");
           if ($announcements->count()>0) {
             foreach($announcements as $a) {
-              echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$player->id.'">';
+              echo '<div class="alert alert-info alert-dismissible announcement" role="alert" data-href="'.$pages->get("name=ajax-content")->url.'?id=unPublish&announcementId='.$a->id.'&playerId='.$user->id.'">';
               echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
               echo '<span class="label label-danger"><span class="glyphicon glyphicon-comment"></span> '.__("Admin's message").' : '.$a->title.'</span>';
               echo $a->body;
