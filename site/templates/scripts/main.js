@@ -274,6 +274,33 @@ $(document).ready(function() {
     return false;
 	});
 
+	$('.confirmSubmit').on('click', function(e) {
+    $this = $(this);
+    e.preventDefault();
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			confirmButtonText: lang.yes,
+			cancelButtonText: lang.no,
+		}).then(result => {
+			if (result.value) {
+        $this.parents('form').submit();
+			} else {
+				return false;
+			}
+		});
+  });
+
+  $('.toggleCheckboxes').on('click', function(e) {
+    var checked = $(this).prop('checked');
+    var index = $(this).parent().parent().index();
+    $('tr').each(function(i, val){
+      $(val).children().eq(index).children().children('input[type=checkbox]').prop("checked", checked);
+    });
+  });
+
 	$('.confirm').on('click', function() {
 		$this = $(this);
 		swal({

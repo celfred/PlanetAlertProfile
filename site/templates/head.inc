@@ -207,6 +207,8 @@
               $out .= "<li><a$class href='{$adminActions->url}users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
               $class = $page->name == 'statistics' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$pages->get("name=statistics")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Statistics')."</a></li>";
+              $class = $page->name == 'sacoche' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$pages->get("name=sacoche")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Import SACoche')."</a></li>";
               
               // Add Admin Zone
               if ($user->isSuperuser()) {
