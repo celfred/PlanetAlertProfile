@@ -13,6 +13,8 @@
     $battleV = $pages->get("name=battle-v");
     $battleR = $pages->get("name=battle-r");
     $battleRR = $pages->get("name=battle-rr");
+    $allNegPlayers = new PageArray();
+    $uniqueId = mt_rand(100000, 999999); // Unique test number
     foreach ($input->post->events as $details=>$value) {
       list($playerId, $result, $itemIndex) = explode('-', $details, 3);
       switch($result) {
@@ -23,11 +25,20 @@
         default : $task = false;
       }
       if ($task) {
+        $task->linkedId = $uniqueId; // All events have the same test reference
         $task->comment = $input->post->items[$itemIndex];
         $player = $pages->get("id=$playerId");
         updateScore($player, $task, true);
+        if ($result == 1 || $result == 2) { $allNegPlayers->add($player); }
       }
     }
+    // Check death for each players having a negative action
+    $allNegPlayers = $allNegPlayers->unique();
+    foreach($allNegPlayers as $p) {
+      checkDeath($p, true);
+    }
+    // Set group captains (get team from last player)
+    setCaptains($player->team);
     $out .= '<h3 class="text-center"><span>'.__("Results have been saved !")."</span></h3>";
     $out .= '<form name="uploadFile" action="'.$page->url.'" method="post" enctype="multipart/form-data">';
     $out .= '<input type="file" name="myFile" />';
@@ -58,7 +69,6 @@
           }
           if ($num == $firstNum && $row > 0) { // Skip first line (SACoche pupils' IDs)
             $results[$row] = [];
-            /* $out .= "<p> $num fields in line $row: <br /></p>\n"; */
             for ($c=0; $c < $num; $c++) {
               // Build results data
               // In each row, first item is item's id, last item is item's name
@@ -88,46 +98,6 @@
         $out .= __('Error opening the file !');
       } 
 
-      /* $handle = fopen($filePath, "r"); */
-      /* if ($handle) { */
-      /*   $row = 0; */
-      /*   while (($data = fgetcsv($handle, 0, ";")) !== FALSE) { */
-      /*     $num = count($data); */
-      /*     if ($row == 0) { */
-      /*       $firstNum = $num; */
-      /*     } */
-      /*     if ($num == $firstNum && $row > 0) { // Skip first line (SACoche pupils' IDs) */
-      /*       $results[$row] = []; */
-      /*       /1* $out .= "<p> $num fields in line $row: <br /></p>\n"; *1/ */
-      /*       for ($c=0; $c < $num; $c++) { */
-      /*         // Build results data */
-      /*         // In each row, first item is item's id, last item is item's name */
-      /*         // Last row is players' names */
-      /*         $results[$row][$c] = utf8_encode($data[$c]); */
-      /*       } */
-      /*     } */
-      /*     $row++; */
-      /*   } */
-      /*   $results = array_values($results); */
-      /*   // Read SACoche extra lines */
-      /*   fclose($handle); */
-      /*   $handle = fopen($page->csvFile->path.$page->csvFile->filename, "r"); */
-      /*   $row = 0; */
-      /*   while(!feof($handle)) { */
-      /*     $line = fgets($handle); */
-      /*     if ($row == count($results)+2) { */
-      /*       $teamName = $sanitizer->pagename($line); */
-      /*     } */
-      /*     if ($row == count($results)+4) { */
-      /*       $testTitle = utf8_encode($line); */
-      /*     } */
-      /*     $row++; */
-      /*   } */
-      /*   fclose($handle); */
-      /* } else { */
-      /*   $out .= __('Error opening the file !'); */
-      /* } */ 
-
       if ($results) {
         $namesRowIndex = count($results)-1;
         // Build events and items
@@ -136,7 +106,6 @@
         for($j=0; $j<$namesRowIndex; $j++) { // Skip names row
           array_push($items, end($results[$j]));
           for($k = 1; $k<count($results[$namesRowIndex]); $k++) { // Skip first value (SACoche's itemId)
-            /* $events[$pupils[$k]][end($results[$j])] = $results[$j][$k+1]; */
             if ($results[$namesRowIndex][$k] != '') {
               $events[$results[$namesRowIndex][$k]][end($results[$j])] = $results[$j][$k];
             }
