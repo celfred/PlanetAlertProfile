@@ -340,7 +340,7 @@
           // Check headTeacher's customization
           $headTeacher = getHeadTeacher($player);
           $mod = $currentPeriod->periodOwner->get("singleTeacher=$headTeacher");
-          if ($mod->id) {
+          if (isset($mod)) {
             $mod->dateStart != '' ? $dateStart = $mod->dateStart : '';
             $mod->dateEnd != '' ? $dateEnd = $mod->dateEnd : '';
           }
