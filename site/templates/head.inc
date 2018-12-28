@@ -343,6 +343,18 @@
               // Hall of Fame
               $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$hall->url}'><span class='glyphicon glyphicon-eye-open'></span> - ".__("Visit the Hall of Fame")."</a></li>";
+              if ($player->team->name != 'cm1') {
+                $out .= '<li class="dropdown-submenu">';
+                  $out .= '<a href="#"><span class="glyphicon glyphicon-education"></span> - '.__("Go to School").'</span></a>';
+                  $out .= '<ul class="dropdown-menu">';
+                    if ($player->team->name != 'no-team') {
+                      $out .= "<li><a href='https://flenglish.tuxfamily.org/articles/cahier-classe-".$player->team->name."' target='_blank'>See my online copybook</a></li>";
+                    }
+                    $out .= "<li><a href='https://sacoche.sesamath.net/sacoche/index.php' target='_blank'>See SACoche</a></li>";
+                    $out .= "<li><a href='https://clg-pasteur-raon.monbureaunumerique.fr/' target='_blank'>Go to the 'ENT'</a></li>";
+                  $out .= '</ul>';
+                $out .= '</li>';
+              }
             $out .= '</ul>';
           $out .= '</div>';
           $out .= '<div class="btn-group">';
