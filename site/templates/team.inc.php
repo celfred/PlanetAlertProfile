@@ -245,7 +245,11 @@
     }
     $out .= '<tr '. $class.'>';
     $out .= '<td>';
-    if ($player->group) { $out .= $player->group->title; };
+    if ($player->group) { 
+      $out .= $player->group->title;
+    } else {
+      $out .= '-';
+    };
     $out .= '</td>';
     $out .= '<td>'. $mini .'</td>';
     $out .= '<td>';

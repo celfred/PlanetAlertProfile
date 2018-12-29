@@ -181,6 +181,8 @@
                 $out .= '<ul class="dropdown-menu">';
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-periods' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/manage-periods/'><span class='glyphicon glyphicon-calendar'></span> - ".__('Manage periods')."</a></li>";
+                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-groups' ? " class='selected-left'" : "";
+                $out .= "<li><a$class href='{$adminActions->url}/manage-groups/'><span class='glyphicon glyphicon-user'></span> - ".__('Manage group names')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-actions' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/manage-actions/'><span class='glyphicon glyphicon-flash'></span> - ".__('Manage actions')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-categories' ? " class='selected-left'" : "";
@@ -207,6 +209,8 @@
               $out .= "<li><a$class href='{$adminActions->url}users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
               $class = $page->name == 'statistics' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$pages->get("name=statistics")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Statistics')."</a></li>";
+              $class = $page->name == 'sacoche' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$pages->get("name=sacoche")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Import SACoche')."</a></li>";
               
               // Add Admin Zone
               if ($user->isSuperuser()) {
@@ -235,7 +239,7 @@
     }
 
     if ($user->hasRole('player')) { // Player's menu
-      $player = $pages->get("template='player', login=$user->name");
+      $player = $pages->get("parent.name=players, template=player, login=$user->name");
       $user->language = $headTeacher->language; // Teacher chooses the language for his students
       $allTeams = $pages->find("template=team, teacher=$headTeacher, sort=title");
       if ($player->team->name != 'no-team') {
@@ -343,6 +347,18 @@
               // Hall of Fame
               $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$hall->url}'><span class='glyphicon glyphicon-eye-open'></span> - ".__("Visit the Hall of Fame")."</a></li>";
+              if ($player->team->name != 'cm1') {
+                $out .= '<li class="dropdown-submenu">';
+                  $out .= '<a href="#"><span class="glyphicon glyphicon-education"></span> - '.__("Go to School").'</span></a>';
+                  $out .= '<ul class="dropdown-menu">';
+                    if ($player->team->name != 'no-team') {
+                      $out .= "<li><a href='https://flenglish.tuxfamily.org/articles/cahier-classe-".$player->team->name."' target='_blank'>See my online copybook</a></li>";
+                    }
+                    $out .= "<li><a href='https://sacoche.sesamath.net/sacoche/index.php' target='_blank'>See SACoche</a></li>";
+                    $out .= "<li><a href='https://clg-pasteur-raon.monbureaunumerique.fr/' target='_blank'>Go to the 'ENT'</a></li>";
+                  $out .= '</ul>';
+                $out .= '</li>';
+              }
             $out .= '</ul>';
           $out .= '</div>';
           $out .= '<div class="btn-group">';

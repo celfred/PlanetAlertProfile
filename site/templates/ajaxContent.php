@@ -626,17 +626,58 @@
           }
         }
         break;
-      case 'battlereport' : // Battle report
+      case 'battlereport' : // Battle report (TODO : Limit to current school year ?)
         $playerId = $input->get('playerId');
         $playerPage = $pages->get("id=$playerId");
         $allBattles = battleReport($playerPage);
-        if ($allBattles->count() > 0) {
-          echo '<p class="label label-primary">'.sprintf(_n('You have faced %d monster attack.', 'You have faced %d monster attacks.', $allBattles->count()), $allBattles->count()).'</p>';
+        $attacks = array();
+        foreach ($allBattles as $p) { // Group by linkedId
+          if ($p->linkedId != '') {
+            $attacks["$p->linkedId"][] = $p;
+          } else { // Make a unique id
+            $uniqueId = mt_rand(100000, 999999); // Unique test number
+            $attacks["$uniqueId"][] = $p;
+          }
+        }
+        if (count($attacks) > 0) {
+          echo '<p class="label label-primary">'.sprintf(_n('You have faced %d monster attack.', 'You have faced %d monster attacks.', count($attacks)), count($attacks)).'</p>';
             echo '<ul class="utReport list-group list-unstyled">';
-            foreach ($allBattles as $m) {
-              echo '<li>'.$m->result.' : '.$m->summary.'';
-              echo ' ['.strftime("%d/%m", $m->date).']';
-              echo '</li>';
+            foreach($attacks as $key => $gr){
+               $count = count($gr);
+               if($count > 1){
+                 $pos = 0;
+                 $neg = 0;
+                 $vv = 0;
+                 $v = 0;
+                 $r = 0;
+                 $rr = 0;
+                 echo '<li>';
+                 foreach($gr as $key => $m){
+                   switch($m->task->name) {
+                     case 'battle-vv': $vv++; $pos++; break;
+                     case 'battle-v': $v++; $pos++; break;
+                     case 'battle-r': $r++; $neg++; break;
+                     case 'battle-rr': $rr++; $neg++; break;
+                     default: break;
+                   }
+                 }
+                 if ($vv != 0) echo '<span class="label label-success">'.$vv.'VV</span>';
+                 if ($v != 0) echo ' <span class="label label-success">'.$v.'V</span>';
+                 if ($r != 0) echo ' <span class="label label-danger">'.$r.'R</span>';
+                 if ($rr != 0) echo ' <span class="label label-danger">'.$rr.'RR</span>';
+                 $testTitle = $gr[0]->summary;
+                 preg_match('/\[(.*?)\]/', $gr[0]->summary, $matches);
+                 echo ' : '.$matches[1].' ['.strftime("%d/%m", $gr[0]->date).']';
+                 echo "</li>";
+               } else if ($count) {
+                 foreach($gr as $key => $m){
+                   echo '<li>';
+                   echo $m->result.' : '.$m->summary;
+                   echo ' ['.strftime("%d/%m", $m->date).']';
+                   echo "</li>";
+                 }
+               }
+               echo "</li>";
             }
             echo '</ul>';
         } else {

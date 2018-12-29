@@ -47,7 +47,6 @@
   }
 
   // helpAlert
-
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
     echo '<div class="row">';
     $tmpCache = $playerPage->children()->get("name=tmp");
@@ -75,7 +74,7 @@
         <span class="">
           <?php 
             echo $playerPage->title;
-            if ($user->isSuperuser()) { echo $playerPage->feel(); }
+            if ($user->isSuperuser() || ($user->hasRole('teacher') && $playerPage->team->teacher->has("id=$user->id"))) { echo $playerPage->feel(); }
           ?>
         </span>
         <?php 
@@ -465,7 +464,7 @@
           <h4>
             <?php 
               echo __('History');
-              if ($user->isSuperuser()) {
+              if ($user->isSuperuser() || ($user->hasRole('teacher') && $playerPage->team->teacher->has("id=$user->id"))) {
                 echo ' <a target="blank" href="'.$adminActions->url.'recalculate/'.$playerPage->id.'">'.__("[Edit history]").'</a>';
               }
             ?>
