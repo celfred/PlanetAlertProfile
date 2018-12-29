@@ -1270,6 +1270,7 @@
             $out .= '</p>';
             $out .= '<table id="usersTable" class="table table-condensed table-hover">';
             $out .= '<thead>';
+            $out .= '<th></th>';
             $out .= '<th>'.__("Player").'</th>';
             $out .= '<th>'.__("Team / Group").'</th>';
             $out .= '<th>'.__("Rank").'</th>';
