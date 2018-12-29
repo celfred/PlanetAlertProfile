@@ -664,6 +664,48 @@
           $out .= '</ul>';
           $out .= '</div>';
           break;
+        case 'manage-groups' :
+          $out .= '<section class="well">';
+          $out .= '<h3 class="text-center">';
+          $out .=   __('Manage group names');
+          $out .= '</h3>';
+          // Get groups
+          if ($user->isSuperuser()) {
+            $allGroups = $pages->find("template=group")->sort("title");
+          } else {
+            $allGroups = $pages->find("template=group, created_users_id=$user->id")->sort("title");
+          }
+          $out .= '<div>';
+            $out .= $pages->get("name=groups")->feel(array(
+              'mode' => 'page-add',
+              'text' => '[Add a new group]',
+              'class' => 'button'
+            ));
+            if ($allGroups->count() > 0) {
+              $out .= '<ul>';
+              foreach($allGroups as $g) {
+                $out .= '<li>';
+                $out .= $g->title;
+                $out .= $g->feel(array(
+                  'text' => __('[Edit]'),
+                  'fields' => 'title'
+                ));
+                // Find group members
+                $members = $pages->count("parent.name=players, group=$g");
+                if ($members > 0) {
+                  $out .= ' ('.sprintf(_n('%d member', '%d members', $members), $members).')';
+                } else {
+                  $out .= ' <a href="#" class="deleteFromId" data-href="'.$page->url.'deleteFromId/'.$user->id.'/'.$g->id.'?type=team">'.__("[Delete]").'</a>';
+                }
+                $out .= '</li>';
+              }
+              $out .= '</ul>';
+            } else {
+              $out .= '<p>'.__("No groups available.").'</p>';
+            }
+          $out .= '</div>';
+          $out .= '</section>';
+          break;
         case 'manage-actions' :
           $out .= '<section class="well">';
           $out .= '<h3 class="text-center">';
@@ -1229,9 +1271,10 @@
             $out .= '<table id="usersTable" class="table table-condensed table-hover">';
             $out .= '<thead>';
             $out .= '<th>'.__("Player").'</th>';
-            $out .= '<th>'.__("Team").'</th>';
+            $out .= '<th>'.__("Team / Group").'</th>';
+            $out .= '<th>'.__("Rank").'</th>';
             $out .= '<th>'.__("User name / Login").'</th>';
-            $out .= '<th>'.__("Head teacher").'</th>';
+            /* $out .= '<th>'.__("Head teacher").'</th>'; */
             $out .= '<th>'.__("Last visit").'</th>';
             if ($user->isSuperuser()) {
               $out .= '<th>'.__("Inactivity").'</th>';
@@ -1246,24 +1289,41 @@
             foreach ($allPlayers as $p) {
               $u = $users->get("name=$p->login");
               $out .= '<tr>';
-              $out .= '<td>'.$p->title.' '.$p->lastName;
-              $out .= ' <a class="btn btn-xs btn-danger" href="'.$p->url.'">Profile page</a> ';
-              if ($user->isSuperuser() || $user->hasRole('teacher')) {
-                $out .= $p->feel();
-              }
+              $out .= '<td>';
+                if ($user->isSuperuser() || $user->hasRole('teacher')) {
+                  $out .= $p->feel();
+                }
+              $out .= '</td>';
+              $out .= '<td>';
+                $out .= '<a href="'.$p->url.'">'.$p->title.' '.$p->lastName.'</a>';
               $out .= '</td>';
               if ($p->team) {
-                $out .= '<td>'.$p->team->title.$p->feel(array('text'=>'[Change]', 'fields'=>'team,rank')).'</td>';
+                $out .= '<td>';
+                $out .= $p->team->title;
+                if ($p->group) { 
+                  $out .= ' / '.$p->group->title;
+                } else {
+                  $out .= ' / -';
+                }
+                $out .= $p->feel(array('text'=>'[Change]', 'fields'=>'team,rank,group'));
+                $out .= '</td>';
               } else {
-                $out .= '<td>-'.$p->feel(array('text'=>'[Change]', 'fields'=>'team,rank')).'</td>';
+                $out .= '<td>-'.$p->feel(array('text'=>'[Change]', 'fields'=>'team,rank,group')).'</td>';
               }
+              $out .= '<td>';
+                if ($p->rank) { 
+                  $out .= $p->rank->title;
+                } else {
+                  $out .= '-';
+                }
+              $out .= '</td>';
               $out .= '<td>'.$u->name.' / '.$p->login.'</td>';
-              $headTeacher = getHeadTeacher($p);
-              if ($headTeacher) {
-                $out .= '<td>'.$headTeacher->name.'</td>';
-              } else {
-                $out .= '<td>-</td>';
-              }
+              /* $headTeacher = getHeadTeacher($p); */
+              /* if ($headTeacher) { */
+              /*   $out .= '<td>'.$headTeacher->name.'</td>'; */
+              /* } else { */
+              /*   $out .= '<td>-</td>'; */
+              /* } */
               $query = $database->prepare("SELECT login_timestamp FROM process_login_history WHERE username = :username AND login_was_successful=1 ORDER BY login_timestamp DESC LIMIT 1");   
               $query->execute(array(':username' => $p->login));
               $lastvisit = $query->fetchColumn();

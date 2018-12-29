@@ -181,6 +181,8 @@
                 $out .= '<ul class="dropdown-menu">';
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-periods' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/manage-periods/'><span class='glyphicon glyphicon-calendar'></span> - ".__('Manage periods')."</a></li>";
+                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-groups' ? " class='selected-left'" : "";
+                $out .= "<li><a$class href='{$adminActions->url}/manage-groups/'><span class='glyphicon glyphicon-user'></span> - ".__('Manage group names')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-actions' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/manage-actions/'><span class='glyphicon glyphicon-flash'></span> - ".__('Manage actions')."</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-categories' ? " class='selected-left'" : "";
