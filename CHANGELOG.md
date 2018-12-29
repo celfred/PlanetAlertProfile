@@ -30,6 +30,24 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.7.1] - [29/12/2018]
+Teachers can now manage their group names. Other improvements are more a personal workflow (SACoche, school website...).
+
+[Added]
+- Manage group names option for teachers
+- Direct access to exercises so a player can log in and do the exercise from an external link
+- Import Monster Attacks results from SACoche's CSV file (https://sacoche.sesamath.net/sacoche/index.php)
+- Add 'Go to school' submenu for pupils to quickly access the school's specific websites
+
+[Changed]
+- New karma and reputation calculating rules
+- Cleaner display for users table
+
+[Backend]
+- Permissions adjustements for 'group' and 'groups' fields/templates
+- CSS ajustements for feel() module
+
+
 ## [v0.7.0] - [26/12/2018]
 Players' scores are now cached to avoid timed-out recalculation when players had many events in their history. 
 
