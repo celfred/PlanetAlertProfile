@@ -2381,7 +2381,9 @@
               } else {
                 $status = '';
               }
-              $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.'</option>';
+              $dateStart = date("d/m/Y", $p->dateStart);
+              $dateEnd = date("d/m/Y", $p->dateEnd);
+              $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.' ('.$dateStart.' → '.$dateEnd.')</option>';
             }
             $out .= ' </select>';
             $out .= '&nbsp;';
