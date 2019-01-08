@@ -1080,7 +1080,7 @@ function pick_question($player) {
           break;
         case 'photo' :
           $quiz['question'] = $sanitizer->entitiesMarkdown(__('**Who** is this ?'));
-          $quiz['answer'] = sprintf(__('%1$s, from %2$s (%3$s)'), $randEl->title, $randEl->country, $randEl->nationality->title);
+          $quiz['answer'] = sprintf(__('%1$s, from %2$s (%3$s)'), $randEl->title, $randEl->country->title, $randEl->nationality);
           break;
         case 'quiz' :
           $randQuiz = $randEl->quiz->getRandom();
