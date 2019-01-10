@@ -7,72 +7,7 @@
   $team = $allTeams->get("name=$input->urlSegment1");
   $rank = $team->rank->index;
   if ($input->urlSegment1 != 'no-team') {
-    $allPlayers = $allPlayers->find("team=$team, sort=group"); // Limit to team players
-    // Build allGroups
-    $allGroups = new PageArray();
-    foreach($allPlayers as $p) {
-      $nbEl = 0;
-      if (!in_array($p->group, $allGroups->getArray())) {
-        $allGroups->add($p->group);
-      }
-      if ($rank >= 8) {
-        $nbEl = $p->places->count()+$p->people->count();
-      } else {
-        $nbEl = $p->places->count();
-      }
-      $p->nbEl = $nbEl;
-    }
-    $outGroups = '';
-
-    // Calculate groups Karma & Set Captain
-    $index = 0;
-    foreach($allGroups as $group) {
-      $group->karma = 0;
-      $group->nbBonus = 0;
-      
-      // Find selected players
-      $players = $allPlayers->find("group=$group");
-      
-      // Check for group bonus
-      $group->nbBonus = groupBonus($players);
-      $group->karma = $group->nbBonus*30;
-
-      // Add individual karmas
-      foreach($players as $player) {
-        // Karma is divided by number of players in the group to be fair with smaller groups
-        $groupKarma = round($player->yearlyKarma/$players->count);
-        (int) $group->karma += $groupKarma;
-        $group->details .= '- '.$player->title.' ('.$groupKarma.'k - '.$player->nbEl.'el)<br />';
-      }
-      $index++;
-    }
-
-    // Prepare group display
-    $allGroups->sort('-karma');
-    $outGroups .= '<ul class="list-inline">';
-    foreach($allGroups as $group) {
-      $outGroups .= '<li>';
-      $outGroups .= '<p class="label label-default" data-toggle="tooltip" data-html="true" title="'.$group->details.'">';
-      $outGroups .= $group->title.' <span class="bg-primary">'.$group->karma.'</span>';
-      // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member)
-      $starsGroups = floor($group->nbBonus/5);
-      if ( $starsGroups < 1) {
-        for ($i=0; $i<$group->nbBonus; $i++) {
-          $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-        }
-      } else {
-        for ($i=0; $i<$starsGroups; $i++) {
-          $outGroups .= ' <span class="glyphicon glyphicon-star"></span>';
-        }
-        $group->nbBonus = $group->nbBonus - $starsGroups*5;
-        for ($i=0; $i<$group->nbBonus; $i++) {
-          $outGroups .= ' <span class="glyphicon glyphicon-star-empty"></span>';
-        }
-      }
-      $outGroups .= '</p>';
-      $outGroups .= '</li>';
-    }
-    $outGroups .= '</ul>';
+    $allPlayers->filter("team=$team, sort=group"); // Limit to team players
   } else {
     // TODO : Order no-team list by karma (i.e. Reputation)
     // Unexpected behavior because of JS table sorting
@@ -112,8 +47,6 @@
     echo '</p>';
 
   }
-
-  // echo $outGroups;
 
   // Players table
   $allPlayers->sort('-yearlyKarma, -level, -XP');

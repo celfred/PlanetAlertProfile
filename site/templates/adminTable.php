@@ -77,7 +77,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
       <?php } ?>
     </tr>
     <tr>
-    <td colspan="2"><?php echo __("Display comments"); ?></td>
+      <td colspan="2"><?php echo __("Display comments"); ?></td>
       <?php foreach ($allTasks as $task) { ?>
       <td data-toggle="tooltip" title="<?php echo __("Display comments"); ?>">
       <input type="checkbox" id="cc_<?php echo $task->id; ?>" class="commonComment" onclick="showComment(<?php echo $task->id; ?>)" />
@@ -86,7 +86,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
       <?php } ?>
     </tr>
     <tr>
-    <td colspan="2"><?php echo __("Select all"); ?></td>
+      <td colspan="2"><?php echo __("Select all"); ?></td>
       <?php foreach ($allTasks as $task) { ?>
         <td data-toggle="tooltip" title="<?php echo __("Select all"); ?>"><input type="checkbox" id="csat_<?php echo $task->id; ?>" class="selectAll" onclick="selectAll(<?php echo $task->id; ?>)" /></td>
       <?php } ?>
@@ -97,8 +97,8 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
       $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
       foreach ($allPlayers as $player) { 
         $id = $player->id; 
-        // See if absence already recorded the same day
-        $abs = $player->get("name=history")->children()->get("task.name=absent, date>=$today");
+        // See if absence already recorded (last event)
+        $abs = $player->get("name=history")->children("date>$today")->get("task.name=abs|absent");
     ?>
     <tr class="<?php if ($abs) { $disabled = 'disabled'; echo 'negative'; } else { $disabled = ''; } ?>">
     <td><?php if (isset($player->group->id)) { echo $player->group->title; } ?></td>

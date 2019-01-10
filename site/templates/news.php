@@ -11,6 +11,7 @@
   $out .= '</div>';
 
   $out .= '<div class="row">';
+  $allConcernedPlayers = $allPlayers; // Already limited to teacher's students TODO : Check this for players !
   if ($user->hasRole('teacher')) { // Teacher's Newsboard 
     // Teacher's Admin board  (to prepare in-class papers to be given to players)
     $out .= '<div id="" class="news panel panel-primary">';
@@ -19,8 +20,9 @@
       $out .= '</div>';
       $out .= '<div class="panel-body">';
         $today = new \DateTime("today");
-        $allConcernedPlayers = $allPlayers; // Already limited to teacher's students
-        $news = $pages->find("parent.name=history, template=event, task.name=free|buy|penalty|fight-vv, publish=1");
+      t();
+        $news = $pages->find("parent.name=history, publish=1");
+      bd(t());
         $news->filter("has_parent=$allConcernedPlayers")->sort('-created');
         $out .= '<div class="col-sm-6">';
         if ($news->count() > 0) {
@@ -165,7 +167,9 @@
 
       if ($user->hasRole('player')) {
         // Get players' last 10 events
+        t('01');
         $allEvents = $player->find("parent.name=history, sort=-created, limit=10");
+        bd(t('01'));
         $out .= '<div id="" class="news panel panel-primary">';
           $out .= '<div class="panel-heading">';
             $out .= '<h4 class="panel-title">';
@@ -175,8 +179,37 @@
               $out .= __('Last 10 events in your personal history');
             $out .= '</h4>';
           $out .= '</div>';
-          $out .= '<div class="panel-body ajaxContent" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="last10&playerId='.$player->id.'" data-priority="1">';
-          $out .= '<p class="text-center"><img src="'.$config->urls->templates.'img/hourglass.gif"></p>';
+          $out .= '<div class="panel-body">';
+          $out .= '<ul class="list-unstyled">';
+            if ($allEvents->count() > 0) {
+              foreach ($allEvents as $event) {
+                $event->task = checkModTask($event->task, $headTeacher);
+                if ($event->task->HP < 0) {
+                  $className = 'negative';
+                  $sign = '';
+                  $signicon = '<span class="glyphicon glyphicon-minus-sign"></span> ';
+                } else {
+                  $className = 'positive';
+                  //$className = '';
+                  $sign = '+';
+                  $signicon = '<span class="glyphicon glyphicon-plus-sign"></span> ';
+                }
+                $out .= '<li class="'.$className.'">';
+                $out .= $signicon;
+                $out .=strftime("%d %b (%A)", $event->date).' : ';
+                if ($className == 'negative') {
+                  $out .= '<span data-toggle="tooltip" title="HP" class="badge badge-warning">'.$sign.$event->task->HP.'HP</span> ';
+                }
+                $out .= $sanitizer->markupToText($event->task->title);
+                if ($event->summary != '') {
+                  $out .= ' ['.$sanitizer->markupToText($event->summary).']';
+                }
+                $out .= '</li>';
+              };
+            } else {
+              $out .= __('No personal history yet...');
+            }
+          $out .= '</ul>';
           $out .= '</div>';
           $out .= '<div class="panel-footer text-right">';
           $out .= '<p>'.__("To see your complete history, go to").' ';
@@ -189,7 +222,9 @@
           $today = new \DateTime("today");
           $interval = new \DateInterval('P5D');
           $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
+          t('01');
           $news = $teamPlayers->get("children.name=history")->find("date>=$limitDate,task.name~=free|buy|ut-action|fight, refPage!=NULL, inClass=0")->sort("-date");
+          bd(t('01'));
           $out .= '<div id="" class="board panel panel-primary">';
             $out .= '<div class="panel-heading">';
             $out .= '<h4 class=""><span class="label label-primary">'.__('Team News (last 5 days)').'</span></h4>';
@@ -483,13 +518,96 @@
       }
     }
     
-    // Recent public news
+    $today = new \DateTime("today");
+    $interval = new \DateInterval('P30D');
+    $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
+    // Planet Alert news
+    $adminId = $users->get("name=admin")->id;
+    if ($user->isGuest()) { // Guests get admin news only
+      $newItems = $pages->find("template=exercise|equipment|item|lesson, created_users_id=$adminId, published>$limitDate, sort=-published, limit=10");
+    } else {
+      if ($user->isSuperuser()) { // Admin gets ALL news
+        $newItems = $pages->find("template=exercise|equipment|item|lesson, published>$limitDate, sort=-published, limit=10");
+      }
+      if ($user->hasRole('teacher')) { // Teachers get admin news + personal news
+        $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
+        $newItems = $pages->find("template=exercise|equipment|item|lesson, (created_users_id=$adminId, published>$limitDate), (teacher=$user, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
+      }
+      if ($user->hasRole('player')) { // Player gets headTeacher news
+        $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
+        $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
+      }
+    }
+    $extra = $newItems->getTotal() - $newItems->getLimit();
+    if ($extra > 0) { $limitReached = '<li>['.$extra.' '.__("more results").']</li>'; } else { $limitReached = ''; }
+    // Recent public news (30 previous days)
     $out .= '<div id="" class="news panel panel-primary">';
       $out .= '<div class="panel-heading">';
         $out .= '<h4 class="panel-title">'.__("Recent public activity").'</h4>';
       $out .= '</div>';
-      $out .= '<div class="panel-body ajaxContent" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="lastEvents">';
-        $out .= '<p class="text-center"><img src="'.$config->urls->templates.'img/hourglass.gif"></p>';
+      // All public news
+      $out .= '<div class="panel-body">';
+      $news = $pages->find("parent.name=history, public=1, date>=$limitDate, sort=-date");
+      if (!$user->isSuperuser()) { // Limit to teacher's players
+        $news->filter("has_parent=$allConcernedPlayers, limit=20");
+      } else {
+        $news->filter("limit=20");
+      }
+      $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("New public activity !").'</h4>';
+      if ($news->count() > 0) {
+        $out .= '<ul class="list-unstyled">';
+        foreach($news as $n) {
+          $currentPlayer = $n->parent('template=player');
+          if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
+          if ($currentPlayer->avatar) {
+            $thumb = $currentPlayer->avatar->size(20,20);
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
+          } else {
+            $mini = '';
+          }
+          $out .= '<li>';
+          $out .=strftime("%d %b (%A)", $n->date).' : ';
+          $out .= $mini;
+          $out .= ' <span>';
+          switch ($n->task->name) {
+            case 'free' : 
+              if ($n->refPage->template == 'place') {
+                $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.$n->refPage->title.'</span>';
+              }
+              if ($n->refPage->template == 'people') {
+                $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.$n->refPage->title.'</span>';
+              }
+              break;
+            case 'buy-pdf' :
+              $out .= '<span class="">'.__("New PDF for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.$n->refPage->title.'</span>';
+              break;
+            case 'buy' :
+              $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.$n->refPage->title.'</span>';
+              break;
+            case 'fight-v' :
+            case 'fight-vv' :
+              $out .= '<span class="">'.__("Monster Fight for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.$n->refPage->title.'</span>';
+              break;
+            case 'ut-action-v' :
+            case 'ut-action-vv' :
+              $out .= '<span class="">'.__("Underground Training for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.$n->refPage->title.'</span>';
+              break;
+            case 'remove' :
+              $out .= '<span class="">'.__("Lost item for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.' : '.$n->refPage->title.'</span>';
+              break;
+            case 'donation' :
+              $out .= '<span class="">'.__("Generous attitude from").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.'] : '.html_entity_decode($n->summary).'</span>';
+              break;
+            default : $out .= __("todo");
+          }
+          //$out .= $n->task->title. ' : ' . $n->summary;
+          $out .= '</span>';
+          $out .= '</li>';
+        }
+        $out .= '</ul>';
+      } else {
+        $out .= '<h4>'.__("No public news within the last 30 days... :(").'</h4>';
+      }
       $out .= '</div>';
     $out .= '</div>';
 

@@ -20,7 +20,7 @@
       $allTeamsNames = $allTeams->implode(',', '{name}');
       // All players (and cache for faster access)
       $template = $templates->get("player");
-      $cache->delete('allPlayers'); // In case we want to clean cache
+      //$cache->delete('allPlayers'); // In case we want to clean cache
       $allPlayers = $cache->get("allPlayers", $template, function($pages) {
         return $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title");
       });

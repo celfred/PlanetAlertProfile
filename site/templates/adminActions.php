@@ -1502,6 +1502,19 @@
 
     switch ($action) {
       case 'script' :
+        /* $allEvents = $pages->find("parent.name=history, publish=1, template=event, task.name=ut-action-v|ut-action-vv|fight-v|bought|inactivity, limit=50"); */
+        /* echo $allEvents->count(); */
+        /* foreach ($allEvents as $e) { */
+          /* $e->publish = 0; */
+          /* $e->of(false); */
+          /* $e->save(); */
+        /* } */
+        /* $allEvents = $pages->find("parent.name=history, template=event, task.name=free|buy|ut-action-v|ut-action-vv"); */
+        /* foreach ($allEvents as $e) { */
+        /*   $e->public = 1; */
+        /*   $e->of(false); */
+        /*   $e->save(); */
+        /* } */
         break;
       case 'setCache' :
         if (isset($selectedTeam) && $selectedTeam != '-1') {
@@ -1693,7 +1706,7 @@
           $task->eDate = date($e->date+1);
           $task->linkedId = false;
           $task->refPage = $element;
-          $historyPage = saveHistory($selectedPlayer, $task, 1);
+          $historyPage = saveHistory($selectedPlayer, $task, 1, 0);
           $linkedId = $historyPage->id;
           // DO NOT use updateScore(...,true), it would touch the equipment for real !!!
         }
@@ -1758,7 +1771,7 @@
           $task->comment = 'Player died. [former level:'.$currentLevel.']';
           $task->eDate = date($e->date+1);
           $task->linkedId = false;
-          $historyPage = saveHistory($selectedPlayer, $task, 1);
+          $historyPage = saveHistory($selectedPlayer, $task, 1, 0);
           $linkedId = $historyPage->id;
           // DO NOT use updateScore(...,true), it would touch the equipment for real !!!
           // Find previous death, check former level and act accordingly
@@ -1783,7 +1796,7 @@
             $teamDeath->linkedId = $linkedId;
             $teamPlayers = $allPlayers->find("group!=$selectedPlayer->group");
             foreach($teamPlayers as $p) {
-              saveHistory($p, $teamDeath, 0);
+              saveHistory($p, $teamDeath, 0, 0);
             }
             // Each group member suffers from player's death
             $groupMembers = $allPlayers->find("group=$selectedPlayer->group, id!=$selectedPlayer->id");
@@ -1793,7 +1806,7 @@
             $groupDeath->eDate = $task->eDate;
             $groupDeath->linkedId = $linkedId;
             foreach($groupMembers as $p) {
-              saveHistory($p, $groupDeath, 0);
+              saveHistory($p, $groupDeath, 0, 0);
             }
           }
           // Reset streak for all players
@@ -1863,7 +1876,7 @@
                   foreach($members as $m) {
                     $boughtHelmet = $m->get("name=history")->child("template=event, task.name=buy, refPage.name=memory-helmet");
                     if ($boughtHelmet->id == '') {
-                      saveHistory($m, $task, 0);
+                      saveHistory($m, $task, 0, 0);
                     }
 
                   }
