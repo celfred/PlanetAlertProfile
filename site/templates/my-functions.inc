@@ -1901,7 +1901,6 @@ function fightReport($player, $monster = false) {
 
 function battleReport($player, $monster = false) {
   if (!$monster) { // All monsters
-    $today = new \DateTime("today");
     $allBattles = $player->find("template=event, task~=battle")->sort("-date");
     if ($allBattles->count() > 0) {
       foreach($allBattles as $f) { // Create monsters list
