@@ -1560,28 +1560,36 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
   }
   switch ($field) {
     case 'yearlyKarma' :
-      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-yearlyKarma, yearlyKarma>0");
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-yearlyKarma, yearlyKarma>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'reputation' :
-      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-reputation, reputation>0");
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-reputation, reputation>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'places' :
-      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-places.count, sort=-reputation, places.count>0");
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-places.count, sort=-reputation, places.count>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'people' :
-      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-people.count, sort=-reputation, people.count>0");
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-people.count, sort=-reputation, people.count>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'fighting_power' :
-      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-fighting_power, sort=-reputation, fighting_power>0');
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-fighting_power, sort=-reputation, fighting_power>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'equipment' :
-      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-equipment.count, sort=-reputation, equipment.count>0');
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-equipment.count, sort=-reputation, equipment.count>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'donation' :
-      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-donation, sort=-reputation, donation>0');
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-donation, sort=-reputation, donation>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'underground_training' :
-      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-underground_training, sort=-reputation, underground_training>0');
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-underground_training, sort=-reputation, underground_training>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'group' :
       $allGroups = groupScores();
