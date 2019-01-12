@@ -211,14 +211,20 @@ function updateScore($player, $task, $real = true) {
     }
 
     if ($real == true) { // Save player's new scores if necessary
-      // Publish on Public Newsboard ?
-      if ($task->is("name=inactivity|penalty|buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|bought|remove|buy-pdf")) {
+      // Publish on Teacher's newsboard (requires teacher's work, in class)
+      if ($task->is("name=inactivity|penalty|buy|free|fight-vv|bought|remove|buy-pdf")) {
         $newsBoard = 1;
       } else {
         $newsBoard = 0;
       }
+      // Publish on Public newsBoard (everybody will see it)
+      if ($task->is("name=buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|remove|buy-pdf")) {
+        $public = 1;
+      } else {
+        $public = 0;
+      }
       // Save history
-      $historyPage = saveHistory($player, $task, $newsBoard);
+      $historyPage = saveHistory($player, $task, $newsBoard, $public);
       $player->of(false);
       $player->save();
     } else {
@@ -240,7 +246,7 @@ function updateScore($player, $task, $real = true) {
       resetPlayer($player, $previousLevel);
       $task->eDate = date('m/d/Y H:i:s', time()+60);
       if ($player->coma == 1) { $task->comment .= ' '.__("[Enter Coma state]"); }
-      $historyPage = saveHistory($player, $task, 1);
+      $historyPage = saveHistory($player, $task, 1, 0);
       $player->of(false);
       $player->save();
     } else {
@@ -889,7 +895,7 @@ function groupBonus($players) {
   return $nbBonus;
 }
 
-function saveHistory($player, $task, $newsBoard = 0) {
+function saveHistory($player, $task, $newsBoard = 0, $public = 0) {
   createHistoryPage($player);
   $history = $player->child("name=history");
   $p = new Page();
@@ -909,6 +915,7 @@ function saveHistory($player, $task, $newsBoard = 0) {
   }
   $p->summary = $task->comment;
   $p->publish = $newsBoard;
+  $p->public = $public;
   $p->linkedId = $task->linkedId;
   $p->save(); 
   return $p;
@@ -1156,16 +1163,11 @@ function setOwners($el, $player) {
 function teamFreeworld($team) {
   $pages = wire('pages');
   // Get all possible elements
-  $allElements = new pageArray();
   $rank = $team->rank->index;
   if ($rank >= 8) {
-    $allPlaces = $pages->find("template=place, name!=places");
-    $allElements->add($allPlaces);
-    $allPeople = $pages->find("template=people, name!=people");
-    $allElements->add($allPeople);
+    $allElements = $pages->find("template=place|people, name!=places|people");
   } else {
-    $allPlaces = $pages->find("template=place, name!=places");
-    $allElements->add($allPlaces);
+    $allElements = $pages->find("template=place, name!=places");
   }
   if ($team->name != 'no-team') {
     $allPlayers = $pages->find("parent.name=players, template=player, team=$team");
@@ -1426,8 +1428,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
           case 'yearlyKarma':
             $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
             break;
-          case 'karma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' reputation</span></li>';
+          case 'reputation':
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' reputation</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {
@@ -1472,8 +1474,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
             case 'yearlyKarma':
               $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
               break;
-            case 'karma':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
+            case 'reputation':
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' rep.</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
@@ -1516,8 +1518,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
         case 'yearlyKarma':
           $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
           break;
-        case 'karma':
-          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
+        case 'reputation':
+          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' rep.</span></li>';
           break;
         case 'places':
           if ($p->places->count > 1) {
@@ -1711,11 +1713,11 @@ function setMonster($player, $monster) {
       if ($monster->utGain >= 20) {
         $monster->waitForFight = -1; 
       } else {
-        $monster->waitForFight = 0; 
+        $monster->waitForFight = 100; 
       }
       $monster->lastFightInterval = -1;
     }
-    if ($monster->waitForFight < 0) {
+    if ($monster->waitForFight <= 0) {
       if ($player->equipment->has("name~=visualizer") || $monster->special == 0 || $player->team->forceVisualizer == 1) {
         $monster->isFightable = 1;
       } else {

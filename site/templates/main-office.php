@@ -169,19 +169,16 @@
       $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
       $teamRecentUtPlayers = new PageArray();
       $teamRecentFightPlayers = new PageArray();
-      foreach($allPlayers as $p) {
-        $lastInClass = $p->get("name=history")->children("sort=-date")->find("template=event, date>=$limitDate, task.name~=free|buy|ut-action|fight, refPage!='', inClass=0");
-        $news->add($lastInClass);
-        if ($news->count() > 0) {
-          $news->sort("-date");
-          $teamRecentUt = $news->find("task.name~=ut-action");
-          foreach ($teamRecentUt as $n) {
-            $currentPlayer = $n->parent('template=player');
-            $teamRecentUtPlayers->add($currentPlayer);
-          }
-          $utPlayersList = $teamRecentUtPlayers->implode(', ', '{title}');
-          $teamRecentFight = $news->find("task.name~=fight");
+      $news = $pages->find("has_parent=$allPlayers, parent.name=history, template=event, date>=$limitDate, task.name~=free|buy|ut-action|fight, refPage!='', inClass=0, sort=-date");
+      if ($news->count() > 0) {
+        $news->sort("-date");
+        $teamRecentUt = $news->find("task.name~=ut-action");
+        foreach ($teamRecentUt as $n) {
+          $currentPlayer = $n->parent('template=player');
+          $teamRecentUtPlayers->add($currentPlayer);
         }
+        $utPlayersList = $teamRecentUtPlayers->implode(', ', '{title}');
+        $teamRecentFight = $news->find("task.name~=fight");
       }
       $out .= '<div id="" class="board panel panel-primary">';
       $out .= '<div class="panel-heading">';

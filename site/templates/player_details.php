@@ -205,7 +205,7 @@
       <p class="label label-danger"><?php echo __("Items you need to use in class ↓"); ?></p>
       <ul class="list-inline">
       <?php
-        if ($playerPage->usabledItems->count() > 0) {
+        if (count($playerPage->usabledItems) > 0) {
           foreach($playerPage->usabledItems as $i) {
             if ($i->image) {
               echo '<li data-toggle="tooltip" title="'.$i->title.'"><img src="'.$i->image->getCrop("small")->url.'" alt="'.$i->title.'" /></li>';
