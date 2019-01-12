@@ -1057,7 +1057,8 @@ $(document).ready(function() {
 				// Send adminTableForm (via Ajax)
 				$("#adminTableForm :submit").prop('disabled', true);
 				var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment');
-				var $toSave = 'adminTableSubmit=Save&';
+        var $customDate = $('#customDate').val();
+				var $toSave = 'adminTableSubmit=Save&customDate='+$customDate+'&';
 				var $formUrl = $this.attr('action');
 				for (var i=0; i<$checked.length; i++) {
 					var $customId = $checked.eq(i).attr('data-customId');
@@ -1230,7 +1231,7 @@ var initTables = function() {
     trainingTable.draw();
   });		    
     
-  $('a.toggle-vis').on( 'click', function (e) {
+  $('.toggle-vis').on( 'click', function (e) {
     e.preventDefault();
     // Show all columns
     adminTable.columns( ).visible( true, false );

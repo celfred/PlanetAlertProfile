@@ -429,6 +429,11 @@
         $task->comment = trim($input->post->$comment);
         $task->refPage = false;
         $task->linkedId = false;
+        if (isset($input->post->customDate)) {
+          $customDate = $input->post->customDate;
+          $currentTime = date('H:i:s', time());
+          $task->eDate = $customDate.' '.$currentTime;
+        }
         if ($task->HP < 0) { // Negative action, keep concerned players to check death later
           $allNegPlayers->add($player); 
         }
@@ -445,7 +450,11 @@
 
       // Redirect to team page (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
-      $url = $pages->get('/players')->url.$player->team->name;
+      if (isset($input->post->adminTableRedirection)) {
+        $url = $pages->get("name=adminTable")->url.$player->team->name;
+      } else {
+        $url = $pages->get('/players')->url.$player->team->name;
+      }
       echo json_encode(array("sender"=>"adminTable", "saved"=>count($checked), "url"=>$url));
     }
 

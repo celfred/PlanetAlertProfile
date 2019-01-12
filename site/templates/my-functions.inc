@@ -261,9 +261,13 @@ function updateScore($player, $task, $real = true) {
 
 function setEventDate($task) { // Set date for correct sorting
   if ($task->is("name!=penalty|team-death|group-death")) {
-    $task->eDate = date('m/d/Y H:i:s', time());
+    if (!isset($task->eDate)) {
+      $task->eDate = date('m/d/Y H:i:s', time());
+    }
   } else {
-    $task->eDate = date('m/d/Y H:i:s', time()+1);
+    if (!isset($task->eDate)) {
+      $task->eDate = date('m/d/Y H:i:s', time()+1);
+    }
   }
 }
 
@@ -474,7 +478,7 @@ function addGroupItem($player, $historyPage, $real) {
   }
 }
 
-function extraActionAfterSave($player, $historyPage, $real) {
+function extraActionAfterSave($player, $historyPage, $real) { // Watch out : recorded with today's date (but trigeering event's linkedId
   $pages = wire('pages');
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
       $task = $pages->get("template=task, name=penalty"); 
@@ -504,8 +508,7 @@ function extraActionAfterSave($player, $historyPage, $real) {
       $task = $pages->get("template=task, name=remove");
       $task->comment = '3rd wrong invasions on '.$historyPage->refPage->title;
       $task->refPage = $historyPage->refPage;
-      $task->eDate = date('m/d/Y H:i:s', time()+60);
-      $task->linkedId = false;
+      $task->linkedId = $historyPage->id;
       updateScore($player, $task, $real);
     }
   }

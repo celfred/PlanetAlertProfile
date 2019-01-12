@@ -43,16 +43,19 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
     if (isset($pagination)) { echo $pagination;}
 ?>
 
-  <form id="adminTableForm" name="adminTableForm" action="<?php echo $pages->get('name=submitforms')->url; ?>" method="post" class="" role="form">
 
   <ul class="list-inline text-center">
     <ul class="list-inline">
-    <li class="btn btn-info"><a href="#" class="toggle-vis" data-category=""><?php echo __('All categories'); ?></a></li>
-      <?php foreach ($allCategories as $cat) { ?>
-        <li class="btn btn-info"><a href="#" class="toggle-vis" data-category="<?php echo $cat->name; ?>"><?php echo $cat->title; ?></a></li>
-      <?php } ?>
+      <li><button class="btn btn-primary toggle-vis" data-category=""><?php echo __('All categories'); ?></button></li>
+      <?php
+        foreach ($allCategories as $cat) {
+          echo '<li><button class="btn btn-primary toggle-vis" data-category="'.$cat->name.'">'.$cat->title.'</button></li>';
+        }
+      ?>
     </ul>
   </ul>
+
+  <form id="adminTableForm" name="adminTableForm" action="<?php echo $pages->get('name=submitforms')->url; ?>" method="post" class="" role="form">
 
   <input type="hidden" name="adminTableSubmit" value="Save" />
   <input type="submit" name="adminTableSubmit" value="<?php echo __("Save"); ?>" class="btn btn-block btn-primary" disabled="disabled" />
@@ -124,6 +127,18 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
     </tbody>
   </table>
   <input type="submit" name="adminTableSubmit" value="<?php echo __("Save"); ?>" class="btn btn-block btn-primary" disabled="disabled" />
+  <fieldset>
+    <?php
+      $today = date('Y-m-d');
+      echo '<legend><span class="glyphicon glyphicon-warning-sign"></span> '.__("More options").'</legend>';
+      echo '<label for="customDate">'.__("Custom date").'</label>';
+      echo '<input id="customDate" name="customDate" type="date" size="8" max="'.$today.'" value="'.$today.'" />';
+      echo '&nbsp;&nbsp;';
+      echo '<input type="checkbox" id="adminTableRedirection" name="adminTableRedirection" />';
+      echo '&nbsp;';
+      echo '<label for="adminTableRedirection">'.__("Stay on adminTable after saving").'</label>';
+    ?>
+  </fieldset>
   </form>
 
 <?php
