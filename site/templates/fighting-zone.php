@@ -38,6 +38,9 @@
 
       if (isset($player)) {
         $todaysLimit = 3; // Limit number of fights a day
+        if ($player->equipment->has("name=recovering-potion")) {
+          $todaysLimit = $todaysLimit*2;
+        }
         $today = new \DateTime("today");
         $limitDate = strtotime($today->format('Y-m-d'));
         $todaysFightsNb = $pages->find("has_parent=$player, task.name~=fight, date>=$limitDate")->count();

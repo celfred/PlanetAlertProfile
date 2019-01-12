@@ -430,6 +430,9 @@ function taskExtraAction($player, $task, $real) {
                 /* $task->comment = 'Memory potion (text '.$newIndex.')'; */
               } else {
                 $task->linkedId = 0;
+                if ($task->refPage->is("name=recovering-potion")) {
+                  $player->equipment->add($task->refPage);
+                }
               }
             }
             break;
@@ -516,7 +519,7 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
     if ($historyPage->refPage->parent->is("name=group-items") && isset($player->group->id)) { // Save group items for all group members 
       addGroupItem($player, $historyPage, $real);
     }
-    if ($historyPage->refPage->parent->is("name=potions") && $historyPage->refPage->is("name!=health-potion")) {
+    if ($historyPage->refPage->parent->is("name=potions") && $historyPage->refPage->is("name!=health-potion|recovering-potion")) {
       // Add item to player's usabledItems
       addUsable($player, $historyPage, $real);
     }
@@ -2312,9 +2315,9 @@ function possibleElements($player) {
   $headTeacher = getHeadTeacher($player);
   $teachersRestrictions = $pages->find("template=item, teacher!=$headTeacher");
   $already->add($teachersRestrictions);
-  // Remove potions for no-team players (except healing potions)
+  // Remove useless potions for no-team players
   if ($player->team->name == 'no-team') {
-    $noteamRestrictions = $pages->find("template=item, name~=potion, name!=health-potion");
+    $noteamRestrictions = $pages->find("template=item, name~=potion, name!=health-potion|recovering-potion");
     $already->add($noteamRestrictions);
   }
   if (($player->rank && $player->rank->is("index>=8")) || ($player->team && $player->team->is("rank.index>=8"))) {
@@ -2343,7 +2346,7 @@ function possibleElement($player, $item) {
     $item->pb = 'already';
   } else {
     $nbEl = $player->places->count()+$player->people->count()+1;
-    $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<$nbEl, id!=$already");
+    $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$already");
     if ($possibleItems->has($item) && $todayItemsCount < 3) {
       $item->pb = 'possible';
       // Lock visualizer if Memory helmet isn't in player's equipment
