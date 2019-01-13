@@ -533,7 +533,7 @@
       }
       if ($user->hasRole('player')) { // Player gets headTeacher news
         $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
-        $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
+        $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, modified>$limitDate, modified_users_id!=$guestId), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-published, sort=-modified, limit=10");
       }
     }
     $extra = $newItems->getTotal() - $newItems->getLimit();
@@ -545,6 +545,28 @@
       $out .= '</div>';
       // All public news
       $out .= '<div class="panel-body">';
+      $book = $pages->get("name=book-knowledge-item");
+      if ($newItems->count() > 0) {
+        $out .= '<p class="label label-danger"><span class="glyphicon glyphicon-hand-up"></span> '.__("Planet Alert News !").'</p>';
+        $out .= '<ul class="list-inline">';
+          foreach($newItems as $n) {
+            if ($n->image) {
+              $mini = "<img data-toggle='tooltip' src='".$n->image->getCrop('mini')->url."' alt='image' />";
+            } else {
+              $mini = '';
+            }
+            if ($n->is("template=lesson")) {
+              $mini = '<img src="'.$book->image->getCrop('mini')->url.'" alt="image">';
+            }
+            $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$n->summary.'">'.$mini.' '.$n->title.' <span class="badge">New</span>';
+            if ($user->isSuperuser()) {
+              $out .= $n->feel();
+            }
+            $out .= '</li>  ';
+          }
+        $out .= $limitReached;
+        $out .= '</ul>';
+      }
       $news = $pages->find("parent.name=history, public=1, date>=$limitDate, sort=-date");
       if (!$user->isSuperuser()) { // Limit to teacher's players
         $news->filter("has_parent=$allConcernedPlayers, limit=20");
