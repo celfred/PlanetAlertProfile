@@ -167,9 +167,7 @@
 
       if ($user->hasRole('player')) {
         // Get players' last 10 events
-        t('01');
         $allEvents = $player->find("parent.name=history, sort=-created, limit=10");
-        bd(t('01'));
         $out .= '<div id="" class="news panel panel-primary">';
           $out .= '<div class="panel-heading">';
             $out .= '<h4 class="panel-title">';

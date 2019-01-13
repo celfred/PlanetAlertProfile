@@ -37,91 +37,111 @@
       }
 
       if (isset($player)) {
-        // Prepare player's fighting possibilities
-        foreach($allMonsters as $m) {
-          setMonster($player, $m);
+        $todaysLimit = 3; // Limit number of fights a day
+        if ($player->equipment->has("name=recovering-potion")) {
+          $todaysLimit = $todaysLimit*2;
         }
-        $availableFights = $allMonsters->find("isFightable=1");
-        $waitingFights = $allMonsters->find("isFightable=0, lastFightInterval!=-1")->sort("waitForFight, allFightsNb");
-        $impossibleFights = $allMonsters->find("isFightable=0, lastFightInterval=-1")->sort("-utGain, title");
+        $today = new \DateTime("today");
+        $limitDate = strtotime($today->format('Y-m-d'));
+        $todaysFightsNb = $pages->find("has_parent=$player, task.name~=fight, date>=$limitDate")->count();
       }
 
-      $out .= '<div class="well">';
-        $out .= '<h2 class="text-center">'.$page->title;
-        if (($user->isSuperuser() || $user->hasRole('teacher')) && isset($playerId) && $playerId != '') {
-          $out .= ' ('.$player->title.')';
+      if ($todaysFightsNb >= $todaysLimit) {
+        $out .= '<div class="well">';
+        $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("Congratulations !").'</span>';
+        $out .= '<h4>'.__("You've reached today's fight limit ! Continuing would be dangerous. You must take a rest !").'</h4>';
+        if (!$player->equipment->has("name=recovering-potion")) {
+          $recoveringPotion = $pages->get("name=recovering-potion");
+          $recoverLink = '<a href="'.$shop->url.'details/'.$recoveringPotion->name.'">'.$recoveringPotion->title.'</a>';
+          $out .= '<p>'.sprintf(__('You can buy the %s to double your fighting limit !'), $recoverLink).'</p>';
         }
-        $out .= '<span class="pull-left glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="right" title="'.$page->summary.'"></span>';
-        $page->of(false);
-        if ($page->summary->getLanguageValue($french) != '') {
-          $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="left" title="'.$page->summary->getLanguageValue($french).'"></span>';
-        }
-        $out .= '</h2>';
-        $out .= '<h4 class="text-center">';
-        $out .= sprintf(__("There are currently %d monsters detected."), $allMonsters->count());
-        if (isset($hiddenMonstersNb)) {
-          $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">'.__('Electronic Visualizer').'</a>';
-          /* $out .= '<p>('.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).')</p>'; */
-        } else {
-          /* $out .= '<p>('.__("All monsters are visible thanks to your Electronic Visualizer.").')</p>'; */
-        }
-        $out .= '</h4>';
-
-        if (isset($availableFights) && $availableFights->count() > 0) {
-          $out .= '<br />';
-          $out .= '<h4><span class="label label-danger">'.__("Monsters at proximity ! (You can fight them!)").'</span></h4>';
-          $out .= '<ul class="list list-inline">';
-          foreach($availableFights as $m) {
-            if ($m->image) {
-              $mini = "<img class='' src='".$m->image->getCrop('small')->url."' alt='image' />";
-            } else {
-              $mini = '';
-            }
-            $out .= '<li><a href="'.$m->url.'fight" class="btn btn-primary" data-toggle="tooltip" data-html="true" title="'.$m->summary.'">'.$mini.' '.$m->title.'</a></li>';
+        $out .= '</div>';
+      } else {
+        if (isset($player)) {
+          // Prepare player's fighting possibilities
+          foreach($allMonsters as $m) {
+            setMonster($player, $m);
           }
-          $out .= '</ul>';
-        } else {
-          $out .= '<h4><span class="label label-danger">'.__("There are no monsters at proximity !").'</h4>';
+          $availableFights = $allMonsters->find("isFightable=1");
+          $waitingFights = $allMonsters->find("isFightable=0, lastFightInterval!=-1")->sort("waitForFight, allFightsNb");
+          $impossibleFights = $allMonsters->find("isFightable=0, lastFightInterval=-1")->sort("-utGain, title");
         }
 
-        if (isset($waitingFights) && $waitingFights->count() > 0) {
-          $out .= '<br />';
-          $out .= '<h4><span class="label label-success">'.__("Approaching monsters ! (You can't fight them today. You must wait.)").'</span></h4>';
-          $out .= '<ul class="list">';
-          foreach($waitingFights as $m) {
-            if ($m->image) {
-              $mini = "<img class='' src='".$m->image->getCrop('mini')->url."' alt='image' />";
-            } else {
-              $mini = '';
-            }
-            $out .= '<li>';
-            $out .= '<span class="label label-success">'.$mini.' '.$m->title.'</span> '.__("will be at proximity in").' ';
-            if ($m->waitForFight == 1) {
-              $out .= '<span class="badge badge-primary">'.__("tomorrow").' !</span>';
-            } else {
-              $out .= '<span class="badge badge-primary">'.$m->waitForFight.' '.__("days").'</span>';
-            }
-            if ($m->lastTrainingInterval == 0) {
-              $out .= ' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.sprintf(__('Memory helmet used today. %s detected it and walked away.'), $m->title).'"></i></li>';
-            }
-            $out .= '</li>';
+        $out .= '<div class="well">';
+          $out .= '<h2 class="text-center">'.$page->title;
+          if (($user->isSuperuser() || $user->hasRole('teacher')) && isset($playerId) && $playerId != '') {
+            $out .= ' ('.$player->title.')';
           }
-          $out .= '</ul>';
-        }
+          $out .= '<span class="pull-left glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="right" title="'.$page->summary.'"></span>';
+          $page->of(false);
+          if ($page->summary->getLanguageValue($french) != '') {
+            $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="left" title="'.$page->summary->getLanguageValue($french).'"></span>';
+          }
+          $out .= '</h2>';
+          $out .= '<h4 class="text-center">';
+          $out .= sprintf(__("There are currently %d monsters detected."), $allMonsters->count());
+          $out .= '<p>'.sprintf(__('You are limited to %2$d fights a day ! (You have done %1$d)'), $todaysFightsNb, $todaysLimit).'</p>';
+          if (isset($hiddenMonstersNb)) {
+            $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">'.__('Electronic Visualizer').'</a>';
+          }
+          $out .= '</h4>';
 
-        if (isset($impossibleFights) && $impossibleFights->count() > 0) {
-          $out .= '<br /><br />';
-          $utZoneLink = '<a href="'.$pages->get("name=underground-training")->url.'">'.__("underground training").'</a>';
-          $out .= '<h4><span class="glyphicon glyphicon-thumbs-down"></span> '.__("Out of reach monsters ! (You can't fight them)").'</h4>';
-          $label = '<span class="label label-success">+20'.__('UT').'</span>';
-          $out .= '<p>'.sprintf(__('You must do %1$s first and get at least %2$s'), $utZoneLink, $label).'</p>';
-          $out .= '<ul class="list list-inline">';
-          foreach($impossibleFights as $m) {
-            $out .= '<li><span class="">['.$m->title.' '.$m->utGain.__('UT').']</span></li>';
+          if (isset($availableFights) && $availableFights->count() > 0) {
+            $out .= '<br />';
+            $out .= '<h4><span class="label label-danger">'.__("Monsters at proximity ! (You can fight them!)").'</span></h4>';
+            $out .= '<ul class="list list-inline">';
+            foreach($availableFights as $m) {
+              if ($m->image) {
+                $mini = "<img class='' src='".$m->image->getCrop('small')->url."' alt='image' />";
+              } else {
+                $mini = '';
+              }
+              $out .= '<li><a href="'.$m->url.'fight" class="btn btn-primary" data-toggle="tooltip" data-html="true" title="'.$m->summary.'">'.$mini.' '.$m->title.'</a></li>';
+            }
+            $out .= '</ul>';
+          } else {
+            $out .= '<h4><span class="label label-danger">'.__("There are no monsters at proximity !").'</h4>';
           }
-          $out .= '</ul>';
-        }
-      $out .= '</div>';
+
+          if (isset($waitingFights) && $waitingFights->count() > 0) {
+            $out .= '<br />';
+            $out .= '<h4><span class="label label-success">'.__("Approaching monsters ! (You can't fight them today. You must wait.)").'</span></h4>';
+            $out .= '<ul class="list">';
+            foreach($waitingFights as $m) {
+              if ($m->image) {
+                $mini = "<img class='' src='".$m->image->getCrop('mini')->url."' alt='image' />";
+              } else {
+                $mini = '';
+              }
+              $out .= '<li>';
+              $out .= '<span class="label label-success">'.$mini.' '.$m->title.'</span> '.__("will be at proximity in").' ';
+              if ($m->waitForFight == 1) {
+                $out .= '<span class="badge badge-primary">'.__("tomorrow").' !</span>';
+              } else {
+                $out .= '<span class="badge badge-primary">'.$m->waitForFight.' '.__("days").'</span>';
+              }
+              if ($m->lastTrainingInterval == 0) {
+                $out .= ' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.sprintf(__('Memory helmet used today. %s detected it and walked away.'), $m->title).'"></i></li>';
+              }
+              $out .= '</li>';
+            }
+            $out .= '</ul>';
+          }
+
+          if (isset($impossibleFights) && $impossibleFights->count() > 0) {
+            $out .= '<br /><br />';
+            $utZoneLink = '<a href="'.$pages->get("name=underground-training")->url.'">'.__("underground training").'</a>';
+            $out .= '<h4><span class="glyphicon glyphicon-thumbs-down"></span> '.__("Out of reach monsters ! (You can't fight them)").'</h4>';
+            $label = '<span class="label label-success">+20'.__('UT').'</span>';
+            $out .= '<p>'.sprintf(__('You must do %1$s first and get at least %2$s'), $utZoneLink, $label).'</p>';
+            $out .= '<ul class="list list-inline">';
+            foreach($impossibleFights as $m) {
+              $out .= '<li><span class="">['.$m->title.' '.$m->utGain.__('UT').']</span></li>';
+            }
+            $out .= '</ul>';
+          }
+        $out .= '</div>';
+      }
 
       // helpAlert
       if ($user->hasRole('player')) {
@@ -130,6 +150,11 @@
             $helpAlert = true;
             $helpTitle = sprintf(__("%d monsters are out of reach !"), $impossibleFights->count());
             $helpMessage = '<h4>'.__("You need to have at least 20UT to be able to fight them.").'</h4>';
+          }
+          if ($todaysFightsNb >= $todaysLimit) {
+            $helpAlert = true;
+            $helpTitle = sprintf(__("You've done %d fights today !"), $todaysFightsNb);
+            $helpMessage = '<h4>'.__("Continuing would be dangerous. You must take a rest !").'</h4>';
           }
         } else {
           $helpAlert = true;

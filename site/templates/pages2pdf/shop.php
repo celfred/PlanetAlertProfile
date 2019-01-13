@@ -2,10 +2,10 @@
 
 $logo = 'http://download.tuxfamily.org/planetalert/logo.png';
 
-$weapons = $pages->find("template='equipment', category='weapons', sort='level'");
-$protections = $pages->find("template='equipment',category='protections', sort='level'");
+$weapons = $pages->find("template=equipment, category=weapons, sort=level");
+$protections = $pages->find("template=equipment,category=protections, sort=level");
 if ($user->isSuperuser()) {
-  $items = $pages->find("template=item, sort=level");
+  $items = $pages->find("template=item, name=recovering-potion, sort=level");
 } else {
   $items = $pages->find("template=item, teacher=$user, sort=level");
 }
@@ -15,9 +15,10 @@ $out = '';
 
 if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
   switch($input->urlSegment2) {
-  case 'weapons' : $items = $weapons; break;
+    case 'weapons' : $items = $weapons; break;
     case 'protections' : $items = $protections; break;
     case 'items' : $items = $items; break;
+    case 'specialItems' : $items = $items; break;
     case 'group-items' : $items = $groupItems; break;
     default : $items = $weapons; break;
   }

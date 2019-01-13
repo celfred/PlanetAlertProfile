@@ -39,6 +39,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/weapons?pages2pdf=1">'.__("Get PDF [Weapons]").'</a>';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/protections?pages2pdf=1">'.__("Get PDF [Protections]").'</a>';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/items?pages2pdf=1">'.__("Get PDF [Potions]").'</a>';
+      echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/specialItems?pages2pdf=1">'.__("Get PDF [Special Potions]").'</a>';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/group-items?pages2pdf=1">'.__("Get PDF [Group items]").'</a>';
       echo '<br /><br />';
       echo '<p class="text-center">'.sprintf(__("Your Planet Alert marketplace contains %d items."), $allEquipments->count());
@@ -69,7 +70,7 @@ if ($input->urlSegment1 == '') { // Complete Shop if no classes is selected
       <tbody>
         <?php foreach ($allEquipments as $item) {
           if ($item->image) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$item->image->url."\" alt=\"avatar\" />' src='".$item->image->getCrop('mini')->url."' alt='avatar' />";
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$item->image->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$item->image->getCrop('mini')->url."' alt='avatar' />";
           } else {
             $mini = '';
           }
