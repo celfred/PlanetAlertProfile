@@ -50,6 +50,11 @@
         $out .= '<div class="well">';
         $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("Congratulations !").'</span>';
         $out .= '<h4>'.__("You've reached today's fight limit ! Continuing would be dangerous. You must take a rest !").'</h4>';
+        if (!$player->equipment->has("name=recovering-potion")) {
+          $recoveringPotion = $pages->get("name=recovering-potion");
+          $recoverLink = '<a href="'.$shop->url.'details/'.$recoveringPotion->name.'">'.$recoveringPotion->title.'</a>';
+          $out .= '<p>'.sprintf(__('You can buy the %s to double your fighting limit !'), $recoverLink).'</p>';
+        }
         $out .= '</div>';
       } else {
         if (isset($player)) {
