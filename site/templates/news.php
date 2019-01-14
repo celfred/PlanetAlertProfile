@@ -49,6 +49,7 @@
                   $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
                 }
                 break;
+              case 'bought' :
               case 'buy' :
                 $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
