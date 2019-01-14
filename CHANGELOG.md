@@ -30,6 +30,33 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.7.2] - [14/01/2019]
+Code optimization and minor bug fixes or features.
+
+[Added]
+- New Recovering potion to double newly added fights limit (see below)
+- Add PDF for special potions
+- Add custom date to adminTable : this should allow the teacher to enter an event for a previous day (when forgotten or if internet was not available). Use with care since it may mess the scores up depending on the added event
+- Add possibility to stay on adminTable after saving
+
+[Changed]
+- Many database requests have been optimized for faster loading
+- allPlayers and allTeams are cached
+- Limit fights to 3 per day : this should avoid 'cramming' and better span fights over several days
+- Better handling of category filter buttons in adminTable
+- Add period dates in period selector
+- Add direct PDF links for teachers from teacher's work panel
+
+[Fixed]
+- Planet Alert News for recent additions (exercises, lessons...)
+- Scoreboards still included 'test' player...
+- Fix answer when quizzing about people
+- Missing <th> tag in Users table
+
+[Backend]
+- 'public' field needs to be added to 'event' template
+
+
 ## [v0.7.1] - [29/12/2018]
 Teachers can now manage their group names. Other improvements are more a personal workflow (SACoche, school website...).
 

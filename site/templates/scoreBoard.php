@@ -137,7 +137,7 @@
     $field = $input->get('id');
     $player = $pages->get("login=$user->name");
     $limit = 5;
-    if ($user->hasRole('player') || $user->isGuest()) {
+    if ($user->hasRole('player')) {
       list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, false);
     } else {
       $player = '';
@@ -274,7 +274,7 @@
             $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' '.__('UT').'</span></li>';
             break;
           case 'group':
-            if ($p == $player->group) {
+            if (isset($player->group) && $p == $player->group) {
               $focus = "class='focus'";
             } else {
               $focus = "";

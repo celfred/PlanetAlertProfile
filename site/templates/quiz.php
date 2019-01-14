@@ -47,7 +47,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
     $notConcerned = new pageArray();
     foreach($allPlayers as $p) { // Find players having at least 3 free elements
       $nbEl = $p->places->count()+$p->people->count();
-      if ( $nbEl >= 3) {
+      if ($nbEl >= 3) {
         $allConcerned->add($p);
       } else {
         $notConcerned->add($p);

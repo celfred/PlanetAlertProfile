@@ -211,14 +211,20 @@ function updateScore($player, $task, $real = true) {
     }
 
     if ($real == true) { // Save player's new scores if necessary
-      // Publish on Public Newsboard ?
-      if ($task->is("name=inactivity|penalty|buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|bought|remove|buy-pdf")) {
+      // Publish on Teacher's newsboard (requires teacher's work, in class)
+      if ($task->is("name=inactivity|penalty|buy|free|fight-vv|bought|remove|buy-pdf")) {
         $newsBoard = 1;
       } else {
         $newsBoard = 0;
       }
+      // Publish on Public newsBoard (everybody will see it)
+      if ($task->is("name=buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|remove|buy-pdf")) {
+        $public = 1;
+      } else {
+        $public = 0;
+      }
       // Save history
-      $historyPage = saveHistory($player, $task, $newsBoard);
+      $historyPage = saveHistory($player, $task, $newsBoard, $public);
       $player->of(false);
       $player->save();
     } else {
@@ -240,7 +246,7 @@ function updateScore($player, $task, $real = true) {
       resetPlayer($player, $previousLevel);
       $task->eDate = date('m/d/Y H:i:s', time()+60);
       if ($player->coma == 1) { $task->comment .= ' '.__("[Enter Coma state]"); }
-      $historyPage = saveHistory($player, $task, 1);
+      $historyPage = saveHistory($player, $task, 1, 0);
       $player->of(false);
       $player->save();
     } else {
@@ -255,9 +261,13 @@ function updateScore($player, $task, $real = true) {
 
 function setEventDate($task) { // Set date for correct sorting
   if ($task->is("name!=penalty|team-death|group-death")) {
-    $task->eDate = date('m/d/Y H:i:s', time());
+    if (!isset($task->eDate)) {
+      $task->eDate = date('m/d/Y H:i:s', time());
+    }
   } else {
-    $task->eDate = date('m/d/Y H:i:s', time()+1);
+    if (!isset($task->eDate)) {
+      $task->eDate = date('m/d/Y H:i:s', time()+1);
+    }
   }
 }
 
@@ -420,6 +430,9 @@ function taskExtraAction($player, $task, $real) {
                 /* $task->comment = 'Memory potion (text '.$newIndex.')'; */
               } else {
                 $task->linkedId = 0;
+                if ($task->refPage->is("name=recovering-potion")) {
+                  $player->equipment->add($task->refPage);
+                }
               }
             }
             break;
@@ -468,7 +481,7 @@ function addGroupItem($player, $historyPage, $real) {
   }
 }
 
-function extraActionAfterSave($player, $historyPage, $real) {
+function extraActionAfterSave($player, $historyPage, $real) { // Watch out : recorded with today's date (but trigeering event's linkedId
   $pages = wire('pages');
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
       $task = $pages->get("template=task, name=penalty"); 
@@ -498,8 +511,7 @@ function extraActionAfterSave($player, $historyPage, $real) {
       $task = $pages->get("template=task, name=remove");
       $task->comment = '3rd wrong invasions on '.$historyPage->refPage->title;
       $task->refPage = $historyPage->refPage;
-      $task->eDate = date('m/d/Y H:i:s', time()+60);
-      $task->linkedId = false;
+      $task->linkedId = $historyPage->id;
       updateScore($player, $task, $real);
     }
   }
@@ -507,7 +519,7 @@ function extraActionAfterSave($player, $historyPage, $real) {
     if ($historyPage->refPage->parent->is("name=group-items") && isset($player->group->id)) { // Save group items for all group members 
       addGroupItem($player, $historyPage, $real);
     }
-    if ($historyPage->refPage->parent->is("name=potions") && $historyPage->refPage->is("name!=health-potion")) {
+    if ($historyPage->refPage->parent->is("name=potions") && $historyPage->refPage->is("name!=health-potion|recovering-potion")) {
       // Add item to player's usabledItems
       addUsable($player, $historyPage, $real);
     }
@@ -889,7 +901,7 @@ function groupBonus($players) {
   return $nbBonus;
 }
 
-function saveHistory($player, $task, $newsBoard = 0) {
+function saveHistory($player, $task, $newsBoard = 0, $public = 0) {
   createHistoryPage($player);
   $history = $player->child("name=history");
   $p = new Page();
@@ -909,6 +921,7 @@ function saveHistory($player, $task, $newsBoard = 0) {
   }
   $p->summary = $task->comment;
   $p->publish = $newsBoard;
+  $p->public = $public;
   $p->linkedId = $task->linkedId;
   $p->save(); 
   return $p;
@@ -1080,7 +1093,7 @@ function pick_question($player) {
           break;
         case 'photo' :
           $quiz['question'] = $sanitizer->entitiesMarkdown(__('**Who** is this ?'));
-          $quiz['answer'] = sprintf(__('%1$s, from %2$s (%3$s)'), $randEl->title, $randEl->country, $randEl->nationality->title);
+          $quiz['answer'] = sprintf(__('%1$s, from %2$s (%3$s)'), $randEl->title, $randEl->country->title, $randEl->nationality);
           break;
         case 'quiz' :
           $randQuiz = $randEl->quiz->getRandom();
@@ -1156,16 +1169,11 @@ function setOwners($el, $player) {
 function teamFreeworld($team) {
   $pages = wire('pages');
   // Get all possible elements
-  $allElements = new pageArray();
   $rank = $team->rank->index;
   if ($rank >= 8) {
-    $allPlaces = $pages->find("template=place, name!=places");
-    $allElements->add($allPlaces);
-    $allPeople = $pages->find("template=people, name!=people");
-    $allElements->add($allPeople);
+    $allElements = $pages->find("template=place|people, name!=places|people");
   } else {
-    $allPlaces = $pages->find("template=place, name!=places");
-    $allElements->add($allPlaces);
+    $allElements = $pages->find("template=place, name!=places");
   }
   if ($team->name != 'no-team') {
     $allPlayers = $pages->find("parent.name=players, template=player, team=$team");
@@ -1426,8 +1434,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
           case 'yearlyKarma':
             $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
             break;
-          case 'karma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' reputation</span></li>';
+          case 'reputation':
+            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' reputation</span></li>';
             break;
           case 'places':
             if ($p->places->count > 1) {
@@ -1472,8 +1480,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
             case 'yearlyKarma':
               $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
               break;
-            case 'karma':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
+            case 'reputation':
+              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' rep.</span></li>';
               break;
             case 'places':
               if ($p->places->count > 1) {
@@ -1516,8 +1524,8 @@ function displayTeamScoreboard($allPlayers, $player = false, $field) {
         case 'yearlyKarma':
           $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
           break;
-        case 'karma':
-          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->karma.' rep.</span></li>';
+        case 'reputation':
+          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' rep.</span></li>';
           break;
         case 'places':
           if ($p->places->count > 1) {
@@ -1558,28 +1566,36 @@ function getScoreboard($player, $field, $limit=5, $global=true) {
   }
   switch ($field) {
     case 'yearlyKarma' :
-      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-yearlyKarma, yearlyKarma>0");
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-yearlyKarma, yearlyKarma>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'reputation' :
-      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-reputation, reputation>0");
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-reputation, reputation>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'places' :
-      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-places.count, sort=-reputation, places.count>0");
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-places.count, sort=-reputation, places.count>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'people' :
-      $allPlayers = $pages->find("parent.name=players, template=player, name!=test $team, sort=-people.count, sort=-reputation, people.count>0");
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-people.count, sort=-reputation, people.count>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'fighting_power' :
-      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-fighting_power, sort=-reputation, fighting_power>0');
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-fighting_power, sort=-reputation, fighting_power>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'equipment' :
-      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-equipment.count, sort=-reputation, equipment.count>0');
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-equipment.count, sort=-reputation, equipment.count>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'donation' :
-      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-donation, sort=-reputation, donation>0');
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-donation, sort=-reputation, donation>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'underground_training' :
-      $allPlayers = $pages->find('parent.name=players, template=player, name!=test $team, sort=-underground_training, sort=-reputation, underground_training>0');
+      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-underground_training, sort=-reputation, underground_training>0";
+      $allPlayers = $pages->find($selectors);
       break;
     case 'group' :
       $allGroups = groupScores();
@@ -1711,11 +1727,11 @@ function setMonster($player, $monster) {
       if ($monster->utGain >= 20) {
         $monster->waitForFight = -1; 
       } else {
-        $monster->waitForFight = 0; 
+        $monster->waitForFight = 100; 
       }
       $monster->lastFightInterval = -1;
     }
-    if ($monster->waitForFight < 0) {
+    if ($monster->waitForFight <= 0) {
       if ($player->equipment->has("name~=visualizer") || $monster->special == 0 || $player->team->forceVisualizer == 1) {
         $monster->isFightable = 1;
       } else {
@@ -1888,7 +1904,6 @@ function fightReport($player, $monster = false) {
 
 function battleReport($player, $monster = false) {
   if (!$monster) { // All monsters
-    $today = new \DateTime("today");
     $allBattles = $player->find("template=event, task~=battle")->sort("-date");
     if ($allBattles->count() > 0) {
       foreach($allBattles as $f) { // Create monsters list
@@ -2300,9 +2315,9 @@ function possibleElements($player) {
   $headTeacher = getHeadTeacher($player);
   $teachersRestrictions = $pages->find("template=item, teacher!=$headTeacher");
   $already->add($teachersRestrictions);
-  // Remove potions for no-team players (except healing potions)
+  // Remove useless potions for no-team players
   if ($player->team->name == 'no-team') {
-    $noteamRestrictions = $pages->find("template=item, name~=potion, name!=health-potion");
+    $noteamRestrictions = $pages->find("template=item, name~=potion, name!=health-potion|recovering-potion");
     $already->add($noteamRestrictions);
   }
   if (($player->rank && $player->rank->is("index>=8")) || ($player->team && $player->team->is("rank.index>=8"))) {
@@ -2331,7 +2346,7 @@ function possibleElement($player, $item) {
     $item->pb = 'already';
   } else {
     $nbEl = $player->places->count()+$player->people->count()+1;
-    $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<$nbEl, id!=$already");
+    $possibleItems = $pages->find("template=place|people|item|equipment, name!=places|people, GC<=$player->GC, level<=$player->level, freeActs<=$nbEl, id!=$already");
     if ($possibleItems->has($item) && $todayItemsCount < 3) {
       $item->pb = 'possible';
       // Lock visualizer if Memory helmet isn't in player's equipment
