@@ -68,5 +68,10 @@ lang = {
 	stopSave : "Stop & Save",
 	stop4 : "You didn't use the memory helmet enough to positively stimulate your brain.",
 	stopOrder : "Stop",
-	training1 : "You've just set a new training record !<br /><br /><small>This message should disappear in 2 seconds. If not, click 'OK' below :)</small>",
+	training : "You've just set a new training record !<br /><br /><small>This message should disappear in 3 seconds. If not, click 'OK' below :)</small>",
+  speedEnd : "You've answered 20 correct answers in ",
+  speedWrong : "You suffer a 5 seconds penalty !",
+  speedPersonalRecord : "Congratulations ! You've set a new personal record : ",
+  speedNoRecord : "You've not set any records. You have been too slow.",
+  speedGlobalRecord : "Congratulations ! You've set a new Master record !",
 };

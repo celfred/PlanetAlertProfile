@@ -618,6 +618,12 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.utPoint = false;
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
+  $scope.playerTime = 0;
+  $scope.playerBestTime = document.getElementById("playerBestTime").getAttribute("data-ms");
+  $scope.monsterBestTime = document.getElementById("monsterBestTime").getAttribute("data-ms");
+  if (document.getElementById("speedQuiz")) { // Regular training or SpeedQuiz ?
+    $scope.speedQuiz = true;
+  }
 
 	// Disable selection
 	if (typeof document.body.onselectstart !== "undefined") { //IE 
@@ -649,11 +655,16 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			// Pick another question
 			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
+      $scope.promise = $interval($scope.setTimer, 10, 100000);
     })
     $scope.exerciseId = exerciseId;
     $scope.redirectUrl = redirectUrl;
     $scope.playerId = playerId;
     $scope.submitUrl = submitUrl;
+  }
+
+  $scope.setTimer = function() {
+    $scope.playerTime++;
   }
 
 	$scope.pickWord = function(w, i){
@@ -688,11 +699,27 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     }
   }
   $scope.dodge = function() { // Show correction
-		$scope.isFocused = false;
-    $scope.showCorrection = $scope.allCorrections.join(', ');
-		$scope.wrong = true;
-		// Set focus on input field
-		$timeout($scope.focusInput, 300);
+    if ($scope.speedQuiz == true) {
+      swal({
+        title: lang.wrong,
+        html: lang.speedWrong,
+        type: "error",
+        showConfirmButton: false,
+        timer: 1000
+      }).catch(swal.noop);
+      $scope.playerTime += 500;
+      $scope.clear();
+      // Pick another question
+      $scope.question = myData.pickQuestion('training');
+      $scope.initQuestion();
+      $scope.focusInput();
+    } else {
+      $scope.isFocused = false;
+      $scope.showCorrection = $scope.allCorrections.join(', ');
+      $scope.wrong = true;
+      // Set focus on input field
+      $timeout($scope.focusInput, 300);
+    }
   }
 
 	$scope.initQuestion = function() {
@@ -703,6 +730,8 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		if ($scope.allCorrections['feedback'] != '') {
 			$scope.feedback = '['+$scope.allCorrections['feedback']+']';
 		}
+    // End animation
+    $timeout(function() { $scope.correct = false; }, 1000);
 		// Init new question
     $scope.wrong = false;
 		if (($scope.mixedWord).length < 4) { // Don't help on very short words
@@ -721,114 +750,198 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 	}
 
   $scope.checkAnswer = function(submitted) {
-    if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
-			$scope.playerAnswer = '';
-			$scope.isFocused = false;
-			if (!$scope.wrong) { // Count word only if no need for answer
-				// Trigger animation
-				$scope.correct = true;
-				$scope.counter++;
-				// Get number of words
-				if (Math.floor($scope.counter/10) < $scope.result+1) {
-					swal({
-						title: lang.correct,
-						html: lang.plus1word,
-						type: "success",
-						showConfirmButton: false,
-						timer: 1000
-					}).catch(swal.noop);
-				} else { // Calculate result
-					$scope.result++;
-					$scope.utPoint = true;
-					$timeout(function() { $scope.utPoint = false; }, 1000);
-					$scope.stopSession(); // Alert +1 U.T. : Stop or continue?
-				}
-			}
-      // Pick another question
-			$scope.question = myData.pickQuestion('training');
-			$scope.initQuestion();
-    } else { // Wrong answer
-			swal({
-				title: lang.wrong,
-				html: lang.copyCorrection,
-				type: "error",
-				showConfirmButton: false,
-				timer: 1000
-			}).catch(swal.noop);
-			// Show correction
-			$scope.showCorrection = $scope.allCorrections.join(', ');
-      $scope.wrong = true;
+    if ($scope.speedQuiz == true) {
+      $scope.playerAnswer = '';
+      if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
+        swal({
+          title: lang.correct,
+          html: lang.plus1word,
+          type: "success",
+          showConfirmButton: false,
+          timer: 500
+        }).catch(swal.noop);
+        $scope.correct = true; // Trigger animation
+        $scope.counter++;
+        if ($scope.counter >= 20) { // Stop speedQuiz
+          $interval.cancel($scope.promise);
+          $scope.stopSession();
+        } else {
+          // Pick another question
+          $scope.question = myData.pickQuestion('training');
+          $scope.initQuestion();
+          $scope.focusInput();
+        }
+      } else { // Wrong answer
+        swal({
+          title: lang.wrong,
+          html: lang.speedWrong,
+          type: "error",
+          showConfirmButton: false,
+          timer: 1000
+        }).catch(swal.noop);
+        $scope.playerTime += 500;
+        // Pick another question
+        $scope.question = myData.pickQuestion('training');
+        $scope.initQuestion();
+        $scope.focusInput();
+      }
+    } else {
+      if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
+        $scope.playerAnswer = '';
+        $scope.isFocused = false;
+        if (!$scope.wrong) { // Count word only if no need for answer
+          $scope.correct = true; // Trigger animation
+          $scope.counter++;
+          // Get number of words
+          if (Math.floor($scope.counter/10) < $scope.result+1) {
+            swal({
+              title: lang.correct,
+              html: lang.plus1word,
+              type: "success",
+              showConfirmButton: false,
+              timer: 500
+            }).catch(swal.noop);
+          } else { // Calculate result
+            $scope.result++;
+            $scope.utPoint = true;
+            $timeout(function() { $scope.utPoint = false; }, 1000);
+            $scope.stopSession(); // Alert +1 U.T. : Stop or continue?
+          }
+        }
+        // Pick another question
+        $scope.question = myData.pickQuestion('training');
+        $scope.initQuestion();
+      } else { // Wrong answer
+        swal({
+          title: lang.wrong,
+          html: lang.copyCorrection,
+          type: "error",
+          showConfirmButton: false,
+          timer: 1000
+        }).catch(swal.noop);
+        // Show correction
+        $scope.showCorrection = $scope.allCorrections.join(', ');
+        $scope.wrong = true;
+      }
     }
   }
 
-	$scope.correctMessage = function() {
-	}
-
   $scope.stopSession = function() {
-    if ($scope.result >= 1) {
-      swal({
-        title: lang.stop,
-        html: lang.stop1 + $scope.result + lang.stop2 + $scope.counter + lang.stop3,
-        type: "success",
-        showCancelButton : true,
-        cancelButtonText: lang.continue,
-        confirmButtonText: lang.stopSave
-			}).then(result => {
-				if (result.value) { // Save and redirect
-					$scope.saveData(true);
-					$scope.waitForStart = true;
-				} else { // Continue session
-					return false;
-				}
-			});
+    if ($scope.speedQuiz == true) {
+      $interval.cancel($scope.promise); // Stop timer
+      $scope.waitForStart = true;
+      if (($scope.monsterBestTime == 0 && $scope.playerTime > 0) || ($scope.monsterBestTime != 0 && $scope.playerTime < $scope.monsterBestTime)) { // New Global record
+        $scope.saveData(false); // Start saving, but no feedback
+        swal({
+          title: lang.congratulations,
+          html: "<h2>" + lang.speedGlobalRecord + '</h2>',
+          type: "success",
+          showCancelButton : false,
+          showConfirmButton : false,
+          timer : 3000
+        }).then(result => {
+          $timeout($scope.redirect($scope.redirectUrl), 200);
+        });
+      } else if (($scope.playerBestTime == 0 && $scope.playerTime > 0) || ($scope.playerBestTime != 0 && $scope.playerTime < $scope.monsterBestTime)) { // New Personal record
+        $scope.saveData(false); // Start saving, but no feedback
+				swal({
+					title: lang.congratulations,
+					html: lang.speedPersonalRecord,
+					type: "success",
+					timer: 3000
+				}).then(result => {
+          $timeout($scope.redirect($scope.redirectUrl), 200);
+				});
+      } else { // No need to save data
+				swal({
+					title: lang.sorry,
+					html: lang.speedNoRecord,
+					type: "success",
+					timer: 3000
+				}).then(result => {
+          $timeout($scope.redirect($scope.redirectUrl), 200);
+        });
+      }
     } else {
-      swal({
-        title: lang.stop,
-        text: lang.stop4,
-        type: "warning",
-        showCancelButton : true,
-        cancelButtonText: lang.continue,
-        confirmButtonText: lang.stopOrder
-			}).then( result => { // DO not save, but redirect
-				if (result.value) {
-					$timeout($scope.redirect($scope.redirectUrl), 200);
-				} else {
-					return false;
-				}
-			});
+      if ($scope.result >= 1) {
+        swal({
+          title: lang.stop,
+          html: lang.stop1 + $scope.result + lang.stop2 + $scope.counter + lang.stop3,
+          type: "success",
+          showCancelButton : true,
+          cancelButtonText: lang.continue,
+          confirmButtonText: lang.stopSave
+        }).then(result => {
+          if (result.value) { // Save and redirect
+            $scope.saveData(true);
+            $scope.waitForStart = true;
+          } else { // Continue session
+            return false;
+          }
+        });
+      } else {
+        swal({
+          title: lang.stop,
+          text: lang.stop4,
+          type: "warning",
+          showCancelButton : true,
+          cancelButtonText: lang.continue,
+          confirmButtonText: lang.stopOrder
+        }).then( result => { // DO not save, but redirect
+          if (result.value) {
+            $timeout($scope.redirect($scope.redirectUrl), 200);
+          } else {
+            return false;
+          }
+        });
+      }
     }
   }
 
   $scope.saveData = function (redirect) { // Save result
+    if ($scope.speedQuiz == true) {
+      $data = {
+        exerciseId : $scope.exerciseId,
+        speedQuiz : true,
+        playerTime : $scope.playerTime
+      };
+    } else {
+      $data = {
+        exerciseId : $scope.exerciseId,
+        training: true,
+        result : $scope.result
+      };
+    }
     $http({
       url: $scope.submitUrl,
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      data: $.param({
-        exerciseId : $scope.exerciseId,
-        training: true,
-        result : $scope.result
-      })
+      data: $.param($data),
     }).then(function(data, status, headers, config){ //make a get request to mock json file.
       $scope.saved = lang.saved;
-			if (data["data"] == '1') {
-				swal({
-					title: lang.congratulations,
-					html: lang.training,
-					type: "success",
-					timer: 2000
-				}).then(result => {
-					if (redirect === true) {
-						$timeout($scope.redirect($scope.redirectUrl), 200);
-					} else {
-						return false;
-					}
-				});
-			} else {
-				if (redirect === true) {
-					$timeout($scope.redirect($scope.redirectUrl), 200);
-				}
-			}
+      var $feedback = lang.training;
+      if ($scope.speedQuiz != true) {
+        if (data["data"] == '1') {
+          swal({
+            title: lang.congratulations,
+            html: $feedback,
+            type: "success",
+            timer: 3000
+          }).then(result => {
+            if (redirect === true) {
+              $timeout($scope.redirect($scope.redirectUrl), 200);
+            } else {
+              return false;
+            }
+          });
+        } else {
+          if (redirect === true) {
+            $timeout($scope.redirect($scope.redirectUrl), 200);
+          } else {
+            return false;
+          }
+        }
+      }
     }, function(data, status, headers, config) {
 			swal(lang.error2, lang.contactAdmin, "error");
       $scope.saved = lang.error2+lang.contactAdmin;
@@ -895,6 +1008,41 @@ exerciseApp.filter('underline', function () {
 	}
 });
 
+exerciseApp.filter('millSecondsToTimeString', function() {
+  return function(millseconds) {
+    var oneSecond = 100;
+    var oneMinute = oneSecond * 60;
+    var oneHour = oneMinute * 60;
+    var oneDay = oneHour * 24;
+    var seconds = Math.floor((millseconds % oneMinute) / oneSecond);
+    var minutes = Math.floor((millseconds % oneHour) / oneMinute);
+    var hours = Math.floor((millseconds % oneDay) / oneHour);
+    var days = Math.floor(millseconds / oneDay);
+    var timeString = '';
+    var millLeft = millseconds;
+    if (days !== 0) {
+      millLeft = millseconds-(days*oneDay);
+      timeString += days + 'd';
+    }
+    if (hours !== 0) {
+      millLeft = millseconds-(hours*oneHour);
+      timeString += hours + 'h ';
+    }
+    if (minutes !== 0) {
+      millLeft = millseconds-(minutes*oneMinute);
+      timeString += minutes + 'm ';
+    }
+    if (seconds !== 0) {
+      millLeft = millseconds-(seconds*oneSecond);
+      if (millLeft>=0 && millLeft <= 9) { millLeft = '0'+millLeft; }
+      timeString += seconds + 's ';
+    }
+    if (millLeft < 1000) {
+      timeString += millLeft;
+    }
+    return timeString;
+  };
+});
 exerciseApp.directive('myEnter', function () {
 	return function (scope, element, attrs) {
 		element.bind("keydown keypress", function (event) {

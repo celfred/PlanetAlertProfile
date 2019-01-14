@@ -78,13 +78,9 @@
           ?>
         </span>
         <?php 
-          if ($playerPage->skills && $playerPage->skills->has("name=captain")) {
-            $showSkills = '<span class="label label-primary">'.$playerPage->skills->get("name=captain")->title.'</span>';
-          } else {
-            $showSkills = '';
-          }
-          if ($playerPage->skills && $playerPage->skills->has("name=ambassador")) {
-            $showSkills .= '<span class="label label-success">'.$playerPage->skills->get("name=ambassador")->title.'</span>';
+          $showSkills = '';
+          foreach($playerPage->skills as $s) {
+            $showSkills .= '&nbsp;<span class="label label-primary">'.$s->title.'</span>';
           }
           echo $showSkills;
         ?>
@@ -416,7 +412,8 @@
   <div class="panel panel-success">
     <div class="panel-heading">
     <h4 class="panel-title"><span class="glyphicon glyphicon-headphones"></span> <span class=""><?php echo __("Underground Training (UT)"); ?> : <?php echo $playerPage->underground_training; ?> / 
-      <span class="glyphicon glyphicon-flash"></span> <?php echo __("Fighting Power (FP)"); ?> : <?php echo $playerPage->fighting_power; ?></span></h4>
+      <span class="glyphicon glyphicon-flash"></span> <?php echo __("Fighting Power (FP)"); ?> : <?php echo $playerPage->fighting_power; ?></span>&nbsp;
+    </h4>
     </div>
     <?php 
       if ($showDetails) {
@@ -441,10 +438,13 @@
     <div class="panel-footer">
       <?php
         if ($playerPage->equipment->get("name=memory-helmet")) {
-          echo '<p><a href="'.$pages->get('name=underground-training')->url.'">→ '.__("Use the Memory Helmet (Training Zone)").'</a>.</p>';
-          echo '<p><a href="'.$pages->get('name=fighting-zone')->url.$playerPage->id.'">→ '.__("Go to the Fighting Zone").'</a>.</p>';
+          echo '→ <span class="glyphicon glyphicon-headphones"></span> <a href="'.$pages->get('name=underground-training')->url.'">'.__("Use the Memory Helmet (Training Zone)").'</a>&nbsp;&nbsp;&nbsp;';
+          echo '→ <span class="glyphicon glyphicon-flash"></span> <a href="'.$pages->get('name=fighting-zone')->url.$playerPage->id.'">'.__("Go to the Fighting Zone").'</a>&nbsp;&nbsp;&nbsp;';
+          if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player') && $player->skills->has("name=fighter"))) {
+            echo '→ <span class="glyphicon glyphicon-time"></span> <a href="'.$pages->get("name~=playground")->url.$playerPage->name.'">'.__("Go to the Fighters playground").'</a>';
+          }
         } else {
-          $link = '<a href="'.$pages->get('name=shop')->url.'details/memory-helmet">'.$pages->get("template=item, name~=helmet")->title.'</a>';
+          $link = '<a href="'.$pages->get('name=shop')->url.'details/memory-helmet">'.$pages->get("template=item, name~=helmet")->title.'</a> ';
           echo sprintf(__("Sorry, but at least one member in your group needs to buy the %s to be able to access the Underground Training zone."), $link);
         }
       ?>
