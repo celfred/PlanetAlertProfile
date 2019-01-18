@@ -32,11 +32,7 @@
         if ($result == 1 || $result == 2) { $allNegPlayers->add($player); }
       }
     }
-    // Check death for each players having a negative action
-    $allNegPlayers = $allNegPlayers->unique();
-    foreach($allNegPlayers as $p) {
-      checkDeath($p, true);
-    }
+    // No need to check death : battles can't cause death
     // Set group captains (get team from last player)
     setCaptains($player->team);
     $out .= '<h3 class="text-center"><span>'.__("Results have been saved !")."</span></h3>";
@@ -182,7 +178,6 @@
       }
       $out .= '</tbody>';
       $out .= '</table>';
-
       $out .= '<p class="alert alert-danger text-center">'.__("Check carefully all data before submitting !").'</p>';
       $out .= '<input type="submit" class="confirmSubmit btn btn-block btn-primary" value="'.__("Save all results").'"></input>';
       $out .= '</form>';
