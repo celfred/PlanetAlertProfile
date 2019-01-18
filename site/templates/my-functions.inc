@@ -331,7 +331,7 @@ function taskExtraAction($player, $task, $real) {
       $player->equipment->add($task->refPage);
     }
   }
-  if ($task->is("name=group-death|team-death")) { // No death because of others
+  if ($task->is("name=group-death|team-death|battle-r|battle-rr")) { // No death because of others
     if ($player->HP<=0) { $player->HP = 1; }
   }
   if ($task->is("name=battle-rr|fight-rr")) {
