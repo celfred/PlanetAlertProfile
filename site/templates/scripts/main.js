@@ -1056,7 +1056,7 @@ $(document).ready(function() {
 			if (result.value) {
 				// Send adminTableForm (via Ajax)
 				$("#adminTableForm :submit").prop('disabled', true);
-				var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment');
+				var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment, #adminTableRedirection');
         var $customDate = $('#customDate').val();
 				var $toSave = 'adminTableSubmit=Save&customDate='+$customDate+'&';
 				var $formUrl = $this.attr('action');
