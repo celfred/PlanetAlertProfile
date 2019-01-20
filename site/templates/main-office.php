@@ -169,7 +169,7 @@
       $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
       $teamRecentUtPlayers = new PageArray();
       $teamRecentFightPlayers = new PageArray();
-      $news = $pages->find("has_parent=$allPlayers, parent.name=history, template=event, date>=$limitDate, task.name~=free|buy|ut-action|fight, refPage!='', inClass=0, sort=-date");
+      $news = $pages->find("has_parent=$allPlayers, parent.name=history, template=event, date>=$limitDate, task.name~=free|buy|ut-action|fight|extra-homework, refPage!='', inClass=0, sort=-date");
       if ($news->count() > 0) {
         $news->sort("-date");
         $teamRecentUt = $news->find("task.name~=ut-action");
@@ -196,6 +196,10 @@
               $out .= '<p><span class="label label-success">'.__('Buy PDF').'</span></p>';
               $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
             }
+            if ($n->refPage->parent->is("name=book-knowledge")) {
+              $out .= '<p><span class="label label-success">'.__('Copied lesson').'</span></p>';
+              $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
+            }
             if ($n->task->is("name~=fight")) {
               $out .= '<span class="label label-primary"><i class="glyphicon glyphicon-flash"></i> '.$n->refPage->title.'</span>';
               // Show result
@@ -209,6 +213,9 @@
             }
             if ($n->refPage->image) {
               $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+            }
+            if ($n->refPage->parent->is("name=book-knowledge")) {
+              $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
             }
             $out .= '<caption class="text-center">';
             $out .= ' <span>(On '.date('l, M. j', $n->date).')</span><br />';
