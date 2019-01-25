@@ -65,7 +65,7 @@
             $mail = wireMail();
             $mail->from($adminMail);
             $mail->subject($subject);
-            $mail->body($msg);
+            $mail->body($sanitizer->entities1($msg));
             if (isset($headTeacher) && $headTeacher->email != '') {
               $mail->to($headTeacher->email, 'Planet Alert');
             } else {

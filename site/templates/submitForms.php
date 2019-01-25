@@ -125,13 +125,13 @@
       }
       $subject = _('Buy form ').' : ';
       $subject .= $player->title. ' ['.$player->team->title.']';
-      $subject .= ' → '.$newItem->title;
+      $subject .= ' → '.$newItem->title. '[Level '.$newItem->level.']';
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
         $adminMail = $users->get("name=admin")->email;
         $mail = wireMail();
         $mail->from($adminMail);
         $mail->subject($subject);
-        $mail->body($msg);
+        $mail->body($sanitizer->entities1($msg));
         if ($headTeacher && $headTeacher->email != '') {
           $mail->to($headTeacher->email, 'Planet Alert');
         } else {
