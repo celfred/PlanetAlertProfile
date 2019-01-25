@@ -67,7 +67,6 @@
     $book = $pages->get("name=book-knowledge");
     $blog = $pages->get("name=blog");
     $contact = $pages->get("name=contact");
-    $documentation = $pages->get("name=documentation");
     $office = $pages->get("name=main-office");
     $donation = $pages->get("name=makedonation");
     $quiz = $pages->get("name=quiz");
@@ -174,7 +173,7 @@
             $class = $page->name == 'blog' ? " class='selected-left'" : "";
             $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
             $class = $page->name == 'documentation' ? " class='selected-left'" : "";
-            $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - {$documentation->title}</a></li>";
+            $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
           $out .= '</ul>';
           $out .= '</div>';
             // Teacher Zone (and Admin)
@@ -407,7 +406,7 @@
               $class = $page->name == 'blog' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
               $class = $page->name == 'documentation' ? " class='selected-left'" : "";
-              $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - {$documentation->title}</a></li>";
+              $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
             $out .= '</ul>';
           $out .= '</div>';
           $out .= '<a class="btn" href="'.$loginUrl.'?logout=1">'.__("Log out").'</a>';
@@ -465,7 +464,7 @@
               $class = $page->name == 'blog' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
               $class = $page->name == 'documentation' ? " class='selected-left'" : "";
-              $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - {$documentation->title}</a></li>";
+              $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
           $out .= '</ul>';
           $out .= '</div>';
           $class = $page->is("name=loginform") ? "on" : "";

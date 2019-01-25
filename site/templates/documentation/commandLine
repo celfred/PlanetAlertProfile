@@ -1,1 +1,0 @@
-pandoc -S docPlanetAlert.txt --template myTemplate.php --toc -t html5 -o docPlanetAlert.html5
