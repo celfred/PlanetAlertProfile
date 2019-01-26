@@ -81,6 +81,7 @@
         $playerTime = $input->post->playerTime;
         if ($monster->id && $player->id) {
           if ($monster->bestTime == 0 || ($monster->bestTime != 0 && $playerTime < $monster->bestTime)) { // New best time on monster
+            $result = __("New Master best time!");
             if ($monster->bestTimePlayer->id) { $oldBest = $monster->bestTimePlayer; }
             $monster->bestTime = $playerTime;
             $monster->bestTimePlayer = $player;
@@ -115,17 +116,42 @@
           } else { // Check if new player best time
             $tmpPage = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
             if ($tmpPage->bestTime == 0 || ($tmpPage->bestTime != 0 && $playerTime < $tmpPage->bestTime)) { // New best time for player
+              $result = __("New personal best time!");
               $tmpPage->bestTime = $playerTime;
               $tmpPage->of(false);
               $tmpPage->save();
               echo '2';
             } else {
+              $result = __("No best time");
               echo '0';
             }
           }
           // Record to log file
           $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$playerTime;
           $log->save('speed-quiz', $logText);
+
+          // Notify teacher (or admin)
+          $subject = _('Speed Quiz ').' : ';
+          $subject .= $player->title. ' ['.$player->team->title.']';
+          $subject .= ' → '.$result;
+          $subject .= ' ['.$monster->title.']';
+          $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+          $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
+          $msg .= __("Result")." : ". $result;
+
+          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+            $adminMail = $users->get("name=admin")->email;
+            $mail = wireMail();
+            $mail->from($adminMail);
+            $mail->subject($subject);
+            $mail->body($sanitizer->entities1($msg));
+            if (isset($headTeacher) && $headTeacher->email != '') {
+              $mail->to($headTeacher->email, 'Planet Alert');
+            } else {
+              $mail->to($adminMail, 'Planet Alert');
+            }
+            $numSent = $mail->send();
+          }
         }
       } else {
         $quality = $input->post->quality;
