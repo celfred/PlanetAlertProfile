@@ -205,6 +205,25 @@ $(document).ready(function() {
 		});
 	});
 
+	$(document).on('click', '.simpleConfirm', (function(e) {
+    e.preventDefault();
+    $this = $(this);
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes
+		}).then( result => {
+			if (result.value) {
+        window.location.href = $this.attr("href");
+      } else {
+        return false;
+      }
+    })
+  }));
+
 	$('.basicConfirm').on('click', function() {
 		var $this = $(this);
 		var $href = $this.attr('data-href');
@@ -1187,6 +1206,10 @@ var initTables = function() {
   var shopAdminTable = $('#shopAdminTable').DataTable({
     paging: false,
     order: [[ 0, "asc"]]
+  });
+  $('#fightersTable').DataTable({
+    paging: false,
+    order: [[ 0, "asc" ]],
   });
   $('#teamTable').DataTable({
     paging: false,

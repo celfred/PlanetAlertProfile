@@ -1111,6 +1111,27 @@
           $out .= '</div>';
           $out .= '</section>';
           break;
+        case 'setFighters' :
+          if ($user->isSuperuser()) {
+            $out .= '<section class="well">';
+            $out .= '<h3 class="text-center">';
+            $out .=   'Set Fighters';
+            $out .= '</h3>';
+            $out .= '<div>';
+            $out .= '<span>Select a team : </span>';
+            $out .= '<select id="teamId">';
+            $out .= '<option value="-1">Select a team</option>';
+            foreach($allTeams as $p) {
+              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+            }
+            $out .= '</select>';
+            $out .= '</div>';
+            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setFighters">Generate</button>';
+            $out .= '<section id="ajaxViewport" class="well"></section>';
+          } else {
+            $out .= $noAuthMessage;
+          }
+          break;
         case 'setCaptains' :
           if ($user->isSuperuser()) {
             $out .= '<section class="well">';
@@ -1961,6 +1982,22 @@
         $player->equipment->remove($item);
         $player->save();
         break;
+      case 'setFighters':
+        if ($selectedTeam && $selectedTeam != '-1') {
+          $old = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=fighter")->implode(', ', '{title}');
+          $out .= '</div>';
+          $out .= '<h4 class="text-center">';
+          $out .=   'Set Fighters for '.$selectedTeam->title;
+          $out .= '</h4>';
+          $out .= '<section>';
+          $out .= '<p> Old fighters : '.$old.'</p>';
+          setFighters($selectedTeam, false);
+          $new = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=fighter")->implode(', ', '{title}');
+          $out .= '<p> New fighters : '.$new.'</p>';
+          $out .= '</section>';
+          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveFighters/'.$selectedTeam->id.'/1">Save new fighters</button>';
+        }
+        break;
       case 'setCaptains':
         if ($selectedTeam && $selectedTeam != '-1') {
           $oldCaptains = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=captain")->implode(', ', '{title}');
@@ -2036,6 +2073,11 @@
           $out .= '</section>';
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveScores/'.$selectedTeam->id.'/1">Save new scores</button>';
         }
+        break;
+      case 'saveFighters':
+        $selectedTeam = $pages->get("$input->urlSegment2");
+        $allPlayers = $allPlayers->find("team=$selectedTeam");
+        setFighters($selectedTeam, true);
         break;
       case 'saveCaptains':
         $selectedTeam = $pages->get("$input->urlSegment2");

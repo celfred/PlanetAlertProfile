@@ -64,6 +64,7 @@
     $monsters = $pages->get("name=monsters");
     $scoreboards = $pages->get("name=the-scoreboards");
     $hall = $pages->get("name=hall-of-fame");
+    $playground = $pages->get("name=fighters-playground");
     $book = $pages->get("name=book-knowledge");
     $blog = $pages->get("name=blog");
     $contact = $pages->get("name=contact");
@@ -240,6 +241,8 @@
                 $out .= "<li><a$class href='{$adminActions->url}/setYearlyKarma/'>Set yearly karmas</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCaptains' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}/setCaptains/'>Set captains</a></li>";
+                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setFighters' ? " class='selected-left'" : "";
+                $out .= "<li><a$class href='{$adminActions->url}/setFighters/'>Set fighters</a></li>";
                 $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCache' ? " class='selected-left'" : "";
                 $out .= "<li><a$class href='{$adminActions->url}setCache/'>Set cache</a></li>";
                 $class = $page->name == 'script' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
@@ -331,6 +334,14 @@
                 $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
                 $out .= "<span class='strikeText'>".__("Fight a monster")."</span></li>";
               }
+              // Fighters playground
+              if ($player && ($player->skills->has("name=fighter"))) {
+                $class = $page->name == 'fighters-playground' ? " class='selected-left'" : "";
+                $out .= "<li><a$class href='{$playground->url}{$player->name}'><span class='glyphicon glyphicon-time'></span> - ".__("Go to the Fighters Playground")."</a></li>";
+              } else {
+                $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
+                $out .= "<span class='strikeText'>".__("Go to the Fighters Playground")."</span></li>";
+              }
               // Check if Visualizer is accessible in player's group
               if ($player && ($player->team->forceVisualizer == 1 || $player->equipment->get("name=electronic-visualizer"))) {
                 $class = $page->name == 'visualizer' ? " class='selected-left'" : "";
@@ -363,7 +374,7 @@
               $out .= "<li><a$class href='{$hall->url}'><span class='glyphicon glyphicon-eye-open'></span> - ".__("Visit the Hall of Fame")."</a></li>";
               if ($player->team->name != 'cm1') {
                 $out .= '<li class="dropdown-submenu">';
-                  $out .= '<a href="#"><span class="glyphicon glyphicon-education"></span> - '.__("Go to School").'</span></a>';
+                  $out .= '<a href="#"><span class="glyphicon glyphicon-education"></span> - '.__("Go to school").'</span></a>';
                   $out .= '<ul class="dropdown-menu">';
                     if ($player->team->name != 'no-team') {
                       $out .= "<li><a href='https://flenglish.tuxfamily.org/articles/cahier-classe-".$player->team->name."' target='_blank'>See my online copybook</a></li>";
@@ -485,7 +496,7 @@
           echo $ieAlert;
         }
         // Any announcements ?
-        if ($user->hasRole('teacher') && $page->is("template!=exercise")) {
+        if ($user->hasRole('teacher') && $page->is("template!=exercise|speedQuiz")) {
           $adminId = $users->get("name=admin")->id;
           $announcements = $pages->find("template=announcement, publish=1, parent=$allTeams, created_users_id=$adminId")->sort("-date");
           if ($announcements->count()>0) {
@@ -498,7 +509,7 @@
             }
           }
         }
-        if ($user->hasRole('player') && $page->is("template!=exercise")) {
+        if ($user->hasRole('player') && $page->is("template!=exercise|speedQuiz")) {
           $adminId = $users->get("name=admin")->id;
           $announcements = $pages->find("template=announcement, publish=1, (parent=$player->team, selectPlayers=0, created_users_id!=$adminId), (parent=$player->team, selectPlayers=1, playersList=$player, created_users_id!=$adminId)")->sort("-date");
           if ($announcements->count()>0) {

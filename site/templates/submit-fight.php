@@ -9,6 +9,7 @@
     $monster = $pages->get($input->post->exerciseId);
     $result = $input->post->result;
     $training = $input->post->training;
+    $speedQuiz = $input->post->speedQuiz;
     $headTeacher = getHeadTeacher($user);
     $user->language = $headTeacher->language;
 
@@ -75,70 +76,120 @@
           }
         }
       }
-    } else { // Monster fight
-      $quality = $input->post->quality;
-
-      switch($result) {
-        case 'RR' :
-          $task = $pages->get("name=fight-rr");
-          break;
-        case 'R' :
-          $task = $pages->get("name=fight-r");
-          break;
-        case 'V' :
-          $task = $pages->get("name=fight-v");
-          break;
-        case 'VV' :
-          $task = $pages->get("name=fight-vv");
-          break;
-        default:
-          break;
-      }
-
-      /* echo 'Before Saving'; */
-      if ($monster->id && $player->id && $task->id) {
-        $monster = setMonster($player, $monster);
-        // Update player's scores
-        $task->comment = $monster->title.' ['.$result.']';
-        $task->refPage = $monster;
-        $task->linkedId = false;
-        // test if fight is possible
-        if ($monster->isFightable == 0) {
-          // Record to log file
-          $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality.' - Fight not allowed!';
-          $log->save('monster-fights', $logText);
-        } else {
-          updateScore($player, $task, true);
-          checkDeath($player, true);
-          // Set group captains
-          setCaptains($player->team);
-          // Record to log file
-          $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
-          $log->save('monster-fights', $logText);
-
-          // Notify teacher (or admin)
-          $subject = _('Monster fight ').' : ';
-          $subject .= $player->title. ' ['.$player->team->title.']';
-          $subject .= ' → '.$result;
-          $subject .= ' ['.$monster->title.']';
-          $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-          $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
-          $msg .= __("Result")." : ". $result;
-          $msg .= ' ['.__("Quality")." : ".$quality."]\r\n";
-          $msg .= __("New player global FP")." : ". $player->fighting_power."\r\n";
-
-          if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-            $adminMail = $users->get("name=admin")->email;
-            $mail = wireMail();
-            $mail->from($adminMail);
-            $mail->subject($subject);
-            $mail->body($msg);
-            if (isset($headTeacher) && $headTeacher->email != '') {
-              $mail->to($headTeacher->email, 'Planet Alert');
-            } else {
-              $mail->to($adminMail, 'Planet Alert');
+    } else { // Monster fight or Speed Quiz
+      if ($speedQuiz) {
+        $playerTime = $input->post->playerTime;
+        if ($monster->id && $player->id) {
+          if ($monster->bestTime == 0 || ($monster->bestTime != 0 && $playerTime < $monster->bestTime)) { // New best time on monster
+            if ($monster->bestTimePlayer->id) { $oldBest = $monster->bestTimePlayer; }
+            $monster->bestTime = $playerTime;
+            $monster->bestTimePlayer = $player;
+            $monster->of(false);
+            $monster->save();
+            // Save also new player best time
+            $tmpPage = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
+            if ($tmpPage->bestTime == 0 || ($tmpPage->bestTime != 0 && $playerTime < $tmpPage->bestTime)) {
+              $tmpPage->bestTime = $playerTime;
+              $tmpPage->of(false);
+              $tmpPage->save();
             }
-            $numSent = $mail->send();
+            // Save Master skill
+            setMaster($player);
+            // Update scores
+            // New player gets credit
+            $task = $pages->get("template=task, name=best-time");
+            $task->comment = __('Best time on ').$monster->title.' : '.ms2string($monster->bestTime);
+            $task->refPage = $monster;
+            $task->linkedId = false;
+            $linkedId = updateScore($player, $task, true);
+            // Old best player loses HP
+            if (isset($oldBest) && $oldBest->id != $player->id) {
+              $task = $pages->get("template=task, name=best-time-lost");
+              $task->comment = __('Best time lost on ').$monster->title;
+              $task->comment .= __("set by").' '.$player->title.' ['.$player->team->title.']';
+              $task->refPage = $monster;
+              $task->linkedId = $linkedId;
+              updateScore($oldBest, $task, true);
+            }
+            echo '1';
+          } else { // Check if new player best time
+            $tmpPage = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
+            if ($tmpPage->bestTime == 0 || ($tmpPage->bestTime != 0 && $playerTime < $tmpPage->bestTime)) { // New best time for player
+              $tmpPage->bestTime = $playerTime;
+              $tmpPage->of(false);
+              $tmpPage->save();
+              echo '2';
+            } else {
+              echo '0';
+            }
+          }
+          // Record to log file
+          $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$playerTime;
+          $log->save('speed-quiz', $logText);
+        }
+      } else {
+        $quality = $input->post->quality;
+        switch($result) {
+          case 'RR' :
+            $task = $pages->get("name=fight-rr");
+            break;
+          case 'R' :
+            $task = $pages->get("name=fight-r");
+            break;
+          case 'V' :
+            $task = $pages->get("name=fight-v");
+            break;
+          case 'VV' :
+            $task = $pages->get("name=fight-vv");
+            break;
+          default:
+            break;
+        }
+        /* echo 'Before Saving'; */
+        if ($monster->id && $player->id && $task->id) {
+          $monster = setMonster($player, $monster);
+          // Update player's scores
+          $task->comment = $monster->title.' ['.$result.']';
+          $task->refPage = $monster;
+          $task->linkedId = false;
+          // test if fight is possible
+          if ($monster->isFightable == 0) {
+            // Record to log file
+            $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality.' - Fight not allowed!';
+            $log->save('monster-fights', $logText);
+          } else {
+            updateScore($player, $task, true);
+            checkDeath($player, true);
+            // Set group captains
+            setCaptains($player->team);
+            // Record to log file
+            $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
+            $log->save('monster-fights', $logText);
+
+            // Notify teacher (or admin)
+            $subject = _('Monster fight ').' : ';
+            $subject .= $player->title. ' ['.$player->team->title.']';
+            $subject .= ' → '.$result;
+            $subject .= ' ['.$monster->title.']';
+            $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+            $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
+            $msg .= __("Result")." : ". $result;
+            $msg .= ' ['.__("Quality")." : ".$quality."]\r\n";
+            $msg .= __("New player global FP")." : ". $player->fighting_power."\r\n";
+
+            if (!in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
+              $adminMail = $users->get("name=admin")->email;
+              $mail = wireMail();
+              $mail->from($adminMail);
+              $mail->subject($subject);
+              $mail->body($msg);
+              if (isset($headTeacher) && $headTeacher->email != '') {
+                $mail->to($headTeacher->email, 'Planet Alert');
+              } else {
+                $mail->to($adminMail, 'Planet Alert');
+              }
+              $numSent = $mail->send();
+            }
           }
         }
       }

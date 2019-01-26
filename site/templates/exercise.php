@@ -295,6 +295,13 @@
           $out .= '<p>Average result : '.averageLabel($page->quality).'</p>';
         }
         $out .= '</li>';
+        // Is speedQuiz available ?
+        $out .= '<li>';
+        if ($user->isSuperuser() || $user->hasRole('teacher') || isset($player->skills) && $player->skills->has("name=fighter") && $player->find("template=event, task.name=fight-vv, refPage=$page")->count() >= 1) {
+          $out .= '<a class="btn btn-primary" href="'.$pages->get("name=speed-quiz")->url.$page->id.'"><i class="glyphicon glyphicon-time"></i> '.__("Start a Speed Quiz !").'</a>';
+        } else {
+          $out .= '<i class="glyphicon glyphicon-time"></i> '.__("You need to have at least 1 VV fight to do a speed quiz.");
+        }
         $out .= '</ul>';
       }
     $out .= '</div>';
@@ -305,9 +312,16 @@
       if ($page->mostTrained) {
         $out .='<span class="label label-success">'.$page->mostTrained->title.$team.' → '.$page->best.'UT</span>';
       } else {
-        $out .='Nobody !';
+        $out .= __('Nobody !');
       }
       $out .= '</p>';
+      $out .= '<p><i class="glyphicon glyphicon-thumbs-up"></i> Master time : ';
+      if ($page->bestTime) {
+        $out .= '<span class="label label-success">'.ms2string($page->bestTime).' '.__('by').' '.$page->bestTimePlayer->title.' ['.$page->bestTimePlayer->team->title.']</span>';
+      } else {
+        $out .= __('Nobody !');
+      }
+      $out .= '</td>';
     $out .= '</div>';
     $out .= '</div>';
 

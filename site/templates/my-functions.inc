@@ -218,7 +218,7 @@ function updateScore($player, $task, $real = true) {
         $newsBoard = 0;
       }
       // Publish on Public newsBoard (everybody will see it)
-      if ($task->is("name=buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|remove|buy-pdf")) {
+      if ($task->is("name=buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|remove|buy-pdf|best-time")) {
         $public = 1;
       } else {
         $public = 0;
@@ -366,6 +366,12 @@ function taskExtraAction($player, $task, $real) {
     }
     if ($task->refPage != false && $task->refPage->template == 'people') {
       $player->people->remove($task->refPage);
+    }
+  }
+  if ($task->is("name~=fight")) { // Set Fighter skill if needed
+    if ($player->find("template=event, task.name~=fight")->count() >= 9) {
+      $role = $pages->get("parent.name=skills, name=fighter");
+      $player->skills->add($role);
     }
   }
   if ($task->is("name=free")) { // Add element
@@ -806,6 +812,31 @@ function setCaptains($team, $real = true) {
   }
 }
 
+function setMaster($player) {
+  $pages = wire('pages');
+  $role = $pages->get("name=master");
+  $player->of(false);
+  $player->skills->add($role);
+  $player->save();
+}
+
+function setFighters($team, $real = true) {
+  $pages = wire('pages');
+  $players = $pages->find("template=player, team=$team");
+  $role = $pages->get("parent.name=skills, name=fighter");
+  foreach($players as $p) {
+    $p->of(false);
+    $p->skills->remove($role);
+    $nbFights = $p->find("template=event, task.name~=fight")->count();
+    if ($nbFights >= 10) {
+      $p->skills->add($role);
+    }
+    if ($real == true) {
+      $p->save();
+    }
+  }
+}
+
 function setReputation($player) { // Reputation calculated from all values (except GC, Donations and HP)
   $free = 20;
   $equipment = 10;
@@ -851,31 +882,33 @@ function once($e, $playerId) {
 
 function eventKarma($e) { // Calculate karma evolution according to recorded event
   $karma = 0;
-  if ($e->task->is("name=free")) { // Free action
-    $karma += 8;
-    $karma += $e->refPage->level;
-  } else if ($e->task->is("name=buy")) { // Buy action
-    $karma += 4;
-    $karma += $e->refPage->level;
-  } else if ($e->task->is("name=donation|bought")) { // 'Special' positive actions
-    $karma += 1;
-  } else if ($e->task->is("name=ut-action-v|donated|buy-pdf")) { // 'Neutralized' actions
-    $karma += 0;
-  } else if ($e->task->is("name=remove|death")) { // 'Special' negative actions
-    $karma -= 5;
-  } else if ($e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
-    $karma += 2;
-    if ($e->task->HP>=5 || $e->task->GC>=5 || $e->task->XP>=5) {
-      $karma += 2;
-    } else {
+  if ($e->task) {
+    if ($e->task->is("name=free")) { // Free action
+      $karma += 8;
+      $karma += $e->refPage->level;
+    } else if ($e->task->is("name=buy")) { // Buy action
+      $karma += 4;
+      $karma += $e->refPage->level;
+    } else if ($e->task->is("name=donation|bought")) { // 'Special' positive actions
+      $karma += 1;
+    } else if ($e->task->is("name=ut-action-v|donated|buy-pdf")) { // 'Neutralized' actions
       $karma += 0;
-    }
-  } else if ($e->task->HP<0 || $e->task->GC<0 || $e->task->XP<0) { // Negative action
-    $karma -= 2;
-    if ($e->task->HP<=-5 || $e->task->GC<=-5 || $e->task->XP<=-5) {
+    } else if ($e->task->is("name=remove|death")) { // 'Special' negative actions
+      $karma -= 5;
+    } else if ($e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
+      $karma += 2;
+      if ($e->task->HP>=5 || $e->task->GC>=5 || $e->task->XP>=5) {
+        $karma += 2;
+      } else {
+        $karma += 0;
+      }
+    } else if ($e->task->HP<0 || $e->task->GC<0 || $e->task->XP<0) { // Negative action
       $karma -= 2;
-    } else {
-      $karma -= 0;
+      if ($e->task->HP<=-5 || $e->task->GC<=-5 || $e->task->XP<=-5) {
+        $karma -= 2;
+      } else {
+        $karma -= 0;
+      }
     }
   }
   return $karma;
@@ -1821,8 +1854,10 @@ function prepareListWords($allLines, $type) {
         foreach($allLines as $line) {
           $pattern = '/\$.*?\$/';
           preg_match($pattern, $line, $matches);
-          $help = preg_replace('/\$/', '', $matches[0]);
-          $listWords .= '- '.$help.'<br />';
+          if (isset($matches[0])) {
+            $help = preg_replace('/\$/', '', $matches[0]);
+            $listWords .= '- '.$help.'<br />';
+          }
         }
       }
       break;
@@ -2585,6 +2620,40 @@ function groupScores($team = NULL) {
 function pluralize($count, $singular, $plural = false) {
   if (!$plural) $plural = $singular . 's';
   return ($count == 1 || $count == 0 ? $singular : $plural) ;
+}
+
+function ms2string($ms) {
+  $oneSecond = 100;
+  $oneMinute = $oneSecond * 60;
+  $oneHour = $oneMinute * 60;
+  $oneDay = $oneHour * 24;
+  $seconds = floor(($ms % $oneMinute) / $oneSecond);
+  $minutes = floor(($ms % $oneHour) / $oneMinute);
+  $hours = floor(($ms % $oneDay) / $oneHour);
+  $days = floor($ms / $oneDay);
+  $timeString = '';
+  $millLeft = $ms;
+  if ($days != 0) {
+    $millLeft = $ms-($days*$oneDay);
+    $timeString .= $days.'d ';
+  }
+  if ($hours != 0) {
+    $millLeft = $ms-($hours*$oneHour);
+    $timeString .= $hours.'h ';
+  }
+  if ($minutes != 0) {
+    $millLeft = $ms-($minutes*$oneMinute);
+    $timeString .= $minutes.'m ';
+  }
+  if ($seconds != 0) {
+    $millLeft = $ms-($seconds*$oneSecond);
+    if ($millLeft>=0 && $millLeft <= 9) { $millLeft = '0'+$millLeft; }
+    $timeString .= $seconds.'s ';
+  }
+  if ($millLeft < 1000) {
+    $timeString .= $millLeft;
+  }
+  return $timeString;
 }
 
 ?>

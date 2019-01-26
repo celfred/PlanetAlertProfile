@@ -103,6 +103,7 @@
     <th><?php echo __('Summary'); ?></th>
     <th><?php echo __('# of words'); ?></th>
     <th><?php echo __('Most trained player'); ?></th>
+    <th><?php echo __('Master time'); ?></th>
     </tr>
   </thead>
   <tbody>
@@ -180,6 +181,13 @@
         $out .= '<td data-sort="'.$m->best.'">';
         if ($m->mostTrained) {
           $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__('UT').' - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
+        } else {
+          $out .= '-';
+        }
+        $out .= '</td>';
+        $out .= '<td data-sort="'.$m->bestTime.'">';
+        if ($m->bestTime) {
+          $out .= ms2string($m->bestTime).' '.__('by').' '.$m->bestTimePlayer->title.' ['.$m->bestTimePlayer->team->title.']';
         } else {
           $out .= '-';
         }
