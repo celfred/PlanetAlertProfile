@@ -68,5 +68,10 @@ lang = {
 	stopSave : "Arrêter & enregistrer",
 	stop4 : "Tu n'as pas utilisé suffisament le casque pour stimuler ton cerveau de manière efficace.",
 	stopOrder : "Arrêter",
-	training1 : "Tu viens de battre le record !<br /><br /><small>Ce message devrait disparaître dans 2 secondes. Si ce n'est pas le cas, clique sur 'OK' ci-dessous :)</small>",
+	training : "Tu viens de battre le record !<br /><br /><small>Ce message devrait disparaître dans 2 secondes. Si ce n'est pas le cas, clique sur 'OK' ci-dessous :)</small>",
+  speedEnd : "Tu as donné 20 réponses justes en ",
+  speedWrong : "5 secondes de pénalités !",
+  speedPersonalRecord : "Félicitations ! Tu as réalisé un nouveau record personnel : ",
+  speedNoRecord : "Tu n'as pas réalisé de record. Tu as été trop lent.",
+  speedGlobalRecord : "Félicitations ! Tu as réalisé un nouveau record de 'Maître' !",
 };

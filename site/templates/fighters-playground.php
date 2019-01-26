@@ -93,6 +93,9 @@
       $out .= '<td class="">';
         if ($validFights >= 1) {
           $out .= '<a class="btn btn-xs btn-primary" href="'.$pages->get("name=speed-quiz")->url.$m->id.'">'.__("Start a Speed Quiz !").'</a>';
+          if ($user->isSuperuser() || $user->hasRole('teacher')) {
+            $out .= ' <a class="btn btn-xs btn-primary" href="'.$pages->get("name=speed-quiz")->url.$m->id.'">'.__("Teacher's access").'</a>';
+          }
         } else {
           $out .= __("No access");
           if ($user->isSuperuser() || $user->hasRole('teacher')) {
