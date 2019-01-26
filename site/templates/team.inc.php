@@ -194,7 +194,7 @@
     }
     $showSkills = '';
     foreach($player->skills as $s) {
-      $showSkills .= '<span class="badge badge-primary" data-toggle="tooltip" title="'.sprintf(__("%s"), $s->title).'">'.$s->title[0].'</span>';
+      $showSkills .= '<span class="badge badge-primary" data-toggle="tooltip" title="'.$s->title.'">'.$s->title[0].'</span>';
     }
     $out .= '<td>'.$showSkills.'</td>';
     $out .= '<td>'. $player->GC .'</td>';

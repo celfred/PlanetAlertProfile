@@ -125,7 +125,7 @@
       }
       $subject = _('Buy form ').' : ';
       $subject .= $player->title. ' ['.$player->team->title.']';
-      $subject .= ' → '.$newItem->title. '[Level '.$newItem->level.']';
+      $subject .= ' → '.$newItem->title. ' [Level '.$newItem->level.']';
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
         $adminMail = $users->get("name=admin")->email;
         $mail = wireMail();
