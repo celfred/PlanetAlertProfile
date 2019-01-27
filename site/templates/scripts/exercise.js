@@ -619,10 +619,10 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   $scope.isFocused = false; // Automatic focus on input field
   $scope.runningInterval = false;
   $scope.playerTime = 0;
-  $scope.playerBestTime = document.getElementById("playerBestTime").getAttribute("data-ms");
-  $scope.monsterBestTime = document.getElementById("monsterBestTime").getAttribute("data-ms");
   if (document.getElementById("speedQuiz")) { // Regular training or SpeedQuiz ?
     $scope.speedQuiz = true;
+    $scope.playerBestTime = document.getElementById("playerBestTime").getAttribute("data-ms");
+    $scope.monsterBestTime = document.getElementById("monsterBestTime").getAttribute("data-ms");
   }
 
 	// Disable selection
