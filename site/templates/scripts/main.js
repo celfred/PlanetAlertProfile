@@ -208,8 +208,19 @@ $(document).ready(function() {
 	$(document).on('click', '.simpleConfirm', (function(e) {
     e.preventDefault();
     $this = $(this);
+    if ($this.attr("data-href")) {
+      var $href = $this.attr("data-href");
+    } else {
+      var $href = '';
+    }
+    if ($this.attr("data-msg")) {
+      var $msg = $this.attr("data-msg");
+    } else {
+      var $msg = '';
+    }
 		swal({
 			title: lang.sure,
+      text: $msg,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
@@ -217,20 +228,32 @@ $(document).ready(function() {
 			confirmButtonText: lang.yes
 		}).then( result => {
 			if (result.value) {
-        window.location.href = $this.attr("href");
+        if ($href != '') { // Ajax-call before following href
+					$.get($href, function(data) { 
+            window.location.href = $this.attr("href");
+					}); 
+        } else {
+          window.location.href = $this.attr("href");
+        }
       } else {
         return false;
       }
     })
   }));
 
-	$('.basicConfirm').on('click', function() {
+	$('.basicConfirm').on('click', function(e) {
+    e.preventDefault();
 		var $this = $(this);
 		var $href = $this.attr('data-href');
     if ($this.attr("data-reload")) {
       var $reload = $this.attr("data-reload");
     } else {
       var $reload = 'false';
+    }
+    if ($this.attr("data-msg")) {
+      var $msg = $this.attr("data-msg");
+    } else {
+      var $msg = '';
     }
     if ($this.attr("data-toDelete")) {
       var $toDelete = $this.parents($this.attr("data-toDelete"));
@@ -239,6 +262,7 @@ $(document).ready(function() {
     }
 		swal({
 			title: lang.sure,
+      text: $msg,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
@@ -938,6 +962,40 @@ $(document).ready(function() {
 				}
 			});
 		}
+		if ($type == 'fightRequest') {
+			var $result = $this.attr('data-result');
+			switch($result) {
+        case 'v' : var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+lang.v; break;
+				case 'vv': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+lang.vv; break;
+        case 'r' : var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+lang.r; break;
+				case 'rr': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+lang.rr; break;
+				default: var $text='';
+			}
+			swal({
+				title: lang.sure,
+				type: "question",
+				html: $text,
+				showCancelButton : true,
+				allowOutsideClick : true,
+				confirmButtonText: lang.yes,
+				cancelButtonText: lang.no,
+			}).then( result => {
+				if (result.value) {
+					var $url = $this.attr('data-url');
+					$.get($url, function(data) { 
+						$this.parents("li").remove();
+						swal({
+							title: lang.saved,
+							text: lang.thanks,
+							timer: 1000,
+							showConfirmButton: false
+						}).catch(swal.noop);
+					});
+				} else {
+					return false;
+				}
+			});
+		}
 		if ($type == 'initiative') {
 			swal({
 				title: lang.tell,
@@ -1190,7 +1248,7 @@ var initTables = function() {
   });
   var trainingTable = $('#trainingTable').DataTable({
     lengthMenu: [ [25, 50, -1], [25, 50, lang.all] ],
-    order: [[ 0, "asc"], [2, "asc"]]
+    order: [[ 0, "asc"], [1, "asc"]]
   });
   var historyTable = $('#historyTable').DataTable({
 		retrieve: true,

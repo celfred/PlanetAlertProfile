@@ -6,6 +6,7 @@
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $user->hasRole('teacher') || $player->team->forceHelmet == 1) {
       $helmet = $pages->get("name=memory-helmet");
+      $player = $pages->get("parent.name=players, name=test");
     } else {
       $helmet = $player->equipment->get('memory-helmet');
     }
@@ -60,13 +61,12 @@
           $out .= '<thead>';
           $out .= '<tr>';
           $out .= '<th>'.__("Name").'</th>';
-          $out .= '<th>'.__("Topic").'</th>';
           $out .= '<th>'.__("Level").'</th>';
-          $out .= '<th>'.__("Summary").'</th>';
-          $out .= '<th>'.__("# of words").'</th>';
+          $out .= '<th style="width:250px;">'.__("Summary").'</th>';
           $out .= '<th>'.__("U.T. gained").'</th>';
           $out .= '<th>'.__("Last training session").'</th>';
-          $out .= '<th>'.__("Action").'</th>';
+          $out .= '<th>'.__("Actions");
+          $out .= ' <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="- '.__('Fight requests require at least +1UT on a monster<br />- Limited to 1 fight request').'"></i></th>';
           $out .= '<th>'.__("Most trained player").'</th>';
           $out .= '<th>'.__("Master time").'</th>';
           $out .= '</tr>';
@@ -82,8 +82,9 @@
             $m->lastTrainingInterval = -1;
             $m->waitForTrain = 0;
           }
+          $topics = $m->topic->implode(', ', '{title}');
           $out .= '<tr>';
-          $out .= '<td>';
+          $out .= '<td data-search="'.$topics.' '.$m->title.'">';
           $out .= $m->title;
           // Find # of days compared to today to set 'New' indicator
           $date2 = new \DateTime(date("Y-m-d", $m->published));
@@ -94,9 +95,6 @@
           if ($m->special) {
             $out .= ' <span class="badge">'.__("Detected").' !</span>';
           }
-          $out .= '</td>';
-          $out .= '<td>';
-          $out .= '<span class="label label-default">'.$m->topic->implode(', ', '{title}').'</span>';
           $out .= '</td>';
           $out .= '<td>';
           $out .= $m->level;
@@ -110,29 +108,10 @@
               $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$m->summary->getLanguageValue($french).'"></span>';
             }
           }
-          $out .= '</td>';
-          // Count # of words
+          // Data preview
           $exData = $m->exData;
           $allLines = preg_split('/$\r|\n/', $sanitizer->entitiesMarkdown($exData));
-          /* Unused because triggers a bug with tooltip display */
-          /* $out .= '<td data-sort="'.count($allLines).'">'; */
-          $out .= '<td>';
           $listWords = prepareListWords($allLines, $m->type->name);
-          switch ($m->type->name) {
-            case 'translate' :
-              $out .= count($allLines).' '.__("words");
-              break;
-            case 'quiz' :
-              $out .= count($allLines).' '.__("questions");
-              break;
-            case 'image-map' :
-              $out .= count($allLines).' '.__("words");
-              break;
-            case 'jumble' :
-              $out .= count($allLines).' '.__("sentences");
-              break;
-            default : continue;
-          }
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
           $out .= '<td>';
@@ -168,13 +147,20 @@
           $out .= '</td>';
           $out .= '<td>';
           if ($m->isTrainable == 1) {
-            $out .= ' <a class="btn btn-primary" href="'.$m->url.'train"><i class="glyphicon glyphicon-headphones"></i> '.__("Put the helmet on !").'</a>';
+            $out .= ' <a class="btn btn-primary btn-xs" href="'.$m->url.'train"><i class="glyphicon glyphicon-headphones" data-toggle="tooltip" title="'.__("Put the helmet on !").'"></i></a>';
           } else {
             if ($m->waitForTrain == 1) { // Trained today
               $out .= __('Come back tomorrow ;)');
             } else {
               $out .= sprintf(__("Come back in %d days ;)"), $m->waitForTrain);
             }
+          }
+          if (!$player->fightRequest && $m->utGain > 1 || $user->hasRole('teacher') || $user->isSuperuser()) { // Limit to 1 request and requires at least 1UT
+            $msg = sprintf(__("Fight request for %s"), $m->title);
+            $out .= ' <span><a class="btn btn-danger btn-xs simpleConfirm" href="'.$page->url.'" data-href="'.$pages->get("name=submitforms")->url.'?form=fightRequest&monsterId='.$m->id.'&playerId='.$player->id.'" data-msg="'.$msg.'" data-reload="true"><i class="glyphicon glyphicon-education" data-toggle="tooltip" title="'.__("Ask teacher for an in-class Fight!").'"></i></a></span>';
+          }
+          if ($player->fightRequest == $m) {
+            $out .= ' <span class="glyphicon glyphicon-ok-circle" data-toggle="tooltip" title="'.__('Your teacher has already been warned about this request.').'"></span>';
           }
           $out .= '</td>';
           // Find best trained player on this monster

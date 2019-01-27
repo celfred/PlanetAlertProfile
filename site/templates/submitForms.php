@@ -143,7 +143,6 @@
 
     if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
       $checkedItems = $input->post->item; // Array
-
       foreach($checkedItems as $item=>$state) {
         $newItem = $pages->get($item);
         // Check if item is not already there
@@ -249,6 +248,40 @@
         }
       }
     }
+
+    if (isset($input->get->form) && $input->get->form == 'fightRequest' && $input->get->playerId != '' && $input->get->monsterId != '') { // Fight request
+      $player = $pages->get($input->get->playerId);
+      $monster = $pages->get($input->get->monsterId);
+      if ($monster->is("template=exercise")) {
+        // Only 1 pending lesson allowed for a player
+        $already = $player->fightRequest;
+        if (!$player->fightRequest) {
+          $player->fightRequest = $monster;
+          $player->of(false);
+          $player->save();
+        }
+        // Notify teacher or admin
+        $subject = _('Fight request ').' : ';
+        $subject .= $player->title. ' ['.$player->team->title.']';
+        $subject .= ' → '.$monster->title;
+        $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+        $msg .= __("Fight request")." : ". $monster->title."\r\n";
+        if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+          $adminMail = $users->get("name=admin")->email;
+          $mail = wireMail();
+          $mail->from($adminMail);
+          $mail->subject($subject);
+          $mail->body($msg);
+          if ($headTeacher && $headTeacher->email != '') {
+            $mail->to($headTeacher->email, 'Planet Alert');
+          } else {
+            $mail->to($adminMail, 'Planet Alert');
+          }
+          $numSent = $mail->send();
+        }
+      }
+    }
+
     // Set group captains
     if ($player->team->name != 'no-team') {
       setCaptains($player->team, true);
@@ -342,10 +375,10 @@
         }
       }
     }
-    // Delete pending lesson without scoring
-    if (isset($input->get->form) && $input->get->form == 'deleteNotification' && $input->get->usedPending != '') {
-      $pending = $pages->get($input->get->usedPending);
-      $pending->trash();
+    // Delete page (pending lesson, fight request, ...) without scoring
+    if (isset($input->get->form) && $input->get->form == 'deleteNotification' && $input->get->pageId != '') {
+      $pageToDel = $pages->get($input->get->pageId);
+      $pageToDel->trash();
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, memory potion...

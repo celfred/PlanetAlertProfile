@@ -214,6 +214,14 @@
         }
       ?>
       </ul>
+      <?php 
+            echo '<p><span class="label label-danger">'.__("Fight request").'</span> → ';
+        if ($playerPage->fightRequest) {
+          echo $playerPage->fightRequest->title;
+        } else {
+          echo '-';
+        }
+      ?>
     </div>
     <?php 
       if ($showDetails) {
