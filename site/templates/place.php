@@ -92,6 +92,19 @@ include("./head.inc");
     <tr>
       <td colspan="2" class="col-sm-10 text-justify">
       <p class="lead"><?php echo $page->summary; ?> <span class="btn btn-info"><a href="<?php echo $page->link; ?>"><?php echo __("[Read more about this place]"); ?></a></span></p>
+      <?php 
+      if ($user->language->name != 'french') {
+        $page->of(false);
+        if ($page->summary->getLanguageValue($french) != '') {
+          echo '<a class="btn btn-sm btn-primary" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
+          echo '<div class="collapse" id="collapseDiv">';
+          echo '<div class="well">';
+          echo $page->summary->getLanguageValue($french);
+          echo '</div>';
+          echo '</div>';
+        }
+      }
+      ?>
       </td>
     <tr>
       <td colspan="3" class="col-sm-12">
