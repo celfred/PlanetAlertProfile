@@ -1077,7 +1077,11 @@ $(document).ready(function() {
 				$("#adminTableForm :submit").prop('disabled', true);
 				var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment, #adminTableRedirection');
         var $customDate = $('#customDate').val();
-				var $toSave = 'adminTableSubmit=Save&customDate='+$customDate+'&';
+        if ($('#adminTableRedirection').prop('checked')) {
+          var $toSave = 'adminTableSubmit=Save&adminTableRedirection=1&customDate='+$customDate+'&';
+        } else {
+          var $toSave = 'adminTableSubmit=Save&customDate='+$customDate+'&';
+        }
 				var $formUrl = $this.attr('action');
 				for (var i=0; i<$checked.length; i++) {
 					var $customId = $checked.eq(i).attr('data-customId');
