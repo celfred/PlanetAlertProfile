@@ -623,6 +623,10 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
     $scope.speedQuiz = true;
     $scope.playerBestTime = document.getElementById("playerBestTime").getAttribute("data-ms");
     $scope.monsterBestTime = document.getElementById("monsterBestTime").getAttribute("data-ms");
+  } else {
+    $scope.speedQuiz = false;
+    $scope.playerBestTime = 0;
+    $scope.monsterBestTime = 0;
   }
 
 	// Disable selection
@@ -637,7 +641,6 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 	$window.addEventListener("beforeunload", function (e) {
 		if (!$scope.waitForStart) {
 			var confirmationMessage = lang.quit;
-
 			(e || window.event).returnValue = confirmationMessage; //Gecko + IE
 			return confirmationMessage;                            //Webkit, Safari, Chrome
 		} else {
@@ -655,7 +658,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			// Pick another question
 			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
-      $scope.promise = $interval($scope.setTimer, 10, 100000);
+      $scope.promise = $interval($scope.setTimer, 10, 1000000);
     })
     $scope.exerciseId = exerciseId;
     $scope.redirectUrl = redirectUrl;

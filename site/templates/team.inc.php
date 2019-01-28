@@ -192,7 +192,11 @@
     if ($user->isLoggedin()) {
       $out .= '<td><span class="trend">'.$trend.'</span></td>';
     }
-    $showSkills = '';
+    if (!$player->skills->has("name=ambassador")) {
+      $showSkills = '<span class="label label-primary">'.$player->streak.'</span>';
+    } else {
+      $showSkills = '';
+    }
     foreach($player->skills as $s) {
       $showSkills .= '<span class="badge badge-primary" data-toggle="tooltip" title="'.$s->title.'">'.$s->title[0].'</span>';
     }

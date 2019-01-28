@@ -16,7 +16,7 @@
     if ($training == true) { // Training session
       if ($result>=1 && $result <=3) { // Excellent training session if 3UT or more
         $task = $pages->get("name=ut-action-v"); 
-      } else if ($result > 5) {
+      } else if ($result > 3) {
         $task = $pages->get("name=ut-action-vv");
       }
 
