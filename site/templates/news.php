@@ -619,6 +619,9 @@
             case 'donation' :
               $out .= '<span class="">'.__("Generous attitude from").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.'] : '.html_entity_decode($n->summary).'</span>';
               break;
+            case 'best-time' :
+              $out .= '<span class="">'.__("Best time for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.'] : '.html_entity_decode($n->summary).'</span>';
+              break;
             default : $out .= __("todo");
           }
           //$out .= $n->task->title. ' : ' . $n->summary;
