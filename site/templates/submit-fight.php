@@ -137,7 +137,7 @@
           $subject .= ' ['.$monster->title.']';
           $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
           $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
-          $msg .= __("Result")." : ". $result;
+          $msg .= __("Result")." : ".$result.' ('.ms2string($monster->bestTime).')' ;
 
           if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
             $adminMail = $users->get("name=admin")->email;
