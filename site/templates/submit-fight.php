@@ -99,7 +99,7 @@
             // Update scores
             // New player gets credit
             $task = $pages->get("template=task, name=best-time");
-            $task->comment = __('Best time on ').$monster->title.' : '.ms2string($monster->bestTime);
+            $task->comment = __('Best time on ').$monster->title.' : '.ms2string($playerTime);
             $task->refPage = $monster;
             $task->linkedId = false;
             $linkedId = updateScore($player, $task, true);
@@ -107,7 +107,7 @@
             if (isset($oldBest) && $oldBest->id != $player->id) {
               $task = $pages->get("template=task, name=best-time-lost");
               $task->comment = __('Best time lost on ').$monster->title;
-              $task->comment .= __("set by").' '.$player->title.' ['.$player->team->title.']';
+              $task->comment .= ', '.__("set by").' '.$player->title.' ['.$player->team->title.'] : '.ms2string($playerTimei);
               $task->refPage = $monster;
               $task->linkedId = $linkedId;
               updateScore($oldBest, $task, true);
