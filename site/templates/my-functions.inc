@@ -947,7 +947,7 @@ function saveHistory($player, $task, $newsBoard = 0, $public = 0) {
   if ($task->refPage) { $p->refPage = $task->refPage; }
   // Tick inClass checkbox if classActivity Team option is on
   // For UT and FP actions only
-  if ($player->team->classActivity == 1 && $task->is("name~=fight|ut-action")) {
+  if (($player->team->classActivity == 1 && $task->is("name~=fight|ut-action")) || $task->inClass == 1) {
     $p->inClass = 1;
   } else {
     $p->inClass = 0;
