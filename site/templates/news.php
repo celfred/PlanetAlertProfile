@@ -20,7 +20,6 @@
       $out .= '</div>';
       $out .= '<div class="panel-body">';
         $today = new \DateTime("today");
-        /* $news = $pages->find("parent.name=history, publish=1"); */
         $news = $pages->find("parent.name=history, publish=1, task.name!=penalty|buy-pdf|inactivity");
         $news->filter("has_parent=$allConcernedPlayers")->sort('-created');
         $out .= '<div class="col-sm-6">';
@@ -68,6 +67,7 @@
 
         $out .= '<p class="label label-primary">'.__("Others").'</p>';
         $others = $pages->find("parent.name=history, publish=1, task.name=penalty|buy-pdf");
+        $others->filter("has_parent=$allConcernedPlayers")->sort('-created');
         if ($others->count() > 0) {
           $out .= '<ul class="list-unstyled">';
           foreach($others as $n) {
@@ -166,7 +166,7 @@
             }
             $out .= '<span>'.$p->player->title.' ['.$p->player->team->title.'] : '.$p->refPage->title.' (warning '.$interval->days.' days ago)</span>';
             $out .= ' <label for="unpublish_'.$p->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$p->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedPending='.$p->id.'" /> validated today</label>';
-            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&pageId='.$p->id.'" class="del">[Delete]</a>';
+            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&pageId='.$p->id.'" class="del">'.__('[Delete]').'</a>';
             $out .= '</li>';
           }
           $out .= '</ul>';
@@ -185,7 +185,7 @@
             $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="r" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=R&monsterId='.$p->fightRequest->id.'">R</button>';
             $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="v" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=V&monsterId='.$p->fightRequest->id.'">V</button>';
             $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="vv" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=VV&monsterId='.$p->fightRequest->id.'">VV</button>';
-            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&pageId='.$p->fightRequest->id.'" class="del">[Delete]</a>';
+            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&pageId='.$p->fightRequest->id.'" class="del">'.__('[Delete]').'</a>';
             $out .= '</li>';
           }
           $out .= '</ul>';
