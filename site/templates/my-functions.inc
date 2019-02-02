@@ -1337,11 +1337,11 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $allHk = $player->find("template=event, task.category.name=homework, date>=$dateStart, date<=$dateEnd");
   $player->initiative = $player->find("task.name=personal-initiative, date>=$dateStart, date<=$dateEnd");
   $player->ut = $player->find("task.name=ut-action-v|ut-action-vv, date>=$dateStart, date<=$dateEnd");
-  $player->fp = $player->find("task.name=battle-v|battle-vv|fight-v|fight-vv, date>=$dateStart, date<=$dateEnd");
+  $player->fp = $player->find("task.name=best-time|battle-v|battle-vv|fight-v|fight-vv, date>=$dateStart, date<=$dateEnd");
   $player->inClassUtCount = $player->ut->find("inClass=1")->count();
   $player->outClassUtCount = $player->ut->find("inClass=0")->count();
   $player->inClassFpCount = $player->fp->find("inClass=1")->count();
-  $player->outClassFpCount = $player->fp->find("inClass=0, (name~=fight)")->count();
+  $player->outClassFpCount = $player->fp->find("inClass=0")->count();
   $player->inClassActivity = $player->inClassUtCount + $player->inoutClassFpCount;
   $player->outClassActivity = $player->outClassUtCount + $player->outClassFpCount;
   $player->nbHk = $allHk->count();
