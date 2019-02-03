@@ -158,6 +158,54 @@
         }
         $out .= '</div>';
         $out .= '</div>';
+        $out .= '<div id="" class="board panel panel-primary">';
+        $out .= '<div class="panel-heading">';
+        $out .= '<h4><span class="label label-primary">'.__("Fight requests / Masters").'</span></h4>';
+        $out .= '</div>';
+        $out .= '<div class="panel-body">';
+        $out .= '<span class="label label-primary">'.__("Fight requests").'</span>';
+        $requests = $allPlayers->find("fightRequest!=''");
+        if ($requests->count() > 0) {
+          $out .= '<ul>';
+          foreach($requests as $r) {
+            $out .= '<li>';
+            if (isset($player)) {
+              $focus = 'focus';
+            } else {
+              $focus = '';
+            }
+            $out .= '<span class="'.$focus.'">'.$r->title.'</span>';
+            $out .= ' <span class="badge">'.$r->fightRequest->title.'</span>';
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__("No fight requests").'</p>';
+        }
+        $out .= '<span class="label label-primary">'.__("Masters").'</span>';
+        $masters = $allPlayers->find("skills.name=master");
+        if ($masters->count() > 0) {
+          $out .= '<ul>';
+          foreach($masters as $m) {
+            $nbBestTimes = $pages->count("template=exercise, bestTimePlayer=$m");
+            if ($nbBestTimes > 0) {
+              $out .= '<li>';
+              if (isset($player)) {
+                $focus = 'focus';
+              } else {
+                $focus = '';
+              }
+              $out .= '<span class="'.$focus.'">'.$m->title.'</span>';
+              $out .= ' <span class="badge">'.$nbBestTimes.'</span>';
+              $out .= '</li>';
+            }
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__("No Master in the team").'</p>';
+        }
+        $out .= '</div>';
+        $out .= '</div>';
       }
     $out .= '</div>';
 
@@ -169,7 +217,7 @@
       $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
       $teamRecentUtPlayers = new PageArray();
       $teamRecentFightPlayers = new PageArray();
-      $news = $pages->find("has_parent=$allPlayers, parent.name=history, template=event, date>=$limitDate, task.name~=free|buy|ut-action|fight|extra-homework, refPage!='', inClass=0, sort=-date");
+      $news = $pages->find("has_parent=$allPlayers, parent.name=history, template=event, date>=$limitDate, task.name~=free|buy|ut-action|fight|extra-homework|best-time, refPage!='', inClass=0, sort=-date");
       if ($news->count() > 0) {
         $news->sort("-date");
         $teamRecentUt = $news->find("task.name~=ut-action");
@@ -187,44 +235,57 @@
       $out .= '<div class="panel-body">';
       $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
       if ($news->count() != 0) {
+        t();
         foreach ($news as $n) {
           if ($n->task->is("!name~=ut-action")) {
-            $currentPlayer = $n->parent('template=player');
-            $out .= '<li>';
-            $out .= '<div class="thumbnail">';
-            if ($n->task->is("name=buy-pdf")) {
-              $out .= '<p><span class="label label-success">'.__('Buy PDF').'</span></p>';
-              $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
+            if (isset($n->refPage) && isset($n->refPage->parent)) {
+              $currentPlayer = $n->parent('template=player');
+              $out .= '<li>';
+              $out .= '<div class="thumbnail">';
+              if ($n->task->is("name=buy-pdf")) {
+                $out .= '<p><span class="label label-success">'.__('Buy PDF').'</span></p>';
+                $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
+              }
+              if ($n->refPage->parent->is("name=book-knowledge")) {
+                $out .= '<p><span class="label label-success">'.__('Copied lesson').'</span></p>';
+                $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
+              }
+              if ($n->task->is("name=best-time")) {
+                $out .= '<span class="label label-success"><i class="glyphicon glyphicon-time"></i> '.__('Best time on');
+                $out .= ' '.$n->refPage->title.'</span>';
+              }
+              if ($n->task->is("name=best-time-lost")) {
+                $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-time"></i> '.__('Best time lost on');
+                $out .= ' '.$n->refPage->title.'</span>';
+              }
+              if ($n->task->is("name~=fight")) {
+                $out .= '<span class="label label-primary"><i class="glyphicon glyphicon-flash"></i> '.$n->refPage->title.'</span>';
+                // Show result
+                if ($n->task->is("name=fight-vv")) { $out .= ' <span class="label label-success">VV</span>'; }
+                if ($n->task->is("name=fight-v")) { $out .= ' <span class="label label-success">V</span>'; }
+                if ($n->task->is("name=fight-r")) { $out .= ' <span class="label label-danger">R</span>'; }
+                if ($n->task->is("name=fight-rr")) { $out .= ' <span class="label label-danger">RR</span>'; }
+              }
+              if ($n->refPage->photo) {
+                $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+              }
+              if ($n->refPage->image) {
+                $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+              }
+              if ($n->refPage->parent->is("name=book-knowledge")) {
+                $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+              }
+              $out .= '<caption class="text-center">';
+              $out .= ' <span>(On '.date('l, M. j', $n->date).')</span><br />';
+              $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
+              $out .= '</caption>';
+              $out .= '</div>';
+              $out .= '</li>';
             }
-            if ($n->refPage->parent->is("name=book-knowledge")) {
-              $out .= '<p><span class="label label-success">'.__('Copied lesson').'</span></p>';
-              $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
-            }
-            if ($n->task->is("name~=fight")) {
-              $out .= '<span class="label label-primary"><i class="glyphicon glyphicon-flash"></i> '.$n->refPage->title.'</span>';
-              // Show result
-              if ($n->task->is("name=fight-vv")) { $out .= ' <span class="label label-success">VV</span>'; }
-              if ($n->task->is("name=fight-v")) { $out .= ' <span class="label label-success">V</span>'; }
-              if ($n->task->is("name=fight-r")) { $out .= ' <span class="label label-danger">R</span>'; }
-              if ($n->task->is("name=fight-rr")) { $out .= ' <span class="label label-danger">RR</span>'; }
-            }
-            if ($n->refPage->photo) {
-              $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-            }
-            if ($n->refPage->image) {
-              $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-            }
-            if ($n->refPage->parent->is("name=book-knowledge")) {
-              $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-            }
-            $out .= '<caption class="text-center">';
-            $out .= ' <span>(On '.date('l, M. j', $n->date).')</span><br />';
-            $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
-            $out .= '</caption>';
-            $out .= '</div>';
-            $out .= '</li>';
-          }
+          }        
         }
+        // TODO : Test exit foreach when test found
+        bd(t());
       } else {
         $out .= '<p>'.__("No recent news :(").'</p>';
       }
