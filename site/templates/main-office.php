@@ -237,29 +237,18 @@
       $out .= '<div class="panel-body">';
       $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
       if ($news->count() != 0) {
-        t();
         foreach ($news as $n) {
           if ($n->task->is("!name~=ut-action")) {
             if (isset($n->refPage) && isset($n->refPage->parent)) {
               $currentPlayer = $n->parent('template=player');
+              $out_02 = '<caption class="text-center">';
+              $out_02 .= ' <span>(On '.date('l, M. j', $n->date).')</span><br />';
+              $out_02 .= ' <span class="badge">'.$currentPlayer->title.'</span>';
+              $out_02 .= '</caption>';
+              $out_02 .= '</div>';
+              $out_02 .= '</li>';
               $out .= '<li>';
               $out .= '<div class="thumbnail">';
-              if ($n->task->is("name=buy-pdf")) {
-                $out .= '<p><span class="label label-success">'.__('Buy PDF').'</span></p>';
-                $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
-              }
-              if ($n->refPage->parent->is("name=book-knowledge")) {
-                $out .= '<p><span class="label label-success">'.__('Copied lesson').'</span></p>';
-                $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
-              }
-              if ($n->task->is("name=best-time")) {
-                $out .= '<span class="label label-success"><i class="glyphicon glyphicon-time"></i> '.__('Best time on');
-                $out .= ' '.$n->refPage->title.'</span>';
-              }
-              if ($n->task->is("name=best-time-lost")) {
-                $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-time"></i> '.__('Best time lost on');
-                $out .= ' '.$n->refPage->title.'</span>';
-              }
               if ($n->task->is("name~=fight")) {
                 $out .= '<span class="label label-primary"><i class="glyphicon glyphicon-flash"></i> '.$n->refPage->title.'</span>';
                 // Show result
@@ -267,27 +256,55 @@
                 if ($n->task->is("name=fight-v")) { $out .= ' <span class="label label-success">V</span>'; }
                 if ($n->task->is("name=fight-r")) { $out .= ' <span class="label label-danger">R</span>'; }
                 if ($n->task->is("name=fight-rr")) { $out .= ' <span class="label label-danger">RR</span>'; }
-              }
-              if ($n->refPage->photo) {
-                $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-              }
-              if ($n->refPage->image) {
                 $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                $out .= $out_02;
+                continue;
+              }
+              if ($n->task->is("name=best-time")) {
+                $out .= '<span class="label label-success"><i class="glyphicon glyphicon-time"></i> '.__('Best time on');
+                $out .= ' '.$n->refPage->title.'</span>';
+                $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                $out .= $out_02;
+                continue;
+              }
+              if ($n->task->is("name=free")) {
+                if ($n->refPage->photo) {
+                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                  $out .= $out_02;
+                }
+                continue;
+              }
+              if ($n->task->is("name=buy")) {
+                if ($n->refPage->image) {
+                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                  $out .= $out_02;
+                }
+                continue;
+              }
+              if ($n->task->is("name=best-time-lost")) {
+                $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-time"></i> '.__('Best time lost on');
+                $out .= ' '.$n->refPage->title.'</span>';
+                $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                $out .= $out_02;
+                continue;
               }
               if ($n->refPage->parent->is("name=book-knowledge")) {
+                $out .= '<p><span class="label label-success">'.__('Copied lesson').'</span></p>';
+                $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
                 $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                $out .= $out_02;
+                continue;
               }
-              $out .= '<caption class="text-center">';
-              $out .= ' <span>(On '.date('l, M. j', $n->date).')</span><br />';
-              $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
-              $out .= '</caption>';
-              $out .= '</div>';
-              $out .= '</li>';
+              if ($n->task->is("name=buy-pdf")) {
+                $out .= '<p><span class="label label-success">'.__('Buy PDF').'</span></p>';
+                $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
+                $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                $out .= $out_02;
+                continue;
+              }
             }
           }        
         }
-        // TODO : Test exit foreach when test found
-        bd(t());
       } else {
         $out .= '<p>'.__("No recent news :(").'</p>';
       }
