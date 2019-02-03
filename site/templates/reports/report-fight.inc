@@ -7,9 +7,9 @@
     $out .= '<ul>';
     foreach($allPlayers as $p) {
       if ($monsterId != '-1') {
-        $allTests = $p->find("template=event, task.name~=fight, refPage=$monsterId, date>=$period->dateStart, date<=$period->dateEnd, sort=refPage, sort=date");
+        $allTests = $p->find("template=event, task.name~=fight|best-time, refPage=$monsterId, date>=$period->dateStart, date<=$period->dateEnd, sort=refPage, sort=date");
       } else {
-        $allTests = $p->find("template=event, task.name~=fight, refPage!='', date>=$period->dateStart, date<=$period->dateEnd, sort=refPage, sort=date");
+        $allTests = $p->find("template=event, task.name~=fight|best-time, refPage!='', date>=$period->dateStart, date<=$period->dateEnd, sort=refPage, sort=date");
       }
       $inClassAllTestsCount = $allTests->find("inClass=1")->count();
       if ($allTests->count() > 0) {
