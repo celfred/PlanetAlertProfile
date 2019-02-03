@@ -306,22 +306,74 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
 
 function taskExtraAction($player, $task, $real) {
   $pages = wire('pages');
+  if ($task->is("name=no-homework")) {
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount++;
+    }
+    return;
+  }
+  if ($task->is("name=homework-half-done|signature")) {
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount += 0.5;
+    }
+    return;
+  }
+  if ($task->is("name=battle-rr|fight-rr")) {
+    $player->fighting_power = $player->fighting_power-2;
+    if ($task->is("name=battle-rr")) { // No death because of battles
+      if ($player->HP<=0) { $player->HP = 1; }
+    }
+  }
+  if ($task->is("name=battle-r|fight-r|wrong-invasion")) {
+    $player->fighting_power = $player->fighting_power-1;
+    if ($task->is("name=battle-r")) { // No death because of battles
+      if ($player->HP<=0) { $player->HP = 1; }
+    }
+  }
+  if ($task->is("name=battle-v|fight-v|right-invasion|best-time")) {
+    $player->fighting_power = $player->fighting_power+1;
+  }
+  if ($task->is("name=battle-vv|fight-vv")) {
+    $player->fighting_power = $player->fighting_power+2;
+  }
+  if ($player->skills->has("!name=fighter") && $task->is("name~=fight")) {
+    if ($player->find("template=event, task.name~=fight")->count() >= 9) {
+      setFighter($player);
+    }
+    return;
+  }
+  if ($task->is("name~=best-time")) { // Set Master skill if needed
+    checkMaster($player);
+    return;
+  }
   if ($task->is("name=penalty")) {
     $player->GC = (int) round($player->GC/2); // Half GC if penalty
     $player->hkcount = 0; // Reset current hkcount
+    return;
+  }
+  if ($task->is("name=group-death|team-death")) { // No death because of others
+    if ($player->HP<=0) { $player->HP = 1; }
+    return;
   }
   if ($task->is("name=inactivity")) { // Lose all GC
     $player->GC = 0;
     $player->streak = 0;
+    return;
   }
   if ($task->is("name=donation")) {
     preg_match("/\d+/", $task->comment, $matches);
     $player->GC = (int) $player->GC - $matches[0];
     $player->donation = (int) $player->donation + $matches[0];
+    return;
   }
   if ($task->is("name=donated")) {
     preg_match("/\d+/", $task->comment, $matches);
     $player->GC = (int) $player->GC + $matches[0];
+    return;
   }
   if ($task->is("name=fake-donator")) { // Reset donation indicator
     $player->donation = 0;
@@ -330,35 +382,7 @@ function taskExtraAction($player, $task, $real) {
     if ($task->refPage) {
       $player->equipment->add($task->refPage);
     }
-  }
-  if ($task->is("name=group-death|team-death|battle-r|battle-rr")) { // No death because of others
-    if ($player->HP<=0) { $player->HP = 1; }
-  }
-  if ($task->is("name=battle-rr|fight-rr")) {
-    $player->fighting_power = $player->fighting_power-2;
-  }
-  if ($task->is("name=battle-r|fight-r|wrong-invasion")) {
-    $player->fighting_power = $player->fighting_power-1;
-  }
-  if ($task->is("name=battle-v|fight-v|right-invasion")) {
-    $player->fighting_power = $player->fighting_power+1;
-  }
-  if ($task->is("name=battle-vv|fight-vv")) {
-    $player->fighting_power = $player->fighting_power+2;
-  }
-  if ($task->is("name=no-homework")) {
-    // If a penalty is still not signed, don't add to hkcount
-    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
-    if (!($penalty->id)) {
-      $player->hkcount++;
-    }
-  }
-  if ($task->is("name=homework-half-done|signature")) {
-    // If a penalty is still not signed, don't add to hkcount
-    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
-    if (!($penalty->id)) {
-      $player->hkcount += 0.5;
-    }
+    return;
   }
   if ($task->is("name=remove")) { // Remove element
     if ($task->refPage != false && $task->refPage->template == 'place') {
@@ -367,15 +391,7 @@ function taskExtraAction($player, $task, $real) {
     if ($task->refPage != false && $task->refPage->template == 'people') {
       $player->people->remove($task->refPage);
     }
-  }
-  if ($task->is("name~=fight")) { // Set Fighter skill if needed
-    if ($player->find("template=event, task.name~=fight")->count() >= 9) {
-      $role = $pages->get("parent.name=skills, name=fighter");
-      $player->skills->add($role);
-    }
-  }
-  if ($task->is("name~=best-time")) { // Set Master skill if needed
-    checkMaster($player);
+    return;
   }
   if ($task->is("name=free")) { // Add element
     if ($task->refPage) {
@@ -396,6 +412,7 @@ function taskExtraAction($player, $task, $real) {
         $player->people->add($task->refPage);
       }
     }
+    return;
   } 
   if ($task->is("name=buy")) { // Add equipment
     if ($task->refPage) {
@@ -451,6 +468,7 @@ function taskExtraAction($player, $task, $real) {
         }
       }
     }
+    return;
   }
 }
 
@@ -638,11 +656,12 @@ function checkStreak($player) {
 function randomSpecial(HookEvent $e) { // Random monsters are hidden if player doesn't have the Visualizer
   $pages = wire('pages');
   $allMonsters = $pages->find("template=exercise");
-  // Reset all specials
-  foreach ($allMonsters as $m) {
-    $m->of(false);
-    if ($m->special === 1) { $m->special = 0; }
-    $m->save();
+  foreach ($allMonsters as $m) { // Reset all specials
+    if ($m->special === 1) { 
+      $m->of(false);
+      $m->special = 0;
+      $m->save();
+    }
   }
   $nb = round($allMonsters->count()/2); // 50% of monsters
   $specialMonsters = $allMonsters->findRandom($nb);
@@ -851,6 +870,11 @@ function setFighters($team, $real = true) {
       $p->save();
     }
   }
+}
+function setFighter($player) {
+  $pages = wire('pages');
+  $role = $pages->get("parent.name=skills, name=fighter");
+  $player->skills->add($role);
 }
 
 function setReputation($player) { // Reputation calculated from all values (except GC, Donations and HP)
