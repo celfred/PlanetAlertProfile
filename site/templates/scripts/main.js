@@ -339,9 +339,20 @@ $(document).ready(function() {
   $('.toggleCheckboxes').on('click', function(e) {
     var checked = $(this).prop('checked');
     var index = $(this).parent().parent().index();
-    $('tr').each(function(i, val){
-      $(val).children().eq(index).children().children('input[type=checkbox]').prop("checked", checked);
-    });
+    if ($(this).attr('data-col')) { // Col toggle
+      $('tr').each(function(i, val){
+        $box = $(val).children().eq(index).children().children("input[type=checkbox]");
+        if ($box.attr("data-result") != 'N') {
+          $box.prop("checked", checked);
+        }
+      });
+    } else { // Row toggle
+      $('tr').eq(index+1).find("input[type=checkbox]").each(function() {
+        if ($(this).attr("data-result") != 'N') {
+          $(this).prop("checked", checked);
+        }
+      });
+    }
   });
 
 	$('.confirm').on('click', function() {
@@ -1117,6 +1128,69 @@ $(document).ready(function() {
     // Start exercise
     // TODO : Record session start...
   });
+
+	$('#importSacocheForm :submit').on('click', function(e){
+		var $this = $(this).parents("form");
+		var $redirectUrl = '';
+		e.preventDefault();
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: lang.noCheck,
+			confirmButtonText: lang.yesSave,
+		}).then( result => {
+			if (result.value) {
+				// Send data (via Ajax)
+				$("#importSacocheForm :submit").prop('disabled', true);
+				var $checked = $this.find('input:checkbox:checked').not('.toggleCheckboxes');
+				var $formUrl = $this.attr('action');
+        var $items = $this.find(".items").serialize(); // Get items inputs values
+        var $testId = $('#testId').val();
+        var $customDate = $('#customDate').val();
+        var $toSave = 'testId='+$testId+'&customDate='+$customDate+'&';
+				for (var i=0; i<$checked.length; i++) {
+					$toSave += $checked.eq(i).attr('name')+'=on&'+$items+'&';
+					if ($checked.length-i > 5) {
+						if (i>0 && i % 5 == 0) {
+							$.post($formUrl, $toSave, function(data) {
+								data = JSON.parse(data);
+								$alreadySaved = parseInt($('#progress').text());
+								$('#progress').text($alreadySaved + data.saved+' saved.');
+							}).fail( function() {
+								$('#progress').text(lang.error);
+							});
+              $toSave = 'testId='+$testId+'&customDate='+$customDate+'&';
+						}
+					} else { // In the 5 last
+						if (i == $checked.length-1) {
+              $toSave += 'lastChunk=1';
+							$.post($formUrl, $toSave, function(data) {
+								data = JSON.parse(data);
+								$alreadySaved = parseInt($('#progress').text());
+								$('#progress').text($alreadySaved + data.saved +' saved.');
+								$redirectUrl = data.url;
+							}).fail( function() {
+								$('#progress').text(lang.error);
+							});
+						}
+					}
+				}
+				$(document).ajaxStop(function() {
+          window.location.href = $redirectUrl;
+					setTimeout( function(){ $('#progress').text(lang.redirecting); }, 1000);
+				})
+				swal({
+					title: '<span id="progress">0 saved.</span>',
+					html: lang.saveForm+"<p>("+$checked.length+" "+lang.itemsTosave+")</p>",
+					showConfirmButton: false
+				});
+			} else { // Don't send form
+				return false;
+			}
+		});
+	});
 
 	$('#adminTableForm :submit').on('click', function(e){
 		var $this = $(this).parents("form");
