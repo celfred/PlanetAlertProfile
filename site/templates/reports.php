@@ -91,6 +91,9 @@ if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player
       $reportTitle .= __("Underground Training report");
       break;
     case 'fight':
+      $reportTitle .= __("Battle report");
+      break;
+    case 'fight':
       if ($monsterId == '-1') {
         $subTitle = __('All monsters');
       } else {
@@ -123,6 +126,7 @@ if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player
     case 'task': include($path.'report-task.inc'); break;
     case 'ut': include($path.'report-ut.inc'); break;
     case 'fight': include($path.'report-fight.inc'); break;
+    case 'battle': include($path.'report-battle.inc'); break;
     case 'category': include($path.'report-category.inc'); break;
     default: include($path.'report-complete.inc');
   }

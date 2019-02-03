@@ -1587,6 +1587,7 @@
             $out .= '<label for="task"><input type="radio" value="task" id="task" name="reportCat" class="reportCat" data-reportId="taskReport"> '.__("Task").'</input></label> &nbsp;&nbsp;';
             $out .= '<label for="ut"><input type="radio" value="ut" id="ut" name="reportCat" class="reportCat" data-reportId="utReport"> '.__("UT").'</input></label> &nbsp;&nbsp;';
             $out .= '<label for="fight"><input type="radio" value="fight" id="fight" name="reportCat" class="reportCat" data-reportId="fightReport"> '.__("Fight").'</input></label> &nbsp;&nbsp;';
+            $out .= '<label for="battle"><input type="radio" value="battle" id="battle" name="reportCat" class="reportCat" data-reportId="battleReport"> '.__("Battle").'</input></label> &nbsp;&nbsp;';
             $out .= '<label for="planetAlert"><input type="radio" value="planetAlert" id="planetAlert" name="reportCat" class="reportCat"> '.__("Planet Alert").'</input></label> &nbsp;&nbsp;';
             $out .= '<label for="cm1"><input type="radio" value="cm1" id="cm1" name="reportCat" class="reportCat"> '.__("CM1").'</input></label> &nbsp;&nbsp;';
           $out .= '</fieldset>';
