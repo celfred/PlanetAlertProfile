@@ -1015,6 +1015,10 @@ img.showInfo {
 	right: 50px;
 }
 
+ul.col4 {
+	column-count: 4;
+}
+
 #discount { display: none; }
 
 fieldset {

@@ -241,9 +241,10 @@ $(document).ready(function() {
     })
   }));
 
-	$('.basicConfirm').on('click', function(e) {
+	$(document).on('click', '.basicConfirm', function(e) {
     e.preventDefault();
 		var $this = $(this);
+    var $defaultHref = $this.attr('href');
 		var $href = $this.attr('data-href');
     if ($this.attr("data-reload")) {
       var $reload = $this.attr("data-reload");
@@ -286,7 +287,21 @@ $(document).ready(function() {
             });
 					}); 
 				} else {
-					window.location.href = $href;
+          if ($href) {
+            $.get($href, function(data) { 
+              swal({
+                title: lang.saved,
+                showCancelButton : false,
+                showConfirmButton: false,
+                timer: 500,
+              });
+            }); 
+          }
+          if ($defaultHref) {
+            window.location.href = $defaultHref;
+          } else {
+            window.location.href = $href;
+          }
 				}
 			} else {
 				return false;
@@ -938,7 +953,7 @@ $(document).ready(function() {
 		$(this).next('span').toggleClass('strikeText');
 	});
 
-	$(document).on('click', '.ajaxBtn', function() {
+	$(document).on('click', '.ajaxBtn', function(e) {
 		var $this = $(this);
 		var $type = $this.attr("data-type");
 		if ($type == 'memory') {
@@ -1065,6 +1080,28 @@ $(document).ready(function() {
 			var $this = $(this);
 			var $itemId = $this.attr("data-id");
 			var $url = $('#showInfo').attr('data-href') + '?id=showInfo&pageId=' + $itemId;
+			swal({
+				title: lang.loading,
+				onOpen: function() {
+					swal.showLoading()
+					$.get($url, function(data) { 
+						var $myContent = data;
+						swal({
+							title: '',
+							html: $myContent,
+							showConfirmButton: false,
+							cancelButtonText : 'Close',
+							showCancelButton: true,
+							allowOutsideClick: true,
+							width: 800
+						}).catch(swal.noop);
+					});
+			}}).catch(swal.noop);
+		}
+		if ($type == 'help') {
+			var $this = $(this);
+			var $playerId = $this.attr("data-id");
+			var $url = $('#showInfo').attr('data-href') + '?id=help&playerId=' + $playerId;
 			swal({
 				title: lang.loading,
 				onOpen: function() {

@@ -58,6 +58,8 @@
               $out .= '<span class="badge">'.$p->GC.'GC</span>';
               if ($p->GC >= $healingPotion->GC) {
                 $out .= ' <a href="#" class="btn btn-xs btn-link buyBtn" data-type="heal" data-url="'.$pages->get('name=submitforms')->url.'?form=buyForm&playerId='.$p->id.'&itemId='.$healingPotion->id.'">→ '.__("Heal ?").'</a>';
+              } else {
+                $out .= ' <a href="#" class="btn btn-xs btn-link ajaxBtn" data-id="'.$p->id.'" data-type="help" data-url="">→ '.__("Help ?").'</a>';
               }
             }
             $out .= '</caption>';
