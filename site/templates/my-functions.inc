@@ -374,6 +374,9 @@ function taskExtraAction($player, $task, $real) {
       $player->skills->add($role);
     }
   }
+  if ($task->is("name~=best-time")) { // Set Master skill if needed
+    checkMaster($player);
+  }
   if ($task->is("name=free")) { // Add element
     if ($task->refPage) {
       // Check for a discount
@@ -810,6 +813,19 @@ function setCaptains($team, $real = true) {
       }
     }
   }
+}
+
+function checkMaster($player) {
+  $pages = wire('pages');
+  $role = $pages->get("name=master");
+  $nbBestTimes = $pages->count("template=exercise, bestTimePlayer=$m");
+  if (nbBestTimes > 0) {
+    $player->skills->add($role);
+  } else {
+    $player->skills->remove($role);
+  }
+  /* $player->of(false); */
+  /* $player->save(); */
 }
 
 function setMaster($player) {

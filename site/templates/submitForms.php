@@ -524,12 +524,18 @@
       echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
     }
 
-    if($input->post->donateFormSubmit) { // donateForm submitted
-      $playerId = $input->post->donator;
+    if($input->post->donateFormSubmit || (isset($input->get->form) && $input->get->form == 'quickDonation' && $input->get->receiver != '' && $input->get->donator != '' && $input->get->amount != '')) { // donateForm submitted
+      if ($input->get->form && $input->get->form == 'quickDonation') {
+        $playerId = $input->get->donator;
+        $amount = (integer) $input->get->amount;
+        $receiverId = $input->get->receiver;
+      } else {
+        $playerId = $input->post->donator;
+        $amount = (integer) $input->post->amount;
+        $receiverId = $input->post->receiver;
+      }
       $player = $pages->get($playerId);
       $player->of(false);
-      $amount = (integer) $input->post->amount;
-      $receiverId = $input->post->receiver;
       $receiver = $pages->get($receiverId);
       $receiver->of(false);
       

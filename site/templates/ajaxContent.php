@@ -202,6 +202,25 @@
         if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
         $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
         break;
+      case 'help' :
+        $playerId = $input->get('playerId');
+        $player = $pages->get($playerId);
+        $healingPotion = $pages->get("name=health-potion");
+        $neededGC = $healingPotion->GC - $player->GC;
+        $allHelpers = $pages->find("parent.name=players, team=$player->team, GC>=$neededGC, sort=name");
+        $out .= '<h2>'.sprintf(__('%d GC needed !'), $neededGC).'</h2>';
+        if ($allHelpers->count() > 0) {
+          $out .= '<p>'.__('Does a player want to help by making a donation ?').'</p>';
+          $out .= '<ul class="col4 text-left list-unstyled">';
+          foreach($allHelpers as $h) {
+            $leftGC = $h->GC-$neededGC;
+            $out .= '<li><a href="'.$pages->get("name=main-office")->url.$player->team->name.'" data-href="'.$pages->get("name=submitforms")->url.'?form=quickDonation&receiver='.$player->id.'&donator='.$h->id.'&amount='.$neededGC.'" class="basicConfirm" data-reload="true" data-msg="['.$h->title.'→'.sprintf(__('%d GC left'), $leftGC).']">'.$h->title.' ('.$h->GC.__("GC").')</a></li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__('No player has enough in the team. Team needs to get organized and collaborate to help the player !').'</p>';
+        }
+        break;
       case 'showInfo' :
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
