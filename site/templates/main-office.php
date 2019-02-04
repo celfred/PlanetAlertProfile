@@ -198,7 +198,7 @@
                 $focus = '';
               }
               $out .= '<span class="'.$focus.'">'.$m->title.'</span>';
-              $out .= ' <span class="badge">'.$nbBestTimes.'</span>';
+              $out .= ' <span class="badge">'.$nbBestTimes.' '._n("Master time", "Master times", $nbBestTimes).'</span>';
               $out .= '</li>';
             }
           }
