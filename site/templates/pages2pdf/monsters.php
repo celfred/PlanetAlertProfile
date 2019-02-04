@@ -9,7 +9,7 @@ if ($m->image) {
   /*   'upscaling' => false */
   /* ); */
   /* $mini = "<img style='float: right;' alt=\"image\" src='".$m->image->size('150', '60', $options)->url."' />"; */
-  $mini =  "<img alt='image' src='".$m->image->getCrop('thumbnail')->url."' />";
+  $mini =  "<img alt='image' style='float:right;' src='".$m->image->getCrop('thumbnail')->url."' />";
 } else {
   $mini = '';
 }
@@ -96,6 +96,29 @@ if ($input->get['thumbnail']) {
         list($left, $right) = preg_split('/::/', $l);
         array_push($listWords, $left);
       }
+      break;
+    case 'categorize' :
+      $clueWords = [];
+      foreach($allLines as $l) {
+        // TODO : Random data from a list
+        $l = str_replace("%fname%", __("Mike"), $l);
+        $l = str_replace("%fnamef%", __("Sarah"), $l);
+        $l = str_replace("%fnamem%", __("John"), $l);
+        $l = str_replace("%name%", __("Simon Keats"), $l);
+        $l = str_replace("%age%", "13", $l);
+        $l = str_replace("%nationality%", __("American"), $l);
+        list($left, $right) = preg_split('/::/', $l);
+        array_push($listWords, $left);
+        $clue = explode(",", $right); // Build clue words
+        foreach($clue as $w) {
+          $w = trim($w);
+          if (!in_array($w, $clueWords)) {
+            array_push($clueWords, $w);
+          }
+        }
+      }
+      $clueWordsList = implode(', ', $clueWords);
+      $m->instructions = sprintf(__("Choose the correct word for each sentence among : %s."), $clueWordsList);
       break;
     default :
       array_push($listWords, 'TODO');
