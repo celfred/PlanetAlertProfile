@@ -1453,7 +1453,7 @@ $.fn.dataTable.ext.search.push(
       } else {
         categoryCol = data[0]; //filter column
       }
-      categoryArray =  $.map( categoryCol.split(','), $.trim); // splits comma separated string into array
+      categoryArray =  $.map(categoryCol.split(','), $.trim); // splits comma separated string into array
       // finding array intersection
       found = $(categoryArray).not($(categoryArray).not(categoryFilter)).length;
       if(found == 0){

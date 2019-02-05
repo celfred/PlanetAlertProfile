@@ -48,7 +48,7 @@
         include("./helpAlert.inc.php"); 
 
         $allCategories = $pages->find("parent.name=topics, sort=name");
-        $out .= '<div id="Filters" data-fcolindex="1" class="text-center">';
+        $out .= '<div id="Filters" class="text-center">';
         $out .= '  <ul class="list-inline well">';
         foreach ($allCategories as $category) {
           if ($allMonsters->get("topic=$category")) {
@@ -84,7 +84,7 @@
           }
           $topics = $m->topic->implode(', ', '{title}');
           $out .= '<tr>';
-          $out .= '<td data-search="'.$topics.' '.$m->title.'">';
+          $out .= '<td data-search="'.$topics.','.$m->name.'">';
           $out .= $m->title;
           // Find # of days compared to today to set 'New' indicator
           $date2 = new \DateTime(date("Y-m-d", $m->published));
