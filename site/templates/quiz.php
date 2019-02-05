@@ -135,7 +135,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
           $out .= '<section class="text-center">';
           $placeId = $quiz['id'];
           $options = array('upscaling'=>false);
-          $photo = $pages->get("$placeId")->photo->getRandom()->size(300,300, $options);
+          $photo = $pages->get("$placeId")->photo->getRandom()->size(200,200, $options);
             $out .= '<img src="'.$photo->url.'" alt="Photo" />';
           $out .= '</section>';
         }
@@ -213,7 +213,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
         $out .= '</section>';
       }
       // Display photo if necessary
-      if ( $quiz['type'] === 'photo' ) {
+      if ($quiz['type'] === 'photo' ) {
         $out .= '<section class="text-center">';
         $placeId = $quiz['id'];
         $options = array('upscaling'=>false);

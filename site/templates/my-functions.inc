@@ -191,10 +191,9 @@ function updateScore($player, $task, $real = true) {
     if ($player->coma == 0) {
       setLevel($player); // Check if new level
       $player->reputation = setReputation($player); // Set reputation (and store for cache)
-      if (!isset($tmpEvent)) { // Make a temporary event page to calculate new yearly Karma
-        $tmpEvent = new Page();
-        $tmpEvent->template = 'event';
-      }
+      // Make a temporary event page to calculate new yearly Karma
+      $tmpEvent = new Page();
+      $tmpEvent->template = 'event';
       $tmpEvent->task = $task;
       if ($task->refPage) { $tmpEvent->refPage = $task->refPage; };
       // Set date for correct sorting
@@ -1093,7 +1092,7 @@ function pick_question($player) {
   } else {
     $rank = 6; // 6emes by default
   }
-  if ( $rank >= 8) {
+  if ($rank >= 8) {
     if ($player->people->count() > 0) {
       $randList = ['people', 'places'];
       $randList = $randList[array_rand($randList, 1)];
@@ -1173,7 +1172,7 @@ function pick_question($player) {
           $randQuiz = $randEl->quiz->getRandom();
           $quiz['question'] = $randQuiz->question;
           $quiz['answer'] = $randQuiz->answer;
-          if (strpos($quiz['question'], 'on the map') == true || strpos($quiz['question'], 'sur la carte') == true) {
+          if (strpos($quiz['question'], 'on the map') == true || strpos($quiz['question'], 'sur la carte') == true) {
             $quiz['type'] = 'map';
           }
           break;
@@ -1206,7 +1205,6 @@ function pick_question($player) {
   $quiz['id'] = $randEl->id;
   // Get player's stats on quizzed element (over current school year)
   $quiz['stats'] = quizStat($randEl, $player);
-
   return $quiz;
 }
 
@@ -1220,8 +1218,8 @@ function quizStat($el, $player, $startDate='', $endDate='') { // Get player's st
   if ($endDate == '') { $endDate = $schoolYear->dateEnd; }
   $invasions = $player->get("name=history")->find("template=event, task.name~=invasion, refPage=$el, date>=$startDate, date<=$endDate");
   if ($invasions->count() > 0) {
-    $right = $invasions->find("task.name=right-invasion")->count();
-    $wrong = $invasions->find("task.name=wrong-invasion")->count();
+    $right = $invasions->count("task.name=right-invasion");
+    $wrong = $invasions->count("task.name=wrong-invasion");
   }
   return array($right, $wrong);
 }

@@ -781,6 +781,15 @@ $(document).ready(function() {
 		}
 	})
 
+  $('[data-toggle=tooltip]').hover(function(){
+    // on mouseenter
+    $(this).tooltip({container : 'body'});
+    $(this).tooltip('show');
+  }, function(){
+    // on mouseleave
+    $(this).tooltip('hide');
+  });
+
 	// Monster invasions
   $(document).on('click', '#toggle', function() {
     $('#quizMenu').toggleClass('shown');
@@ -1526,7 +1535,7 @@ var onCheck = function(taskId) {
 var shopCheck = function(obj, remainingGC, itemGC) {
   //alert(remainingGC+'-'+itemGC);
 	var nbChecked = parseInt($('#nbChecked').text());
-  if ( $(obj).prop('checked') === true) {
+  if ($(obj).prop('checked') === true) {
     var newGC = remainingGC - itemGC;
     $('#remainingGC').text(newGC);
 		nbChecked++;
@@ -1557,8 +1566,10 @@ var shopCheck = function(obj, remainingGC, itemGC) {
 		$('#nbChecked').text(nbChecked);
     $('ul.itemList li input[type=checkbox]').each(function() {
       if ($(this).attr('data-gc') > newGC) {
-        $(this).prop('disabled', true);
-        $(this).parent('label').css('text-decoration', 'line-through');
+        if ($(this).prop('checked') === false) {
+          $(this).prop('disabled', true);
+          $(this).parent('label').css('text-decoration', 'line-through');
+        }
       } else {
         $(this).prop('disabled', false);
         $(this).parent('label').css('text-decoration', '');
