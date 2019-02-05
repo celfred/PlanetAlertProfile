@@ -1246,10 +1246,19 @@ function progressBar($index, $total) {
   return $out;
 }
 
+function setTeamRate($teamId) {
+  $pages = wire('pages');
+  $team = $pages->get($teamId);
+  $nbPlayers = $pages->count("parent.name=players, team=$team");
+  $teamRate = round(($nbPlayers*20)/100);
+  $teamRate == 0 ? $teamRate = 1 : '';
+  return $teamRate;
+}
+
 function setOwners($el, $player) {
   $pages = wire('pages');
   $allPlayers = $pages->find("template=player, team=$player->team");
-  $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
+  $teamRate = setTeamRate($player->team->id); // Set team stats
   if ($el->template == 'place') {
     $teamOwners = $allPlayers->find("places=$el");
   }
@@ -1276,8 +1285,7 @@ function teamFreeworld($team) {
   }
   if ($team->name != 'no-team') {
     $allPlayers = $pages->find("parent.name=players, template=player, team=$team");
-    $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
-    $teamRate == 0 ? $teamRate = 1 : '';
+    $teamRate = setTeamRate($team->id); // Set team stats
     // Test if teamRate is reached
     foreach($allElements as $el) {
       if ($el->template == 'place') {

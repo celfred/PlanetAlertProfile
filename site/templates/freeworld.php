@@ -8,10 +8,8 @@
   }
   $out = '';
   if ($team->name != 'no-team') {
-    $allPlayers = $allPlayers->find("team=$team"); // Limit to team players
-    // Set team stats
-    $teamRate = round(($allPlayers->count()*20)/100);
-    $teamRate == 0 ? $teamRate = 1 : '';
+    $allPlayers->filter("team=$team"); // Limit to team players
+    $teamRate = setTeamRate($team->id); // Set team stats
     $valid = true;
     $individual = false;
   } else { // Individual free world for no-team players
@@ -33,7 +31,6 @@
     }
     if ($individual) { 
       $allElements = new pageArray();
-      $rank = $team->rank->index;
       if ($rank >= 8) {
         $allPlaces = $pages->find("template=place, name!=places");
         $allElements->add($allPlaces);
