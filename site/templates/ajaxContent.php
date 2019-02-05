@@ -231,8 +231,13 @@
           $out .= ' (in '.$p->city->title.', '.$p->country->title.')</h3>';
         } else if ($p->is("template=people")) {
           $out .= ' (from '.$p->country->title.')</h3>';
+        } else if ($p->is("template=exercise")) {
+          $topics = $p->topic->implode(', ', '{title}');
+          $out .= ' ('.$topics.')</h3>';
+        } else if ($p->is("template=equipment|item")) {
+          $out .= ' ('.$p->category->title.')';
         } else {
-          $out .= ' ('.$p->category->title.')</h3>';
+          $out .= 'TODO';
         }
         $out .= '<div class="row">';
         $out .= '<div class="col-sm-4 text-center">';
@@ -243,6 +248,26 @@
         $out .= '<div class="col-sm-8 text-justify">';
           $out .= '<br/>';
           $out .= '<p class="lead">'.$p->summary.'</p>';
+          if ($p->is("template=exercise")) {
+            $out .= '<p>';
+            $out .= __('Most trained player').' → ';
+            if ($p->mostTrained) {
+              $out .= '<span class="label label-primary">'.$p->best.' '.__('UT').' - '.$p->mostTrained->title.' ['.$p->mostTrained->team->title.']</span>';
+            } else {
+              $out .= '-';
+            }
+            $out .= '</p>';
+            $out .= '<p>';
+            $out .= __('Master time').' → ';
+            $out .= '<span class="label label-primary">';
+            if ($p->bestTime) {
+              $out .= ms2string($p->bestTime).' '.__('by').' '.$p->bestTimePlayer->title.' ['.$p->bestTimePlayer->team->title.']';
+            } else {
+              $out .= '-';
+            }
+            $out .= '</span>';
+            $out .= '</p>';
+          }
         $out .= '</div>';
         $out .= '</div>';
         break;

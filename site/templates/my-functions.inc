@@ -191,10 +191,9 @@ function updateScore($player, $task, $real = true) {
     if ($player->coma == 0) {
       setLevel($player); // Check if new level
       $player->reputation = setReputation($player); // Set reputation (and store for cache)
-      if (!isset($tmpEvent)) { // Make a temporary event page to calculate new yearly Karma
-        $tmpEvent = new Page();
-        $tmpEvent->template = 'event';
-      }
+      // Make a temporary event page to calculate new yearly Karma
+      $tmpEvent = new Page();
+      $tmpEvent->template = 'event';
       $tmpEvent->task = $task;
       if ($task->refPage) { $tmpEvent->refPage = $task->refPage; };
       // Set date for correct sorting
@@ -306,22 +305,74 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
 
 function taskExtraAction($player, $task, $real) {
   $pages = wire('pages');
+  if ($task->is("name=no-homework")) {
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount++;
+    }
+    return;
+  }
+  if ($task->is("name=homework-half-done|signature")) {
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount += 0.5;
+    }
+    return;
+  }
+  if ($task->is("name=battle-rr|fight-rr")) {
+    $player->fighting_power = $player->fighting_power-2;
+    if ($task->is("name=battle-rr")) { // No death because of battles
+      if ($player->HP<=0) { $player->HP = 1; }
+    }
+  }
+  if ($task->is("name=battle-r|fight-r|wrong-invasion")) {
+    $player->fighting_power = $player->fighting_power-1;
+    if ($task->is("name=battle-r")) { // No death because of battles
+      if ($player->HP<=0) { $player->HP = 1; }
+    }
+  }
+  if ($task->is("name=battle-v|fight-v|right-invasion|best-time")) {
+    $player->fighting_power = $player->fighting_power+1;
+  }
+  if ($task->is("name=battle-vv|fight-vv")) {
+    $player->fighting_power = $player->fighting_power+2;
+  }
+  if ($player->skills->has("!name=fighter") && $task->is("name~=fight")) {
+    if ($player->find("template=event, task.name~=fight")->count() >= 9) {
+      setFighter($player);
+    }
+    return;
+  }
+  if ($task->is("name~=best-time")) { // Set Master skill if needed
+    checkMaster($player);
+    return;
+  }
   if ($task->is("name=penalty")) {
     $player->GC = (int) round($player->GC/2); // Half GC if penalty
     $player->hkcount = 0; // Reset current hkcount
+    return;
+  }
+  if ($task->is("name=group-death|team-death")) { // No death because of others
+    if ($player->HP<=0) { $player->HP = 1; }
+    return;
   }
   if ($task->is("name=inactivity")) { // Lose all GC
     $player->GC = 0;
     $player->streak = 0;
+    return;
   }
   if ($task->is("name=donation")) {
     preg_match("/\d+/", $task->comment, $matches);
     $player->GC = (int) $player->GC - $matches[0];
     $player->donation = (int) $player->donation + $matches[0];
+    return;
   }
   if ($task->is("name=donated")) {
     preg_match("/\d+/", $task->comment, $matches);
     $player->GC = (int) $player->GC + $matches[0];
+    return;
   }
   if ($task->is("name=fake-donator")) { // Reset donation indicator
     $player->donation = 0;
@@ -330,35 +381,7 @@ function taskExtraAction($player, $task, $real) {
     if ($task->refPage) {
       $player->equipment->add($task->refPage);
     }
-  }
-  if ($task->is("name=group-death|team-death|battle-r|battle-rr")) { // No death because of others
-    if ($player->HP<=0) { $player->HP = 1; }
-  }
-  if ($task->is("name=battle-rr|fight-rr")) {
-    $player->fighting_power = $player->fighting_power-2;
-  }
-  if ($task->is("name=battle-r|fight-r|wrong-invasion")) {
-    $player->fighting_power = $player->fighting_power-1;
-  }
-  if ($task->is("name=battle-v|fight-v|right-invasion")) {
-    $player->fighting_power = $player->fighting_power+1;
-  }
-  if ($task->is("name=battle-vv|fight-vv")) {
-    $player->fighting_power = $player->fighting_power+2;
-  }
-  if ($task->is("name=no-homework")) {
-    // If a penalty is still not signed, don't add to hkcount
-    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
-    if (!($penalty->id)) {
-      $player->hkcount++;
-    }
-  }
-  if ($task->is("name=homework-half-done|signature")) {
-    // If a penalty is still not signed, don't add to hkcount
-    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
-    if (!($penalty->id)) {
-      $player->hkcount += 0.5;
-    }
+    return;
   }
   if ($task->is("name=remove")) { // Remove element
     if ($task->refPage != false && $task->refPage->template == 'place') {
@@ -367,15 +390,7 @@ function taskExtraAction($player, $task, $real) {
     if ($task->refPage != false && $task->refPage->template == 'people') {
       $player->people->remove($task->refPage);
     }
-  }
-  if ($task->is("name~=fight")) { // Set Fighter skill if needed
-    if ($player->find("template=event, task.name~=fight")->count() >= 9) {
-      $role = $pages->get("parent.name=skills, name=fighter");
-      $player->skills->add($role);
-    }
-  }
-  if ($task->is("name~=best-time")) { // Set Master skill if needed
-    checkMaster($player);
+    return;
   }
   if ($task->is("name=free")) { // Add element
     if ($task->refPage) {
@@ -396,6 +411,7 @@ function taskExtraAction($player, $task, $real) {
         $player->people->add($task->refPage);
       }
     }
+    return;
   } 
   if ($task->is("name=buy")) { // Add equipment
     if ($task->refPage) {
@@ -451,6 +467,7 @@ function taskExtraAction($player, $task, $real) {
         }
       }
     }
+    return;
   }
 }
 
@@ -493,11 +510,11 @@ function addGroupItem($player, $historyPage, $real) {
 function extraActionAfterSave($player, $historyPage, $real) { // Watch out : recorded with today's date (but trigeering event's linkedId
   $pages = wire('pages');
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
-      $task = $pages->get("template=task, name=penalty"); 
-      $task->comment = 'Automatic homework penalty';
-      $task->refPage = false;
-      $task->linkedId = $historyPage->id;
-      updateScore($player, $task, $real);
+    $task = $pages->get("template=task, name=penalty"); 
+    $task->comment = 'Automatic homework penalty';
+    $task->refPage = false;
+    $task->linkedId = $historyPage->id;
+    updateScore($player, $task, $real);
   }
   if ($historyPage->task->is("name=donation")) {  // Record the linked 'Donated' event
     $task = $pages->get("name=donated");
@@ -539,9 +556,9 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
       updateCache($player, $historyPage);
     }
     if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
-      updateTeamScores($player->team);
+      updateTeamScores($player->team, $historyPage->refPage);
     }
-    if (checkCache($player)) {
+    if (checkNewPageCache($player)) {
       setCache($player->id, false);
     }
   }
@@ -638,11 +655,12 @@ function checkStreak($player) {
 function randomSpecial(HookEvent $e) { // Random monsters are hidden if player doesn't have the Visualizer
   $pages = wire('pages');
   $allMonsters = $pages->find("template=exercise");
-  // Reset all specials
-  foreach ($allMonsters as $m) {
-    $m->of(false);
-    if ($m->special === 1) { $m->special = 0; }
-    $m->save();
+  foreach ($allMonsters as $m) { // Reset all specials
+    if ($m->special === 1) { 
+      $m->of(false);
+      $m->special = 0;
+      $m->save();
+    }
   }
   $nb = round($allMonsters->count()/2); // 50% of monsters
   $specialMonsters = $allMonsters->findRandom($nb);
@@ -787,12 +805,38 @@ function displayPlayerScores($cachePage) {
   return $out;
 }
 
-function setCaptains($team, $real = true) {
+function setGroupCaptain($playerId, $real = true) {
+  $pages = wire('pages');
+  $player = $pages->get($playerId);
+  if (isset($player->group) && $player->group != '') {
+    $players = $pages->find("parent.name=players, template=player, team=$player->team, group=$player->group");
+    $captain = $players->sort('-yearlyKarma')->first();
+    if (!$captain->skills->has("skills.name=captain")) { // Else captain has not changed
+      $role = $pages->get("parent.name=skills, name=captain");
+      // Remove old captain
+      $oldCaptain = $players->get("skills.name=captain");
+      if ($oldCaptain->id) {
+        $oldCaptain->skills->remove($role);
+        if ($real == true) {
+          $oldCaptain->of(false);
+          $oldCaptain->save();
+        }
+      }
+      // Set new captain
+      $captain->skills->add($role);
+      if ($real == true) {
+        $captain->of(false);
+        $captain->save();
+      }
+    }
+  }
+}
+function setTeamCaptains($team, $real = true) {
   if ($team->is("name!=no-team")) { // Skip no-team players
     $pages = wire('pages');
     $players = $pages->find("template=player, team=$team");
     // Remove old captains
-    $role = $pages->get("name=captain");
+    $role = $pages->get("parent.name=skills, name=captain");
     $groups = new PageArray();
     foreach($players as $p) {
       $p->of(false);
@@ -830,7 +874,7 @@ function checkMaster($player) {
 
 function setMaster($player) {
   $pages = wire('pages');
-  $role = $pages->get("name=master");
+  $role = $pages->get("parent.name=skills, name=master");
   $player->of(false);
   $player->skills->add($role);
   $player->save();
@@ -851,6 +895,11 @@ function setFighters($team, $real = true) {
       $p->save();
     }
   }
+}
+function setFighter($player) {
+  $pages = wire('pages');
+  $role = $pages->get("parent.name=skills, name=fighter");
+  $player->skills->add($role);
 }
 
 function setReputation($player) { // Reputation calculated from all values (except GC, Donations and HP)
@@ -976,7 +1025,7 @@ function saveHistory($player, $task, $newsBoard = 0, $public = 0) {
   return $p;
 }
 
-function checkCache($player) {
+function checkNewPageCache($player) {
   $limit=50;
   $nbEvents = $player->get("name=history")->numChildren();
   $toCache = ceil($nbEvents/$limit)-1; // Skip last page
@@ -1043,7 +1092,7 @@ function pick_question($player) {
   } else {
     $rank = 6; // 6emes by default
   }
-  if ( $rank >= 8) {
+  if ($rank >= 8) {
     if ($player->people->count() > 0) {
       $randList = ['people', 'places'];
       $randList = $randList[array_rand($randList, 1)];
@@ -1123,7 +1172,7 @@ function pick_question($player) {
           $randQuiz = $randEl->quiz->getRandom();
           $quiz['question'] = $randQuiz->question;
           $quiz['answer'] = $randQuiz->answer;
-          if (strpos($quiz['question'], 'on the map') == true || strpos($quiz['question'], 'sur la carte') == true) {
+          if (strpos($quiz['question'], 'on the map') == true || strpos($quiz['question'], 'sur la carte') == true) {
             $quiz['type'] = 'map';
           }
           break;
@@ -1156,7 +1205,6 @@ function pick_question($player) {
   $quiz['id'] = $randEl->id;
   // Get player's stats on quizzed element (over current school year)
   $quiz['stats'] = quizStat($randEl, $player);
-
   return $quiz;
 }
 
@@ -1170,8 +1218,8 @@ function quizStat($el, $player, $startDate='', $endDate='') { // Get player's st
   if ($endDate == '') { $endDate = $schoolYear->dateEnd; }
   $invasions = $player->get("name=history")->find("template=event, task.name~=invasion, refPage=$el, date>=$startDate, date<=$endDate");
   if ($invasions->count() > 0) {
-    $right = $invasions->find("task.name=right-invasion")->count();
-    $wrong = $invasions->find("task.name=wrong-invasion")->count();
+    $right = $invasions->count("task.name=right-invasion");
+    $wrong = $invasions->count("task.name=wrong-invasion");
   }
   return array($right, $wrong);
 }
@@ -1196,10 +1244,38 @@ function progressBar($index, $total) {
   return $out;
 }
 
+function setTeamRate($teamId) {
+  $pages = wire('pages');
+  $team = $pages->get($teamId);
+  $nbPlayers = $pages->count("parent.name=players, team=$team");
+  $teamRate = round(($nbPlayers*20)/100);
+  $teamRate == 0 ? $teamRate = 1 : '';
+  return $teamRate;
+}
+
 function setOwners($el, $player) {
   $pages = wire('pages');
   $allPlayers = $pages->find("template=player, team=$player->team");
-  $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
+  $teamRate = setTeamRate($player->team->id); // Set team stats
+  if ($el->template == 'place') {
+    $teamOwners = $allPlayers->find("places=$el");
+  }
+  if ($el->template == 'people') {
+    $teamOwners = $allPlayers->find("people=$el");
+  }
+  $el->owners = $teamOwners;
+  // Set element free rate
+  if ($teamOwners->count() >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'label label-info'; }
+  if ($teamOwners->count() >= $teamRate) { $el->completed = 1; $el->cssClass = 'label label-success'; }
+  if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = 'label label-danger'; }
+  $el->teamRate = $teamRate;
+  return $el;
+}
+
+function setElement($el, $team) {
+  $pages = wire('pages');
+  $allPlayers = $pages->find("template=player, team=$team");
+  $teamRate = setTeamRate($team->id); // Set team stats
   if ($el->template == 'place') {
     $teamOwners = $allPlayers->find("places=$el");
   }
@@ -1226,8 +1302,7 @@ function teamFreeworld($team) {
   }
   if ($team->name != 'no-team') {
     $allPlayers = $pages->find("parent.name=players, template=player, team=$team");
-    $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
-    $teamRate == 0 ? $teamRate = 1 : '';
+    $teamRate = setTeamRate($team->id); // Set team stats
     // Test if teamRate is reached
     foreach($allElements as $el) {
       if ($el->template == 'place') {
@@ -1275,20 +1350,33 @@ function saveScoresForCache($player, $index) {
   $historyPage->save();
 }
 
-function updateTeamScores($team) {
-  $team->freeActs = nbFreedomActs($team);
+function updateTeamScores($team, $element = false) {
   if ($team->name != 'no-team') {
-    // TODO : Optimize by testing only new elements ?
-    $team->freeelements->removeAll();
-    $allElements = teamFreeworld($team);
-    $completed = $allElements->find("completed=1");
-    $percent = round((100*$completed->count())/$allElements->count());
-    foreach ($completed as $el) {
-      $team->freeelements->add($el);
+    if (isset($element)) { // Test only new element
+      $team->freeActs += 1;
+      if (!$team->freeelements->has($el)) { // Element is not already freed
+        if ($team->rank->index >= 8) {
+          $nbAllElements = $pages->count("template=place|people");
+        } else {
+          $nbAllElements = $pages->count("template=place");
+        }
+        $element = setElement($element, $team);
+        if ($element->completed) { $team->freeelements->add($el); }
+        $percent = round((100*$team->freeelements->count())/$nbAllElements);
+      }
+    } else {
+      $team->freeActs = nbFreedomActs($team);
+      $team->freeelements->removeAll();
+      $allElements = teamFreeworld($team);
+      $completed = $allElements->find("completed=1");
+      $percent = round((100*$completed->count())/$allElements->count());
+      foreach ($completed as $el) {
+        $team->freeelements->add($el);
+      }
+      $team->freeworld = $percent;
+      $team->of(false);
+      $team->save();
     }
-    $team->freeworld = $percent;
-    $team->of(false);
-    $team->save();
   }
 }
 
@@ -1770,6 +1858,7 @@ function setMonster($player, $monster) {
     // Sets fighting possibilities
     $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
     if ($tmpCache->lastFightDate != '') {
+      $today = new \DateTime("today");
       $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
       $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
     } else {
@@ -2078,6 +2167,7 @@ function updateCache($player, $historyPage) {
       }
       $tmpCache->of(false);
       $tmpCache->save();
+      return;
     }
     if ($historyPage->task->is("name~=fight")) { // Update tmpCache
       if ($tmpCache) { // Monster already exists in tmpMonstersActivity
@@ -2086,6 +2176,7 @@ function updateCache($player, $historyPage) {
       }
       $tmpCache->of(false);
       $tmpCache->save();
+      return;
     }
   }
 }

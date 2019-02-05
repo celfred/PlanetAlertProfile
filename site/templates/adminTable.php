@@ -10,6 +10,8 @@ if ($user->isSuperuser()) {
 }
 include("./tabList.inc"); 
 
+$today = mktime(0,0,0, date("m"), date("d"), date("Y"));
+
 if ($user->hasRole('teacher') || $user->isSuperuser()) {
   $allCategories = $pages->find("parent.name=categories, template=category, adminOnly=1,sort=name");
   if ($user->isSuperuser()) {
@@ -20,11 +22,11 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
       $pagination = $allPlayers->renderPager();
     } else {
       $allTasks = $pages->find("parent.name=tasks, owner.singleTeacher=$headTeacher")->sort("category.name, HP, XP");
-      $allPlayers = $allPlayers->find("team=$team"); // Limit to team players
+      $allPlayers->filter("team=$team"); // Limit to team players
     }
   } else { // Limit to logged in teacher
     $allTasks = $pages->find("parent.name=tasks, owner.singleTeacher=$user")->sort("category.name, HP, XP");
-    $allPlayers = $allPlayers->find("team=$team, team.teacher=$user");
+    $allPlayers->filter("team=$team, team.teacher=$user");
   }
   // helpAlert for players having a high hccount
   if ($user->name == 'flieutaud' || $user->isSuperuser()) {
@@ -97,7 +99,6 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
     </thead>
     <tbody>
     <?php
-      $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
       foreach ($allPlayers as $player) { 
         $id = $player->id; 
         // See if absence already recorded (last event)

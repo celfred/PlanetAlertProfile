@@ -33,11 +33,9 @@
       updateScore($player, $task, true);
       checkDeath($player, true);
       // Set group captains
-      setCaptains($player->team);
+      setGroupCaptain($player->id);
       // Remove fight request
-      $player->fightRequest = '';
-      $player->of(false);
-      $player->save();
+      $player->setAndSave('fightRequest', '');
       // Record to log file
       $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result;
       $log->save('monster-fights', $logText);
@@ -72,7 +70,7 @@
             updateScore($player, $task, true);
             // No need to checkDeath, Underground Training can't cause death
             // Set group captains
-            setCaptains($player->team);
+            setGroupCaptain($player->id);
             // Check if new record
             list($utGain, $inClassGain) = utGain($monster, $player);
             $newUtGain = $utGain+$inClassGain;
@@ -224,7 +222,7 @@
               updateScore($player, $task, true);
               checkDeath($player, true);
               // Set group captains
-              setCaptains($player->team);
+              setGroupCaptain($player->id);
               // Record to log file
               $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result.', '.$quality;
               $log->save('monster-fights', $logText);

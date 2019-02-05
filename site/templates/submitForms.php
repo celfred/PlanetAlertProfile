@@ -10,7 +10,6 @@
     // Get logged in player
     $player = $pages->get("template=player, login=$user->name");
     $player->of(false);
-
     // Buy PDF
     if (isset($input->get->form) && $input->get->form == 'buyPdf' && $input->get->playerId != '' && $input->get->lessonId != '') {
       // Add buy-pdf action to player's history and update GC
@@ -282,9 +281,8 @@
       }
     }
 
-    // Set group captains
     if ($player->team->name != 'no-team') {
-      setCaptains($player->team, true);
+      setGroupCaptain($player->id);
     }
 
     // Redirect to player's profile (in main.js, because doesn't work due to Ajax ?)
@@ -297,13 +295,10 @@
     // Unpublish News from Newsboard
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
-      $n->of(false);
       if ($n->publish == 0) { // Unpublish
-        $n->publish = 1;
-        $n->save();
+        $n->setAndSave('publish', 1);
       } else { // News will disappear on reload
-        $n->publish = 0;
-        $n->save();
+        $n->setAndSave('publish', 0);
       }
     }
     // Use item
@@ -311,17 +306,13 @@
       $historyPage = $pages->get($input->get->usedItemHistoryPageId);
       $player = $historyPage->parent("template=player");
       $usedItem = $historyPage->refPage;
+      $player->of(false);
       if ($player->usabledItems->has($usedItem)) { // 'Used today' is ticked
-        // Remove item from player's usabledItems list
-        $player->of(false);
-        $player->usabledItems->remove($usedItem);
-        $player->save();
+        $player->usabledItems->remove($usedItem); // Remove item from player's usabledItems list
       } else { // Used today is unclicked
-        // Restore item in player's usabledItems list
-        $player->of(false);
-        $player->usabledItems->add($usedItem);
-        $player->save();
+        $player->usabledItems->add($usedItem); // Restore item in player's usabledItems list
       }
+      $player->save();
     }
     // Validate Book of Knowledge
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->usedPending != '') {
@@ -345,9 +336,9 @@
           $player->reputation = $tempPlayer->reputation;
           $player->yearlyKarma = $tempPlayer->yearlyKarma;
         }
-        setCaptains($player->team);
         $player->of(false);
         $player->save();
+        setGroupCaptain($player->id);
         if ($tempPlayer) { 
           $tempPlayer->delete();
         }
@@ -355,9 +346,7 @@
         // Store previous player's state in temp page for restore possibility
         $tmpParent = $pages->get("name=tmp");
         $tempPlayer = $pages->clone($player, $tmpParent, false);
-        $tempPlayer->of(false);
-        $tempPlayer->login = $name;
-        $tempPlayer->save();
+        $tempPlayer->setAndSave('login', $name);
         // Create task in player's history
         $task = $pending->task;
         $task->date = $pending->date;
@@ -366,12 +355,11 @@
           $task->refPage = $pending->refPage;
           $task->linkedId = $pending->id;
           updateScore($player, $task, true);
-          // Set group captains
-          setCaptains($player->team);
           if ($pending) {
             $pending->of(false);
             $pending->trash();
           }
+          setGroupCaptain($player->id);
         }
       }
     }
@@ -379,6 +367,10 @@
     if (isset($input->get->form) && $input->get->form == 'deleteNotification' && $input->get->pageId != '') {
       $pageToDel = $pages->get($input->get->pageId);
       $pageToDel->trash();
+    }
+    if (isset($input->get->form) && $input->get->form == 'deleteFightRequest' && $input->get->pageId != '') {
+      $player = $pages->get($input->get->pageId);
+      $player->setAndSave('fightRequest', '');
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, memory potion...
@@ -405,8 +397,7 @@
           $task->refPage = $historyPage->refPage;
           $task->linkedId = $historyPage->id;
           updateScore($player, $task, true);
-          // Set group captains
-          setCaptains($player->team);
+          setGroupCaptain($player->id);
         }
       }
       if ($task->name == 'personal-initiative') {
@@ -414,8 +405,7 @@
         $task->refPage = '';
         $task->linkedId = false;
         updateScore($player, $task, true);
-        // Set group captains
-        setCaptains($player->team);
+        setGroupCaptain($player->id);
       }
     }
 
@@ -443,8 +433,7 @@
         $task->linkedId = false;
       }
       updateScore($player, $task, true);
-      // Set group captains
-      setCaptains($player->team);
+      setGroupCaptain($player->id);
     }
 
     if($input->post->adminTableSubmit) { // adminTableForm submitted
@@ -456,7 +445,6 @@
       for ($i=0; $i<count($checked); $i++) {
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $comment = 'comment_'.$playerId.'_'.$taskId;
-
         $player = $pages->get($playerId);
         $task = $pages->get($taskId); 
         $task->comment = trim($input->post->$comment);
@@ -478,8 +466,7 @@
       foreach($allNegPlayers as $p) {
         checkDeath($p, true);
       }
-      // Set group captains
-      setCaptains($player->team);
+      setTeamCaptains($player->team);
 
       // Redirect to team page (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
@@ -516,8 +503,7 @@
           // No need to checkDeath, Marketplace can't cause death
         }
       }
-      // Set group captains
-      setCaptains($player->team);
+      setGroupCaptain($player->id);
       // Redirect to MarketPlace (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/shop')->url.$player->team->name); */
       $url = $pages->get('/shop')->url.$player->team->name;
@@ -549,10 +535,7 @@
         $task->linkedId = false;
         updateScore($player, $task, true);
         // No need to checkDeath, Donation can't cause death
-
-        // Set group captains
-        setCaptains($player->team);
-
+        setGroupCaptain($player->id);
         // Redirection to Team page (in main.js, because doesn't work due to Ajax ?)
         /* $session->redirect($pages->get("name=players")->url.$player->team->name); */
         $url = $pages->get('/players')->url.$player->team->name;
