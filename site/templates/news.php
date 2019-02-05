@@ -185,7 +185,7 @@
             $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="r" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=R&monsterId='.$p->fightRequest->id.'">R</button>';
             $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="v" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=V&monsterId='.$p->fightRequest->id.'">V</button>';
             $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="vv" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=VV&monsterId='.$p->fightRequest->id.'">VV</button>';
-            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&pageId='.$p->fightRequest->id.'" class="del">'.__('[Delete]').'</a>';
+            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteFightRequest&pageId='.$p->id.'" class="del">'.__('[Delete]').'</a>';
             $out .= '</li>';
           }
           $out .= '</ul>';

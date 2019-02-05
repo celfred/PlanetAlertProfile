@@ -511,11 +511,11 @@ function addGroupItem($player, $historyPage, $real) {
 function extraActionAfterSave($player, $historyPage, $real) { // Watch out : recorded with today's date (but trigeering event's linkedId
   $pages = wire('pages');
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
-      $task = $pages->get("template=task, name=penalty"); 
-      $task->comment = 'Automatic homework penalty';
-      $task->refPage = false;
-      $task->linkedId = $historyPage->id;
-      updateScore($player, $task, $real);
+    $task = $pages->get("template=task, name=penalty"); 
+    $task->comment = 'Automatic homework penalty';
+    $task->refPage = false;
+    $task->linkedId = $historyPage->id;
+    updateScore($player, $task, $real);
   }
   if ($historyPage->task->is("name=donation")) {  // Record the linked 'Donated' event
     $task = $pages->get("name=donated");
@@ -559,7 +559,7 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
     if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
       updateTeamScores($player->team);
     }
-    if (checkCache($player)) {
+    if (checkNewPageCache($player)) {
       setCache($player->id, false);
     }
   }
@@ -806,12 +806,38 @@ function displayPlayerScores($cachePage) {
   return $out;
 }
 
-function setCaptains($team, $real = true) {
+function setGroupCaptain($playerId, $real = true) {
+  $pages = wire('pages');
+  $player = $pages->get($playerId);
+  if (isset($player->group) && $player->group != '') {
+    $players = $pages->find("parent.name=players, template=player, team=$player->team, group=$player->group");
+    $captain = $players->sort('-yearlyKarma')->first();
+    if (!$captain->skills->has("skills.name=captain")) { // Else captain has not changed
+      $role = $pages->get("parent.name=skills, name=captain");
+      // Remove old captain
+      $oldCaptain = $players->get("skills.name=captain");
+      if ($oldCaptain->id) {
+        $oldCaptain->skills->remove($role);
+        if ($real == true) {
+          $oldCaptain->of(false);
+          $oldCaptain->save();
+        }
+      }
+      // Set new captain
+      $captain->skills->add($role);
+      if ($real == true) {
+        $captain->of(false);
+        $captain->save();
+      }
+    }
+  }
+}
+function setTeamCaptains($team, $real = true) {
   if ($team->is("name!=no-team")) { // Skip no-team players
     $pages = wire('pages');
     $players = $pages->find("template=player, team=$team");
     // Remove old captains
-    $role = $pages->get("name=captain");
+    $role = $pages->get("parent.name=skills, name=captain");
     $groups = new PageArray();
     foreach($players as $p) {
       $p->of(false);
@@ -849,7 +875,7 @@ function checkMaster($player) {
 
 function setMaster($player) {
   $pages = wire('pages');
-  $role = $pages->get("name=master");
+  $role = $pages->get("parent.name=skills, name=master");
   $player->of(false);
   $player->skills->add($role);
   $player->save();
@@ -1000,7 +1026,7 @@ function saveHistory($player, $task, $newsBoard = 0, $public = 0) {
   return $p;
 }
 
-function checkCache($player) {
+function checkNewPageCache($player) {
   $limit=50;
   $nbEvents = $player->get("name=history")->numChildren();
   $toCache = ceil($nbEvents/$limit)-1; // Skip last page
@@ -1794,6 +1820,7 @@ function setMonster($player, $monster) {
     // Sets fighting possibilities
     $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
     if ($tmpCache->lastFightDate != '') {
+      $today = new \DateTime("today");
       $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
       $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
     } else {
@@ -2102,6 +2129,7 @@ function updateCache($player, $historyPage) {
       }
       $tmpCache->of(false);
       $tmpCache->save();
+      return;
     }
     if ($historyPage->task->is("name~=fight")) { // Update tmpCache
       if ($tmpCache) { // Monster already exists in tmpMonstersActivity
@@ -2110,6 +2138,7 @@ function updateCache($player, $historyPage) {
       }
       $tmpCache->of(false);
       $tmpCache->save();
+      return;
     }
   }
 }

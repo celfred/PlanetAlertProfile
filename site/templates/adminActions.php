@@ -2008,7 +2008,7 @@
           $out .= '</h4>';
           $out .= '<section>';
           $out .= '<p> Old captains : '.$oldCaptains.'</p>';
-          setCaptains($selectedTeam, false);
+          setTeamCaptains($selectedTeam, false);
           $newCaptains = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=captain")->implode(', ', '{title}');
           $out .= '<p> New captains : '.$newCaptains.'</p>';
           $out .= '</section>';
@@ -2083,7 +2083,7 @@
       case 'saveCaptains':
         $selectedTeam = $pages->get("$input->urlSegment2");
         $allPlayers = $allPlayers->find("team=$selectedTeam");
-        setCaptains($selectedTeam, true);
+        setTeamCaptains($selectedTeam, true);
         break;
       case 'saveReputation':
         $selectedTeam = $pages->get("$input->urlSegment2");
