@@ -1,4 +1,4 @@
-<?php /* list-all template */
+<?php namespace ProcessWire;
   include("./head.inc"); 
 
   //if ($page->children->get("template='player'")) { // Admin front-end

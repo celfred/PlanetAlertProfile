@@ -1,7 +1,6 @@
 <?php namespace ProcessWire; ?>
 <div>
-  <?php /* list-all template */
-
+  <?php
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
   $team = $allTeams->get("name=$input->urlSegment1");
@@ -21,13 +20,12 @@
   }
 
   if ($input->urlSegment1 != 'no-team') {
-    $captains = $allPlayers->find("skills.count>0, skills.name=captain")->implode(', ', '{title}');
+    $captains = $allPlayers->find("skills.name=captain")->implode(', ', '{title}');
     if (strlen($captains) == 0) { 
       $captains = __('Nobody.');
     }
     echo '<p class="text-center">';
-      // Any new serious injuries ? (personal workflow)
-      if ($user->name == 'flieutaud' || $user->isSuperuser()) {
+      if ($user->name == 'flieutaud' || $user->isSuperuser()) { // Any new serious injuries ? (personal workflow)
         $penalty = $pages->find("has_parent=$allPlayers, template=event, publish=1, task.name=penalty, sort=-date");
         if (count($penalty) > 0) {
           $players = $penalty->implode(', ', '{parent.parent.title}');
@@ -42,10 +40,8 @@
           $helpMessage = '<h4>'.$players.'</h4>';
         }
       }
-
       echo '<span class="label label-primary"><span class="glyphicon glyphicon-star"></span> '.__("Group Captains").'</span> → '.$captains;
     echo '</p>';
-
   }
 
   // Players table
@@ -66,7 +62,7 @@
   $out .= '<th data-toggle="tooltip" title="'.__("Special skills").'">S.</th>';
   $out .= '<th data-toggle="tooltip" title="'.__("Gold coins").'"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></th>';
   $out .= '<th data-toggle="tooltip" title="'.__("Level").'"><span class="glyphicon glyphicon-signal"></span></th>';
-  $out .= '<th data-toggle="tooltip" title="'.__("Reputation").'">R&nbsp;&nbsp;</th>';
+  $out .= '<th data-toggle="tooltip" title="'.__("Reputation").'">R.</th>';
   $out .= '<th data-toggle="tooltip" title="'.__("Health Points").'"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> ';
   $out .= __("HP").'</th>';
   $out .= '<th data-toggle="tooltip" title="'.__("Experience").'"><img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
@@ -78,25 +74,24 @@
   $out .= '<th data-toggle="tooltip" title="'.__("Equipment").'"><span class="glyphicon glyphicon-wrench"></span></th>';
   $out .= '<th data-toggle="tooltip" title="'.__("Donation").'"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></th>';
   $out .= '<th data-toggle="tooltip" title="'.__("Underground training").'">';
-  $out .= __("U.T.").'</th>';
+  $out .= __("UT").'</th>';
   $out .= '<th data-toggle="tooltip" title="'.__("Fighting Power").'">';
-  $out .= __("F.P.").'</th>';
+  $out .= __("FP").'</th>';
   $out .= '</tr>';
   $out .= '</thead>';
   $out .= '<tbody>';
+  t('global');
   foreach($allPlayers as $player) {
+    $historyPage = $player->child("name=history");
     if ($player->login == $user->name) {
       $class = ' class="selected"';
     } else {
       $class = '';
     }
-    if ($user->isLoggedin()) {
-      // Get last recorded events
-      // Get last event date
-      $lastEvent = $player->child("name=history")->child("sort=-date");
-      $prevDay = date("m/d/Y", $lastEvent->date); // Get all events on same day
-      $prevDate = $prevDay.' 0:0:0'; // Select events for the whole day
-      $prevEvents = $player->child("name=history")->children("template=event, date>=$prevDate");
+    if ($user->isLoggedin()) { // Get last recorded events
+      $lastEvent = $historyPage->child("sort=-date");
+      $prevDate = date("m/d/Y", $lastEvent->date)." 0:0:0"; // Get all events on same day
+      $prevEvents = $historyPage->children("template=event, date>=$prevDate");
       $trend = '';
       foreach ($prevEvents as $event) {
         $event->task = checkModTask($event->task, $headTeacher, $player);
@@ -109,7 +104,7 @@
       }
       if ($team->is("name!=no-team|cm1")) {
         // Set hk counter
-        if ($user->hasRole('teacher') || $user->isSuperuser() || ($user->isLoggedin() && $user->name == $player->login)) { // Admin is logged or user
+        if ($user->hasRole('teacher') || $user->isSuperuser() || $user->name == $player->login) { // Admin is logged or user
           if ($player->hkcount > 0) {
             $hkCount = '&nbsp;<span class="label label-danger">'.$player->hkcount.'</span>';
           } else {
@@ -122,23 +117,14 @@
     } else {
       $hkCount = '';
     }
-    // Set HP progressbar
-    $HPwidth = round(150*$player->HP/50);
+    $HPwidth = round(150*$player->HP/50); // Set HP progressbar
     // Set XP progressbar
-    if ($player->level <= 4) {
-      $delta = 40+($player->level*10);
-    } else {
-      $delta = 90;
-    }
-    $threshold = ($player->level*10)+$delta;
+    $threshold = getLevelThreshold($player->level);
     $XPwidth = round(150*$player->XP/($threshold));
     // Places list
-    $tooltipPlaces = '';
     if ($player->places->count() > 0) {
       $listPlaces = '<ul>';
-      foreach ($player->places as $place) {
-        $listPlaces .= '<li>'.$place->title.'</li>';
-      }
+      $listPlaces .= $player->places->each('<li>{title}</li>');
       $listPlaces .= '</ul>';
       $tooltipPlaces =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listPlaces.'"';
     } else {
@@ -146,12 +132,9 @@
     }
     if ($team->rank && $team->rank->is("index>=8")) {
       // People list
-      $tooltipPeople = '';
       if ($player->people->count() > 0) {
         $listPeople = '<ul>';
-        foreach ($player->people as $people) {
-          $listPeople .= '<li>'.$people->title.'</li>';
-        }
+        $listPeople .= $player->people->each('<li>{title}</li>');
         $listPeople .= '</ul>';
         $tooltipPeople =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listPeople.'"';
       } else {
@@ -159,18 +142,14 @@
       }
     }
     // Equipment list
-    $tooltipEquipment = '';
     if ($player->equipment->count() > 0) {
       $listEquipment = '<ul>';
-      foreach ($player->equipment as $equipment) {
-        $listEquipment .= '<li>'.$equipment->title.'</li>';
-      }
+      $listEquipment .= $player->equipment->each('<li>{title}</li>');
       $listEquipment .= '</ul>';
       $tooltipEquipment =  'data-toggle="tooltip" data-html="true" data-placement="top" title="'.$listEquipment.'"';
     } else {
       $tooltipEquipment = '';
     }
-
     if ($player->avatar) {
       $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img class=\"tipList-light\" src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$player->avatar->getCrop('mini')->url."' alt='avatar' />";
     } else {
@@ -232,6 +211,7 @@
     $out .= '<td>'. $player->fighting_power .'</td>';
     $out .= '</tr>';
   }
+  bd(t('global'));
   $out .= '</tbody>';
   $out .= '</table>';
   if (isset($pagination)) { $out .= $pagination;}
@@ -245,7 +225,6 @@
       $helpMessage = __("Low HP !");
     }
   }
-
   include("./helpAlert.inc.php");
 
   echo $out;

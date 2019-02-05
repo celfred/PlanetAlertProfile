@@ -1,8 +1,6 @@
 <?php namespace ProcessWire;
 
   $out = '';
-  $monthName = strtolower(date("F"));
-  $monthId = $pages->get("name=$monthName")->id;
   $currentPeriod = $team->periods;
 
   $out .= '<ul class="tabList list-inline">';
