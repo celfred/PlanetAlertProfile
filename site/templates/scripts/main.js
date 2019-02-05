@@ -1,25 +1,24 @@
 $(document).ready(function() {
-	$('#scrollDown').on('click', function(e) {
+	$(document).on('click', '#scrollDown', function(e) {
 		e.preventDefault();
 		window.scrollBy(0,350);
 	});
-	$('#scrollUp').on('click', function(e) {
+	$(document).on('click', '#scrollUp', function(e) {
 		e.preventDefault();
 		window.scrollBy(0,-350);
 	});
 
-  $('.close').on('click', function () {
+  $(document).on('click', '.close', function () {
     var id = $(this).attr('data-id');
     $(id).hide();
   });
 
-	$('a.frenchVersion').on('click', function() {
+	$(document).on('click', 'a.frenchVersion', function() {
 		$('div.frenchVersion').toggle();
 		return false;
 	});
 
-  
-	$('.publishElement').on('click', function() {
+	$(document).on('click', '.publishElement', function() {
 		var href = $(this).attr('href');
 		var $this = $(this);
     $this.html(lang.saving); 
@@ -30,7 +29,7 @@ $(document).ready(function() {
     return false; 
 	});
 
-	$('.selectElement').on('click', function() {
+	$(document).on('click', '.selectElement', function() {
     $("#ajaxViewport").html("<p>"+lang.saving+"</p>"); 
 		var href = $(this).attr('href');
 		$el = $(this).parent('li');
@@ -54,7 +53,7 @@ $(document).ready(function() {
     return false; 
 	});
 
-	$('.deleteFromId').on('click', function(e) {
+	$(document).on('click', '.deleteFromId', function(e) {
     e.preventDefault();
 		$this = $(this);
 		swal({
@@ -77,7 +76,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.togglePublish').on('click', function(e) {
+	$(document).on('click', '.togglePublish', function(e) {
     e.preventDefault();
 		$this = $(this);
 		var href = $this.attr('data-href');
@@ -99,7 +98,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.announcement').on('close.bs.alert', function(e) {
+	$(document).on('close.bs.laert', '.announcement', function(e) {
 		e.preventDefault();
 		var $this = $(this);
 		var $href = $this.attr('data-href')
@@ -121,7 +120,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.teamOption').on('click', function() {
+	$(document).on('click', '.teamOption', function() {
     $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
 		var href = $(this).attr('href');
     $.get(href, function(data) { 
@@ -130,7 +129,7 @@ $(document).ready(function() {
     return false; 
   }); 
 
-  $(".adminAction").on('click', function() {
+	$(document).on('click', '.adminAction', function() {
     $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
 		var playerId = $('#playerId').val();
 		if (playerId == '-1' || playerId == null) {
@@ -158,12 +157,12 @@ $(document).ready(function() {
 			var href = $(this).attr('data-href') + action + '?&periodId=' + $('#periodId').val();
 		}
     $.get(href, function(data) { 
-        $("#ajaxViewport").html(data); 
+      $("#ajaxViewport").html(data); 
     }); 
     return false; 
   }); 
 
-	$('.limitButton').on('click', function() {
+	$(document).on('click', '.limitButton', function() {
 		$('.limitButton').each( function() {
 			$(this).prop('class', 'limitButton btn btn-primary');
 		});
@@ -181,7 +180,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$('.monsterInfo').on('click', function() {
+	$(document).on('click', '.monsterInfo', function() {
 		$this = $(this);
 		var $url = $this.attr('data-href');
 		swal({
@@ -332,7 +331,7 @@ $(document).ready(function() {
     return false;
 	});
 
-	$('.confirmSubmit').on('click', function(e) {
+	$(document).on('click', '.confirmSubmit', function(e) {
     $this = $(this);
     e.preventDefault();
 		swal({
@@ -351,7 +350,7 @@ $(document).ready(function() {
 		});
   });
 
-  $('.toggleCheckboxes').on('click', function(e) {
+  $(document).on('click', '.toggleCheckboxes', function(e) {
     var checked = $(this).prop('checked');
     var index = $(this).parent().parent().index();
     if ($(this).attr('data-col')) { // Col toggle
@@ -370,7 +369,7 @@ $(document).ready(function() {
     }
   });
 
-	$('.confirm').on('click', function() {
+	$(document).on('click', '.confirm', function() {
 		$this = $(this);
 		swal({
 			title: lang.sure,
@@ -393,7 +392,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.proceed').on('click', function() {
+	$(document).on('click', '.proceed', function() {
 		$this = $(this);
 		swal({
 			title: lang.sure,
@@ -418,12 +417,12 @@ $(document).ready(function() {
 		});
 	});
 
-	$('#playerId').on('change', function() {
+	$(document).on('change', '#playerId', function() {
 		var pageId = $(this).val();
 		var url = $('#backendEditable').attr('data-href');
 		$('#backendEditable').attr('href', url+pageId); 
 	});
-	$('#backendEditable').on('click', function() {
+	$(document).on('click', '#backendEditable', function() {
 		if ($(this).attr('href') != '') {
 			var url = $(this).attr('href');
 			window.location.href = url;
@@ -433,13 +432,13 @@ $(document).ready(function() {
 		}
 	})
 
-  $(".toggleEnabled").on('click', function(e) {
+  $(document).on('click', '.toggleEnabled', function(e) {
 		e.preventDefault();
 		$checkbox = $(this).parents('td').find("input");
 		$checkbox.prop('disabled', !$checkbox.prop('disabled'));
 	});
 
-  $(".removeAbs").on('click', function(e) {
+  $(document).on('click', '.removeAbs', function(e) {
 		e.preventDefault();
     $this = $(this);
 		swal({
@@ -610,7 +609,7 @@ $(document).ready(function() {
     return false; 
   })); 
 
-  $('#shopSelect').change( function() {
+  $(document).on('change', '#shopSelect', function() {
     var url = $('#shopSelect').val();
     $.get(url, function(data) { 
         $("#possibleItems").html(data); 
@@ -618,29 +617,29 @@ $(document).ready(function() {
     return false; 
   });
 
-  $('#switchGallery').click( function() {
+  $(document).on('click', '#switchGallery', function() {
     $('#galleryPlacesList').toggle();
     $('#detailedPlacesList').toggle();
   });
 
-  $('button.popup').click( function(e) {
+  $(document).on('click', 'button.popup', function(e) {
 		e.preventDefault();
 		$(this).closest('form').attr('target', '_blank').submit(); // Open form in new tab/window
 	});
 
-  $('#periodId').focus( function() {
+  $(document).on('focu', '#periodId', function() {
 		$('#selectedPeriod').click();
 	});
-  $('#periodId').on('change', function() {
+  $(document).on('change', '#periodId', function() {
 		$confirmButton = $(this).next('button');
 		$href = $(this).next('button').attr('data-href');
 		$confirmButton.attr('data-href', $href+'/'+$(this).val());
 		$confirmButton.prop('disabled', false);
 	});
-  $('#startDate, #endDate').focus( function() {
+  $(document).on('focus', '#startDate, #endDate', function() {
 		$('#customDates').click();
 	});
-  $('.reportCat').click( function() {
+  $(document).on('click', '.reportCat', function() {
 		var $reportId = $(this).attr("data-reportId");
 		$('#allOptions').show("blind");
 		$(".specificOption").hide("blind");
@@ -649,15 +648,15 @@ $(document).ready(function() {
 		}
 	});
 
-  $('#quizForm').submit( function(event) {
+  $(document).on('submit', '#quizForm', function(event) {
     //event.preventDefault();
   });
-  $('#showAnswer').click( function() {
+  $(document).on('click', '#showAnswer', function() {
     $('#answer').toggle();
     return false;
   });
 
-  $('#playerQuizButton').click( function() {
+  $(document).on('click', '#playerQuizButton', function() {
     var url = $('#players_list').val();
     window.location.href = url;
   });
@@ -671,7 +670,7 @@ $(document).ready(function() {
     });
   }
 
-  $('#buyFormSubmit').on( "click", function(e) {
+  $(document).on('click', '#buyFormSubmit', function(e) {
 		e.preventDefault();
 		var $this = $(this).parents("form");
 		swal({
@@ -697,7 +696,7 @@ $(document).ready(function() {
 		});
 	});
 
-  $('#donateFormSubmit').on( "click", function(e) {
+  $(document).on('click', '#donateFormSubmit', function(e) {
 		e.preventDefault();
 		var $this = $(this).parents("form");
     if ($('#donator').val() == 0 ) {
@@ -756,10 +755,10 @@ $(document).ready(function() {
 		$('#amount').next('.form-control-feedback').hide();
 		return true;
 	}
-  $('#amount').on('keyup', function() {
+  $(document).on('keyup', '#amount', function() {
 		checkAmount($(this).val());
   });
-	$('#donator').on('change', function() {
+	$(document).on('change', '#donator', function() {
 		if ($(this).val() != 0) {
 			$(this).next('.form-control-feedback').hide();
 			if (checkAmount($('#amount').val())) {
@@ -770,7 +769,7 @@ $(document).ready(function() {
 			$('#donateFormSubmit').prop('disabled', true);
 		}
 	});
-	$('#receiver').on('change', function() {
+	$(document).on('change', '#receiver', function() {
 		if ($(this).val() != 0) {
 			$(this).next('.form-control-feedback').hide();
 			if (checkAmount($('#amount').val())) {
@@ -782,35 +781,25 @@ $(document).ready(function() {
 		}
 	})
 
-	$('[data-toggle=tooltip]').hover(function(){
-			// on mouseenter
-			$(this).tooltip({container : 'body'});
-			$(this).tooltip('show');
-	}, function(){
-			// on mouseleave
-			$(this).tooltip('hide');
-	});
-
 	// Monster invasions
-  $('#toggle').on('click', function() {
+  $(document).on('click', '#toggle', function() {
     $('#quizMenu').toggleClass('shown');
     $('#quizMenu').toggleClass('hidden');
-
     return false;
   });
-  $('#tickAll').on('click', function() {
+  $(document).on('click', '#tickAll', function() {
     $('.list-group-item input[type=checkbox]').each( function() {
 			$(this).prop('checked', true);
     });
     return false;
   });
-  $('#untickAll').on('click', function() {
+  $(document).on('click', '#untickAll', function() {
     $('.list-group-item input[type=checkbox]').each( function() {
       $(this).prop('checked', false);
     });
     return false;
   });
-  $('button.generateQuiz').on('click', function() {
+  $(document).on('click', 'button.generateQuiz', function() {
 		var noChecked = true;
     $('.list-group-item input[type=checkbox]').each( function(index) {
       if ( $(this).prop('checked') === true) {
@@ -824,7 +813,7 @@ $(document).ready(function() {
 		}
   });
 
-  $('.showInfo').on('click', function() {
+  $(document).on('click', '.showInfo', function(e) {
 		var $this = $(this);
 		var $itemId = $this.attr("data-id");
 		if ($this.hasClass("buy")) {
@@ -919,7 +908,7 @@ $(document).ready(function() {
 		return false;
 	});
 
-  $('.pickFromList').on('click', function() {
+  $(document).on('click', '.pickFromList', function() {
 		var $this = $(this);
 		var list = $this.attr("data-list");
 		var items = list.split(',');
@@ -1154,7 +1143,7 @@ $(document).ready(function() {
 		return false;
 	});
 
-  $('#startFight').on('click', function() {
+  $(document).on('click', '#startFight', function() {
     // TODO : Move function into exercise.js?
 		var $this = $(this);
 		$('#exHeader').hide('slow', function() {
@@ -1166,7 +1155,7 @@ $(document).ready(function() {
     // TODO : Record session start...
   });
 
-	$('#importSacocheForm :submit').on('click', function(e){
+	$(document).on('click', '#importSacocheForm :submit', function(e){
 		var $this = $(this).parents("form");
 		var $redirectUrl = '';
 		e.preventDefault();
@@ -1229,7 +1218,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('#adminTableForm :submit').on('click', function(e){
+	$(document).on('click', '#adminTableForm :submit', function(e){
 		var $this = $(this).parents("form");
 		var $redirectUrl = '';
 		e.preventDefault();
@@ -1592,7 +1581,7 @@ var shopCheck = function(obj, remainingGC, itemGC) {
   }
 }
 
-$('#marketPlaceForm :submit').on('click', function(e){
+$(document).on('click', '#marketPlaceForm :submit', function(e){
 	var $this = $(this).parents("form");
 	e.preventDefault();
 	swal({

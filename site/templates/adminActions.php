@@ -1472,7 +1472,6 @@
     echo '$(".removeUser").click( function() {  var playerId=$(this).attr("data-playerId"); var action = $(this).attr("data-action"); var href=$(this).attr("data-href")+action+"/"+playerId+"/1"; var that=$(this); if (confirm("Proceed ?")) {$.get(href, function(data) { that.attr("disabled", true); $("#ajaxViewport").html(data);that.html("User deleted. Please reload!"); })}});';
     echo '</script>';
   } else { // Ajax call, display requested information
-    echo '<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
     $out = '';
     $allPlayers = $pages->find("parent.name=players, template=player")->sort("team.name, title");
     $action = $input->urlSegment1;
@@ -1571,7 +1570,6 @@
         }
         break;
       case 'reports' :
-        $out .='<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
         if ($selectedTeam && $selectedTeam != '-1') {
           $allPeriods = $pages->get("name=periods")->children();
           $officialPeriod = $selectedTeam->periods;
@@ -2052,9 +2050,8 @@
         }
         break;
       case 'setScores':
-        $out = '';
         if ($selectedTeam && $selectedTeam != '-1') {
-          $out .= '</div>';
+          $out .= '<section>';
           $out .= '<h4 class="text-center">';
           $out .=   'School year Team scores for '.$selectedTeam->title;
           $out .= '</h4>';
@@ -2065,7 +2062,9 @@
           $out .= '</section>';
           $out .= '<section>';
           $out .= '<ul><span class="label label-danger">New scores</span>';
+          t();
           $free = nbFreedomActs($selectedTeam);
+          bd(t());
           $allElements = teamFreeworld($selectedTeam);
           $completed = $allElements->find("completed=1");
           $percent = round((100*$completed->count())/$allElements->count());
@@ -2073,6 +2072,7 @@
           $out .= '<li>'.$free.' free acts</li>';
           $out .= '</section>';
           $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveScores/'.$selectedTeam->id.'/1">Save new scores</button>';
+          $out .= '</section>';
         }
         break;
       case 'saveFighters':
@@ -2405,7 +2405,6 @@
         $pages->trash($playerPage);
         break;
       case 'team-options' :
-        $out = '';
         if ($selectedTeam && $selectedTeam != '-1') {
           $out .= '</div>';
           $out .= '<h4 class="text-center">';
@@ -2518,7 +2517,6 @@
         $newPlayers = $input->post->newPlayers;
         $newUserLines = preg_split("/[\r\n]+/", $newPlayers, -1, PREG_SPLIT_NO_EMPTY);
         $parentPage =  $pages->get('name=players');
-        $out = '';
         foreach($newUserLines as $l) {
           $newUser = array_map('trim', explode(',', $l));
           list($title, $lastName, $rank, $team, $teacher) = $newUser;

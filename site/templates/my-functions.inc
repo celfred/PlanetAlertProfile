@@ -557,7 +557,7 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
       updateCache($player, $historyPage);
     }
     if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
-      updateTeamScores($player->team);
+      updateTeamScores($player->team, $historyPage->refPage);
     }
     if (checkNewPageCache($player)) {
       setCache($player->id, false);
@@ -1274,6 +1274,25 @@ function setOwners($el, $player) {
   return $el;
 }
 
+function setElement($el, $team) {
+  $pages = wire('pages');
+  $allPlayers = $pages->find("template=player, team=$team");
+  $teamRate = setTeamRate($team->id); // Set team stats
+  if ($el->template == 'place') {
+    $teamOwners = $allPlayers->find("places=$el");
+  }
+  if ($el->template == 'people') {
+    $teamOwners = $allPlayers->find("people=$el");
+  }
+  $el->owners = $teamOwners;
+  // Set element free rate
+  if ($teamOwners->count() >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'label label-info'; }
+  if ($teamOwners->count() >= $teamRate) { $el->completed = 1; $el->cssClass = 'label label-success'; }
+  if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = 'label label-danger'; }
+  $el->teamRate = $teamRate;
+  return $el;
+}
+
 function teamFreeworld($team) {
   $pages = wire('pages');
   // Get all possible elements
@@ -1333,20 +1352,33 @@ function saveScoresForCache($player, $index) {
   $historyPage->save();
 }
 
-function updateTeamScores($team) {
-  $team->freeActs = nbFreedomActs($team);
+function updateTeamScores($team, $element = false) {
   if ($team->name != 'no-team') {
-    // TODO : Optimize by testing only new elements ?
-    $team->freeelements->removeAll();
-    $allElements = teamFreeworld($team);
-    $completed = $allElements->find("completed=1");
-    $percent = round((100*$completed->count())/$allElements->count());
-    foreach ($completed as $el) {
-      $team->freeelements->add($el);
+    if (isset($element)) { // Test only new element
+      $team->freeActs += 1;
+      if (!$team->freeelements->has($el)) { // Element is not already freed
+        if ($team->rank->index >= 8) {
+          $nbAllElements = $pages->count("template=place|people");
+        } else {
+          $nbAllElements = $pages->count("template=place");
+        }
+        $element = setElement($element, $team);
+        if ($element->completed) { $team->freeelements->add($el); }
+        $percent = round((100*$team->freeelements->count())/$nbAllElements);
+      }
+    } else {
+      $team->freeActs = nbFreedomActs($team);
+      $team->freeelements->removeAll();
+      $allElements = teamFreeworld($team);
+      $completed = $allElements->find("completed=1");
+      $percent = round((100*$completed->count())/$allElements->count());
+      foreach ($completed as $el) {
+        $team->freeelements->add($el);
+      }
+      $team->freeworld = $percent;
+      $team->of(false);
+      $team->save();
     }
-    $team->freeworld = $percent;
-    $team->of(false);
-    $team->save();
   }
 }
 
