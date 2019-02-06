@@ -5,7 +5,7 @@
   </div><!-- /.container -->
 </div><!--/wrap-->
 
-<?php if ($user->isSuperuser() || $user->hasRole('teacher')) { ?>
+<?php if ($user->isSuperuser() || $user->hasRole('teacher') || $user->name == 'test') { ?>
   <section class="navigate">
     <a href="#" id="scrollUp"><span class="glyphicon glyphicon-triangle-top"></span></a>
     <a href="#" id="scrollDown"><span class="glyphicon glyphicon-triangle-bottom"></span></a>

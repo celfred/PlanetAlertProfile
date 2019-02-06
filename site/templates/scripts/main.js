@@ -1,11 +1,11 @@
 $(document).ready(function() {
 	$(document).on('click', '#scrollDown', function(e) {
 		e.preventDefault();
-		window.scrollBy(0,350);
+    $("body, html").animate({scrollTop: $("body, html").scrollTop() + 350}, 1500);
 	});
 	$(document).on('click', '#scrollUp', function(e) {
 		e.preventDefault();
-		window.scrollBy(0,-350);
+    $("body, html").animate({scrollTop: $("body, html").scrollTop() - 350}, 1500);
 	});
 
   $(document).on('click', '.close', function () {
