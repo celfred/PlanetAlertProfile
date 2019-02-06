@@ -1152,18 +1152,6 @@ $(document).ready(function() {
 		return false;
 	});
 
-  $(document).on('click', '#startFight', function() {
-    // TODO : Move function into exercise.js?
-		var $this = $(this);
-		$('#exHeader').hide('slow', function() {
-			$this.parents('.alert').hide();
-			$('#energyDiv').show('slow');
-			$('#fightForm').show();
-		});
-    // Start exercise
-    // TODO : Record session start...
-  });
-
 	$(document).on('click', '#importSacocheForm :submit', function(e){
 		var $this = $(this).parents("form");
 		var $redirectUrl = '';

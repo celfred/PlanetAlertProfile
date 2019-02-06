@@ -90,7 +90,6 @@ exerciseApp.service('myData', function($http) {
 					str = allLines[i];
 				}
 			}
-
 			// console.log(allLines);
 			// return allLines;
 		},
@@ -185,11 +184,10 @@ exerciseApp.service('myData', function($http) {
 					correction[0] = '';
 					for(var i=0; i<chunks.length; i++) {
 						if (i>0) {
-							chunks[i] = ' '+$.trim(chunks[i]);
+              correction[0] += ' '+$.trim(chunks[i]);
 						} else {
-							chunks[i] = $.trim(chunks[i]);
+              correction[0] += $.trim(chunks[i]);
 						}
-						correction[0] += chunks[i];
 					}
 					question['allCorrections'] = this.parseCorrections(correction);
 					break;
@@ -366,10 +364,17 @@ exerciseApp.controller('FightCtrl', function ($scope, $http, $timeout, $interval
   }
 
   $scope.startFight = function() {
-		$scope.started = true;
-		// Pick a new question
-		$scope.question = myData.pickQuestion('fight');
-		$scope.initQuestion();
+		var $this = $(this);
+    $('#exHeader').hide('slow', function() { // Animated start fight
+      $('.exSummary').hide('fast', function() {
+        $('#energyDiv').show('fast', function() {
+            $scope.started = true;
+            $scope.question = myData.pickQuestion('fight');
+            $scope.initQuestion();
+            $('#fightForm').show('slow');
+        });
+      });
+		});
   }
 
 	$scope.initQuestion = function() {
@@ -658,7 +663,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 			// Pick another question
 			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
-      $scope.promise = $interval($scope.setTimer, 10, 1000000);
+      $scope.promise = $interval($scope.setTimer, 10);
     })
     $scope.exerciseId = exerciseId;
     $scope.redirectUrl = redirectUrl;

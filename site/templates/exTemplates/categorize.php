@@ -26,25 +26,7 @@
   $out .= $player->title;
   $out .= '</span>';
   $out .= '<span class="pull-right">';
-  $out .= '<span class="avatarContainer">';
-  if ($player->avatar) {
-    $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
-  } else {
-    $out .= '<Avatar>';
-  }
-  if ($weaponRatio > 0) { // Player has weapons
-    $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
-    if ($bestWeapon->id && $bestWeapon->image) {
-        $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getCrop("small")->url.'" alt="'.$bestWeapon->title.'" />';
-    }
-  }
-  if ($protectionRatio > 0) { // Player has protections
-    $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
-    if ($bestProtection->id && $bestProtection->image) {
-        $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong}" src="'.$bestProtection->image->getCrop("small")->url.'" alt="'.$bestProtection->title.'" />';
-    }
-  }
-  $out .= '</span>';
+  include("player-avatar.inc");
   $out .= '</span>';
   $out .= '</h2>';
   $out .= '<h3 class="row well text-center">';
@@ -62,13 +44,13 @@
   $out .= '<br /><br />';
   if ($user->language->name != 'french') {
     $page->of(false);
-    if ($page->type->getLanguageValue($french) != '') {
-      echo '<a class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
-      echo '<div class="collapse" id="collapseDiv">';
-      echo '<div class="well">';
-      echo nl2br($page->type->getLanguageValue($french));
-      echo '</div>';
-      echo '</div>';
+    if ($page->summary->getLanguageValue($french) != '') {
+      $out .= '<a class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv"><img class="img-rounded" src="'.$urls->templates.'img/flag_fr.png" /> '.__("[French version]").'</a>';
+      $out .= '<div class="collapse" id="collapseDiv">';
+      $out .= '<div class="well">';
+      $out .= nl2br($page->summary->getLanguageValue($french));
+      $out .= '</div>';
+      $out .= '</div>';
     }
   }
   $out .= '<br /><br />';
@@ -103,10 +85,10 @@
   } else {
     $out .= '<Avatar>';
   }
-  if ($bestWeapon->id && $bestWeapon->image) {
+  if (isset($bestWeapon) && $bestWeapon->image) {
     $out .= '<img ng-class="{weapon:true, superpose:true, blink:correct}" src="'.$bestWeapon->image->getCrop("small")->url.'" alt="'.$bestWeapon->title.'" />';
   }
-  if ($bestProtection->id && $bestProtection->image) {
+  if (isset($bestProtection) && $bestProtection->image) {
     $out .= '<img ng-class="{protection:true, superpose:true, blink:wrong}" src="'.$bestProtection->image->getCrop("small")->url.'" alt="'.$bestProtection->title.'" />';
   }
   $out .= '</span>';
