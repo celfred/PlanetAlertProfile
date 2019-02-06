@@ -75,7 +75,7 @@
           $out .= '<span class="pull-left glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="right" title="'.$page->summary.'"></span>';
           $page->of(false);
           if ($page->summary->getLanguageValue($french) != '') {
-            $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="left" title="'.$page->summary->getLanguageValue($french).'"></span>';
+            $out .= '<img class="img-rounded pull-right" src="'.$urls->templates.'img/flag_fr.png" data-toggle="tooltip" data-html="true" data-placement="left" title="'.$page->summary->getLanguageValue($french).'" />';
           }
           $out .= '</h2>';
           $out .= '<h4 class="text-center">';

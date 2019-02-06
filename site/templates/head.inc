@@ -267,17 +267,17 @@
       // Avatar
       $out .= '<div style=" color: #FFF;">';
       $out .= '<span class="avatarContainer">';
-      if ($player->avatar) {
-        $out .= '<img class="avatar superpose" src="'.$player->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
-      } else {
-        $out .= '<Avatar>';
-      }
-      if ($bestWeapon && $bestWeapon->image) {
-        $out .= '<img class="weapon mini superpose" src="'.$bestWeapon->image->getCrop("mini")->url.'" alt="'.$bestWeapon->title.'" />';
-      }
-      if ($bestProtection && $bestProtection->image) {
-        $out .= '<img class="protection mini superpose" src="'.$bestProtection->image->getCrop("mini")->url.'" alt="'.$bestProtection->title.'" />';
-      }
+        if ($player->avatar) {
+          $out .= '<img class="avatar superpose" src="'.$player->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
+        } else {
+          $out .= '<Avatar>';
+        }
+        if ($bestWeapon && $bestWeapon->image) {
+          $out .= '<img class="weapon mini superpose" src="'.$bestWeapon->image->getCrop("mini")->url.'" alt="'.$bestWeapon->title.'" />';
+        }
+        if ($bestProtection && $bestProtection->image) {
+          $out .= '<img class="protection mini superpose" src="'.$bestProtection->image->getCrop("mini")->url.'" alt="'.$bestProtection->title.'" />';
+        }
       $out .= '</span>';
       $out .= '</div>';
 

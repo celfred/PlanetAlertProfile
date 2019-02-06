@@ -16,7 +16,7 @@ $out .= '</div>';
 $out .= $page->body;
 
 if ($user->language->name == 'default') {
-  $out .= '<a href="#" class="frenchVersion">[<img src="'.$urls->templates.'img/flag_fr.png" /> French version]</a>';
+  $out .= '<a href="#" class="frenchVersion">[<img class="img-rounded" src="'.$urls->templates.'img/flag_fr.png" /> French version]</a>';
 }
 
 echo $out;

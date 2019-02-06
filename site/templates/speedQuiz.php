@@ -33,16 +33,16 @@
           $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$monster->id.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
           if ($monster->id) { // Training session starts
             $out .= '<div class="col-sm-12 text-center">';
-              $out .= '<h2 class="text-left">';
-              $out .= '<span class="label label-primary">'.__("Speed Quiz");
+              $out .= '<h2>';
+              $out .= '<span class="label label-success">'.__("Speed Quiz");
               $out .= ' : ';
               $out .= $monster->title.'</span>';
               $out .= ' → ';
-              $out .= '<span ng-class="{label:true, \'label-success\':true, \'blink\':correct}">'.__("Correct answers").': {{counter}}</span>';
+              $out .= ' <span class="label label-primary">'.__('Your time').' : <span id="playerTime">{{playerTime}}</span></span>';
               $out .= ' → ';
-              $out .= ' <span class="label label-default">'.__('Your time').' : <span id="playerTime">{{playerTime}}</span></span>';
+              $out .= '<span ng-class="{label:true, \'label-default\':true, \'blink\':correct}">'.__("Correct answers").': {{counter}}</span>';
               $out .= '</h2>';
-              $out .= '<p class="text-left"><span class="glyphicon glyphicon-info-sign"></span> '.__("20 correct answers required to stop the timer")."</p>";
+              $out .= '<span class="glyphicon glyphicon-info-sign"></span> '.__("20 correct answers required to stop the timer");
               $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
             $out .= '</div>';
             $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
