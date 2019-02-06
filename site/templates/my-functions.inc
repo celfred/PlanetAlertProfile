@@ -1277,16 +1277,16 @@ function setElement($el, $team) {
   $allPlayers = $pages->find("template=player, team=$team");
   $teamRate = setTeamRate($team->id); // Set team stats
   if ($el->template == 'place') {
-    $teamOwners = $allPlayers->find("places=$el");
+    $teamOwners = $allPlayers->count("places=$el");
   }
   if ($el->template == 'people') {
-    $teamOwners = $allPlayers->find("people=$el");
+    $teamOwners = $allPlayers->count("people=$el");
   }
   $el->owners = $teamOwners;
   // Set element free rate
-  if ($teamOwners->count() >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'label label-info'; }
-  if ($teamOwners->count() >= $teamRate) { $el->completed = 1; $el->cssClass = 'label label-success'; }
-  if ($teamOwners->count() <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = 'label label-danger'; }
+  if ($teamOwners >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'label label-info'; }
+  if ($teamOwners >= $teamRate) { $el->completed = 1; $el->cssClass = 'label label-success'; }
+  if ($teamOwners <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = 'label label-danger'; }
   $el->teamRate = $teamRate;
   return $el;
 }
@@ -1351,14 +1351,15 @@ function saveScoresForCache($player, $index) {
 }
 
 function updateTeamScores($team, $element = false) {
+  $pages = wire('pages');
   if ($team->name != 'no-team') {
-    if (isset($element)) { // Test only new element
+    if ($element != false) { // Test only new element
       $team->freeActs += 1;
-      if (!$team->freeelements->has($el)) { // Element is not already freed
+      if (!$team->freeelements->has($element)) { // Element is not already freed
         if ($team->rank->index >= 8) {
-          $nbAllElements = $pages->count("template=place|people");
+          $nbAllElements = $pages->find("template=place|people")->count();
         } else {
-          $nbAllElements = $pages->count("template=place");
+          $nbAllElements = $pages->find("template=place")->count();
         }
         $element = setElement($element, $team);
         if ($element->completed) { $team->freeelements->add($el); }
@@ -1374,9 +1375,9 @@ function updateTeamScores($team, $element = false) {
         $team->freeelements->add($el);
       }
       $team->freeworld = $percent;
-      $team->of(false);
-      $team->save();
     }
+    $team->of(false);
+    $team->save();
   }
 }
 
