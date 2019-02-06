@@ -38,7 +38,7 @@
   include("scoring.inc"); 
 
   // First step : Display exercise summary to prepare the activity
-  $out .= '<h3 class="alert alert-info" role="alert">';
+  $out .= '<h3 class="exSummary alert alert-info" role="alert">';
   $out .= '<strong><span class="glyphicon glyphicon-hand-up"></span> '.$page->type->summary.'</strong>';
   $out .= '<span class="glyphicon glyphicon-question-sign pull-right" data-toggle="tooltip" data-html="true" title="'.__("Attack = I know!<br />Dodge = I don't know.<br />Tip : Use 'Enter' to play faster ;)").'"></span>';
   $out .= '<br /><br />';
