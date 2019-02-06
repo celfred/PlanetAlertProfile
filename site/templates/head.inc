@@ -225,7 +225,7 @@
               $class = $page->name == 'statistics' ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$pages->get("name=statistics")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Statistics')."</a></li>";
               $class = $page->name == 'sacoche' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$pages->get("name=sacoche")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Import SACoche')."</a></li>";
+              $out .= "<li><a$class href='{$pages->get("name=sacoche")->url}' target='_blank'><span class='glyphicon glyphicon-flash'></span> - ".__('Import SACoche')."</a></li>";
               
               // Add Admin Zone
               if ($user->isSuperuser()) {
