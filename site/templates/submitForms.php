@@ -301,6 +301,15 @@
         $n->setAndSave('publish', 0);
       }
     }
+    // Toggle inClass indicator
+    if (isset($input->get->form) && $input->get->form == 'inClass' && $input->get->eventId != '') {
+      $e = $pages->get($input->get->eventId);
+      if ($e->inClass == 0) { // Untick
+        $e->setAndSave('inClass', 1);
+      } else { // Tick
+        $e->setAndSave('inClass', 0);
+      }
+    }
     // Use item
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->usedItemHistoryPageId != '') {
       $historyPage = $pages->get($input->get->usedItemHistoryPageId);

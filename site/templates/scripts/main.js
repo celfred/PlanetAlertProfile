@@ -328,6 +328,13 @@ $(document).ready(function() {
       }
       if ($disable == 'true') { $this.prop('disabled', true); }
     }); 
+    if ($this.is(":checkbox")) {
+      if ( $this.attr("checked") == 'checked') {
+        $this.attr("checked") = '';
+      } else {
+        $this.attr("checked") = 'checked';
+      }
+    }
     return false;
 	});
 

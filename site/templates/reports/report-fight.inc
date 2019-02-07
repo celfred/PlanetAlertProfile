@@ -37,10 +37,11 @@
           $out_03 .= '<li>';
           $out_03 .= date('d/m', $t->date).' → '.$t->refPage->title.' [lvl '.$t->refPage->level.'] <span class="label label-'.$class.'">'.$result.'</span> <span class="label label-danger">'.$error.'</span>';
           if ($t->inClass == 1) {
-            $out_03 .= ' ['.__("in class").']';
+            $checked = 'checked="checked"';
           } else {
-            $out_03 .= ' ['.__("not in class").']';
+            $checked ='';
           }
+          $out_03 .= ' <label for="ckbx'.$t->id.'" class="btn btn-danger btn-xs"><input name="ckbx'.$t->id.'" id="ckbx'.$t->id.'" type="checkbox" data-href="'.$pages->get('name=submitforms')->url.'?form=inClass&eventId='.$t->id.'" class="simpleAjax" data-hide-feedback="true" value="" '.$checked.' /> '.__("[in class]").'</label>';
           $out_03 .='</li>';
           $prevDate = date('Y-m-d', $t->date);
           $prevName = $t->refPage->name;
