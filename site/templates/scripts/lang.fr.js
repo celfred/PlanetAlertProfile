@@ -41,7 +41,7 @@ lang = {
 	yesSave	: "Oui, j'enregistre !",
 	redirecting	: "Redirection...",
 	saveForm	: "<p>Enregistrement du formulaire, merci de patienter...</p>",
-	itemsTosave	: "éléments restants.",
+	itemsTosave	: "élément·s restant·s.",
 	all	: "Tous",
 	ok	: "Ok",
 	whatNumber	: "À quoi correspond le ",

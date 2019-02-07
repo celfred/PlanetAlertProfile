@@ -41,7 +41,7 @@ lang = {
 	yesSave	: "Yes, save it!",
 	redirecting	: "Redirecting...",
 	saveForm	: "<p>Saving form, please wait...</p>",
-	itemsTosave	: "items to save.",
+	itemsTosave	: "item·s to save.",
 	all	: "All",
 	ok	: "Ok",
 	whatNumber	: "What's number ",

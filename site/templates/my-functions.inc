@@ -862,14 +862,12 @@ function setTeamCaptains($team, $real = true) {
 function checkMaster($player) {
   $pages = wire('pages');
   $role = $pages->get("name=master");
-  $nbBestTimes = $pages->count("template=exercise, bestTimePlayer=$m");
+  $nbBestTimes = $pages->count("template=exercise, bestTimePlayer=$player");
   if (nbBestTimes > 0) {
     $player->skills->add($role);
   } else {
     $player->skills->remove($role);
   }
-  /* $player->of(false); */
-  /* $player->save(); */
 }
 
 function setMaster($player) {
