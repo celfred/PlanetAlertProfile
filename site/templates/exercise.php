@@ -187,8 +187,9 @@
               $protectionRatio = 0;
               $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
               $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
-              if (isset($bestWeapon)) { $weaponRatio = $bestWeapon->XP; } else { $weaponRatio = 0; }
-              if (isset($bestProtection)) { $protectionRatio = $bestProtection->HP; } else { $protectionRatio = 0; }
+              bd($bestProtection);
+              if ($bestWeapon != false) { $weaponRatio = $bestWeapon->XP; } else { $weaponRatio = 0; }
+              if ($bestProtection != false) { $protectionRatio = $bestProtection->HP; } else { $protectionRatio = 0; }
               // Get exercise type
               include('./exTemplates/'.$page->type->name.'.php');
               echo '</div>';
