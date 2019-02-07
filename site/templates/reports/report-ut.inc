@@ -7,7 +7,7 @@
     if ($user->isSuperuser()) {
       $allMonstersIds = $pages->findIds("parent.name=monsters, template=exercise, include=all");
     } else {
-      $allMonstersIds = $pages->findIds("parent.name=monsters, template=exercise, (teacher=$user), (created_users_id=$user->id), include=all");
+      $allMonstersIds = $pages->findIds("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1, summary!='')");
     }
     $teamUt = 0;
     foreach($allPlayers as $p) {
