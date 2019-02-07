@@ -184,9 +184,11 @@ exerciseApp.service('myData', function($http) {
 					correction[0] = '';
 					for(var i=0; i<chunks.length; i++) {
 						if (i>0) {
+              chunks[i] = ' '+$.trim(chunks[i]);
               correction[0] += ' '+$.trim(chunks[i]);
 						} else {
-              correction[0] += $.trim(chunks[i]);
+              chunks[i] = $.trim(chunks[i]);
+              correction[0] += chunks[i];
 						}
 					}
 					question['allCorrections'] = this.parseCorrections(correction);
@@ -794,6 +796,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         $scope.focusInput();
       }
     } else {
+      window.alert('-'+$scope.playerAnswer+'-'+$scope.allCorrections+'-');
       if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
         $scope.playerAnswer = '';
         $scope.isFocused = false;
