@@ -50,10 +50,21 @@
         ->setMaxFileSize(10 * pow(2, 20))// 10MB
         ->setDestinationPath($tempDir)
         ->execute();
-    $out .= '<form name="uploadFile" action="'.$page->url.'" method="post" enctype="multipart/form-data">';
-    $out .= '<input type="file" name="myFile" />';
-    $out .= '<input type="submit" class="btn btn-primary" value="'.__("Upload file").'"></input>';
-    $out .= '</form>';
+    $out .= '<div class="well">';
+      $out .= '<form name="uploadFile" action="'.$page->url.'" method="post" enctype="multipart/form-data">';
+        $out .= '<input type="file" name="myFile" />';
+        $out .= '<input type="submit" class="btn btn-primary" value="'.__("Upload file").'"></input>';
+        $out .= '<p class="text-right">Force team → ';
+          $out .= '<select id="teamId" name="teamId">';
+          $out .= '<option value="-1">Select a team</option>';
+          foreach($allTeams as $p) {
+            $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+          }
+          $out .= '</select>';
+        $out .= '</p>';
+      $out .= '</form>';
+    $out .= '</div>';
+    $teamId = $input->post->teamId;
     foreach ($uploaded as $file) {
       $out .= '<h3 class="text-center"><span>'.__("Chosen file")." : ".$file."</span></h3>";
       $filePath = $tempDir . $file;
@@ -158,7 +169,12 @@
         $out .= '</td>';
         $out .= '<td class="text-left">';
         list($firstName, $lastName) = explode(' ', $name, 2); 
-        $paPlayer = $pages->get("title~=$firstName, lastName~=$lastName, team.name=$teamName");
+        if ($teamId != -1) {
+          $paPlayer = $pages->get("title~=$firstName, lastName~=$lastName, team.id=$teamId");
+        } else {
+          bd('ok');
+          $paPlayer = $pages->get("title~=$firstName, lastName~=$lastName, team.name=$teamName");
+        }
         if ($paPlayer->id) {
           $out .= ' <span class="label label-success">'.$paPlayer->title.' ['.$paPlayer->team->title.']</span>';
           $out .= '<input type="checkbox" checked="checked" class="toggleCheckboxes pull-right" name="box-'.$index.'" id="box-'.$index.'" data-row="'.$index.'" />';
