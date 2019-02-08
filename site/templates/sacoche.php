@@ -33,7 +33,7 @@
     // No need to check death : battles can't cause death
     // Set group captains (get team from last player)
     if ($input->post->lastChunk) {
-      setCaptains($player->team);
+      setTeamCaptains($player->team, true);
     }
     echo json_encode(array("sender"=>"importSacocheForm", "saved"=>count($input->post->events), "url"=>$page->url));
   } else {
