@@ -179,8 +179,8 @@
           }
           $out .= '</td>';
           $out .= '<td data-sort="'.$m->bestTime.'">';
-          if ($m->bestTime) {
-            $out .= ms2string($m->bestTime).' '.__('by').' '.$m->bestTimePlayer->title.' ['.$m->bestTimePlayer->team->title.']';
+          if ($m->masterTime) {
+            $out .= ms2string($m->masterTime).' '.__('by').' '.$m->bestTimePlayer->title.' ['.$m->bestTimePlayer->team->title.']';
           } else {
             $out .= '-';
           }

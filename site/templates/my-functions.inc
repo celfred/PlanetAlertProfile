@@ -1833,6 +1833,7 @@ function setMonster($player, $monster) {
   $tmpCache = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
   if ($tmpCache) {
     // Sets inUt, outUt, lastFightDate.... for $monster
+    $monster->masterTime = $monster->bestTime; // Keep aster time before overriding it below
     foreach ($tmpCache->fields as $f) {
       if ($f->name != 'monster') {
         $monster->$f = $tmpCache->$f;
