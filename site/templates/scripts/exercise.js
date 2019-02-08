@@ -796,7 +796,6 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         $scope.focusInput();
       }
     } else {
-      window.alert('-'+$scope.playerAnswer+'-'+$scope.allCorrections+'-');
       if ($scope.allCorrections.indexOf(submitted) != -1 ) { // Correct answer
         $scope.playerAnswer = '';
         $scope.isFocused = false;
