@@ -13,16 +13,21 @@
   <title>
     <?php
       // All teams (and cache for faster access)
-      $template = $templates->get("team");
-      $allTeams = $cache->get('allTeams', $template, function($pages) {
-        return $pages->find("template=team")->sort("title");
-      });
+      if ($user->isSuperuser()) { // Test team is included for debug
+        $allTeams = $pages->find("template=team")->sort("title");
+      } else {
+        /* $cache->delete('allTeams'); // In case we want to clean cache */
+        $template = $templates->get("team");
+        $allTeams = $cache->get('allTeams', $template, function($pages) {
+          return $pages->find("template=team, name!='test-team'")->sort("title");
+        });
+      }
       $allTeamsNames = $allTeams->implode(',', '{name}');
       // All players (and cache for faster access)
       $template = $templates->get("player");
-      //$cache->delete('allPlayers'); // In case we want to clean cache
+      /* $cache->delete('allPlayers'); // In case we want to clean cache */
       $allPlayers = $cache->get("allPlayers", $template, function($pages) {
-        return $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title");
+        return $pages->find("parent.name=players, template=player, team.name!=no-team|test-team")->sort("team->name, title");
       });
       if (isset($input->urlSegment1) && stripos($allTeamsNames, $input->urlSegment1)) {
         echo $page->get("title").' '.strtoupper($input->urlSegment1);
