@@ -293,13 +293,14 @@ $(document).ready(function() {
                 showCancelButton : false,
                 showConfirmButton: false,
                 timer: 500,
+              }).then( result => {
+                if ($defaultHref) {
+                  window.location.href = $defaultHref;
+                } else {
+                  window.location.href = $href;
+                }
               });
             }); 
-          }
-          if ($defaultHref) {
-            window.location.href = $defaultHref;
-          } else {
-            window.location.href = $href;
           }
 				}
 			} else {
