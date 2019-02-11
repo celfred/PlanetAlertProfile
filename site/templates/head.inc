@@ -24,10 +24,10 @@
       }
       $allTeamsNames = $allTeams->implode(',', '{name}');
       // All players (and cache for faster access)
-      $template = $templates->get("player");
       /* $cache->delete('allPlayers'); // In case we want to clean cache */
+      $template = $templates->get("player");
       $allPlayers = $cache->get("allPlayers", $template, function($pages) {
-        return $pages->find("parent.name=players, template=player, team.name!=no-team|test-team")->sort("team->name, title");
+        return $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title");
       });
       if (isset($input->urlSegment1) && stripos($allTeamsNames, $input->urlSegment1)) {
         echo $page->get("title").' '.strtoupper($input->urlSegment1);

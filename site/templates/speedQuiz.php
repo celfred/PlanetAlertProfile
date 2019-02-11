@@ -87,16 +87,17 @@
             $out .= '</div>';
             $out .= '<h4>';
             $out .= '<span class="glyphicon glyphicon-education"></span> '.__("Current record").' : ';
-            if (isset($monster->bestTime) && isset($monster->bestTimePlayer)) {
+            if (isset($monster->bestTime) && $monster->bestTimePlayerId != 0) {
               $monsterBestTime = $monster->bestTime;
             } else {
               $monsterBestTime = 0;
             }
             if ($monsterBestTime != 0) {
-              if ($monster->bestTimePlayer->id == $player->id) {
+              if ($monster->bestTimePlayerId == $player->id) {
                 $out .= '<span id="monsterBestTime" data-ms="'.$monsterBestTime.'">'.ms2string($monsterBestTime).'</span> '.__('by').' <span class="label label-success">YOU !</span>';
               } else {
-                $out .= '<span id="monsterBestTime" data-ms="'.$monsterBestTime.'">'.ms2string($monsterBestTime).'</span> '.__('by').' '.$monster->bestTimePlayer->title.' ['.$monster->bestTimePlayer->team->title.']';
+                $master = $pages->get($monster->bestTimePlayerId);
+                $out .= '<span id="monsterBestTime" data-ms="'.$monsterBestTime.'">'.ms2string($monsterBestTime).'</span> '.__('by').' '.$master->title.' ['.$master->team->title.']';
               }
             } else {
               $out .= '<span id="monsterBestTime" data-ms="'.$monsterBestTime.'">'.__("No record yet.");

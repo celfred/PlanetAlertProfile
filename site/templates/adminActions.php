@@ -24,9 +24,10 @@
             $out .= '<ul>';
             foreach($allMonsters as $m) {
               $out .= '<li>'.$m->title;
-              if ($m->mostTrained) {
+              if ($m->bestTrainedPlayerId != 0) {
+                $bestTrained = $pages->get($m->bestTrainedPlayerId);
                 $bestUt = $m->best;
-                $out .= ' [Current best : '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.'] : '.$bestUt.'UT]';
+                $out .= ' [Current best : '.$bestTrained->title.' ['.$bestTrained->team->title.'] : '.$bestUt.'UT]';
               } else {
                 $out .= ' [-] ';
               }

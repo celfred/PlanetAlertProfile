@@ -340,7 +340,7 @@ function taskExtraAction($player, $task, $real) {
     $player->fighting_power = $player->fighting_power+2;
   }
   if ($player->skills->has("!name=fighter") && $task->is("name~=fight")) {
-    if ($player->find("template=event, task.name~=fight")->count() >= 9) {
+    if ($player->find("template=event, task.name~=fight")->count() > 9) {
       setFighter($player);
     }
     return;
@@ -862,8 +862,8 @@ function setTeamCaptains($team, $real = true) {
 function checkMaster($player) {
   $pages = wire('pages');
   $role = $pages->get("name=master");
-  $nbBestTimes = $pages->count("template=exercise, bestTimePlayer=$player");
-  if (nbBestTimes > 0) {
+  $nbBestTimes = $pages->count("template=exercise, bestTimePlayerId=$player->id");
+  if ($nbBestTimes > 0) {
     $player->skills->add($role);
   } else {
     $player->skills->remove($role);
@@ -1825,15 +1825,67 @@ function setFightsQuality($player, $monster) {
   return array($fightNb, $posNb, $negNb, $quality, $averageLabel, $lastFightDate);
 }
 
+function setMonsterFromCache ($tmpCache, $monster) {
+  $minUt = 20; // Previous training required to be able to fight
+  $spacedFights = 15; // 15 days between fights
+  $fightInterval = new \DateInterval('P15D');
+  // Sets inUt, outUt, lastFightDate.... for $monster
+  $monster->masterTime = $monster->bestTime; // Keep faster time before overriding it below
+  foreach ($tmpCache->fields as $f) {
+    if ($f->name != 'monster') {
+      $monster->$f = $tmpCache->$f;
+    }
+  }
+  // Sets training possibilities
+  $monster->utGain = ($tmpCache->inUt+$tmpCache->outUt);
+  $monster->lastTrainingInterval = wire('datetime')->relativeTimeStr($tmpCache->lastTrainDate);
+  if ($tmpCache->date) {
+    $availableTrainDate = new \DateTime(date("Y-m-d", $tmpCache->date));
+    $today = new \DateTime("today");
+    $monster->waitForTrain = $today->diff($availableTrainDate)->format("%r%a");
+  } else {
+    $monster->waitForTrain = 0;
+  }
+  if ($monster->waitForTrain <= 0) {
+    $monster->isTrainable = 1;
+  } else {
+    $monster->isTrainable = 0;
+    $monster->waitForTrain = abs($monster->waitForTrain);
+  }
+  // Sets fighting possibilities
+  $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
+  if ($tmpCache->lastFightDate != '') {
+    $today = new \DateTime("today");
+    $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
+    $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
+  } else {
+    if ($monster->utGain >= 20) {
+      $monster->waitForFight = -1; 
+    } else {
+      $monster->waitForFight = 100; 
+    }
+    $monster->lastFightInterval = -1;
+  }
+  if ($monster->waitForFight <= 0) {
+    // TODO : Check visualizer ?
+    $monster->isFightable = 0;
+  } else {
+    $monster->isFightable = 0;
+  }
+  return $monster;
+}
+
 function setMonster($player, $monster) {
+  $pages = wire('pages');
   $minUt = 20; // Previous training required to be able to fight
   $spacedFights = 15; // 15 days between fights
   $fightInterval = new \DateInterval('P15D');
   // Prepare monster from player's Cache page
   $tmpCache = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
+  $tmpCache->of(false);
   if ($tmpCache) {
     // Sets inUt, outUt, lastFightDate.... for $monster
-    $monster->masterTime = $monster->bestTime; // Keep aster time before overriding it below
+    $monster->masterTime = $monster->bestTime; // Keep faster time before overriding it below
     foreach ($tmpCache->fields as $f) {
       if ($f->name != 'monster') {
         $monster->$f = $tmpCache->$f;
@@ -1886,6 +1938,30 @@ function setMonster($player, $monster) {
     $monster->isFightable = 0;
     $monster->lastFightInterval = -1;
     $monster->waitForFight = 0;
+  }
+  if ($monster->bestTrainedPlayerId != 0) {
+    $bestTrained = $pages->get($monster->bestTrainedPlayerId);
+    $monster->bestTrainedTitle = $bestTrained->title;
+    $monster->bestTrainedTeam = $bestTrained->team->title;
+    if ($monster->bestTrainedPlayerId == $player->id) {
+      $monster->isBestTrained = true;
+    } else {
+      $monster->isBestTrained = false;
+    }
+  }
+  if ($monster->bestTimePlayerId != 0) {
+    $master = $pages->get($monster->bestTimePlayerId);
+    $monster->bestTimePlayerTitle = $master->title;
+    $monster->bestTimeTeam = $master->team->title;
+    if ($master->id == $player->id) {
+      $monster->isMaster = true;
+    } else {
+      $monster->isMaster = false;
+    }
+  } else {
+    $monster->bestTimePlayerTitle = false;
+    $monster->bestTimeTeam = false;
+    $monster->isMaster = false;
   }
   return $monster;
 }
@@ -2240,7 +2316,7 @@ function setBestPlayer($monster, $player, $utGain) {
   $pages = wire('pages');
   $monster = $pages->get($monster->id);
   $monster->of(false);
-  $monster->mostTrained = $player;
+  $monster->bestTrainedPlayerId = $player->id;
   $monster->best = $utGain;
   $monster->save();
 }

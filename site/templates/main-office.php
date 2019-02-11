@@ -124,6 +124,9 @@
           } else {
             $pickButton = '';
           }
+        } else {
+          $groupList = false;
+          $pickButton = '';
         }
         $out .= '<div id="" class="board panel panel-primary">';
         $out .= '<div class="panel-heading">';
@@ -166,7 +169,7 @@
         $out .= '</div>';
         $out .= '<div class="panel-body">';
         $out .= '<span class="label label-primary">'.__("Fight requests").'</span>';
-        $requests = $allPlayers->find("fightRequest!=''");
+        $requests = $allPlayers->find("fight_request!=0");
         if ($requests->count() > 0) {
           $out .= '<ul>';
           foreach($requests as $r) {
@@ -177,7 +180,7 @@
               $focus = '';
             }
             $out .= '<span class="'.$focus.'">'.$r->title.'</span>';
-            $out .= ' <span class="badge">'.$r->fightRequest->title.'</span>';
+            $out .= ' <span class="badge">'.$pages->get($r->fight_request)->title.'</span>';
             $out .= '</li>';
           }
           $out .= '</ul>';
@@ -189,7 +192,7 @@
         if ($masters->count() > 0) {
           $out .= '<ul>';
           foreach($masters as $m) {
-            $nbBestTimes = $pages->count("template=exercise, bestTimePlayer=$m");
+            $nbBestTimes = $pages->count("template=exercise, bestTimePlayerId=$m->id");
             if ($nbBestTimes > 0) {
               $out .= '<li>';
               if (isset($player)) {

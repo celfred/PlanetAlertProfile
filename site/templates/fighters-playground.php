@@ -112,12 +112,13 @@
       $out .= '</td>';
       $out .= '<td>';
       if ($m->bestTime) {
+        $master = $pages->get($m->bestTimePlayerId);
         $out .= '<span class="label label-success">';
         $out .= ms2string($m->bestTime).' '.__('by').' ';
-        if ($user->name == $m->bestTimePlayer->name) {
+        if ($user->name == $master->name) {
           $out .= 'YOU !';
         } else {
-          $out .= $m->bestTimePlayer->title.' ['.$m->bestTimePlayer->team->title.']';
+          $out .= $master->title.' ['.$master->team->title.']';
         }
         $out .= '</span>';
       } else {

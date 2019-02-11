@@ -35,7 +35,7 @@
       // Set group captains
       setGroupCaptain($player->id);
       // Remove fight request
-      $player->setAndSave('fightRequest', '');
+      $player->setAndSave('fight-request', '0');
       // Record to log file
       $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result;
       $log->save('monster-fights', $logText);
@@ -92,8 +92,9 @@
             $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
             $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
             $msg .= __("Result")." : +". $result.__("UT")."\r\n";
-            $msg .= __("Player's total training on this monster")." : ". $utGain."\r\n";
-            $msg .= __("New best player")." :  ". $best." (".$monster->mostTrained->title.":".$monster->best.")\r\n";
+            $msg .= __("Total training on this monster")." : ". $utGain."\r\n";
+            $bestTrained = $pages->get($monster->bestTrainedPlayerId);
+            $msg .= __("New best player").' :  '. $best.' ('.$bestTrained->title.' ['.$bestTrained->team->title.'] : '.$monster->best.')\r\n';
             $msg .= __("Player's global UT")." : ". $player->underground_training."\r\n";
 
             if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
@@ -117,17 +118,15 @@
           if ($monster->id && $player->id) {
             if ($monster->bestTime == 0 || ($monster->bestTime != 0 && $playerTime < $monster->bestTime)) { // New best time on monster
               $result = __("New Master best time!");
-              if ($monster->bestTimePlayer->id) { $oldBest = $monster->bestTimePlayer; }
+              if ($monster->bestTimePlayerId != 0) { $oldBest = $monster->bestTimePlayerId; }
               $monster->bestTime = $playerTime;
-              $monster->bestTimePlayer = $player;
+              $monster->bestTimePlayerId = $player->id;
               $monster->of(false);
               $monster->save();
               // Save also new player best time
               $tmpPage = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
               if ($tmpPage->bestTime == 0 || ($tmpPage->bestTime != 0 && $playerTime < $tmpPage->bestTime)) {
-                $tmpPage->bestTime = $playerTime;
-                $tmpPage->of(false);
-                $tmpPage->save();
+                $tmpPage->setAndSave('bestTime', $playerTime);
               }
               // Save Master skill
               setMaster($player);

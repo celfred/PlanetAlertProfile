@@ -660,8 +660,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		myData.getData(url).then( function(exerciseData) {
 			$scope.exType = exerciseData['exType'];
 			myData.parseData();
-			// Enable start Fight button
-			$scope.waitForStart = false;
+			$scope.waitForStart = false; // Enable start Fight button
 			// Pick another question
 			$scope.question = myData.pickQuestion('training');
 			$scope.initQuestion();
@@ -959,7 +958,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
   }
 
 	$scope.redirect = function(url) {
-		$window.location.href = url;
+    $window.location.href = url;
 	}
 
   $scope.focusInput = function() {

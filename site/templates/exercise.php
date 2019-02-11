@@ -151,8 +151,9 @@
                   $out .= '</span>';
                   $out .= '<h4>';
                   $out .= '<span class="glyphicon glyphicon-education"></span> '.__("Current record").' → ';
-                  if ($monster->mostTrained && $monster->mostTrained->id) {
-                    $out .= '<span class="label label-primary">'.$monster->best.__('UT by ').$monster->mostTrained->title.' ['.$monster->mostTrained->team->title.']</span>';
+                  if ($monster->bestTrainedPlayerId != 0) {
+                    $bestTrained = $pages->get($monster->bestTrainedPlayerId);
+                    $out .= '<span class="label label-primary">'.$monster->best.__('UT by ').$bestTrained->title.' ['.$bestTrained->team->title.']</span>';
                   } else {
                     $out .= __("No record yet.");
                   }
@@ -296,17 +297,21 @@
     $out .= '</div>';
     $out .= '<div class="col-sm-8 text-left">';
       $out .= "<br /><br />";
-      if ($page->mostTrained && $page->mostTrained->team->name != "no-team" ) { $team = ' ['.$page->mostTrained->team->title.']'; } else { $team = ''; }
+      if ($page->bestTrainedPlayerId != 0) {
+        $bestTrained = $pages->get($page->bestTrainedPlayerId);
+        if ($bestTrained->team->name != "no-team" ) { $team = ' ['.$bestTrained->team->title.']'; } else { $team = ''; }
+      }
       $out .= '<p><i class="glyphicon glyphicon-thumbs-up"></i> Most trained player : ';
-      if ($page->mostTrained) {
-        $out .='<span class="label label-success">'.$page->mostTrained->title.$team.' → '.$page->best.'UT</span>';
+      if ($page->bestTrainedPlayerId) {
+        $out .='<span class="label label-success">'.$bestTrained->title.$team.' → '.$page->best.'UT</span>';
       } else {
         $out .= __('Nobody !');
       }
       $out .= '</p>';
       $out .= '<p><i class="glyphicon glyphicon-thumbs-up"></i> Master time : ';
-      if ($page->bestTime) {
-        $out .= '<span class="label label-success">'.ms2string($page->bestTime).' '.__('by').' '.$page->bestTimePlayer->title.' ['.$page->bestTimePlayer->team->title.']</span>';
+      if ($page->masterTime != 0) {
+        $master = $pages->get($page->bestTimePlayerId);
+        $out .= '<span class="label label-success">'.ms2string($page->masterTime).' '.__('by').' '.$master->title.' ['.$master->team->title.']</span>';
       } else {
         $out .= __('Nobody !');
       }

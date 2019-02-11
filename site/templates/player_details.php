@@ -216,8 +216,9 @@
       </ul>
       <?php 
             echo '<p><span class="label label-danger">'.__("Fight request").'</span> → ';
-        if ($playerPage->fightRequest) {
-          echo $playerPage->fightRequest->title;
+        if ($playerPage->fight_request != 0) {
+          $monster = $pages->get($playerPage->fight_request);
+          echo $monster->title;
         } else {
           echo '-';
         }

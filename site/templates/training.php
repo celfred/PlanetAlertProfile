@@ -6,28 +6,35 @@
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $user->hasRole('teacher') || $player->team->forceHelmet == 1) {
       $helmet = $pages->get("name=memory-helmet");
-      $player = $pages->get("parent.name=players, name=test");
+      if ($user->isSuperuser() || $user->hasRole('teacher')) {
+        $player = $pages->get("parent.name=players, name=test");
+        // Never trained (for admin)
+        $m->isTrainable = 1;
+        $m->lastTrainingInterval = -1;
+        $m->waitForTrain = 0;
+      }
     } else {
-      $helmet = $player->equipment->get('memory-helmet');
+      $helmet = $player->equipment->get("name=memory-helmet");
     }
     if ($helmet) {
       $out = '<div>';
       if (!$input->get->id) { // Display training catalogue
         // Set all available monsters
-        if ($user->isSuperuser()) {
-          $allMonsters = $pages->find("parent.name=monsters, template=exercise, sort=name, include=all");
-        }
-        if ($user->hasRole('teacher')) {
-          $allMonsters = $pages->find("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1, summary!='')")->sort("name");
-        }
         if ($user->hasRole('player')) {
           // Check if player has the Visualizer (or forced by admin)
           if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
             $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
+            $allMonstersNb = $allMonsters->count();
           } else {
             $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0")->sort("name");
             $hiddenMonstersNb = $pages->count("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), special=1");
           }
+          // Check if fightRequest
+          if ($player->fight_request == 0) { $request = false; } else { $request = $player->fight_request; }
+        } else if ($user->hasRole('teacher')) {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1, summary!='')")->sort("name");
+        } else if ($user->isSuperuser()) {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise, sort=name, include=all");
         }
         $out .= '<br />';
         $out .= '<div class="well">';
@@ -72,121 +79,144 @@
           $out .= '</tr>';
           $out .= '</thead>';
           $out .= '<tbody>';
-        $today = new \DateTime("today");
-        foreach($allMonsters as $m) {
-          if ($user->hasRole('player')) {
-            // Prepare player's training possibilities
-            setMonster($player, $m);
-          } else { // Never trained (for admin)
-            $m->isTrainable = 1;
-            $m->lastTrainingInterval = -1;
-            $m->waitForTrain = 0;
-          }
-          $topics = $m->topic->implode(', ', '{title}');
-          $out .= '<tr>';
-          $out .= '<td data-search="'.$topics.','.$m->name.'">';
-          $out .= $m->title;
-          // Find # of days compared to today to set 'New' indicator
-          $date2 = new \DateTime(date("Y-m-d", $m->published));
-          $interval = $today->diff($date2);
-          if ($interval->days < 7) {
-            $out .= ' <span class="badge">'.__("New").'</span>';
-          }
-          if ($m->special) {
-            $out .= ' <span class="badge">'.__("Detected").' !</span>';
-          }
-          $out .= '</td>';
-          $out .= '<td>';
-          $out .= $m->level;
-          $out .= '</td>';
-          $out .= '<td>';
-          $m->summary == '' ? $summary = '-' : $summary = $m->summary;
-          $out .= $summary;
-          if ($user->language->name != 'french') {
+          $today = new \DateTime("today");
+          foreach($allMonsters as $m) {
             $m->of(false);
-            if ($m->summary->getLanguageValue($french) != '') {
-              $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$m->summary->getLanguageValue($french).'"></span>';
+            if ($user->hasRole('player')) {
+              // Prepare player's training possibilities
+              $tmpCache = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$m");
+              if ($tmpCache) {
+                setMonsterFromCache($tmpCache, $m);
+              } else { // No previous monster activity
+                $m->utGain = 0;
+                $m->isTrainable = 1;
+                $m->lastTrainingInterval = '-1';
+                $m->waitForTrain = 0;
+                $m->isFightable = 0;
+                $m->lastFightInterval = -1;
+                $m->waitForFight = 0;
+              }
+              if ($m->bestTrainedPlayerId != 0) {
+                $bestTrained = $pages->get($m->bestTrainedPlayerId);
+                $m->bestTrainedTitle = $bestTrained->title;
+                $m->bestTrainedTeam = $bestTrained->team->title;
+                if ($m->bestTrainedPlayerId == $player->id) {
+                  $m->isBestTrained = true;
+                } else {
+                  $m->isBestTrained = false;
+                }
+              }
+              if ($m->bestTimePlayerId != 0) {
+                $master = $pages->get($m->bestTimePlayerId);
+                $m->bestTimePlayerTitle = $master->title;
+                $m->bestTimeTeam = $master->team->title;
+                if ($m->bestTrainedPlayerId == $player->id) {
+                  $m->isMaster = true;
+                } else {
+                  $m->isMaster = false;
+                }
+              }
+              /* setMonster($player, $m); */
             }
-          }
-          // Data preview
-          $exData = $m->exData;
-          $allLines = preg_split('/$\r|\n/', $sanitizer->entitiesMarkdown($exData));
-          $listWords = prepareListWords($allLines, $m->type->name);
-          $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
-          $out .= '</td>';
-          $out .= '<td>';
-          if ($user->hasRole('player')) {
-            if ($m->utGain > 0) {
-              $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> +'.$m->utGain.'</span> ';
+            $topics = $m->topic->implode(', ', '{title}');
+            $out .= '<tr>';
+            $out .= '<td data-search="'.$topics.','.$m->name.'">';
+            $out .= $m->title;
+            // Find # of days compared to today to set 'New' indicator
+            $date2 = new \DateTime(date("Y-m-d", $m->published));
+            $interval = $today->diff($date2);
+            if ($interval->days < 7) {
+              $out .= ' <span class="badge">'.__("New").'</span>';
+            }
+            if ($m->special) {
+              $out .= ' <span class="badge">'.__("Detected").' !</span>';
+            }
+            $out .= '</td>';
+            $out .= '<td>';
+            $out .= $m->level;
+            $out .= '</td>';
+            $out .= '<td>';
+            $m->summary == '' ? $summary = '-' : $summary = $m->summary;
+            $out .= $summary;
+            if ($user->language->name != 'french') {
+              $m->of(false);
+              if ($m->summary->getLanguageValue($french) != '') {
+                $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$m->summary->getLanguageValue($french).'"></span>';
+              }
+            }
+            // Data preview
+            $exData = $m->exData;
+            $allLines = preg_split('/$\r|\n/', $sanitizer->entitiesMarkdown($exData));
+            $listWords = prepareListWords($allLines, $m->type->name);
+            $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
+            $out .= '</td>';
+            $out .= '<td>';
+            if ($user->hasRole('player')) {
+              if ($m->utGain > 0) {
+                $out .= '<span class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> +'.$m->utGain.'</span> ';
+              } else {
+                $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span> 0</span> ';
+              }
             } else {
-              $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-thumbs-down"></span> 0</span> ';
+              if ($user->isSuperuser()) {
+                $out .= '[Admin]';
+              } else {
+                $out .= '['.__("Teacher").']';
+              }
             }
-          } else {
-            if ($user->isSuperuser()) {
-              $out .= '[Admin]';
+            $out .= '</td>';
+            // Last training session date
+            $out .= '<td>';
+            if ($user->hasRole('player')) {
+              if ($m->lastTrainingInterval != '-1') {
+                $out .= $m->lastTrainingInterval;
+              } else {
+                $out .= '-';
+              }
             } else {
-              $out .= '['.__("Teacher").']';
+              if ($user->isSuperuser()) {
+                $out .= '[Admin]';
+              } else {
+                $out .= '['.__("Teacher").']';
+              }
             }
-          }
-          $out .= '</td>';
-          // Last training session date
-          $out .= '<td>';
-          if ($user->hasRole('player')) {
-            if ($m->lastTrainingInterval != '-1') {
-              $out .= $m->lastTrainingInterval;
+            $out .= '</td>';
+            $out .= '<td>';
+            if ($m->isTrainable == 1) {
+              $out .= ' <a class="btn btn-primary btn-xs" href="'.$m->url.'train"><i class="glyphicon glyphicon-headphones" data-toggle="tooltip" title="'.__("Put the helmet on !").'"></i></a>';
+            } else {
+              if ($m->waitForTrain == 1) { // Trained today
+                $out .= __('Come back tomorrow ;)');
+              } else {
+                $out .= sprintf(__("Come back in %d days ;)"), $m->waitForTrain);
+              }
+            }
+            if ($request == 0) {
+              $msg = sprintf(__("Fight request for %s"), $m->title);
+              $out .= ' <span><a class="btn btn-danger btn-xs simpleConfirm" href="'.$page->url.'" data-href="'.$pages->get("name=submitforms")->url.'?form=fightRequest&monsterId='.$m->id.'&playerId='.$player->id.'" data-msg="'.$msg.'" data-reload="true"><i class="glyphicon glyphicon-education" data-toggle="tooltip" title="'.__("Ask teacher for an in-class Fight!").'"></i></a></span>';
+            } else if ($request == $m->id) {
+              $out .= ' <span class="glyphicon glyphicon-ok-circle" data-toggle="tooltip" title="'.__('Your teacher has already been warned about this request.').'"></span>';
+            }
+            $out .= '</td>';
+            // Find best trained player on this monster
+            $out .= '<td data-sort="'.$m->best.'">';
+            if ($m->bestTrainedPlayerId != 0) {
+              if ($m->isBestTrained) { $class = 'success'; } else { $class = 'primary'; }
+              $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__("UT").' - '.$m->bestTrainedTitle.' ['.$m->bestTrainedTeam.']</span>';
+            } else {
+              $out .= '<span>No record yet.</span>';
+            }
+            $out .= '</td>';
+            $out .= '<td data-sort="'.$m->masterTime.'">';
+            if ($m->bestTimePlayerTitle) {
+              if ($m->isMaster) { $class = 'success'; } else { $class = 'primary'; }
+              $out .= '<span class="label label-'.$class.'">'.ms2string($m->masterTime).' '.__('by').' '.$m->bestTimePlayerTitle.' ['.$m->bestTimeTeam.']</span>';
             } else {
               $out .= '-';
             }
-          } else {
-            if ($user->isSuperuser()) {
-              $out .= '[Admin]';
-            } else {
-              $out .= '['.__("Teacher").']';
-            }
+            $out .= '</td>';
+            $out .= '</tr>';
           }
-          $out .= '</td>';
-          $out .= '<td>';
-          if ($m->isTrainable == 1) {
-            $out .= ' <a class="btn btn-primary btn-xs" href="'.$m->url.'train"><i class="glyphicon glyphicon-headphones" data-toggle="tooltip" title="'.__("Put the helmet on !").'"></i></a>';
-          } else {
-            if ($m->waitForTrain == 1) { // Trained today
-              $out .= __('Come back tomorrow ;)');
-            } else {
-              $out .= sprintf(__("Come back in %d days ;)"), $m->waitForTrain);
-            }
-          }
-          if (!$player->fightRequest && $m->utGain > 1 || $user->hasRole('teacher') || $user->isSuperuser()) { // Limit to 1 request and requires at least 1UT
-            $msg = sprintf(__("Fight request for %s"), $m->title);
-            $out .= ' <span><a class="btn btn-danger btn-xs simpleConfirm" href="'.$page->url.'" data-href="'.$pages->get("name=submitforms")->url.'?form=fightRequest&monsterId='.$m->id.'&playerId='.$player->id.'" data-msg="'.$msg.'" data-reload="true"><i class="glyphicon glyphicon-education" data-toggle="tooltip" title="'.__("Ask teacher for an in-class Fight!").'"></i></a></span>';
-          }
-          if ($player->fightRequest == $m) {
-            $out .= ' <span class="glyphicon glyphicon-ok-circle" data-toggle="tooltip" title="'.__('Your teacher has already been warned about this request.').'"></span>';
-          }
-          $out .= '</td>';
-          // Find best trained player on this monster
-          if ($m->mostTrained) {
-            if (isset($player) && $m->mostTrained == $player) {
-              $class = 'success';
-            } else {
-              $class = 'primary';
-            }
-          }
-          $out .= '<td data-sort="'.$m->best.'">';
-          if ($m->mostTrained) {
-            $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__("UT").' - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
-          } else {
-            $out .= '<span>No record yet.</span>';
-          }
-          $out .= '</td>';
-          $out .= '<td data-sort="'.$m->bestTime.'">';
-          if ($m->masterTime) {
-            $out .= ms2string($m->masterTime).' '.__('by').' '.$m->bestTimePlayer->title.' ['.$m->bestTimePlayer->team->title.']';
-          } else {
-            $out .= '-';
-          }
-          $out .= '</td>';
-          $out .= '</tr>';
-        }
         $out .= '</tbody>';
         $out .= '</table>';
       }

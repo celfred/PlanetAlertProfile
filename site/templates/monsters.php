@@ -171,23 +171,25 @@
         }
         $out .= '</td>';
         // Find best trained player on this monster
-        if ($m->mostTrained) {
-          if (isset($player) && $m->mostTrained == $player) {
+        if ($m->bestTrainedPlayerId != 0) {
+          if (isset($player) && $m->bestTrainedPlayerId == $player->id) {
             $class = 'success';
           } else {
             $class = 'primary';
           }
         }
         $out .= '<td data-sort="'.$m->best.'">';
-        if ($m->mostTrained) {
-          $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__('UT').' - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
+        if ($m->bestTrainedPlayerId != 0) {
+          $bestTrained = $pages->get($m->bestTrainedPlayerId);
+          $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__('UT').' - '.$bestTrained->title.' ['.$bestTrained->team->title.']</span>';
         } else {
           $out .= '-';
         }
         $out .= '</td>';
         $out .= '<td data-sort="'.$m->bestTime.'">';
         if ($m->bestTime) {
-          $out .= ms2string($m->bestTime).' '.__('by').' '.$m->bestTimePlayer->title.' ['.$m->bestTimePlayer->team->title.']';
+          $master = $pages->get($m->bestTimePlayerId);
+          $out .= ms2string($m->bestTime).' '.__('by').' '.$master->title.' ['.$master->team->title.']';
         } else {
           $out .= '-';
         }

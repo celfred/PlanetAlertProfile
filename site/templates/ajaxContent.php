@@ -251,8 +251,10 @@
           if ($p->is("template=exercise")) {
             $out .= '<p>';
             $out .= __('Most trained player').' → ';
-            if ($p->mostTrained) {
-              $out .= '<span class="label label-primary">'.$p->best.' '.__('UT').' - '.$p->mostTrained->title.' ['.$p->mostTrained->team->title.']</span>';
+            if ($p->bestTrainedPlayerId != 0) {
+              $bestTrained = $pages->get($p->bestTrainedPlayerId);
+              bd($p->bestTrainedPlayerId);
+              $out .= '<span class="label label-primary">'.$p->best.' '.__('UT').' - '.$bestTrained->title.' ['.$bestTrained->team->title.']</span>';
             } else {
               $out .= '-';
             }
@@ -261,7 +263,8 @@
             $out .= __('Master time').' → ';
             $out .= '<span class="label label-primary">';
             if ($p->bestTime) {
-              $out .= ms2string($p->bestTime).' '.__('by').' '.$p->bestTimePlayer->title.' ['.$p->bestTimePlayer->team->title.']';
+              $master = $pages->get($p->bestTimePlayerId);
+              $out .= ms2string($p->bestTime).' '.__('by').' '.$master->title.' ['.$master->team->title.']';
             } else {
               $out .= '-';
             }
@@ -715,9 +718,10 @@
           $newBestPlayer = $pages->get($newBestId);
         } else {
           $newBestPlayer = false;
+          $newBestId = 0;
         }
         if (!$confirm) {
-          if (($m->mostTrained && ($newBestId == $m->mostTrained->id && $newBestUt == $m->best)) || (!$m->mostTrained && !$newBestPlayer)) {
+          if (($newBestId == $m->bestTimePlayerId && $newBestUt == $m->best) || ($m->bestTrainedPlayerId == 0 && $newBestId != 0)) {
             $out = '&nbsp;<span class="label label-success">OK</span>';
           } else {
             $out = '&nbsp;<span class="label label-danger">Error</span> : '.$newBestPlayer->title.' → '.$newBestUt.'UT';
@@ -732,7 +736,7 @@
           }
         } else { // Saving new highscore
           $m->of(false);
-          $m->mostTrained = $newBestPlayer;
+          $m->bestTrainedPlayerId = $newBestId;
           $m->best = $newBestUt;
           $m->save();
           $out = '<span class="label label-success">✓ Saved !</span>';

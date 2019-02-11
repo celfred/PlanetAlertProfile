@@ -253,11 +253,8 @@
       $monster = $pages->get($input->get->monsterId);
       if ($monster->is("template=exercise")) {
         // Only 1 pending lesson allowed for a player
-        $already = $player->fightRequest;
-        if (!$player->fightRequest) {
-          $player->fightRequest = $monster;
-          $player->of(false);
-          $player->save();
+        if ($player->fight_request == 0) {
+          $player->setAndSave('fight_request', $monster->id);
         }
         // Notify teacher or admin
         $subject = _('Fight request ').' : ';
@@ -379,7 +376,7 @@
     }
     if (isset($input->get->form) && $input->get->form == 'deleteFightRequest' && $input->get->pageId != '') {
       $player = $pages->get($input->get->pageId);
-      $player->setAndSave('fightRequest', '');
+      $player->setAndSave('fight_request', '0');
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, memory potion...
