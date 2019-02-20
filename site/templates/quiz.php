@@ -195,14 +195,12 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
 } else {
   if ($user->hasRole('player')) {
     $out = '';
-    $player = $pages->get("login=$user->name");
-
     $quiz = pick_question($player);
     $out .= '<div class="well quiz">';
       $logo = $homepage->photo->eq(0)->getCrop('thumbnail');
       $out .= '<img class="monster" src="'.$logo->url.'" />';
       $out .= '<h3>'.__("Defensive preparation !");
-      $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("This is a simple practice area. Click on 'Check answer' below to see the solution. Then you can click on 'Next question'. Stop the session when you're tired :)").'"></span></h3>';
+      $out .= ' <span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("This is a simple practice area. Click on 'Check answer' below to see the solution. Then you can click on 'Next question'. Stop the session when you're tired :)").'"></span></h3>';
       $out .= '<h2 class="alert alert-danger text-center">';
       $out .= $quiz['question'].'&nbsp;&nbsp;';
       $out .= '</h2>';
@@ -221,7 +219,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
           $out .= '<img src="'.$photo->url.'" alt="Photo" />';
         $out .= '</section>';
       }
-      $out .= '<a id="showAnswer" class="label label-info lead">'.__("[Check answer]").'</a>';
+      $out .= '<a id="showAnswer" class="label label-primary">'.__("[Check answer]").'</a>';
       $out .= '<h2 id="answer" class="lead text-center">';
       $out .= $quiz['answer'];
       $out .= ' <a class="btn btn-primary" href="'.$page->url.'">'.__("Next question").'</a>';

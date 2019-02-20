@@ -30,6 +30,25 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 - Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
 
 
+## [v0.8.0] - [21/02/2019]
+Major code refactoring and minor bug fixes.
+
+[Fixed]
+- Avoid losing Master role when setting a new best time
+
+[Changed]
+- Scoreboards are contextual to logged-in player
+- Player can see his or her position in team or gloabl scoreboards
+- Monster tables show less information
+- Remove free rate information for no-team players
+- Paginate no-team players
+- Load only last 30 days history in player's profile (and a button allows to load complete history)
+
+[Backend]
+- New Integer field bestTrainedPlayerId (replacing mostTrained page filed)
+- New Integer field bestTimePlayerId
+ 
+
 ## [v0.7.2] - [14/01/2019]
 Code optimization and minor bug fixes or features.
 

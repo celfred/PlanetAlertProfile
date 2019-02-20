@@ -1,12 +1,10 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
-  $team = $pages->get("parent.name=teams, name=$input->urlSegment1");
-  $rank = $team->rank->index;
-  if ($team->name != 'no-team') {
-    $allPlayers = $allPlayers->find("team=$team")->sort("-karma");
-  } else {
-    $allPlayers = $pages->find("team=$team")->sort("-karma");
+  $rank = $selectedTeam->rank->index;
+  if ($user->isLoggedin()) {
+    $allPlayers = getAllPlayers($user, false);
+    echo $allPlayers->count();
   }
 
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
@@ -18,15 +16,16 @@
 
   $out = '';
   // Decisions menu (via ajax)
-  $out .= '<div id="ajaxDecision" data-href="'.$pages->get('name=ajax-content')->url.'" data-id="decision"></div>';
-  $out .= '<div id="showInfo" data-href="'.$pages->get('name=ajax-content')->url.'"></div>';
+  $ajaxContentUrl = $pages->get("name=ajax-content")->url;
+  $out .= '<div id="ajaxDecision" data-href="'.$ajaxContentUrl.'" data-id="decision"></div>';
+  $out .= '<div id="showInfo" data-href="'.$ajaxContentUrl.'"></div>';
 
   if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
     showScores($allTeams);
   }
 
   if ($allPlayers->count() > 0) {
-    $dangerPlayers = $pages->find("parent.name=players, team=$team, (HP<=15), (coma=1)")->sort("coma, HP");
+    $dangerPlayers = $allPlayers->find("(HP<=15), (coma=1)")->sort("coma, HP");
     $out .= '<div class="col-sm-4">';
       // Help needed
       $out .= '<div id="" class="board panel panel-primary">';
@@ -115,12 +114,12 @@
       }
 
       // Groups
-      if ($allPlayers->count() > 0 && $team->name != 'no-team') {
-        $allGroups = groupScores($team);
+      if ($allPlayers->count() > 0 && $selectedTeam->name != 'no-team') {
+        $allGroups = groupScores($selectedTeam);
         if (isset($allGroups)) {
           $groupList = $allGroups->implode(', ', '{id}');
           if ($groupList && ($user->isSuperuser() || $user->hasRole('teacher'))) {
-            $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'" data-team="'.$team.'">Pick 1!</a>';
+            $pickButton = ' <a class="btn btn-danger btn-sm pickFromList" data-list="'.$groupList.'" data-team="'.$selectedTeam.'">Pick 1!</a>';
           } else {
             $pickButton = '';
           }
@@ -138,7 +137,7 @@
           foreach($allGroups as $group) {
             $out .= '<li>';
             if ($user->isSuperuser() || $user->hasRole('teacher')) {
-              $out .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');" data-team="'.$team.'">';
+              $out .= '<p class="pickFromList" data-list="'.$group->id.'" data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');" data-team="'.$selectedTeam.'">';
             } else {
               $out .= '<p data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
             }

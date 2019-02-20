@@ -4,10 +4,10 @@
   $out = '';
 
   if ($user->isGuest()) {
-    $allMonsters = $page->children->sort("level, name");
+    $allMonsters = $page->children->sort("name");
   } else {
     if ($user->isSuperuser()) {
-      $allMonsters = $page->children("include=all")->sort("level, name");
+      $allMonsters = $page->children("include=all")->sort("name");
     }
     if ($user->hasRole('teacher')) {
       $allMonsters = $page->children("(created_users_id=$user->id), (exerciseOwner.singleTeacher=$user, exerciseOwner.publish=1)")->sort("level, name");
@@ -65,9 +65,7 @@
     echo '</h4>';
     echo '</div>';
   } else {
-    echo '<div>';
-    echo '<h4>'.$page->summary.'</h4>';
-    echo '</div>';
+    echo '<h2 class="text-center">'.__("Planet Alert Monsters/Exercises").'</h2>';
   }
 
 
@@ -95,13 +93,9 @@
       echo '<th></th>';
     }
     ?>
-    <th></th>
     <th><?php echo __('Name'); ?></th>
-    <th><?php echo __('Topic'); ?></th>
     <th><?php echo __('Level'); ?></th>
-    <!-- <th>Type</th> -->
-    <th><?php echo __('Summary'); ?></th>
-    <th><?php echo __('# of words'); ?></th>
+    <th style="width:250px"><?php echo __('Summary'); ?></th>
     <th><?php echo __('Most trained player'); ?></th>
     <th><?php echo __('Master time'); ?></th>
     </tr>
@@ -109,6 +103,7 @@
   <tbody>
     <?php
       foreach ($allMonsters as $m) {
+        $topics = $m->topic->implode(', ', '{title}');
         $out .= '<tr>';
         if ($m->image) {
           $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
@@ -121,8 +116,9 @@
           $out .= '<a class="pdfLink btn btn-info btn-xs" href="'.$page->url.'?id='.$m->id.'&thumbnail=1&pages2pdf=1">[PDF Image]</a>';
           $out .= '</td>';
         }
-        $out .= '<td>'. $mini .'</td>';
-        $out .= '<td>';
+        /* $out .= '<td>'. $mini .'</td>'; */
+        $out .= '<td data-search="'.$topics.','.$m->name.'">';
+        $out .= $mini;
         if ($m->is(Page::statusUnpublished)) {
           $out .= '<span style="text-decoration: line-through">'.$m->title.'</span>';
         } else {
@@ -130,47 +126,31 @@
         }
         $out .= '';
         $out .= '</td>';
-        $out .= '<td>';
-        $out .= '<span class="label label-default">'.$m->topic->implode(', ', '{title}').'</span>';
-        $out .= '</td>';
         $out .= '<td>'.$m->level.'</td>';
-        if ($user->language->name != 'french') {
-          $m->of(false);
-          $m->summary == '' ? $summary = '-' : $summary = $m->summary;
-          $out .= '<td>'.$summary;
+        $out .= '<td>';
+        $m->of(false);
+        if ($m->summary == '') {
           if ($m->summary->getLanguageValue($french) != '') {
-            $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.$m->summary->getLanguageValue($french).'"></span></td>';
+            $out .= $m->summary->getLanguageValue($french);
+          } else {
+            $out .= '-';
           }
         } else {
-          $out .= '<td>'.$m->summary.'</td>';
+          $out .= $m->summary;
+          if ($user->language->name != 'french') {
+            $m->of(false);
+            if ($m->summary->getLanguageValue($french) != '') {
+              $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$m->summary->getLanguageValue($french).'"></span>';
+            }
+          }
         }
-        // Count # of words
+        // Data preview
         $exData = $m->exData;
         $allLines = preg_split('/$\r|\n/', $sanitizer->entitiesMarkdown($exData));
-        /* Unused because triggers a bug with tooltip display */
-        /* $out .= '<td data-sort="'.count($allLines).'">'; */
-        $out .= '<td>';
-        if ($m->type) {
-          $listWords = prepareListWords($allLines, $m->type->name);
-          switch ($m->type->name) {
-            case 'translate' :
-              $out .= count($allLines).' '.__("words");
-              break;
-            case 'quiz' :
-              $out .= count($allLines).' '.__("questions");
-              break;
-            case 'image-map' :
-              $out .= count($allLines).' '.__("words");
-              break;
-            case 'jumble' :
-              $out .= count($allLines).' '.__("sentences");
-              break;
-            default : continue;
-        }
+        $listWords = prepareListWords($allLines, $m->type->name);
         $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
-        }
         $out .= '</td>';
-        // Find best trained player on this monster
+        // Most trained player
         if ($m->bestTrainedPlayerId != 0) {
           if (isset($player) && $m->bestTrainedPlayerId == $player->id) {
             $class = 'success';

@@ -13,7 +13,7 @@
 <?php } ?>
 
 <footer class="text-center">
-  <p>Planet Alert v0.7.2dev
+  <p>Planet Alert v0.8.0dev
     &nbsp;&copy; <?php echo date("Y"); ?> FL 
     &nbsp;-&nbsp;
     Powered by <a href="http://processwire.com">ProcessWire</a> CMS (v<?php echo $config->version; ?>)
@@ -37,11 +37,11 @@
 ?>
   <script src="<?php echo $config->urls->templates?>bower_components/jquery/dist/jquery.min.js"></script>
   <script src="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-  <?php if ($page->is("template!=newsboard")) { ?>
-    <script src="<?php echo $config->urls->templates?>bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
-    <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.min.js'></script>
-    <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.css">
-  <?php } ?>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/dt-1.10.18/datatables.min.css"/>
+  <script src="<?php echo $config->urls->templates?>bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.18/datatables.min.js"></script>
+  <script type='text/javascript' src='<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.min.js'></script>
+  <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/sweetalert2/dist/sweetalert2.css">
   <?php if ($page->is("template=hall-of-fame|visualizer")) { ?>
     <script src="<?php echo $config->urls->templates?>bower_components/masonry/dist/masonry.pkgd.min.js"></script>
   <?php } ?>

@@ -313,6 +313,9 @@ $(document).ready(function() {
 		$this = $(this);
     $hide = $this.attr('data-hide-feedback');
     $disable = $this.attr("data-disable");
+    $targetId = $this.attr("data-targetId");
+    $targetEl = $('#'+$targetId);
+    if ($targetEl) { $targetEl.html(lang.loading); }
     var href = $this.attr('data-href');
     if ($this.next().hasClass("ajaxFeedback")) {
       $this.next().remove();
@@ -320,7 +323,14 @@ $(document).ready(function() {
     $that = $('<span class="ajaxFeedback"> '+lang.loading+'</span>').insertAfter($this);
     $.get(href, function(data) { 
       if (data) {
-        $that.html(data);
+        if ($targetId) {
+          $targetEl.html(data);
+          if ($targetId == 'historyPanel') {
+            initTables();
+          }
+        } else {
+          $that.html(data);
+        }
       } else {
         $that.html(' '+lang.saved);
       }
@@ -1306,7 +1316,12 @@ $(document).ready(function() {
 	}
 	function getContentFromAjax(url, el) {
 		var id = el.attr('data-id');
-    $.get(url+'?id='+id+'&randSeed='+Math.random(), function(data) { 
+    if (url.indexOf('?') != -1) {
+      url = url+'&id='+id+'&randSeed='+Math.random();
+    } else {
+      url = url+'?id='+id+'&randSeed='+Math.random();
+    }
+    $.get(url, function(data) { 
 			el.html(data); 
 			el.children('[data-toggle="tooltip"]').tooltip();
 			initTables();
@@ -1378,13 +1393,23 @@ var initTables = function() {
     paging: false,
     order: [[ 0, "asc" ]],
   });
-  $('#teamTable').DataTable({
-    paging: false,
-    searching: false,
-    columnDefs: [{ "orderable": false, "targets": 1 },
-      { "orderable": false, "targets": 4}],
-    order: [[ 3, "desc" ]],
-  });
+  if ($('#teamTable').length > 0 && $('.MarkupPagerNav').length > 0) { // No-team table is sorted on reputation column
+    $('#teamTable').DataTable({
+      paging: false,
+      searching: false,
+      columnDefs: [{ "orderable": false, "targets": 1 },
+        { "orderable": false, "targets": 4}],
+      order: [[ 7, "desc" ]],
+    });
+  } else {
+    $('#teamTable').DataTable({
+      paging: false,
+      searching: false,
+      columnDefs: [{ "orderable": false, "targets": 1 },
+        { "orderable": false, "targets": 4}],
+      order: [[ 3, "desc" ]],
+    });
+  }
   var adminTable = $('#adminTable').DataTable({
     dom: 't',
     paging: false,
@@ -1398,7 +1423,7 @@ var initTables = function() {
   });
   var monstersTable = $('#monstersTable').DataTable({
     lengthMenu: [ [25, 50, -1], [25, 50, lang.all] ],
-    order: [[ 2, "asc"], [0, "asc"]],
+    order: [[ 1, "asc"], [0, "asc"]],
     orderCellsTop: true
   });
   var loggedTable = $('#loggedTable').DataTable({

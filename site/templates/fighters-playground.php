@@ -92,7 +92,7 @@
       $out .= '</td>';
       $out .= '<td class="">';
         if ($validFights >= 1) {
-          $out .= '<a class="btn btn-xs btn-primary" href="'.$pages->get("name=speed-quiz")->url.$m->id.'">'.__("Start a Speed Quiz !").'</a>';
+          $out .= '<a class="btn btn-xs btn-primary" href="'.$pages->get("name=speed-quiz")->url.$m->id.'"><span class="glyphicon glyphicon-time" data-toggle="tooltip" title="'.__("Start a Speed Quiz !").'"></span></a>';
           if ($user->isSuperuser() || $user->hasRole('teacher')) {
             $out .= ' <a class="btn btn-xs btn-primary" href="'.$pages->get("name=speed-quiz")->url.$m->id.'">'.__("Teacher's access").'</a>';
           }

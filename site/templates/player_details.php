@@ -1,20 +1,11 @@
 <?php namespace ProcessWire;
   $playerPage = $pages->get("template=player,name=".$input->urlSegment2);
   $playersTotalNb = $pages->count("template=player,team=$playerPage->team");
-  if ($playerPage->places) {
-    $playerPlacesNb = $playerPage->places->count();
-  } else {
-    $playerPlacesNb = 0;
-  }
-  if ($playerPage->people) {
-    $playerPeopleNb = $playerPage->people->count();
-  } else {
-    $playerPeopleNb = 0;
-  }
+  $playerPlacesNb = $playerPage->places->count();
+  $playerPeopleNb = $playerPage->people->count();
   $playerNbEl = $playerPlacesNb+$playerPeopleNb;
-  $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
-  $rightInvasions = $allEvents->find("task.name=right-invasion")->count();
-  $wrongInvasions = $allEvents->find("task.name=wrong-invasion")->count();
+  $rightInvasions = $pages->find("has_parent=$playerPage, parent.name=history, task.name=right-invasion")->count();
+  $wrongInvasions = $pages->find("has_parent=$playerPage, parent.name=history, task.name=wrong-invasion")->count();
 
   $karma = $playerPage->yearlyKarma;
   if (!$karma) $karma = 0;
@@ -171,14 +162,10 @@
           if ($playerPage->equipment->count > 0) {
             foreach ($playerPage->equipment as $equipment) {
               if ($equipment->image) {
-                if ($equipment->image->width() > $equipment->image->height()) {
-                  $thumb = $equipment->image->getCrop('small')->url;
-                } else {
-                  $thumb = $equipment->image->getCrop('thumbnail')->url;
-                }
+                $thumb = $equipment->image->getCrop('small')->url;
                 echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
                 if ($equipment->name == "memory-helmet") { // Direct link to training zone
-                  echo '<a href="'.$pages->get('name=underground-training')->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                  echo '<a href="'.$trainingZone->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
                 } else if ($equipment->name == "electronic-visualizer") { // Direct link to Visualizer page
                   echo '<a href="'.$pages->get("name=visualizer")->url.'" title="Use the '.$equipment->title.'"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
                 } else if ($equipment->name == "book-knowledge-item") { // Direct link to Visualizer page
@@ -215,13 +202,14 @@
       ?>
       </ul>
       <?php 
-            echo '<p><span class="label label-danger">'.__("Fight request").'</span> → ';
+        echo '<p><span class="label label-danger">'.__("Fight request").'</span> → ';
         if ($playerPage->fight_request != 0) {
           $monster = $pages->get($playerPage->fight_request);
           echo $monster->title;
         } else {
-          echo '-';
+          echo __('No request');
         }
+        echo '</p>';
       ?>
     </div>
     <?php 
@@ -241,7 +229,7 @@
 <div class="row">
   <div class="panel panel-success">
     <div class="panel-heading">
-      <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> <?php echo __("Free elements"); ?> : <?php echo $playerPlacesNb+$playerPeopleNb; ?></span></h4>
+      <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> <?php echo __("Free elements"); ?> : <?php echo $playerNbEl; ?></span></h4>
     </div>
     <div class="panel-body">
     <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> <?php echo __("Free places"); ?> </span></h4>
@@ -294,125 +282,67 @@
     <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-list"></span> <?php echo __("The Scoreboards"); ?></span></h4>
     </div>
     <div class="panel-body">
-      <ul>
+      <ul class="list-unstyled col2">
       <?php 
+        // Scoreboards positions
+        $scoreboardRawLink = $pages->get('name=scoreboard')->url;
+        $totalPlayers = $pages->count("parent.name=players, name!=test");
+        $totalTeamPlayers = $pages->count("parent.name=players, name!=test, team=$playerPage->team");
+
+        // Most active (yearlyKarma)
+        list($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb) = setScoreboardNew($playerPage, 'yearlyKarma', 'all', true);
+        $scoreboardLink = $scoreboardRawLink.'?field=yearlyKarma';
+        echo displayPlayerPos($scoreboardLink, __("Most active"), $playerGlobalPos, $playerTeamPos, $totalGlobalPlayersNb, $totalTeamPlayersNb);
+
         // Most influential (reputation)
-        list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'reputation');
-        if ($playerPos) {
-          if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=reputation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Most influential').' : '.$playerPos.'/'.$totalPlayers.' '.$star.'</p></li>';
-        } else {
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=reputation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Most influential').' : ';
-          echo __('No ranking.');
-          echo '</p></li>';
-        }
+        list($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb) = setScoreboardNew($playerPage, 'reputation', 'all', true);
+        $scoreboardLink = $scoreboardRawLink.'?field=reputation';
+        echo displayPlayerPos($scoreboardLink, __("Most influential"), $playerGlobalPos, $playerTeamPos, $totalGlobalPlayersNb, $totalTeamPlayersNb);
+
         // Greatest # of places (places)
-        list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'places');
-        if ($playerPos) {
-          if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Greatest # of places').' : '.$playerPos.'/'.$totalPlayers.' '.$star.'</p></li>';
-        } else {
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Greatest # of places').' : ';
-          echo __('No ranking.');
-          echo '</p></li>';
-        }
+        list($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb) = setScoreboardNew($playerPage, 'places', 'all', true);
+        $scoreboardLink = $scoreboardRawLink.'?field=places';
+        echo displayPlayerPos($scoreboardLink, __("Greatest # of places"), $playerGlobalPos, $playerTeamPos, $totalGlobalPlayersNb, $totalTeamPlayersNb);
+        
         // Greatest # of people (people)
-        list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'people');
-        if ($playerPos) {
-          if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Greatest # of people').' : '.$playerPos.'/'.$totalPlayers.' '.$star.'</p></li>';
-        } else {
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Greatest # of people').' : ';
-          echo __('No ranking.');
-          echo '</p></li>';
+        if ($playerPage->rank && $playerPage->rank->is("index>=8")) {
+          list($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb) = setScoreboardNew($playerPage, 'people', 'all', true);
+          $scoreboard = $scoreboardRawLink.'?field=people';
+          echo displayPlayerPos($scoreboardLink, __("Greatest # of people"), $playerGlobalPos, $playerTeamPos, $totalGlobalPlayersNb, $totalTeamPlayersNb);
         }
+        
         // Best warrior (fighting_power)
-        list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'fighting_power');
-        if ($playerPos) {
-          if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Best warriors').' : '.$playerPos.'/'.$totalPlayers.' '. $star.'</p></li>';
-        } else {
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Best warriors').' : ';
-          echo __('No ranking.');
-          echo '</p></li>';
-        }
+        list($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb) = setScoreboardNew($playerPage, 'fighting_power', 'all', true);
+        $scoreboardLink = $scoreboardRawLink.'?field=fighting_power';
+        echo displayPlayerPos($scoreboardLink, __("Best warriors"), $playerGlobalPos, $playerTeamPos, $totalGlobalPlayersNb, $totalTeamPlayersNb);
+        
         // Best donators (donation)
-        list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'donation');
-        if ($playerPos) {
-          if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Best donators').' : '.$playerPos.'/'.$totalPlayers.' '.$star.'</p></li>';
-        } else {
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Best donators').' : ';
-          echo __('No ranking.');
-          echo '</p></li>';
-        }
+        list($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb) = setScoreboardNew($playerPage, 'donation', 'all', true);
+        $scoreboardLink = $scoreboardRawLink.'?field=donation';
+        echo displayPlayerPos($scoreboardLink, __("Best donators"), $playerGlobalPos, $playerTeamPos, $totalGlobalPlayersNb, $totalTeamPlayersNb);
+        
         // Most trained (underground_training)
-        if ($playerPage->underground_training) {
-          list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'underground_training');
-          if ($playerPos) {
-            if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
-            echo '<li>';
-            echo '<p>';
-            echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-            echo __('Most trained').' : '.$playerPos.'/'.$totalPlayers.' '.$star;
-            echo '</p></li>';
-          } else {
-            echo '<li>';
-            echo '<p>';
-            echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-            echo __('Most trained').' : ';
-            echo __('No ranking.');
-            echo '</p></li>';
-          }
-        }
+        list($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb) = setScoreboardNew($playerPage, 'underground_training', 'all', true);
+        $scoreboardLink = $scoreboardRawLink.'?field=underground_training';
+        echo displayPlayerPos($scoreboardLink, __("Most trained"), $playerGlobalPos, $playerTeamPos, $totalGlobalPlayersNb, $totalTeamPlayersNb);
 
         // Most active groups
-        list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'group');
-        if ($playerPos) {
-          if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=group"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Most active groups').' : '.$playerPos.'/'.$totalPlayers.' '.$star;
-          echo '</p></li>';
-        } else {
-          echo '<li>';
-          echo '<p>';
-          echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
-          echo __('Most active groups').' : ';
-          echo __('No ranking.');
-          echo '</p></li>';
-        }
+        /* list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($playerPage, 'group'); */
+        /* if ($playerPos) { */
+        /*   if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; } */
+        /*   echo '<li>'; */
+        /*   echo '<p>'; */
+        /*   echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=group"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> '; */
+        /*   echo __('Most active groups').' : '.$playerPos.'/'.$totalPlayers.' '.$star; */
+        /*   echo '</p></li>'; */
+        /* } else { */
+        /*   echo '<li>'; */
+        /*   echo '<p>'; */
+        /*   echo '<a href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> '; */
+        /*   echo __('Most active groups').' : '; */
+        /*   echo __('No ranking.'); */
+        /*   echo '</p></li>'; */
+        /* } */
       ?>
       </ul>
     </div>
@@ -472,14 +402,19 @@
         <div class="panel-heading">
           <h4>
             <?php 
-              echo __('History');
+              echo __('History').' ';
+              echo __('[for the last 30 days]').' ';
               if ($user->isSuperuser() || ($user->hasRole('teacher') && $playerPage->team->teacher->has("id=$user->id"))) {
                 echo ' <a target="blank" href="'.$adminActions->url.'recalculate/'.$playerPage->id.'">'.__("[Edit history]").'</a>';
+              }
+              if ($user->name == $playerPage->name) {
+                // TODO : Ajax reload of complete history
+                echo '<a href="#" data-href="'.$pages->get('name=ajax-content')->url.'?id=history&limit=0&playerId='.$playerPage->id.'" data-targetId="historyPanel" data-hide-feedback="true" class="simpleAjax btn btn-xs btn-danger">'.__("Reload complete history").'</a>';
               }
             ?>
           </h4>
         </div>
-        <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="history&playerId=<?php echo $playerPage->id; ?>">
+        <div id="historyPanel" class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="history&limit=30&playerId=<?php echo $playerPage->id; ?>">
           <p class="text-center"><img src="<?php echo $config->urls->templates; ?>img/hourglass.gif"></p>
         </div>
       </div>

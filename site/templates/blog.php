@@ -52,8 +52,8 @@ namespace ProcessWire;
         if ($user->language->name != 'french') {
           $n->of(false);
           if ($n->body->getLanguageValue($french) != '') {
-            echo '<a class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
-            echo '<div class="collapse" id="collapseDiv">';
+            echo '<a class="" data-toggle="collapse" href="#collapseDiv'.$n->id.'" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
+            echo '<div class="collapse" id="collapseDiv'.$n->id.'">';
             echo '<div class="well">';
             echo nl2br($n->body->getLanguageValue($french));
             echo '</div>';
@@ -64,7 +64,7 @@ namespace ProcessWire;
          </div>
          <?php
          if ($user->isSuperuser()) {
-           if ( $n->publish == 0 ) {
+           if ($n->publish == 0) {
             $checked = '';
            } else {
             $checked = 'checked="checked"';

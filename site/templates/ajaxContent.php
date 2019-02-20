@@ -292,13 +292,15 @@
           $out .= '<div class="">';
             $out .= $mini;
             if ($p->is("template=place|people")) {
-              // Find element's # of owners
-              $out .= '<div class="alert alert-info">';
-              $p = setOwners($p, $currentPlayer);
-              $out .= '<span class="">'.__("Free rate").' : ['.$p->owners->count().'/'.$p->teamRate.']</span> ';
-              $out .= progressbar($p->owners->count(), $p->teamRate);
-              if ($p->completed == 1) { $out .= '<span class="badge">'.__("Congratulations !").'</span>'; }
-              $out .= '</div>';
+              if ($currentPlayer->team->is("name!=no-team")) {
+                // Find element's # of owners
+                $out .= '<div class="alert alert-info">';
+                $p = setOwners($p, $currentPlayer);
+                $out .= '<span class="">'.__("Free rate").' : ['.$p->owners->count().'/'.$p->teamRate.']</span> ';
+                $out .= progressbar($p->owners->count(), $p->teamRate);
+                if ($p->completed == 1) { $out .= '<span class="badge">'.__("Congratulations !").'</span>'; }
+                $out .= '</div>';
+              }
             }
           $out .= '</div>';
         $out .= '</div>';
@@ -355,7 +357,11 @@
               }
               echo '</li>';
             }
-            echo '<li class="label label-danger">'.sprintf(__("You have NEVER trained on %d monsters"), $tmpPage->index).'</li>';
+            if ($tmpPage->index > 0) {
+              echo '<li class="label label-danger">'.sprintf(__("You have NEVER trained on %d monsters"), $tmpPage->index).'</li>';
+            } else {
+              echo '<li class="label label-success">'.__("You have trained on ALL monsters !").'</li>';
+            }
             echo '</ul>';
           } else {
             echo "<p>".__("You have never used the Memory Helmet.")."</p>";
@@ -456,7 +462,13 @@
         $playerId = $input->get('playerId');
         $playerPage = $pages->get($playerId);
         $headTeacher = getHeadTeacher($playerPage);
-        $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
+        if ($input->get->limit == 30) {
+          $limitDate  = new \DateTime("-30 days");
+          $limitDate = strtotime($limitDate->format('Y-m-d'));
+          $allEvents = $playerPage->child("name=history")->find("template=event, date>$limitDate, sort=-date");
+        } else {
+          $allEvents = $playerPage->child("name=history")->find("template=event, sort=-date");
+        }
         $allCategories = new PageArray();
         foreach ($allEvents as $e) {
           if (isset($e->task->category)) {

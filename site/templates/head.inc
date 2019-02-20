@@ -4,7 +4,7 @@
 <head>
   <?php
     date_default_timezone_set('Europe/Paris');
-
+    $testPlayer = $pages->get("name=test, template=player, parent.name=players");
     if ($input->get->logout == 1) {
       $session->logout();
       $session->redirect('./');
@@ -23,16 +23,12 @@
         });
       }
       $allTeamsNames = $allTeams->implode(',', '{name}');
-      // All players (and cache for faster access)
-      /* $cache->delete('allPlayers'); // In case we want to clean cache */
-      $template = $templates->get("player");
-      $allPlayers = $cache->get("allPlayers", $template, function($pages) {
-        return $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title");
-      });
-      if (isset($input->urlSegment1) && stripos($allTeamsNames, $input->urlSegment1)) {
-        echo $page->get("title").' '.strtoupper($input->urlSegment1);
-      } else {
+      if (isset($input->urlSegment1) && stripos($allTeamsNames, $input->urlSegment1) === false) {
         echo $page->get("title");
+        $selectedTeam = false;
+      } else {
+        echo $page->get("title").' '.strtoupper($input->urlSegment1);
+        $selectedTeam = $allTeams->get("name=$input->urlSegment1");
       }
     ?>
   </title>
@@ -48,9 +44,6 @@
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>bower_components/bootstrap/dist/css/bootstrap-theme.min.css" />
 
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/main.css" />
-
-  <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css"> -->
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.css">
 
   <!--[if IE]>
   <link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates?>styles/ie.css" />
@@ -69,6 +62,8 @@
     $monsters = $pages->get("name=monsters");
     $scoreboards = $pages->get("name=the-scoreboards");
     $hall = $pages->get("name=hall-of-fame");
+    $fightingZone = $pages->get('name=fighting-zone');
+    $trainingZone = $pages->get('name=underground-training');
     $playground = $pages->get("name=fighters-playground");
     $book = $pages->get("name=book-knowledge");
     $blog = $pages->get("name=blog");
@@ -76,7 +71,9 @@
     $office = $pages->get("name=main-office");
     $donation = $pages->get("name=makedonation");
     $quiz = $pages->get("name=quiz");
-    $adminActions = $pages->get('name=admin-actions');
+    if ($user->hasRole('teacher') || $user->isSuperuser()) {
+      $adminActions = $pages->get('name=admin-actions');
+    }
     if (!$user->isSuperuser()) {
       $headTeacher = getHeadTeacher($user);
     }
@@ -85,17 +82,17 @@
     $out .= '<div id="masthead" class="masthead">';
 
     if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teacher or Superuser is logged
-      $profilePage = $pages->get("parent.name=teachers, singleTeacher=$user");
       if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
         $allTeams->filter("teacher=$user");
-        $allPlayers->filter("team.teacher=$user");
+        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
+      } else {
+        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
       }
 
       // Official period is checked only when viewing a team page
       if ($page->is("name=main-office|players|quiz|adminTable|world|donation")) {
-        $team = $pages->get("parent.name=teams, name=$input->urlSegment1");
-        $headTeacher = $team->teacher->first();
-        $out .= periodNotification($team, $headTeacher);
+        $headTeacher = $selectedTeam->teacher->first();
+        $out .= periodNotification($selectedTeam, $headTeacher);
       }
       
       $out .= '<ul>';
@@ -263,10 +260,7 @@
     if ($user->hasRole('player')) { // Player's menu
       $player = $pages->get("parent.name=players, template=player, login=$user->name");
       $user->language = $headTeacher->language; // Teacher chooses the language for his students
-      $allTeams = $allTeams->find("teacher=$headTeacher")->sort("title");
-      if ($player->team->name != 'no-team') {
-        $allPlayers = $allPlayers->find("team=$player->team");
-      }
+      $allTeams = $allTeams->find("teacher=$headTeacher")->sort("title"); // Limit to headTeacher's teams
       $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
       $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
       // Avatar
@@ -491,6 +485,9 @@
     $out .= '</div>'; // /masthead
     
     echo $out;
+    
+    // Menu is ready, clean memory
+    $pages->unCacheAll();
   ?>
 
   <div class="container-fluid">

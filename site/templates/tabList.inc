@@ -1,6 +1,7 @@
 <?php namespace ProcessWire;
 
   $out = '';
+  $team = $selectedTeam;
   $currentPeriod = $team->periods;
 
   $out .= '<ul class="tabList list-inline">';

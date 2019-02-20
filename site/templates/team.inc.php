@@ -3,16 +3,8 @@
   <?php
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
-  $team = $allTeams->get("name=$input->urlSegment1");
-  $rank = $team->rank->index;
-  if ($input->urlSegment1 != 'no-team') {
-    $allPlayers->filter("team=$team, sort=group"); // Limit to team players
-  } else {
-    // TODO : Order no-team list by karma (i.e. Reputation)
-    // Unexpected behavior because of JS table sorting
-    $allPlayers = $pages->find("template=player, team.name=no-team, limit=35, sort=-yearlyKarma");
-    $pagination = $allPlayers->renderPager();
-  }
+  $rank = $selectedTeam->rank->index;
+  $allPlayers = getAllPlayers($user, true);
 
   // Nav tabs
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
@@ -42,10 +34,12 @@
       }
       echo '<span class="label label-primary"><span class="glyphicon glyphicon-star"></span> '.__("Group Captains").'</span> → '.$captains;
     echo '</p>';
+  } else {
+    $pagination = $allPlayers->renderPager();
   }
 
   // Players table
-  $allPlayers->sort('-yearlyKarma, -level, -XP');
+  /* $allPlayers->sort('-yearlyKarma, -level, -XP'); */
   $out = '';
 
   if (isset($pagination)) { $out .= $pagination;}
@@ -68,7 +62,7 @@
   $out .= '<th data-toggle="tooltip" title="'.__("Experience").'"><img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
   $out .= __("XP").'</th>';
   $out .= '<th data-toggle="tooltip" title="'.__("Places").'"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
-  if ($team->rank && $team->rank->is("index>=8")) {
+  if ($selectedTeam->rank && $selectedTeam->rank->is("index>=8")) {
     $out .= '<th data-toggle="tooltip" title="'.__("People").'"><span class="glyphicon glyphicon-user"></span></th>';
   }
   $out .= '<th data-toggle="tooltip" title="'.__("Equipment").'"><span class="glyphicon glyphicon-wrench"></span></th>';
@@ -80,21 +74,22 @@
   $out .= '</tr>';
   $out .= '</thead>';
   $out .= '<tbody>';
-  t('global');
   foreach($allPlayers as $player) {
-    $historyPage = $player->child("name=history");
-    if ($player->login == $user->name) {
-      $class = ' class="selected"';
-    } else {
-      $class = '';
-    }
+    $historyPage = $player->get("name=history");
+    $player->login == $user->name ? $class = ' class="selected"' : $class = '';
     if ($user->isLoggedin()) { // Get last recorded events
       $lastEvent = $historyPage->child("sort=-date");
       $prevDate = date("m/d/Y", $lastEvent->date)." 0:0:0"; // Get all events on same day
       $prevEvents = $historyPage->children("template=event, date>=$prevDate");
       $trend = '';
       foreach ($prevEvents as $event) {
-        $event->task = checkModTask($event->task, $headTeacher, $player);
+        if (isset($headTeacher)) { // Get custom info if needed
+          $mod = $event->task->owner->get("singleTeacher=$headTeacher"); // Get personalized infos if needed
+          if ($mod) {
+            if ($mod->title != '') { $event->task = $mod->title; }
+            if ($mod->HP != '') { $event->task->HP = $mod->HP; }
+          }
+        }
         if (($user->hasRole('teacher') || $user->isSuperuser()) && $event->task->is("name=penalty|death")) { $class = 'selected'; }
         $HP = $event->task->HP;
         $title = $event->task->title;
@@ -102,14 +97,15 @@
         $event->summary !== '' ? $summary = ' ('.$event->summary.')' : $summary = '';
         $trend .= '<span class="'.$trendClass.'" data-toggle="tooltip" data-html="true" title="'.strftime("%d/%m", $event->date).': '.$title.$summary.'">&nbsp;</span>';
       }
-      if ($team->is("name!=no-team|cm1")) {
-        // Set hk counter
+      if ($selectedTeam->is("name!=no-team|cm1")) { // Set hk counter (Personal workflow)
         if ($user->hasRole('teacher') || $user->isSuperuser() || $user->name == $player->login) { // Admin is logged or user
           if ($player->hkcount > 0) {
             $hkCount = '&nbsp;<span class="label label-danger">'.$player->hkcount.'</span>';
           } else {
             $hkCount = '';
           }
+        } else {
+          $hkCount = '';
         }
       } else {
         $hkCount = '';
@@ -130,7 +126,7 @@
     } else {
       $tooltipPlaces = '';
     }
-    if ($team->rank && $team->rank->is("index>=8")) {
+    if ($selectedTeam->rank && $selectedTeam->rank->is("index>=8")) {
       // People list
       if ($player->people->count() > 0) {
         $listPeople = '<ul>';
@@ -202,7 +198,7 @@
     }
     $out .= '</td>';
     $out .= '<td '.$tooltipPlaces.'>'. $player->places->count() .'</td>';
-    if ($team->rank && $team->rank->is("index>=8")) {
+    if ($selectedTeam->rank && $selectedTeam->rank->is("index>=8")) {
       $out .= '<td '.$tooltipPeople.'>'. $player->people->count() .'</td>';
     }
     $out .= '<td '.$tooltipEquipment.'>'. $player->equipment->count() .'</td>';
@@ -211,7 +207,7 @@
     $out .= '<td>'. $player->fighting_power .'</td>';
     $out .= '</tr>';
   }
-  bd(t('global'));
+  $pages->unCacheAll();
   $out .= '</tbody>';
   $out .= '</table>';
   if (isset($pagination)) { $out .= $pagination;}

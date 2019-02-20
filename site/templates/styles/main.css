@@ -505,7 +505,9 @@ tr.selected {
 .focus, .focus a {
   background-color: #3175AF;
   color: #FFF;
+  font-weight: bold;
   padding: 2px;
+  border-radius: 5px;
 }
 .news {
   margin: 20px 0px;
@@ -766,9 +768,8 @@ table.adminTable > thead > tr > th {
   display: none;
 }
 #showAnswer {
-  float: left;
-  margin: 15px;
-  font-size: 1.5em;
+  margin: 10px;
+  font-size: 1.2em;
 }
 .quiz img.monster {
   transform: rotate(-8deg);
@@ -1008,7 +1009,13 @@ img.showInfo {
 	right: 50px;
 }
 
-ul.col4 {
+ul.col2, ol.col2 {
+	column-count: 2;
+}
+ul.col3, ol.col3 {
+	column-count: 3;
+}
+ul.col4, ol.col4 {
 	column-count: 4;
 }
 

@@ -1523,19 +1523,6 @@
 
     switch ($action) {
       case 'script' :
-        /* $allEvents = $pages->find("parent.name=history, publish=1, template=event, task.name=ut-action-v|ut-action-vv|fight-v|bought|inactivity, limit=50"); */
-        /* echo $allEvents->count(); */
-        /* foreach ($allEvents as $e) { */
-          /* $e->publish = 0; */
-          /* $e->of(false); */
-          /* $e->save(); */
-        /* } */
-        /* $allEvents = $pages->find("parent.name=history, template=event, task.name=free|buy|ut-action-v|ut-action-vv"); */
-        /* foreach ($allEvents as $e) { */
-        /*   $e->public = 1; */
-        /*   $e->of(false); */
-        /*   $e->save(); */
-        /* } */
         break;
       case 'setCache' :
         if (isset($selectedTeam) && $selectedTeam != '-1') {

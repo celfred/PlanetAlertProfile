@@ -116,9 +116,13 @@
         if ($speedQuiz) {
           $playerTime = $input->post->playerTime;
           if ($monster->id && $player->id) {
-            if ($monster->bestTime == 0 || ($monster->bestTime != 0 && $playerTime < $monster->bestTime)) { // New best time on monster
+            if ($monster->bestTime == 0 || ($monster->bestTime != 0 && $playerTime < $monster->bestTime)) { // New Master best time
               $result = __("New Master best time!");
-              if ($monster->bestTimePlayerId != 0) { $oldBest = $monster->bestTimePlayerId; }
+              if ($monster->bestTimePlayerId != 0 && $player->bestTimePlayerId != $player->id ) { // Keep old best id if changed
+                $oldBest = $monster->bestTimePlayerId;
+              } else {
+                $oldBest = 0;
+              }
               $monster->bestTime = $playerTime;
               $monster->bestTimePlayerId = $player->id;
               $monster->of(false);
@@ -138,7 +142,7 @@
               $task->linkedId = false;
               $linkedId = updateScore($player, $task, true);
               // Old best player loses HP
-              if (isset($oldBest) && $oldBest->id != $player->id) {
+              if (isset($oldBest) && $oldBest != 0 && $oldBest != $player->id) {
                 $task = $pages->get("template=task, name=best-time-lost");
                 $task->comment = __('Best time lost on ').$monster->title;
                 $task->comment .= __("set by").' '.$player->title.' ['.$player->team->title.']';
@@ -149,7 +153,7 @@
               echo '1';
             } else { // Check if new player best time
               $tmpPage = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
-              if ($tmpPage->bestTime == 0 || ($tmpPage->bestTime != 0 && $playerTime < $tmpPage->bestTime)) { // New best time for player
+              if ($tmpPage->bestTime == 0 || ($tmpPage->bestTime != 0 && $playerTime < $tmpPage->bestTime)) { // New personal best time
                 $result = __("New personal best time!");
                 $tmpPage->bestTime = $playerTime;
                 $tmpPage->of(false);

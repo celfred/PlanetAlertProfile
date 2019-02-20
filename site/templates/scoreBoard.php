@@ -1,132 +1,109 @@
 <?php namespace ProcessWire;
 
-  if (!$config->ajax) {
+  if (!$config->ajax) { // Complete scoreboard
     include("./head.inc"); 
-
     $field = $input->get('field');
-    if (!isset($player)) { $player = ''; }
-    list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, -1);
+    if ($field == 'places' || $field == 'people') { $selector = '-'.$field.'.count'; } else { $selector = '-'.$field; }
+    if (isset($player)) { // Get player's positions
+      $playerId = $player->id;
+    } else {
+      $player = false;
+      $playerId = false;
+    }
+    if ($user->isGuest() || $input->urlSegment1 == 'global') {
+      $global = true;
+    } else {
+      $global = false;
+    }
+    if ($global) {
+      $allPlayers = setGlobalScoreboard($field, 35);
+      $input->whitelist("field", $field); // Get parameter for pagination
+      $pagination = $allPlayers->renderPager();
+      if ($player) {
+        list($playerPos, $totalPlayersNb) = setScoreboardNew($player, $field, 'global', true);
+        $posTitle = sprintf(__('You are %1$s/%2$s in this scoreboard.'), $playerPos, $totalPlayersNb);
+      } else {
+        $posTitle = '';
+      }
+    } else {
+      $allPlayers = setTeamScoreboard($player->team->name, $field);
+      $pagination = false;
+      if ($player) {
+        list($playerPos, $totalPlayersNb) = setScoreboardNew($player, $field, 'team', true);
+        $posTitle = sprintf(__('You are %1$s/%2$s in this scoreboard.'), $playerPos, $totalPlayersNb);
+      } else {
+        $posTitle = '';
+      }
+    }
     switch ($field) {
       case 'yearlyKarma' :
-        $title = 'Most influential';
+        $title = __('Most active');
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       case 'reputation' :
-        $title = 'Most influential';
+        $title = __('Most influential');
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       case 'places' :
-        $title = 'Greatest # of places';
+        $title = __('Greatest # of places');
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       case 'people' :
-        $title = 'Greatest # of people';
+        $title = __('Greatest # of people');
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       case 'fighting_power' :
-        $title = 'Best warriors';
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
-        break;
-      case 'equipment' :
-        $title = 'Most equipped';
+        $title = __('Best warriors');
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       case 'donation' :
-        $title = 'Best donators';
+        $title = __('Best donators');
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       case 'underground_training' :
-        $title = 'Most trained';
+        $title = __('Most trained');
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
         break;
       case 'group' :
-        $title = 'Most active groups';
+        $title = __('Most active groups');
         $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $playerPos = false;
         break;
       default : 
         $title = 'Error';
+        $subTitle = '';
+        $playerPos = false;
     }
-
-    if ($user->isLoggedin()) {
-      // Get player's position
-      if ($playerPos) {
-        $pos = '<h3 class="text-center"><span class="label label-success">You are '.$playerPos.'/'.$totalPlayers.' in the \''.$title.'\' score board.</span></h3>';
-      } else {
-        $pos = '<h3 class="text-center"><span class="label label-success">You are not on this score board. Sorry :(</span></h3>';
-      }
-    }
+    $subTitle = ' ['.sprintf(__('Out of %d players'), $allPlayers->getTotal()).']';
   ?>
 
   <div class="row">
-    <?php if (isset($pos)) { echo $pos; } ?>
+    <?php 
+      if (!$global) {
+        echo '<a href="'.$page->url.'global?field='.$field.'" class="btn btn-primary pull-right">'.__("See global scoreboard").'</a>';
+      } else {
+        echo '<a href="'.$page->url.'?field='.$field.'" class="btn btn-primary pull-right">'.__("See team scoreboard").'</a>';
+      }
+      if ($user->isLoggedin()) {
+        echo '<h3 class="text-center">';
+        echo '<span class="label label-primary">'.$posTitle.'</span>';
+        echo '</h3>';
+      }
+      if ($pagination) { echo $pagination; }
+    ?>
     <div class="panel panel-success">
       <div class="panel-heading">
-      <h4 class="panel-title"><?php echo $img .' '. $title; ?></h4>
+      <h4 class="panel-title"><?php echo $img .' '. $title.$subTitle; ?></h4>
       </div>
       <div class="panel-body">
-        <ol>
+        <ol class="col3">
           <?php
-            foreach($topPlayers as $player) {
-              switch ($field) {
-                case 'yearlyKarma' :
-                  $indicator = $player->yearlyKarma;
-                  $tag = 'K.';
-                  break;
-                case 'reputation' :
-                  $indicator = $player->reputation;
-                  $tag = 'rep.';
-                  break;
-                case 'places' :
-                  $indicator = $player->places->count;
-                  $tag = 'places';
-                  break;
-                case 'people' :
-                  $indicator = $player->people->count;
-                  $tag = 'people';
-                  break;
-                case 'fighting_power' :
-                  $indicator = $player->fighting_power;
-                  $tag = 'FP';
-                  break;
-                case 'equipment' :
-                  $indicator = $player->equipment->count;
-                  $tag = 'equipment';
-                  break;
-                case 'donation' :
-                  $indicator = $player->donation;
-                  $tag = 'GC';
-                  break;
-                case 'underground_training' :
-                  $indicator = $player->underground_training;
-                  $tag = 'U.T.';
-                  break;
-                case 'group' :
-                  $indicator = $player->reputation;
-                  $tag = 'rep.';
-                  break;
-                default : 
-                  $title = 'Error';
-              }
-              if ($player->avatar) {
-                $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$player->avatar->getCrop('mini')->url."' alt='avatar' />";
-              } else {
-                $mini = '';
-              }
-              if ($player->login == $user->name || ($field == 'group' && $player->focus == 1)) {
-                $focus = "class='focus'";
-              } else {
-                $focus = "";
-              }
-              if ($player->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$player->team->title.']';}
-              echo '<li><span '. $focus .'>'.$mini.' <a href="'.$player->url.'">'.$player->title.'</a>'.$team.'</span> <span class="badge">'.$indicator.' '.$tag.' </span></li>';
-            }
+            echo displayCompleteScoreboard($allPlayers, $playerId, $field, $input->pageNum);
           ?>
         </ol>
-        <div class="panel-footer">
-          <p class="text-center"><span class="label label-success">Total # of players : <?php echo $totalPlayers; ?></span> If you have a 0 indicator in the selected scoreboard, then you are absent of this list :(</p>
-        </div>
       </div>
     </div>
+    <?php if ($pagination) { echo $pagination; } ?>
   </div>
 
   <?php
@@ -135,167 +112,52 @@
   } else { // Ajax loaded
     $out = '';
     $field = $input->get('id');
-    $player = $pages->get("login=$user->name");
-    $limit = 5;
-    if ($user->hasRole('player')) {
-      list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, false);
-    } else {
-      $player = '';
-      list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = getScoreboard($player, $field, $limit, true);
+    switch($field) {
+      case 'yearlyKarma' : $title = __("Most active players");
+        break;
+      case 'reputation' : $title = __("Most influential players");
+        break;
+      case 'underground_training' : $title = __("Most trained players");
+        break;
+      case 'places' : $title = __("Greatest # of places");
+        break;
+      case 'people' : $title = __("Greatest # of people");
+        break;
+      case 'fighting_power' : $title = __("Best warriors");
+        break;
+      case 'donation' : $title = __("Best donators");
+        break;
+      default : $title = 'todo';
     }
-    if ($prevPlayers != false) { // Player is 'surrounded'
-      $out .= '<ol>';
-      if ($topPlayers->count() > 0) {
-        foreach ($topPlayers as $p) {
-          if ($p->avatar) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
-          } else {
-            $mini = '';
-          }
-          if ($p->login == $user->name) {
-            $focus = "class='focus'";
-          } else {
-            $focus = "";
-          }
-          if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
-          switch($field) {
-            case 'reputation':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' '.__('rep.').'</span></li>';
-              break;
-            case 'places':
-              if ($p->places->count > 1) {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('places').'</span></li>';
-              } else {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('place').'</span></li>';
-              }
-              break;
-            case 'people':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' '.__('people').'</span></li>';
-              break;
-            case 'fighting_power':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' '.__('FP').'</span></li>';
-              break;
-            case 'donation':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' '.__('GC').'</span></li>';
-              break;
-            case 'underground_training':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' '.__('UT').'</span></li>';
-              break;
-            case 'group':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
-              break;
-            default: $out .= 'Error.';
-          }
-        }
+    if ($user->isGuest()) { // Global Scoreboards
+      $playerPos = false;
+      $topPlayers = setGlobalScoreboard($field, 10);;
+      $prevPlayers = false;
+      $nextPlayer = false;
+      $playerId = false;
+      $team = false;
+    } else { // Team Scoreboards
+      $player = $pages->get("login=$user->name");
+      $playerId = $player->id;
+      if ($input->get->type && $input->get->type == 'global') {
+        list($playerPos, $totalPlayersNb, $prevPlayers, $topPlayers, $nextPlayer) = setScoreboardNew($player, $field, 'global');
+        $team = false;
+      } else {
+        list($playerPos, $totalPlayersNb, $prevPlayers, $topPlayers, $nextPlayer) = setScoreboardNew($player, $field, 'team');
+        $team = '['.$player->team->title.']';
       }
-      $out .= '</ol>';
-      $out .= '<hr />';
-      $startIndex = (int) $playerPos-round($limit/2)+1; 
-      $out .= '<ol start="'.$startIndex.'">';
-        if ($prevPlayers->count() > 0) {
-        foreach ($prevPlayers as $p) {
-          if ($p->avatar) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
-          } else {
-            $mini = '';
-          }
-          if ($p->login == $user->name) {
-            $focus = "class='focus'";
-          } else {
-            $focus = "";
-          }
-          if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
-          switch($field) {
-            case 'reputation':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' '.__('rep.').'</span></li>';
-              break;
-            case 'places':
-              if ($p->places->count > 1) {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('places').'</span></li>';
-              } else {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('place').'</span></li>';
-              }
-              break;
-            case 'people':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' '.__('people').'</span></li>';
-              break;
-            case 'fighting_power':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' '.__('FP').'</span></li>';
-              break;
-            case 'donation':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' '.__('GC').'</span></li>';
-              break;
-            case 'underground_training':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' '.__('UT').'</span></li>';
-              break;
-            case 'group':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
-              break;
-            default: $out .= 'Error.';
-          }
-        }
-        }
-      $out .= '</ol>';
-    } else { // No ranking or Top 10
-      $out .= '<ol>';
-      foreach ($topPlayers as $p) {
-        if ($p->avatar) {
-          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
-        } else {
-          $mini = '';
-        }
-        if ($p->login == $user->name) {
-          $focus = "class='focus'";
-        } else {
-          $focus = "";
-        }
-        if ($p->team->name == 'no-team') { $team = ''; } else {$team = ' ['.$p->team->title.']';}
-        switch($field) {
-          case 'reputation':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->reputation.' '.__('rep.').'</span></li>';
-            break;
-          case 'places':
-            if ($p->places->count > 1) {
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('places').'</span></li>';
-            } else {
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->places->count.' '.__('place').'</span></li>';
-            }
-            break;
-          case 'people':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->people->count.' '.__('people').'</span></li>';
-            break;
-          case 'fighting_power':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->fighting_power.' '.__('FP').'</span></li>';
-            break;
-          case 'donation':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->donation.' '.__('GC').'</span></li>';
-            break;
-          case 'underground_training':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a>'.$team.'</span> <span class="badge">'.$p->underground_training.' '.__('UT').'</span></li>';
-            break;
-          case 'group':
-            if (isset($player->group) && $p == $player->group) {
-              $focus = "class='focus'";
-            } else {
-              $focus = "";
-            }
-            $out .= '<li>';
-            $out .= '<span '.$focus.' data-toggle="tooltip" data-html="true" onmouseenter="$(this).tooltip(\'show\');" title="'.$p->members.'">';
-            $out .= $p->title.' ['.$p->team->title.']</span> <span class="badge">'.$p->karma.' K</span>';
-            // Display stars for bonus
-            if ($p->nbBonus > 0) {
-              $out .= '&nbsp;&nbsp;<span class="glyphicon glyphicon-star"></span>';
-              $out .= '<span class="badge">'.$p->nbBonus.'</span>';
-            }
-            $out .= '</p>';
-            $out .= '</li>';
-            break;
-          default: $out .= 'Error.';
-        }
-      }
-      $out .= '</ol>';
     }
-
+    $out .= '<div class="board panel panel-success">';
+    $out .= '  <div class="panel-heading">';
+    $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field='.$field.'"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+    $out .= '  <h4 class="panel-title">';
+    $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
+    $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.__("Your position in this scoreboard").'">'.$playerPos.'</span> '.$team.' '.$title.'</h4>';
+    $out .= '  </div>';
+    $out .= '  <div class="panel-body">';
+    $out .= displaySmallScoreboard($topPlayers, $prevPlayers, $playerPos, $playerId, $field);
+    $out .= '  </div>';
+    $out .= '</div>';
     echo $out;
   }
-  ?>
+?>

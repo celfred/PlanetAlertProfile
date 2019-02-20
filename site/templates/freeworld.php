@@ -1,15 +1,15 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
-  $team = $pages->get("template=team, name=$input->urlSegment1");
-  $rank = $team->rank->index;
+  $rank = $selectedTeam->rank->index;
+
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
     include("./tabList.inc");
   }
+
   $out = '';
-  if ($team->name != 'no-team') {
-    $allPlayers->filter("team=$team"); // Limit to team players
-    $teamRate = setTeamRate($team->id); // Set team stats
+  if ($selectedTeam->name != 'no-team') {
+    $teamRate = setTeamRate($selectedTeam->id); // Set team stats
     $valid = true;
     $individual = false;
   } else { // Individual free world for no-team players
@@ -58,7 +58,7 @@
         }
       }
     } else {
-      $allElements = teamFreeworld($team);
+      $allElements = teamFreeworld($selectedTeam);
       $out .= '<h4 class="text-center">['.__("Team rate").' : '.$teamRate.']';
       $out .= ' <span data-toggle="tooltip" data-html="true" title="'.__("# of players required to complete a place and increase %.").'" class="glyphicon glyphicon-question-sign"></span></h4>';
     }
@@ -74,13 +74,13 @@
     }
     foreach($notCompleted as $el) {
       if ($el->photo) {
-        $thumbImage = $el->photo->eq(0)->getCrop('thumbnail')->url;
+        $thumbImage = $el->photo->eq(0)->getCrop('mini')->url;
       }
       $out .= '<div>';
       $title = '<h3>'.$el->title.'</h3>';
       $title .= '<h4>'.__("Level").' '.$el->level;
       $title .= ', '.$el->GC.__("GC").'</h4>';
-      if ($team->name != 'no-team') {
+      if ($selectedTeam->name != 'no-team') {
         if ($el->teamOwners->count() > 0 && $el->teamOwners->count() < 10) {
           $ownerList = '['.$el->teamOwners->implode(', ', '{title}').']';
         } else {
@@ -92,10 +92,8 @@
         } else {
           $title = '<h4>'.__("Freed by nobody.").'</h4>';
         }
-        if ($el->completed != 1) {
-          $left = $teamRate - $el->teamOwners->count();
-          $title .= '<br /><h4><span class=\'label label-primary\'>'.$left.' '.__('more needed !').'</span></h4>';
-        }
+        $left = $teamRate - $el->teamOwners->count();
+        $title .= '<br /><h4><span class=\'label label-primary\'>'.$left.' '.__('more needed !').'</span></h4>';
       }
       $out .= '<a href="'.$el->url.'" class=""><img class="'.$el->cssClass.'" src="'.$thumbImage.'" data-toggle="tooltip" data-html="true" title="'.$title.'" /></a>';
       $out .= "</div>";
@@ -112,7 +110,7 @@
         $thumbImage = $el->photo->eq(0)->getCrop('thumbnail')->url;
       }
       $out .= '<div>';
-      if ($team->name != 'no-team') {
+      if ($selectedTeam->name != 'no-team') {
         $title = '<h3>'.$el->title.'</h3>';
         $title .= '<h4>'.__("Level").' '.$el->level;
         $title .= ', '.$el->GC.__("GC").'</h4>';
