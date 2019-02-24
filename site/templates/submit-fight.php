@@ -4,6 +4,8 @@
       '::1'
   );
 
+  $adminMail = $users->get("name=admin")->email;
+
   if ($user->isLoggedin() && $user->isSuperuser() == false) {
     if (isset($input->get->form) && $input->get->form == 'fightRequest' && $input->get->playerId != '' && $input->get->result != '' && $input->get->monsterId != '') { // Manage fight requests results
       $player = $pages->get($input->get->playerId);
@@ -87,28 +89,27 @@
             // Notify teacher (or admin)
             $subject = _('Underground Training ').' : ';
             $subject .= $player->title. ' ['.$player->team->title.']';
-            $subject .= ' → +'.$result.__("UT");
+            $subject .= ' - +'.$result.__("UT");
             $subject .= ' ['.$monster->title.']';
-            $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-            $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
-            $msg .= __("Result")." : +". $result.__("UT")."\r\n";
+            $msg = __("Player")." : ".$player->title." [".$player->team->title."]\r\n";
+            $msg .= __("Monster")." : ".$monster->title."\r\n";
+            $msg .= __("Result")." : +".$result.__("UT")."\r\n";
             $msg .= __("Total training on this monster")." : ". $utGain."\r\n";
             $bestTrained = $pages->get($monster->bestTrainedPlayerId);
-            $msg .= __("New best player").' :  '. $best.' ('.$bestTrained->title.' ['.$bestTrained->team->title.'] : '.$monster->best.')\r\n';
-            $msg .= __("Player's global UT")." : ". $player->underground_training."\r\n";
+            $msg .= __("New best player")." :  ". $best." (".$bestTrained->title." [".$bestTrained->team->title."] : ".$monster->best.")\r\n";
+            $msg .= __("Global UT of player")." : ". $player->underground_training;
 
             if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-              $adminMail = $users->get("name=admin")->email;
-              $mail = wireMail();
-              $mail->from($adminMail);
-              $mail->subject($subject);
-              $mail->body($sanitizer->entities1($msg));
+              $message = $mail->new();
+              $message->from($adminMail, "Planel Alert");
               if (isset($headTeacher) && $headTeacher->email != '') {
-                $mail->to($headTeacher->email, 'Planet Alert');
+                $message->to($headTeacher->email);
               } else {
-                $mail->to($adminMail, 'Planet Alert');
+                $message->to($adminMail);
               }
-              $numSent = $mail->send();
+              $message->subject($subject);
+              $message->body($msg);
+              $numSent = $message->send();
             }
           }
         }
@@ -117,7 +118,7 @@
           $playerTime = $input->post->playerTime;
           if ($monster->id && $player->id) {
             if ($monster->bestTime == 0 || ($monster->bestTime != 0 && $playerTime < $monster->bestTime)) { // New Master best time
-              $result = __("New Master best time!");
+              $result = __("New Master best time!").' ('.ms2string($playerTime).')';;
               if ($monster->bestTimePlayerId != 0 && $player->bestTimePlayerId != $player->id ) { // Keep old best id if changed
                 $oldBest = $monster->bestTimePlayerId;
               } else {
@@ -154,7 +155,7 @@
             } else { // Check if new player best time
               $tmpPage = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
               if ($tmpPage->bestTime == 0 || ($tmpPage->bestTime != 0 && $playerTime < $tmpPage->bestTime)) { // New personal best time
-                $result = __("New personal best time!");
+                $result = __("New personal best time!").' ('.ms2string($playerTime).')';
                 $tmpPage->bestTime = $playerTime;
                 $tmpPage->of(false);
                 $tmpPage->save();
@@ -171,24 +172,23 @@
             // Notify teacher (or admin)
             $subject = _('Speed Quiz ').' : ';
             $subject .= $player->title. ' ['.$player->team->title.']';
-            $subject .= ' → '.$result;
+            $subject .= ' - '.$result;
             $subject .= ' ['.$monster->title.']';
-            $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-            $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
+            $msg = __("Player")." : ".$player->title." [".$player->team->title."]\r\n";
+            $msg .= __("Monster")." : ".$monster->title."\r\n";
             $msg .= __("Result")." : ". $result;
 
             if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
-              $adminMail = $users->get("name=admin")->email;
-              $mail = wireMail();
-              $mail->from($adminMail);
-              $mail->subject($subject);
-              $mail->body($sanitizer->entities1($msg));
+              $message = $mail->new();
+              $message->from($adminMail, "Planel Alert");
               if (isset($headTeacher) && $headTeacher->email != '') {
-                $mail->to($headTeacher->email, 'Planet Alert');
+                $message->to($headTeacher->email);
               } else {
-                $mail->to($adminMail, 'Planet Alert');
+                $message->to($adminMail);
               }
-              $numSent = $mail->send();
+              $message->subject($subject);
+              $message->body($msg);
+              $numSent = $message->send();
             }
           }
         } else {
@@ -233,26 +233,25 @@
               // Notify teacher (or admin)
               $subject = _('Monster fight ').' : ';
               $subject .= $player->title. ' ['.$player->team->title.']';
-              $subject .= ' → '.$result;
+              $subject .= ' - '.$result;
               $subject .= ' ['.$monster->title.']';
-              $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-              $msg .= __("Monster")." : ". $sanitizer->markupToText($monster->title)."\r\n";
+              $msg = __("Player")." : ".$player->title." [".$player->team->title."]\r\n";
+              $msg .= __("Monster")." : ".$monster->title."\r\n";
               $msg .= __("Result")." : ". $result;
               $msg .= ' ['.__("Quality")." : ".$quality."]\r\n";
-              $msg .= __("New player global FP")." : ". $player->fighting_power."\r\n";
+              $msg .= __("Global FP of player")." : ". $player->fighting_power."\r\n";
 
               if (!in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
-                $adminMail = $users->get("name=admin")->email;
-                $mail = wireMail();
-                $mail->from($adminMail);
-                $mail->subject($subject);
-                $mail->body($msg);
+                $message = $mail->new();
+                $message->from($adminMail, "Planel Alert");
                 if (isset($headTeacher) && $headTeacher->email != '') {
-                  $mail->to($headTeacher->email, 'Planet Alert');
+                  $message->to($headTeacher->email);
                 } else {
-                  $mail->to($adminMail, 'Planet Alert');
+                  $message->to($adminMail);
                 }
-                $numSent = $mail->send();
+                $message->subject($subject);
+                $message->body($msg);
+                $numSent = $message->send();
               }
             }
           }

@@ -1,6 +1,8 @@
 <?php namespace ProcessWire;
   include('./my-functions.inc'); // Planet Alert PHP functions
 
+  $adminMail = $users->get("name=admin")->email;
+
   if (!$user->isSuperuser()) {
     $headTeacher = getHeadTeacher($user);
     $user->language = $headTeacher->language;
@@ -22,21 +24,20 @@
       // Notify teacher or admin
       $subject = _('Buy PDF ').' : ';
       $subject .= $player->title. ' ['.$player->team->title.']';
-      $subject .= ' → '.$lesson->title;
-      $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
-      $msg .= "Buy PDF : ". $lesson->title."\r\n";
+      $subject .= ' - '.$lesson->title;
+      $msg = "Player : ".$player->title." [".$player->team->title."]\r\n";
+      $msg .= "Buy PDF : ".$lesson->title."\r\n";
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-        $adminMail = $users->get("name=admin")->email;
-        $mail = wireMail();
-        $mail->from($adminMail);
-        $mail->subject($subject);
-        $mail->body($msg);
+        $message = $mail->new();
+        $message->from($adminMail, "Planel Alert");
         if ($headTeacher && $headTeacher->email != '') {
-          $mail->to($headTeacher->email, 'Planet Alert');
+          $message->to($headTeacher->email);
         } else {
-          $mail->to($adminMail, 'Planet Alert');
+          $message->to($adminMail);
         }
-        $numSent = $mail->send();
+        $message->subject($subject);
+        $message->body($msg);
+        $numSent = $message->send();
       }
     }
 
@@ -56,21 +57,20 @@
         // Notify teacher or admin
         $subject = _('Copied lesson ').' : ';
         $subject .= $player->title. ' ['.$player->team->title.']';
-        $subject .= ' → '.$refPage->title;
-        $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-        $msg .= __("Copied lesson")." : ". $refPage->title."\r\n";
+        $subject .= ' - '.$refPage->title;
+        $msg = __("Player")." : ".$player->title." [".$player->team->title."]\r\n";
+        $msg .= __("Copied lesson")." : ".$refPage->title."\r\n";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-          $adminMail = $users->get("name=admin")->email;
-          $mail = wireMail();
-          $mail->from($adminMail);
-          $mail->subject($subject);
-          $mail->body($msg);
+          $message = $mail->new();
+          $message->from($adminMail, "Planel Alert");
+          $message->subject($subject);
+          $message->body($msg);
           if ($headTeacher && $headTeacher->email != '') {
-            $mail->to($headTeacher->email, 'Planet Alert');
+            $message->to($headTeacher->email);
           } else {
-            $mail->to($adminMail, 'Planet Alert');
+            $message->to($adminMail);
           }
-          $numSent = $mail->send();
+          $numSent = $message->send();
         }
       }
     }
@@ -118,25 +118,25 @@
         $msg .= "Item : ". $newItem->title;
       } else {
         // Notify admin
-        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
-        $msg .= "Item : ". $newItem->title."\r\n";
+        $msg = "Player : ". $sanitizer->entities1($player->title)." [".$player->team->title."]\r\n";
+        $msg .= "Item : ". $sanitizer->entities1($newItem->title)."\r\n";
         $msg .= "An error has occurred.";
       }
       $subject = _('Buy form ').' : ';
-      $subject .= $player->title. ' ['.$player->team->title.']';
-      $subject .= ' → '.$newItem->title. ' [Level '.$newItem->level.']';
+      $subject .= $player->title.' ['.$player->team->title.']';
+      $subject .= ' - '.$newItem->title.' [Level '.$newItem->level.']';
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-        $adminMail = $users->get("name=admin")->email;
-        $mail = wireMail();
-        $mail->from($adminMail);
-        $mail->subject($subject);
-        $mail->body($sanitizer->entities1($msg));
+        $message = $mail->new();
         if ($headTeacher && $headTeacher->email != '') {
-          $mail->to($headTeacher->email, 'Planet Alert');
+          $message->to($headTeacher->email, "Planet Alert");
         } else {
-          $mail->to($adminMail, 'Planet Alert');
+          $message->to($adminMail, "Planet Alert");
         }
-        $numSent = $mail->send();
+        $message->from($adminMail);
+        $message->fromName("Planel Alert");
+        $message->subject($subject);
+        $message->body($msg);
+        $numSent = $message->send();
       }
     }
 
@@ -185,23 +185,21 @@
           // Notify admin
           $subject = _('Buy form ').' : ';
           $subject .= $player->title. ' ['.$player->team->title.']';
-          $subject .= ' → '.$newItem->title;
+          $subject .= ' - '.$newItem->title;
           $msg = "Player : ". $player->title."\r\n";
           $msg .= "Team : ". $player->team->title."\r\n";
           $msg .= "Item : ". $newItem->title;
-          /* $msg .= "Item : ". $newItem->title.$error; */
           if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-            $adminMail = $users->get("name=admin")->email;
-            $mail = wireMail();
-            $mail->from($adminMail);
-            $mail->subject($subject);
-            $mail->body($msg);
-            if ($headTeacher && $headTeacher->email != '') {
-              $mail->to($headTeacher->email, 'Planet Alert');
+            $message = $mail->new();
+            $message->from($adminMail, "Planel Alert");
+            $message->subject($subject);
+            $message->body($msg);
+              if ($headTeacher && $headTeacher->email != '') {
+              $message->to($headTeacher->email);
             } else {
-              $mail->to($adminMail, 'Planet Alert');
+              $message->to($adminMail);
             }
-            $numSent = $mail->send();
+            $numSent = $message->send();
           }
         }
       }
@@ -227,23 +225,22 @@
         $subject = __('Donation').' : ';
         $subject .= $amount.__("GC");
         $subject .= ' '.$player->title. ' ['.$player->team->title.']';
-        $subject .= ' → '.$receiver->title.' ['.$receiver->team->title.']';
-        $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+        $subject .= ' - '.$receiver->title.' ['.$receiver->team->title.']';
+        $msg = __("Player")." : ".$player->title." [".$player->team->title."]\r\n";
         $msg .= __("Donation amount")." : ". $amount."\r\n";
-        $msg .= __("Donated to")." : ". $receiver->title." [".$receiver->team->title."]\r\n";
+        $msg .= __("Donated to")." : ".$receiver->title." [".$receiver->team->title."]\r\n";
         $msg .= __("Player global donation indicator")." : ". $player->donation."\r\n";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-          $adminMail = $users->get("name=admin")->email;
-          $mail = wireMail();
-          $mail->from($adminMail);
-          $mail->subject($subject);
-          $mail->body($msg);
+          $message = $mail->new();
+          $message->from($adminMail, "Planel Alert");
+          $message->subject($subject);
+          $message->body($msg);
           if ($headTeacher && $headTeacher->email != '') {
-            $mail->to($headTeacher->email, 'Planet Alert');
+            $message->to($headTeacher->email);
           } else {
-            $mail->to($adminMail, 'Planet Alert');
+            $message->to($adminMail);
           }
-          $numSent = $mail->send();
+          $numSent = $message->send();
         }
       }
     }
@@ -259,21 +256,20 @@
         // Notify teacher or admin
         $subject = _('Fight request ').' : ';
         $subject .= $player->title. ' ['.$player->team->title.']';
-        $subject .= ' → '.$monster->title;
+        $subject .= ' - '.$monster->title;
         $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-        $msg .= __("Fight request")." : ". $monster->title."\r\n";
+        $msg .= __("Fight request")." : ".$monster->title."\r\n";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-          $adminMail = $users->get("name=admin")->email;
-          $mail = wireMail();
-          $mail->from($adminMail);
-          $mail->subject($subject);
-          $mail->body($msg);
+          $message = $mail->new();
+          $message->from($adminMail, "Planel Alert");
+          $message->subject($subject);
+          $message->body($msg);
           if ($headTeacher && $headTeacher->email != '') {
-            $mail->to($headTeacher->email, 'Planet Alert');
+            $message->to($headTeacher->email);
           } else {
-            $mail->to($adminMail, 'Planet Alert');
+            $message->to($adminMail);
           }
-          $numSent = $mail->send();
+          $numSent = $message->send();
         }
       }
     }

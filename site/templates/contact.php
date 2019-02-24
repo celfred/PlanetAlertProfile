@@ -6,13 +6,17 @@
   $error = '';
   $feedback = false;
   $numSent= false;
-  $emailTo = $users->get("name=admin")->email;
+  $adminMail = $users->get("name=admin")->email;
   if ($user->hasRole('player')) {
     $player = $pages->get("login=$user->name");
     $headTeacher = getHeadTeacher($user);
     if ($headTeacher && $headTeacher->email != '') {
       $emailTo = $headTeacher->email;
+    } else {
+      $emailTo = $adminMail;
     }
+  } else {
+    $emailTo = adminMail;
   }
 
   if($input->post->submit) { // Form was submitted
@@ -63,13 +67,13 @@
     }
 
     if($error == '') { // No errors, email the form results
-      $mail = wireMail();
-      $mail->to($emailTo, 'Planet Alert');
-      $mail->from("flenglish@tuxfamily.org");
-      $mail->fromName($form['fullname']);
-      $mail->subject($subject);
-      $mail->body($form['message']);
-      $numSent = $mail->send();
+      $message = $mail->new();
+      $message->to($emailTo, "Planet Alert");
+      $message->from($adminMail);
+      $message->fromName($form['fullname']);
+      $message->subject($subject);
+      $message->body($form['message']);
+      $numSent = $message->send();
       if ($numSent == 1) {
         $feedback = '<h2 class="text-center">'.__("Thank you! Your message has been sent.").'</h2>'; 
       } else {

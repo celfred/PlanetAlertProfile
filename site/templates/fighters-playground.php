@@ -13,7 +13,7 @@
 
   if ($requirements) {
     $tmpPage = $playerPage->child("name=tmp");
-    if ($user->isSuperuser()) {
+    if ($user->isSuperuser() || $player->team->is("name=test-team")) {
       $allMonsters = $pages->get("name=monsters")->children("include=all")->sort("level, name");
     } else {
       if ($user->hasRole('player')) {

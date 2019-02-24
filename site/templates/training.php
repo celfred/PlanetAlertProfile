@@ -18,7 +18,10 @@
       // Set all available monsters
       if ($user->hasRole('player')) {
         // Check if player has the Visualizer (or forced by admin)
-        if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
+        if ($player->team->is("name=test-team")) {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise")->sort("name");
+          $allMonstersNb = $allMonsters->count();
+        } else if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
           $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
           $allMonstersNb = $allMonsters->count();
         } else {

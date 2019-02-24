@@ -38,7 +38,7 @@
           echo '</div>';
       } else {
         // Check for publish state from exerciseOwner or created_users_id
-        if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player') && $page->exerciseOwner->get("singleTeacher=$headTeacher") != NULL && $page->exerciseOwner->get("singleTeacher=$headTeacher")->publish == 1)) {
+        if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player') && $page->exerciseOwner->get("singleTeacher=$headTeacher") != NULL && $page->exerciseOwner->get("singleTeacher=$headTeacher")->publish == 1) || $player->team->is("name=test-team")) {
           // Test if player has unlocked Memory helmet (only training equipment for the moment)
           // or if admin has forced it in Team options
           if ($user->isSuperuser() || $user->hasRole('teacher')) {
@@ -58,7 +58,7 @@
             $out = '';
             $redirectUrl = $pages->get('name=underground-training')->url;
             $monster = $page;
-            if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
+            if (!$user->isSuperuser() && !$user->hasRole('teacher') || $plyaer->team->is("name!=test-team")) {
               setMonster($player, $monster);
             } else { // Never trained (for admin)
               $monster->isTrainable = 1;
