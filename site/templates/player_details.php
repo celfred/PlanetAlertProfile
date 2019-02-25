@@ -307,7 +307,7 @@
         // Greatest # of people (people)
         if ($playerPage->rank && $playerPage->rank->is("index>=8")) {
           list($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb) = setScoreboardNew($playerPage, 'people', 'all', true);
-          $scoreboard = $scoreboardRawLink.'?field=people';
+          $scoreboardLink = $scoreboardRawLink.'?field=people';
           echo displayPlayerPos($scoreboardLink, __("Greatest # of people"), $playerGlobalPos, $playerTeamPos, $totalGlobalPlayersNb, $totalTeamPlayersNb);
         }
         

@@ -10,7 +10,7 @@
       $player = false;
       $playerId = false;
     }
-    if ($user->isGuest() || $input->urlSegment1 == 'global') {
+    if ($user->isSuperuser() || $user->hasRole("teacher") || $user->isGuest() || $input->urlSegment1 == 'global') {
       $global = true;
     } else {
       $global = false;
@@ -129,7 +129,7 @@
         break;
       default : $title = 'todo';
     }
-    if ($user->isGuest()) { // Global Scoreboards
+    if ($user->isSuperuser() || $user->hasRole("teacher") || $user->isGuest()) { // Global Scoreboards
       $playerPos = false;
       $topPlayers = setGlobalScoreboard($field, 10);;
       $prevPlayers = false;

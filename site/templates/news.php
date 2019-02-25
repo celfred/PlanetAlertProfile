@@ -177,16 +177,16 @@
         }
         $out .= '<hr />';
         $out .= '<p class="label label-primary">'.__("Fight requests").'</p>';
-        $fightRequests = $allPlayers->find("fightRequest!=''");
+        $fightRequests = $allPlayers->find("fight_request!=''");
         if (count($fightRequests) > 0) {
           $out .= '<ul class="list-unstyled">';
           foreach ($fightRequests as $p) {
             $out .= '<li>';
-            $out .= $p->title.' ['.$p->team->title.'] : <a href="'.$pages->get("name=monsters")->url.'?id='.$p->fightRequest->id.'&pages2pdf=1">'.$p->fightRequest->title.'</a>';
-            $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="rr" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=RR&monsterId='.$p->fightRequest->id.'">RR</button>';
-            $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="r" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=R&monsterId='.$p->fightRequest->id.'">R</button>';
-            $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="v" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=V&monsterId='.$p->fightRequest->id.'">V</button>';
-            $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="vv" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=VV&monsterId='.$p->fightRequest->id.'">VV</button>';
+            $out .= $p->title.' ['.$p->team->title.'] : <a href="'.$pages->get("name=monsters")->url.'?id='.$p->fight_request->id.'&pages2pdf=1">'.$p->fight_request->title.'</a>';
+            $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="rr" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=RR&monsterId='.$p->fight_request->id.'">RR</button>';
+            $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="r" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=R&monsterId='.$p->fight_request->id.'">R</button>';
+            $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="v" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=V&monsterId='.$p->fight_request->id.'">V</button>';
+            $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="vv" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=VV&monsterId='.$p->fight_request->id.'">VV</button>';
             $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteFightRequest&pageId='.$p->id.'" class="del">'.__('[Delete]').'</a>';
             $out .= '</li>';
           }
@@ -205,10 +205,8 @@
       if ($user->hasRole('player')) {
         $playerName = $player->name;
         if ($player->team->is("name!=no-team")) {
-          /* $allPlayers = $pages->find("parent.name=players, template=player, team=$player->team"); */
           $team = '['.$player->team->title.']';
         } else {
-          /* $allPlayers = $pages->find("parent.name=players, template=player, name!=test"); */
           $team = '';
         }
         // Help messages ?

@@ -4,7 +4,6 @@
   $rank = $selectedTeam->rank->index;
   if ($user->isLoggedin()) {
     $allPlayers = getAllPlayers($user, false);
-    echo $allPlayers->count();
   }
 
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
@@ -168,7 +167,7 @@
         $out .= '</div>';
         $out .= '<div class="panel-body">';
         $out .= '<span class="label label-primary">'.__("Fight requests").'</span>';
-        $requests = $allPlayers->find("fight_request!=0");
+        $requests = $allPlayers->find("fight_request!=''");
         if ($requests->count() > 0) {
           $out .= '<ul>';
           foreach($requests as $r) {
