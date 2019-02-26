@@ -64,7 +64,7 @@
       <h1 class="panel-title">
         <span class="">
           <?php 
-            echo $playerPage->title;
+            echo $playerPage->title.' ['.$playerPage->team->title.']';
             if ($user->isSuperuser() || ($user->hasRole('teacher') && $playerPage->team->teacher->has("id=$user->id"))) { echo $playerPage->feel(); }
           ?>
         </span>
