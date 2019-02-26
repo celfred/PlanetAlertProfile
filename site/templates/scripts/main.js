@@ -98,7 +98,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$(document).on('close.bs.laert', '.announcement', function(e) {
+	$(document).on('close.bs.alert', '.announcement', function(e) {
 		e.preventDefault();
 		var $this = $(this);
 		var $href = $this.attr('data-href')
