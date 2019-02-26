@@ -124,12 +124,12 @@
                     $out .= ' <span class="badge">!</span> ';
                   }
                   if ($historyPage->refPage->is("name!=memory-potion")) {
-                    $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                    $out .= '<span><a href="'.$p->url.'">'.$p->title.'</a> ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
                     $out .= ' <label for="unpublish_'.$historyPage->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("used today").'</label>';
                   } else {
                     $successId = $pages->get("template=memory-text, id=$historyPage->linkedId")->task->id;
                     $failedId = $pages->get("name=solo-r")->id;
-                    $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->summary.' (bought '.$interval->days.' days ago)</span>';
+                    $out .= '<span><a href="'.$p->url.'">'.$p->title.'</a> ['.$p->team->title.'] : '.$historyPage->summary.' (bought '.$interval->days.' days ago)</span>';
                     $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="memory" data-result="good" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$successId.'"><i class="glyphicon glyphicon-thumbs-up"></i></button>';
                     $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="memory" data-result="bad" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$failedId.'"><i class="glyphicon glyphicon-thumbs-down"></i></button>';
                   }
@@ -141,7 +141,7 @@
                   $interval = $today->diff($date2);
                   $out .= '<li>';
                   $out .= ' <span class="badge">!</span> ';
-                  $out .= '<span>'.$p->title.' '.$p->lastName.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                  $out .= '<span><a href="'.$p->url.'">'.$p->title.'</a> '.$p->lastName.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
                   $out .= ' <label for="unpublish_'.$historyPage->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("remove").'</label>';
                   $out .= '</li>';
                 }
@@ -166,7 +166,7 @@
             if ($interval->days > 21) {
               $out .= ' <span class="badge">!</span> ';
             }
-            $out .= '<span>'.$p->player->title.' ['.$p->player->team->title.'] : '.$p->refPage->title.' (warning '.$interval->days.' days ago)</span>';
+            $out .= '<span><a href="'.$p->player->url.'">'.$p->player->title.'</a> ['.$p->player->team->title.'] : '.$p->refPage->title.' (warning '.$interval->days.' days ago)</span>';
             $out .= ' <label for="unpublish_'.$p->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$p->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedPending='.$p->id.'" /> validated today</label>';
             $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&pageId='.$p->id.'" class="del">'.__('[Delete]').'</a>';
             $out .= '</li>';
@@ -182,7 +182,7 @@
           $out .= '<ul class="list-unstyled">';
           foreach ($fightRequests as $p) {
             $out .= '<li>';
-            $out .= $p->title.' ['.$p->team->title.'] : <a href="'.$pages->get("name=monsters")->url.'?id='.$p->fight_request.'&pages2pdf=1">'.$pages->get($p->fight_request)->title.'</a>';
+            $out .= '<a href="'.$p->url.'">'.$p->title.'</a> ['.$p->team->title.'] : <a href="'.$pages->get("name=monsters")->url.'?id='.$p->fight_request.'&pages2pdf=1">'.$pages->get($p->fight_request)->title.'</a>';
             $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="rr" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=RR&monsterId='.$p->fight_request.'">RR</button>';
             $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="r" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=R&monsterId='.$p->fight_request.'">R</button>';
             $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="v" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=V&monsterId='.$p->fight_request.'">V</button>';
