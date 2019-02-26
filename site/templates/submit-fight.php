@@ -37,7 +37,7 @@
       // Set group captains
       setGroupCaptain($player->id);
       // Remove fight request
-      $player->setAndSave('fight-request', '0');
+      $player->setAndSave('fight_request', '');
       // Record to log file
       $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result;
       $log->save('monster-fights', $logText);
