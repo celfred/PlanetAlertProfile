@@ -169,21 +169,19 @@
           }
           // Go to the Marketplace
           if ($possibleItems->count() > 0) {
-            $out .= '<li><span><a href="'.$pages->get("name=shop")->url.$team->name.'">→ Go to the Marketplace.</a></span></li>';
+            $out .= '<li><span><a href="'.$pages->get("name=shop")->url.$team->name.'?playerId='.$p->id.'">→ Go to my marketplace.</a></span></li>';
           }
         }
         // Make a donation
         if ($p->GC > 5 || $p->is("parent.name=groups")) {
-          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
+          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$team->name.'/'.$donatorId.'">→ Make a donation.</a></span></li>';
         }
         // Go to team's Freeworld
-        $out .= '<li><span><a href="'.$pages->get("name=world")->url.$team->name.'">→ See team\'s Freeworld.</a></span></li>';
+        /* $out .= '<li><span><a href="'.$pages->get("name=world")->url.$team->name.'">→ See team\'s Freeworld.</a></span></li>'; */
         // Go to team's scoring table
-        $out .= '<li><span><a href="'.$pages->get("name=players")->url.$team->name.'">→ See team\'s scoring table.</a></span></li>';
-        // Pick another player
-        $out .= '<li><span><a href="#" onclick="swal.close(); $(\'#pickTeamPlayer\').click(); return false;">→ Pick a random player in the team.</a></span></li>';
+        /* $out .= '<li><span><a href="'.$pages->get("name=players")->url.$team->name.'">→ See team\'s scoring table.</a></span></li>'; */
         // Read about a random element
-        $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
+        /* $allPlaces = $pages->get("/places/")->find("template='place', sort='title'"); */
         $allPeople = $pages->find("template=people, name!=people, sort=title");
         if (isset($allPlaces) && isset($allPeople)) {
           $allElements = clone($allPlaces);
@@ -191,8 +189,6 @@
           $randomId = $allElements->getRandom()->id;
           $out .= '<li><span><a href="#" class="ajaxBtn" data-type="showInfo" data-id="'.$randomId.'">→ Read about a random element.</a></span></li>';
         }
-        // Visit the Hall of Fame
-        $out .= '<li><span><a href="'.$pages->get("name=hall-of-fame")->url.'">→ Visit the Hall of Fame.</a></span></li>';
         $out .= '</ul>';
         $out .= '</div>';
         break;

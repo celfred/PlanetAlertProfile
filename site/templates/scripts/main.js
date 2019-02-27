@@ -1299,10 +1299,10 @@ $(document).ready(function() {
 		});
 	});
 
-	if ($('div.ajaxContent')) {
+	if ($('div.ajaxContent, section.ajaxContent')) {
 		var timerFast = 0;
 		var timerSlow = 1000;
-		$('div.ajaxContent').each( function() {
+		$('div.ajaxContent, section.ajaxContent').each( function() {
 			var el = $(this);
 			var url = $(this).attr('data-href');
 			if (el.attr('data-priority') == '1') {
