@@ -14,7 +14,7 @@ $logoUrl = $pages->get("name=home")->photo->eq(1)->url;
 ?>
 
 <div class="row">
-  <div class="col-md-10 text-center">
+  <div class="col-md-12 text-center">
     <h1>Welcome to Planet Alert !</h1>
     <?php if (!$user->isLoggedin()) {
       if($input->post->username) echo "<h3><span class='label label-danger'>Login failed... (check user name or password)</span></h3>"; ?>
@@ -40,11 +40,6 @@ $logoUrl = $pages->get("name=home")->photo->eq(1)->url;
     }
     ?>
   </div>
-
-  <div class="col-md-2">
-    <img class="" width="200" src="<?php echo $logoUrl; ?>" />
-  </div>
-
   <div class="push"><!--//--!></div>
 </div>
 <?php
