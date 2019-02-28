@@ -70,9 +70,9 @@
 
 
   if ($user->isSuperuser() || $user->hasRole('teacher')) {
-    $colIndex = 3;
+    $colIndex = 1;
   } else {
-    $colIndex = 2;
+    $colIndex = 0;
   }
 ?>
 
@@ -116,7 +116,6 @@
           $out .= '<a class="pdfLink btn btn-info btn-xs" href="'.$page->url.'?id='.$m->id.'&thumbnail=1&pages2pdf=1">[PDF Image]</a>';
           $out .= '</td>';
         }
-        /* $out .= '<td>'. $mini .'</td>'; */
         $out .= '<td data-search="'.$topics.','.$m->name.'">';
         $out .= $mini;
         if ($m->is(Page::statusUnpublished)) {
