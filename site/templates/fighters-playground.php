@@ -13,7 +13,7 @@
 
   if ($requirements) {
     $tmpPage = $playerPage->child("name=tmp");
-    if ($user->isSuperuser() || $player->team->is("name=test-team")) {
+    if ($user->isSuperuser() || (isset($player) && $player->team->is("name=test-team"))) {
       $allMonsters = $pages->get("name=monsters")->children("include=all")->sort("level, name");
     } else {
       if ($user->hasRole('player')) {
@@ -129,6 +129,14 @@
     }
     $out .= '</tbody>';
     $out .= '</table>';
+    
+    // helpAlert
+    if ($user->hasRole('teacher')) {
+      $helpAlert = true;
+      $helpTitle = sprintf(__("Viewing Fighting zone of %s !"), $playerPage->title);;
+      $helpMessage = '<h4>'.__("Available monsters depend on player's training.").'</h4>';
+    }
+    include("./helpAlert.inc.php"); 
   } else {
     $out .= $noAuthMessage;
   }
