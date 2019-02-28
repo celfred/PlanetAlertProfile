@@ -1,6 +1,9 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
+  $limitDate  = new \DateTime("-1 year");
+  $limitDate = strtotime($limitDate->format('Y-m-d'));
+
   if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     // or if admin has forced it in Team options
@@ -182,11 +185,16 @@
               $out .= sprintf(__("Come back in %d days ;)"), $m->waitForTrain);
             }
           }
-          if ($request == 0) {
-            $msg = sprintf(__("Fight request for %s"), $m->title);
-            $out .= ' <span><a class="btn btn-danger btn-xs simpleConfirm" href="'.$page->url.'" data-href="'.$pages->get("name=submitforms")->url.'?form=fightRequest&monsterId='.$m->id.'&playerId='.$player->id.'" data-msg="'.$msg.'" data-reload="true"><i class="glyphicon glyphicon-education" data-toggle="tooltip" title="'.__("Ask teacher for an in-class Fight!").'"></i></a></span>';
-          } else if ($request == $m->id) {
-            $out .= ' <span class="glyphicon glyphicon-ok-circle" data-toggle="tooltip" title="'.__('Your teacher has already been warned about this request.').'"></span>';
+          $formerRequest = $pages->get("has_parent=$player, template=event, task.name=fight-v|fight-vv, inClass=1, refPage=$m, date>$limitDate");
+          if ($formerRequest->id) {
+            $out .= ' <span class="glyphicon glyphicon-ok" data-toggle="tooltip" title="'.__('You have already defeated this monster in the previous year.').'"></span>';
+          } else {
+            if ($request == 0) {
+              $msg = sprintf(__("Fight request for %s"), $m->title);
+              $out .= ' <span><a class="btn btn-danger btn-xs simpleConfirm" href="'.$page->url.'" data-href="'.$pages->get("name=submitforms")->url.'?form=fightRequest&monsterId='.$m->id.'&playerId='.$player->id.'" data-msg="'.$msg.'" data-reload="true"><i class="glyphicon glyphicon-education" data-toggle="tooltip" title="'.__("Ask teacher for an in-class Fight!").'"></i></a></span>';
+            } else if ($request == $m->id) {
+              $out .= ' <span class="glyphicon glyphicon-ok-circle" data-toggle="tooltip" title="'.__('Your teacher has already been warned about this request.').'"></span>';
+            }
           }
           $out .= '</td>';
           // Find best trained player on this monster
