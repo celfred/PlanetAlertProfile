@@ -21,7 +21,9 @@
     }
 
     if ($allPlayers->count() > 0) {
-      $dangerPlayers = $allPlayers->find("(HP<=15), (coma=1)")->sort("coma, HP");
+      $dangerPlayers = $allPlayers->find("coma=1");
+      $lowPlayers = $allPlayers->find("HP<=15");
+      $dangerPlayers->add($lowPlayers);
       $out .= '<div class="col-sm-4">';
         // Help needed
         $out .= '<div id="" class="board panel panel-primary">';
