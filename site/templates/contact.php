@@ -16,7 +16,7 @@
       $emailTo = $adminMail;
     }
   } else {
-    $emailTo = adminMail;
+    $emailTo = $adminMail;
   }
 
   if($input->post->submit) { // Form was submitted
