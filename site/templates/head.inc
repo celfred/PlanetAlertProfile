@@ -84,7 +84,7 @@
     if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teacher or Superuser is logged
       if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
         $allTeams->filter("teacher=$user");
-        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
+        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
       } else {
         $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
       }

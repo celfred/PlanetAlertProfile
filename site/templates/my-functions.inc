@@ -48,7 +48,7 @@ function getAllPlayers($user = false, $paginate = false) {
         $allPlayers = $pages->find("parent.name=players, template=player, team.name=$teamName, sort=group"); // Limit to team players
       } else { // Order no-team list by reputation (and paginate)
         if ($user->hasRole("teacher")) {
-          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team, team.teacher=$user");
+          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user");
         } else {
           $allPlayers = $pages->find("parent.name=players, template=player, team.name=no-team, limit=35, sort=-reputation");
           $pagination = $allPlayers->renderPager();

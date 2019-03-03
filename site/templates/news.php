@@ -24,6 +24,7 @@
         $today = new \DateTime("today");
         $news = $pages->find("parent.name=history, publish=1, task.name!=penalty|buy-pdf|inactivity");
         $news->filter("has_parent=$allPlayers")->sort('-created');
+        bd($allPlayers->count());
         $out .= '<div class="col-sm-6">';
         $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
         if ($news->count() > 0) {
@@ -55,6 +56,9 @@
                 break;
               case 'fight-vv' :
                 $out .= '<span class="">'.__("Successful fight for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$pages->get("name=monsters")->url.'?id='.$n->refPage->id.'&thumbnail=1&pages2pdf=1">'.$sanitizer->entities($n->summary).'</a></span>';
+                break;
+              case 'death' :
+                $out .= '<span class="">'.__("Death for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' <span class="glyphicon glyphicon-thumbs-down></span>"</span>';
                 break;
               default : $out .= $n->task->name. ': '.__("todo");
             }
