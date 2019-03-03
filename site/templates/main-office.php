@@ -1,6 +1,9 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
+  if (isset($player) && $player->team->is("name=test-team")) {
+    $selectedTeam = $pages->get("name=test-team");
+  }
   $rank = $selectedTeam->rank->index;
   if ($user->isLoggedin()) {
     $allPlayers = getAllPlayers($user, false);

@@ -12,13 +12,11 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasR
   }
   if ($visualizer) {
     // Limit to player/teacher's monsters
-    if ($user->isSuperuser()) {
+    if ($user->isSuperuser() || (isset($player) && $player->team->is("name=test-team"))) {
       $allMonsters = $pages->find("parent.name=monsters, template=exercise, include=all");
-    }
-    if ($user->hasRole('teacher')) {
+    } else if ($user->hasRole('teacher')) {
       $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$user")->sort("name");
-    }
-    if ($user->hasRole('player')) {
+    } else if ($user->hasRole('player')) {
       // Check if player has the Visualizer (or forced by admin)
       $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, summary!=''")->sort("name");
     }

@@ -3,8 +3,13 @@
   <?php
   $reportLink = $pages->get("/reports")->url;
   $reportGeneratorLink = $pages->get("/report_generator")->url;
-  $rank = $selectedTeam->rank->index;
-  $allPlayers = getAllPlayers($user, true);
+  if (isset($player) && $player->team->is("name=test-team")) {
+    $selectedTeam = $pages->get("name=test-team");
+    $allPlayers = $pages->find("parent.name=players, team.name=test-team");
+  } else {
+    $rank = $selectedTeam->rank->index;
+    $allPlayers = getAllPlayers($user, true);
+  }
 
   // Nav tabs
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
