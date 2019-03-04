@@ -257,13 +257,10 @@
         if ($input->urlSegment2 == '') { // A class is selected, display possible items
           if ($user->hasRole('teacher') || $user->isSuperuser() ) {
             // Nav tabs
-            $team = $pages->get("template=team, name=$input->urlSegment1");;
             include("./tabList.inc"); 
-
             $out = '';
-            $team = $pages->find("name=$input->urlSegment1");
-            $playerId = $input->get("playerId");
-            $allPlayers = $pages->findMany("template=player, team=$team, sort=title");
+            $playerId = $input->get("playerId"); // Useful if coming from decision menu
+            $allPlayers = $allPlayers->find("team=$selectedTeam, sort=title");
             // Select form
             $out .= '<select class="" id="shopSelect" name="shopSelect">';
               $out .= '<option value="">'.__('Select a player').'</option>';
