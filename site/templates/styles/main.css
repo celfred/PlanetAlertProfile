@@ -1050,7 +1050,8 @@ span.paTagItalicised {
 }
 
 .announcement {
-  font-size: 1.1em;
+  font-size: 1.2em;
+  background: #FFF;
 }
 
 #helpAlert { display: none; }
