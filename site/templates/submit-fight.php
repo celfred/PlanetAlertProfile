@@ -159,6 +159,11 @@
                 $tmpPage->bestTime = $playerTime;
                 $tmpPage->of(false);
                 $tmpPage->save();
+                $task = $pages->get("template=task, name=best-time");
+                $task->comment = __('Best time on ').$monster->title.' : '.ms2string($monster->bestTime);
+                $task->refPage = $monster;
+                $task->linkedId = false;
+                updateScore($player, $task, true);
                 echo '2';
               } else {
                 $result = __("No best time");
