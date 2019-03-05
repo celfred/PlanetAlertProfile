@@ -58,7 +58,7 @@
             $out = '';
             $redirectUrl = $pages->get('name=underground-training')->url;
             $monster = $page;
-            if (!$user->isSuperuser() && !$user->hasRole('teacher') || $plyaer->team->is("name!=test-team")) {
+            if (!$user->isSuperuser() && !$user->hasRole('teacher') || isset($player) && $player->team->is("name!=test-team")) {
               setMonster($player, $monster);
             } else { // Never trained (for admin)
               $monster->isTrainable = 1;
