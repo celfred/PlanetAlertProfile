@@ -25,13 +25,13 @@
       'playerClass' => $sanitizer->text($input->post->playerClass),
       'email' => $sanitizer->email($input->post->email),
       'subject' => $sanitizer->text($input->post->subject),
-      'message' => $sanitizer->textarea($input->post->message)
+      'message' => $sanitizer->textarea($input->post->message, ['allowCRLF' => true])
     ); 
     // Form treatment
     $antispam_code =  $sanitizer->int($input->post->antispam_code);
     if ($user->isLoggedin() || ($session->get('antispam_code') == $antispam_code)) {
       $session->remove('antispam_code');
-      foreach($form as $key => $value) { // Determine if any fields were ommitted or didn't validate
+      foreach($form as $key=>$value) { // Determine if any fields were ommitted or didn't validate
         if ($key != 'email' && $key != 'playerClass') {
           if(empty($value)) $error = '<h2 class="text-center"><span class="label label-danger">'.__("An error occurred. Please check that all fields marked with * have been completed.").'</span></h2>';
         }
