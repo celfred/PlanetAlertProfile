@@ -1391,6 +1391,7 @@
         case 'announcements' :
           $out .= '<section class="well">';
           $out .= '<h3 class="text-center">'.__("Announcements").'</h3>';
+          $out .= '<p class="text-center">'.__("Click ✓ or ✗ to quickly publish/unpublish announcements").'</p>';
           $out .= '<div>';
           // Get teacher's teams to quickly add an announcement
           if ($user->hasRole('teacher')) {
@@ -1409,40 +1410,79 @@
             $out .= '</li>';
           }
           $out .= '</ul>';
+          $adminId = $users->get("name=admin")->id;
           if ($user->isSuperuser()) {
-            $allAnnouncements = $pages->find("template=announcement")->sort("team.name, title");
+            $allAnnouncements = $pages->find("template=announcement")->sort("created_users_id, team.name, title");
           } else {
-            $allAnnouncements = $pages->find("template=announcement, created_users_id=$user->id")->sort("team.name, title");
+            $allAnnouncements = $pages->find("template=announcement, created_users_id=$user->id|$adminId")->sort("created_users_id, team.name, title");
           }
-          if ($allAnnouncements->count() > 0) {
-            $out .= '<ul class="list">';
-            $out .= __("Click ✓ or ✗ to quickly publish/unpublish announcements");
+          $out .= '<table class="table">';
+            $out .= '<tr>';
+            $out .= '<th></th>';
+            $out .= '<th>'.__("Visible").'</th>';
+            $out .= '<th>'.__("Team").'</th>';
+            $out .= '<th>'.__("Visible by teacher").'</th>';
+            $out .= '<th>'.__("Concerned players").'</th>';
+            $out .= '<th>'.__("Title").'</th>';
+            $out .= '<th>'.__("Content").'</th>';
+            $out .= '<th>'.__("Actions").'</th>';
+            $out .= '</tr>';
             foreach ($allAnnouncements as $a) {
-              $out .= '<li>';
+              $a->of(false);
+              if ($user->isSuperuser() && $a->title->getLanguageValue($french) != '') { $a->title = $a->title->getLanguageValue($french); }
+              $out .= '<tr>';
+              $out .= '<td>';
+              if ($a->created_users_id == $adminId) {
+                $out .= __('Admin');
+              }
+              $out .= '</td>';
+              $out .= '<td>';
               if ($a->publish) {
                 $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublish/'.$user->id.'/'.$a->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
               } else {
                 if ($a->body != '') {
                   $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'togglePublish/'.$user->id.'/'.$a->id.'?type=team"><span class="label label-danger" data-toggle="tooltip" title="'.__('Publish').'">✗</span></a> ';
+                } else {
+                  $out .= '<span class="glyphicon glyphicon-warning-sign" data-toggle="tooltip" title="'.__("Empty message").'"></span> ';
                 }
               }
+              $out .= '</td>';
+              $out .= '<td>';
+              $out .= $a->parent->title;
+              $out .= '</td>';
+              $out .= '<td>';
+              if ($a->public) {
+                $out .= __("Yes");
+              } else {
+                $out .= __("No");
+              }
+              $out .= '</td>';
+              $out .= '<td>';
               if ($a->selectPlayers) {
                 $selectedPlayers = $a->playersList->implode(', ', '{title}');
+                if (strlen($selectedPlayers) == 0) { 
+                  $selectedPlayers = __("Nobody (read by concerned players ?)");
+                }
               } else {
-                $selectedPlayers = '';
+                if ($a->created_users_id == $adminId) {
+                  $selectedPlayers = '-';
+                } else {
+                  $selectedPlayers = __("All players");
+                }
               }
-              $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.$selectedPlayers.'">';
-              $out .= $a->parent->title;
-              if ($a->selectPlayers) {
-                $out .= '*';
-              }
-              $out .= '</span>&nbsp;';
+              $out .= $selectedPlayers;
+              $out .= '</td>';
+              $out .= '<td>';
               $out .= $a->title.' ';
+              $out .= '</td>';
+              $out .= '<td>';
               if ($a->body == '') {
-                $out .= '<span class="glyphicon glyphicon-warning-sign" data-toggle="tooltip" title="'.__("Empty message").'"></span>';
+                $out .= '-';
               } else {
                 $out .= '<span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="'.$sanitizer->entities($a->body).'"></span>';
               }
+              $out .= '</td>';
+              $out .= '<td>';
               if (!$user->isSuperuser()) {
                 $out .= $a->feel(array(
                           "text" => __('[Edit]'),
@@ -1450,18 +1490,22 @@
               } else {
                 $out .= $a->feel();
               }
-              $out .= '<a href="#" class="deleteFromId" data-href="'.$page->url.'deleteFromId/'.$user->id.'/'.$a->id.'?type=team">'.__("[Delete]").'</a>';
-              $out .= '</li>';
+              if ($user->isSuperuser() || $a->created_users_id != $adminId) {
+                $out .= ' <a href="#" class="deleteFromId" data-href="'.$page->url.'deleteFromId/'.$user->id.'/'.$a->id.'?type=team">'.__("[Delete]").'</a>';
+              } else {
+                $out .= '-';
+              }
+              $out .= '</td>';
+              $out .= '</tr>';
             }
-            $out .= '</ul>';
-          }
-          $out .= '</div>';
-          $out .= '</section>';
-          break;
-        default :
-          $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
-          $out .= '<section id="ajaxViewport" class="well"></section>';
-          $out .= '</div>';
+          $out .= '</table>';
+        $out .= '</div>';
+        $out .= '</section>';
+        break;
+      default :
+        $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="script">Generate</button>';
+        $out .= '<section id="ajaxViewport" class="well"></section>';
+        $out .= '</div>';
       }
     } else { // End if admin/teacher
       $out .= $noAuthMessage;
