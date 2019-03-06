@@ -1006,11 +1006,12 @@ $(document).ready(function() {
 		}
 		if ($type == 'fightRequest') {
 			var $result = $this.attr('data-result');
+      var $name = $this.parent().find("a:first").text();
 			switch($result) {
-        case 'v' : var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+lang.v; break;
-				case 'vv': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+lang.vv; break;
-        case 'r' : var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+lang.r; break;
-				case 'rr': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+lang.rr; break;
+        case 'v' : var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+$name+' : '+lang.v; break;
+				case 'vv': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+$name+' : '+lang.vv; break;
+        case 'r' : var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+$name+' : '+lang.r; break;
+				case 'rr': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+$name+' : '+lang.rr; break;
 				default: var $text='';
 			}
 			swal({
