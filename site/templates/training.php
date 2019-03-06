@@ -191,7 +191,7 @@
           } else {
             if ($request == 0) {
               $msg = sprintf(__("Fight request for %s"), $m->title);
-              $out .= ' <span><a class="btn btn-danger btn-xs simpleConfirm" href="'.$page->url.'" data-href="'.$pages->get("name=submitforms")->url.'?form=fightRequest&monsterId='.$m->id.'&playerId='.$player->id.'" data-msg="'.$msg.'" data-reload="true"><i class="glyphicon glyphicon-education" data-toggle="tooltip" title="'.__("Ask teacher for an in-class Fight!").'"></i></a></span>';
+              $out .= ' <span><a class="btn btn-danger btn-xs fightRequestConfirm" href="'.$page->url.'" data-href="'.$pages->get("name=submitforms")->url.'?form=fightRequest&monsterId='.$m->id.'&playerId='.$player->id.'" data-msg="'.$msg.'" data-reload="true"><i class="glyphicon glyphicon-education" data-toggle="tooltip" title="'.__("Ask teacher for an in-class Fight!").'"></i></a></span>';
             } else if ($request == $m->id) {
               $out .= ' <span class="glyphicon glyphicon-ok-circle" data-toggle="tooltip" title="'.__('Your teacher has already been warned about this request.').'"></span>';
             }

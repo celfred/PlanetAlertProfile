@@ -204,6 +204,31 @@ $(document).ready(function() {
 		});
 	});
 
+	$(document).on('click', '.fightRequestConfirm', (function(e) {
+    e.preventDefault();
+    $this = $(this);
+    var $href = $this.attr("data-href");
+    var $msg = $this.attr("data-msg");
+		swal({
+			title: lang.sure,
+      text: $msg,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes
+		}).then( result => {
+			if (result.value) {
+        $.get($href, function(data) { 
+          $('<span class="glyphicon glyphicon-ok-sign"></span>').insertAfter($this);
+          $("a.fightRequestConfirm").remove();
+        }); 
+      } else {
+        return false;
+      }
+    })
+  }));
+
 	$(document).on('click', '.simpleConfirm', (function(e) {
     e.preventDefault();
     $this = $(this);
