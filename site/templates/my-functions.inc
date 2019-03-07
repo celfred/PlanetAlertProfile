@@ -712,7 +712,11 @@ function cleanTest(HookEvent $e) { // Empty /tmp subtree
   $pages = wire('pages');
   $testPlayers = $pages->get("parent.name=players, team.name=test-team");
   foreach ($testPlayers as $p) {
-    $p->setAndSave('fight_request', 0);
+    $p->of(false);
+    if ($p->fight_request != 0) {
+      $p->fight_request = 0;
+      $p->save();
+    }
   }
 }
 function emptyTmp(HookEvent $e) { // Empty /tmp subtree
