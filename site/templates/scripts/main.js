@@ -68,7 +68,7 @@ $(document).ready(function() {
 				var href = $this.attr('data-href');
 				$('<span>Saving...</span>').insertAfter($this);
 				$.get(href, function(data) { 
-					$this.parent('li').remove();
+					$this.parent('li, tr').remove();
 				}); 
 			} else { 
 				return false;
