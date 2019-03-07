@@ -802,6 +802,10 @@ $(document).ready(function() {
 		checkAmount($(this).val());
   });
 	$(document).on('change', '#donator', function() {
+    $('#amount').val('');
+    $maxAmount = $(this).find("option:selected").attr('data-GC');
+    $('#maxAmount').text($maxAmount);
+    $('#amount').attr('data-max', $maxAmount);
 		if ($(this).val() != 0) {
 			$(this).next('.form-control-feedback').hide();
 			if (checkAmount($('#amount').val())) {

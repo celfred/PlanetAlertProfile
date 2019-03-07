@@ -22,12 +22,14 @@
     if ($user->isSuperuser() || $user->hasRole('teacher')) {
       if (isset($input->urlSegment2)) {
         $playerId = $input->urlSegment2;
+        $selectedPlayer = $pages->get($playerId);
+        $maxAmount = $selectedPlayer->GC;
         $hidden = '';
       } else {
         $playerId = 0;
         $hidden = 'hidden';
+        $maxAmount = 1000;
       }
-      $maxAmount = 1000;
     } else {
       $playerId = $player->id;
       $maxAmount= $player->GC;
@@ -37,9 +39,9 @@
     $out .= '<form id="donateForm" name="donateForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="form-horizontal" role="form">';
     $out .= '<div class="form-group has-warning has-feedback">';
     if ($user->isSuperuser() || $user->hasRole('teacher')) {
-      $out .= '<label for="amount" class="col-sm-5 control-label">'.__("Amount").' (<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" />&nbsp;<span class="glyphicon glyphicon-warning-sign"></span> max.) : </label>';
+      $out .= '<label for="amount" class="col-sm-5 control-label">'.__("Amount").' (<span class="glyphicon glyphicon-warning-sign"></span>&nbsp;<span id="maxAmount">'.$maxAmount.'</span>GC max.) : </label>';
     } else {
-      $out .= '<label for="amount" class="col-sm-5 control-label">'.__('Amount').' (<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" />&nbsp;'.$maxAmount.' max.) : </label>';
+      $out .= '<label for="amount" class="col-sm-5 control-label">'.__('Amount').' (<span id="maxAmount">'.$maxAmount.'</span>GC max.) : </label>';
     }
     $out .= '<div class="col-sm-5">';
     $out .= '<input id="amount" name="amount" type="text" data-max="'.$maxAmount.'" size="5" placeholder="0" class="form-control" />';
@@ -51,19 +53,21 @@
       $out .= '<label for="donator" class="col-sm-5 control-label">'.__("Donation from").' : </label>';
       $out .= '<div class="col-sm-5">';
       $out .= '<select class="form-control" id="donator" name="donator">';
-        $out .= '<option value="0">'.__("Select a player").'</option>';
+        $out .= '<option value="0" data-gc="0">'.__("Select a player").'</option>';
         foreach ($globalPlayers as $plyr) {
-          if ($plyr->id == $playerId) {
-            $selected = ' selected="selected"';
-          } else {
-            $selected = '';
+          if ($plyr->GC > 0) {
+            if ($plyr->id == $playerId) {
+              $selected = ' selected="selected"';
+            } else {
+              $selected = '';
+            }
+            if ($plyr->team->name != 'no-team') {
+              $team = ' ['.$plyr->team->title.']';
+            } else {
+              $team = '';
+            }
+            $out .= '<option value="'.$plyr->id.'" data-gc="'.$plyr->GC.'" '.$selected.'>'.$plyr->title.$team.' ('.$plyr->GC.' GC)</option>';
           }
-          if ($plyr->team->name != 'no-team') {
-            $team = ' ['.$plyr->team->title.']';
-          } else {
-            $team = '';
-          }
-          $out .= '<option value="'.$plyr->id.'"'.$selected.'>'.$plyr->title.$team.' ('.$plyr->GC.' GC)</option>';
         }
       $out .= '</select>';
       $out .= '<span class="glyphicon glyphicon-warning-sign form-control-feedback '.$hidden.'" aria-hidden="true"></span>';
