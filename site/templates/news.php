@@ -425,7 +425,7 @@
         $out .= '<div id="'.$n->id.'" class="news panel panel-success">';
         $out .= '<div class="panel-heading">';
         $out .= '<h4 class="panel-title">';
-        $logo = $homepage->photo->eq(0)->size(40,40); 
+        $logo = $homepage->photo->eq(1)->size(40,40); 
         $out .= '<img src="'.$logo->url.'" alt="" /> ';
         $out .= date("M. d, Y", $n->created);
         $out .= ' - ';
