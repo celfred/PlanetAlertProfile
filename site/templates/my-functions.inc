@@ -710,7 +710,7 @@ function randomSpecial(HookEvent $e) { // Random monsters are hidden if player d
 
 function cleanTest(HookEvent $e) { // Empty /tmp subtree
   $pages = wire('pages');
-  $testPlayers = $pages->get("parent.name=players, team.name=test-team");
+  $testPlayers = $pages->find("parent.name=players, team.name=test-team");
   foreach ($testPlayers as $p) {
     $p->of(false);
     if ($p->fight_request != 0) {
