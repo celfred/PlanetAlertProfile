@@ -562,8 +562,8 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
     updateScore($receiverPlayer, $task, $real);
   }
   if ($historyPage->task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
-    $wrongInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date");
-    // Limit to events AFTER the last 'Free' action on the oarticular element
+    $wrongInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date"); // Limited to current school year
+    // Limit to events AFTER the last 'Free' action on the oarticular element (in case element has been freed again)
     $lastFree = $player->get("name=history")->get("task.name=free, refPage=$historyPage->refPage, sort=-date");
     if ($lastFree->id) {
       $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
@@ -1406,8 +1406,9 @@ function updateTeamScores($team, $element = false) {
           $nbAllElements = $pages->find("template=place")->count();
         }
         $element = setElement($element, $team);
-        if ($element->completed) { $team->freeelements->add($el); }
+        if ($element->completed) { $team->freeelements->add($element); }
         $percent = round((100*$team->freeelements->count())/$nbAllElements);
+        $team->freeworld = $percent;
       }
     } else {
       $team->freeActs = nbFreedomActs($team);
