@@ -27,7 +27,7 @@ namespace ProcessWire;
         <div class="panel-heading">
           <h4 class="panel-title">
           <?php
-          $logo = $homepage->photo->eq(0)->size(40,40); 
+          $logo = $homepage->photo->eq(1)->size(40,40); 
           echo '<img src="'.$logo->url.'" alt="" /> ';
           echo strftime("%d %b %Y", $n->created);
           echo ' - ';

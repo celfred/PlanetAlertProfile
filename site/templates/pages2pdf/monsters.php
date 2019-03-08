@@ -1,15 +1,10 @@
 <?php 
 
-$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
+$logo = $pages->get('/')->photo->eq(1)->getCrop('thumbnail');
 $monsterId = $input->get("id");
 $m = $pages->get("id=$monsterId");
 if ($m->image) {
-  /* $options = array( */
-  /*   'cropping' => false, */
-  /*   'upscaling' => false */
-  /* ); */
-  /* $mini = "<img style='float: right;' alt=\"image\" src='".$m->image->size('150', '60', $options)->url."' />"; */
-  $mini =  "<img alt='image' style='float:right;' src='".$m->image->getCrop('thumbnail')->url."' />";
+  $mini =  "<img alt='image' style='float:right;' src='".$m->image->getCrop('small')->url."' />";
 } else {
   $mini = '';
 }
@@ -150,10 +145,11 @@ if ($input->get['thumbnail']) {
         'cropping' => false,
         'upscaling' => false
       );
-      $imageMap = "<img alt=\"image\" src='".$m->imageMap->size('500', '350', $options)->url."' />";
+      $imageMap = "<img alt=\"image\" src='".$m->imageMap->first()->size('500', '350', $options)->url."' />";
       $out .= '<div style="text-align: center;">';
       $out .= $imageMap;
       $out .= '</div>';
+      $out .= '<br />';
     } else {
       $imageMap = '';
     }
