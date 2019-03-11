@@ -687,6 +687,21 @@ function checkStreak($player) {
   return $streak;
 }
 
+function clearAdminTableCache(HookEvent $e) {
+  $p = wire('pages')->get("name=admintable");
+  $cacheFile = wire('modules')->PageRender->getCacheFile($p);
+  if($cacheFile->exists()) {
+    $cacheFile->remove();
+  }
+}
+function triggerClearAdminTableCache() {
+  $p = wire('pages')->get("name=admintable");
+  $cacheFile = wire('modules')->PageRender->getCacheFile($p);
+  if($cacheFile->exists()) {
+    $cacheFile->remove();
+  }
+}
+
 function randomSpecial(HookEvent $e) { // Random monsters are hidden if player doesn't have the Visualizer
   $pages = wire('pages');
   $allMonsters = $pages->find("template=exercise");

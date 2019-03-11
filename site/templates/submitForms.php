@@ -416,6 +416,7 @@
       // Limit to absence (no need to recalculate scores)
       if ($event->is("task.name=absent|abs")) {
         $pages->trash($event);
+        triggerClearAdminTableCache();
       }
     }
 
@@ -439,6 +440,7 @@
     }
 
     if($input->post->adminTableSubmit) { // adminTableForm submitted
+      $clearAdminTableCache = false;
       // Consider checked players only
       $checkedPlayers = $input->post->player;
       $checked = array_keys($checkedPlayers);
@@ -448,7 +450,9 @@
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $comment = 'comment_'.$playerId.'_'.$taskId;
         $player = $pages->get($playerId);
+        $player->of(false);
         $task = $pages->get($taskId); 
+        $task->of(false);
         $task->comment = trim($input->post->$comment);
         $task->refPage = false;
         $task->linkedId = false;
@@ -462,6 +466,9 @@
         }
         // Update player's scores and save
         updateScore($player, $task, true);
+        if ($task->is("name=abs|absent")) {
+          $clearAdminTableCache = true;
+        }
       }
       // Check death for each players having a negative action
       $allNegPlayers = $allNegPlayers->unique();
@@ -470,6 +477,9 @@
       }
       setTeamCaptains($player->team);
 
+      if ($clearAdminTableCache) {
+        triggerClearAdminTableCache();
+      }
       // Redirect to team page (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
       if (isset($input->post->adminTableRedirection)) {

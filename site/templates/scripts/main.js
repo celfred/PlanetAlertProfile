@@ -1365,6 +1365,10 @@ $(document).ready(function() {
 	// Init tables if needed
 	if ($('table').length > 0) { initTables(); }
 
+  // if ($('~customDate').length > 0) { // Override today's date in cached pages
+    // $('#customDate').val(new Date().toDateInputValue());
+  // }
+
 	if ($('#helpAlert').length > 0) {
 		swal({
 			position: 'top',
