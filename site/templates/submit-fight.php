@@ -263,5 +263,6 @@
         }
       }
     }
+    clearCache("newsboard");
   }
 ?>

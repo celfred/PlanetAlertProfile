@@ -99,7 +99,7 @@
           $class = $page->name == 'home' ? "on" : "";
           $out .= "<a class='btn $class' href='{$homepage->url}'>{$homepage->title}</a>";
           $class = $page->name == 'newsboard' ? "on" : "";
-          $out .= "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
+          $out .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
           $out .= '<div class="btn-group" role="group">';
             $class = $page->name == 'players' || $page->name == "world" || $page->template == 'main-office' ? "on" : "";
             $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The Teams").' <span class="caret"></span></button>';
@@ -282,7 +282,7 @@
       $out .= '<ul>';
         $out .= '<div class="btn-group" role="group" aria-label="...">';
           $class = $page->name == 'newsboard' ? "on" : "";
-          $out .= "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
+          $out .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
           $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
           $out .= "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}/{$player->name}'>".__("My Profile")."</a>";
           $out .= '<div class="btn-group">';
@@ -430,7 +430,7 @@
             $class = $page->name == 'home' ? "on" : "";
             $guestMenu .= "<a class='btn $class' href='{$homepage->url}'>{$homepage->title}</a>";
             $class = $page->name == 'newsboard' ? "on" : "";
-            $guestMenu .= "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
+            $guestMenu .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
             $guestMenu .= '<div class="btn-group" role="group">';
               $class = $page->name == 'players' || $page->name == "world" || $page->template == 'main-office' ? "on" : "";
               $guestMenu .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The Teams").' <span class="caret"></span></button>';

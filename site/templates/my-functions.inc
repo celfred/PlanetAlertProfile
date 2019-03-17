@@ -26,6 +26,15 @@ function getMultiDimensional($values, $prefix) {
   return $output;
 }
 
+function clearCache($pageName) {
+  $pages = wire('pages');
+  $myPage = $pages->get("name=$pageName");
+  if ($myPage->id) {
+    $myPage->of(false);
+    $myPage->save();
+  }
+}
+
 function getAllPlayers($user = false, $paginate = false) {
   $page = wire('page');
   $pages = wire('pages');
@@ -688,13 +697,6 @@ function checkStreak($player) {
 }
 
 function clearAdminTableCache(HookEvent $e) {
-  $p = wire('pages')->get("name=admintable");
-  $cacheFile = wire('modules')->PageRender->getCacheFile($p);
-  if($cacheFile->exists()) {
-    $cacheFile->remove();
-  }
-}
-function triggerClearAdminTableCache() {
   $p = wire('pages')->get("name=admintable");
   $cacheFile = wire('modules')->PageRender->getCacheFile($p);
   if($cacheFile->exists()) {

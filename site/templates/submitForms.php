@@ -416,7 +416,7 @@
       // Limit to absence (no need to recalculate scores)
       if ($event->is("task.name=absent|abs")) {
         $pages->trash($event);
-        triggerClearAdminTableCache();
+        clearCache("adminTable");
       }
     }
 
@@ -478,7 +478,7 @@
       setTeamCaptains($player->team);
 
       if ($clearAdminTableCache) {
-        triggerClearAdminTableCache();
+        clearCache("adminTable");
       }
       // Redirect to team page (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
@@ -554,5 +554,8 @@
         echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
       }
     }
+
+    clearCache("newsboard");
   }
+
 ?>
