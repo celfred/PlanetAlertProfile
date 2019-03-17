@@ -1056,7 +1056,7 @@
                 $out .= '<span class="strikeText">'.$p->title.'</span>';
                 $out .= ' <a class="publishElement" href="'.$page->url.'publish-element/'.$user->id.'/'.$p->id.'?type=team">'.__('[Publish]').'</a>';
               } else {
-                $out .= '<span><a href="'.$shop->url.'details/'.$p->name.'" target="blank">'.$p->title.'</a></span>';
+                $out .= '<span><a href="'.$p->url.'" target="blank">'.$p->title.'</a></span>';
               }
               if ($p->summary != '') {
                 $out .= ' → <span>'.$p->summary.'</span> ';
@@ -1080,7 +1080,7 @@
             if (!$user->isSuperuser()) {
               $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
             }
-            $out .= '<span><a href="'.$shop->url.'details/'.$p->name.'" target="blank">'.$p->title.'</a></span> → ';
+            $out .= '<span><a href="'.$p->url.'" target="blank">'.$p->title.'</a></span> → ';
             $out .= '<span>'.$p->summary.'</span> ';
             if ($p->category) {
               $out .= ' <span class="label label-danger">'.$p->category->title.'</span>';
@@ -1097,7 +1097,7 @@
           $allEquipments = $pages->find("template=equipment")->sort("category.title, title");
           foreach($allEquipments as $p) {
             $out .= '<li>';
-            $out .= '<span><a href="'.$shop->url.'details/'.$p->name.'" target="blank">'.$p->title.'</a></span> → ';
+            $out .= '<span><a href="'.$p->url.'" target="blank">'.$p->title.'</a></span> → ';
             $out .= '<span>'.$p->summary.'</span> ';
             $out .= '<span class="label label-danger">'.$p->category->title.'</span> ';
             if ($user->isSuperuser() || $user->name == 'flieutaud') {

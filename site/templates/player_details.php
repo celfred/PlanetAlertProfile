@@ -1,8 +1,8 @@
 <?php namespace ProcessWire;
   $playerPage = $pages->get("template=player,name=".$input->urlSegment2);
   $playersTotalNb = $pages->count("template=player,team=$playerPage->team");
-  $playerPlacesNb = $playerPage->places->count();
-  $playerPeopleNb = $playerPage->people->count();
+  $playerPage->places ? $playerPlacesNb = $playerPage->places->count() : $playerPlacesNb = 0;
+  $playerPage->people ? $playerPeopleNb = $playerPage->people->count() : $playerPeopleNb = 0;
   $playerNbEl = $playerPlacesNb+$playerPeopleNb;
   $rightInvasions = $pages->find("has_parent=$playerPage, parent.name=history, task.name=right-invasion")->count();
   $wrongInvasions = $pages->find("has_parent=$playerPage, parent.name=history, task.name=wrong-invasion")->count();
@@ -383,7 +383,7 @@
             echo '→ <span class="glyphicon glyphicon-time"></span> <a href="'.$pages->get("name=fighters-playground")->url.$playerPage->name.'">'.__("Go to the Fighters playground").'</a>';
           }
         } else {
-          $link = '<a href="'.$pages->get('name=shop')->url.'details/memory-helmet">'.$pages->get("template=item, name~=helmet")->title.'</a> ';
+          $link = '<a href="'.$pages->get('template=item, name=memory-helmet')->url.'">'.$pages->get("template=item, name~=helmet")->title.'</a> ';
           echo sprintf(__("Sorry, but at least one member in your group needs to buy the %s to be able to access the Underground Training zone."), $link);
         }
       ?>

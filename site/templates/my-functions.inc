@@ -2790,7 +2790,7 @@ function miniProfile($player, $type = '') {
           $out .= '<ul class="list-inline">';
           $out .= '<li>'.__("Your equipment").' ('.$player->equipment->count().') → </li>';
           foreach($player->equipment as $p) {
-            $out .= '<li><a href="'.$shop->url.'details/'.$p->name.'"><img class="" src="'.$p->image->getCrop('small')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
+            $out .= '<li><a href="'.$p->url.'"><img class="" src="'.$p->image->getCrop('small')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
           }
           $out .= '</ul>';
         } else {
