@@ -1506,7 +1506,7 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $player->inClassUtCount = $player->ut->find("inClass=1")->count();
   $player->outClassUtCount = $player->ut->find("inClass=0")->count();
   $player->inClassFpCount = $player->fp->find("inClass=1")->count();
-  $player->outClassFpCount = $player->fp->find("inClass=0")->count();
+  $player->outClassFpCount = $player->fp->find("inClass=0, task.name!=battle-v|battle-vv")->count();
   $player->inClassActivity = $player->inClassUtCount + $player->inoutClassFpCount;
   $player->outClassActivity = $player->outClassUtCount + $player->outClassFpCount;
   $player->nbHk = $allHk->count();
