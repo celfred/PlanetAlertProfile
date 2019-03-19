@@ -6,7 +6,7 @@ if($input->post->username && $input->post->pass) {
   $userName = $sanitizer->pageName($input->post->username);
   $pass = $input->post->pass; 
   if($session->login($userName, $pass)) {
-    $session->redirect($newsboardPage->url); // Redirect logged user to newboard
+    $session->redirect($newsboardPage->url.$user->name); // Redirect logged user to newboard
   }
 }
 
