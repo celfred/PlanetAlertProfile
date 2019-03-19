@@ -124,7 +124,7 @@
                 $out .=  "<a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
                 $out .= "<ul class='dropdown-menu'>";
                 foreach ($teamPlayers as $p) {
-                  $out .= "<li><a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}/{$p->name}'>{$p->title}</a></li>";
+                  $out .= "<li><a href='{$p->url}'>{$p->title}</a></li>";
                 }
                 $out .= "</ul>";
                 $out .= "</li>";
