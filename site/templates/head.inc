@@ -284,7 +284,7 @@
           $class = $page->name == 'newsboard' ? "on" : "";
           $out .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
           $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
-          $out .= "<a class='btn $class' href='{$pages->get('/players')->url}{$player->team->name}/{$player->name}'>".__("My Profile")."</a>";
+          $out .= "<a class='btn $class' href='{$player->url}'>".__("My Profile")."</a>";
           $out .= '<div class="btn-group">';
             $class = ($page->is("name=players|main-office|world") && $input->urlSegment2 == '') ? "on" : "";
             $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("My Team").'<span class="caret"> </span></button>';
@@ -424,68 +424,62 @@
     }
 
     if (!$user->isLoggedin()) { // Guest menu
-      if (!$cache->get("guestMenu")) {
-        $guestMenu = '<ul>';
-          $guestMenu .= '<div class="btn-group" role="group" aria-label="...">';
-            $class = $page->name == 'home' ? "on" : "";
-            $guestMenu .= "<a class='btn $class' href='{$homepage->url}'>{$homepage->title}</a>";
-            $class = $page->name == 'newsboard' ? "on" : "";
-            $guestMenu .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
-            $guestMenu .= '<div class="btn-group" role="group">';
-              $class = $page->name == 'players' || $page->name == "world" || $page->template == 'main-office' ? "on" : "";
-              $guestMenu .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The Teams").' <span class="caret"></span></button>';
-              $guestMenu .= '<ul class="dropdown-menu">';
-              foreach($allTeams as $team) {
-                $class = $team->name == $input->urlSegment1 ? " class='selected-left'" : "";
-                $guestMenu .= "<li class=''>";
-                $guestMenu .= "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title}</a>";
-                $guestMenu .= "</li>";
-              }
-              $guestMenu .= '</ul>';
-            $guestMenu .= '</div>';
-            $guestMenu .= '<div class="btn-group">';
-              $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : "";
-              $guestMenu .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The World").'<span class="caret"> </span></button>';
-              $guestMenu .= '<ul class="dropdown-menu">';
-                $class = $page->name == 'shop' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$shop->url}'>{$shop->title}</a></li>";
-                $class = $page->name == 'places' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$places->url}'>{$places->title}</a></li>";
-                $class = $page->name == 'people' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$peoples->url}'>{$peoples->title}</a></li>";
-                $class = $page->name == 'tasks' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$tasks->url}'>{$tasks->title}</a></li>";
-                $class = $page->name == 'monsters' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$monsters->url}'>{$monsters->title}</a></li>";
-                $class = $page->name == 'the-scoreboards' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$scoreboards->url}'>{$scoreboards->title}</a></li>";
-                $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$hall->url}'>{$hall->title}</a></li>";
-                $class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$book->url}'>{$book->title}</a></li>";
-              $guestMenu .= '</ul>';
-            $guestMenu .= '</div>';
-            $guestMenu .= '<div class="btn-group">';
-              $class = $page->is("name=blog|documentation|contact") ? "on" : "";
-              $guestMenu .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>';
-              $guestMenu .= '<ul class="dropdown-menu">';
-              $class = $page->name == 'contact' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - {$contact->title}</a></li>";
-                $class = $page->name == 'blog' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
-                $class = $page->name == 'documentation' ? " class='selected-left'" : "";
-                $guestMenu .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
-            $guestMenu .= '</ul>';
-            $guestMenu .= '</div>';
-            $class = $page->is("name=loginform") ? "on" : "";
-            $guestMenu .= '<a class="btn '.$class.'" href="'.$loginUrl.'">'.__("Log in").'</a>';
-          $guestMenu .= '</div>';
-        $guestMenu .= '</ul>';
-        $cache->save("guestMenu", $guestMenu, "+ 1 year");
-      } else {
-        $guestMenu = $cache->get("guestMenu");
-      }
-      $out .= $guestMenu;
+      $out .= '<ul>';
+        $out .= '<div class="btn-group" role="group" aria-label="...">';
+          $class = $page->name == 'home' ? "on" : "";
+          $out .= "<a class='btn $class' href='{$homepage->url}'>{$homepage->title}</a>";
+          $class = $page->name == 'newsboard' ? "on" : "";
+          $out .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
+          $out .= '<div class="btn-group" role="group">';
+            $class = $page->name == 'players' || $page->name == "world" || $page->template == 'main-office' ? "on" : "";
+            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The Teams").' <span class="caret"></span></button>';
+            $out .= '<ul class="dropdown-menu">';
+            foreach($allTeams as $team) {
+              $class = $team->name == $input->urlSegment1 ? " class='selected-left'" : "";
+              $out .= "<li class=''>";
+              $out .= "<a$class href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title}</a>";
+              $out .= "</li>";
+            }
+            $out .= '</ul>';
+          $out .= '</div>';
+          $out .= '<div class="btn-group">';
+            $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : "";
+            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The World").'<span class="caret"> </span></button>';
+            $out .= '<ul class="dropdown-menu">';
+              $class = $page->name == 'shop' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$shop->url}'>{$shop->title}</a></li>";
+              $class = $page->name == 'places' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$places->url}'>{$places->title}</a></li>";
+              $class = $page->name == 'people' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$peoples->url}'>{$peoples->title}</a></li>";
+              $class = $page->name == 'tasks' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$tasks->url}'>{$tasks->title}</a></li>";
+              $class = $page->name == 'monsters' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$monsters->url}'>{$monsters->title}</a></li>";
+              $class = $page->name == 'the-scoreboards' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$scoreboards->url}'>{$scoreboards->title}</a></li>";
+              $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$hall->url}'>{$hall->title}</a></li>";
+              $class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$book->url}'>{$book->title}</a></li>";
+            $out .= '</ul>';
+          $out .= '</div>';
+          $out .= '<div class="btn-group">';
+            $class = $page->is("name=blog|documentation|contact") ? "on" : "";
+            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>';
+            $out .= '<ul class="dropdown-menu">';
+            $class = $page->name == 'contact' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - {$contact->title}</a></li>";
+              $class = $page->name == 'blog' ? " class='selected-left'" : "";
+              $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
+              $class = $page->name == 'documentation' ? " class='selected-left'" : "";
+              $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
+          $out .= '</ul>';
+          $out .= '</div>';
+          $class = $page->is("name=loginform") ? "on" : "";
+          $out .= '<a class="btn '.$class.'" href="'.$loginUrl.'">'.__("Log in").'</a>';
+        $out .= '</div>';
+      $out .= '</ul>';
     }
     $out .= '</div>'; // /masthead
     
