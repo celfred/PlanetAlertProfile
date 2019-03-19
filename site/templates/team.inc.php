@@ -166,7 +166,7 @@
     $out .= '</td>';
     $out .= '<td>'. $mini .'</td>';
     $out .= '<td>';
-    $out .='<a href="'.$page->url.$input->urlSegment1.'/'.$player->name.'">'. $player->title .'</a>'.$hkCount;
+    $out .='<a href="'.$player->url.'">'. $player->title .'</a>'.$hkCount;
     $out .= '</td>';
     $out .= '<td>'. $player->yearlyKarma .'</td>';
     if ($user->isLoggedin()) {

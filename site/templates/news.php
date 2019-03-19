@@ -272,7 +272,7 @@
           $out .= '</div>';
           $out .= '<div class="panel-footer text-right">';
           $out .= '<p>'.__("To see your complete history, go to").' ';
-          $out .= '<a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'">'.__("My Profile page").'</a></p>';
+          $out .= '<a href="'.$player->url.'">'.__("My Profile page").'</a></p>';
           $out .= '</div>';
         $out .= '</div>';
       }
