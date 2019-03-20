@@ -6,9 +6,40 @@
   $wire->addHook('LazyCron::everyDay', null, 'cleanTest'); // Init test-team players
   $wire->addHook('LazyCron::everyDay', null, 'clearAdminTableCache');
 
+  // Manage redirections (restrictions in case of hard coded urls to try and access another user's page
+  $homepage = $pages->get("/");
+  wire()->addHookBefore("Page::render", function($event) use($homepage, $session, $pages, $user, $input, $page){
+    switch($page->name) {
+      case 'main-office' :
+        if (($user->hasRole('player') && $input->urlSegment2 != 'player') || ($user->isGuest() && $input->urlSegment2 != 'player')) {
+          // TODO ? Test if player is on his or her own team's office ?
+          $session->redirect($homepage->url);
+        }
+        break;
+      case 'newsboard' :
+        if (($user->hasRole('player') && $input->urlSegment1 != $user->name) || ($user->isGuest() && $input->urlSegment2 != '')) {
+          $session->redirect($homepage->url);
+        }
+        break;
+      default: return;
+    }
+  });
+
   // the next ensures that the following code will only run on front end (otherwise back end would get cached, too which results in problems)
   // make sure to place anything you need in the backend before this line or change it to your needs..
-  if ((strpos($page->url, wire('config')->urls->admin) !== false) || ($page->id && $page->is('parent|has_parent=2'))) return;
+  /* if ((strpos($page->url, wire('config')->urls->admin) !== false) || ($page->id && $page->is('parent|has_parent=2'))) return; */
+
+  /* $wire->addHookBefore('Page::render', function($event) use($session, $user, $page, $input) { */
+  /*   if ($user->isLoggedin()) { */
+  /*     if ($page->name == 'newsboard' && $input->urlSegment1 != $user->name ) { */
+  /*       $session->redirect($page->url.$user->name); */
+  /*     } */
+  /*   } else { // Guest pages */
+  /*     if ($page->name == 'newsboard' && $input->urlSegment1 != '') { // Guest tries to see somebody's Newsboard */
+  /*       $session->redirect($page->url); */
+  /*     } */
+  /*   } */
+  /* }); */
 
   /* $session->alert = "<div class='alert alert-success closable expire'>All caches have been deleted. <i class='fa fa-close'></i></div>"; */
 

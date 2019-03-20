@@ -1,4 +1,5 @@
 <?php namespace ProcessWire;
+
   include("./head.inc"); 
 
   if (isset($player) && $player->team->is("name=test-team")) {

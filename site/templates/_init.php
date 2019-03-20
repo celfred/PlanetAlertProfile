@@ -1,5 +1,5 @@
 <?php namespace ProcessWire;
-  include('./my-functions.inc'); // Planet Alert PHP functions
+  include_once('./my-functions.inc'); // Planet Alert PHP functions
 
   $homepage = $pages->get("/"); 
   $loginUrl = $pages->get("name=loginform")->url;

@@ -110,15 +110,15 @@
               $out .= "<li class='dropdown-submenu'>";
               if ($user->isSuperuser()) {
                 if ($team->teacher->first()) {
-                  $out .= "<a$class href='{$office->url}{$team->name}'>{$team->title} [{$team->teacher->eq(0)->name}]</a>";
+                  $out .= "<a$class href='{$office->url}{$team->name}/teacher'>{$team->title} [{$team->teacher->eq(0)->name}]</a>";
                 } else {
-                  $out .= "<a$class href='{$office->url}{$team->name}'>{$team->title} [-]</a>";
+                  $out .= "<a$class href='{$office->url}{$team->name}/teacher'>{$team->title} [-]</a>";
                 }
               } else {
-                $out .= "<a$class href='{$office->url}{$team->name}'>{$team->title}</a>";
+                $out .= "<a$class href='{$office->url}{$team->name}/teacher'>{$team->title}</a>";
               }
                 $out .= "<ul class='dropdown-menu'>";
-              $out .=  "<li><a href='{$office->url}{$team->name}'>{$team->title} {$office->title}</a>";
+              $out .=  "<li><a href='{$office->url}{$team->name}/teacher'>{$team->title} {$office->title}</a>";
               if ($team->name != 'no-team') {
                 $out .=  "<li class='dropdown-submenu'>";
                 $out .=  "<a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
@@ -290,7 +290,7 @@
             $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("My Team").'<span class="caret"> </span></button>';
             $out .= '<ul class="dropdown-menu">';
               $class = $page->name == 'main-office' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$office->url}{$player->team->name}'><span class='glyphicon glyphicon-eye-open'></span> - {$office->title}</a></li>";
+              $out .= "<li><a$class href='{$office->url}{$player->team->name}/player'><span class='glyphicon glyphicon-eye-open'></span> - {$office->title}</a></li>";
               $class = ($page->name == 'players' && $input->urlSegment2 == '') ? " class='selected-left'" : "";
               $out .= "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}'><span class='glyphicon glyphicon-th-list'></span> - ".__("List")." </a></li>";
               $class = $page->name == 'world' ? " class='selected-left'" : "";

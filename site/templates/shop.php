@@ -12,13 +12,14 @@
 
   if ($input->urlSegment1 == '') { // Complete catalogue
     if ($user->isSuperuser() || $user->hasRole('teacher')) {
+      echo '<div class="row">';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'?pages2pdf=1">'.__("Get PDF [Catalogue]").'</a>';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/weapons?pages2pdf=1">'.__("Get PDF [Weapons]").'</a>';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/protections?pages2pdf=1">'.__("Get PDF [Protections]").'</a>';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/items?pages2pdf=1">'.__("Get PDF [Potions]").'</a>';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/specialItems?pages2pdf=1">'.__("Get PDF [Special Potions]").'</a>';
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/group-items?pages2pdf=1">'.__("Get PDF [Group items]").'</a>';
-      echo '<br /><br />';
+      echo '</div>';
     }
     $out = $cache->get('cache__shop-'.$headTeacher->name, '86400', function($user, $pages, $config) use($headTeacher) {
       $out = '';

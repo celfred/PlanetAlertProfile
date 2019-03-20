@@ -605,6 +605,7 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
     if (checkNewPageCache($player)) {
       setCache($player->id, false);
     }
+    // TODO : Clear caches here ???
   }
 }
 
