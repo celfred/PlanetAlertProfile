@@ -122,6 +122,7 @@
                       $out .= '<div class="text-center">';
                       $out .= '<h2 class="inline" ng-bind-html="word|paTags"></h2>   ';
                       $out .= '<span class="lead pull-right" data-toggle="tooltip" data-html="true" title="{{mixedWord}}" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses"></span></span>';
+                      $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}}</span></h3> ';
                       $out .= '</div>';
                       $out .= '<br />';
                       $out .= '<h2 class="category inline" ng-repeat="c in categories">';

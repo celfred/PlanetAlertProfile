@@ -738,7 +738,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
 		$scope.allCorrections = $scope.question['allCorrections'];
 		if ($scope.allCorrections['feedback'] != '') {
 			$scope.feedback = '['+$scope.allCorrections['feedback']+']';
-		}
+    }
     // End animation
     $timeout(function() { $scope.correct = false; }, 1000);
 		// Init new question
@@ -829,7 +829,11 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
           timer: 1000
         }).catch(swal.noop);
         // Show correction
-        $scope.showCorrection = $scope.allCorrections.join(', ');
+        if ($scope.exType == 'categorize') {
+          $scope.showCorrection = $scope.allCorrections;
+        } else {
+          $scope.showCorrection = $scope.allCorrections.join(', ');
+        }
         $scope.wrong = true;
       }
     }
