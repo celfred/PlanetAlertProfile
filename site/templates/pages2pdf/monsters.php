@@ -3,14 +3,14 @@
 $logo = $pages->get('/')->photo->eq(1)->getCrop('thumbnail');
 $monsterId = $input->get("id");
 $m = $pages->get("id=$monsterId");
-if ($m->image) {
-  $mini =  "<img alt='image' style='float:right;' src='".$m->image->getCrop('small')->url."' />";
-} else {
-  $mini = '';
-}
 
 if ($input->get['thumbnail']) {
   $out = '';
+  if ($m->image) {
+    $mini =  "<img alt='image' style='float:right;' src='".$m->image->getCrop('thumbnail')->url."' />";
+  } else {
+    $mini = '';
+  }
   for ($i=0; $i<6; $i++) {
     $out .= '<table class="miniTable" style="width:3cm;">';
     $out .= '<tr>';
@@ -32,6 +32,11 @@ if ($input->get['thumbnail']) {
     $out .= '<br />';
   }
 } else {
+  if ($m->image) {
+    $mini =  "<img alt='image' style='float:right;' src='".$m->image->getCrop('small')->url."' />";
+  } else {
+    $mini = '';
+  }
   $exData = $m->exData;
   $allLines = preg_split('/$\r|\n/', $exData);
   shuffle($allLines);
