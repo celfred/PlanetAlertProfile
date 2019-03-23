@@ -111,7 +111,7 @@
                       $out .= '</div>';
                       $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedback|paTags}}</span></h3> ';
                       $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">'.__("Try again").'</button> ';
-                      $out .= '<span class="lead pull-right" data-toggle="tooltip" data-html="true" title="{{mixedWord}}" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses"></span></span>';
+                      $out .= '<span class="lead pull-right" data-toggle="tooltip" data-html="true" data-original-title="{{mixedWord}}" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses"></span></span>';
                       $out .= '<br /><br />';
                       $out .= '<h3 id="" ng-bind="playerAnswer"></h3>';
                       $out .= '<p class="text-right">';
@@ -121,7 +121,7 @@
                     } else if ($monster->type->name == 'categorize') {
                       $out .= '<div class="text-center">';
                       $out .= '<h2 class="inline" ng-bind-html="word|paTags"></h2>   ';
-                      $out .= '<span class="lead pull-right" data-toggle="tooltip" data-html="true" title="{{mixedWord}}" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses"></span></span>';
+                      $out .= '<span class="lead pull-right" data-toggle="tooltip" data-html="true" data-original-title="{{mixedWord}}" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses"></span></span>';
                       $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}}</span></h3> ';
                       $out .= '</div>';
                       $out .= '<br />';
@@ -131,7 +131,7 @@
                     } else {
                       $out .= '<div class="text-center">';
                       $out .= '<h2 class="inline" ng-bind-html="word|paTags"></h2>   ';
-                      $out .= '<span class="lead pull-right" data-toggle="tooltip" data-html="true" title="{{mixedWord}}" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses"></span></span>';
+                      $out .= '<span class="lead pull-right" data-toggle="tooltip" data-html="true" data-original-title="{{mixedWord}}" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses"></span></span>';
                       $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> <span ng-bind-html="showCorrection|underline"></span> {{feedback}}</span></h3> ';
                       $out .= '</div>';
                       $out .= '<br />';
