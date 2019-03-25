@@ -11,3 +11,5 @@
 /site/templates/*.swp
 /site/modules/*
 /site/config.php
+/site/templates/node_modules/*
+/site/templates/dist/*
