@@ -26,12 +26,15 @@ function getMultiDimensional($values, $prefix) {
   return $output;
 }
 
-function clearCache($pageName) {
-  $pages = wire('pages');
-  $myPage = $pages->get("name=$pageName");
-  if ($myPage->id) {
-    $myPage->of(false);
-    $myPage->save();
+function clearCache(...$pageNames) {
+  foreach($pageNames as $p) {
+    $pageName = wire('pages')->get("name=$p");
+    if ($pageName->id) {
+      $cacheFile = wire('modules')->PageRender->getCacheFile($pageName);
+      if($cacheFile->exists()) {
+        $cacheFile->remove();
+      }
+    }
   }
 }
 
@@ -605,7 +608,6 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
     if (checkNewPageCache($player)) {
       setCache($player->id, false);
     }
-    // TODO : Clear caches here ???
   }
 }
 

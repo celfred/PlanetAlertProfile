@@ -554,8 +554,7 @@
         echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
       }
     }
-
-    clearCache("newsboard");
+    clearCache("newsboard", "main-office", "players");
   }
 
 ?>

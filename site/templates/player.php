@@ -410,8 +410,8 @@
               if ($user->isSuperuser() || ($user->hasRole('teacher') && $playerPage->team->teacher->has("id=$user->id"))) {
                 echo ' <a target="blank" href="'.$adminActions->url.'recalculate/'.$playerPage->id.'">'.__("[Edit history]").'</a>';
               }
-              if ($user->name == $playerPage->name) {
-                // TODO : Ajax reload of complete history
+              if ($user->name == $playerPage->name || $user->isSuperuser() || ($user->hasRole('teacher') && $playerPage->team->teacher->has("id=$user->id"))) {
+                // Ajax reload of complete history
                 echo '<a href="#" data-href="'.$pages->get('name=ajax-content')->url.'?id=history&limit=0&playerId='.$playerPage->id.'" data-targetId="historyPanel" data-hide-feedback="true" class="simpleAjax btn btn-xs btn-danger">'.__("Reload complete history").'</a>';
               }
             ?>

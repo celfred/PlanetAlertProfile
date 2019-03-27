@@ -9,22 +9,27 @@
       $session->logout();
       $session->redirect('./');
     }
+
+    // All teams (and cache for faster access)
+    if ($user->isSuperuser()) { // Test team is included for debug
+      $allTeams = $pages->find("template=team")->sort("title");
+    } else {
+      /* $cache->delete('allTeams'); // In case we want to clean cache */
+      $template = $templates->get("team");
+      $allTeams = $cache->get('allTeams', $template, function($pages) {
+        return $pages->find("template=team, name!='test-team'")->sort("title");
+      });
+    }
+    $allTeamsNames = $allTeams->implode(',', '{name}');
   ?>
   <title>
     <?php
-      // All teams (and cache for faster access)
-      if ($user->isSuperuser()) { // Test team is included for debug
-        $allTeams = $pages->find("template=team")->sort("title");
-      } else {
-        /* $cache->delete('allTeams'); // In case we want to clean cache */
-        $template = $templates->get("team");
-        $allTeams = $cache->get('allTeams', $template, function($pages) {
-          return $pages->find("template=team, name!='test-team'")->sort("title");
-        });
-      }
-      $allTeamsNames = $allTeams->implode(',', '{name}');
       if (isset($input->urlSegment1) && stripos($allTeamsNames, $input->urlSegment1) === false) {
-        echo $page->get("title");
+        if ($page->name == 'home') {
+          echo 'Planet Alert';
+        } else {
+          echo $page->get("title");
+        }
         $selectedTeam = false;
       } else {
         echo $page->get("title").' '.strtoupper($input->urlSegment1);
@@ -264,7 +269,7 @@
       $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
       // Avatar
       $out .= '<div style=" color: #FFF;">';
-      $out .= '<span class="avatarContainer">';
+      $out .= '<span class="avatarContainer" data-loggedId="'.$player->id.'">';
         if ($player->avatar) {
           $out .= '<img class="avatar superpose" src="'.$player->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
         } else {

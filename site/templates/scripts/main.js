@@ -1365,6 +1365,11 @@ $(document).ready(function() {
 	// Init tables if needed
 	if ($('table').length > 0) { initTables(); }
 
+  // Highlight logged in player if needed
+  if ($('#teamTable').length > 0 && $(".avatarContainer").eq(0).attr("data-loggedId") != '') {
+    var $loggedId = $(".avatarContainer").eq(0).attr("data-loggedId");
+    $('.'+$loggedId).addClass('selected');
+  }
   // if ($('~customDate').length > 0) { // Override today's date in cached pages
     // $('#customDate').val(new Date().toDateInputValue());
   // }
