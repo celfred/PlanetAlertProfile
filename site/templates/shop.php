@@ -21,7 +21,7 @@
       echo '<a class="pdfLink btn btn-sm btn-info" href="'. $page->url.'pictures/group-items?pages2pdf=1">'.__("Get PDF [Group items]").'</a>';
       echo '</div>';
     }
-    $out = $cache->get('cache__shop-'.$headTeacher->name, '86400', function($user, $pages, $config) use($headTeacher) {
+    $out = $cache->get('cache__shop-'.$headTeacher->name, 2678400, function($user, $pages, $config) use($headTeacher) {
       $out = '';
       if ($user->isLoggedin()) { // Limit to teacher's world
         if ($user->isSuperuser()) {

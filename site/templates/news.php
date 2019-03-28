@@ -8,9 +8,7 @@
   $out = '';
   // Display team scores
   $out .= '<div class="row text-center">';
-    if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
-      showScores($allTeams);
-    }
+    $out .= getScoresSummaries($headTeacher);
   $out .= '</div>';
 
   $out .= '<div class="row">';
@@ -24,7 +22,6 @@
         $today = new \DateTime("today");
         $news = $pages->find("parent.name=history, publish=1, task.name!=penalty|buy-pdf|inactivity");
         $news->filter("has_parent=$allPlayers")->sort('-created');
-        bd($allPlayers->count());
         $out .= '<div class="col-sm-6">';
         $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
         if ($news->count() > 0) {

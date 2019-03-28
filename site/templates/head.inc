@@ -14,9 +14,7 @@
     if ($user->isSuperuser()) { // Test team is included for debug
       $allTeams = $pages->find("template=team")->sort("title");
     } else {
-      /* $cache->delete('allTeams'); // In case we want to clean cache */
-      $template = $templates->get("team");
-      $allTeams = $cache->get('allTeams', $template, function($pages) {
+      $allTeams = $cache->get('cache__allTeams', 2678400, function($pages) {
         return $pages->find("template=team, name!='test-team'")->sort("title");
       });
     }
@@ -80,352 +78,295 @@
     }
     if (!$user->isSuperuser()) {
       $headTeacher = getHeadTeacher($user);
+    } else {
+      $headTeacher = $user;
     }
 
     $out .= '<div id="wrap">'; // Closed in foot.inc
     $out .= '<div id="masthead" class="masthead">';
 
     if ($user->hasRole('teacher') || $user->isSuperuser()) { // Teacher or Superuser is logged
-      if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
-        $allTeams->filter("teacher=$user");
-        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
-      } else {
-        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
-      }
-
       // Official period is checked only when viewing a team page
       if ($page->is("name=main-office|players|quiz|adminTable|world|donation")) {
         $headTeacher = $selectedTeam->teacher->first();
         $out .= periodNotification($selectedTeam, $headTeacher);
       }
       
-      $out .= '<ul>';
-        $out .= '<div class="btn-group" role="group" aria-label="...">';
-          $class = $page->name == 'home' ? "on" : "";
-          $out .= "<a class='btn $class' href='{$homepage->url}'>{$homepage->title}</a>";
-          $class = $page->name == 'newsboard' ? "on" : "";
-          $out .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
-          $out .= '<div class="btn-group" role="group">';
-            $class = $page->name == 'players' || $page->name == "world" || $page->template == 'main-office' ? "on" : "";
-            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The Teams").' <span class="caret"></span></button>';
-            $out .= '<ul class="dropdown-menu">';
-            foreach($allTeams as $team) {
-              $class = $team->name == $input->urlSegment1 ? " class='selected-left'" : "";
-              $teamPlayers = $allPlayers->find("team=$team");
-              $out .= "<li class='dropdown-submenu'>";
-              if ($user->isSuperuser()) {
-                if ($team->teacher->first()) {
-                  $out .= "<a$class href='{$office->url}{$team->name}/teacher'>{$team->title} [{$team->teacher->eq(0)->name}]</a>";
+      if ($session->headMenu) { // Head menu already session cached
+        $out .= $session->headMenu;
+      } else { // Build head menu
+        if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
+          $allTeams->filter("teacher=$user");
+          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
+        } else {
+          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
+        }
+
+        $headMenu = '<ul>';
+          $headMenu .= '<div class="btn-group" role="group" aria-label="...">';
+            $headMenu .= "<a class='btn' href='{$homepage->url}'>{$homepage->title}</a>";
+            $headMenu .= "<a class='btn' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
+            $headMenu .= '<div class="btn-group" role="group">';
+              $headMenu .= '<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The Teams").' <span class="caret"></span></button>';
+              $headMenu .= '<ul class="dropdown-menu">';
+              foreach($allTeams as $team) {
+                $teamPlayers = $allPlayers->find("team=$team");
+                $headMenu .= "<li class='dropdown-submenu'>";
+                if ($user->isSuperuser()) {
+                  if ($team->teacher->first()) {
+                    $headMenu .= "<a href='{$office->url}{$team->name}'>{$team->title} [{$team->teacher->eq(0)->name}]</a>";
+                  } else {
+                    $headMenu .= "<a href='{$office->url}{$team->name}'>{$team->title} [-]</a>";
+                  }
                 } else {
-                  $out .= "<a$class href='{$office->url}{$team->name}/teacher'>{$team->title} [-]</a>";
+                  $headMenu .= "<a href='{$office->url}{$team->name}'>{$team->title}</a>";
                 }
-              } else {
-                $out .= "<a$class href='{$office->url}{$team->name}/teacher'>{$team->title}</a>";
-              }
-                $out .= "<ul class='dropdown-menu'>";
-              $out .=  "<li><a href='{$office->url}{$team->name}/teacher'>{$team->title} {$office->title}</a>";
-              if ($team->name != 'no-team') {
-                $out .=  "<li class='dropdown-submenu'>";
-                $out .=  "<a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
-                $out .= "<ul class='dropdown-menu'>";
-                foreach ($teamPlayers as $p) {
-                  $out .= "<li><a href='{$p->url}'>{$p->title}</a></li>";
-                }
-                $out .= "</ul>";
-                $out .= "</li>";
-              } else {
-                $out .= "<li>";
-                $out .=  "<a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
-                $out .= "</li>";
-              }
-              $out .= "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('marketplace')."</a></li>";
-              $out .= "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('adminTable')."</a></li>";
-              $out .= "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('monster invasions')."</a></li>";
-              $out .= "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('team world')."</a></li>";
-              $out .= "</ul>";
-              $out .= "</li>";
-            }
-            $out .= '</ul>';
-          $out .= '</div>';
-          $out .= '<div class="btn-group">';
-            $class = $page->is("name=blog|documentation|contact") ? "on" : "";
-            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>';
-            $out .= '<ul class="dropdown-menu">';
-              $out .= '<li class="dropdown-submenu">';
-              $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : "";
-              $out .= '<a class="'.$class.'" href=""><span class="glyphicon glyphicon-globe"></span> - '.__("Discover Planet Alert World").'</a>';
-              $out .= '<ul class="dropdown-menu">';
-                $class = $page->name == 'shop' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$shop->url}'>{$shop->title}</a></li>";
-                $class = $page->name == 'places' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$places->url}'>{$places->title}</a></li>";
-                $class = $page->name == 'people' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$peoples->url}'>{$peoples->title}</a></li>";
-                $class = $page->name == 'tasks' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$tasks->url}'>{$tasks->title}</a></li>";
-                $class = $page->name == 'monsters' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$monsters->url}'>{$monsters->title}</a></li>";
-                $class = $page->name == 'the-scoreboards' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$scoreboards->url}'>{$scoreboards->title}</a></li>";
-                $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$hall->url}'>{$hall->title}</a></li>";
-                $class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$book->url}'>{$book->title}</a></li>";
-              $out .= '</ul>';
-            $out .= '</li>';
-            if (!$user->isSuperuser()) {
-              $class = $page->name == 'contact' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__('Contact Admin')."</a></li>";
-            }
-            $class = $page->name == 'blog' ? " class='selected-left'" : "";
-            $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
-            $class = $page->name == 'documentation' ? " class='selected-left'" : "";
-            $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
-          $out .= '</ul>';
-          $out .= '</div>';
-            // Teacher Zone (and Admin)
-            $out .= '<div class="btn-group">';
-            $class = $page->is("name=admin-actions") ? "on" : "";
-            if ($user->isSuperuser()) {
-              $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("Admin Zone").'<span class="caret"> </span></button>';
-            } else {
-              $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("Teacher Zone").'<span class="caret"> </span></button>';
-            }
-            $out .= '<ul class="dropdown-menu">';
-              $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'team-options' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$adminActions->url}/team-options/'><span class='glyphicon glyphicon-cog'></span> - ".__('Team options')."</a></li>";
-              $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'announcements' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$adminActions->url}announcements/'><span class='glyphicon glyphicon-comment'></span> - ".__('Announcements')."</a></li>";
-              $out .= '<li class="dropdown-submenu">';
-                $class = $page->is("name=admin-actions") && strpos($input->urlSegment1, 'manage') !== false ? "selected-left" : "";
-                $out .= '<a class="'.$class.'" href=""><span class="glyphicon glyphicon-cog"></span> - '.__("Planet Alert Settings").'</a>';
-                $out .= '<ul class="dropdown-menu">';
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-periods' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-periods/'><span class='glyphicon glyphicon-calendar'></span> - ".__('Manage periods')."</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-groups' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-groups/'><span class='glyphicon glyphicon-user'></span> - ".__('Manage group names')."</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-actions' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-actions/'><span class='glyphicon glyphicon-flash'></span> - ".__('Manage actions')."</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-categories' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-categories/'><span class='glyphicon glyphicon-tag'></span> - ".__('Manage categories and topics')."</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-lessons' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-lessons/'><span class='glyphicon glyphicon-file'></span> - ".__('Manage lessons')."</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-monsters' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-monsters/'><span class='glyphicon glyphicon-headphones'></span> - ".__('Manage monsters')."</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'manage-shop' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/manage-shop/'><span class='glyphicon glyphicon-shopping-cart'></span> - ".__('Manage marketplace')."</a></li>";
-                // Check if teacher has selected the Memory potion
-                $memoryPotion = $pages->get("name=memory-potion");
-                if ($user->isSuperuser() || $memoryPotion->teacher->has($user)) {
-                  $class = $input->urlSegment2 == 'memory-potion' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$pages->get("name=shop")->url}details/memory-potion'><span class='glyphicon glyphicon-duplicate'></span> - ".__('Manage Memory potion')."</a></li>";
+                  $headMenu .= "<ul class='dropdown-menu'>";
+                $headMenu .=  "<li><a href='{$office->url}{$team->name}'>{$team->title} {$office->title}</a>";
+                if ($team->name != 'no-team') {
+                  $headMenu .=  "<li class='dropdown-submenu'>";
+                  $headMenu .=  "<a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
+                  $headMenu .= "<ul class='dropdown-menu'>";
+                  foreach ($teamPlayers as $p) {
+                    $headMenu .= "<li><a href='{$p->url}'>{$p->title}</a></li>";
+                  }
+                  $headMenu .= "</ul>";
+                  $headMenu .= "</li>";
                 } else {
-                  $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> <span class='strikeText'>".__('Manage Memory potion')."</span></li>";
+                  $headMenu .= "<li>";
+                  $headMenu .=  "<a href='{$homepage->url}players/{$sanitizer->pageName($team->name)}'>{$team->title} ".__("team list")."</a>";
+                  $headMenu .= "</li>";
                 }
-                $out .= '</ul>';
-              $out .= '</li>';
-              $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'reports' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$adminActions->url}reports/' target='_blank'><span class='glyphicon glyphicon-file'></span> - ".__('Reports')."</a></li>";
-              $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'users' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$adminActions->url}users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
-              $class = $page->name == 'statistics' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$pages->get("name=statistics")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Statistics')."</a></li>";
-              $class = $page->name == 'sacoche' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$pages->get("name=sacoche")->url}' target='_blank'><span class='glyphicon glyphicon-flash'></span> - ".__('Import SACoche')."</a></li>";
-              
-              // Add Admin Zone
-              if ($user->isSuperuser()) {
-                $out .= "<li role='separator' class='divider'></li>";
-                $out .= "<li role='separator' class='divider'></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/ut/'>UT Hall of fame</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setScores' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/setScores/'>Set scores</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setReputation' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/setReputation/'>Set reputation</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setYearlyKarma' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/setYearlyKarma/'>Set yearly karmas</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCaptains' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/setCaptains/'>Set captains</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setFighters' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/setFighters/'>Set fighters</a></li>";
-                $class = $page->name == 'admin-actions' && $input->urlSegment1 == 'setCache' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}setCache/'>Set cache</a></li>";
-                $class = $page->name == 'script' && $input->urlSegment1 == 'ut' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$adminActions->url}/script/'>Script</a></li>";
+                $headMenu .= "<li><a href='{$homepage->url}shop/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('marketplace')."</a></li>";
+                $headMenu .= "<li><a href='{$homepage->url}adminTable/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('adminTable')."</a></li>";
+                $headMenu .= "<li><a href='{$homepage->url}quiz/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('monster invasions')."</a></li>";
+                $headMenu .= "<li><a href='{$homepage->url}world/{$sanitizer->pageName($team->name)}'>{$team->title} ".__('team world')."</a></li>";
+                $headMenu .= "</ul>";
+                $headMenu .= "</li>";
               }
-            $out .= '</ul>';
-            $out .= '</div>';
-          $out .= '<a class="btn" href="'.$loginUrl.'?logout=1">'.__("Log out").'</a>';
-        $out .= '</div>';
-      $out .= '</ul>';
+              $headMenu .= '</ul>';
+            $headMenu .= '</div>';
+            $headMenu .= '<div class="btn-group">';
+              $headMenu .= '<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>';
+              $headMenu .= '<ul class="dropdown-menu">';
+                $headMenu .= '<li class="dropdown-submenu">';
+                $headMenu .= '<a href=""><span class="glyphicon glyphicon-globe"></span> - '.__("Discover Planet Alert World").'</a>';
+                $headMenu .= '<ul class="dropdown-menu">';
+                  $headMenu .= "<li><a href='{$shop->url}'>{$shop->title}</a></li>";
+                  $headMenu .= "<li><a href='{$places->url}'>{$places->title}</a></li>";
+                  $headMenu .= "<li><a href='{$peoples->url}'>{$peoples->title}</a></li>";
+                  $headMenu .= "<li><a href='{$tasks->url}'>{$tasks->title}</a></li>";
+                  $headMenu .= "<li><a href='{$monsters->url}'>{$monsters->title}</a></li>";
+                  $headMenu .= "<li><a href='{$scoreboards->url}'>{$scoreboards->title}</a></li>";
+                  $headMenu .= "<li><a href='{$hall->url}'>{$hall->title}</a></li>";
+                  $headMenu .= "<li><a href='{$book->url}'>{$book->title}</a></li>";
+                $headMenu .= '</ul>';
+              $headMenu .= '</li>';
+              if (!$user->isSuperuser()) {
+                $headMenu .= "<li><a href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__('Contact Admin')."</a></li>";
+              }
+              $headMenu .= "<li><a href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
+              $headMenu .= "<li><a target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
+            $headMenu .= '</ul>';
+            $headMenu .= '</div>';
+              // Teacher Zone (and Admin)
+              $headMenu .= '<div class="btn-group">';
+              if ($user->isSuperuser()) {
+                $headMenu .= '<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("Admin Zone").'<span class="caret"> </span></button>';
+              } else {
+                $headMenu .= '<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("Teacher Zone").'<span class="caret"> </span></button>';
+              }
+              $headMenu .= '<ul class="dropdown-menu">';
+                $headMenu .= "<li><a href='{$adminActions->url}/team-options/'><span class='glyphicon glyphicon-cog'></span> - ".__('Team options')."</a></li>";
+                $headMenu .= "<li><a href='{$adminActions->url}announcements/'><span class='glyphicon glyphicon-comment'></span> - ".__('Announcements')."</a></li>";
+                $headMenu .= '<li class="dropdown-submenu">';
+                  $headMenu .= '<a href=""><span class="glyphicon glyphicon-cog"></span> - '.__("Planet Alert Settings").'</a>';
+                  $headMenu .= '<ul class="dropdown-menu">';
+                  $headMenu .= "<li><a href='{$adminActions->url}/manage-periods/'><span class='glyphicon glyphicon-calendar'></span> - ".__('Manage periods')."</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/manage-groups/'><span class='glyphicon glyphicon-user'></span> - ".__('Manage group names')."</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/manage-actions/'><span class='glyphicon glyphicon-flash'></span> - ".__('Manage actions')."</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/manage-categories/'><span class='glyphicon glyphicon-tag'></span> - ".__('Manage categories and topics')."</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/manage-lessons/'><span class='glyphicon glyphicon-file'></span> - ".__('Manage lessons')."</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/manage-monsters/'><span class='glyphicon glyphicon-headphones'></span> - ".__('Manage monsters')."</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/manage-shop/'><span class='glyphicon glyphicon-shopping-cart'></span> - ".__('Manage marketplace')."</a></li>";
+                  // Check if teacher has selected the Memory potion
+                  $memoryPotion = $pages->get("name=memory-potion");
+                  if ($user->isSuperuser() || $memoryPotion->teacher->has($user)) {
+                    $headMenu .= "<li><a href='{$pages->get("name=shop")->url}details/memory-potion'><span class='glyphicon glyphicon-duplicate'></span> - ".__('Manage Memory potion')."</a></li>";
+                  } else {
+                    $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> <span class='strikeText'>".__('Manage Memory potion')."</span></li>";
+                  }
+                  $headMenu .= '</ul>';
+                $headMenu .= '</li>';
+                $headMenu .= "<li><a href='{$adminActions->url}reports/' target='_blank'><span class='glyphicon glyphicon-file'></span> - ".__('Reports')."</a></li>";
+                $headMenu .= "<li><a href='{$adminActions->url}users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
+                $headMenu .= "<li><a href='{$pages->get("name=statistics")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Statistics')."</a></li>";
+                $headMenu .= "<li><a href='{$pages->get("name=sacoche")->url}' target='_blank'><span class='glyphicon glyphicon-flash'></span> - ".__('Import SACoche')."</a></li>";
+                
+                // Add Admin Zone
+                if ($user->isSuperuser()) {
+                  $headMenu .= "<li role='separator' class='divider'></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/ut/'>UT Hall of fame</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/setScores/'>Set scores</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/setReputation/'>Set reputation</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/setYearlyKarma/'>Set yearly karmas</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/setCaptains/'>Set captains</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/setFighters/'>Set fighters</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}setCache/'>Set cache</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}/script/'>Script</a></li>";
+                }
+              $headMenu .= '</ul>';
+              $headMenu .= '</div>';
+            $headMenu .= '<a class="btn" href="'.$loginUrl.'?logout=1">'.__("Log out").'</a>';
+          $headMenu .= '</div>';
+        $headMenu .= '</ul>';
+        $session->set("headMenu", $headMenu);
+        $out .= $headMenu;
+      }
     }
 
+    // headMenu session cache for logged-in player (no use for guests since pages use template cache)
     if ($user->hasRole('player')) { // Player's menu
       $player = $pages->get("parent.name=players, template=player, login=$user->name");
-      $user->language = $headTeacher->language; // Teacher chooses the language for his students
-      $allTeams = $allTeams->find("teacher=$headTeacher")->sort("title"); // Limit to headTeacher's teams
-      $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-XP")->first();
-      $bestProtection = $player->equipment->find("parent.name=protections, sort=-HP")->first();
-      // Avatar
-      $out .= '<div style=" color: #FFF;">';
-      $out .= '<span class="avatarContainer" data-loggedId="'.$player->id.'">';
-        if ($player->avatar) {
-          $out .= '<img class="avatar superpose" src="'.$player->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
-        } else {
-          $out .= '<Avatar>';
-        }
-        if ($bestWeapon && $bestWeapon->image) {
-          $out .= '<img class="weapon mini superpose" src="'.$bestWeapon->image->getCrop("mini")->url.'" alt="'.$bestWeapon->title.'" />';
-        }
-        if ($bestProtection && $bestProtection->image) {
-          $out .= '<img class="protection mini superpose" src="'.$bestProtection->image->getCrop("mini")->url.'" alt="'.$bestProtection->title.'" />';
-        }
-      $out .= '</span>';
-      $out .= '</div>';
+      $user->language = $headTeacher->language; // teacher chooses the language for his students
+      $allTeams = $allTeams->find("teacher=$headTeacher")->sort("title"); // limit to headteacher's teams
+      $bestWeapon = $player->equipment->find("parent.name=weapons, sort=-xp")->first();
+      $bestProtection = $player->equipment->find("parent.name=protections, sort=-hp")->first();
+      if ($session->headMenu) { // Head menu already session cached
+        $out .= $session->headMenu;
+      } else { // Build head menu
+        $headMenu = '';
+        // Avatar
+        $headMenu .= '<div style=" color: #FFF;">';
+        $headMenu .= '<span class="avatarContainer" data-loggedId="'.$player->id.'">';
+          if ($player->avatar) {
+            $headMenu .= '<img class="avatar superpose" src="'.$player->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
+          } else {
+            $headMenu .= '<Avatar>';
+          }
+          if ($bestWeapon && $bestWeapon->image) {
+            $headMenu .= '<img class="weapon mini superpose" src="'.$bestWeapon->image->getCrop("mini")->url.'" alt="'.$bestWeapon->title.'" />';
+          }
+          if ($bestProtection && $bestProtection->image) {
+            $headMenu .= '<img class="protection mini superpose" src="'.$bestProtection->image->getCrop("mini")->url.'" alt="'.$bestProtection->title.'" />';
+          }
+        $headMenu .= '</span>';
+        $headMenu .= '</div>';
 
-      $out .= '<ul>';
-        $out .= '<div class="btn-group" role="group" aria-label="...">';
-          $class = $page->name == 'newsboard' ? "on" : "";
-          $out .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
-          $class = ($player->team->name == $input->urlSegment1 && $input->urlSegment2 == $player->name ) ? "on" : "";
-          $out .= "<a class='btn $class' href='{$player->url}'>".__("My Profile")."</a>";
-          $out .= '<div class="btn-group">';
-            $class = ($page->is("name=players|main-office|world") && $input->urlSegment2 == '') ? "on" : "";
-            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("My Team").'<span class="caret"> </span></button>';
-            $out .= '<ul class="dropdown-menu">';
-              $class = $page->name == 'main-office' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$office->url}{$player->team->name}/player'><span class='glyphicon glyphicon-eye-open'></span> - {$office->title}</a></li>";
-              $class = ($page->name == 'players' && $input->urlSegment2 == '') ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$pages->get('/players')->url}{$player->team->name}'><span class='glyphicon glyphicon-th-list'></span> - ".__("List")." </a></li>";
-              $class = $page->name == 'world' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$homepage->url}world/{$player->team->name}'><span class='glyphicon glyphicon-flag'></span> - ".__('team world')."</a></li>";
-            $out .= '</ul>';
-          $out .= '</div>';
-          $out .= '<div class="btn-group">';
-            $class = $page->is("name=shop_generator|makedonation") ? "on" : "";
-            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("My Actions").'<span class="caret"> </span></button>';
-            $out .= '<ul class="dropdown-menu">';
-              $class = $page->is("name=shop_generator") ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$pages->get('/shop_generator')->url}{$player->id}'><span class='glyphicon glyphicon-shopping-cart'></span> - ".__("Go to the Marketplace")."</a></li>";
-              $class = $page->name == 'makedonation' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$donation->url}'><span class='glyphicon glyphicon-heart'></span> - ".__("Make a donation")."</a></li>";
-              // Check if player can face Monster Invasions
-              if ($player->places->count >= 3 || $player->people->count >= 3) {
-                $class = $page->name == 'quiz' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$pages->get('name=quiz')->url}'><span class='glyphicon glyphicon-star'></span> - ".__("Prepare my defense")."</a></li>";
-              } else {
-                $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
-                $out .= "<span class='strikeText'>".__("Prepare my defense")."</span></li>";
-              }
-              // Check if memory helmet accessible in player's group
-              if ($player && ($player->team->forceHelmet == 1 || $player->equipment->get("name=memory-helmet"))) {
-                if ($player->team->forceHelmet == 1) {
-                  $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
-                  $out .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=underground-training')->url}'><span class='glyphicon glyphicon-headphones'></span> - ".__("Use the Memory helmet")."</a></li>";
-                  $class = $page->name == 'fighting-zone' ? " class='selected-left'" : "";
-                  $out .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - ".__("Fight a monster")."</a></li>";
+        $headMenu .= '<ul>';
+          $headMenu .= '<div class="btn-group" role="group" aria-label="...">';
+            $headMenu .= "<a class='btn' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
+            $headMenu .= "<a class='btn' href='{$player->url}'>".__("My Profile")."</a>";
+            $headMenu .= '<div class="btn-group">';
+              $headMenu .= '<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("My Team").'<span class="caret"> </span></button>';
+              $headMenu .= '<ul class="dropdown-menu">';
+                $headMenu .= "<li><a href='{$office->url}{$player->team->name}'><span class='glyphicon glyphicon-eye-open'></span> - {$office->title}</a></li>";
+                $headMenu .= "<li><a href='{$pages->get('/players')->url}{$player->team->name}'><span class='glyphicon glyphicon-th-list'></span> - ".__("List")." </a></li>";
+                $headMenu .= "<li><a href='{$homepage->url}world/{$player->team->name}'><span class='glyphicon glyphicon-flag'></span> - ".__('team world')."</a></li>";
+              $headMenu .= '</ul>';
+            $headMenu .= '</div>';
+            $headMenu .= '<div class="btn-group">';
+              $headMenu .= '<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("My Actions").'<span class="caret"> </span></button>';
+              $headMenu .= '<ul class="dropdown-menu">';
+                $headMenu .= "<li><a href='{$pages->get('/shop_generator')->url}{$player->id}'><span class='glyphicon glyphicon-shopping-cart'></span> - ".__("Go to the Marketplace")."</a></li>";
+                $headMenu .= "<li><a href='{$donation->url}'><span class='glyphicon glyphicon-heart'></span> - ".__("Make a donation")."</a></li>";
+                // Check if player can face Monster Invasions
+                if ($player->places->count >= 3 || $player->people->count >= 3) {
+                  $headMenu .= "<li><a href='{$pages->get('name=quiz')->url}'><span class='glyphicon glyphicon-star'></span> - ".__("Prepare my defense")."</a></li>";
                 } else {
-                  $class = $page->name == 'underground-training' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$pages->get('name=underground-training')->url}'><span class='glyphicon glyphicon-headphones'></span> - ".__("Use the Memory helmet")."</a></li>";
-                  $class = $page->name == 'fighting-zone' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - ".__("Fight a monster")."</a></li>";
+                  $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
+                  $headMenu .= "<span class='strikeText'>".__("Prepare my defense")."</span></li>";
                 }
-              } else {
-                $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
-                $out .= "<span class='strikeText'>".__("Use the Memory helmet")."</span></li>";
-                $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
-                $out .= "<span class='strikeText'>".__("Fight a monster")."</span></li>";
-              }
-              // Fighters playground
-              if ($player && ($player->skills->has("name=fighter"))) {
-                $class = $page->name == 'fighters-playground' ? " class='selected-left'" : "";
-                $out .= "<li><a$class href='{$playground->url}{$player->name}'><span class='glyphicon glyphicon-time'></span> - ".__("Go to the Fighters Playground")."</a></li>";
-              } else {
-                $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
-                $out .= "<span class='strikeText'>".__("Go to the Fighters Playground")."</span></li>";
-              }
-              // Check if Visualizer is accessible in player's group
-              if ($player && ($player->team->forceVisualizer == 1 || $player->equipment->get("name=electronic-visualizer"))) {
-                $class = $page->name == 'visualizer' ? " class='selected-left'" : "";
-                if ($player->team->forceVisualizer == 1) {
-                  $out .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=visualizer')->url}'><span class='glyphicon glyphicon-th'></span> - ".__("Use the Electronic Visualizer")."</a></li>";
-                } else {
-                  $out .= "<li><a$class href='{$pages->get('name=visualizer')->url}'><span class='glyphicon glyphicon-th'></span> - ".__("Use the Electronic Visualizer")."</a></li>";
-                }
-              } else {
-                $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
-                $out .= "<span class='strikeText'>".__("Use the Electronic Visualizer")."</span></li>";
-              }
-              // Check if Book of Knowledge is accessible in player's group
-              if ($player && ($player->team->forceKnowledge == 1 || $player->equipment->get("name~=book-knowledge"))) {
-                $class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
-                if ($player->team->forceKnowledge == 1) {
-                  $out .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-book'></span> - ".__("Read the Book of Knowledge")."</a></li>";
-                } else {
-                  $out .= "<li><a$class href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-book'></span> - ".__("Read the Book of Knowledge")."</a></li>";
-                }
-              } else {
-                $out .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
-                $out .= "<span class='strikeText'>".__("Read the Book of Knowledge")."</span></li>";
-              }
-              // Contact teacher
-              $class = $page->name == 'contact' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__("Contact my teacher")."</a></li>";
-              // Hall of Fame
-              $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$hall->url}'><span class='glyphicon glyphicon-eye-open'></span> - ".__("Visit the Hall of Fame")."</a></li>";
-              if ($player->team->name != 'cm1') {
-                $out .= '<li class="dropdown-submenu">';
-                  $out .= '<a href="#"><span class="glyphicon glyphicon-education"></span> - '.__("Go to school").'</span></a>';
-                  $out .= '<ul class="dropdown-menu">';
-                    if ($player->team->name != 'no-team') {
-                      $out .= "<li><a href='https://flenglish.tuxfamily.org/articles/cahier-classe-".$player->team->name."' target='_blank'>See my online copybook</a></li>";
-                    }
-                    $out .= "<li><a href='https://sacoche.sesamath.net/sacoche/index.php' target='_blank'>See SACoche</a></li>";
-                    $out .= "<li><a href='https://clg-pasteur-raon.monbureaunumerique.fr/' target='_blank'>Go to the 'ENT'</a></li>";
-                  $out .= '</ul>';
-                $out .= '</li>';
-              }
-            $out .= '</ul>';
-          $out .= '</div>';
-          $out .= '<div class="btn-group">';
-            $class = $page->is("name=blog|documentation") ? "on" : "";
-            $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>';
-            $out .= '<ul class="dropdown-menu">';
-              $out .= '<li class="dropdown-submenu">';
-                $class = $page->is("name=shop|places|people|tasks|monsters|hall-of-fame") ? "selected-left" : "";
-                $out .= '<a class="'.$class.'" href="'.$places->url.'"><span class="glyphicon glyphicon-globe"></span> - '.__("Discover Planet Alert World").'</span></a>';
-                $out .= '<ul class="dropdown-menu">';
-                  $class = $page->name == 'shop' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$shop->url}'>{$shop->title}</a></li>";
-                  $class = $page->name == 'places' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$places->url}'>{$places->title}</a></li>";
-                  if ($player->team->rank && $player->team->rank->is('index>=8')) {
-                    $class = $page->name == 'people' ? " class='selected-left'" : "";
-                    $out .= "<li><a$class href='{$peoples->url}'>{$peoples->title}</a></li>";
+                // Check if memory helmet accessible in player's group
+                if ($player && ($player->team->forceHelmet == 1 || $player->equipment->get("name=memory-helmet"))) {
+                  if ($player->team->forceHelmet == 1) {
+                    $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a href='{$pages->get('name=underground-training')->url}'><span class='glyphicon glyphicon-headphones'></span> - ".__("Use the Memory helmet")."</a></li>";
+                    $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - ".__("Fight a monster")."</a></li>";
+                  } else {
+                    $headMenu .= "<li><a href='{$pages->get('name=underground-training')->url}'><span class='glyphicon glyphicon-headphones'></span> - ".__("Use the Memory helmet")."</a></li>";
+                    $headMenu .= "<li><a href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - ".__("Fight a monster")."</a></li>";
                   }
-                  $class = $page->name == 'tasks' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$tasks->url}'>{$tasks->title}</a></li>";
-                  $class = $page->name == 'monsters' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$monsters->url}'>{$monsters->title}</a></li>";
-                  $class = $page->name == 'the-scoreboards' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$scoreboards->url}'>{$scoreboards->title}</a></li>";
-                  $class = $page->name == 'hall-of-fame' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$hall->url}'>{$hall->title}</a></li>";
-                  $class = $page->name == 'book-knowledge' ? " class='selected-left'" : "";
-                  $out .= "<li><a$class href='{$book->url}'>{$book->title}</a></li>";
-                $out .= '</ul>';
-              $out .= '</li>';
-              $class = $page->name == 'blog' ? " class='selected-left'" : "";
-              $out .= "<li><a$class href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
-              $class = $page->name == 'documentation' ? " class='selected-left'" : "";
-              $out .= "<li><a$class target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
-            $out .= '</ul>';
-          $out .= '</div>';
-          $out .= '<a class="btn" href="'.$loginUrl.'?logout=1">'.__("Log out").'</a>';
-        $out .= '</div>';
-      $out .= '</ul>';
+                } else {
+                  $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
+                  $headMenu .= "<span class='strikeText'>".__("Use the Memory helmet")."</span></li>";
+                  $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
+                  $headMenu .= "<span class='strikeText'>".__("Fight a monster")."</span></li>";
+                }
+                // Fighters playground
+                if ($player && ($player->skills->has("name=fighter"))) {
+                  $headMenu .= "<li><a href='{$playground->url}{$player->name}'><span class='glyphicon glyphicon-time'></span> - ".__("Go to the Fighters Playground")."</a></li>";
+                } else {
+                  $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
+                  $headMenu .= "<span class='strikeText'>".__("Go to the Fighters Playground")."</span></li>";
+                }
+                // Check if Visualizer is accessible in player's group
+                if ($player && ($player->team->forceVisualizer == 1 || $player->equipment->get("name=electronic-visualizer"))) {
+                  if ($player->team->forceVisualizer == 1) {
+                    $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a href='{$pages->get('name=visualizer')->url}'><span class='glyphicon glyphicon-th'></span> - ".__("Use the Electronic Visualizer")."</a></li>";
+                  } else {
+                    $headMenu .= "<li><a href='{$pages->get('name=visualizer')->url}'><span class='glyphicon glyphicon-th'></span> - ".__("Use the Electronic Visualizer")."</a></li>";
+                  }
+                } else {
+                  $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
+                  $headMenu .= "<span class='strikeText'>".__("Use the Electronic Visualizer")."</span></li>";
+                }
+                // Check if Book of Knowledge is accessible in player's group
+                if ($player && ($player->team->forceKnowledge == 1 || $player->equipment->get("name~=book-knowledge"))) {
+                  if ($player->team->forceKnowledge == 1) {
+                    $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-book'></span> - ".__("Read the Book of Knowledge")."</a></li>";
+                  } else {
+                    $headMenu .= "<li><a href='{$pages->get('name=book-knowledge')->url}'><span class='glyphicon glyphicon-book'></span> - ".__("Read the Book of Knowledge")."</a></li>";
+                  }
+                } else {
+                  $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
+                  $headMenu .= "<span class='strikeText'>".__("Read the Book of Knowledge")."</span></li>";
+                }
+                // Contact teacher
+                $headMenu .= "<li><a href='{$contact->url}'><span class='glyphicon glyphicon-envelope'></span> - ".__("Contact my teacher")."</a></li>";
+                // Hall of Fame
+                $headMenu .= "<li><a href='{$hall->url}'><span class='glyphicon glyphicon-eye-open'></span> - ".__("Visit the Hall of Fame")."</a></li>";
+                if ($player->team->name != 'cm1') {
+                  $headMenu .= '<li class="dropdown-submenu">';
+                    $headMenu .= '<a href="#"><span class="glyphicon glyphicon-education"></span> - '.__("Go to school").'</span></a>';
+                    $headMenu .= '<ul class="dropdown-menu">';
+                      if ($player->team->name != 'no-team') {
+                        $headMenu .= "<li><a href='https://flenglish.tuxfamily.org/articles/cahier-classe-".$player->team->name."' target='_blank'>See my online copybook</a></li>";
+                      }
+                      $headMenu .= "<li><a href='https://sacoche.sesamath.net/sacoche/index.php' target='_blank'>See SACoche</a></li>";
+                      $headMenu .= "<li><a href='https://clg-pasteur-raon.monbureaunumerique.fr/' target='_blank'>Go to the 'ENT'</a></li>";
+                    $headMenu .= '</ul>';
+                  $headMenu .= '</li>';
+                }
+              $headMenu .= '</ul>';
+            $headMenu .= '</div>';
+            $headMenu .= '<div class="btn-group">';
+              $headMenu .= '<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Infos<span class="caret"> </span></button>';
+              $headMenu .= '<ul class="dropdown-menu">';
+                $headMenu .= '<li class="dropdown-submenu">';
+                  $headMenu .= '<a href="'.$places->url.'"><span class="glyphicon glyphicon-globe"></span> - '.__("Discover Planet Alert World").'</span></a>';
+                  $headMenu .= '<ul class="dropdown-menu">';
+                    $headMenu .= "<li><a href='{$shop->url}'>{$shop->title}</a></li>";
+                    $headMenu .= "<li><a href='{$places->url}'>{$places->title}</a></li>";
+                    if ($player->team->rank && $player->team->rank->is('index>=8')) {
+                      $headMenu .= "<li><a href='{$peoples->url}'>{$peoples->title}</a></li>";
+                    }
+                    $headMenu .= "<li><a href='{$tasks->url}'>{$tasks->title}</a></li>";
+                    $headMenu .= "<li><a href='{$monsters->url}'>{$monsters->title}</a></li>";
+                    $headMenu .= "<li><a href='{$scoreboards->url}'>{$scoreboards->title}</a></li>";
+                    $headMenu .= "<li><a href='{$hall->url}'>{$hall->title}</a></li>";
+                    $headMenu .= "<li><a href='{$book->url}'>{$book->title}</a></li>";
+                  $headMenu .= '</ul>';
+                $headMenu .= '</li>';
+                $headMenu .= "<li><a href='{$blog->url}'><span class='glyphicon glyphicon-hand-up'></span> - {$blog->title}</a></li>";
+                $headMenu .= "<li><a target='_blank' href='https://celfred.gitbooks.io/planet-alert-documentation/content/fr/'><span class='glyphicon glyphicon-question-sign'></span> - ".__('Documentation')."</a></li>";
+              $headMenu .= '</ul>';
+            $headMenu .= '</div>';
+            $headMenu .= '<a class="btn" href="'.$loginUrl.'?logout=1">'.__("Log out").'</a>';
+          $headMenu .= '</div>';
+        $headMenu .= '</ul>';
+        $session->set("headMenu", $headMenu);
+        $out .= $headMenu;
+      }
     }
 
     if (!$user->isLoggedin()) { // Guest menu
@@ -434,7 +375,7 @@
           $class = $page->name == 'home' ? "on" : "";
           $out .= "<a class='btn $class' href='{$homepage->url}'>{$homepage->title}</a>";
           $class = $page->name == 'newsboard' ? "on" : "";
-          $out .= "<a class='btn $class' href='{$newsboardPage->url}{$user->name}'>{$newsboardPage->title}</a>";
+          $out .= "<a class='btn $class' href='{$newsboardPage->url}'>{$newsboardPage->title}</a>";
           $out .= '<div class="btn-group" role="group">';
             $class = $page->name == 'players' || $page->name == "world" || $page->template == 'main-office' ? "on" : "";
             $out .= '<button type="button" class="'.$class.' dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("The Teams").' <span class="caret"></span></button>';

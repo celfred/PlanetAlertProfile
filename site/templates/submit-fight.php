@@ -263,6 +263,6 @@
         }
       }
     }
-    clearCache("newsboard");
+    /* clearFileCache("newsboard", "main-office", "players"); */
   }
 ?>

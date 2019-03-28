@@ -61,10 +61,10 @@ echo '<div>';
   if ($user->hasRole('teacher')) {
     $cacheName = 'cache__teacher-'.$page->name.'-'.$input->urlSegment1.'-'.$user->language->name;
   }
-  if ($user->hasRole('player')) {
+  if ($user->hasRole('player') || $user->isGuest()) {
     $cacheName = 'cache__player-'.$page->name.'-'.$input->urlSegment1.'-'.$headTeacher->language->name;
   }
-  $cachedTable = $cache->get($cacheName, 300, function($user, $pages, $config) use($selectedTeam, $allPlayers) {
+  $cachedTable = $cache->get($cacheName, 86400, function($user, $pages, $config) use($selectedTeam, $allPlayers) {
     $out = '';
     $out .= '<table id="teamTable" class="table table-hover table-condensed teamView" data-highlight="{$loggedId}">';
     $out .= '<thead>';

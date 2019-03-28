@@ -13,7 +13,7 @@ $out = '';
       echo '</div>';
     }
 
-    $out = $cache->get('cache__tasks-'.$headTeacher->name, '86400', function($user, $pages, $config) use($headTeacher) {
+    $out = $cache->get('cache__tasks-'.$headTeacher->name, 2678400, function($user, $pages, $config) use($headTeacher) {
       $out = '';
       if ($user->isLoggedin()) {
         if ($user->isSuperuser()) {

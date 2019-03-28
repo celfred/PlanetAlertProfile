@@ -7,20 +7,19 @@
     echo '</div>';
   }
 
-  // Get any limiting elements in URL
-  $type = $input->get->type;
-  $name = $input->get->name;
+  // Get any limiting elements from urlSegments
+  $type = $input->urlSegment1;
+  $name = $input->urlSegment2;
   $formattedName = $pages->get("name=$name")->title;
   // Set parent accordingly
   if ($type && $name) {
     $parent = $pages->get("template=$type, name=$name");
-    $angularParam = "&".$type."=".$name;
   } else {
+    $type = 'all';
     $parent = $pages->get("/places");
-    $angularParam = '';
   }
 
-  // Get selected places (or all places if $parent=/places
+  // Get selected places (or all places if $parent=/places)
   $selector = "template=place, name!=places, has_parent=$parent, sort=name, limit=30";
   $selectedPlaces = $pages->find($selector);
   $pagination = $selectedPlaces->renderPager(array(
@@ -34,14 +33,13 @@
   // Count ALL places in the game (for information)
   $totalCount = $pages->find("template=place")->count();
   // Get all cities having places
-  $cities = $pages->find("template=city, children.count>0, sort=title");
+  $cities = $cache->get("cache__allCities", 2678400, function($pages) {
+    return $pages->find("template=city, children.count>0, sort=title");
+  });
   // Get all countries having places
-  $countries = $pages->find("template=country, children.count>0,sort=title");
-
-  if (!$type) {
-    $type = 'All places';
-    $name = $totalCount.' places in '.$cities->count().' cities, in '.$countries->count().' different countries.';
-  }
+  $countries = $cache->get("cache__allCountries", 2678400, function($pages) {
+    return $pages->find("template=country, children.count>0,sort=title");
+  });
 
   if ($user->isSuperuser() || $user->hasRole('teacher')) {
     echo '<a class="pdfLink btn btn-info" href="'. $selectedPlaces->first()->url.'all?pages2pdf=1">'.__("Get PDF [Places catalogue]").'</a>';
@@ -51,83 +49,129 @@
   <div class="row">
     <div class="text-center">
     <h2><a href="<?php echo $pages->get('name=map')->url; ?>"><?php echo __("See complete Planet Alert World map"); ?></a></h2>
-      <?php
-        if ($formattedName) {
-          echo "<h2>".__('Places in')." : {$formattedName} ({$selectedPlaces->count()})</h2>";
-        } else {
-          echo "<h2>".__('All places')." ({$totalCount})</h2>";
-        }
-      ?>
-        <a class="btn btn-info" href="<?php echo $page->url; ?>"><?php echo __('See ALL places'); ?></a>
-      <div class="dropdown btn-group">
-      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"><?php echo __('Select a country'); ?> <span class="caret"></span></button>
-        <ul class="dropdown-menu" role="menu">
-          <?php
-            foreach($countries as $country) {
-             echo "<li><a href='{$page->url}?type=country&name={$country->name}'>{$country->title}</a></li>";
+  <?php
+      if ($formattedName) {
+        echo "<h2>".__('Places in')." : {$formattedName} ({$selectedPlaces->count()})</h2>";
+      } else {
+        echo "<h2>".__('All places')." ({$totalCount})</h2>";
+      }
+
+      $placesMenu = $cache->get("cache__placesMenu", 2678400, function($page) use($cities, $countries) {
+        $out = '';
+        $out .= '<a class="btn btn-info" href="'.$page->url.'">'.__('See ALL places').'</a>';
+        $out .= '<div class="dropdown btn-group">';
+        $out .= '<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">'.__('Select a country').' <span class="caret"></span></button>';
+        $out .= '<ul class="dropdown-menu" role="menu">';
+          foreach($countries as $country) {
+           $out .= '<li><a href="'.$page->url.'country/'.$country->name.'">'.$country->title.'</a></li>';
+          }
+        $out .= '</ul>';
+        $out .= '</div>';
+        $out .= '<div class=" dropdown btn-group">';
+        $out .= '<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">'.__('Select a city').' <span class="caret"></span></button>';
+        $out .= '<ul class="dropdown-menu" role="menu">';
+          foreach($cities as $city) {
+            $out .= '<li><a href="'.$page->url.'city/'.$city->name.'">'.$city->title.'</a></li>';
+          }
+        $out .= '</ul>';
+        $out .= '</div>';
+        $out .= '<span id="switchGallery" class="btn btn-primary">'.__('Change view').'</span>';
+        $out .= '</div>';
+        return $out;
+      });
+      echo $placesMenu;
+
+    if ($type == 'all') { // Get all places from cache
+      $allPlacesGallery = $cache->get("cache__allPlacesGallery-page".$pageNum, 2678400, function() use($selectedPlaces, $pagination) {
+      $out = '<div id="galleryPlacesList" class="text-center">';
+        $out .= '<div class="text-center">'.$pagination.'</div>';
+        $out .= '<ul class="list-inline placesList">';
+          foreach($selectedPlaces as $place) {
+            $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
+            $city = $place->parent->title;
+            $country = $place->parent->parent->title;
+            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="" data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.','.$country.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
+          }
+        $out .= '</ul>';
+        $out .= '<div class="text-center">'.$pagination.'</div>';
+      $out .= '</div>';
+      $out .= '<div id="detailedPlacesList" style="display: none;" class="row">';
+        $out .= '<div class="text-center">'.$pagination.'</div>';
+        $out .= '<table id="mapTable" class="table table-condensed table-hover">';
+          $out .= '<thead>';
+          $out .= '<tr>';
+            $out .= '<th>'.__("Name").'</th>';
+            $out .= '<th>'.__("Country").'</th>';
+            $out .= '<th>'.__("City").'</th>';
+            $out .= '<th>'.__("GC").'</th>';
+            $out .= '<th>'.__("Level").'</th>';
+          $out .= '</tr>';
+          $out .= '</thead>';
+          $out .= '<tbody>';
+            foreach ($selectedPlaces as $place) {
+              $out .= '<tr>';
+              $out .= '<td>';
+              $out .= $place->title;
+              $out .= '<img src="'.$place->photo->eq(0)->getCrop('mini')->url.'"  alt="" />';
+              $out .= '</td>';
+              $out .= '<td>'.$place->country->title.'</td>';
+              $out .= '<td>'.$place->city->title.'</td>';
+              $out .= '<td>'.$place->GC.'</td>';
+              $out .= '<td>'.$place->level.'<td>';
+              $out .= '</tr>';
             }
-          ?>
-        </ul>
-      </div>
-      <div class=" dropdown btn-group">
-      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"><?php echo __('Select a city'); ?> <span class="caret"></span></button>
-        <ul class="dropdown-menu" role="menu">
-          <?php
-            foreach($cities as $city) {
-              echo "<li><a href='{$page->url}?type=city&name={$city->name}'>{$city->title}</a></li>";
+          $out .= '</tbody>';
+        $out .= '</table>';
+        $out .= '<div class="text-center">'.$pagination.'</div>';
+      $out .= '</div>';
+      return $out;
+      });
+      echo $allPlacesGallery;
+    } else { // Load limited gallery
+      $out = '<div id="galleryPlacesList" class="text-center">';
+        $out .= '<div class="text-center">'.$pagination.'</div>';
+        $out .= '<ul class="list-inline placesList">';
+          foreach($selectedPlaces as $place) {
+            $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
+            $city = $place->parent->title;
+            $country = $place->parent->parent->title;
+            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="" data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.','.$country.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
+          }
+        $out .= '</ul>';
+        $out .= '<div class="text-center">'.$pagination.'</div>';
+      $out .= '</div>';
+      $out .= '<div id="detailedPlacesList" style="display: none;" class="row">';
+        $out .= '<div class="text-center">'.$pagination.'</div>';
+        $out .= '<table id="mapTable" class="table table-condensed table-hover">';
+          $out .= '<thead>';
+          $out .= '<tr>';
+            $out .= '<th>'.__("Name").'</th>';
+            $out .= '<th>'.__("Country").'</th>';
+            $out .= '<th>'.__("City").'</th>';
+            $out .= '<th>'.__("GC").'</th>';
+            $out .= '<th>'.__("Level").'</th>';
+          $out .= '</tr>';
+          $out .= '</thead>';
+          $out .= '<tbody>';
+            foreach ($selectedPlaces as $place) {
+              $out .= '<tr>';
+              $out .= '<td>';
+              $out .= $place->title;
+              $out .= '<img src="'.$place->photo->eq(0)->getCrop('mini')->url.'"  alt="" />';
+              $out .= '</td>';
+              $out .= '<td>'.$place->country->title.'</td>';
+              $out .= '<td>'.$place->city->title.'</td>';
+              $out .= '<td>'.$place->GC.'</td>';
+              $out .= '<td>'.$place->level.'<td>';
+              $out .= '</tr>';
             }
-          ?>
-        </ul>
-      </div>
-      <span id="switchGallery" class="btn btn-primary" onclick=""><?php echo __('Change view'); ?></span>
-    </div>
+          $out .= '</tbody>';
+        $out .= '</table>';
+        $out .= '<div class="text-center">'.$pagination.'</div>';
+      $out .= '</div>';
+      echo $out;
+    }
 
-  <div id="galleryPlacesList" class="text-center">
-    <div class="text-center"><?php echo $pagination; ?></div>
-    <ul class="list-inline placesList">
-      <?php
-        foreach($selectedPlaces as $place) {
-          $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
-          $city = $place->parent->title;
-          $country = $place->parent->parent->title;
-          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage->url}' alt='' data-toggle='tooltip' data-html='true' title='<h4><span>{$place->mapIndex}</span> - {$place->title}</h4> <h5>{$city},{$country}</h5> <strong>Level {$place->level}, {$place->GC} GC</strong>' data-placement='bottom' /></a></li>";
-        }
-      ?>
-    </ul>
-    <div class="text-center"><?php echo $pagination; ?></div>
-  </div>
-
-  <div id="detailedPlacesList" style="display: none;" class="row">
-    <div class="text-center"><?php echo $pagination; ?></div>
-    <table id="mapTable" class="table table-condensed table-hover">
-      <thead>
-      <tr>
-        <th><?php echo __("Name"); ?></th>
-        <th><?php echo __("Country"); ?></th>
-        <th><?php echo __("City"); ?></th>
-        <th><?php echo __("GC"); ?></th>
-        <th><?php echo __("Level"); ?></th>
-      </tr>
-      </thead>
-      <tbody>
-      <?php foreach ($selectedPlaces as $place) { ?>
-      <tr>
-        <td>
-          <?php echo $place->title; ?>
-          <img src="<?php echo $place->photo->eq(0)->getCrop('mini')->url; ?>" />
-        </td>
-        <td><?php echo $place->country->title; ?></td>
-        <td><?php echo $place->city->title; ?></td>
-        <td><?php echo $place->GC; ?></td>
-        <td><?php echo $place->level; ?></td>
-      </tr>
-      <?php } ?>
-      </tbody>
-    </table>
-    <div class="text-center"><?php echo $pagination; ?></div>
-  </div>
-
-  <?php 
     if ($user->hasRole('player')) {
       echo '<a class="btn btn-block btn-primary" href="'.$pages->get('/shop_generator')->url.$player->id.'">'.__("Go to the marketplace").'</a>';
     }

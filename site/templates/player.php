@@ -230,55 +230,51 @@
 </div>
 
 <div class="row">
-  <div class="panel panel-success">
-    <div class="panel-heading">
-      <h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> <?php echo __("Free elements"); ?> : <?php echo $playerNbEl; ?></span></h4>
-    </div>
-    <div class="panel-body">
-    <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> <?php echo __("Free places"); ?> </span></h4>
-      <ul class="playerPlaces list-inline">
-      <?php
+  <?php
+    $out = '<div class="panel panel-success">';
+    $out .= '<div class="panel-heading">';
+      $out .= '<h4 class="panel-title"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> '.__("Free elements").' : '.$playerNbEl.'</span></h4>';
+    $out .= '</div>';
+    $out .= '<div class="panel-body">';
+    $cachedElements = $cache->get("cache__elements-".$playerPage->name, 2678400, function() use($playerPage) {
+      $out = '';
+      $out .= '<h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> '.__("Free places").' </span></h4>';
+        $out .= '<ul class="playerPlaces list-inline">';
         foreach($playerPage->places as $place) {
           $thumbImage = $place->photo->eq(0)->getCrop('thumbnail')->url;
-          echo "<li><a href='{$place->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$place->title<br />$place->summary<br />[{$place->parent->title},{$place->parent->parent->title}]' /></a></li>";
-        }
-      ?>
-      </ul>
-
-      <?php
-        if ($playerPage->rank && $playerPage->rank->is("index>=8")) {
-      ?>
-        <h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> <?php echo __("Free people"); ?> </span></h4>
-        <ul class="playerPlaces list-inline">
-        <?php
-          foreach($playerPage->people as $p) {
-            $thumbImage = $p->photo->eq(0)->getCrop('thumbnail')->url;
-            echo "<li><a href='{$p->url}'><img class='img-thumbnail' src='{$thumbImage}' alt='' data-toggle='tooltip' data-html='true' title='$p->title<br />$p->summary' /></a></li>";
+          $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage.'" alt="" data-toggle="tooltip" data-html="true" title="'.$place->title.'<br />'.$place->summary.'<br />['.$place->parent->title.','.$place->parent->parent->title.']" /></a></li>';
           }
-        ?>
-        </ul>
-      <?php } else {
-        echo '<p class="badge badge-danger">'.__("People are available for 4emes and 3emes only.").'</p>';
-      } ?>
-    </div>
-    <?php 
-      if ($user->hasRole('teacher') || $user->isSuperuser() || ($user->hasRole('player') && $user->name === $playerPage->login)) { // Admin is logged or user
-    ?>
-    <div class="panel-footer">
-        <span class="glyphicon glyphicon-star"></span>
-        <?php
-        if ($rightInvasions > 0 || $wrongInvasions > 0) {
-          echo __('Defensive power').' : <span>'.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span>';
-          echo '('.sprintf(__('You have repelled %1$s out of %2$s monster invasions'), $rightInvasions, ($rightInvasions+$wrongInvasions)).')';
+        $out .= '</ul>';
+        if ($playerPage->rank && $playerPage->rank->is("index>=8")) {
+          $out .= '<h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> '.__("Free people").'</span></h4>';
+          $out .= '<ul class="playerPlaces list-inline">';
+            foreach($playerPage->people as $p) {
+              $thumbImage = $p->photo->eq(0)->getCrop('thumbnail')->url;
+              $out .= '<li><a href="'.$p->url.'"><img class="img-thumbnail" src="'.$thumbImage.'" alt="" data-toggle="tooltip" data-html="true" title="'.$p->title.'<br />'.$p->summary.'" /></a></li>';
+            }
+          $out .= '</ul>';
         } else {
-          echo __('You have not faced any monster invasion yet.');
+          $out .= '<p class="badge badge-danger">'.__("People are available for 4emes and 3emes only.").'</p>';
         }
-        ?>
-    </div>
-    <?php 
-      }
-    ?>
-  </div>
+        return $out;
+    });
+    $out .= $cachedElements;
+    $out .= '</div>';
+      
+    if ($user->hasRole('teacher') || $user->isSuperuser() || ($user->hasRole('player') && $user->name === $playerPage->login)) { // Admin is logged or user
+      $out .= '<div class="panel-footer">';
+        $out .= '<span class="glyphicon glyphicon-star"></span>';
+        if ($rightInvasions > 0 || $wrongInvasions > 0) {
+          $out .= __('Defensive power').' : <span>'.round(($rightInvasions*100)/($wrongInvasions+$rightInvasions)).'%</span>';
+          $out .= '('.sprintf(__('You have repelled %1$s out of %2$s monster invasions'), $rightInvasions, ($rightInvasions+$wrongInvasions)).')';
+        } else {
+            $out .= __('You have not faced any monster invasion yet.');
+        }
+      $out .= '</div>';
+    }
+    $out .= '</div>';
+    echo $out;
+  ?>
 
   <div class="panel panel-success">
     <div class="panel-heading">

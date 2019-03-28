@@ -6,28 +6,37 @@
   $wire->addHook('LazyCron::everyDay', null, 'cleanTest'); // Init test-team players
   $wire->addHook('LazyCron::everyDay', null, 'clearAdminTableCache');
 
+  // Clean caches
+  /* $wire->addHookAfter('Pages::saved', function($e) use($cache) { */
+  /*   $page = $e->arguments(0); */
+  /*   if ($page->is("template=team")) { */
+  /*     $cache->delete('cache__freeworld-'.$page->name); */
+  /*     $headTeacher = $page->teacher->eq(0); */
+  /*     $cache->delete('cache__scores-'.$headTeacher->name); */
+  /*   } */
+  /* }); */
   // the next ensures that the following code will only run on front end (otherwise back end would get cached, too which results in problems)
   // make sure to place anything you need in the backend before this line or change it to your needs..
-  if ((strpos($page->url, wire('config')->urls->admin) !== false) || ($page->id && $page->is('parent|has_parent=2'))) return;
+  /* if ((strpos($page->url, wire('config')->urls->admin) !== false) || ($page->id && $page->is('parent|has_parent=2'))) return; */
 
   // Manage redirections (restrictions in case of hard coded urls to try and access another user's page
   $homepage = $pages->get("/");
-  wire()->addHookBefore("Page::render", function($event) use($homepage, $session, $pages, $user, $input, $page){
-    switch($page->name) {
-      case 'main-office' :
-        if (($user->hasRole('player') && $input->urlSegment2 != 'player') || ($user->isGuest() && $input->urlSegment2 != 'player')) {
+  /* wire()->addHookBefore("Page::render", function($event) use($homepage, $session, $pages, $user, $input, $page){ */
+    /* switch($page->name) { */
+      /* case 'main-office' : */
+        /* if (($user->hasRole('player') && $input->urlSegment2 != 'player') || ($user->isGuest() && $input->urlSegment2 != 'player')) { */
           // TODO ? Test if player is on his or her own team's office ?
-          $session->redirect($homepage->url);
-        }
-        break;
-      case 'newsboard' :
-        if (($user->hasRole('player') && $input->urlSegment1 != $user->name) || ($user->isGuest() && $input->urlSegment2 != '')) {
-          $session->redirect($homepage->url);
-        }
-        break;
-      default: return;
-    }
-  });
+          /* $session->redirect($homepage->url); */
+        /* } */
+        /* break; */
+      /* case 'newsboard' : */
+        /* if (($user->hasRole('player') && $input->urlSegment1 != $user->name) || ($user->isGuest() && $input->urlSegment2 != '')) { */
+        /*   $session->redirect($homepage->url); */
+        /* } */
+        /* break; */
+      /* default: return; */
+    /* } */
+  /* }); */
 
   /* $wire->addHookBefore('Page::render', function($event) use($session, $user, $page, $input) { */
   /*   if ($user->isLoggedin()) { */
