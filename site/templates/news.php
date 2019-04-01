@@ -21,19 +21,23 @@
       $out .= '<div class="panel-body">';
         $today = new \DateTime("today");
         $news = $pages->find("parent.name=history, publish=1, task.name!=penalty|buy-pdf|inactivity");
-        $news->filter("has_parent=$allPlayers")->sort('-created');
+        $news->filter("has_parent=$allPlayers")->sort("-parent.parent.team.name, -date");
         $out .= '<div class="col-sm-6">';
         $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
         if ($news->count() > 0) {
           $out .= '<ul class="list-unstyled">';
+          $previousTeam = '';
           foreach($news as $n) {
             $currentPlayer = $n->parent('template=player');
             if ($currentPlayer->team->name == 'no-team') { 
               $team = '';
               $name = $currentPlayer->title.' '.$currentPlayer->lastName;
             } else { 
-              $team = '['.$currentPlayer->team->title.']';
+              $team = $currentPlayer->team->title;
               $name = $currentPlayer->title;
+            }
+            if ($team != $previousTeam) {
+              $out .= '<p class="label label-danger">'.$team.'</p>';
             }
             $out .= '<li class="">';
             $out .=strftime("%d %b (%A)", $n->date).' : ';
@@ -41,27 +45,28 @@
             switch ($n->task->name) {
               case 'free' : 
                 if ($n->refPage->template == 'place') {
-                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
+                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
                 }
                 if ($n->refPage->template == 'people') {
-                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
+                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
                 }
                 break;
               case 'bought' :
               case 'buy' :
-                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> : '.html_entity_decode($n->summary).'</span>';
                 break;
               case 'fight-vv' :
-                $out .= '<span class="">'.__("Successful fight for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$pages->get("name=monsters")->url.'?id='.$n->refPage->id.'&thumbnail=1&pages2pdf=1">'.$sanitizer->entities($n->summary).'</a></span>';
+                $out .= '<span class="">'.__("Successful fight for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> : <a href="'.$pages->get("name=monsters")->url.'?id='.$n->refPage->id.'&thumbnail=1&pages2pdf=1">'.$sanitizer->entities($n->summary).'</a></span>';
                 break;
               case 'death' :
-                $out .= '<span class="">'.__("Death for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' <span class="glyphicon glyphicon-thumbs-down></span>"</span>';
+                $out .= '<span class="">'.__("Death for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> <span class="glyphicon glyphicon-thumbs-down></span>"</span>';
                 break;
               default : $out .= $n->task->name. ': '.__("todo");
             }
             $out .= '</span>';
             $out .= ' <label for="unpublish_'.$n->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> '.__("Unpublish").'</label>';
             $out .= '</li>';
+            $previousTeam = $team;
           }
           $out .= '</ul>';
         } else {
