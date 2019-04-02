@@ -375,7 +375,6 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
 
 function taskExtraAction($player, $task, $real) {
   $pages = wire('pages');
-  setStreak($player, $task);
   if ($task->is("name=no-homework")) {
     // If a penalty is still not signed, don't add to hkcount
     $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
