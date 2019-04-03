@@ -28,7 +28,10 @@
       }
       // Check if player has the Visualizer (or forced by admin)
       if (isset($player)) {
-        if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
+        $headTeacher = getHeadTeacher($player);
+        if ($player->team->is("name=test-team")) {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise")->sort("level, name");
+        } else if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
           $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, summary!=''")->sort("level, name");
         } else { // Limit to visible monsters
           $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0, summary!=''")->sort("level, name");
@@ -75,7 +78,7 @@
           $out .= '<span class="pull-left glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="right" title="'.$page->summary.'"></span>';
           $page->of(false);
           if ($page->summary->getLanguageValue($french) != '') {
-            $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" data-placement="left" title="'.$page->summary->getLanguageValue($french).'"></span>';
+            $out .= '<img class="img-rounded pull-right" src="'.$urls->templates.'img/flag_fr.png" data-toggle="tooltip" data-html="true" data-placement="left" title="'.$page->summary->getLanguageValue($french).'" />';
           }
           $out .= '</h2>';
           $out .= '<h4 class="text-center">';

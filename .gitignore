@@ -11,3 +11,6 @@
 /site/templates/*.swp
 /site/modules/*
 /site/config.php
+/site/templates/node_modules/*
+/site/templates/dist/*
+!/site/templates/dist/pa-profile.zip

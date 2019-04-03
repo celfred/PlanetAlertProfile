@@ -1,17 +1,17 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
+  if ($user->isLoggedin()) {
+    $allPlayers = getAllPlayers($user, false);
+  }
+
   $out = '';
-  
   // Display team scores
   $out .= '<div class="row text-center">';
-    if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
-      showScores($allTeams);
-    }
+    $out .= getScoresSummaries($headTeacher);
   $out .= '</div>';
 
   $out .= '<div class="row">';
-  $allConcernedPlayers = $allPlayers; // Already limited to teacher's students TODO : Check this for players !
   if ($user->hasRole('teacher')) { // Teacher's Newsboard 
     // Teacher's Admin board  (to prepare in-class papers to be given to players)
     $out .= '<div id="" class="news panel panel-primary">';
@@ -20,15 +20,65 @@
       $out .= '</div>';
       $out .= '<div class="panel-body">';
         $today = new \DateTime("today");
-      t();
-        $news = $pages->find("parent.name=history, publish=1");
-      bd(t());
-        $news->filter("has_parent=$allConcernedPlayers")->sort('-created');
+        $news = $pages->find("parent.name=history, publish=1, task.name!=penalty|buy-pdf|inactivity");
+        $news->filter("has_parent=$allPlayers")->sort("-parent.parent.team.name, -date");
         $out .= '<div class="col-sm-6">';
+        $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
         if ($news->count() > 0) {
-          $out .= '<p class="label label-primary">'.__("Papers to be given").'</p>';
           $out .= '<ul class="list-unstyled">';
+          $previousTeam = '';
           foreach($news as $n) {
+            $currentPlayer = $n->parent('template=player');
+            if ($currentPlayer->team->name == 'no-team') { 
+              $team = '';
+              $name = $currentPlayer->title.' '.$currentPlayer->lastName;
+            } else { 
+              $team = $currentPlayer->team->title;
+              $name = $currentPlayer->title;
+            }
+            if ($team != $previousTeam) {
+              $out .= '<p class="label label-danger">'.$team.'</p>';
+            }
+            $out .= '<li class="">';
+            $out .=strftime("%d %b (%A)", $n->date).' : ';
+            $out .= '<span>';
+            switch ($n->task->name) {
+              case 'free' : 
+                if ($n->refPage->template == 'place') {
+                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
+                }
+                if ($n->refPage->template == 'people') {
+                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
+                }
+                break;
+              case 'bought' :
+              case 'buy' :
+                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> : '.html_entity_decode($n->summary).'</span>';
+                break;
+              case 'fight-vv' :
+                $out .= '<span class="">'.__("Successful fight for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> : <a href="'.$pages->get("name=monsters")->url.'?id='.$n->refPage->id.'&thumbnail=1&pages2pdf=1">'.$sanitizer->entities($n->summary).'</a></span>';
+                break;
+              case 'death' :
+                $out .= '<span class="">'.__("Death for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> <span class="glyphicon glyphicon-thumbs-down></span>"</span>';
+                break;
+              default : $out .= $n->task->name. ': '.__("todo");
+            }
+            $out .= '</span>';
+            $out .= ' <label for="unpublish_'.$n->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> '.__("Unpublish").'</label>';
+            $out .= '</li>';
+            $previousTeam = $team;
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__("Nothing to do.").'</p>';
+        }
+
+        $out .= '<p class="label label-primary">'.__("Others").'</p>';
+        $others = $pages->find("parent.name=history, publish=1, task.name=penalty|buy-pdf");
+        $others->filter("has_parent=$allPlayers")->sort('-created');
+        if ($others->count() > 0) {
+          $out .= '<ul class="list-unstyled">';
+          foreach($others as $n) {
             $currentPlayer = $n->parent('template=player');
             if ($currentPlayer->team->name == 'no-team') { 
               $team = '';
@@ -40,38 +90,31 @@
             $out .= '<li class="">';
             $out .=strftime("%d %b (%A)", $n->date).' : ';
             $out .= '<span>';
+            $others = new PageArray();
             switch ($n->task->name) {
-              case 'free' : 
-                if ($n->refPage->template == 'place') {
-                  $out .= '<span class="">'.__("New place for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
-                }
-                if ($n->refPage->template == 'people') {
-                  $out .= '<span class="">'.__("New people for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$n->refPage->url.'?pages2pdf=1&id='.$n->refPage->id.'">'.html_entity_decode($n->summary).'</a></span>';
-                }
-                break;
-              case 'bought' :
-              case 'buy' :
-                $out .= '<span class="">'.__("New equipment for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
-                break;
               case 'penalty' :
                 $out .= '<span class="">'.__("Penalty for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
-              case 'fight-vv' :
-                $out .= '<span class="">'.__("Successful fight for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : <a href="'.$pages->get("name=monsters")->url.'?id='.$n->refPage->id.'&thumbnail=1&pages2pdf=1">'.$sanitizer->entities($n->summary).'</a></span>';
+              case 'inactivity' :
+                $out .= '<span class="">'.__("Inactivity for").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
+                break;
+              case 'buy-pdf':
+                $out .= '<span class="">'.__("PDF bought by").' <a href="'.$currentPlayer->url.'">'.$name.'</a> '.$team.' : '.html_entity_decode($n->summary).'</span>';
                 break;
               default : $out .= $n->task->name. ': '.__("todo");
             }
             $out .= '</span>';
-            $out .= ' <label for="unpublish_'.$n->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> '.__("Unpublish").'</label>';
+            $out .= ' <label for="unpublish_'.$n->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> '.__("Unpublish").'</label>';
             $out .= '</li>';
           }
           $out .= '</ul>';
         } else {
-          $out .= '<p>'.__("Nothing to do.").'</p>';
+          $out .= '<p>'.__("Nothing to check.").'</p>';
         }
+
         $out .= '</div>';
         $out .= '<div class="col-sm-6">';
-        $unusedConcerned = $allConcernedPlayers->find("usabledItems.count>0")->sort("-team.name, name");
+        $unusedConcerned = $allPlayers->find("usabledItems.count>0")->sort("-team.name, name");
         $out .= '<p class="label label-primary">'.__("Potion Planner").'</p>';
         if ($unusedConcerned->count() > 0) {
           $out .= '<ul class="list-unstyled">';
@@ -87,12 +130,12 @@
                     $out .= ' <span class="badge">!</span> ';
                   }
                   if ($historyPage->refPage->is("name!=memory-potion")) {
-                    $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
-                    $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("used today").'</label>';
+                    $out .= '<span><a href="'.$p->url.'">'.$p->title.'</a> ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                    $out .= ' <label for="unpublish_'.$historyPage->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("used today").'</label>';
                   } else {
                     $successId = $pages->get("template=memory-text, id=$historyPage->linkedId")->task->id;
                     $failedId = $pages->get("name=solo-r")->id;
-                    $out .= '<span>'.$p->title.' ['.$p->team->title.'] : '.$historyPage->summary.' (bought '.$interval->days.' days ago)</span>';
+                    $out .= '<span><a href="'.$p->url.'">'.$p->title.'</a> ['.$p->team->title.'] : '.$historyPage->summary.' (bought '.$interval->days.' days ago)</span>';
                     $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="memory" data-result="good" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$successId.'"><i class="glyphicon glyphicon-thumbs-up"></i></button>';
                     $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="memory" data-result="bad" data-url="'.$pages->get('name=submitforms')->url.'?form=manualTask&type=memory&playerId='.$p->id.'&historyPageId='.$historyPage->id.'&taskId='.$failedId.'"><i class="glyphicon glyphicon-thumbs-down"></i></button>';
                   }
@@ -104,8 +147,8 @@
                   $interval = $today->diff($date2);
                   $out .= '<li>';
                   $out .= ' <span class="badge">!</span> ';
-                  $out .= '<span>'.$p->title.' '.$p->lastName.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
-                  $out .= ' <label for="unpublish_'.$historyPage->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("remove").'</label>';
+                  $out .= '<span><a href="'.$p->url.'">'.$p->title.'</a> '.$p->lastName.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
+                  $out .= ' <label for="unpublish_'.$historyPage->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("remove").'</label>';
                   $out .= '</li>';
                 }
             }
@@ -116,7 +159,7 @@
         }
         $book = $pages->get("name=book-knowledge");
         $pendings = $book->pending;
-        $pendings->filter("player=$allConcernedPlayers");
+        $pendings->filter("player=$allPlayers");
         $out .= '<hr />';
         $out .= '<p class="label label-primary">'.__("Copy work").'</p>';
         if (count($pendings) > 0) {
@@ -129,14 +172,33 @@
             if ($interval->days > 21) {
               $out .= ' <span class="badge">!</span> ';
             }
-            $out .= '<span>'.$p->player->title.' ['.$p->player->team->title.'] : '.$p->refPage->title.' (warning '.$interval->days.' days ago)</span>';
-            $out .= ' <label for="unpublish_'.$p->id.'" class="label label-default"><input type="checkbox" id="unpublish_'.$p->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedPending='.$p->id.'" /> validated today</label>';
-            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&usedPending='.$p->id.'" class="del">[Delete]</a>';
+            $out .= '<span><a href="'.$p->player->url.'">'.$p->player->title.'</a> ['.$p->player->team->title.'] : '.$p->refPage->title.' (warning '.$interval->days.' days ago)</span>';
+            $out .= ' <label for="unpublish_'.$p->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$p->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedPending='.$p->id.'" /> validated today</label>';
+            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteNotification&pageId='.$p->id.'" class="del">'.__('[Delete]').'</a>';
             $out .= '</li>';
           }
           $out .= '</ul>';
         } else {
           $out .= '<p>'.__("No lessons to be validated.").'</p>';
+        }
+        $out .= '<hr />';
+        $out .= '<p class="label label-primary">'.__("Fight requests").'</p>';
+        $fightRequests = $allPlayers->find("fight_request!=''");
+        if (count($fightRequests) > 0) {
+          $out .= '<ul class="list-unstyled">';
+          foreach ($fightRequests as $p) {
+            $out .= '<li>';
+            $out .= '<a href="'.$p->url.'">'.$p->title.'</a> ['.$p->team->title.'] : <a href="'.$pages->get("name=monsters")->url.'?id='.$p->fight_request.'&pages2pdf=1">'.$pages->get($p->fight_request)->title.'</a>';
+            $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="rr" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=RR&monsterId='.$p->fight_request.'">RR</button>';
+            $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="r" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=R&monsterId='.$p->fight_request.'">R</button>';
+            $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="v" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=V&monsterId='.$p->fight_request.'">V</button>';
+            $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="vv" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$p->id.'&result=VV&monsterId='.$p->fight_request.'">VV</button>';
+            $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteFightRequest&pageId='.$p->id.'" class="del">'.__('[Delete]').'</a>';
+            $out .= '</li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__("No requests.").'</p>';
         }
         $out .= '</div>';
       $out .= '</div>';
@@ -147,13 +209,13 @@
     $out .= '<div class="col-sm-6">'; // Column 1
   }
       if ($user->hasRole('player')) {
+        $playerName = $player->name;
         if ($player->team->is("name!=no-team")) {
-          $teamPlayers = $allPlayers->find("team=$player->team"); // Limit to logged player's team
           $team = '['.$player->team->title.']';
         } else {
-          $teamPlayers = $pages->find("parent.name=players, template=player, name!=test");
           $team = '';
         }
+        // Help messages ?
         if ($player->GC > 80) {
           $helpAlert = true;
           $helpTitle = sprintf(__("You have %dGC !"), $player->GC);
@@ -162,13 +224,13 @@
         include("./helpAlert.inc.php"); 
       } else {
         $player = false;
-        $teamPlayers = $pages->find("parent.name=players, template=player, name!=test");
+        $playerName = '';
         $team = '';
       }
 
       if ($user->hasRole('player')) {
         // Get players' last 10 events
-        $allEvents = $player->find("parent.name=history, sort=-created, limit=10");
+        $allEvents = $player->get("name=history")->children("sort=-created, limit=10");
         $out .= '<div id="" class="news panel panel-primary">';
           $out .= '<div class="panel-heading">';
             $out .= '<h4 class="panel-title">';
@@ -212,129 +274,67 @@
           $out .= '</div>';
           $out .= '<div class="panel-footer text-right">';
           $out .= '<p>'.__("To see your complete history, go to").' ';
-          $out .= '<a href="'.$pages->get('/players')->url.$player->team->name.'/'.$player->name.'">'.__("My Profile page").'</a></p>';
+          $out .= '<a href="'.$player->url.'">'.__("My Profile page").'</a></p>';
           $out .= '</div>';
         $out .= '</div>';
-        if ($player->team->is("name!=no-team")) {
-          // Team News (Free/Buy actions during last 5 days)
-          $news = new PageArray();
-          $today = new \DateTime("today");
-          $interval = new \DateInterval('P5D');
-          $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
-          t('01');
-          $news = $teamPlayers->get("children.name=history")->find("date>=$limitDate,task.name~=free|buy|ut-action|fight, refPage!=NULL, inClass=0")->sort("-date");
-          bd(t('01'));
-          $out .= '<div id="" class="board panel panel-primary">';
-            $out .= '<div class="panel-heading">';
-            $out .= '<h4 class=""><span class="label label-primary">'.__('Team News (last 5 days)').'</span></h4>';
-            $out .= '</div>';
-            $out .= '<div class="panel-body">';
-              $out .= '<ul id="newsList" class="list list-unstyled list-inline text-center">';
-              $counter = 1;
-              foreach ($news as $n) {
-                $currentPlayer = $n->parent('template=player');
-                $out .= '<li>';
-                $out .= '<div class="thumbnail">';
-                $out .= '<span class="badge">'.$counter.'</span>';
-                $counter++;
-                if ($n->refPage->photo) {
-                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-                }
-                if ($n->refPage->image) {
-                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
-                }
-                $out .= '<caption class="text-center">';
-                $out .= ' <span>(On '.date('D, M. j', $n->date).')</span><br />';
-                $out .= ' <span class="badge">'.$currentPlayer->title.'</span>';
-                $out .= '</caption>';
-                $out .= '</div>';
-                $out .= '</li>';
-              }
-              if ($news->count() == 0) {
-                $out .= '<p>'.__('No recent news.').'</p>';
-              }
-              $out .= '</ul>';
-            $out .= '</div>';
-          $out .= '</div>';
-        }
       }
           
       if ($user->hasRole('player') || !$user->isLoggedin()) { // Not for teachers and superuser
-          // Scoreboards
-          $out .= '<div class="row">'; // Nested 2 columns
-            $out .= '<div class="col-sm-6">'; // Subcolumn 1
-              // Most active
+        // Scoreboards
+        $out .= '<div class="row">'; // Nested 2 columns
+          $out .= '<div class="col-sm-6">'; // Subcolumn 1
+            $boardsOnCol = ['yearlyKarma', 'reputation', 'underground_training'];
+            foreach($boardsOnCol as $field) {
+              switch($field) {
+                case 'yearlyKarma' : $title = __("Most active players");
+                  break;
+                case 'reputation' : $title = __("Most influential players");
+                  break;
+                case 'underground_training' : $title = __("Most trained players");
+                  break;
+                default : $title = 'todo';
+              }
+              if ($user->isGuest()) { // Global Scoreboards
+                $playerPos = false;
+                $topPlayers = setGlobalScoreboard($field, 10);;
+                $prevPlayers = false;
+                $nextPlayer = false;
+                $playerId = false;
+              } else { // Team Scoreboards
+                list($playerPos, $totalPlayersNb, $prevPlayers, $topPlayers, $nextPlayer) = setScoreboardNew($player, $field, 'team');
+                $playerId = $player->id;
+              }
               $out .= '<div class="board panel panel-success">';
               $out .= '  <div class="panel-heading">';
-              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=yearlyKarma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-              $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$team.' '.__("Most Active Players").'</h4>';
+              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field='.$field.'"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+              $out .= '  <h4 class="panel-title">';
+              $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
+              $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.__("Your position in this scoreboard").'">'.$playerPos.'</span> '.$team.' '.$title.'</h4>';
               $out .= '  </div>';
               $out .= '  <div class="panel-body">';
-              $out .= displayTeamScoreboard($teamPlayers, $player, "-yearlyKarma");
+              $out .= displaySmallScoreboard($topPlayers, $prevPlayers, $playerPos, $playerId, $field);
               $out .= '  </div>';
               $out .= '</div>';
-              
-              if ($user->hasRole('player') && $player->team->name != 'no-team') {
-                // Most active Groups
+            }
+            if ($user->hasRole('player') && $player->team->name != 'no-team') {
+              // Most active Groups
+              $allGroups = setGroupScores($allPlayers);
+              if (isset($allGroups)) { // Don't display if no groups are set
                 $out .= '<div id="" class="panel panel-success">';
                 $out .= '  <div class="panel-heading">';
                 $out .= '  <h4 class="panel-title">'.$team.' '.__("Most Active Groups").'</h4>';
                 $out .= '  </div>';
                 $out .= '  <div class="panel-body">';
-                $allGroups = groupScores($player->team);
-                if (isset($allGroups)) {
-                  $out .= '<ol class="">';
-                  foreach($allGroups as $group) {
-                    if (isset($player) && $player->group == $group) {
-                      $focus = 'focus';
-                    } else {
-                      $focus = '';
-                    }
-                    $out .= '<li>';
-                    $out .= '<p data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
-                    $out .= '<span class="'.$focus.'">'.$group->title.'</span>';
-                    $out .= ' <span class="badge">'.$group->karma.' K</span>';
-                    // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member)
-                    if ($group->nbBonus > 0) {
-                      $out .= '&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-star"></span>';
-                      $out .= '<span class="badge">'.$group->nbBonus.'</span>';
-                    }
-                    $out .= '</p>';
-                    $out .= '</li>';
-                  }
-                  $out .= '</ol>';
-                } else {
-                  $out .= '<p class="text-center">'.__("No groups are set").'</p>';
-                }
+                  if ($player->group) { $groupId = $player->group->id; } else { $groupId = false; }
+                  $out .= displayGroupScoreboard($allGroups, $groupId);
                 $out .= '  </div>';
                 $out .= '</div>';
               }
+            }
+          $out .= '</div>'; // /subcolumn 1
 
-              // Most influential
-              $out .= '<div id="" class="panel panel-success">';
-              $out .= '  <div class="panel-heading">';
-              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=karma"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-              $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$team.' '.__("Most influential").'</h4>';
-              $out .= '  </div>';
-              $out .= '  <div class="panel-body">';
-              $out .= displayTeamScoreboard($teamPlayers, $player, "-reputation");
-              $out .= '  </div>';
-              $out .= '</div>';
-
-              // Best UT
-              $out .= '<div id="" class="panel panel-success">';
-              $out .= '  <div class="panel-heading">';
-              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=underground_training"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-              $out .= '  <h4 class="panel-title"><i class="glyphicon glyphicon-headphones"></i> '.$team.' '.__("Most Trained").'</h4>';
-              $out .= '  </div>';
-              $out .= '  <div class="panel-body">';
-              $out .= displayTeamScoreboard($teamPlayers, $player, "-underground_training");
-              $out .= '  </div>';
-              $out .= '</div>';
-            $out .= '</div>'; // /subcolumn 1
-
-            $out .= '<div class="col-sm-6">'; // Subcolumn 2
-              if ($user->hasRole('player') && $player->team->is("name!=no-team")) {
+          $out .= '<div class="col-sm-6">'; // Subcolumn 2
+            if ($user->hasRole('player') && $player->team->is("name!=no-team")) {
                 // Help needed
                 $out .= '<div id="" class="board panel panel-danger">';
                   $out .= '<div class="panel-heading">';
@@ -369,53 +369,42 @@
                   $out .= '<div class="panel-footer text-right">';
                   $out .= '</div>';
                 $out .= '</div>';
+            }
+            $boardsOnCol = ['places', 'people', 'fighting_power', 'donation'];
+            foreach($boardsOnCol as $field) {
+              switch($field) {
+                case 'places' : $title = __("Greatest # of places");
+                  break;
+                case 'people' : $title = __("Greatest # of people");
+                  break;
+                case 'fighting_power' : $title = __("Best warriors");
+                  break;
+                case 'donation' : $title = __("Best donators");
+                  break;
+                default : $title = 'todo';
               }
-             
-              // Greatest # of places
-              $out .= '<div id="" class="panel panel-success">';
-              $out .= '  <div class="panel-heading">';
-              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=places"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-              $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$team.' '.__("Greatest # of places").'</h4>';
-              $out .= '  </div>';
-              $out .= '  <div class="panel-body">';
-              $out .= displayTeamScoreboard($teamPlayers, $player, "-places.count");
-              $out .= '  </div>';
-              $out .= '</div>';
-
-              // Greatest # of people if needed
-              if (($user->hasRole('player') && $player->rank && $player->rank->is("index>=8")) || !$user->isLoggedin()) {
-                $out .= '<div id="" class="panel panel-success">';
-                $out .= '  <div class="panel-heading">';
-                $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=people"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-                $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$team.' '.__("Greatest # of people").'</h4>';
-                $out .= '  </div>';
-                $out .= '  <div class="panel-body">';
-                $out .= displayTeamScoreboard($teamPlayers, $player, "-people.count");
-                $out .= '  </div>';
-                $out .= '</div>';
+              if ($user->isGuest()) { // Global Scoreboards
+                $playerPos = false;
+                $topPlayers = setGlobalScoreboard($field, 10);;
+                $prevPlayers = false;
+                $nextPlayer = false;
+                $playerId = false;
+              } else { // Team Scoreboards
+                list($playerPos, $totalPlayersNb, $prevPlayers, $topPlayers, $nextPlayer) = setScoreboardNew($player, $field, 'team');
+                $playerId = $player->id;
               }
-
-              // Best warrior
-              $out .= '<div id="" class="panel panel-success">';
+              $out .= '<div class="board panel panel-success">';
               $out .= '  <div class="panel-heading">';
-              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=fighting_power"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-              $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/flash.png" alt="" /> '.$team.' '.__("Best warriors").'</h4>';
+              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field='.$field.'"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
+              $out .= '  <h4 class="panel-title">';
+              $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
+              $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.__("Your position in this scoreboard").'">'.$playerPos.'</span> '.$team.' '.$title.'</h4>';
               $out .= '  </div>';
               $out .= '  <div class="panel-body">';
-              $out .= displayTeamScoreboard($teamPlayers, $player, "-fighting_power");
+              $out .= displaySmallScoreboard($topPlayers, $prevPlayers, $playerPos, $playerId, $field);
               $out .= '  </div>';
               $out .= '</div>';
-
-              // Best donators
-              $out .= '<div id="" class="panel panel-success">';
-              $out .= '  <div class="panel-heading">';
-              $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field=donation"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
-              $out .= '  <h4 class="panel-title"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> '.$team.' '.__("Best donators").'</h4>';
-              $out .= '  </div>';
-              $out .= '  <div class="panel-body">';
-              $out .= displayTeamScoreboard($teamPlayers, $player, "-donation");
-              $out .= '  </div>';
-              $out .= '</div>';
+            }
             $out .= '</div>'; // /subcolumn 2
           $out .= '</div>'; // /row
         $out .= '</div>'; // /col-sm-6 /Column 1
@@ -438,7 +427,7 @@
         $out .= '<div id="'.$n->id.'" class="news panel panel-success">';
         $out .= '<div class="panel-heading">';
         $out .= '<h4 class="panel-title">';
-        $logo = $homepage->photo->eq(0)->size(40,40); 
+        $logo = $homepage->photo->eq(1)->size(40,40); 
         $out .= '<img src="'.$logo->url.'" alt="" /> ';
         $out .= date("M. d, Y", $n->created);
         $out .= ' - ';
@@ -470,11 +459,11 @@
             }
            }
        $out .= '</div>';
-          if ($user->isSuperuser()) {
-       $out .= '<div class="panel-footer text-right">';
-        $out .= '<label for="unpublish_'.$n->id.'"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> Unpublish from Newsboard<span id="feedback"></span></label>';
-       $out .= '</div>';
-         }
+       if ($user->isSuperuser()) {
+         $out .= '<div class="panel-footer text-right">';
+          $out .= '<label for="unpublish_'.$n->id.'"><input type="checkbox" id="unpublish_'.$n->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&newsId='.$n->id.'" /> Unpublish from Newsboard<span id="feedback"></span></label>';
+         $out .= '</div>';
+       }
       $out .= '</div>';
       }
     }
@@ -517,67 +506,22 @@
       }
     }
     
-    $today = new \DateTime("today");
-    $interval = new \DateInterval('P30D');
-    $limitDate = strtotime($today->sub($interval)->format('Y-m-d'));
-    // Planet Alert news
-    $adminId = $users->get("name=admin")->id;
-    if ($user->isGuest()) { // Guests get admin news only
-      $newItems = $pages->find("template=exercise|equipment|item|lesson, created_users_id=$adminId, published>$limitDate, sort=-published, limit=10");
-    } else {
-      if ($user->isSuperuser()) { // Admin gets ALL news
-        $newItems = $pages->find("template=exercise|equipment|item|lesson, published>$limitDate, sort=-published, limit=10");
-      }
-      if ($user->hasRole('teacher')) { // Teachers get admin news + personal news
-        $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
-        $newItems = $pages->find("template=exercise|equipment|item|lesson, (created_users_id=$adminId, published>$limitDate), (teacher=$user, modified>$limitDate, modified_users_id!=$guestId), sort=-modified, sort=-published, limit=10");
-      }
-      if ($user->hasRole('player')) { // Player gets headTeacher news
-        $guestId = $users->get("name=guest"); // To avoid undetectable updated monsters
-        $newItems = $pages->find("template=exercise|equipment|item|lesson, (template=equipment, published>$limitDate), (created_users_id=$headTeacher->id, published>$limitDate), (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, modified>$limitDate, modified_users_id!=$guestId), (teacher=$headTeacher, modified>$limitDate, modified_users_id!=$guestId), sort=-published, sort=-modified, limit=10");
-      }
-    }
-    $extra = $newItems->getTotal() - $newItems->getLimit();
-    if ($extra > 0) { $limitReached = '<li>['.$extra.' '.__("more results").']</li>'; } else { $limitReached = ''; }
     // Recent public news (30 previous days)
     $out .= '<div id="" class="news panel panel-primary">';
       $out .= '<div class="panel-heading">';
         $out .= '<h4 class="panel-title">'.__("Recent public activity").'</h4>';
       $out .= '</div>';
-      // All public news
       $out .= '<div class="panel-body">';
-      $book = $pages->get("name=book-knowledge-item");
-      if ($newItems->count() > 0) {
-        $out .= '<p class="label label-danger"><span class="glyphicon glyphicon-hand-up"></span> '.__("Planet Alert News !").'</p>';
-        $out .= '<ul class="list-inline">';
-          foreach($newItems as $n) {
-            if ($n->image) {
-              $mini = "<img data-toggle='tooltip' src='".$n->image->getCrop('mini')->url."' alt='image' />";
-            } else {
-              $mini = '';
-            }
-            if ($n->is("template=lesson")) {
-              $mini = '<img src="'.$book->image->getCrop('mini')->url.'" alt="image">';
-            }
-            $out .= '  <li data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$n->summary.'">'.$mini.' '.$n->title.' <span class="badge">New</span>';
-            if ($user->isSuperuser()) {
-              $out .= $n->feel();
-            }
-            $out .= '</li>  ';
-          }
-        $out .= $limitReached;
-        $out .= '</ul>';
-      }
-      $news = $pages->find("parent.name=history, public=1, date>=$limitDate, sort=-date");
-      if (!$user->isSuperuser()) { // Limit to teacher's players
-        $news->filter("has_parent=$allConcernedPlayers, limit=20");
+      $limitDate  = new \DateTime("-15 days");
+      $limitDate = strtotime($limitDate->format('Y-m-d'));
+      if ($user->isGuest()) { // All players (longest loading time)
+        $recentEvents = $pages->find("has_parent!=$testPlayer, parent.name=history, template=event, date>$limitDate, public=1, limit=20, sort=-date");
       } else {
-        $news->filter("limit=20");
+        $recentEvents = $pages->find("has_parent!=$testPlayer, parent.parent.team=$allTeams, parent.name=history, template=event, date>$limitDate, public=1, limit=20, sort=-date"); // Limit to headTeacher's teams
       }
-      $out .= '<h4 class="label label-success"><span class="glyphicon glyphicon-thumbs-up"></span> '.__("New public activity !").'</h4>';
-      if ($news->count() > 0) {
-        $out .= '<ul class="list-unstyled">';
-        foreach($news as $n) {
+      if ($recentEvents->count() > 0) {
+        $out .= '<ul class="">';
+        foreach($recentEvents as $n) {
           $currentPlayer = $n->parent('template=player');
           if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
           if ($currentPlayer->avatar) {
@@ -619,9 +563,11 @@
             case 'donation' :
               $out .= '<span class="">'.__("Generous attitude from").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.'] : '.html_entity_decode($n->summary).'</span>';
               break;
-            default : $out .= __("todo");
+            case 'best-time' :
+              $out .= '<span class="">'.__("Best time for").' <a href="'.$currentPlayer->url.'">'.$currentPlayer->title.'</a> '.$team.'] : '.html_entity_decode($n->summary).'</span>';
+              break;
+            default : $out .= __("todo").' : '.$n->task->name;
           }
-          //$out .= $n->task->title. ' : ' . $n->summary;
           $out .= '</span>';
           $out .= '</li>';
         }

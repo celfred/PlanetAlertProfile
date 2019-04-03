@@ -1,25 +1,24 @@
 $(document).ready(function() {
-	$('#scrollDown').on('click', function(e) {
+	$(document).on('click', '#scrollDown', function(e) {
 		e.preventDefault();
-		window.scrollBy(0,350);
+    $("body, html").animate({scrollTop: $("body, html").scrollTop() + 350}, 1500);
 	});
-	$('#scrollUp').on('click', function(e) {
+	$(document).on('click', '#scrollUp', function(e) {
 		e.preventDefault();
-		window.scrollBy(0,-350);
+    $("body, html").animate({scrollTop: $("body, html").scrollTop() - 350}, 1500);
 	});
 
-  $('.close').on('click', function () {
+  $(document).on('click', '.close', function () {
     var id = $(this).attr('data-id');
     $(id).hide();
   });
 
-	$('a.frenchVersion').on('click', function() {
+	$(document).on('click', 'a.frenchVersion', function() {
 		$('div.frenchVersion').toggle();
 		return false;
 	});
 
-  
-	$('.publishElement').on('click', function() {
+	$(document).on('click', '.publishElement', function() {
 		var href = $(this).attr('href');
 		var $this = $(this);
     $this.html(lang.saving); 
@@ -30,7 +29,7 @@ $(document).ready(function() {
     return false; 
 	});
 
-	$('.selectElement').on('click', function() {
+	$(document).on('click', '.selectElement', function() {
     $("#ajaxViewport").html("<p>"+lang.saving+"</p>"); 
 		var href = $(this).attr('href');
 		$el = $(this).parent('li');
@@ -54,7 +53,7 @@ $(document).ready(function() {
     return false; 
 	});
 
-	$('.deleteFromId').on('click', function(e) {
+	$(document).on('click', '.deleteFromId', function(e) {
     e.preventDefault();
 		$this = $(this);
 		swal({
@@ -69,7 +68,7 @@ $(document).ready(function() {
 				var href = $this.attr('data-href');
 				$('<span>Saving...</span>').insertAfter($this);
 				$.get(href, function(data) { 
-					$this.parent('li').remove();
+					$this.parents('li, tr').remove();
 				}); 
 			} else { 
 				return false;
@@ -77,7 +76,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.togglePublish').on('click', function(e) {
+	$(document).on('click', '.togglePublish', function(e) {
     e.preventDefault();
 		$this = $(this);
 		var href = $this.attr('data-href');
@@ -99,7 +98,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.announcement').on('close.bs.alert', function(e) {
+	$(document).on('close.bs.alert', '.announcement', function(e) {
 		e.preventDefault();
 		var $this = $(this);
 		var $href = $this.attr('data-href')
@@ -121,7 +120,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.teamOption').on('click', function() {
+	$(document).on('click', '.teamOption', function() {
     $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
 		var href = $(this).attr('href');
     $.get(href, function(data) { 
@@ -130,7 +129,7 @@ $(document).ready(function() {
     return false; 
   }); 
 
-  $(".adminAction").on('click', function() {
+	$(document).on('click', '.adminAction', function() {
     $("#ajaxViewport").html("<p>"+lang.loading+"</p>"); 
 		var playerId = $('#playerId').val();
 		if (playerId == '-1' || playerId == null) {
@@ -158,12 +157,12 @@ $(document).ready(function() {
 			var href = $(this).attr('data-href') + action + '?&periodId=' + $('#periodId').val();
 		}
     $.get(href, function(data) { 
-        $("#ajaxViewport").html(data); 
+      $("#ajaxViewport").html(data); 
     }); 
     return false; 
   }); 
 
-	$('.limitButton').on('click', function() {
+	$(document).on('click', '.limitButton', function() {
 		$('.limitButton').each( function() {
 			$(this).prop('class', 'limitButton btn btn-primary');
 		});
@@ -181,7 +180,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$('.monsterInfo').on('click', function() {
+	$(document).on('click', '.monsterInfo', function() {
 		$this = $(this);
 		var $url = $this.attr('data-href');
 		swal({
@@ -205,13 +204,81 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.basicConfirm').on('click', function() {
+	$(document).on('click', '.fightRequestConfirm', (function(e) {
+    e.preventDefault();
+    $this = $(this);
+    var $href = $this.attr("data-href");
+    var $msg = $this.attr("data-msg");
+		swal({
+			title: lang.sure,
+      text: $msg,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes
+		}).then( result => {
+			if (result.value) {
+        $.get($href, function(data) { 
+          $('<span class="glyphicon glyphicon-ok-sign"></span>').insertAfter($this);
+          $("a.fightRequestConfirm").remove();
+        }); 
+      } else {
+        return false;
+      }
+    })
+  }));
+
+	$(document).on('click', '.simpleConfirm', (function(e) {
+    e.preventDefault();
+    $this = $(this);
+    if ($this.attr("data-href")) {
+      var $href = $this.attr("data-href");
+    } else {
+      var $href = '';
+    }
+    if ($this.attr("data-msg")) {
+      var $msg = $this.attr("data-msg");
+    } else {
+      var $msg = '';
+    }
+		swal({
+			title: lang.sure,
+      text: $msg,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: lang.no,
+			confirmButtonText: lang.yes
+		}).then( result => {
+			if (result.value) {
+        if ($href != '') { // Ajax-call before following href
+					$.get($href, function(data) { 
+            window.location.href = $this.attr("href");
+					}); 
+        } else {
+          window.location.href = $this.attr("href");
+        }
+      } else {
+        return false;
+      }
+    })
+  }));
+
+	$(document).on('click', '.basicConfirm', function(e) {
+    e.preventDefault();
 		var $this = $(this);
+    var $defaultHref = $this.attr('href');
 		var $href = $this.attr('data-href');
     if ($this.attr("data-reload")) {
       var $reload = $this.attr("data-reload");
     } else {
       var $reload = 'false';
+    }
+    if ($this.attr("data-msg")) {
+      var $msg = $this.attr("data-msg");
+    } else {
+      var $msg = '';
     }
     if ($this.attr("data-toDelete")) {
       var $toDelete = $this.parents($this.attr("data-toDelete"));
@@ -220,6 +287,7 @@ $(document).ready(function() {
     }
 		swal({
 			title: lang.sure,
+      text: $msg,
 			type: "warning",
 			showCancelButton : true,
 			allowOutsideClick : true,
@@ -243,7 +311,22 @@ $(document).ready(function() {
             });
 					}); 
 				} else {
-					window.location.href = $href;
+          if ($href) {
+            $.get($href, function(data) { 
+              swal({
+                title: lang.saved,
+                showCancelButton : false,
+                showConfirmButton: false,
+                timer: 500,
+              }).then( result => {
+                if ($defaultHref) {
+                  window.location.href = $defaultHref;
+                } else {
+                  window.location.href = $href;
+                }
+              });
+            }); 
+          }
 				}
 			} else {
 				return false;
@@ -255,6 +338,9 @@ $(document).ready(function() {
 		$this = $(this);
     $hide = $this.attr('data-hide-feedback');
     $disable = $this.attr("data-disable");
+    $targetId = $this.attr("data-targetId");
+    $targetEl = $('#'+$targetId);
+    if ($targetEl) { $targetEl.html(lang.loading); }
     var href = $this.attr('data-href');
     if ($this.next().hasClass("ajaxFeedback")) {
       $this.next().remove();
@@ -262,7 +348,14 @@ $(document).ready(function() {
     $that = $('<span class="ajaxFeedback"> '+lang.loading+'</span>').insertAfter($this);
     $.get(href, function(data) { 
       if (data) {
-        $that.html(data);
+        if ($targetId) {
+          $targetEl.html(data);
+          if ($targetId == 'historyPanel') {
+            initTables();
+          }
+        } else {
+          $that.html(data);
+        }
       } else {
         $that.html(' '+lang.saved);
       }
@@ -271,10 +364,17 @@ $(document).ready(function() {
       }
       if ($disable == 'true') { $this.prop('disabled', true); }
     }); 
+    if ($this.is(":checkbox")) {
+      if ( $this.attr("checked") == 'checked') {
+        $this.attr("checked") = '';
+      } else {
+        $this.attr("checked") = 'checked';
+      }
+    }
     return false;
 	});
 
-	$('.confirmSubmit').on('click', function(e) {
+	$(document).on('click', '.confirmSubmit', function(e) {
     $this = $(this);
     e.preventDefault();
 		swal({
@@ -293,15 +393,26 @@ $(document).ready(function() {
 		});
   });
 
-  $('.toggleCheckboxes').on('click', function(e) {
+  $(document).on('click', '.toggleCheckboxes', function(e) {
     var checked = $(this).prop('checked');
     var index = $(this).parent().parent().index();
-    $('tr').each(function(i, val){
-      $(val).children().eq(index).children().children('input[type=checkbox]').prop("checked", checked);
-    });
+    if ($(this).attr('data-col')) { // Col toggle
+      $('tr').each(function(i, val){
+        $box = $(val).children().eq(index).children().children("input[type=checkbox]");
+        if ($box.attr("data-result") != 'N') {
+          $box.prop("checked", checked);
+        }
+      });
+    } else { // Row toggle
+      $('tr').eq(index+1).find("input[type=checkbox]").each(function() {
+        if ($(this).attr("data-result") != 'N') {
+          $(this).prop("checked", checked);
+        }
+      });
+    }
   });
 
-	$('.confirm').on('click', function() {
+	$(document).on('click', '.confirm', function() {
 		$this = $(this);
 		swal({
 			title: lang.sure,
@@ -324,7 +435,7 @@ $(document).ready(function() {
 		});
 	});
 
-	$('.proceed').on('click', function() {
+	$(document).on('click', '.proceed', function() {
 		$this = $(this);
 		swal({
 			title: lang.sure,
@@ -349,12 +460,12 @@ $(document).ready(function() {
 		});
 	});
 
-	$('#playerId').on('change', function() {
+	$(document).on('change', '#playerId', function() {
 		var pageId = $(this).val();
 		var url = $('#backendEditable').attr('data-href');
 		$('#backendEditable').attr('href', url+pageId); 
 	});
-	$('#backendEditable').on('click', function() {
+	$(document).on('click', '#backendEditable', function() {
 		if ($(this).attr('href') != '') {
 			var url = $(this).attr('href');
 			window.location.href = url;
@@ -364,13 +475,13 @@ $(document).ready(function() {
 		}
 	})
 
-  $(".toggleEnabled").on('click', function(e) {
+  $(document).on('click', '.toggleEnabled', function(e) {
 		e.preventDefault();
 		$checkbox = $(this).parents('td').find("input");
 		$checkbox.prop('disabled', !$checkbox.prop('disabled'));
 	});
 
-  $(".removeAbs").on('click', function(e) {
+  $(document).on('click', '.removeAbs', function(e) {
 		e.preventDefault();
     $this = $(this);
 		swal({
@@ -541,7 +652,7 @@ $(document).ready(function() {
     return false; 
   })); 
 
-  $('#shopSelect').change( function() {
+  $(document).on('change', '#shopSelect', function() {
     var url = $('#shopSelect').val();
     $.get(url, function(data) { 
         $("#possibleItems").html(data); 
@@ -549,29 +660,29 @@ $(document).ready(function() {
     return false; 
   });
 
-  $('#switchGallery').click( function() {
+  $(document).on('click', '#switchGallery', function() {
     $('#galleryPlacesList').toggle();
     $('#detailedPlacesList').toggle();
   });
 
-  $('button.popup').click( function(e) {
+  $(document).on('click', 'button.popup', function(e) {
 		e.preventDefault();
 		$(this).closest('form').attr('target', '_blank').submit(); // Open form in new tab/window
 	});
 
-  $('#periodId').focus( function() {
+  $(document).on('focu', '#periodId', function() {
 		$('#selectedPeriod').click();
 	});
-  $('#periodId').on('change', function() {
+  $(document).on('change', '#periodId', function() {
 		$confirmButton = $(this).next('button');
 		$href = $(this).next('button').attr('data-href');
 		$confirmButton.attr('data-href', $href+'/'+$(this).val());
 		$confirmButton.prop('disabled', false);
 	});
-  $('#startDate, #endDate').focus( function() {
+  $(document).on('focus', '#startDate, #endDate', function() {
 		$('#customDates').click();
 	});
-  $('.reportCat').click( function() {
+  $(document).on('click', '.reportCat', function() {
 		var $reportId = $(this).attr("data-reportId");
 		$('#allOptions').show("blind");
 		$(".specificOption").hide("blind");
@@ -580,15 +691,15 @@ $(document).ready(function() {
 		}
 	});
 
-  $('#quizForm').submit( function(event) {
+  $(document).on('submit', '#quizForm', function(event) {
     //event.preventDefault();
   });
-  $('#showAnswer').click( function() {
+  $(document).on('click', '#showAnswer', function() {
     $('#answer').toggle();
     return false;
   });
 
-  $('#playerQuizButton').click( function() {
+  $(document).on('click', '#playerQuizButton', function() {
     var url = $('#players_list').val();
     window.location.href = url;
   });
@@ -602,7 +713,7 @@ $(document).ready(function() {
     });
   }
 
-  $('#buyFormSubmit').on( "click", function(e) {
+  $(document).on('click', '#buyFormSubmit', function(e) {
 		e.preventDefault();
 		var $this = $(this).parents("form");
 		swal({
@@ -628,7 +739,7 @@ $(document).ready(function() {
 		});
 	});
 
-  $('#donateFormSubmit').on( "click", function(e) {
+  $(document).on('click', '#donateFormSubmit', function(e) {
 		e.preventDefault();
 		var $this = $(this).parents("form");
     if ($('#donator').val() == 0 ) {
@@ -687,10 +798,14 @@ $(document).ready(function() {
 		$('#amount').next('.form-control-feedback').hide();
 		return true;
 	}
-  $('#amount').on('keyup', function() {
+  $(document).on('keyup', '#amount', function() {
 		checkAmount($(this).val());
   });
-	$('#donator').on('change', function() {
+	$(document).on('change', '#donator', function() {
+    $('#amount').val('');
+    $maxAmount = $(this).find("option:selected").attr('data-GC');
+    $('#maxAmount').text($maxAmount);
+    $('#amount').attr('data-max', $maxAmount);
 		if ($(this).val() != 0) {
 			$(this).next('.form-control-feedback').hide();
 			if (checkAmount($('#amount').val())) {
@@ -701,7 +816,7 @@ $(document).ready(function() {
 			$('#donateFormSubmit').prop('disabled', true);
 		}
 	});
-	$('#receiver').on('change', function() {
+	$(document).on('change', '#receiver', function() {
 		if ($(this).val() != 0) {
 			$(this).next('.form-control-feedback').hide();
 			if (checkAmount($('#amount').val())) {
@@ -713,35 +828,34 @@ $(document).ready(function() {
 		}
 	})
 
-	$('[data-toggle=tooltip]').hover(function(){
-			// on mouseenter
-			$(this).tooltip({container : 'body'});
-			$(this).tooltip('show');
-	}, function(){
-			// on mouseleave
-			$(this).tooltip('hide');
-	});
+  $('[data-toggle=tooltip]').hover(function(){
+    // on mouseenter
+    $(this).tooltip({container : 'body'});
+    $(this).tooltip('show');
+  }, function(){
+    // on mouseleave
+    $(this).tooltip('hide');
+  });
 
 	// Monster invasions
-  $('#toggle').on('click', function() {
+  $(document).on('click', '#toggle', function() {
     $('#quizMenu').toggleClass('shown');
     $('#quizMenu').toggleClass('hidden');
-
     return false;
   });
-  $('#tickAll').on('click', function() {
+  $(document).on('click', '#tickAll', function() {
     $('.list-group-item input[type=checkbox]').each( function() {
 			$(this).prop('checked', true);
     });
     return false;
   });
-  $('#untickAll').on('click', function() {
+  $(document).on('click', '#untickAll', function() {
     $('.list-group-item input[type=checkbox]').each( function() {
       $(this).prop('checked', false);
     });
     return false;
   });
-  $('button.generateQuiz').on('click', function() {
+  $(document).on('click', 'button.generateQuiz', function() {
 		var noChecked = true;
     $('.list-group-item input[type=checkbox]').each( function(index) {
       if ( $(this).prop('checked') === true) {
@@ -755,7 +869,7 @@ $(document).ready(function() {
 		}
   });
 
-  $('.showInfo').on('click', function() {
+  $(document).on('click', '.showInfo', function(e) {
 		var $this = $(this);
 		var $itemId = $this.attr("data-id");
 		if ($this.hasClass("buy")) {
@@ -850,7 +964,7 @@ $(document).ready(function() {
 		return false;
 	});
 
-  $('.pickFromList').on('click', function() {
+  $(document).on('click', '.pickFromList', function() {
 		var $this = $(this);
 		var list = $this.attr("data-list");
 		var items = list.split(',');
@@ -884,7 +998,7 @@ $(document).ready(function() {
 		$(this).next('span').toggleClass('strikeText');
 	});
 
-	$(document).on('click', '.ajaxBtn', function() {
+	$(document).on('click', '.ajaxBtn', function(e) {
 		var $this = $(this);
 		var $type = $this.attr("data-type");
 		if ($type == 'memory') {
@@ -892,6 +1006,41 @@ $(document).ready(function() {
 			switch($result) {
 				case 'good': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+lang.good; break;
 				case 'bad': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+lang.bad; break;
+				default: var $text='';
+			}
+			swal({
+				title: lang.sure,
+				type: "question",
+				html: $text,
+				showCancelButton : true,
+				allowOutsideClick : true,
+				confirmButtonText: lang.yes,
+				cancelButtonText: lang.no,
+			}).then( result => {
+				if (result.value) {
+					var $url = $this.attr('data-url');
+					$.get($url, function(data) { 
+						$this.parents("li").remove();
+						swal({
+							title: lang.saved,
+							text: lang.thanks,
+							timer: 1000,
+							showConfirmButton: false
+						}).catch(swal.noop);
+					});
+				} else {
+					return false;
+				}
+			});
+		}
+		if ($type == 'fightRequest') {
+			var $result = $this.attr('data-result');
+      var $name = $this.parent().find("a:first").text();
+			switch($result) {
+        case 'v' : var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+$name+' : '+lang.v; break;
+				case 'vv': var $text= '<i class="glyphicon glyphicon-thumbs-up"></i> '+$name+' : '+lang.vv; break;
+        case 'r' : var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+$name+' : '+lang.r; break;
+				case 'rr': var $text= '<i class="glyphicon glyphicon-thumbs-down"></i> '+$name+' : '+lang.rr; break;
 				default: var $text='';
 			}
 			swal({
@@ -995,6 +1144,28 @@ $(document).ready(function() {
 					});
 			}}).catch(swal.noop);
 		}
+		if ($type == 'help') {
+			var $this = $(this);
+			var $playerId = $this.attr("data-id");
+			var $url = $('#showInfo').attr('data-href') + '?id=help&playerId=' + $playerId;
+			swal({
+				title: lang.loading,
+				onOpen: function() {
+					swal.showLoading()
+					$.get($url, function(data) { 
+						var $myContent = data;
+						swal({
+							title: '',
+							html: $myContent,
+							showConfirmButton: false,
+							cancelButtonText : 'Close',
+							showCancelButton: true,
+							allowOutsideClick: true,
+							width: 800
+						}).catch(swal.noop);
+					});
+			}}).catch(swal.noop);
+		}
 		return false;
 	});
 
@@ -1029,19 +1200,70 @@ $(document).ready(function() {
 		return false;
 	});
 
-  $('#startFight').on('click', function() {
-    // TODO : Move function into exercise.js?
-		var $this = $(this);
-		$('#exHeader').hide('slow', function() {
-			$this.parents('.alert').hide();
-			$('#energyDiv').show('slow');
-			$('#fightForm').show();
+	$(document).on('click', '#importSacocheForm :submit', function(e){
+		var $this = $(this).parents("form");
+		var $redirectUrl = '';
+		e.preventDefault();
+		swal({
+			title: lang.sure,
+			type: "warning",
+			showCancelButton : true,
+			allowOutsideClick : true,
+			cancelButtonText: lang.noCheck,
+			confirmButtonText: lang.yesSave,
+		}).then( result => {
+			if (result.value) {
+				// Send data (via Ajax)
+				$("#importSacocheForm :submit").prop('disabled', true);
+				var $checked = $this.find('input:checkbox:checked').not('.toggleCheckboxes');
+				var $formUrl = $this.attr('action');
+        var $items = $this.find(".items").serialize(); // Get items inputs values
+        var $testId = $('#testId').val();
+        var $customDate = $('#customDate').val();
+        var $toSave = 'testId='+$testId+'&customDate='+$customDate+'&';
+				for (var i=0; i<$checked.length; i++) {
+					$toSave += $checked.eq(i).attr('name')+'=on&'+$items+'&';
+					if ($checked.length-i > 5) {
+						if (i>0 && i % 5 == 0) {
+							$.post($formUrl, $toSave, function(data) {
+								data = JSON.parse(data);
+								$alreadySaved = parseInt($('#progress').text());
+								$('#progress').text($alreadySaved + data.saved+' saved.');
+							}).fail( function() {
+								$('#progress').text(lang.error);
+							});
+              $toSave = 'testId='+$testId+'&customDate='+$customDate+'&';
+						}
+					} else { // In the 5 last
+						if (i == $checked.length-1) {
+              $toSave += 'lastChunk=1';
+							$.post($formUrl, $toSave, function(data) {
+								data = JSON.parse(data);
+								$alreadySaved = parseInt($('#progress').text());
+								$('#progress').text($alreadySaved + data.saved +' saved.');
+								$redirectUrl = data.url;
+							}).fail( function() {
+								$('#progress').text(lang.error);
+							});
+						}
+					}
+				}
+				$(document).ajaxStop(function() {
+          window.location.href = $redirectUrl;
+					setTimeout( function(){ $('#progress').text(lang.redirecting); }, 1000);
+				})
+				swal({
+					title: '<span id="progress">0 saved.</span>',
+					html: lang.saveForm+"<p>("+$checked.length+" "+lang.itemsTosave+")</p>",
+					showConfirmButton: false
+				});
+			} else { // Don't send form
+				return false;
+			}
 		});
-    // Start exercise
-    // TODO : Record session start...
-  });
+	});
 
-	$('#adminTableForm :submit').on('click', function(e){
+	$(document).on('click', '#adminTableForm :submit', function(e){
 		var $this = $(this).parents("form");
 		var $redirectUrl = '';
 		e.preventDefault();
@@ -1058,7 +1280,11 @@ $(document).ready(function() {
 				$("#adminTableForm :submit").prop('disabled', true);
 				var $checked = $this.find(' :checkbox:checked').not('.selectAll, .commonComment, #adminTableRedirection');
         var $customDate = $('#customDate').val();
-				var $toSave = 'adminTableSubmit=Save&customDate='+$customDate+'&';
+        if ($('#adminTableRedirection').prop('checked')) {
+          var $toSave = 'adminTableSubmit=Save&adminTableRedirection=1&customDate='+$customDate+'&';
+        } else {
+          var $toSave = 'adminTableSubmit=Save&customDate='+$customDate+'&';
+        }
 				var $formUrl = $this.attr('action');
 				for (var i=0; i<$checked.length; i++) {
 					var $customId = $checked.eq(i).attr('data-customId');
@@ -1103,10 +1329,10 @@ $(document).ready(function() {
 		});
 	});
 
-	if ($('div.ajaxContent')) {
+	if ($('div.ajaxContent, section.ajaxContent')) {
 		var timerFast = 0;
 		var timerSlow = 1000;
-		$('div.ajaxContent').each( function() {
+		$('div.ajaxContent, section.ajaxContent').each( function() {
 			var el = $(this);
 			var url = $(this).attr('data-href');
 			if (el.attr('data-priority') == '1') {
@@ -1120,7 +1346,12 @@ $(document).ready(function() {
 	}
 	function getContentFromAjax(url, el) {
 		var id = el.attr('data-id');
-    $.get(url+'?id='+id+'&randSeed='+Math.random(), function(data) { 
+    if (url.indexOf('?') != -1) {
+      url = url+'&id='+id+'&randSeed='+Math.random();
+    } else {
+      url = url+'?id='+id+'&randSeed='+Math.random();
+    }
+    $.get(url, function(data) { 
 			el.html(data); 
 			el.children('[data-toggle="tooltip"]').tooltip();
 			initTables();
@@ -1133,6 +1364,15 @@ $(document).ready(function() {
 	
 	// Init tables if needed
 	if ($('table').length > 0) { initTables(); }
+
+  // Highlight logged in player if needed
+  if ($('#teamTable').length > 0 && $(".avatarContainer").eq(0).attr("data-loggedId") != '') {
+    var $loggedId = $(".avatarContainer").eq(0).attr("data-loggedId");
+    $('.'+$loggedId).addClass('selected');
+  }
+  // if ($('~customDate').length > 0) { // Override today's date in cached pages
+    // $('#customDate').val(new Date().toDateInputValue());
+  // }
 
 	if ($('#helpAlert').length > 0) {
 		swal({
@@ -1167,7 +1407,7 @@ var initTables = function() {
   });
   var trainingTable = $('#trainingTable').DataTable({
     lengthMenu: [ [25, 50, -1], [25, 50, lang.all] ],
-    order: [[ 0, "asc"], [2, "asc"]]
+    order: [[ 0, "asc"], [1, "asc"]]
   });
   var historyTable = $('#historyTable').DataTable({
 		retrieve: true,
@@ -1188,13 +1428,27 @@ var initTables = function() {
     paging: false,
     order: [[ 0, "asc"]]
   });
-  $('#teamTable').DataTable({
+  $('#fightersTable').DataTable({
     paging: false,
-    searching: false,
-    columnDefs: [{ "orderable": false, "targets": 1 },
-      { "orderable": false, "targets": 4}],
-    order: [[ 3, "desc" ]],
+    order: [[ 0, "asc" ]],
   });
+  if ($('#teamTable').length > 0 && $('.MarkupPagerNav').length > 0) { // No-team table is sorted on reputation column
+    $('#teamTable').DataTable({
+      paging: false,
+      searching: false,
+      columnDefs: [{ "orderable": false, "targets": 1 },
+        { "orderable": false, "targets": 4}],
+      order: [[ 7, "desc" ]],
+    });
+  } else {
+    $('#teamTable').DataTable({
+      paging: false,
+      searching: false,
+      columnDefs: [{ "orderable": false, "targets": 1 },
+        { "orderable": false, "targets": 4}],
+      order: [[ 3, "desc" ]],
+    });
+  }
   var adminTable = $('#adminTable').DataTable({
     dom: 't',
     paging: false,
@@ -1208,7 +1462,7 @@ var initTables = function() {
   });
   var monstersTable = $('#monstersTable').DataTable({
     lengthMenu: [ [25, 50, -1], [25, 50, lang.all] ],
-    order: [[ 2, "asc"], [0, "asc"]],
+    order: [[ 1, "asc"], [0, "asc"]],
     orderCellsTop: true
   });
   var loggedTable = $('#loggedTable').DataTable({
@@ -1268,7 +1522,7 @@ $.fn.dataTable.ext.search.push(
       } else {
         categoryCol = data[0]; //filter column
       }
-      categoryArray =  $.map( categoryCol.split(','), $.trim); // splits comma separated string into array
+      categoryArray =  $.map(categoryCol.split(','), $.trim); // splits comma separated string into array
       // finding array intersection
       found = $(categoryArray).not($(categoryArray).not(categoryFilter)).length;
       if(found == 0){
@@ -1341,7 +1595,7 @@ var onCheck = function(taskId) {
 var shopCheck = function(obj, remainingGC, itemGC) {
   //alert(remainingGC+'-'+itemGC);
 	var nbChecked = parseInt($('#nbChecked').text());
-  if ( $(obj).prop('checked') === true) {
+  if ($(obj).prop('checked') === true) {
     var newGC = remainingGC - itemGC;
     $('#remainingGC').text(newGC);
 		nbChecked++;
@@ -1372,8 +1626,10 @@ var shopCheck = function(obj, remainingGC, itemGC) {
 		$('#nbChecked').text(nbChecked);
     $('ul.itemList li input[type=checkbox]').each(function() {
       if ($(this).attr('data-gc') > newGC) {
-        $(this).prop('disabled', true);
-        $(this).parent('label').css('text-decoration', 'line-through');
+        if ($(this).prop('checked') === false) {
+          $(this).prop('disabled', true);
+          $(this).parent('label').css('text-decoration', 'line-through');
+        }
       } else {
         $(this).prop('disabled', false);
         $(this).parent('label').css('text-decoration', '');
@@ -1396,7 +1652,7 @@ var shopCheck = function(obj, remainingGC, itemGC) {
   }
 }
 
-$('#marketPlaceForm :submit').on('click', function(e){
+$(document).on('click', '#marketPlaceForm :submit', function(e){
 	var $this = $(this).parents("form");
 	e.preventDefault();
 	swal({

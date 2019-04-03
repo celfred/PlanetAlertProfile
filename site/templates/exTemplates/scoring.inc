@@ -9,7 +9,7 @@
 	$out .= '</div>';
 	$out .= '<div class="col-sm-6">';
 	$out .= '<div class="progress progress-lg" data-toggle="tooltip" title="'.__("Health points").'">';
-	$out .= '<div class="progress-bar progress-bar-striped progress-bar-danger active" role="progressbar" aria-valuenow="{{monsterHP}}" aria-valuemin="0" aria-valuemax="100" style="width:{{monsterHP}}%">';
+	$out .= '<div class="progress-bar progress-bar-striped progress-bar-danger active" role="progressbar" aria-valuenow="{{monsterHP}}" aria-valuemin="0" aria-valuemax="100" ng-attr-style="width:{{monsterHP}}%">';
 	$out .= '</div>';
 	$out .= '</div>';
 	$out .= '</div>';
@@ -28,7 +28,7 @@
 	$out .= '</div>';
 	$out .= '<div class="col-sm-6">';
 	$out .= '<div class="progress progress-lg" data-toggle="tooltip" title="'.__("Health points").'">';
-	$out .= '<div class="progress-bar progress-bar-striped progress-bar-success active" role="progressbar" aria-valuenow="{{playerHP}}" aria-valuemin="0" aria-valuemax="100" style="width:{{playerHP}}%">';
+	$out .= '<div class="progress-bar progress-bar-striped progress-bar-success active" role="progressbar" aria-valuenow="{{playerHP}}" aria-valuemin="0" aria-valuemax="100" ng-attr-style="width:{{playerHP}}%">';
 	$out .= '</div>';
 	$out .= '</div>';
 	$out .= '</div>';

@@ -1,21 +1,16 @@
 <?php 
 
-$logo = $pages->get('/')->photo->eq(0)->getCrop('thumbnail');
+$logo = $pages->get('/')->photo->eq(1)->getCrop('thumbnail');
 $monsterId = $input->get("id");
 $m = $pages->get("id=$monsterId");
-if ($m->image) {
-  /* $options = array( */
-  /*   'cropping' => false, */
-  /*   'upscaling' => false */
-  /* ); */
-  /* $mini = "<img style='float: right;' alt=\"image\" src='".$m->image->size('150', '60', $options)->url."' />"; */
-  $mini =  "<img alt='image' src='".$m->image->getCrop('thumbnail')->url."' />";
-} else {
-  $mini = '';
-}
 
 if ($input->get['thumbnail']) {
   $out = '';
+  if ($m->image) {
+    $mini =  "<img alt='image' style='float:right;' src='".$m->image->getCrop('thumbnail')->url."' />";
+  } else {
+    $mini = '';
+  }
   for ($i=0; $i<6; $i++) {
     $out .= '<table class="miniTable" style="width:3cm;">';
     $out .= '<tr>';
@@ -37,6 +32,11 @@ if ($input->get['thumbnail']) {
     $out .= '<br />';
   }
 } else {
+  if ($m->image) {
+    $mini =  "<img alt='image' style='float:right;' src='".$m->image->getCrop('small')->url."' />";
+  } else {
+    $mini = '';
+  }
   $exData = $m->exData;
   $allLines = preg_split('/$\r|\n/', $exData);
   shuffle($allLines);
@@ -97,6 +97,29 @@ if ($input->get['thumbnail']) {
         array_push($listWords, $left);
       }
       break;
+    case 'categorize' :
+      $clueWords = [];
+      foreach($allLines as $l) {
+        // TODO : Random data from a list
+        $l = str_replace("%fname%", __("Mike"), $l);
+        $l = str_replace("%fnamef%", __("Sarah"), $l);
+        $l = str_replace("%fnamem%", __("John"), $l);
+        $l = str_replace("%name%", __("Simon Keats"), $l);
+        $l = str_replace("%age%", "13", $l);
+        $l = str_replace("%nationality%", __("American"), $l);
+        list($left, $right) = preg_split('/::/', $l);
+        array_push($listWords, $left);
+        $clue = explode(",", $right); // Build clue words
+        foreach($clue as $w) {
+          $w = trim($w);
+          if (!in_array($w, $clueWords)) {
+            array_push($clueWords, $w);
+          }
+        }
+      }
+      $clueWordsList = implode(', ', $clueWords);
+      $m->instructions = sprintf(__("Choose the correct word for each sentence among : %s."), $clueWordsList);
+      break;
     default :
       array_push($listWords, 'TODO');
   }
@@ -127,10 +150,11 @@ if ($input->get['thumbnail']) {
         'cropping' => false,
         'upscaling' => false
       );
-      $imageMap = "<img alt=\"image\" src='".$m->imageMap->size('500', '350', $options)->url."' />";
+      $imageMap = "<img alt=\"image\" src='".$m->imageMap->first()->size('500', '350', $options)->url."' />";
       $out .= '<div style="text-align: center;">';
       $out .= $imageMap;
       $out .= '</div>';
+      $out .= '<br />';
     } else {
       $imageMap = '';
     }

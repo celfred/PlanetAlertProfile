@@ -26,6 +26,66 @@ function getMultiDimensional($values, $prefix) {
   return $output;
 }
 
+function clearFileCache(...$pageNames) { // File cache for guests
+  foreach($pageNames as $p) {
+    $pageName = wire('pages')->get("name=$p");
+    if ($pageName->id) {
+      $cacheFile = wire('modules')->PageRender->getCacheFile($pageName);
+      if($cacheFile->exists()) {
+        $cacheFile->remove();
+      }
+    }
+  }
+}
+
+function clearMarkupCache(...$cacheNames) { // Markup cache for logged in users
+  foreach($cacheNames as $n) {
+    wire('cache')->delete($n);
+  }
+}
+
+function clearSessionCache(...$cacheNames) { // Session cache for logged in users
+  foreach($cacheNames as $n) {
+    wire('session')->remove($n);
+  }
+}
+
+
+function getAllPlayers($user = false, $paginate = false) {
+  $page = wire('page');
+  $pages = wire('pages');
+  $input = wire('input');
+  if ($user) {
+    if ($user->hasRole('player')) {
+      $player = $pages->get("parent.name=players, template=player, login=$user->name");
+      if ($input->urlSegment1 != 'no-team' && $player->team->is("name!=no-team")) {
+        $allPlayers = $pages->find("parent.name=players, template=player, team=$player->team");
+      } else {
+        if ($paginate) {
+          $allPlayers = $pages->find("template=player, team.name=no-team, limit=35, sort=-reputation");
+        } else {
+          $allPlayers = $pages->find("template=player, team.name=no-team, sort=-reputation");
+        }
+      }
+    } else { // Teacher, Admin or Guest ?
+      if ($input->urlSegment1 != '' && $input->urlSegment1 != 'no-team') {
+        $teamName = $input->urlSegment1; 
+        $allPlayers = $pages->find("parent.name=players, template=player, team.name=$teamName, sort=group"); // Limit to team players
+      } else { // Order no-team list by reputation (and paginate)
+        if ($user->hasRole("teacher")) {
+          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user");
+        } else {
+          $allPlayers = $pages->find("parent.name=players, template=player, team.name=no-team, limit=35, sort=-reputation");
+          $pagination = $allPlayers->renderPager();
+        }
+      }
+    }
+  } else { // All Planet Alert players
+    $allPlayers = $pages->find("parent.name=players, template=player");
+  }
+  return $allPlayers;
+}
+
 function initPlayer($player) {
   // Get previous score from last archived page
   $prevScores = $player->get("template=archive, name!=history, sort=-date");
@@ -191,10 +251,9 @@ function updateScore($player, $task, $real = true) {
     if ($player->coma == 0) {
       setLevel($player); // Check if new level
       $player->reputation = setReputation($player); // Set reputation (and store for cache)
-      if (!isset($tmpEvent)) { // Make a temporary event page to calculate new yearly Karma
-        $tmpEvent = new Page();
-        $tmpEvent->template = 'event';
-      }
+      // Make a temporary event page to calculate new yearly Karma
+      $tmpEvent = new Page();
+      $tmpEvent->template = 'event';
       $tmpEvent->task = $task;
       if ($task->refPage) { $tmpEvent->refPage = $task->refPage; };
       // Set date for correct sorting
@@ -211,6 +270,9 @@ function updateScore($player, $task, $real = true) {
     }
 
     if ($real == true) { // Save player's new scores if necessary
+      clearMarkupCache('cache__players-*-'.$player->team->name.'-*');
+      clearMarkupCache('cache__office-*-'.$player->team->name);
+      clearFileCache("newsboard", "main-office", "players"); // For guests
       // Publish on Teacher's newsboard (requires teacher's work, in class)
       if ($task->is("name=inactivity|penalty|buy|free|fight-vv|bought|remove|buy-pdf")) {
         $newsBoard = 1;
@@ -218,10 +280,24 @@ function updateScore($player, $task, $real = true) {
         $newsBoard = 0;
       }
       // Publish on Public newsBoard (everybody will see it)
-      if ($task->is("name=buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|remove|buy-pdf")) {
+      if ($task->is("name=buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|remove|buy-pdf|best-time")) {
         $public = 1;
+        if ($player->skills->has("!name=fighter") && $task->is("name~=fight")) {
+          if ($player->find("template=event, task.name~=fight")->count() == 10) {
+            clearSessionCache('headMenu');
+          }
+        }
       } else {
         $public = 0;
+      }
+      if ($task->is("name=free")) {
+        clearMarkupCache('cache__elements-'.$player->name);
+        if ($player->places->count == 4 || $player->people->count == 4) {
+          clearSessionCache('headMenu');
+        }
+      }
+      if ($task->is("name=buy|bought") && $task->refPage->category->name == 'group-items') {
+        clearSessionCache('headMenu');
       }
       // Save history
       $historyPage = saveHistory($player, $task, $newsBoard, $public);
@@ -306,22 +382,73 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
 
 function taskExtraAction($player, $task, $real) {
   $pages = wire('pages');
+  if ($task->is("name=no-homework")) {
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount++;
+    }
+    return;
+  }
+  if ($task->is("name=homework-half-done|signature")) {
+    // If a penalty is still not signed, don't add to hkcount
+    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
+    if (!($penalty->id)) {
+      $player->hkcount += 0.5;
+    }
+    return;
+  }
+  if ($task->is("name=battle-rr|fight-rr")) {
+    $player->fighting_power = $player->fighting_power-2;
+    if ($task->is("name=battle-rr")) { // No death because of battles
+      if ($player->HP<=0) { $player->HP = 1; }
+    }
+  }
+  if ($task->is("name=battle-r|fight-r|wrong-invasion")) {
+    $player->fighting_power = $player->fighting_power-1;
+    if ($task->is("name=battle-r")) { // No death because of battles
+      if ($player->HP<=0) { $player->HP = 1; }
+    }
+  }
+  if ($task->is("name=battle-v|fight-v|right-invasion|best-time")) {
+    $player->fighting_power = $player->fighting_power+1;
+  }
+  if ($task->is("name=battle-vv|fight-vv")) {
+    $player->fighting_power = $player->fighting_power+2;
+  }
+  if ($player->skills->has("!name=fighter") && $task->is("name~=fight")) {
+    if ($player->find("template=event, task.name~=fight")->count() > 9) {
+      setFighter($player);
+    }
+    return;
+  }
+  if ($task->is("name~=best-time")) { // Set Master skill if needed
+    checkMaster($player);
+    return;
+  }
   if ($task->is("name=penalty")) {
     $player->GC = (int) round($player->GC/2); // Half GC if penalty
     $player->hkcount = 0; // Reset current hkcount
+    return;
+  }
+  if ($task->is("name=group-death|team-death")) { // No death because of others
+    if ($player->HP<=0) { $player->HP = 1; }
+    return;
   }
   if ($task->is("name=inactivity")) { // Lose all GC
     $player->GC = 0;
-    $player->streak = 0;
+    return;
   }
   if ($task->is("name=donation")) {
     preg_match("/\d+/", $task->comment, $matches);
     $player->GC = (int) $player->GC - $matches[0];
     $player->donation = (int) $player->donation + $matches[0];
+    return;
   }
   if ($task->is("name=donated")) {
     preg_match("/\d+/", $task->comment, $matches);
     $player->GC = (int) $player->GC + $matches[0];
+    return;
   }
   if ($task->is("name=fake-donator")) { // Reset donation indicator
     $player->donation = 0;
@@ -330,35 +457,7 @@ function taskExtraAction($player, $task, $real) {
     if ($task->refPage) {
       $player->equipment->add($task->refPage);
     }
-  }
-  if ($task->is("name=group-death|team-death|battle-r|battle-rr")) { // No death because of others
-    if ($player->HP<=0) { $player->HP = 1; }
-  }
-  if ($task->is("name=battle-rr|fight-rr")) {
-    $player->fighting_power = $player->fighting_power-2;
-  }
-  if ($task->is("name=battle-r|fight-r|wrong-invasion")) {
-    $player->fighting_power = $player->fighting_power-1;
-  }
-  if ($task->is("name=battle-v|fight-v|right-invasion")) {
-    $player->fighting_power = $player->fighting_power+1;
-  }
-  if ($task->is("name=battle-vv|fight-vv")) {
-    $player->fighting_power = $player->fighting_power+2;
-  }
-  if ($task->is("name=no-homework")) {
-    // If a penalty is still not signed, don't add to hkcount
-    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
-    if (!($penalty->id)) {
-      $player->hkcount++;
-    }
-  }
-  if ($task->is("name=homework-half-done|signature")) {
-    // If a penalty is still not signed, don't add to hkcount
-    $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
-    if (!($penalty->id)) {
-      $player->hkcount += 0.5;
-    }
+    return;
   }
   if ($task->is("name=remove")) { // Remove element
     if ($task->refPage != false && $task->refPage->template == 'place') {
@@ -367,6 +466,7 @@ function taskExtraAction($player, $task, $real) {
     if ($task->refPage != false && $task->refPage->template == 'people') {
       $player->people->remove($task->refPage);
     }
+    return;
   }
   if ($task->is("name=free")) { // Add element
     if ($task->refPage) {
@@ -387,6 +487,7 @@ function taskExtraAction($player, $task, $real) {
         $player->people->add($task->refPage);
       }
     }
+    return;
   } 
   if ($task->is("name=buy")) { // Add equipment
     if ($task->refPage) {
@@ -442,6 +543,7 @@ function taskExtraAction($player, $task, $real) {
         }
       }
     }
+    return;
   }
 }
 
@@ -484,11 +586,11 @@ function addGroupItem($player, $historyPage, $real) {
 function extraActionAfterSave($player, $historyPage, $real) { // Watch out : recorded with today's date (but trigeering event's linkedId
   $pages = wire('pages');
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
-      $task = $pages->get("template=task, name=penalty"); 
-      $task->comment = 'Automatic homework penalty';
-      $task->refPage = false;
-      $task->linkedId = $historyPage->id;
-      updateScore($player, $task, $real);
+    $task = $pages->get("template=task, name=penalty"); 
+    $task->comment = 'Automatic homework penalty';
+    $task->refPage = false;
+    $task->linkedId = $historyPage->id;
+    updateScore($player, $task, $real);
   }
   if ($historyPage->task->is("name=donation")) {  // Record the linked 'Donated' event
     $task = $pages->get("name=donated");
@@ -501,8 +603,8 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
     updateScore($receiverPlayer, $task, $real);
   }
   if ($historyPage->task->is("name=wrong-invasion")) { // Remove element if 3rd wrong invasion
-    $wrongInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date");
-    // Limit to events AFTER the last 'Free' action on the oarticular element
+    $wrongInvasions = $player->get("name=history")->find("template=event, task.name=wrong-invasion, refPage=$historyPage->refPage, sort=-date"); // Limited to current school year
+    // Limit to events AFTER the last 'Free' action on the oarticular element (in case element has been freed again)
     $lastFree = $player->get("name=history")->get("task.name=free, refPage=$historyPage->refPage, sort=-date");
     if ($lastFree->id) {
       $wrongInvasions = $wrongInvasions->find("date>=$lastFree->date");
@@ -530,9 +632,9 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
       updateCache($player, $historyPage);
     }
     if ($historyPage->task->is("name=free|remove")) { // Team score has changed, save it
-      updateTeamScores($player->team);
+      updateTeamScores($player->team, $historyPage->refPage);
     }
-    if (checkCache($player)) {
+    if (checkNewPageCache($player)) {
       setCache($player->id, false);
     }
   }
@@ -626,14 +728,23 @@ function checkStreak($player) {
   return $streak;
 }
 
+function clearAdminTableCache(HookEvent $e) {
+  $p = wire('pages')->get("name=admintable");
+  $cacheFile = wire('modules')->PageRender->getCacheFile($p);
+  if($cacheFile->exists()) {
+    $cacheFile->remove();
+  }
+}
+
 function randomSpecial(HookEvent $e) { // Random monsters are hidden if player doesn't have the Visualizer
   $pages = wire('pages');
   $allMonsters = $pages->find("template=exercise");
-  // Reset all specials
-  foreach ($allMonsters as $m) {
-    $m->of(false);
-    if ($m->special === 1) { $m->special = 0; }
-    $m->save();
+  foreach ($allMonsters as $m) { // Reset all specials
+    if ($m->special === 1) { 
+      $m->of(false);
+      $m->special = 0;
+      $m->save();
+    }
   }
   $nb = round($allMonsters->count()/2); // 50% of monsters
   $specialMonsters = $allMonsters->findRandom($nb);
@@ -646,6 +757,17 @@ function randomSpecial(HookEvent $e) { // Random monsters are hidden if player d
   }
 }
 
+function cleanTest(HookEvent $e) { // Empty /tmp subtree
+  $pages = wire('pages');
+  $testPlayers = $pages->find("parent.name=players, team.name=test-team");
+  foreach ($testPlayers as $p) {
+    $p->of(false);
+    if ($p->fight_request != 0) {
+      $p->fight_request = 0;
+      $p->save();
+    }
+  }
+}
 function emptyTmp(HookEvent $e) { // Empty /tmp subtree
   $pages = wire('pages');
   $allTmp = $pages->get("name=tmp")->children();
@@ -778,12 +900,38 @@ function displayPlayerScores($cachePage) {
   return $out;
 }
 
-function setCaptains($team, $real = true) {
+function setGroupCaptain($playerId, $real = true) {
+  $pages = wire('pages');
+  $player = $pages->get($playerId);
+  if (isset($player->group) && $player->group != '') {
+    $players = $pages->find("parent.name=players, template=player, team=$player->team, group=$player->group");
+    $captain = $players->sort('-yearlyKarma')->first();
+    if (!$captain->skills->has("skills.name=captain")) { // Else captain has not changed
+      $role = $pages->get("parent.name=skills, name=captain");
+      // Remove old captain
+      $oldCaptain = $players->get("skills.name=captain");
+      if ($oldCaptain->id) {
+        $oldCaptain->skills->remove($role);
+        if ($real == true) {
+          $oldCaptain->of(false);
+          $oldCaptain->save();
+        }
+      }
+      // Set new captain
+      $captain->skills->add($role);
+      if ($real == true) {
+        $captain->of(false);
+        $captain->save();
+      }
+    }
+  }
+}
+function setTeamCaptains($team, $real = true) {
   if ($team->is("name!=no-team")) { // Skip no-team players
     $pages = wire('pages');
     $players = $pages->find("template=player, team=$team");
     // Remove old captains
-    $role = $pages->get("name=captain");
+    $role = $pages->get("parent.name=skills, name=captain");
     $groups = new PageArray();
     foreach($players as $p) {
       $p->of(false);
@@ -804,6 +952,47 @@ function setCaptains($team, $real = true) {
       }
     }
   }
+}
+
+function checkMaster($player) {
+  $pages = wire('pages');
+  $role = $pages->get("name=master");
+  $nbBestTimes = $pages->count("template=exercise, bestTimePlayerId=$player->id");
+  if ($nbBestTimes > 0) {
+    $player->skills->add($role);
+  } else {
+    $player->skills->remove($role);
+  }
+}
+
+function setMaster($player) {
+  $pages = wire('pages');
+  $role = $pages->get("parent.name=skills, name=master");
+  $player->of(false);
+  $player->skills->add($role);
+  $player->save();
+}
+
+function setFighters($team, $real = true) {
+  $pages = wire('pages');
+  $players = $pages->find("template=player, team=$team");
+  $role = $pages->get("parent.name=skills, name=fighter");
+  foreach($players as $p) {
+    $p->of(false);
+    $p->skills->remove($role);
+    $nbFights = $p->find("template=event, task.name~=fight")->count();
+    if ($nbFights >= 10) {
+      $p->skills->add($role);
+    }
+    if ($real == true) {
+      $p->save();
+    }
+  }
+}
+function setFighter($player) {
+  $pages = wire('pages');
+  $role = $pages->get("parent.name=skills, name=fighter");
+  $player->skills->add($role);
 }
 
 function setReputation($player) { // Reputation calculated from all values (except GC, Donations and HP)
@@ -851,31 +1040,33 @@ function once($e, $playerId) {
 
 function eventKarma($e) { // Calculate karma evolution according to recorded event
   $karma = 0;
-  if ($e->task->is("name=free")) { // Free action
-    $karma += 8;
-    $karma += $e->refPage->level;
-  } else if ($e->task->is("name=buy")) { // Buy action
-    $karma += 4;
-    $karma += $e->refPage->level;
-  } else if ($e->task->is("name=donation|bought")) { // 'Special' positive actions
-    $karma += 1;
-  } else if ($e->task->is("name=ut-action-v|donated|buy-pdf")) { // 'Neutralized' actions
-    $karma += 0;
-  } else if ($e->task->is("name=remove|death")) { // 'Special' negative actions
-    $karma -= 5;
-  } else if ($e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
-    $karma += 2;
-    if ($e->task->HP>=5 || $e->task->GC>=5 || $e->task->XP>=5) {
-      $karma += 2;
-    } else {
+  if ($e->task) {
+    if ($e->task->is("name=free")) { // Free action
+      $karma += 8;
+      $karma += $e->refPage->level;
+    } else if ($e->task->is("name=buy")) { // Buy action
+      $karma += 4;
+      $karma += $e->refPage->level;
+    } else if ($e->task->is("name=donation|bought")) { // 'Special' positive actions
+      $karma += 1;
+    } else if ($e->task->is("name=ut-action-v|donated|buy-pdf")) { // 'Neutralized' actions
       $karma += 0;
-    }
-  } else if ($e->task->HP<0 || $e->task->GC<0 || $e->task->XP<0) { // Negative action
-    $karma -= 2;
-    if ($e->task->HP<=-5 || $e->task->GC<=-5 || $e->task->XP<=-5) {
+    } else if ($e->task->is("name=remove|death")) { // 'Special' negative actions
+      $karma -= 5;
+    } else if ($e->task->HP>0 || $e->task->GC>0 || $e->task->XP>0) { // Positive action
+      $karma += 2;
+      if ($e->task->HP>=5 || $e->task->GC>=5 || $e->task->XP>=5) {
+        $karma += 2;
+      } else {
+        $karma += 0;
+      }
+    } else if ($e->task->HP<0 || $e->task->GC<0 || $e->task->XP<0) { // Negative action
       $karma -= 2;
-    } else {
-      $karma -= 0;
+      if ($e->task->HP<=-5 || $e->task->GC<=-5 || $e->task->XP<=-5) {
+        $karma -= 2;
+      } else {
+        $karma -= 0;
+      }
     }
   }
   return $karma;
@@ -914,7 +1105,7 @@ function saveHistory($player, $task, $newsBoard = 0, $public = 0) {
   if ($task->refPage) { $p->refPage = $task->refPage; }
   // Tick inClass checkbox if classActivity Team option is on
   // For UT and FP actions only
-  if ($player->team->classActivity == 1 && $task->is("name~=fight|ut-action")) {
+  if (($player->team->classActivity == 1 && $task->is("name~=fight|ut-action")) || $task->inClass == 1) {
     $p->inClass = 1;
   } else {
     $p->inClass = 0;
@@ -924,10 +1115,13 @@ function saveHistory($player, $task, $newsBoard = 0, $public = 0) {
   $p->public = $public;
   $p->linkedId = $task->linkedId;
   $p->save(); 
+  // Clear session, markup or file caches
+  /* if ($p->task->is("name=free")) { */
+  /* } */
   return $p;
 }
 
-function checkCache($player) {
+function checkNewPageCache($player) {
   $limit=50;
   $nbEvents = $player->get("name=history")->numChildren();
   $toCache = ceil($nbEvents/$limit)-1; // Skip last page
@@ -994,7 +1188,7 @@ function pick_question($player) {
   } else {
     $rank = 6; // 6emes by default
   }
-  if ( $rank >= 8) {
+  if ($rank >= 8) {
     if ($player->people->count() > 0) {
       $randList = ['people', 'places'];
       $randList = $randList[array_rand($randList, 1)];
@@ -1074,7 +1268,7 @@ function pick_question($player) {
           $randQuiz = $randEl->quiz->getRandom();
           $quiz['question'] = $randQuiz->question;
           $quiz['answer'] = $randQuiz->answer;
-          if (strpos($quiz['question'], 'on the map') == true || strpos($quiz['question'], 'sur la carte') == true) {
+          if (strpos($quiz['question'], 'on the map') == true || strpos($quiz['question'], 'sur la carte') == true) {
             $quiz['type'] = 'map';
           }
           break;
@@ -1107,7 +1301,6 @@ function pick_question($player) {
   $quiz['id'] = $randEl->id;
   // Get player's stats on quizzed element (over current school year)
   $quiz['stats'] = quizStat($randEl, $player);
-
   return $quiz;
 }
 
@@ -1121,8 +1314,8 @@ function quizStat($el, $player, $startDate='', $endDate='') { // Get player's st
   if ($endDate == '') { $endDate = $schoolYear->dateEnd; }
   $invasions = $player->get("name=history")->find("template=event, task.name~=invasion, refPage=$el, date>=$startDate, date<=$endDate");
   if ($invasions->count() > 0) {
-    $right = $invasions->find("task.name=right-invasion")->count();
-    $wrong = $invasions->find("task.name=wrong-invasion")->count();
+    $right = $invasions->count("task.name=right-invasion");
+    $wrong = $invasions->count("task.name=wrong-invasion");
   }
   return array($right, $wrong);
 }
@@ -1147,10 +1340,19 @@ function progressBar($index, $total) {
   return $out;
 }
 
+function setTeamRate($teamId) {
+  $pages = wire('pages');
+  $team = $pages->get($teamId);
+  $nbPlayers = $pages->count("parent.name=players, team=$team");
+  $teamRate = round(($nbPlayers*20)/100);
+  $teamRate == 0 ? $teamRate = 1 : '';
+  return $teamRate;
+}
+
 function setOwners($el, $player) {
   $pages = wire('pages');
   $allPlayers = $pages->find("template=player, team=$player->team");
-  $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
+  $teamRate = setTeamRate($player->team->id); // Set team stats
   if ($el->template == 'place') {
     $teamOwners = $allPlayers->find("places=$el");
   }
@@ -1166,6 +1368,25 @@ function setOwners($el, $player) {
   return $el;
 }
 
+function setElement($el, $team) {
+  $pages = wire('pages');
+  $allPlayers = $pages->find("template=player, team=$team");
+  $teamRate = setTeamRate($team->id); // Set team stats
+  if ($el->template == 'place') {
+    $teamOwners = $allPlayers->count("places=$el");
+  }
+  if ($el->template == 'people') {
+    $teamOwners = $allPlayers->count("people=$el");
+  }
+  $el->owners = $teamOwners;
+  // Set element free rate
+  if ($teamOwners >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'label label-info'; }
+  if ($teamOwners >= $teamRate) { $el->completed = 1; $el->cssClass = 'label label-success'; }
+  if ($teamOwners <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = 'label label-danger'; }
+  $el->teamRate = $teamRate;
+  return $el;
+}
+
 function teamFreeworld($team) {
   $pages = wire('pages');
   // Get all possible elements
@@ -1177,8 +1398,7 @@ function teamFreeworld($team) {
   }
   if ($team->name != 'no-team') {
     $allPlayers = $pages->find("parent.name=players, template=player, team=$team");
-    $teamRate = round(($allPlayers->count()*20)/100); // 20% of players
-    $teamRate == 0 ? $teamRate = 1 : '';
+    $teamRate = setTeamRate($team->id); // Set team stats
     // Test if teamRate is reached
     foreach($allElements as $el) {
       if ($el->template == 'place') {
@@ -1226,36 +1446,61 @@ function saveScoresForCache($player, $index) {
   $historyPage->save();
 }
 
-function updateTeamScores($team) {
-  $team->freeActs = nbFreedomActs($team);
+function updateTeamScores($team, $element = false) {
+  $pages = wire('pages');
   if ($team->name != 'no-team') {
-    // TODO : Optimize by testing only new elements ?
-    $team->freeelements->removeAll();
-    $allElements = teamFreeworld($team);
-    $completed = $allElements->find("completed=1");
-    $percent = round((100*$completed->count())/$allElements->count());
-    foreach ($completed as $el) {
-      $team->freeelements->add($el);
+    if ($element != false) { // Test only new element
+      $team->freeActs += 1;
+      if (!$team->freeelements->has($element)) { // Element is not already freed
+        if ($team->rank->index >= 8) {
+          $nbAllElements = $pages->find("template=place|people")->count();
+        } else {
+          $nbAllElements = $pages->find("template=place")->count();
+        }
+        $element = setElement($element, $team);
+        if ($element->completed) { $team->freeelements->add($element); }
+        $percent = round((100*$team->freeelements->count())/$nbAllElements);
+        $team->freeworld = $percent;
+      }
+    } else {
+      $team->freeActs = nbFreedomActs($team);
+      $team->freeelements->removeAll();
+      $allElements = teamFreeworld($team);
+      $completed = $allElements->find("completed=1");
+      $percent = round((100*$completed->count())/$allElements->count());
+      foreach ($completed as $el) {
+        $team->freeelements->add($el);
+      }
+      $team->freeworld = $percent;
     }
-    $team->freeworld = $percent;
     $team->of(false);
     $team->save();
+    clearMarkupCache('cache__freeworld-'.$team->name , 'cache__scores-'.$team->teacher->eq(0));
   }
 }
 
-function showScores($allTeams) {
-  echo '<h4 class="text-center scores">';
-  echo '<ul class="list-inline">';
-  $allTeams->sort("-title");
-  foreach($allTeams as $t) {
-    if ($t->name != 'no-team') {
-      if ($t->freeActs == '') { $t->freeActs = 0; }
-      if ($t->freeworld == '') { $t->freeworld = 0; }
-      echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t->title.':'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
+function getScoresSummaries($headTeacher = false) {
+  $cachedScores = wire('cache')->get('cache__scores-'.$headTeacher->name, 86400, function() use($headTeacher) {
+    if (!$headTeacher->isSuperuser()) {
+      $allTeams = wire('pages')->find("template=team, teacher=$headTeacher, name!=test-team");
+    } else {
+      $allTeams = wire('pages')->find("template=team");
     }
-  }
-  echo '</ul>';
-  echo '</h4>';
+    $out =  '<h4 class="text-center scores">';
+    $out .=  '<ul class="list-inline">';
+    $allTeams->sort("-title");
+    foreach($allTeams as $t) {
+      if ($t->name != 'no-team') {
+        if ($t->freeActs == '') { $t->freeActs = 0; }
+        if ($t->freeworld == '') { $t->freeworld = 0; }
+        $out .=  '<li class="label label-default" data-toggle="tooltip" data-html="true" title="'.__("School year Team Activity").'"><h4><strong>'.$t->title.':'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
+      }
+    }
+    $out .=  '</ul>';
+    $out .=  '</h4>';
+    return $out;
+  });
+  return $cachedScores;
 }
 
 function possibleDefense($team) {
@@ -1304,11 +1549,11 @@ function setHomework($player, $dateStart='', $dateEnd='') {
   $allHk = $player->find("template=event, task.category.name=homework, date>=$dateStart, date<=$dateEnd");
   $player->initiative = $player->find("task.name=personal-initiative, date>=$dateStart, date<=$dateEnd");
   $player->ut = $player->find("task.name=ut-action-v|ut-action-vv, date>=$dateStart, date<=$dateEnd");
-  $player->fp = $player->find("task.name=battle-v|battle-vv|fight-v|fight-vv, date>=$dateStart, date<=$dateEnd");
+  $player->fp = $player->find("task.name=best-time|battle-v|battle-vv|fight-v|fight-vv, date>=$dateStart, date<=$dateEnd");
   $player->inClassUtCount = $player->ut->find("inClass=1")->count();
   $player->outClassUtCount = $player->ut->find("inClass=0")->count();
   $player->inClassFpCount = $player->fp->find("inClass=1")->count();
-  $player->outClassFpCount = $player->fp->find("inClass=0, (name~=fight)")->count();
+  $player->outClassFpCount = $player->fp->find("inClass=0, task.name!=battle-v|battle-vv")->count();
   $player->inClassActivity = $player->inClassUtCount + $player->inoutClassFpCount;
   $player->outClassActivity = $player->outClassUtCount + $player->outClassFpCount;
   $player->nbHk = $allHk->count();
@@ -1354,288 +1599,294 @@ function setAttitude($player, $dateStart='', $dateEnd='') {
   $player->nbAmbush = $allEvents->find("task.name=ambush")->count();
 }
 
-function setScoreboard($allPlayers, $player, $field) {
-  if ($field != 'group') {
-    $allPlayers->sort($field);
+function setTeamScoreboard($teamName, $field, $limit = false) {
+  $pages = wire('pages');
+  if ($field == 'places' || $field == 'people') { $term1 = $field.'.count'; } else { $term1 = $field; }
+  if ($limit) {
+    $allPlayers = $pages->find("parent.name=players, team.name=$teamName, sort=-$term1, limit=$limit");
   } else {
-    // Build group list
-    $allGroups = new PageArray();
-    foreach($allPlayers as $p) {
+    $allPlayers = $pages->find("parent.name=players, team.name=$teamName, name!=test, sort=-$term1");
+  }
+  return $allPlayers;
+}
+
+function setGlobalScoreboard($field, $limit = false) {
+  $pages = wire('pages');
+  if ($field == 'places' || $field == 'people') { $term1 = $field.'.count'; } else { $term1 = $field; }
+  if ($limit) {
+    $allPlayers = $pages->find("parent.name=players, template=player, name!=test, sort=-$term1, limit=$limit");
+  } else {
+    $allPlayers = $pages->find("parent.name=players, template=player, name!=test, sort=-$term1");
+  }
+  return $allPlayers;
+}
+
+function setScoreboardNew($player, $field, $scope = 'all', $posOnly = false) {
+  $pages = wire('pages');
+  if ($field == 'places' || $field == 'people') { 
+    $term1 = $field.'.count'; 
+    if ($player != false) {
+      $term2 = $player->$field->count();
+    }
+  } else { 
+    $term1 = $field; 
+    if ($player != false) {
+      $term2 = $player->$field;
+    }
+  }
+  if ($scope == 'all' || $scope == 'global') { // Global scoreboard
+    if ($player != false) {
+      $playerGlobalPos = $pages->count("parent.name=players, name!=test, $term1>$term2")+1;
+      $totalGlobalPlayersNb = $pages->count("parent.name=players, name!=test");
+      if ($posOnly == false) {
+        if ($playerGlobalPos <= 6) { // Good position, get top 6
+          $topGlobalPlayers =  $pages->find("parent.name=players, name!=test, $term1>$term2, limit=6, sort=-$term1");
+          $topGlobalPlayers->add($player);
+          $prevGlobalPlayers = false;
+          $nextGlobalPlayer = false;
+          if ($playerGlobalPos < 6) {
+            $nextLimit = 6-$playerGlobalPos;
+            $nextGlobalPlayers = $pages->find("parent.name=players, id!=$player->id, name!=test, $term1<=$term2, sort=-$term1, limit=$nextLimit");
+            $topGlobalPlayers->add($nextGlobalPlayers);
+          }
+        } else {
+          $topGlobalPlayers =  $pages->find("parent.name=players, name!=test, $term1>$term2, limit=3, sort=-$term1");
+          $prevGlobalPlayers = $pages->find("parent.name=players, name!=test, $term1>$term2, limit=2, sort=$term1");
+          $prevGlobalPlayers->add($player);
+          $nextGlobalPlayer = $pages->get("parent.name=players, name!=test, id!=$player->id, $term1<$term2, sort=-$term1");
+          $prevGlobalPlayers->add($nextGlobalPlayer);
+        }
+      }
+      if ($scope == 'global') {
+        if ($posOnly == false) {
+          return array($playerGlobalPos, $totalGlobalPlayersNb, $prevGlobalPlayers, $topGlobalPlayers, $nextGlobalPlayer);
+        } else {
+          return array($playerGlobalPos, $totalGlobalPlayersNb);
+        }
+      }
+    } else {
+      $totalGlobalPlayersNb = $pages->count("parent.name=players, name!=test");
+      $topGlobalPlayers =  $pages->find("parent.name=players, name!=test, limit=6, sort=-$term1");
+      return array($topGlobalPlayers, $totalGlobalPlayersNb);
+    }
+  }
+  if ($scope == 'all' || $scope == 'team') { // Team scoreboard
+    if ($player != false) {
+      $playerTeamPos = $pages->count("parent.name=players, team=$player->team, $term1>$term2")+1;
+      $totalTeamPlayersNb = $pages->count("parent.name=players, team=$player->team");
+      if ($posOnly == false) {
+        if ($playerTeamPos <= 6) { // Good position, get top 6
+          $topTeamPlayers = $pages->find("parent.name=players, team=$player->team, $term1>$term2, limit=6, sort=-$term1");
+          $topTeamPlayers->add($player);
+          $prevTeamPlayers = false;
+          $nextTeamPlayer = false;
+          if ($playerTeamPos < 6) {
+            $nextLimit = 6-$playerTeamPos;
+            $nextTeamPlayers = $pages->find("parent.name=players, id!=$player->id, team=$player->team, $term1<=$term2, sort=-$term1, limit=$nextLimit");
+            $topTeamPlayers->add($nextTeamPlayers);
+          }
+        } else {
+          $topTeamPlayers = $pages->find("parent.name=players, team=$player->team, $term1>$term2, limit=3, sort=-$term1");
+          $prevTeamPlayers = $pages->find("parent.name=players, team=$player->team, $term1>$term2, limit=2, sort=$term1");
+          $prevTeamPlayers->add($player);
+          $nextTeamPlayer = $pages->get("parent.name=players, team=$player->team, id!=$player->id, $term1<=$term2, sort=-$term1");
+          if ($nextTeamPlayer->count() > 0) {
+            $prevTeamPlayers->add($nextTeamPlayer);
+          }
+        }
+      }
+      if ($scope == 'team') {
+        if ($posOnly == false) {
+          return array($playerTeamPos, $totalTeamPlayersNb, $prevTeamPlayers, $topTeamPlayers, $nextTeamPlayer);
+        } else {
+          return array($playerTeamPos, $totalTeamPlayersNb);
+        }
+      }
+    } else {
+      $totalTeamPlayersNb = $pages->count("parent.name=players, team=$player->team");
+      // TODO : Manage team name ?
+    }
+  }
+  if ($posOnly == false) {
+    return array($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb, $prevGlobalPlayers, $prevTeamPlayers, $topGlobalPlayers, $topTeamPlayers, $nextGlobalPlayer, $nextTeamPlayer);
+  } else {
+    return array($playerGlobalPos, $totalGlobalPlayersNb, $playerTeamPos, $totalTeamPlayersNb);
+  }
+}
+
+function setGroupScores($allPlayers) {
+  // Build all groups
+  $allGroups = new PageArray();
+  foreach($allPlayers as $p) {
+    $nbEl = 0;
+    if (!in_array($p->group, $allGroups->getArray())) {
       $allGroups->add($p->group);
     }
+    $p->nbEl = $p->places->count()+$p->people->count();
+  }
+  if ($allGroups->count() > 0) {
+    // Calculate groups Karma
     foreach($allGroups as $group) {
+      $group->karma = 0;
+      $group->nbBonus = 0;
+      // Find selected players
       $players = $allPlayers->find("group=$group");
       // Check for group bonus
       $group->nbBonus = groupBonus($players);
       $group->karma = $group->nbBonus*30;
-
       // Add individual karmas
-      foreach($players as $p) {
+      foreach($players as $player) {
         // Karma is divided by number of players in the group to be fair with smaller groups
-        $groupYearlyKarma = round($p->yearlyKarma/$players->count);
-        (int) $group->yearlyKarma = $group->yearlyKarma + $groupYearlyKarma;
-        $group->details .= $p->title.' - ';
-        $group->team = $p->team;
+        $groupKarma = round($player->yearlyKarma/$players->count);
+        (int) $group->karma += $groupKarma;
+        $group->members = $players->implode(' - ', '{title} {yearlyKarma}K {nbEl}el.');
+        $group->team = $player->team;
       }
     }
-    $allPlayers = $allGroups->sort('-yearlyKarma');
+    $allGroups->sort('-karma');
+  } else {
+    $allGroups = NULL;
   }
-  $allPlayersReindexed = new PageArray();
-  $allPlayersReindexed->import($allPlayers);
-  $playerPos = $allPlayersReindexed->getItemKey($player)+1;
-  if ($playerPos) { // Player is in the charts
-    if ($field != 'group') {
-      if ($playerPos <= 5) { // Good position, get Top 6
-        $topPlayers = $allPlayersReindexed->slice(0, 6);
-        $prevPlayers = false;
-      } else {
-        $topPlayers = $allPlayersReindexed->slice(0, 3); // Get top 3 players
-        $prevIndex = $playerPos-3;
-        $prevPlayers = $allPlayersReindexed->slice($prevIndex, 4);
-      }
-    } else {
-      $topPlayers = $allPlayersReindexed;
-      $prevPlayers = false;
-    }
-  } else { // No ranking (or complete scoreboard)
-    if ($field != 'group') {
-      $topPlayers = $allPlayersReindexed->slice(0, 5); // Get Top 5
-    } else {
-      $topPlayers = $allPlayersReindexed;
-    }
-    $prevPlayers = false;
-  }
-  return array($topPlayers, $prevPlayers, $playerPos, $allPlayersReindexed->count);
+  return $allGroups;
 }
 
-function displayTeamScoreboard($allPlayers, $player = false, $field) {
+function displaySmallScoreboard($topPlayers, $prevPlayers, $playerPos, $playerId, $field) {
   $out = '';
-  $limit = 5;
-  list($topPlayers, $prevPlayers, $playerPos, $totalPlayers) = setScoreboard($allPlayers, $player, $field);
-  // Clean field
-  $field = \str_replace('-', '', $field);
-  $field = \str_replace('+', '', $field);
-  $field = \str_replace('.count', '', $field);
   if ($prevPlayers != false) { // Player is 'surrounded'
     $out .= '<ol>';
     if ($topPlayers->count() > 0) {
       foreach ($topPlayers as $p) {
-        if ($p->avatar) {
-          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
-        } else {
-          $mini = '';
-        }
-        if ($p->login == $player->name) {
-          $focus = "class='focus'";
-        } else {
-          $focus = "";
-        }
-        switch($field) {
-          case 'yearlyKarma':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
-            break;
-          case 'reputation':
-            $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' reputation</span></li>';
-            break;
-          case 'places':
-            if ($p->places->count > 1) {
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' places</span></li>';
-            } else {
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' place</span></li>';
-            }
-            break;
-          case 'people':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->people->count.' people</span></li>';
-            break;
-          case 'fighting_power':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
-            break;
-          case 'donation':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' GC</span></li>';
-            break;
-          case 'underground_training':
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
-            break;
-          default: $out .= 'Error.';
-        }
+        $p->id == $playerId ? $focus = "class='focus'" : $focus = "";
+        $out .= scoreboardLine($field, $p, $focus);
       }
     }
     $out .= '</ol>';
-    $out .= '<hr />';
-    $startIndex = (int) $playerPos-round($limit/2)+1; 
+    $out .= '<p class="text-center">[...]</p>';
+    $startIndex = (int) $playerPos-2; 
     $out .= '<ol start="'.$startIndex.'">';
       if ($prevPlayers->count() > 0) {
         foreach ($prevPlayers as $p) {
-          if ($p->avatar) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
-          } else {
-            $mini = '';
-          }
-          if ($p->login == $player->name) {
-            $focus = "class='focus'";
-          } else {
-            $focus = "";
-          }
-          switch($field) {
-            case 'yearlyKarma':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
-              break;
-            case 'reputation':
-              $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' rep.</span></li>';
-              break;
-            case 'places':
-              if ($p->places->count > 1) {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' places</span></li>';
-              } else {
-                $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' place</span></li>';
-              }
-              break;
-            case 'people':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->people->count.' people</span></li>';
-              break;
-            case 'fighting_power':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
-              break;
-            case 'donation':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' GC</span></li>';
-              break;
-            case 'underground_training':
-              $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
-              break;
-            default: $out .= 'Error.';
-          }
+          $p->id == $playerId ? $focus = "class='focus'" : $focus = "";
+          $out .= scoreboardLine($field, $p, $focus);
         }
       }
     $out .= '</ol>';
   } else { // No ranking or Top 10
     $out .= '<ol>';
     foreach ($topPlayers as $p) {
-      if ($p->avatar) {
-        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
-      } else {
-        $mini = '';
-      }
-      if ($player && ($p->login == $player->name)) {
-        $focus = "class='focus'";
-      } else {
-        $focus = "";
-      }
-      switch($field) {
-        case 'yearlyKarma':
-          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' K</span></li>';
-          break;
-        case 'reputation':
-          $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' rep.</span></li>';
-          break;
-        case 'places':
-          if ($p->places->count > 1) {
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' places</span></li>';
-          } else {
-            $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->places->count.' place</span></li>';
-          }
-          break;
-        case 'people':
-          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->people->count.' people</span></li>';
-          break;
-        case 'fighting_power':
-          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' F.P.</span></li>';
-          break;
-        case 'donation':
-          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' GC</span></li>';
-          break;
-        case 'underground_training':
-          $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' UT</span></li>';
-          break;
-        default: $out .= 'Error.';
-      }
+      $p->id == $playerId ? $focus = "class='focus'" : $focus = "";
+      $out .= scoreboardLine($field, $p, $focus);
     }
     $out .= '</ol>';
   }
-
   return $out;
 }
 
-function getScoreboard($player, $field, $limit=5, $global=true) {
-  $pages = wire('pages');
-  // TODO : Use session or cache to get only once the list of players and then simply sort them according to the scoreboard ? But needs to be updated whenever something is recorded...
-  // Limit to team players if player is logged in
-  if ($global === false) {
-    $team = ',team='.$player->team;
+function displayCompleteScoreboard($allPlayers, $playerId, $field, $pageNum) {
+  if ($field == 'places' || $field == 'people') { $selector = '-'.$field.'.count'; } else { $selector = '-'.$field; }
+  $allPlayers->sort($selector);
+  $out = '';
+  $startIndex = ($pageNum*35)-34;
+  $out .= '<ol start="'.$startIndex.'">';
+  foreach ($allPlayers as $p) {
+    $p->id == $playerId ? $focus = 'class="focus"' : $focus = '';
+    if ($p->avatar) {
+      $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
+    } else {
+      $mini = '';
+    }
+    $out .= scoreboardLine($field, $p, $focus);
+  }
+  $out .= '</ol>';
+  return $out;
+}
+
+function displayGroupScoreboard($allGroups, $playerGroupId) {
+  $out = '';
+  $out .= '<ol class="">';
+  foreach($allGroups as $group) {
+    if ($playerGroupId == $group->id) {
+      $focus = 'focus';
+    } else {
+      $focus = '';
+    }
+    $out .= '<li>';
+    $out .= '<p data-toggle="tooltip" data-html="true" title="'.$group->members.'" onmouseenter="$(this).tooltip(\'show\');">';
+    $out .= '<span class="'.$focus.'">'.$group->title.'</span>';
+    $out .= ' <span class="badge">'.$group->karma.' K</span>';
+    // Display stars for bonus (filled star = 5 empty stars, 1 star = 1 free element for each group member)
+    if ($group->nbBonus > 0) {
+      $out .= '&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-star"></span>';
+      $out .= '<span class="badge">'.$group->nbBonus.'</span>';
+    }
+    $out .= '</p>';
+    $out .= '</li>';
+  }
+  $out .= '</ol>';
+  return $out;
+}
+
+function scoreboardLine($field, $player, $focus) {
+  $out = '';
+  $p = $player;
+  if ($p->avatar) {
+    $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
   } else {
-    $team = '';
+    $mini = '';
   }
-  switch ($field) {
-    case 'yearlyKarma' :
-      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-yearlyKarma, yearlyKarma>0";
-      $allPlayers = $pages->find($selectors);
-      break;
-    case 'reputation' :
-      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-reputation, reputation>0";
-      $allPlayers = $pages->find($selectors);
-      break;
-    case 'places' :
-      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-places.count, sort=-reputation, places.count>0";
-      $allPlayers = $pages->find($selectors);
-      break;
-    case 'people' :
-      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-people.count, sort=-reputation, people.count>0";
-      $allPlayers = $pages->find($selectors);
-      break;
-    case 'fighting_power' :
-      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-fighting_power, sort=-reputation, fighting_power>0";
-      $allPlayers = $pages->find($selectors);
-      break;
-    case 'equipment' :
-      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-equipment.count, sort=-reputation, equipment.count>0";
-      $allPlayers = $pages->find($selectors);
-      break;
-    case 'donation' :
-      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-donation, sort=-reputation, donation>0";
-      $allPlayers = $pages->find($selectors);
-      break;
-    case 'underground_training' :
-      $selectors = "parent.name=players, template=player, name!=test".$team.", sort=-underground_training, sort=-reputation, underground_training>0";
-      $allPlayers = $pages->find($selectors);
-      break;
-    case 'group' :
-      $allGroups = groupScores();
-    default : 
-      $allPlayers = NULL;
+  switch($field) {
+    case 'yearlyKarma': $label = __('K.'); break;
+    case 'reputation': $label = __('rep.'); break;
+    case 'places': $label = __('pl.'); break;
+    case 'people': $label = __('peo.'); break;
+    case 'fighting_power': $label = __('FP'); break;
+    case 'donation': $label = __('GC'); break;
+    case 'underground_training': $label = __('UT'); break;
+    default: $out .= 'Error.';
   }
-  if ($allPlayers && $field != 'group') {
-    if ($allPlayers->getItemKey($player) != 0) {
-      $playerPos = $allPlayers->getItemKey($player)+1;
-    } else {
-      $playerPos = false;
-    }
-  } else { // Groups display (TODO : refactor...)
-    $playerPos = NULL;
-    $allPlayers = $allGroups;
+  switch($field) {
+    case 'yearlyKarma':
+      $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->yearlyKarma.' '.$label.'</span></li>';
+      break;
+    case 'reputation':
+      $out .= '<li><span '. $focus .'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->reputation.' '.$label.'</span></li>';
+      break;
+    case 'places':
+      if (!isset($p->places)) { $placesNb = 0; } else { $placesNb = $p->places->count(); }
+      $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$placesNb.' '.$label.'</span></li>';
+      break;
+    case 'people':
+      if (!isset($p->people)) { $peopleNb = 0; } else { $peopleNb = $p->people->count(); }
+      $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$peopleNb.' '.$label.'</span></li>';
+      break;
+    case 'fighting_power':
+      $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->fighting_power.' '.$label.'</span></li>';
+      break;
+    case 'donation':
+      $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->donation.' '.$label.'</span></li>';
+      break;
+    case 'underground_training':
+      $out .= '<li><span '.$focus.'>'.$mini.' <a href="'.$p->url.'">'.$p->title.'</a></span> <span class="badge">'.$p->underground_training.' '.$label.'</span></li>';
+      break;
+    default: $out .= 'Error.';
   }
-  if (isset($playerPos)) { // Player is in the charts
-    if ($limit == -1) { // Complete scoreboard
-      $topPlayers = $allPlayers; // Complete scoreboard
-      $prevPlayers = false;
-    } else {
-      if ($playerPos <= 8) { // Good position, get Top 10
-        $topPlayers = $allPlayers->slice(0, 10);
-        $prevPlayers = false;
-      } else {
-        $topPlayers = $allPlayers->slice(0, 3); // Get top 3 players
-        $prevIndex = $playerPos-round($limit/2);
-        $prevPlayers = $allPlayers->slice($prevIndex, $limit);
-      }
-    }
-  } else { // No ranking (or complete scoreboard)
-    $playerPos = false;
-    if ($limit == -1) {
-      $topPlayers = $allPlayers; // Complete scoreboard
-    } else {
-      $topPlayers = $allPlayers->slice(0, 10); // Get Top 10
-    }
-    $prevPlayers = false;
-  }
-  return array($topPlayers, $prevPlayers, $playerPos, $allPlayers->count);
+  return $out;
+}
+
+function displayPlayerPos($scoreboardLink, $title, $playerPos, $playerTeamPos, $totalPlayers, $totalTeamPlayers) {
+  $out = '';
+  $out .= '<p>';
+  $out .= '<a href="'.$scoreboardLink.'">';
+  $out .= '<span class="glyphicon glyphicon-list" data-toggle="tooltip" title="'.__("See the complete scoreboard").'"></span></a> ';
+  $out .= $title.' → ';
+  $out .= '<span class="label label-primary">'.__("In Planet Alert").'</span> ';
+  if ($playerPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
+  $out .= $playerPos.'/'.$totalPlayers.' '.$star.' ';
+  if ($playerTeamPos === 1) { $star = '<span class="glyphicon glyphicon-star"></span>'; } else { $star=''; }
+  $out .= '<span class="label label-primary">'.__("In your team").'</span> ';
+  $out .= $playerTeamPos.'/'.$totalTeamPlayers.' '.$star;
+  $out .= '</p>';
+  return $out;
 }
 
 function setSpacedRepetition($level, $trainNb) { // Set spaced repetition according to monster's level?
@@ -1689,14 +1940,67 @@ function setFightsQuality($player, $monster) {
   return array($fightNb, $posNb, $negNb, $quality, $averageLabel, $lastFightDate);
 }
 
+function setMonsterFromCache ($tmpCache, $monster) {
+  $minUt = 20; // Previous training required to be able to fight
+  $spacedFights = 15; // 15 days between fights
+  $fightInterval = new \DateInterval('P15D');
+  // Sets inUt, outUt, lastFightDate.... for $monster
+  $monster->masterTime = $monster->bestTime; // Keep faster time before overriding it below
+  foreach ($tmpCache->fields as $f) {
+    if ($f->name != 'monster') {
+      $monster->$f = $tmpCache->$f;
+    }
+  }
+  // Sets training possibilities
+  $monster->utGain = ($tmpCache->inUt+$tmpCache->outUt);
+  $monster->lastTrainingInterval = wire('datetime')->relativeTimeStr($tmpCache->lastTrainDate);
+  if ($tmpCache->date) {
+    $availableTrainDate = new \DateTime(date("Y-m-d", $tmpCache->date));
+    $today = new \DateTime("today");
+    $monster->waitForTrain = $today->diff($availableTrainDate)->format("%r%a");
+  } else {
+    $monster->waitForTrain = 0;
+  }
+  if ($monster->waitForTrain <= 0) {
+    $monster->isTrainable = 1;
+  } else {
+    $monster->isTrainable = 0;
+    $monster->waitForTrain = abs($monster->waitForTrain);
+  }
+  // Sets fighting possibilities
+  $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
+  if ($tmpCache->lastFightDate != '') {
+    $today = new \DateTime("today");
+    $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
+    $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
+  } else {
+    if ($monster->utGain >= 20) {
+      $monster->waitForFight = -1; 
+    } else {
+      $monster->waitForFight = 100; 
+    }
+    $monster->lastFightInterval = -1;
+  }
+  if ($monster->waitForFight <= 0) {
+    // TODO : Check visualizer ?
+    $monster->isFightable = 0;
+  } else {
+    $monster->isFightable = 0;
+  }
+  return $monster;
+}
+
 function setMonster($player, $monster) {
+  $pages = wire('pages');
   $minUt = 20; // Previous training required to be able to fight
   $spacedFights = 15; // 15 days between fights
   $fightInterval = new \DateInterval('P15D');
   // Prepare monster from player's Cache page
   $tmpCache = $player->child("name=tmp")->tmpMonstersActivity->get("monster=$monster");
   if ($tmpCache) {
+    $tmpCache->of(false);
     // Sets inUt, outUt, lastFightDate.... for $monster
+    $monster->masterTime = $monster->bestTime; // Keep faster time before overriding it below
     foreach ($tmpCache->fields as $f) {
       if ($f->name != 'monster') {
         $monster->$f = $tmpCache->$f;
@@ -1721,6 +2025,7 @@ function setMonster($player, $monster) {
     // Sets fighting possibilities
     $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
     if ($tmpCache->lastFightDate != '') {
+      $today = new \DateTime("today");
       $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
       $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
     } else {
@@ -1749,6 +2054,30 @@ function setMonster($player, $monster) {
     $monster->lastFightInterval = -1;
     $monster->waitForFight = 0;
   }
+  if ($monster->bestTrainedPlayerId != 0) {
+    $bestTrained = $pages->get($monster->bestTrainedPlayerId);
+    $monster->bestTrainedTitle = $bestTrained->title;
+    $monster->bestTrainedTeam = $bestTrained->team->title;
+    if ($monster->bestTrainedPlayerId == $player->id) {
+      $monster->isBestTrained = true;
+    } else {
+      $monster->isBestTrained = false;
+    }
+  }
+  if ($monster->bestTimePlayerId != 0) {
+    $master = $pages->get($monster->bestTimePlayerId);
+    $monster->bestTimePlayerTitle = $master->title;
+    $monster->bestTimeTeam = $master->team->title;
+    if ($master->id == $player->id) {
+      $monster->isMaster = true;
+    } else {
+      $monster->isMaster = false;
+    }
+  } else {
+    $monster->bestTimePlayerTitle = false;
+    $monster->bestTimeTeam = false;
+    $monster->isMaster = false;
+  }
   return $monster;
 }
 
@@ -1756,8 +2085,8 @@ function prepareListWords($allLines, $type) {
   switch ($type) {
     case 'translate' :
       if (count($allLines)>15) {
-        $listWords = '<strong>'.__("15 first words").' :</strong><br />';
-        for($i=0; $i<15; $i++) {
+        $listWords = '<strong>'.__("10 first words").' :</strong><br />';
+        for($i=0; $i<10; $i++) {
           list($left, $right) = preg_split('/,/', $allLines[$i]);
           $listWords .= $right.'<br />';
         }
@@ -1771,9 +2100,9 @@ function prepareListWords($allLines, $type) {
       }
       break;
     case 'quiz' :
-      if (count($allLines)>14) {
-        $listWords = '<strong>'.__("15 first questions").' :</strong><br />';
-        for($i=0; $i<15; $i++) {
+      if (count($allLines)>10) {
+        $listWords = '<strong>'.__("10 first questions").' :</strong><br />';
+        for($i=0; $i<10; $i++) {
           if (strpos($allLines[$i], "::") !== false) {
             list($left, $right) = preg_split('/::/', $allLines[$i]);
             $listWords .= '- '.$left.'<br />';
@@ -1789,9 +2118,9 @@ function prepareListWords($allLines, $type) {
       }
       break;
     case 'image-map' :
-      if (count($allLines)>15) {
-        $listWords = '<strong>'.__("15 first words").' :</strong><br />';
-        for($i=0; $i<15; $i++) {
+      if (count($allLines)>10) {
+        $listWords = '<strong>'.__("10 first words").' :</strong><br />';
+        for($i=0; $i<10; $i++) {
           list($left, $right) = preg_split('/::/', $allLines[$i]);
           $listWords .= '- '.$right.'<br />';
         }
@@ -1805,9 +2134,9 @@ function prepareListWords($allLines, $type) {
       }
       break;
     case 'jumble' :
-      if (count($allLines)>15) {
-        $listWords = '<strong>'.__("15 first sentences").' :</strong><br />';
-        for($i=0; $i<15; $i++) {
+      if (count($allLines)>10) {
+        $listWords = '<strong>'.__("10 first sentences").' :</strong><br />';
+        for($i=0; $i<10; $i++) {
           $pattern = '/\$.*?\$/';
           preg_match($pattern, $allLines[$i], $matches);
           if ($matches) {
@@ -1821,8 +2150,10 @@ function prepareListWords($allLines, $type) {
         foreach($allLines as $line) {
           $pattern = '/\$.*?\$/';
           preg_match($pattern, $line, $matches);
-          $help = preg_replace('/\$/', '', $matches[0]);
-          $listWords .= '- '.$help.'<br />';
+          if (isset($matches[0])) {
+            $help = preg_replace('/\$/', '', $matches[0]);
+            $listWords .= '- '.$help.'<br />';
+          }
         }
       }
       break;
@@ -1832,75 +2163,75 @@ function prepareListWords($allLines, $type) {
   return $listWords;
 }
 
-function utReport($player, $monster = false) {
-  if (!$monster) { // All monsters
-    $allEvents = $player->find("template=event, task~=ut-action")->sort("refPage.name, date");
-    $allConcernedMonsters = new PageArray();
-    $lastMonster = '';
-    if ($allEvents->count() > 0) {
-      foreach($allEvents as $e) { // Create monsters list
-        $allConcernedMonsters->add($e->refPage);
-      }
-      foreach ($allConcernedMonsters as $m) {
-        // Set monster result
-        $fights = $allEvents->find("refPage=$m")->sort("-date");
-        $m->fightsCount = $fights->count();
-        $m->total = $allEvents->count();
-        // Set monster status
-        $m = setMonster($player, $m);
-      }
-      $allConcernedMonsters->sort("lastTrainDate, -utGain");
-    }
-    return $allConcernedMonsters;
-  } else { // TODO ??? Single monster stats
-  }
-}
+/* function utReport($player, $monster = false) { */
+/*   if (!$monster) { // All monsters */
+/*     $allEvents = $player->find("template=event, task~=ut-action")->sort("refPage.name, date"); */
+/*     $allConcernedMonsters = new PageArray(); */
+/*     $lastMonster = ''; */
+/*     if ($allEvents->count() > 0) { */
+/*       foreach($allEvents as $e) { // Create monsters list */
+/*         $allConcernedMonsters->add($e->refPage); */
+/*       } */
+/*       foreach ($allConcernedMonsters as $m) { */
+/*         // Set monster result */
+/*         $fights = $allEvents->find("refPage=$m")->sort("-date"); */
+/*         $m->fightsCount = $fights->count(); */
+/*         $m->total = $allEvents->count(); */
+/*         // Set monster status */
+/*         $m = setMonster($player, $m); */
+/*       } */
+/*       $allConcernedMonsters->sort("lastTrainDate, -utGain"); */
+/*     } */
+/*     return $allConcernedMonsters; */
+/*   } else { // TODO ??? Single monster stats */
+/*   } */
+/* } */
 
-function fightReport($player, $monster = false) {
-  if (!$monster) { // All monsters
-    $today = new \DateTime("today");
-    $allFights = $player->find("template=event, task~=fight, refPage!=NULL")->sort("refPage.name, date");
-    $allConcernedMonsters = new PageArray();
-    $lastMonster = '';
-    if ($allFights->count() > 0) {
-      foreach($allFights as $f) { // Create monsters list
-        if ($f->refPage) {
-          if ($f->refPage->name != $lastMonster) {
-            $allConcernedMonsters->add($f->refPage);
-          }
-          $lastMonster = $f->refPage->name;
-        }
-      }
-      foreach ($allConcernedMonsters as $m) {
-        // Set monster result
-        $fights = $allFights->find("refPage=$m")->sort("-date");
-        $m->fightsCount = $fights->count();
-        // Calculate average
-        $VV = $fights->find("task.name=fight-vv")->count();
-        $V = $fights->find("task.name=fight-v")->count();
-        $R = $fights->find("task.name=fight-r")->count();
-        $RR = $fights->find("task.name=fight-rr")->count();
-        $m->positive = $V + $VV;
-        $m->negative = $R + $RR;
-        if ($m->fightsCount > 0) {
-          $m->ratio = round(($VV*2+$V-$R-$RR*2)/$m->fightsCount, 1);
-          if ($m->ratio >= 1.5) { $m->average = '<span class="label label-success">VV</span>'; }
-          if ($m->ratio < 1.5 && $m->ratio > 0.3) { $m->average = '<span class="label label-success">V</span>'; }
-          if ($m->ratio <= 0.3 && $m->ratio > -0.4) { $m->average = '<span class="label label-danger">R</span>'; }
-          if ($m->ratio <= -0.4) { $m->average = '<span class="label label-danger">RR</span>'; }
-        }
-        // Set monster status
-        $m = setMonster($player, $m);
-      }
-      $allConcernedMonsters->sort("lastFight, -fightsCount");
-    }
-    return $allConcernedMonsters;
-  } else { // Single monster stats
-    list($monster->fightsCount, $monster->positive, $monster->negative, $monster->quality, $monster->average, $monster->lastFightDate) = setFightsQuality($player, $monster);
-    $monster->ratio = $monster->quality;
-    return $monster;
-  }
-}
+/* function fightReport($player, $monster = false) { */
+/*   if (!$monster) { // All monsters */
+/*     $today = new \DateTime("today"); */
+/*     $allFights = $player->find("template=event, task~=fight, refPage!=NULL")->sort("refPage.name, date"); */
+/*     $allConcernedMonsters = new PageArray(); */
+/*     $lastMonster = ''; */
+/*     if ($allFights->count() > 0) { */
+/*       foreach($allFights as $f) { // Create monsters list */
+/*         if ($f->refPage) { */
+/*           if ($f->refPage->name != $lastMonster) { */
+/*             $allConcernedMonsters->add($f->refPage); */
+/*           } */
+/*           $lastMonster = $f->refPage->name; */
+/*         } */
+/*       } */
+/*       foreach ($allConcernedMonsters as $m) { */
+/*         // Set monster result */
+/*         $fights = $allFights->find("refPage=$m")->sort("-date"); */
+/*         $m->fightsCount = $fights->count(); */
+/*         // Calculate average */
+/*         $VV = $fights->find("task.name=fight-vv")->count(); */
+/*         $V = $fights->find("task.name=fight-v")->count(); */
+/*         $R = $fights->find("task.name=fight-r")->count(); */
+/*         $RR = $fights->find("task.name=fight-rr")->count(); */
+/*         $m->positive = $V + $VV; */
+/*         $m->negative = $R + $RR; */
+/*         if ($m->fightsCount > 0) { */
+/*           $m->ratio = round(($VV*2+$V-$R-$RR*2)/$m->fightsCount, 1); */
+/*           if ($m->ratio >= 1.5) { $m->average = '<span class="label label-success">VV</span>'; } */
+/*           if ($m->ratio < 1.5 && $m->ratio > 0.3) { $m->average = '<span class="label label-success">V</span>'; } */
+/*           if ($m->ratio <= 0.3 && $m->ratio > -0.4) { $m->average = '<span class="label label-danger">R</span>'; } */
+/*           if ($m->ratio <= -0.4) { $m->average = '<span class="label label-danger">RR</span>'; } */
+/*         } */
+/*         // Set monster status */
+/*         $m = setMonster($player, $m); */
+/*       } */
+/*       $allConcernedMonsters->sort("lastFight, -fightsCount"); */
+/*     } */
+/*     return $allConcernedMonsters; */
+/*   } else { // Single monster stats */
+/*     list($monster->fightsCount, $monster->positive, $monster->negative, $monster->quality, $monster->average, $monster->lastFightDate) = setFightsQuality($player, $monster); */
+/*     $monster->ratio = $monster->quality; */
+/*     return $monster; */
+/*   } */
+/* } */
 
 function battleReport($player, $monster = false) {
   if (!$monster) { // All monsters
@@ -2027,6 +2358,7 @@ function updateCache($player, $historyPage) {
       }
       $tmpCache->of(false);
       $tmpCache->save();
+      return;
     }
     if ($historyPage->task->is("name~=fight")) { // Update tmpCache
       if ($tmpCache) { // Monster already exists in tmpMonstersActivity
@@ -2035,6 +2367,7 @@ function updateCache($player, $historyPage) {
       }
       $tmpCache->of(false);
       $tmpCache->save();
+      return;
     }
   }
 }
@@ -2098,194 +2431,194 @@ function setBestPlayer($monster, $player, $utGain) {
   $pages = wire('pages');
   $monster = $pages->get($monster->id);
   $monster->of(false);
-  $monster->mostTrained = $player;
+  $monster->bestTrainedPlayerId = $player->id;
   $monster->best = $utGain;
   $monster->save();
 }
 
-function pma($player) {
-  $out = '';
-  $pages = wire('pages');
-  $config = wire('config');
-  switch ($player->rank->index) {
-    case '6': // 6emes
-      /* $levels = '1|2'; */
-      $levels = '1|2|3|4|5';
-      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
-      break;
-    case '7': // 5emes
-      /* $levels = '1|2'; */
-      $levels = '1|2|3|4|5';
-      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
-      break;
-    case '8': // 4emes
-      $levels = '1|2|3|4|5';
-      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=-level, sort=name");
-    case '9': // 3emes
-      $levels = '1|2|3|4|5';
-      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=-level, sort=name");
-    default:
-      $levels = '1|2|3|4|5';
-      $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name");
-  }
-  if ($player->equipment->has('name=memory-helmet')) {
-    foreach($allMonsters as $m) {
-      $m = setMonster($player, $m);
-    }
-  }
-  $suggestedFights = $allMonsters->find("isFightable=1, sort=lastFightDate, sort=random, limit=3"); // Pick less-recently trained fightable monsters
-  $suggestedTrainings = $allMonsters->find("isTrainable=2, sort=name, limit=3");
-  if ($suggestedTrainings->count() < 3) {
-    $n = 3-$suggestedTrainings->count();
-    $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingInterval=-1, level=$levels, sort=random, limit=$n"));
-    if ($suggestedTrainings->count() < 3) {
-      $n = 3-$suggestedTrainings->count();
-      $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingInterval!=-1, level=$levels, sort=-lastTrainingInterval, limit=$n"));
-    }
-  }
+/* function pma($player) { */
+/*   $out = ''; */
+/*   $pages = wire('pages'); */
+/*   $config = wire('config'); */
+/*   switch ($player->rank->index) { */
+/*     case '6': // 6emes */
+/*       /1* $levels = '1|2'; *1/ */
+/*       $levels = '1|2|3|4|5'; */
+/*       $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name"); */
+/*       break; */
+/*     case '7': // 5emes */
+/*       /1* $levels = '1|2'; *1/ */
+/*       $levels = '1|2|3|4|5'; */
+/*       $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name"); */
+/*       break; */
+/*     case '8': // 4emes */
+/*       $levels = '1|2|3|4|5'; */
+/*       $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=-level, sort=name"); */
+/*     case '9': // 3emes */
+/*       $levels = '1|2|3|4|5'; */
+/*       $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=-level, sort=name"); */
+/*     default: */
+/*       $levels = '1|2|3|4|5'; */
+/*       $allMonsters = $pages->find("template=exercise, type.name=translate|quiz, sort=level, sort=name"); */
+/*   } */
+/*   if ($player->equipment->has('name=memory-helmet')) { */
+/*     foreach($allMonsters as $m) { */
+/*       $m = setMonster($player, $m); */
+/*     } */
+/*   } */
+/*   $suggestedFights = $allMonsters->find("isFightable=1, sort=lastFightDate, sort=random, limit=3"); // Pick less-recently trained fightable monsters */
+/*   $suggestedTrainings = $allMonsters->find("isTrainable=2, sort=name, limit=3"); */
+/*   if ($suggestedTrainings->count() < 3) { */
+/*     $n = 3-$suggestedTrainings->count(); */
+/*     $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingInterval=-1, level=$levels, sort=random, limit=$n")); */
+/*     if ($suggestedTrainings->count() < 3) { */
+/*       $n = 3-$suggestedTrainings->count(); */
+/*       $suggestedTrainings->add($allMonsters->find("isTrainable=1, lastTrainingInterval!=-1, level=$levels, sort=-lastTrainingInterval, limit=$n")); */
+/*     } */
+/*   } */
 
-  $out .= '<div class="row">';
-  $out .= '<div class="col-sm-12">';
-  $out .= '<div class="pma panel panel-primary">';
-  $out .= '<div class="panel-heading">';
-  $out .= '<h4><span class="glyphicon glyphicon-calendar"></span> Personal Analyzer';
-  $out .= '<span class="pull-right">';
-  $out .= '<span class="label label-success">Karma : '.$player->yearlyKarma.'</span>';
-  $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-success">Reputation : '.$player->reputation.'</span>';
-  $out .= '&nbsp;&nbsp;';
-  if ($player->coma == 0) {
-    $out .= '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>';
-    $out .= '&nbsp;&nbsp;';
-    $out .= '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>';
-    $out .= '&nbsp;&nbsp;';
-    $out .= '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
-  } else {
-    $out .= '<span class="label label-danger">Coma !</span>';
-  }
-  $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>';
-  $out .= '&nbsp;&nbsp;';
-  $freeElements = $player->places->count()+$player->people->count();
-  $out .= '<span class="label label-info" data-toggle="tooltip" title="Free places/people">'.$freeElements.'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>';
-  $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-info" data-toggle="tooltip" title="Equipment">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>';
-  $out .= '&nbsp;&nbsp;';
-  if ($player->donation == false) {$player->donation = 0; }
-  $out .= '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
-  $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-primary" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' UT</span>';
-  $out .= '&nbsp;&nbsp;';
-  $out .= '<span class="label label-primary" data-toggle="tooltip" title="Fighting Power">'.$player->fighting_power.' FP</span>';
-  $out .= '</span>';
-  $out .= '</h4>';
-  $out .= '</div>';
-  $out .= '<div class="panel-body">';
-  $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" title="This analyser is here to help you organize."></span>';
-  $out .= '<span class="label label-primary">';
-  $helmet = $pages->get("name=memory-helmet");
-  if ($helmet->image) {
-    $out .= '<img width="20" src="'.$helmet->image->url.'" alt="Helmet" />';
-  }
-  $out .= ' Underground Training</span> ⇒ ';
-  if ($suggestedTrainings->count() > 0) {
-    foreach($suggestedTrainings as $m) {
-      if ($m->image) {
-        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
-      } else {
-        $mini = '';
-      }
-      if ($m->isTrainable == 2) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; }
-      $out .= '<a href="'.$pages->get("name=underground-training")->url.'?id='.$m->id.'" class="btn btn-sm btn-info" '.$style.' data-toggle="tooltip" data-html="true">'.$m->title.' '.$tag.'</a> ';
-    }
-  } else {
-    if ($player->team->forceHelmet == 1) {
-      $out .= __('Special access to the Underground Training Zone !');
-    } else {
-      $out .= __('You have no possible training today.');
-    }
-  }
-  $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-  $out .= '<span class="label label-primary"><span class="glyphicon glyphicon-flash"></span> Monster Fight(s)</span> ⇒ ';
-  // Test if fights have been disabled by Admin
-  $lock = $pages->get("$player->team")->lockFights;
-  if ($lock == 1) {
-    $out .= 'The administrator has disabled this feature.';
-  } else {
-    if ($suggestedFights->count() > 0) {
-      foreach($suggestedFights as $m) {
-        if ($m->image) {
-          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
-        } else {
-          $mini = '';
-        }
-        if ($m->lastTrainingInterval == 0) {
-          $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought/Trained today"></span>';
-          $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"';
-        } else {
-          $tag = '';
-          $style = 'title="'.$m->summary.'"';
-        }
-        $out .= '<a href="'.$m->url.'" class="btn btn-sm btn-danger" '.$style.' data-toggle="tooltip" data-html="true">'.$mini.' '.$m->title.' '.$tag.'</a> ';
-      }
-    } else {
-      if ($player->team->forceHelmet == 1) {
-        $out .= __('Special access to the Fighting Zone !');
-      } else {
-        $out .= __('You have no possible fights today.');
-      }
-    }
-  }
-  $out .= '</p>';
-  $out .= '</div>';
-  // Personal advice
-  $out .= '<div class="panel-footer">';
-  $lowTeamMembers = $pages->find("template=player, team=$player->team, HP<10");
-  if ($lowTeamMembers->count() > 0) {
-    $out .= '<p><span class="label label-danger">Low HP in your team <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Maybe you can help them (donation, encouraging in class...)?"></span>: </span>';
-    foreach($lowTeamMembers as $p) {
-      $out .= ''.$p->title.' ';
-    }
-    $out .= '</p>';
-  }
-  $helmet = $player->equipment->get("name=memory-helmet");
-  if (!$helmet->id) {
-    $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> Think as a team : 1 member of your group should buy the Memory Helmet to give access to the group to the Underground Training Zone ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Agissez en équipe : 1 membre du groupe devrait débloquer le Memory Helmet pour donner l\'accès au groupe à la Underground Training Zone !"></span></p>';
-  }
-  if ($player->GC > 100) {
-    $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> You have '.$player->GC.' GC ! You should use it to increase your karma  (buy equipment, free elements, donate...) :) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Tu as beaucoup de pièces d\'or ! Tu devrais les utiliser pour augmenter ton Karma (acheter de l\'équipement, libérer quelque chose, faire un don...)"></span></p>';
-  }
-  $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'");
-  $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name");
-  $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
-  // Possible places
-  $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name");
-  $possibleElements = $possiblePlaces->count();
-  if ($player->rank->is("index>=8") || ($player->team->is("name!=no-team") && $player->team->is("rank.index>=8"))) {
-    $allPeople = $pages->find("template=people, name!=people, sort=title");
-    // Possible people
-    $possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name");
-    $possibleElements += $possiblePeople->count();
-  }
-  if ($possibleEquipment->count() > 0 || $possibleElements > 0) {
-    //Limit to 3 items a day
-    $today = new \DateTime("today");
-    $limitDate = strtotime($today->format('Y-m-d'));
-    $todayItemsCount = $player->get("name=history")->find("date>=$limitDate")->count();
-    if ($todayItemsCount >= 3) {
-      $out .= "<p class='text-center alert alert-warning'>You have reached the 3 items limit for today ! Come back tomorrow  to go to the Marketplace !</p>";
-    } else {
-      $marketPlace = $pages->get("name=shop_generator")->url.$player->id;
-      $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> New elements are available for you at <a href="'.$marketPlace.'">the Marketplace</a> ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="De nouveaux éléments sont accessibles pour toi dans la Marketplace !"></span></p>';
-    }
-  }
-  $out .= '</div>';
-  $out .= '</div>';
-  $out .= '</div>';
-  $out .= '</div>';
+/*   $out .= '<div class="row">'; */
+/*   $out .= '<div class="col-sm-12">'; */
+/*   $out .= '<div class="pma panel panel-primary">'; */
+/*   $out .= '<div class="panel-heading">'; */
+/*   $out .= '<h4><span class="glyphicon glyphicon-calendar"></span> Personal Analyzer'; */
+/*   $out .= '<span class="pull-right">'; */
+/*   $out .= '<span class="label label-success">Karma : '.$player->yearlyKarma.'</span>'; */
+/*   $out .= '&nbsp;&nbsp;'; */
+/*   $out .= '<span class="label label-success">Reputation : '.$player->reputation.'</span>'; */
+/*   $out .= '&nbsp;&nbsp;'; */
+/*   if ($player->coma == 0) { */
+/*     $out .= '<span class="label label-default" data-toggle="tooltip" title="Level">'.$player->level.'<span class="glyphicon glyphicon-signal"></span></span>'; */
+/*     $out .= '&nbsp;&nbsp;'; */
+/*     $out .= '<span class="label label-default" data-toggle="tooltip" title="XP">'.$player->XP.'<img src="'.$config->urls->templates.'img/star.png" alt="" /></span>'; */
+/*     $out .= '&nbsp;&nbsp;'; */
+/*     $out .= '<span class="label label-default" data-toggle="tooltip" title="HP">'.$player->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>'; */
+/*   } else { */
+/*     $out .= '<span class="label label-danger">Coma !</span>'; */
+/*   } */
+/*   $out .= '&nbsp;&nbsp;'; */
+/*   $out .= '<span class="label label-default" data-toggle="tooltip" title="GC">'.$player->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /></span>'; */
+/*   $out .= '&nbsp;&nbsp;'; */
+/*   $freeElements = $player->places->count()+$player->people->count(); */
+/*   $out .= '<span class="label label-info" data-toggle="tooltip" title="Free places/people">'.$freeElements.'<img src="'.$config->urls->templates.'img/globe.png" alt="" /></span>'; */
+/*   $out .= '&nbsp;&nbsp;'; */
+/*   $out .= '<span class="label label-info" data-toggle="tooltip" title="Equipment">'.$player->equipment->count().'<span class="glyphicon glyphicon-wrench"></span></span>'; */
+/*   $out .= '&nbsp;&nbsp;'; */
+/*   if ($player->donation == false) {$player->donation = 0; } */
+/*   $out .= '<span class="label label-default" data-toggle="tooltip" title="Donated">'.$player->donation.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>'; */
+/*   $out .= '&nbsp;&nbsp;'; */
+/*   $out .= '<span class="label label-primary" data-toggle="tooltip" title="Underground Training">'.$player->underground_training.' UT</span>'; */
+/*   $out .= '&nbsp;&nbsp;'; */
+/*   $out .= '<span class="label label-primary" data-toggle="tooltip" title="Fighting Power">'.$player->fighting_power.' FP</span>'; */
+/*   $out .= '</span>'; */
+/*   $out .= '</h4>'; */
+/*   $out .= '</div>'; */
+/*   $out .= '<div class="panel-body">'; */
+/*   $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" title="This analyser is here to help you organize."></span>'; */
+/*   $out .= '<span class="label label-primary">'; */
+/*   $helmet = $pages->get("name=memory-helmet"); */
+/*   if ($helmet->image) { */
+/*     $out .= '<img width="20" src="'.$helmet->image->url.'" alt="Helmet" />'; */
+/*   } */
+/*   $out .= ' Underground Training</span> ⇒ '; */
+/*   if ($suggestedTrainings->count() > 0) { */
+/*     foreach($suggestedTrainings as $m) { */
+/*       if ($m->image) { */
+/*         $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />"; */
+/*       } else { */
+/*         $mini = ''; */
+/*       } */
+/*       if ($m->isTrainable == 2) { $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought today"></span>'; $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; } else { $tag = ''; $style = 'title="'.$m->summary.'"'; } */
+/*       $out .= '<a href="'.$pages->get("name=underground-training")->url.'?id='.$m->id.'" class="btn btn-sm btn-info" '.$style.' data-toggle="tooltip" data-html="true">'.$m->title.' '.$tag.'</a> '; */
+/*     } */
+/*   } else { */
+/*     if ($player->team->forceHelmet == 1) { */
+/*       $out .= __('Special access to the Underground Training Zone !'); */
+/*     } else { */
+/*       $out .= __('You have no possible training today.'); */
+/*     } */
+/*   } */
+/*   $out .= '&nbsp;&nbsp;&nbsp;&nbsp;'; */
+/*   $out .= '<span class="label label-primary"><span class="glyphicon glyphicon-flash"></span> Monster Fight(s)</span> ⇒ '; */
+/*   // Test if fights have been disabled by Admin */
+/*   $lock = $pages->get("$player->team")->lockFights; */
+/*   if ($lock == 1) { */
+/*     $out .= 'The administrator has disabled this feature.'; */
+/*   } else { */
+/*     if ($suggestedFights->count() > 0) { */
+/*       foreach($suggestedFights as $m) { */
+/*         if ($m->image) { */
+/*           $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />"; */
+/*         } else { */
+/*           $mini = ''; */
+/*         } */
+/*         if ($m->lastTrainingInterval == 0) { */
+/*           $tag = '<span class="glyphicon glyphicon-ok-sign" title="Fought/Trained today"></span>'; */
+/*           $style = ' disabled="disabled" style="text-decoration: line-through;" title="Done today!"'; */
+/*         } else { */
+/*           $tag = ''; */
+/*           $style = 'title="'.$m->summary.'"'; */
+/*         } */
+/*         $out .= '<a href="'.$m->url.'" class="btn btn-sm btn-danger" '.$style.' data-toggle="tooltip" data-html="true">'.$mini.' '.$m->title.' '.$tag.'</a> '; */
+/*       } */
+/*     } else { */
+/*       if ($player->team->forceHelmet == 1) { */
+/*         $out .= __('Special access to the Fighting Zone !'); */
+/*       } else { */
+/*         $out .= __('You have no possible fights today.'); */
+/*       } */
+/*     } */
+/*   } */
+/*   $out .= '</p>'; */
+/*   $out .= '</div>'; */
+/*   // Personal advice */
+/*   $out .= '<div class="panel-footer">'; */
+/*   $lowTeamMembers = $pages->find("template=player, team=$player->team, HP<10"); */
+/*   if ($lowTeamMembers->count() > 0) { */
+/*     $out .= '<p><span class="label label-danger">Low HP in your team <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Maybe you can help them (donation, encouraging in class...)?"></span>: </span>'; */
+/*     foreach($lowTeamMembers as $p) { */
+/*       $out .= ''.$p->title.' '; */
+/*     } */
+/*     $out .= '</p>'; */
+/*   } */
+/*   $helmet = $player->equipment->get("name=memory-helmet"); */
+/*   if (!$helmet->id) { */
+/*     $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> Think as a team : 1 member of your group should buy the Memory Helmet to give access to the group to the Underground Training Zone ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Agissez en équipe : 1 membre du groupe devrait débloquer le Memory Helmet pour donner l\'accès au groupe à la Underground Training Zone !"></span></p>'; */
+/*   } */
+/*   if ($player->GC > 100) { */
+/*     $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> You have '.$player->GC.' GC ! You should use it to increase your karma  (buy equipment, free elements, donate...) :) <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Tu as beaucoup de pièces d\'or ! Tu devrais les utiliser pour augmenter ton Karma (acheter de l\'équipement, libérer quelque chose, faire un don...)"></span></p>'; */
+/*   } */
+/*   $allEquipments = $pages->get("/shop/")->find("template=equipment|item, sort='title'"); */
+/*   $possibleEquipment = $allEquipments->find("GC<=$player->GC, level<=$player->level, id!=$player->equipment, parent.name!=potions, sort=-parent.name, sort=name"); */
+/*   $allPlaces = $pages->get("/places/")->find("template='place', sort='title'"); */
+/*   // Possible places */
+/*   $possiblePlaces = $allPlaces->find("GC<=$player->GC, level<=$player->level, id!=$player->places,sort=name"); */
+/*   $possibleElements = $possiblePlaces->count(); */
+/*   if ($player->rank->is("index>=8") || ($player->team->is("name!=no-team") && $player->team->is("rank.index>=8"))) { */
+/*     $allPeople = $pages->find("template=people, name!=people, sort=title"); */
+/*     // Possible people */
+/*     $possiblePeople = $allPeople->find("GC<=$player->GC, level<=$player->level, id!=$player->people,sort=name"); */
+/*     $possibleElements += $possiblePeople->count(); */
+/*   } */
+/*   if ($possibleEquipment->count() > 0 || $possibleElements > 0) { */
+/*     //Limit to 3 items a day */
+/*     $today = new \DateTime("today"); */
+/*     $limitDate = strtotime($today->format('Y-m-d')); */
+/*     $todayItemsCount = $player->get("name=history")->find("date>=$limitDate")->count(); */
+/*     if ($todayItemsCount >= 3) { */
+/*       $out .= "<p class='text-center alert alert-warning'>You have reached the 3 items limit for today ! Come back tomorrow  to go to the Marketplace !</p>"; */
+/*     } else { */
+/*       $marketPlace = $pages->get("name=shop_generator")->url.$player->id; */
+/*       $out .= '<p><span class="glyphicon glyphicon-hand-up"></span> New elements are available for you at <a href="'.$marketPlace.'">the Marketplace</a> ! <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="De nouveaux éléments sont accessibles pour toi dans la Marketplace !"></span></p>'; */
+/*     } */
+/*   } */
+/*   $out .= '</div>'; */
+/*   $out .= '</div>'; */
+/*   $out .= '</div>'; */
+/*   $out .= '</div>'; */
 
-  return $out;
-}
+/*   return $out; */
+/* } */
 
 function possibleElements($player) {
   $pages = wire('pages');
@@ -2396,6 +2729,10 @@ function setParticipation($player, $dateStart='', $dateEnd='') {
   }
 }
 
+function customTask($task, $field, $headTeacher = false, $player = false) {
+  $modTask = clone $task;
+}
+
 function checkModTask($task, $headTeacher = false, $player = false) {
   $modTask = clone $task;
   $user = wire('user');
@@ -2500,7 +2837,7 @@ function miniProfile($player, $type = '') {
           $out .= '<ul class="list-inline">';
           $out .= '<li>'.__("Your equipment").' ('.$player->equipment->count().') → </li>';
           foreach($player->equipment as $p) {
-            $out .= '<li><a href="'.$shop->url.'details/'.$p->name.'"><img class="" src="'.$p->image->getCrop('small')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
+            $out .= '<li><a href="'.$p->url.'"><img class="" src="'.$p->image->getCrop('small')->url.'" data-toggle="tooltip" title="'.$p->title.'" /></a></li>';
           }
           $out .= '</ul>';
         } else {
@@ -2585,6 +2922,40 @@ function groupScores($team = NULL) {
 function pluralize($count, $singular, $plural = false) {
   if (!$plural) $plural = $singular . 's';
   return ($count == 1 || $count == 0 ? $singular : $plural) ;
+}
+
+function ms2string($ms) {
+  $oneSecond = 100;
+  $oneMinute = $oneSecond * 60;
+  $oneHour = $oneMinute * 60;
+  $oneDay = $oneHour * 24;
+  $seconds = floor(($ms % $oneMinute) / $oneSecond);
+  $minutes = floor(($ms % $oneHour) / $oneMinute);
+  $hours = floor(($ms % $oneDay) / $oneHour);
+  $days = floor($ms / $oneDay);
+  $timeString = '';
+  $millLeft = $ms;
+  if ($days != 0) {
+    $millLeft = $ms-($days*$oneDay);
+    $timeString .= $days.'d ';
+  }
+  if ($hours != 0) {
+    $millLeft = $ms-($hours*$oneHour);
+    $timeString .= $hours.'h ';
+  }
+  if ($minutes != 0) {
+    $millLeft = $ms-($minutes*$oneMinute);
+    $timeString .= $minutes.'m ';
+  }
+  if ($seconds != 0) {
+    $millLeft = $ms-($seconds*$oneSecond);
+    if ($millLeft>=0 && $millLeft <= 9) { $millLeft = '0'+$millLeft; }
+    $timeString .= $seconds.'s ';
+  }
+  if ($millLeft < 1000) {
+    $timeString .= $millLeft;
+  }
+  return $timeString;
 }
 
 ?>

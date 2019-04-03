@@ -71,11 +71,11 @@
         $nbHk = $player->nbHk;
         $nbExtraHk = $player->extraHk->count() + $player->veryExtraHk->count();
         $death = $player->find("task.name=death, date>=$period->dateStart, date<=$period->dateEnd");
-        $utSessions = $player->find("template=event, task.name=ut-action-v|ut-action-vv, date>=$period->dateStart, date<=$period->dateEnd");
+        $utSessions = $player->ut;
         $inClassUtCount = $utSessions->find("inClass=1")->count();
-        $fpSessions = $player->find("template=event, task.category.name=test, date>=$period->dateStart, date<=$period->dateEnd");
+        $fpSessions = $player->fp;
         $inClassFpCount = $fpSessions->find("inClass=1")->count();
-        $posTests = $fpSessions->find("task.HP=0");
+        $posTests = $fpSessions->find("task.HP>=0");
         $negTests = $fpSessions->find("task.HP<0");
         // Team stats
         $teamNoHk += $nbNoHk;
@@ -341,12 +341,13 @@
           }
         }
         $out .= '</td>';
+        // Bonus
         $out .= '<td>';
           $nbBonus = $player->initiative->count() + $player->extraHk->count() + $player->veryExtraHk->count();
           if ($player->motivation == 'V' || $player->motivation == 'VV') {
-            $out .= '<span class="label label-success" data-toggle="tooltip" title="'.$nbBonus.' xtHk/init. - '.$player->outClassActivity.' out of class activity">'.$player->motivation.'</span>';
+            $out .= '<span class="label label-success" data-toggle="tooltip" title="'.$nbBonus.' xtHk/init. - '.$player->outClassActivity.' out of class actions">'.$player->motivation.'</span>';
           } else {
-            $out .= '<span class="label label-default" data-toggle="tooltip" title="'.$nbBonus.' xtHk/init. - '.$player->outClassActivity.' out of class activity">NN</span>';
+            $out .= '<span class="label label-default" data-toggle="tooltip" title="'.$nbBonus.' xtHk/init. - '.$player->outClassActivity.' out of class actions">NN</span>';
           }
         $out .= '</td>';
         // Planet Alert

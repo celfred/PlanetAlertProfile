@@ -64,7 +64,7 @@ div.frenchVersion {
 }
 #masthead {
   height: 90px;
-  background-image: url('images/logo_02.png');
+  background-image: url('../img/logo-small.png');
   background-repeat: no-repeat;
   background-position: 98%;
   background-color: #313131;
@@ -318,6 +318,11 @@ img.superpose {
   border-radius: 30px 30px 30px 0px;
   margin-left: 50px;
 }
+.bubble-right {
+  bottom: 0px;
+  border-radius: 30px 30px 0px 30px;
+  margin-right: 100px;
+}
 .zoom {
   animation-duration: 0.5s;
   animation-name: zoom;
@@ -382,11 +387,6 @@ img.superpose {
 @keyframes squeeze {
   from { transform: scale(0.9); }
   to { transform: scale(1); }
-}
-.bubble-right {
-  bottom: 0px;
-  border-radius: 30px 30px 0px 30px;
-  margin-right: 100px;
 }
 #fightForm {
   display: none;
@@ -458,7 +458,7 @@ img.superpose {
 span.glyphicon {
   cursor: pointer;
 }
-#clue, .tooltip-inner {
+.tooltip-inner {
   border: 2px solid #FFF;
   border-radius: 10px;
   background: #313131;
@@ -468,13 +468,6 @@ span.glyphicon {
 }
 .tooltip {
   position: absolute;
-}
-#clue {
-	padding: 6px;
-	font-size: 1.2em;
-	display: none;
-	position: absolute;
-	left: 50%;
 }
 .tooltip ul li {
   list-style-type: square;
@@ -489,12 +482,11 @@ span.glyphicon {
   cursor: pointer;
   border-radius: 10px;
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border: 1px solid #000;
 }
 .negativeTrend {
-  vertical-align: bottom;
   background-color: #F00;
 }
 .positiveTrend {
@@ -513,7 +505,9 @@ tr.selected {
 .focus, .focus a {
   background-color: #3175AF;
   color: #FFF;
+  font-weight: bold;
   padding: 2px;
+  border-radius: 5px;
 }
 .news {
   margin: 20px 0px;
@@ -774,9 +768,8 @@ table.adminTable > thead > tr > th {
   display: none;
 }
 #showAnswer {
-  float: left;
-  margin: 15px;
-  font-size: 1.5em;
+  margin: 10px;
+  font-size: 1.2em;
 }
 .quiz img.monster {
   transform: rotate(-8deg);
@@ -1016,6 +1009,16 @@ img.showInfo {
 	right: 50px;
 }
 
+ul.col2, ol.col2 {
+	column-count: 2;
+}
+ul.col3, ol.col3 {
+	column-count: 3;
+}
+ul.col4, ol.col4 {
+	column-count: 4;
+}
+
 #discount { display: none; }
 
 fieldset {
@@ -1047,10 +1050,13 @@ span.paTagItalicised {
 }
 
 .announcement {
-  font-size: 1.1em;
+  font-size: 1.2em;
+  background: #FFF;
 }
 
 #helpAlert { display: none; }
+
+.actionBtn { margin: 5px; }
 
 /* Large desktop */
 @media (min-width: 1200px) { 

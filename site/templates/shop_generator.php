@@ -282,8 +282,6 @@ echo $out;
 
 if (!$config->ajax) {
   include("./foot.inc"); 
-} else { // Have JS functions available
-  echo '<script type="text/javascript" src="'.$config->urls->templates.'scripts/main.js"></script>';
 }
 
 ?>

@@ -1,88 +1,122 @@
 <?php namespace ProcessWire;
   include("./head.inc"); 
 
+  $limitDate  = new \DateTime("-1 year");
+  $limitDate = strtotime($limitDate->format('Y-m-d'));
+
   if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $user->hasRole('teacher') || $player->team->forceHelmet == 1) {
       $helmet = $pages->get("name=memory-helmet");
+      if ($user->isSuperuser() || $user->hasRole('teacher')) {
+        $player = $pages->get("parent.name=players, name=test");
+        $request = false;
+      }
     } else {
-      $helmet = $player->equipment->get('memory-helmet');
+      $helmet = $player->equipment->get("name=memory-helmet");
     }
-    if ($helmet) {
+    if ($helmet) { // Display training catalogue
       $out = '<div>';
-      if (!$input->get->id) { // Display training catalogue
-        // Set all available monsters
-        if ($user->isSuperuser()) {
-          $allMonsters = $pages->find("parent.name=monsters, template=exercise, sort=name, include=all");
+      // Set all available monsters
+      if ($user->hasRole('player')) {
+        // Check if player has the Visualizer (or forced by admin)
+        if ($player->team->is("name=test-team")) {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise")->sort("name");
+          $allMonstersNb = $allMonsters->count();
+        } else if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
+          $allMonstersNb = $allMonsters->count();
+        } else {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0")->sort("name");
+          $hiddenMonstersNb = $pages->count("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), special=1");
         }
-        if ($user->hasRole('teacher')) {
-          $allMonsters = $pages->find("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1, summary!='')")->sort("name");
-        }
-        if ($user->hasRole('player')) {
-          // Check if player has the Visualizer (or forced by admin)
-          if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
-            $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
-          } else {
-            $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0")->sort("name");
-            $hiddenMonstersNb = $pages->count("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), special=1");
-          }
-        }
-        $out .= '<br />';
-        $out .= '<div class="well">';
-        $out .= '<h2 class="text-center">'.$page->title;
+        // Check if fightRequest
+        if ($player->fight_request == 0) { $request = false; } else { $request = $player->fight_request; }
+      } else if ($user->hasRole('teacher')) {
+        $allMonsters = $pages->find("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1, summary!='')")->sort("name");
+      } else if ($user->isSuperuser()) {
+        $allMonsters = $pages->find("parent.name=monsters, template=exercise, sort=name, include=all");
+      }
+      $out .= '<div class="well">';
+      $out .= '<h2 class="text-center">';
         $out .= '<span class="pull-left glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->summary.'"></span>';
+        $out .= $page->title;
         if ($helmet->image) {
           $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
         }
-        $out .= '</h2>';
-        if (isset($hiddenMonstersNb)) { // Display helpAlert for Electronic visualizer
-          $helpAlert = true;
-          $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
-          $helpTitle = __("Some monsters are absent !");
-          $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="image" /> ';
-          $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
-        }
-
-        include("./helpAlert.inc.php"); 
-
-        $allCategories = $pages->find("parent.name=topics, sort=name");
-        $out .= '<div id="Filters" data-fcolindex="1" class="text-center">';
+      $out .= '</h2>';
+      if (isset($hiddenMonstersNb)) { // Display helpAlert for Electronic visualizer
+        $helpAlert = true;
+        $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
+        $helpTitle = __("Some monsters are absent !");
+        $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="image" /> ';
+        $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
+      }
+      include("./helpAlert.inc.php"); 
+      $allCategories = $cache->get('cache__allTrainCategories', $templates->get("name=category"), function($pages) {
+        return $pages->find("parent.name=topics, sort=name");
+      });
+      $out .= '<div id="Filters" class="text-center">';
         $out .= '  <ul class="list-inline well">';
-        foreach ($allCategories as $category) {
-          if ($allMonsters->get("topic=$category")) {
-            $out .= '<li><label for="'.$category->name.'" class="btn btn-primary btn-xs">'.$category->title.' <input type="checkbox" value="'.$category->title.'" class="categoryFilter" name="categoryFilter" id="'.$category->name.'"></label></li>';
+          foreach ($allCategories as $category) {
+            if ($allMonsters->get("topic=$category")) {
+              $out .= '<li><label for="'.$category->name.'" class="btn btn-primary btn-xs">'.$category->title.' <input type="checkbox" value="'.$category->title.'" class="categoryFilter" name="categoryFilter" id="'.$category->name.'"></label></li>';
+            }
           }
-        }
         $out .= '</ul>';
-        $out .= '</div>';
-        $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
-          $out .= '<thead>';
-          $out .= '<tr>';
-          $out .= '<th>'.__("Name").'</th>';
-          $out .= '<th>'.__("Topic").'</th>';
-          $out .= '<th>'.__("Level").'</th>';
-          $out .= '<th>'.__("Summary").'</th>';
-          $out .= '<th>'.__("# of words").'</th>';
-          $out .= '<th>'.__("U.T. gained").'</th>';
-          $out .= '<th>'.__("Last training session").'</th>';
-          $out .= '<th>'.__("Action").'</th>';
-          $out .= '<th>'.__("Most trained player").'</th>';
-          $out .= '</tr>';
-          $out .= '</thead>';
-          $out .= '<tbody>';
+      $out .= '</div>';
+      $out .= '<table id="trainingTable" class="table table-condensed table-hover">';
+        $out .= '<thead>';
+        $out .= '<tr>';
+        $out .= '<th>'.__("Name").'</th>';
+        $out .= '<th>'.__("Level").'</th>';
+        $out .= '<th style="width:250px;">'.__("Summary").'</th>';
+        $out .= '<th>'.__("U.T. gained").'</th>';
+        $out .= '<th>'.__("Last training session").'</th>';
+        $out .= '<th>'.__("Actions");
+        $out .= ' <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="- '.__('Fight requests require at least +1UT on a monster<br />- Limited to 1 fight request').'"></i></th>';
+        $out .= '<th>'.__("Most trained player").'</th>';
+        $out .= '<th>'.__("Master time").'</th>';
+        $out .= '</tr>';
+        $out .= '</thead>';
+        $out .= '<tbody>';
         $today = new \DateTime("today");
         foreach($allMonsters as $m) {
+          $m->of(false);
           if ($user->hasRole('player')) {
             // Prepare player's training possibilities
             setMonster($player, $m);
-          } else { // Never trained (for admin)
+            if ($m->bestTrainedPlayerId != 0) {
+              $bestTrained = $pages->get($m->bestTrainedPlayerId);
+              $m->bestTrainedTitle = $bestTrained->title;
+              $m->bestTrainedTeam = $bestTrained->team->title;
+              if ($m->bestTrainedPlayerId == $player->id) {
+                $m->isBestTrained = true;
+              } else {
+                $m->isBestTrained = false;
+              }
+            }
+            if ($m->bestTimePlayerId != 0) {
+              $master = $pages->get($m->bestTimePlayerId);
+              $m->bestTimePlayerTitle = $master->title;
+              $m->bestTimeTeam = $master->team->title;
+              if ($m->bestTrainedPlayerId == $player->id) {
+                $m->isMaster = true;
+              } else {
+                $m->isMaster = false;
+              }
+            }
+          }
+          if ($user->hasRole("teacher")) {
+            // Never trained (for admin)
             $m->isTrainable = 1;
             $m->lastTrainingInterval = -1;
             $m->waitForTrain = 0;
           }
+          $topics = $m->topic->implode(', ', '{title}');
           $out .= '<tr>';
-          $out .= '<td>';
+          $out .= '<td data-search="'.$topics.','.$m->name.'">';
           $out .= $m->title;
           // Find # of days compared to today to set 'New' indicator
           $date2 = new \DateTime(date("Y-m-d", $m->published));
@@ -93,9 +127,6 @@
           if ($m->special) {
             $out .= ' <span class="badge">'.__("Detected").' !</span>';
           }
-          $out .= '</td>';
-          $out .= '<td>';
-          $out .= '<span class="label label-default">'.$m->topic->implode(', ', '{title}').'</span>';
           $out .= '</td>';
           $out .= '<td>';
           $out .= $m->level;
@@ -109,29 +140,10 @@
               $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$m->summary->getLanguageValue($french).'"></span>';
             }
           }
-          $out .= '</td>';
-          // Count # of words
+          // Data preview
           $exData = $m->exData;
           $allLines = preg_split('/$\r|\n/', $sanitizer->entitiesMarkdown($exData));
-          /* Unused because triggers a bug with tooltip display */
-          /* $out .= '<td data-sort="'.count($allLines).'">'; */
-          $out .= '<td>';
           $listWords = prepareListWords($allLines, $m->type->name);
-          switch ($m->type->name) {
-            case 'translate' :
-              $out .= count($allLines).' '.__("words");
-              break;
-            case 'quiz' :
-              $out .= count($allLines).' '.__("questions");
-              break;
-            case 'image-map' :
-              $out .= count($allLines).' '.__("words");
-              break;
-            case 'jumble' :
-              $out .= count($allLines).' '.__("sentences");
-              break;
-            default : continue;
-          }
           $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.$listWords.'"></span>';
           $out .= '</td>';
           $out .= '<td>';
@@ -167,7 +179,7 @@
           $out .= '</td>';
           $out .= '<td>';
           if ($m->isTrainable == 1) {
-            $out .= ' <a class="btn btn-primary" href="'.$m->url.'train"><i class="glyphicon glyphicon-headphones"></i> '.__("Put the helmet on !").'</a>';
+            $out .= ' <a class="btn btn-primary btn-xs" href="'.$m->url.'train"><i class="glyphicon glyphicon-headphones" data-toggle="tooltip" title="'.__("Put the helmet on !").'"></i></a>';
           } else {
             if ($m->waitForTrain == 1) { // Trained today
               $out .= __('Come back tomorrow ;)');
@@ -175,169 +187,40 @@
               $out .= sprintf(__("Come back in %d days ;)"), $m->waitForTrain);
             }
           }
-          $out .= '</td>';
-          // Find best trained player on this monster
-          if ($m->mostTrained) {
-            if (isset($player) && $m->mostTrained == $player) {
-              $class = 'success';
-            } else {
-              $class = 'primary';
+          $formerRequest = $pages->get("has_parent=$player, template=event, task.name=fight-v|fight-vv, inClass=1, refPage=$m, date>$limitDate");
+          if ($formerRequest->id) {
+            $out .= ' <span class="glyphicon glyphicon-ok" data-toggle="tooltip" title="'.__('You have already defeated this monster in the previous year.').'"></span>';
+          } else {
+            if ($request == 0) {
+              $msg = sprintf(__("Fight request for %s"), $m->title);
+              $out .= ' <span><a class="btn btn-danger btn-xs fightRequestConfirm" href="'.$page->url.'" data-href="'.$pages->get("name=submitforms")->url.'?form=fightRequest&monsterId='.$m->id.'&playerId='.$player->id.'" data-msg="'.$msg.'" data-reload="true"><i class="glyphicon glyphicon-education" data-toggle="tooltip" title="'.__("Ask teacher for an in-class Fight!").'"></i></a></span>';
+            } else if ($request == $m->id) {
+              $out .= ' <span class="glyphicon glyphicon-ok-circle" data-toggle="tooltip" title="'.__('Your teacher has already been warned about this request.').'"></span>';
             }
           }
+          $out .= '</td>';
+          // Find best trained player on this monster
           $out .= '<td data-sort="'.$m->best.'">';
-          if ($m->mostTrained) {
-            $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__("UT").' - '.$m->mostTrained->title.' ['.$m->mostTrained->team->title.']</span>';
+          if ($m->bestTrainedPlayerId != 0) {
+            if ($m->isBestTrained) { $class = 'success'; } else { $class = 'primary'; }
+            $out .= '<span class="label label-'.$class.'">'.$m->best.' '.__("UT").' - '.$m->bestTrainedTitle.' ['.$m->bestTrainedTeam.']</span>';
           } else {
             $out .= '<span>No record yet.</span>';
           }
           $out .= '</td>';
+          $out .= '<td data-sort="'.$m->masterTime.'">';
+          if ($m->bestTimePlayerTitle) {
+            if ($m->isMaster) { $class = 'success'; } else { $class = 'primary'; }
+            $out .= '<span class="label label-'.$class.'">'.ms2string($m->masterTime).' '.__('by').' '.$m->bestTimePlayerTitle.' ['.$m->bestTimeTeam.']</span>';
+          } else {
+            $out .= '-';
+          }
+          $out .= '</td>';
           $out .= '</tr>';
         }
-        $out .= '</tbody>';
-        $out .= '</table>';
-      } else { // Training session
-        if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false) { // IE detected
-          $out .= $wrongBrowserMessage;
-        } else {
-          $redirectUrl = $pages->get('name=underground-training')->url;
-          if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
-            $monster = $pages->get($input->get->id);
-            setMonster($player, $monster);
-          } else { // Never trained (for admin)
-            $monsterId = $input->get->id;
-            $monster = $pages->get("id=$monsterId, include=all");
-            $monster->isTrainable = 1;
-            $monster->lastTrainingInterval = -1;
-          }
-          if ($monster->isTrainable == 0) { // Not allowed because of spaced repetition.
-            // Redirect to training page
-            $session->redirect($redirectUrl);
-          } else { // Ok, let's start the training session !
-            $out .= '<div ng-app="exerciseApp">';
-            if (isset($player)) {
-              $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$monster.'\', \''.$redirectUrl.'\', \''.$player->id.'\', \''.$pages->get("name=submit-fight")->url.'\')">';
-            } else {
-              $out .= '<div class="row" ng-controller="TrainingCtrl" ng-init="init(\''.$pages->get("name=service-pages")->url.'\', \''.$monster.'\', \''.$redirectUrl.'\', \'0\', \''.$pages->get("name=submit-fight")->url.'\')">';
-            }
-            if ($monster->id) { // Training session starts
-              $out .= '<h3>';
-              $out .= __("Memory helmet programmed").' : ';
-              $out .= $monster->summary;
-              if ($user->language->name != 'french') {
-                $monster->of(false);
-                if ($monster->summary->getLanguageValue($french) != '') {
-                  $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$monster->summary->getLanguageValue($french).'"></span>';
-                }
-              }
-              $out .= '</h3> ';
-              $out .= '<div class="col-sm-3">';
-              $out .= '<h3><span ng-class="{label:true, \'label-primary\':true}">'.__("Training session");
-              $out .= ' <span class="blink">'.__("started").'</span></span></h3>';
-              $out .= '<br />';
-              $out .= '<h4><span ng-class="{label:true, \'label-primary\':true}">'.__("Current counter").': {{counter}}</span> → ';
-              $out .= '<span class="label label-primary">+{{result}}'.__("UT").'</span></h4>';
-              $out .= '<span class="glyphicon glyphicon-info-sign"></span> '.__("10 words/sentences = +1UT");
-              $out .= '<br /><br />';
-              $out .= '<div class="panel panel-success">';
-              $out .= '<div class="panel-heading">';
-              $out .= '<h4 class="panel-title"><span class="glyphicon glyphicon-education"></span> '.__("Current record").'</h4>';
-              $out .= '</div>';
-              $out .= '<div class="panel-body">';
-              if ($monster->mostTrained && $monster->mostTrained->id) {
-                $out .= '<h4 class="text-center">'.$monster->best.__('UT by ').$monster->mostTrained->title.' ['.$monster->mostTrained->team->title.']</h4>';
-              } else {
-                $out .= '<h4 class="text-center">'.__("No record yet.").'</h4>';
-              }
-              $out .= '</div>';
-              $out .= '<div class="panel-footer">';
-              if (!$user->isSuperuser() && !$user->hasRole('teacher')) {
-                list($utGain, $inClassUtGain) = utGain($monster, $player);
-                $out .= '<p>'.__("Your global UT for this monster").': '.($utGain+$inClassUtGain).'</p>';
-              }
-              $out .= '</div>';
-              $out .= '</div>';
-              $out .= '</div>';
-
-              $out .= '<div class="col-sm-9 text-center">';
-                if ($monster->instructions != '') {
-                  $out .= '<h3 class="text-center">'.$monster->instructions.'</h3>';
-                }
-                $out .= '<div class="well trainingBoard" ng-show="waitForStart">Please wait while loading data...';
-              $out .= '</div>';
-              $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
-              if ($monster->type->name == 'image-map') {
-                $out .= '<div class=""><img src="'.$monster->imageMap->first()->url.'" max-width="800" alt="Image" /></div>';
-              }
-              if ($monster->type->name == 'jumble') {
-                $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.__("Click on the words to build a correct sentence. If you make a mistake, use the 'Try again' button. If you're wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information.").'"></span>';
-              } else {
-                $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.__("Type your answer. If you don't know, just hover on the glasses to see the mixed letters. If you're wrong, the correct answer will be shown and you just have to copy the correction.<br />See documentation for more information.").'"></span>';
-              }
-              $out .= '<div class="bubble-right">';
-              if ($monster->type->name == 'jumble') {
-                $out .= '<div class="text-center">';
-                $out .= '<h2 class="jumbleW inline" ng-repeat="w in word track by $index">';
-                $out .= '<span ng-class="{\'label\':true, \'label-primary\':selectedItems.indexOf($index) === -1, \'label-warning\':selectedItems.indexOf($index) !== -1}" ng-click="pickWord(w, $index)" ng-bind-html="w|paTags"></span>';
-                $out .= '</h2>';
-                $out .= '</div>';
-                $out .= ' <h3><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> {{showCorrection}} {{feedback|paTags}}</span></h3> ';
-                $out .= '<button class="btn btn-danger btn-xs" ng-click="clear()">'.__("Try again").'</button>';
-                $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
-                $out .= '<span id="clue" ng-show="showClue" ng-bind-html="mixedWord|paTags"></span>';
-                $out .= '<br /><br />';
-                $out .= '<h3 id="" ng-bind="playerAnswer"></h3>';
-                $out .= '<br />';
-                $out .= '<button ng-click="attack()" class="btn btn-success">'.__("Stimulate !").'</button>';
-                $out .= '&nbsp;&nbsp;';
-                $out .= '<button ng-click="dodge()" class="btn btn-danger">'.__("I don't know").'</button>';
-              } else if ($monster->type->name == 'categorize') {
-                $out .= '<div class="text-center">';
-                $out .= '<h2 class="inline" ng-bind-html="word|paTags"></h2>   ';
-                $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
-                $out .= '<span id="clue" ng-show="showClue">{{mixedWord}}</span>';
-                $out .= '</div>';
-                $out .= '<br />';
-                $out .= '<h2 class="category inline" ng-repeat="c in categories">';
-                $out .= '<span ng-click="pickCategory(c)" ng-bind-html="c|paTags"></span>';
-                $out .= '</h2>';
-              } else {
-                $out .= '<div class="text-center">';
-                $out .= '<h2 class="inline" ng-bind-html="word|paTags"></h2>   ';
-                $out .= '&nbsp;&nbsp;&nbsp;<h2 class="inline" ng-show="showClue"><span class="glyphicon glyphicon-sunglasses" onmouseenter="$(\'#clue\').show();" onmouseleave="$(\'#clue\').hide();"></span></h2>';
-                $out .= '<span id="clue" ng-show="showClue">{{mixedWord}}</span>';
-                $out .= ' <h3 class="inline"><span ng-show="wrong"><span class="glyphicon glyphicon-arrow-right" ng-show="wrong"></span> <span ng-bind-html="showCorrection|underline"></span> {{feedback}}</span></h3> ';
-                $out .= '</div>';
-                $out .= '<br />';
-                $out .= '<input type="text" class="input-lg" ng-model="playerAnswer" size="50" placeholder="'.__("Type your answer").'" autocomplete="off" my-enter="attack()" sync-focus-with="isFocused" />';
-                $out .= '<br />';
-                $out .= '<button ng-click="attack()" class="btn btn-success">'.__("Stimulate !").'</button>';
-                $out .= '&nbsp;&nbsp;';
-                $out .= '<button ng-click="dodge()" class="btn btn-danger">'.__("I don't know").'</button>';
-              }
-              $out .= '<span class="pull-right">';
-              $out .= '<span class="avatarContainer">';
-              if (isset($player) && $player->avatar) {
-                $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
-              }
-              if ($helmet->image) {
-                $out .= '<img class="helmet superpose squeeze" src="'.$helmet->image->url.'" alt="image" />';
-              }
-              $out .= '</span>';
-              $out .= '</span>';
-              $out .= '</div>';
-              $out .= '<button ng-click="stopSession()" class="btn btn-danger" ng-disabled="">'.__("Take the helmet off (Stop training session)").'</button>';
-              $out .= '</div>';
-              $out .= '</div>';
-              $out .= '</div>';
-            } else {
-              $out .= __("Sorry, but a problem occured. Please try again. If the problem still exists, contact the administrator.");
-            }
-          }
-        }
-      }
-
+      $out .= '</tbody>';
+      $out .= '</table>';
       echo $out;
-
       echo '</div>';
       echo '</div>';
     }

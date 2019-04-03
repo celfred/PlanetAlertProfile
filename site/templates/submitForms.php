@@ -1,6 +1,8 @@
 <?php namespace ProcessWire;
   include('./my-functions.inc'); // Planet Alert PHP functions
 
+  $adminMail = $users->get("name=admin")->email;
+
   if (!$user->isSuperuser()) {
     $headTeacher = getHeadTeacher($user);
     $user->language = $headTeacher->language;
@@ -10,7 +12,6 @@
     // Get logged in player
     $player = $pages->get("template=player, login=$user->name");
     $player->of(false);
-
     // Buy PDF
     if (isset($input->get->form) && $input->get->form == 'buyPdf' && $input->get->playerId != '' && $input->get->lessonId != '') {
       // Add buy-pdf action to player's history and update GC
@@ -23,21 +24,20 @@
       // Notify teacher or admin
       $subject = _('Buy PDF ').' : ';
       $subject .= $player->title. ' ['.$player->team->title.']';
-      $subject .= ' → '.$lesson->title;
-      $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
-      $msg .= "Buy PDF : ". $lesson->title."\r\n";
+      $subject .= ' - '.$lesson->title;
+      $msg = "Player : ".$player->title." [".$player->team->title."]\r\n";
+      $msg .= "Buy PDF : ".$lesson->title."\r\n";
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-        $adminMail = $users->get("name=admin")->email;
-        $mail = wireMail();
-        $mail->from($adminMail);
-        $mail->subject($subject);
-        $mail->body($msg);
+        $message = $mail->new();
+        $message->from($adminMail, "Planel Alert");
         if ($headTeacher && $headTeacher->email != '') {
-          $mail->to($headTeacher->email, 'Planet Alert');
+          $message->to($headTeacher->email);
         } else {
-          $mail->to($adminMail, 'Planet Alert');
+          $message->to($adminMail);
         }
-        $numSent = $mail->send();
+        $message->subject($subject);
+        $message->body($msg);
+        $numSent = $message->send();
       }
     }
 
@@ -57,21 +57,20 @@
         // Notify teacher or admin
         $subject = _('Copied lesson ').' : ';
         $subject .= $player->title. ' ['.$player->team->title.']';
-        $subject .= ' → '.$refPage->title;
-        $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
-        $msg .= __("Copied lesson")." : ". $refPage->title."\r\n";
+        $subject .= ' - '.$refPage->title;
+        $msg = __("Player")." : ".$player->title." [".$player->team->title."]\r\n";
+        $msg .= __("Copied lesson")." : ".$refPage->title."\r\n";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-          $adminMail = $users->get("name=admin")->email;
-          $mail = wireMail();
-          $mail->from($adminMail);
-          $mail->subject($subject);
-          $mail->body($msg);
+          $message = $mail->new();
+          $message->from($adminMail, "Planel Alert");
+          $message->subject($subject);
+          $message->body($msg);
           if ($headTeacher && $headTeacher->email != '') {
-            $mail->to($headTeacher->email, 'Planet Alert');
+            $message->to($headTeacher->email);
           } else {
-            $mail->to($adminMail, 'Planet Alert');
+            $message->to($adminMail);
           }
-          $numSent = $mail->send();
+          $numSent = $message->send();
         }
       }
     }
@@ -81,10 +80,10 @@
       $newItem = $pages->get($itemId);
       // Set task according to newItem's type
       if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-        $task = $pages->get("name='buy'");
+        $task = $pages->get("name=buy");
       }
       if ($newItem->template == 'place' || $newItem->template == 'people') {
-        $task = $pages->get("name='free'");
+        $task = $pages->get("name=free");
       }
       // Check if item is not already there
       $already = false;
@@ -119,31 +118,30 @@
         $msg .= "Item : ". $newItem->title;
       } else {
         // Notify admin
-        $msg = "Player : ". $player->title." [".$player->team->title."]\r\n";
-        $msg .= "Item : ". $newItem->title."\r\n";
+        $msg = "Player : ". $sanitizer->entities1($player->title)." [".$player->team->title."]\r\n";
+        $msg .= "Item : ". $sanitizer->entities1($newItem->title)."\r\n";
         $msg .= "An error has occurred.";
       }
       $subject = _('Buy form ').' : ';
-      $subject .= $player->title. ' ['.$player->team->title.']';
-      $subject .= ' → '.$newItem->title;
+      $subject .= $player->title.' ['.$player->team->title.']';
+      $subject .= ' - '.$newItem->title.' [Level '.$newItem->level.']';
       if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-        $adminMail = $users->get("name=admin")->email;
-        $mail = wireMail();
-        $mail->from($adminMail);
-        $mail->subject($subject);
-        $mail->body($msg);
+        $message = $mail->new();
         if ($headTeacher && $headTeacher->email != '') {
-          $mail->to($headTeacher->email, 'Planet Alert');
+          $message->to($headTeacher->email, "Planet Alert");
         } else {
-          $mail->to($adminMail, 'Planet Alert');
+          $message->to($adminMail, "Planet Alert");
         }
-        $numSent = $mail->send();
+        $message->from($adminMail);
+        $message->fromName("Planel Alert");
+        $message->subject($subject);
+        $message->body($msg);
+        $numSent = $message->send();
       }
     }
 
     if($input->post->marketPlaceSubmit) { // marketPlaceForm submitted
       $checkedItems = $input->post->item; // Array
-
       foreach($checkedItems as $item=>$state) {
         $newItem = $pages->get($item);
         // Check if item is not already there
@@ -173,10 +171,10 @@
         if ($already == false) {
           // Get item's data
           if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-            $task = $pages->get("name='buy'");
+            $task = $pages->get("name=buy");
           }
           if ($newItem->template == 'place' || $newItem->template == 'people') {
-            $task = $pages->get("name='free'");
+            $task = $pages->get("name=free");
           }
           // Update player's scores and save
           $task->comment = $newItem->title;
@@ -187,23 +185,21 @@
           // Notify admin
           $subject = _('Buy form ').' : ';
           $subject .= $player->title. ' ['.$player->team->title.']';
-          $subject .= ' → '.$newItem->title;
+          $subject .= ' - '.$newItem->title;
           $msg = "Player : ". $player->title."\r\n";
           $msg .= "Team : ". $player->team->title."\r\n";
           $msg .= "Item : ". $newItem->title;
-          /* $msg .= "Item : ". $newItem->title.$error; */
           if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-            $adminMail = $users->get("name=admin")->email;
-            $mail = wireMail();
-            $mail->from($adminMail);
-            $mail->subject($subject);
-            $mail->body($msg);
-            if ($headTeacher && $headTeacher->email != '') {
-              $mail->to($headTeacher->email, 'Planet Alert');
+            $message = $mail->new();
+            $message->from($adminMail, "Planel Alert");
+            $message->subject($subject);
+            $message->body($msg);
+              if ($headTeacher && $headTeacher->email != '') {
+              $message->to($headTeacher->email);
             } else {
-              $mail->to($adminMail, 'Planet Alert');
+              $message->to($adminMail);
             }
-            $numSent = $mail->send();
+            $numSent = $message->send();
           }
         }
       }
@@ -229,29 +225,57 @@
         $subject = __('Donation').' : ';
         $subject .= $amount.__("GC");
         $subject .= ' '.$player->title. ' ['.$player->team->title.']';
-        $subject .= ' → '.$receiver->title.' ['.$receiver->team->title.']';
-        $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+        $subject .= ' - '.$receiver->title.' ['.$receiver->team->title.']';
+        $msg = __("Player")." : ".$player->title." [".$player->team->title."]\r\n";
         $msg .= __("Donation amount")." : ". $amount."\r\n";
-        $msg .= __("Donated to")." : ". $receiver->title." [".$receiver->team->title."]\r\n";
+        $msg .= __("Donated to")." : ".$receiver->title." [".$receiver->team->title."]\r\n";
         $msg .= __("Player global donation indicator")." : ". $player->donation."\r\n";
         if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-          $adminMail = $users->get("name=admin")->email;
-          $mail = wireMail();
-          $mail->from($adminMail);
-          $mail->subject($subject);
-          $mail->body($msg);
+          $message = $mail->new();
+          $message->from($adminMail, "Planel Alert");
+          $message->subject($subject);
+          $message->body($msg);
           if ($headTeacher && $headTeacher->email != '') {
-            $mail->to($headTeacher->email, 'Planet Alert');
+            $message->to($headTeacher->email);
           } else {
-            $mail->to($adminMail, 'Planet Alert');
+            $message->to($adminMail);
           }
-          $numSent = $mail->send();
+          $numSent = $message->send();
         }
       }
     }
-    // Set group captains
+
+    if (isset($input->get->form) && $input->get->form == 'fightRequest' && $input->get->playerId != '' && $input->get->monsterId != '') { // Fight request
+      $player = $pages->get($input->get->playerId);
+      $monster = $pages->get($input->get->monsterId);
+      if ($monster->is("template=exercise")) {
+        // Only 1 pending lesson allowed for a player
+        if ($player->fight_request == 0) {
+          $player->setAndSave('fight_request', $monster->id);
+        }
+        // Notify teacher or admin
+        $subject = _('Fight request ').' : ';
+        $subject .= $player->title. ' ['.$player->team->title.']';
+        $subject .= ' - '.$monster->title;
+        $msg = __("Player")." : ". $player->title." [".$player->team->title."]\r\n";
+        $msg .= __("Fight request")." : ".$monster->title."\r\n";
+        if($_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+          $message = $mail->new();
+          $message->from($adminMail, "Planel Alert");
+          $message->subject($subject);
+          $message->body($msg);
+          if ($headTeacher && $headTeacher->email != '') {
+            $message->to($headTeacher->email);
+          } else {
+            $message->to($adminMail);
+          }
+          $numSent = $message->send();
+        }
+      }
+    }
+
     if ($player->team->name != 'no-team') {
-      setCaptains($player->team, true);
+      setGroupCaptain($player->id);
     }
 
     // Redirect to player's profile (in main.js, because doesn't work due to Ajax ?)
@@ -264,13 +288,19 @@
     // Unpublish News from Newsboard
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->newsId != '') {
       $n = $pages->get($input->get->newsId);
-      $n->of(false);
       if ($n->publish == 0) { // Unpublish
-        $n->publish = 1;
-        $n->save();
+        $n->setAndSave('publish', 1);
       } else { // News will disappear on reload
-        $n->publish = 0;
-        $n->save();
+        $n->setAndSave('publish', 0);
+      }
+    }
+    // Toggle inClass indicator
+    if (isset($input->get->form) && $input->get->form == 'inClass' && $input->get->eventId != '') {
+      $e = $pages->get($input->get->eventId);
+      if ($e->inClass == 0) { // Untick
+        $e->setAndSave('inClass', 1);
+      } else { // Tick
+        $e->setAndSave('inClass', 0);
       }
     }
     // Use item
@@ -278,17 +308,13 @@
       $historyPage = $pages->get($input->get->usedItemHistoryPageId);
       $player = $historyPage->parent("template=player");
       $usedItem = $historyPage->refPage;
+      $player->of(false);
       if ($player->usabledItems->has($usedItem)) { // 'Used today' is ticked
-        // Remove item from player's usabledItems list
-        $player->of(false);
-        $player->usabledItems->remove($usedItem);
-        $player->save();
+        $player->usabledItems->remove($usedItem); // Remove item from player's usabledItems list
       } else { // Used today is unclicked
-        // Restore item in player's usabledItems list
-        $player->of(false);
-        $player->usabledItems->add($usedItem);
-        $player->save();
+        $player->usabledItems->add($usedItem); // Restore item in player's usabledItems list
       }
+      $player->save();
     }
     // Validate Book of Knowledge
     if (isset($input->get->form) && $input->get->form == 'unpublish' && $input->get->usedPending != '') {
@@ -312,9 +338,9 @@
           $player->reputation = $tempPlayer->reputation;
           $player->yearlyKarma = $tempPlayer->yearlyKarma;
         }
-        setCaptains($player->team);
         $player->of(false);
         $player->save();
+        setGroupCaptain($player->id);
         if ($tempPlayer) { 
           $tempPlayer->delete();
         }
@@ -322,9 +348,7 @@
         // Store previous player's state in temp page for restore possibility
         $tmpParent = $pages->get("name=tmp");
         $tempPlayer = $pages->clone($player, $tmpParent, false);
-        $tempPlayer->of(false);
-        $tempPlayer->login = $name;
-        $tempPlayer->save();
+        $tempPlayer->setAndSave('login', $name);
         // Create task in player's history
         $task = $pending->task;
         $task->date = $pending->date;
@@ -333,19 +357,22 @@
           $task->refPage = $pending->refPage;
           $task->linkedId = $pending->id;
           updateScore($player, $task, true);
-          // Set group captains
-          setCaptains($player->team);
           if ($pending) {
             $pending->of(false);
             $pending->trash();
           }
+          setGroupCaptain($player->id);
         }
       }
     }
-    // Delete pending lesson without scoring
-    if (isset($input->get->form) && $input->get->form == 'deleteNotification' && $input->get->usedPending != '') {
-      $pending = $pages->get($input->get->usedPending);
-      $pending->trash();
+    // Delete page (pending lesson, fight request, ...) without scoring
+    if (isset($input->get->form) && $input->get->form == 'deleteNotification' && $input->get->pageId != '') {
+      $pageToDel = $pages->get($input->get->pageId);
+      $pageToDel->trash();
+    }
+    if (isset($input->get->form) && $input->get->form == 'deleteFightRequest' && $input->get->pageId != '') {
+      $player = $pages->get($input->get->pageId);
+      $player->setAndSave('fight_request', '0');
     }
 
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, memory potion...
@@ -372,8 +399,7 @@
           $task->refPage = $historyPage->refPage;
           $task->linkedId = $historyPage->id;
           updateScore($player, $task, true);
-          // Set group captains
-          setCaptains($player->team);
+          setGroupCaptain($player->id);
         }
       }
       if ($task->name == 'personal-initiative') {
@@ -381,8 +407,7 @@
         $task->refPage = '';
         $task->linkedId = false;
         updateScore($player, $task, true);
-        // Set group captains
-        setCaptains($player->team);
+        setGroupCaptain($player->id);
       }
     }
 
@@ -391,6 +416,7 @@
       // Limit to absence (no need to recalculate scores)
       if ($event->is("task.name=absent|abs")) {
         $pages->trash($event);
+        clearFileCache("adminTable");
       }
     }
 
@@ -410,11 +436,11 @@
         $task->linkedId = false;
       }
       updateScore($player, $task, true);
-      // Set group captains
-      setCaptains($player->team);
+      setGroupCaptain($player->id);
     }
 
     if($input->post->adminTableSubmit) { // adminTableForm submitted
+      $clearAdminTableCache = false;
       // Consider checked players only
       $checkedPlayers = $input->post->player;
       $checked = array_keys($checkedPlayers);
@@ -423,9 +449,10 @@
       for ($i=0; $i<count($checked); $i++) {
         list($playerId, $taskId) = explode('_', $checked[$i]);
         $comment = 'comment_'.$playerId.'_'.$taskId;
-
         $player = $pages->get($playerId);
+        $player->of(false);
         $task = $pages->get($taskId); 
+        $task->of(false);
         $task->comment = trim($input->post->$comment);
         $task->refPage = false;
         $task->linkedId = false;
@@ -439,15 +466,20 @@
         }
         // Update player's scores and save
         updateScore($player, $task, true);
+        if ($task->is("name=abs|absent")) {
+          $clearAdminTableCache = true;
+        }
       }
       // Check death for each players having a negative action
       $allNegPlayers = $allNegPlayers->unique();
       foreach($allNegPlayers as $p) {
         checkDeath($p, true);
       }
-      // Set group captains
-      setCaptains($player->team);
+      setTeamCaptains($player->team);
 
+      if ($clearAdminTableCache) {
+        clearFileCache("adminTable");
+      }
       // Redirect to team page (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
       if (isset($input->post->adminTableRedirection)) {
@@ -483,20 +515,25 @@
           // No need to checkDeath, Marketplace can't cause death
         }
       }
-      // Set group captains
-      setCaptains($player->team);
+      setGroupCaptain($player->id);
       // Redirect to MarketPlace (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/shop')->url.$player->team->name); */
       $url = $pages->get('/shop')->url.$player->team->name;
       echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
     }
 
-    if($input->post->donateFormSubmit) { // donateForm submitted
-      $playerId = $input->post->donator;
+    if($input->post->donateFormSubmit || (isset($input->get->form) && $input->get->form == 'quickDonation' && $input->get->receiver != '' && $input->get->donator != '' && $input->get->amount != '')) { // donateForm submitted
+      if ($input->get->form && $input->get->form == 'quickDonation') {
+        $playerId = $input->get->donator;
+        $amount = (integer) $input->get->amount;
+        $receiverId = $input->get->receiver;
+      } else {
+        $playerId = $input->post->donator;
+        $amount = (integer) $input->post->amount;
+        $receiverId = $input->post->receiver;
+      }
       $player = $pages->get($playerId);
       $player->of(false);
-      $amount = (integer) $input->post->amount;
-      $receiverId = $input->post->receiver;
       $receiver = $pages->get($receiverId);
       $receiver->of(false);
       
@@ -510,10 +547,7 @@
         $task->linkedId = false;
         updateScore($player, $task, true);
         // No need to checkDeath, Donation can't cause death
-
-        // Set group captains
-        setCaptains($player->team);
-
+        setGroupCaptain($player->id);
         // Redirection to Team page (in main.js, because doesn't work due to Ajax ?)
         /* $session->redirect($pages->get("name=players")->url.$player->team->name); */
         $url = $pages->get('/players')->url.$player->team->name;
@@ -521,4 +555,5 @@
       }
     }
   }
+
 ?>

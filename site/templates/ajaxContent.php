@@ -169,21 +169,19 @@
           }
           // Go to the Marketplace
           if ($possibleItems->count() > 0) {
-            $out .= '<li><span><a href="'.$pages->get("name=shop")->url.$team->name.'">→ Go to the Marketplace.</a></span></li>';
+            $out .= '<li><span><a href="'.$pages->get("name=shop")->url.$team->name.'?playerId='.$p->id.'">→ Go to my marketplace.</a></span></li>';
           }
         }
         // Make a donation
         if ($p->GC > 5 || $p->is("parent.name=groups")) {
-          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$team->name.'/'.$donatorId.'">→ Make a donation (help another player).</a></span></li>';
+          $out .= '<li><span><a href="'.$pages->get("name=makedonation")->url.$team->name.'/'.$donatorId.'">→ Make a donation.</a></span></li>';
         }
         // Go to team's Freeworld
-        $out .= '<li><span><a href="'.$pages->get("name=world")->url.$team->name.'">→ See team\'s Freeworld.</a></span></li>';
+        /* $out .= '<li><span><a href="'.$pages->get("name=world")->url.$team->name.'">→ See team\'s Freeworld.</a></span></li>'; */
         // Go to team's scoring table
-        $out .= '<li><span><a href="'.$pages->get("name=players")->url.$team->name.'">→ See team\'s scoring table.</a></span></li>';
-        // Pick another player
-        $out .= '<li><span><a href="#" onclick="swal.close(); $(\'#pickTeamPlayer\').click(); return false;">→ Pick a random player in the team.</a></span></li>';
+        /* $out .= '<li><span><a href="'.$pages->get("name=players")->url.$team->name.'">→ See team\'s scoring table.</a></span></li>'; */
         // Read about a random element
-        $allPlaces = $pages->get("/places/")->find("template='place', sort='title'");
+        /* $allPlaces = $pages->get("/places/")->find("template='place', sort='title'"); */
         $allPeople = $pages->find("template=people, name!=people, sort=title");
         if (isset($allPlaces) && isset($allPeople)) {
           $allElements = clone($allPlaces);
@@ -191,8 +189,6 @@
           $randomId = $allElements->getRandom()->id;
           $out .= '<li><span><a href="#" class="ajaxBtn" data-type="showInfo" data-id="'.$randomId.'">→ Read about a random element.</a></span></li>';
         }
-        // Visit the Hall of Fame
-        $out .= '<li><span><a href="'.$pages->get("name=hall-of-fame")->url.'">→ Visit the Hall of Fame.</a></span></li>';
         $out .= '</ul>';
         $out .= '</div>';
         break;
@@ -201,6 +197,25 @@
         $p = $pages->get("id=$pageId");
         if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
         $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
+        break;
+      case 'help' :
+        $playerId = $input->get('playerId');
+        $player = $pages->get($playerId);
+        $healingPotion = $pages->get("name=health-potion");
+        $neededGC = $healingPotion->GC - $player->GC;
+        $allHelpers = $pages->find("parent.name=players, team=$player->team, GC>=$neededGC, sort=name");
+        $out .= '<h2>'.sprintf(__('%d GC needed !'), $neededGC).'</h2>';
+        if ($allHelpers->count() > 0) {
+          $out .= '<p>'.__('Does a player want to help by making a donation ?').'</p>';
+          $out .= '<ul class="col4 text-left list-unstyled">';
+          foreach($allHelpers as $h) {
+            $leftGC = $h->GC-$neededGC;
+            $out .= '<li><a href="'.$pages->get("name=main-office")->url.$player->team->name.'" data-href="'.$pages->get("name=submitforms")->url.'?form=quickDonation&receiver='.$player->id.'&donator='.$h->id.'&amount='.$neededGC.'" class="basicConfirm" data-reload="true" data-msg="['.$h->title.'→'.sprintf(__('%d GC left'), $leftGC).']">'.$h->title.' ('.$h->GC.__("GC").')</a></li>';
+          }
+          $out .= '</ul>';
+        } else {
+          $out .= '<p>'.__('No player has enough in the team. Team needs to get organized and collaborate to help the player !').'</p>';
+        }
         break;
       case 'showInfo' :
         $pageId = $input->get('pageId');
@@ -212,8 +227,13 @@
           $out .= ' (in '.$p->city->title.', '.$p->country->title.')</h3>';
         } else if ($p->is("template=people")) {
           $out .= ' (from '.$p->country->title.')</h3>';
+        } else if ($p->is("template=exercise")) {
+          $topics = $p->topic->implode(', ', '{title}');
+          $out .= ' ('.$topics.')</h3>';
+        } else if ($p->is("template=equipment|item")) {
+          $out .= ' ('.$p->category->title.')';
         } else {
-          $out .= ' ('.$p->category->title.')</h3>';
+          $out .= 'TODO';
         }
         $out .= '<div class="row">';
         $out .= '<div class="col-sm-4 text-center">';
@@ -224,6 +244,29 @@
         $out .= '<div class="col-sm-8 text-justify">';
           $out .= '<br/>';
           $out .= '<p class="lead">'.$p->summary.'</p>';
+          if ($p->is("template=exercise")) {
+            $out .= '<p>';
+            $out .= __('Most trained player').' → ';
+            if ($p->bestTrainedPlayerId != 0) {
+              $bestTrained = $pages->get($p->bestTrainedPlayerId);
+              bd($p->bestTrainedPlayerId);
+              $out .= '<span class="label label-primary">'.$p->best.' '.__('UT').' - '.$bestTrained->title.' ['.$bestTrained->team->title.']</span>';
+            } else {
+              $out .= '-';
+            }
+            $out .= '</p>';
+            $out .= '<p>';
+            $out .= __('Master time').' → ';
+            $out .= '<span class="label label-primary">';
+            if ($p->bestTime) {
+              $master = $pages->get($p->bestTimePlayerId);
+              $out .= ms2string($p->bestTime).' '.__('by').' '.$master->title.' ['.$master->team->title.']';
+            } else {
+              $out .= '-';
+            }
+            $out .= '</span>';
+            $out .= '</p>';
+          }
         $out .= '</div>';
         $out .= '</div>';
         break;
@@ -245,13 +288,15 @@
           $out .= '<div class="">';
             $out .= $mini;
             if ($p->is("template=place|people")) {
-              // Find element's # of owners
-              $out .= '<div class="alert alert-info">';
-              $p = setOwners($p, $currentPlayer);
-              $out .= '<span class="">'.__("Free rate").' : ['.$p->owners->count().'/'.$p->teamRate.']</span> ';
-              $out .= progressbar($p->owners->count(), $p->teamRate);
-              if ($p->completed == 1) { $out .= '<span class="badge">'.__("Congratulations !").'</span>'; }
-              $out .= '</div>';
+              if ($currentPlayer->team->is("name!=no-team")) {
+                // Find element's # of owners
+                $out .= '<div class="alert alert-info">';
+                $p = setOwners($p, $currentPlayer);
+                $out .= '<span class="">'.__("Free rate").' : ['.$p->owners->count().'/'.$p->teamRate.']</span> ';
+                $out .= progressbar($p->owners->count(), $p->teamRate);
+                if ($p->completed == 1) { $out .= '<span class="badge">'.__("Congratulations !").'</span>'; }
+                $out .= '</div>';
+              }
             }
           $out .= '</div>';
         $out .= '</div>';
@@ -308,7 +353,11 @@
               }
               echo '</li>';
             }
-            echo '<li class="label label-danger">'.sprintf(__("You have NEVER trained on %d monsters"), $tmpPage->index).'</li>';
+            if ($tmpPage->index > 0) {
+              echo '<li class="label label-danger">'.sprintf(__("You have NEVER trained on %d monsters"), $tmpPage->index).'</li>';
+            } else {
+              echo '<li class="label label-success">'.__("You have trained on ALL monsters !").'</li>';
+            }
             echo '</ul>';
           } else {
             echo "<p>".__("You have never used the Memory Helmet.")."</p>";
@@ -409,7 +458,13 @@
         $playerId = $input->get('playerId');
         $playerPage = $pages->get($playerId);
         $headTeacher = getHeadTeacher($playerPage);
-        $allEvents = $playerPage->child("name=history")->find("template=event,sort=-date");
+        if ($input->get->limit == 30) {
+          $limitDate  = new \DateTime("-30 days");
+          $limitDate = strtotime($limitDate->format('Y-m-d'));
+          $allEvents = $playerPage->child("name=history")->find("template=event, date>$limitDate, sort=-date");
+        } else {
+          $allEvents = $playerPage->child("name=history")->find("template=event, sort=-date");
+        }
         $allCategories = new PageArray();
         foreach ($allEvents as $e) {
           if (isset($e->task->category)) {
@@ -671,9 +726,10 @@
           $newBestPlayer = $pages->get($newBestId);
         } else {
           $newBestPlayer = false;
+          $newBestId = 0;
         }
         if (!$confirm) {
-          if (($m->mostTrained && ($newBestId == $m->mostTrained->id && $newBestUt == $m->best)) || (!$m->mostTrained && !$newBestPlayer)) {
+          if (($newBestId == $m->bestTimePlayerId && $newBestUt == $m->best) || ($m->bestTrainedPlayerId == 0 && $newBestId != 0)) {
             $out = '&nbsp;<span class="label label-success">OK</span>';
           } else {
             $out = '&nbsp;<span class="label label-danger">Error</span> : '.$newBestPlayer->title.' → '.$newBestUt.'UT';
@@ -688,7 +744,7 @@
           }
         } else { // Saving new highscore
           $m->of(false);
-          $m->mostTrained = $newBestPlayer;
+          $m->bestTrainedPlayerId = $newBestId;
           $m->best = $newBestUt;
           $m->save();
           $out = '<span class="label label-success">✓ Saved !</span>';

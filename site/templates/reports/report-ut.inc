@@ -7,7 +7,7 @@
     if ($user->isSuperuser()) {
       $allMonstersIds = $pages->findIds("parent.name=monsters, template=exercise, include=all");
     } else {
-      $allMonstersIds = $pages->findIds("parent.name=monsters, template=exercise, (teacher=$user), (created_users_id=$user->id), include=all");
+      $allMonstersIds = $pages->findIds("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1, summary!='')");
     }
     $teamUt = 0;
     foreach($allPlayers as $p) {
@@ -65,10 +65,19 @@
             }
           }
           $out .= '<li>'.$mT->refPage->title.' → <span class="label label-success">'.($outUt+$inUt).' '.__('UT').'</span>';
-          $out .= ' - '.sprintf(_n("%d session", "%d sessions", $mTrainings->count()), $mTrainings->count()).'</li>';
+          $out .= ' - '.sprintf(_n("%d session", "%d sessions", $mTrainings->count()), $mTrainings->count());
           if ($inUt > 0) {
-            $out .= ' - ['.$inUt.' '.__("in class").']';
+            $out .= ' - ['.$inUt.'UT '.__("in class").']';
           }
+          if ($mTrainings->count() == 1) {
+            if ($mT->inClass == 1) {
+              $checked = 'checked="checked"';
+            } else {
+              $checked ='';
+            }
+            $out .= ' <label for="ckbx'.$mT->id.'" class="btn btn-danger btn-xs"><input name="ckbx'.$mT->id.'" id="ckbx'.$mT->id.'" type="checkbox" data-href="'.$pages->get('name=submitforms')->url.'?form=inClass&eventId='.$mT->id.'" class="simpleAjax" data-hide-feedback="true" value="" '.$checked.' /> [in class]</label>';
+          }
+          $out .= '</li>';
           $out .= '</ul>';
           $teamUt += ($inUt+$outUt);
         }

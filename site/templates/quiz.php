@@ -38,9 +38,8 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
     }
   }
 
-  $selectedTeam = $input->urlSegment1;
   $selectedIds = $input->post->selected; // Checked players
-  $rank = $pages->get("template=team, name=$selectedTeam")->rank->index;
+  $rank = $team->rank->index;
   if ($rank >= 8) {
     $allPlayers = $allPlayers->find("team=$team"); // Limit to team players
     $allConcerned = new pageArray();
@@ -55,10 +54,10 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
     }
     $notConcerned = $notConcerned->implode(', ', '{title}');
   } else {
-    $allConcerned = $pages->find("template=player, parent.name=players, team.name=$selectedTeam, places.count>=3"); // Find players having at least 3 places
-    $notConcerned = $pages->find("template=player, team.name=$selectedTeam, places.count<3")->implode(', ', '{title}');
+    $allConcerned = $pages->find("parent.name=players, team=$team, places.count>=3"); // Find players having at least 3 places
+    $notConcerned = $pages->find("parent.name=players, team=$team, places.count<3")->implode(', ', '{title}');
   }
-  $ambassadors = $pages->find("template=player, team.name=$selectedTeam, skills.count>0, skills.name=ambassador");
+  $ambassadors = $pages->find("parent.name=players, team=$team, skills.name=ambassador");
   if ($ambassadors->count() == 0 ) { 
     $ambassadorsNames = __('Nobody.');
     $ambassadorsButton = '';
@@ -89,8 +88,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
   // Set nbInvasion foreach players
   $allConcerned->sort("name");
   foreach($allConcerned as $p) { // Limited to current schoolyear
-    $schoolYear = $pages->get("template=period, name=school-year");
-    $p->nbInvasions = $p->find("template=event, task.name=right-invasion|wrong-invasion, date>=$schoolYear->dateStart, date<=$schoolYear->dateEnd")->count();
+    $p->nbInvasions = $p->find("parent.name=history, template=event, task.name=right-invasion|wrong-invasion")->count();
     if ($selectedIds && in_array($p, $selectedIds)) { // Keep checked players
       $p->checked = "checked='checked'";
     } else {
@@ -102,7 +100,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
     }
   }
 
-  if ($selectedTeam) {
+  if (isset($team)) {
     $out .= '<form id="quizForm" name="quizForm" action="'.$page->url.$input->urlSegment1.'" method="post" role="form">';
     // A player is selected : Quiz display
     if (isset($selectedPlayer)) {
@@ -137,7 +135,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
           $out .= '<section class="text-center">';
           $placeId = $quiz['id'];
           $options = array('upscaling'=>false);
-          $photo = $pages->get("$placeId")->photo->getRandom()->size(300,300, $options);
+          $photo = $pages->get("$placeId")->photo->getRandom()->size(200,200, $options);
             $out .= '<img src="'.$photo->url.'" alt="Photo" />';
           $out .= '</section>';
         }
@@ -197,14 +195,12 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
 } else {
   if ($user->hasRole('player')) {
     $out = '';
-    $player = $pages->get("login=$user->name");
-
     $quiz = pick_question($player);
     $out .= '<div class="well quiz">';
       $logo = $homepage->photo->eq(0)->getCrop('thumbnail');
       $out .= '<img class="monster" src="'.$logo->url.'" />';
       $out .= '<h3>'.__("Defensive preparation !");
-      $out .= ' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("This is a simple practice area. Click on 'Check answer' below to see the solution. Then you can click on 'Next question'. Stop the session when you're tired :)").'"></span></h3>';
+      $out .= ' <span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("This is a simple practice area. Click on 'Check answer' below to see the solution. Then you can click on 'Next question'. Stop the session when you're tired :)").'"></span></h3>';
       $out .= '<h2 class="alert alert-danger text-center">';
       $out .= $quiz['question'].'&nbsp;&nbsp;';
       $out .= '</h2>';
@@ -215,7 +211,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
         $out .= '</section>';
       }
       // Display photo if necessary
-      if ( $quiz['type'] === 'photo' ) {
+      if ($quiz['type'] === 'photo' ) {
         $out .= '<section class="text-center">';
         $placeId = $quiz['id'];
         $options = array('upscaling'=>false);
@@ -223,7 +219,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
           $out .= '<img src="'.$photo->url.'" alt="Photo" />';
         $out .= '</section>';
       }
-      $out .= '<a id="showAnswer" class="label label-info lead">'.__("[Check answer]").'</a>';
+      $out .= '<a id="showAnswer" class="label label-primary">'.__("[Check answer]").'</a>';
       $out .= '<h2 id="answer" class="lead text-center">';
       $out .= $quiz['answer'];
       $out .= ' <a class="btn btn-primary" href="'.$page->url.'">'.__("Next question").'</a>';

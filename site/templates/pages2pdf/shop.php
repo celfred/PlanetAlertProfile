@@ -2,6 +2,8 @@
 
 $logo = 'http://download.tuxfamily.org/planetalert/logo.png';
 
+$french = $languages->get('french');
+
 $weapons = $pages->find("template=equipment, category=weapons, sort=level");
 $protections = $pages->find("template=equipment,category=protections, sort=level");
 if ($user->isSuperuser()) {
@@ -82,7 +84,7 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $out .= '</tr>';
       $out .= '<tr>';
       $text->of(false);
-      if (strlen($text->getLanguageValue($french)) > 0) {
+      if (strlen($text->summary->getLanguageValue($french)) > 0) {
         $out .= '<td>';
       } else {
         $out .= '<td colspan="2">';
@@ -91,10 +93,10 @@ if ($input->urlSegment1 && $input->urlSegment1 == 'pictures') {
       $out .= '<h2>'.$text->title.'</h2>';
       $out .= '<p style="font-size: 16px;">'.nl2br($text->summary).'</p>';
       $out .= '</td>';
-      if (strlen($text->getLanguageValue($french)) > 0) {
+      if (strlen($text->summary->getLanguageValue($french)) > 0) {
         $out .= '<td>';
         $out .= '<p><img style="" src="'.$config->urls->templates.'img/flag_fr.png" alt="French" /></p>';
-        $out .= '<p style="font-size:16px;">'.nl2br($text->getLanguageValue($french)).'</p>';
+        $out .= '<p style="font-size:16px;">'.nl2br($text->summary->getLanguageValue($french)).'</p>';
         $out .= '</td>';
       }
       $out .= '</tr>';
