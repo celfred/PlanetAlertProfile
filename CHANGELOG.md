@@ -26,8 +26,29 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 	- 'Backend' for changes in backend fields/templates
 
 
-## v1.0.0 - [Unreleased]
-- Better repository management to allow other users to quickly start a Planet Alert instance (and to take part in development ;) )
+## v1.0.0 - [04/03/2019]
+Make Planet Alert site profile available for ProcessWire users. They should be able to easily start a Planet Alert website from a blank ProcessWire installation. The other important change with this version is to try and use a lot more of PW cache's options in order to improve wite performances. There are also some minor bug fixes.
+
+[Added]
+- Planet Alert profile ZIP file is available in dist/ folder : this should allow easier sharing for people interested in installing a Planet Alert website. Note that version numbers now should indicate how safe it is to update : middle number should reflect a backend change while last minor number should cause no problem by simply updating templates folder
+- Cache management for many pages : template cache for guests, markup cache and session cache for logged-in users : There's still a lot of room for improvement, but this is an 'official' start :)
+
+[Changed]
+- Newsboard : Sort teacher's work by team names
+- Header menu does not highlight any more (because of cache)
+- Update .gitignore
+
+[Fixed]
+- Period sorting in team options
+- Streaks calculation (called twice for some actions)
+- Fix meta and img tags
+- Clue tooltip was not updated during training session
+- Categorize exercise : correct answer after a wrong answer doesn't increment word counter any longer but it shows the correct answer (this was the expected behavior)
+- Wrong image size for monsters PDF files
+- Out of class activity count was not corect in Reports
+
+[Backend]
+- Use cache options for many pages (for guests)
 
 
 ## [v0.8.0] - [21/02/2019]
