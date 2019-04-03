@@ -22,9 +22,7 @@
       if ($user->hasRole('player')) {
         // Check if player has the Visualizer (or forced by admin)
         if ($player->team->is("name=test-team")) {
-          $allMonsters = $cache->get('allMonsters', '+ 1 day', function($pages) {
-            return $pages->find("parent.name=monsters, template=exercise")->sort("name");
-          });
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise")->sort("name");
           $allMonstersNb = $allMonsters->count();
         } else if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
           $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
@@ -56,8 +54,7 @@
         $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
       }
       include("./helpAlert.inc.php"); 
-      $template = $templates->get("category");
-      $allCategories = $cache->get('allCategories', $template, function($pages) {
+      $allCategories = $cache->get('cache__allTrainCategories', $templates->get("name=category"), function($pages) {
         return $pages->find("parent.name=topics, sort=name");
       });
       $out .= '<div id="Filters" class="text-center">';

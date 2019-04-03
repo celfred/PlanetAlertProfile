@@ -10,7 +10,6 @@ if($input->post->username && $input->post->pass) {
   }
 }
 
-$logoUrl = $pages->get("name=home")->photo->eq(1)->url;
 ?>
 
 <div class="row">

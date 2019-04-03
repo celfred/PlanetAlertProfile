@@ -26,6 +26,31 @@ function getMultiDimensional($values, $prefix) {
   return $output;
 }
 
+function clearFileCache(...$pageNames) { // File cache for guests
+  foreach($pageNames as $p) {
+    $pageName = wire('pages')->get("name=$p");
+    if ($pageName->id) {
+      $cacheFile = wire('modules')->PageRender->getCacheFile($pageName);
+      if($cacheFile->exists()) {
+        $cacheFile->remove();
+      }
+    }
+  }
+}
+
+function clearMarkupCache(...$cacheNames) { // Markup cache for logged in users
+  foreach($cacheNames as $n) {
+    wire('cache')->delete($n);
+  }
+}
+
+function clearSessionCache(...$cacheNames) { // Session cache for logged in users
+  foreach($cacheNames as $n) {
+    wire('session')->remove($n);
+  }
+}
+
+
 function getAllPlayers($user = false, $paginate = false) {
   $page = wire('page');
   $pages = wire('pages');
@@ -245,6 +270,9 @@ function updateScore($player, $task, $real = true) {
     }
 
     if ($real == true) { // Save player's new scores if necessary
+      clearMarkupCache('cache__players-*-'.$player->team->name.'-*');
+      clearMarkupCache('cache__office-*-'.$player->team->name);
+      clearFileCache("newsboard", "main-office", "players"); // For guests
       // Publish on Teacher's newsboard (requires teacher's work, in class)
       if ($task->is("name=inactivity|penalty|buy|free|fight-vv|bought|remove|buy-pdf")) {
         $newsBoard = 1;
@@ -254,8 +282,22 @@ function updateScore($player, $task, $real = true) {
       // Publish on Public newsBoard (everybody will see it)
       if ($task->is("name=buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|remove|buy-pdf|best-time")) {
         $public = 1;
+        if ($player->skills->has("!name=fighter") && $task->is("name~=fight")) {
+          if ($player->find("template=event, task.name~=fight")->count() == 10) {
+            clearSessionCache('headMenu');
+          }
+        }
       } else {
         $public = 0;
+      }
+      if ($task->is("name=free")) {
+        clearMarkupCache('cache__elements-'.$player->name);
+        if ($player->places->count == 4 || $player->people->count == 4) {
+          clearSessionCache('headMenu');
+        }
+      }
+      if ($task->is("name=buy|bought") && $task->refPage->category->name == 'group-items') {
+        clearSessionCache('headMenu');
       }
       // Save history
       $historyPage = saveHistory($player, $task, $newsBoard, $public);
@@ -340,7 +382,6 @@ function setDelta($player, $task) { // Ponderate task's impact according to play
 
 function taskExtraAction($player, $task, $real) {
   $pages = wire('pages');
-  setStreak($player, $task);
   if ($task->is("name=no-homework")) {
     // If a penalty is still not signed, don't add to hkcount
     $penalty = $pages->get("has_parent=$player, template=event, publish=1, task.name=penalty, sort=-date");
@@ -688,13 +729,6 @@ function checkStreak($player) {
 }
 
 function clearAdminTableCache(HookEvent $e) {
-  $p = wire('pages')->get("name=admintable");
-  $cacheFile = wire('modules')->PageRender->getCacheFile($p);
-  if($cacheFile->exists()) {
-    $cacheFile->remove();
-  }
-}
-function triggerClearAdminTableCache() {
   $p = wire('pages')->get("name=admintable");
   $cacheFile = wire('modules')->PageRender->getCacheFile($p);
   if($cacheFile->exists()) {
@@ -1081,6 +1115,9 @@ function saveHistory($player, $task, $newsBoard = 0, $public = 0) {
   $p->public = $public;
   $p->linkedId = $task->linkedId;
   $p->save(); 
+  // Clear session, markup or file caches
+  /* if ($p->task->is("name=free")) { */
+  /* } */
   return $p;
 }
 
@@ -1438,22 +1475,32 @@ function updateTeamScores($team, $element = false) {
     }
     $team->of(false);
     $team->save();
+    clearMarkupCache('cache__freeworld-'.$team->name , 'cache__scores-'.$team->teacher->eq(0));
   }
 }
 
-function showScores($allTeams) {
-  echo '<h4 class="text-center scores">';
-  echo '<ul class="list-inline">';
-  $allTeams->sort("-title");
-  foreach($allTeams as $t) {
-    if ($t->name != 'no-team') {
-      if ($t->freeActs == '') { $t->freeActs = 0; }
-      if ($t->freeworld == '') { $t->freeworld = 0; }
-      echo '<li class="label label-default" data-toggle="tooltip" data-html="true" title="School year Team Activity"><h4><strong>'.$t->title.':'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
+function getScoresSummaries($headTeacher = false) {
+  $cachedScores = wire('cache')->get('cache__scores-'.$headTeacher->name, 86400, function() use($headTeacher) {
+    if (!$headTeacher->isSuperuser()) {
+      $allTeams = wire('pages')->find("template=team, teacher=$headTeacher, name!=test-team");
+    } else {
+      $allTeams = wire('pages')->find("template=team");
     }
-  }
-  echo '</ul>';
-  echo '</h4>';
+    $out =  '<h4 class="text-center scores">';
+    $out .=  '<ul class="list-inline">';
+    $allTeams->sort("-title");
+    foreach($allTeams as $t) {
+      if ($t->name != 'no-team') {
+        if ($t->freeActs == '') { $t->freeActs = 0; }
+        if ($t->freeworld == '') { $t->freeworld = 0; }
+        $out .=  '<li class="label label-default" data-toggle="tooltip" data-html="true" title="'.__("School year Team Activity").'"><h4><strong>'.$t->title.':'.$t->freeActs.'</strong> ('.$t->freeworld.'%)</strong></h4></li>';
+      }
+    }
+    $out .=  '</ul>';
+    $out .=  '</h4>';
+    return $out;
+  });
+  return $cachedScores;
 }
 
 function possibleDefense($team) {

@@ -9,7 +9,7 @@
   $team->freeworld == '' ? $team->freeworld = 0 : '';
   $out .= '<li><span class="label label-primary">'.$team->title.' : '.$team->freeActs.' ('.$team->freeworld.'%)</span></li>';
   $class = $page->is("template=main-office") ? "active" : "";
-  $out .= '<li class="'.$class.'"><a href="'.$office->url.$team->name.'">'.$office->title.'</a></li>';
+  $out .= '<li class="'.$class.'"><a href="'.$office->url.$team->name.'/teacher">'.$office->title.'</a></li>';
   $class = $page->is("name=players") ? "active" : "";
   $out .= '<li class="'.$class.'"><a href="'.$homepage->url.'players/'.$team->name.'">'.__("The team").'</a></li>';
   $class = $page->is("name=world") ? "active" : "";

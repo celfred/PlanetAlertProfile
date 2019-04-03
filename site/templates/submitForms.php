@@ -80,10 +80,10 @@
       $newItem = $pages->get($itemId);
       // Set task according to newItem's type
       if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-        $task = $pages->get("name='buy'");
+        $task = $pages->get("name=buy");
       }
       if ($newItem->template == 'place' || $newItem->template == 'people') {
-        $task = $pages->get("name='free'");
+        $task = $pages->get("name=free");
       }
       // Check if item is not already there
       $already = false;
@@ -171,10 +171,10 @@
         if ($already == false) {
           // Get item's data
           if ($newItem->template == 'equipment' || $newItem->template == 'item') {
-            $task = $pages->get("name='buy'");
+            $task = $pages->get("name=buy");
           }
           if ($newItem->template == 'place' || $newItem->template == 'people') {
-            $task = $pages->get("name='free'");
+            $task = $pages->get("name=free");
           }
           // Update player's scores and save
           $task->comment = $newItem->title;
@@ -416,7 +416,7 @@
       // Limit to absence (no need to recalculate scores)
       if ($event->is("task.name=absent|abs")) {
         $pages->trash($event);
-        triggerClearAdminTableCache();
+        clearFileCache("adminTable");
       }
     }
 
@@ -478,7 +478,7 @@
       setTeamCaptains($player->team);
 
       if ($clearAdminTableCache) {
-        triggerClearAdminTableCache();
+        clearFileCache("adminTable");
       }
       // Redirect to team page (in main.js, because doesn't work due to Ajax ?)
       /* $session->redirect($pages->get('/players')->url.$player->team->name); */
@@ -555,4 +555,5 @@
       }
     }
   }
+
 ?>

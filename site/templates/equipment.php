@@ -34,52 +34,59 @@
     }
     $out .= '<h3 class="text-center"><span class="label label-danger">'.$pbTitle.'</span></h3>';
   }
-  $out .= '<div class="well">';
-  $out .= '<h2 class="text-center">';
-  $out .= '<strong>'.$item->title.'</strong>';
-  $out .= ' → ';
-  $out .= '<span class="label label-primary">'.$item->category->title.'</span>';
-  $out .= '</h2>';
-  $out .= '<div class="row">';
-    $out .= '<div class="col-sm-4">';
-      if ($item->image) {
-        $out .= '<img class="img-thumbnail" src="'.$item->image->getCrop("big")->url.'" alt="Image" />&nbsp;&nbsp;';
-      }
-      $out .= '<h3>';
-      $out .= '<span class="label label-primary"><span class="glyphicon glyphicon-signal"></span> '.$item->level.'</span>';
-      $out .= '&nbsp;&nbsp;';
-      $out .= '<span class="label label-default"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$item->GC.__('GC').'</span>';
-      $out .= '&nbsp;&nbsp;';
-      if ($item->HP !== 0) {
-        if ($item->HP > 0) { $sign = '+'; } else { $sign = ''; }
-        $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> '.$sign.$item->HP.'HP</span>';
-        $out .= '&nbsp;&nbsp;';
-      }
-      if ($item->XP !== 0) {
-        if ($item->XP > 0) { $sign = '+'; } else { $sign = ''; }
-        $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '.$sign.$item->XP.'XP</span>';
-      }
-      $out .= '</h3>';
-    $out .= '</div>';
-    $out .= '<div class="col-sm-8">';
-      $out .= '<h2 class="">'.nl2br($item->summary);
-      $out .= '</h2>';
-      if ($user->language->name == 'default') {
-        $item->of(false);
-        if ($item->summary->getLanguageValue($french) != '') {
-          $out .= '<a class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
-          $out .= '<div class="collapse" id="collapseDiv">';
-          $out .= '<div class="well">';
-            $out .= nl2br($item->summary->getLanguageValue($french));
-          $out .= '</div>';
-          $out .= '</div>';
+  $cachedOut = $cache->get('cache__'.$page->name.'-'.$headTeacher->language->name, 2678400, function($pages, $config, $user) use($item, $french, $shop) {
+    $out = '';
+    $out .= '<div class="well">';
+    $out .= '<h2 class="text-center">';
+    $out .= '<strong>'.$item->title.'</strong>';
+    $out .= ' → ';
+    $out .= '<span class="label label-primary">'.$item->category->title.'</span>';
+    $out .= '</h2>';
+    $out .= '<div class="row">';
+      $out .= '<div class="col-sm-4">';
+        if ($item->image) {
+          $out .= '<img class="img-thumbnail" src="'.$item->image->getCrop("big")->url.'" alt="Image" />&nbsp;&nbsp;';
         }
-      }
+        $out .= '<h3>';
+        $out .= '<span class="label label-primary"><span class="glyphicon glyphicon-signal"></span> '.$item->level.'</span>';
+        $out .= '&nbsp;&nbsp;';
+        $out .= '<span class="label label-default"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$item->GC.__('GC').'</span>';
+        $out .= '&nbsp;&nbsp;';
+        if ($item->HP !== 0) {
+          if ($item->HP > 0) { $sign = '+'; } else { $sign = ''; }
+          $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> '.$sign.$item->HP.'HP</span>';
+          $out .= '&nbsp;&nbsp;';
+        }
+        if ($item->XP !== 0) {
+          if ($item->XP > 0) { $sign = '+'; } else { $sign = ''; }
+          $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '.$sign.$item->XP.'XP</span>';
+        }
+        $out .= '</h3>';
+      $out .= '</div>';
+      $out .= '<div class="col-sm-8">';
+        $out .= '<h2 class="">'.nl2br($item->summary);
+        $out .= '</h2>';
+        if ($user->language->name == 'default') {
+          $item->of(false);
+          if ($item->summary->getLanguageValue($french) != '') {
+            $out .= '<a class="" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
+            $out .= '<div class="collapse" id="collapseDiv">';
+            $out .= '<div class="well">';
+              $out .= nl2br($item->summary->getLanguageValue($french));
+            $out .= '</div>';
+            $out .= '</div>';
+          }
+        }
+      $out .= '</div>';
     $out .= '</div>';
+    $out .= '</div>';
+    return $out;
+  });
+  $out .= $cachedOut;
+
   if ($item->is("name=memory-potion")) {
     if ($user->isLoggedin()) {
       $out .= '<hr />';
-      $out .= '<h4>'.__("Available texts").' :</h4>';
       $out .= '<ol class="list">';
       if ($user->isSuperuser()) {
         $allTexts = $pages->find("template=memory-text, include=all, sort=index");
@@ -91,6 +98,7 @@
         $allTexts = '';
       }
       if ($user->isSuperuser() || $user->hasRole('teacher')) { // Show all texts for admin
+        $out .= '<h4>'.__("Available texts").' :</h4>';
         if (count($allTexts) > 0) {
           foreach ($allTexts as $t) {
             $out .= '<li>';
@@ -123,6 +131,7 @@
           'fields'=>'title,summary,task'
         ));
       } else { // Show possible texts for logged-in player
+        $out .= '<h4><span class="label label-primary">'.__("Available texts").' : '.count($allTexts).'</span></h4>';
         $playerBoughtTexts = $player->find("template=event, refPage=$item, task.name=buy");
         if ($playerBoughtTexts->count() > 0) {
           foreach ($playerBoughtTexts as $bt) {
@@ -133,7 +142,7 @@
               $out .= '<h4>';
               $out .= ' <span>'.$t->title.'</span>';
               $out .= ' <span class="glyphicon glyphicon-eye-open" data-toggle="tooltip" data-html="true" title="'.nl2br($t->summary).'"></span>';
-              if ($result->id) {
+              if ($result != false) {
                 if ($result->task->HP < 0) {
                   $out .= ' → <i class="glyphicon glyphicon-thumbs-down"></i>';
                 } else {
@@ -158,9 +167,8 @@
       $out .= "</ol>";
     }
   }
-  $out .= '</div>';
   $out .= '<a class="btn btn-block btn-primary" href="'.$shop->url.'">'.__("Back to the Marketplace").'</a>';
-  $out .= '</div>';
+
   echo $out;
 
   include("./foot.inc"); 

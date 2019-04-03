@@ -1,4 +1,5 @@
 <?php namespace ProcessWire;
+
   include("./head.inc"); 
 
   if (isset($player) && $player->team->is("name=test-team")) {
@@ -19,10 +20,16 @@
     $out .= '<div id="ajaxDecision" data-href="'.$ajaxContentUrl.'" data-id="decision"></div>';
     $out .= '<div id="showInfo" data-href="'.$ajaxContentUrl.'"></div>';
 
-    if (!($allTeams->count() == 1 && $allTeams->eq(0)->name == 'no-team')) { // Means Just no-team
-      showScores($allTeams);
-    }
+    $out .= getScoresSummaries($headTeacher);
 
+  if ($user->hasRole('teacher') || $user->isSuperuser()) {
+    $cacheName = 'cache__office-teacher-'.$input->urlSegment1.'-'.$user->language->name;
+  }
+  if ($user->hasRole('player') || $user->isGuest()) {
+    $cacheName = 'cache__office-player-'.$input->urlSegment1.'-'.$headTeacher->language->name;
+  }
+  $cachedOffice = $cache->get($cacheName, 86400, function($user, $pages) use($selectedTeam, $allPlayers, $pickFromList, $rank) {
+    $out = '';
     if ($allPlayers->count() > 0) {
       $dangerPlayers = $allPlayers->find("coma=1");
       $lowPlayers = $allPlayers->find("HP<=15");
@@ -547,6 +554,9 @@
     } else {
       $out .= '<h3 class="text-center">'.__("No players in the team !").'</h3>';
     }
+    return $out;
+  });
+  $out .= $cachedOffice;
   } else {
     $out = $noAuthMessage;
   }
