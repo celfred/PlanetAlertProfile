@@ -26,7 +26,7 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 	- 'Backend' for changes in backend fields/templates
 
 
-## v1.0.0 - [04/03/2019]
+## [v1.0.0] - [04/03/2019]
 Make Planet Alert site profile available for ProcessWire users. They should be able to easily start a Planet Alert website from a blank ProcessWire installation. The other important change with this version is to try and use a lot more of PW cache's options in order to improve wite performances. There are also some minor bug fixes.
 
 [Added]
@@ -578,3 +578,4 @@ Initial official release.
 [v0.5.0]: https://framagit.org/celfred/planetAlert/tags/v0.5.0
 [v0.6.0]: https://framagit.org/celfred/planetAlert/tags/v0.6.0
 [v0.7.0]: https://framagit.org/celfred/planetAlert/tags/v0.7.0
+[v1.0.0]: https://framagit.org/celfred/planetAlert/tags/v1.0.0
