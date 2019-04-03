@@ -34,7 +34,7 @@
     }
     $out .= '<h3 class="text-center"><span class="label label-danger">'.$pbTitle.'</span></h3>';
   }
-  $cachedOut = $cache->get('cache__'.$page->name, 2678400, function($pages, $config, $user) use($item, $french, $shop) {
+  $cachedOut = $cache->get('cache__'.$page->name.'-'.$headTeacher->language->name, 2678400, function($pages, $config, $user) use($item, $french, $shop) {
     $out = '';
     $out .= '<div class="well">';
     $out .= '<h2 class="text-center">';

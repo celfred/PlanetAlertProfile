@@ -32,15 +32,6 @@
   
   // Count ALL places in the game (for information)
   $totalCount = $pages->find("template=place")->count();
-  // Get all cities having places
-  $cities = $cache->get("cache__allCities", 2678400, function($pages) {
-    return $pages->find("template=city, children.count>0, sort=title");
-  });
-  // Get all countries having places
-  $countries = $cache->get("cache__allCountries", 2678400, function($pages) {
-    return $pages->find("template=country, children.count>0,sort=title");
-  });
-
   if ($user->isSuperuser() || $user->hasRole('teacher')) {
     echo '<a class="pdfLink btn btn-info" href="'. $selectedPlaces->first()->url.'all?pages2pdf=1">'.__("Get PDF [Places catalogue]").'</a>';
   }
@@ -56,7 +47,9 @@
         echo "<h2>".__('All places')." ({$totalCount})</h2>";
       }
 
-      $placesMenu = $cache->get("cache__placesMenu", 2678400, function($page) use($cities, $countries) {
+      $placesMenu = $cache->get("cache__placesMenu", 2678400, function($page, $pages) {
+        $cities = $pages->find("template=city, children.count>0, sort=title");
+        $countries = $pages->find("template=country, children.count>0,sort=title");
         $out = '';
         $out .= '<a class="btn btn-info" href="'.$page->url.'">'.__('See ALL places').'</a>';
         $out .= '<div class="dropdown btn-group">';

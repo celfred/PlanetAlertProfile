@@ -54,7 +54,7 @@
         $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
       }
       include("./helpAlert.inc.php"); 
-      $allCategories = $cache->get('cache__allTrainCategories', 2678400, function($pages) {
+      $allCategories = $cache->get('cache__allTrainCategories', $templates->get("name=category"), function($pages) {
         return $pages->find("parent.name=topics, sort=name");
       });
       $out .= '<div id="Filters" class="text-center">';

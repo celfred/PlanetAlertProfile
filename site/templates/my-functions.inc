@@ -270,6 +270,9 @@ function updateScore($player, $task, $real = true) {
     }
 
     if ($real == true) { // Save player's new scores if necessary
+      clearMarkupCache('cache__players-*-'.$player->team->name.'-*');
+      clearMarkupCache('cache__office-*-'.$player->team->name);
+      clearFileCache("newsboard", "main-office", "players"); // For guests
       // Publish on Teacher's newsboard (requires teacher's work, in class)
       if ($task->is("name=inactivity|penalty|buy|free|fight-vv|bought|remove|buy-pdf")) {
         $newsBoard = 1;
@@ -279,18 +282,22 @@ function updateScore($player, $task, $real = true) {
       // Publish on Public newsBoard (everybody will see it)
       if ($task->is("name=buy|free|fight-v|fight-vv|ut-action-v|ut-action-vv|remove|buy-pdf|best-time")) {
         $public = 1;
+        if ($player->skills->has("!name=fighter") && $task->is("name~=fight")) {
+          if ($player->find("template=event, task.name~=fight")->count() == 10) {
+            clearSessionCache('headMenu');
+          }
+        }
       } else {
         $public = 0;
       }
-      clearMarkupCache('cache__players-'.$player->team->name.'-*');
       if ($task->is("name=free")) {
-        clearMarkupCache('cache__elements-'.$player->name.'-*');
-      }
-      if ($task->is("name=buy")) {
-        clearMarkupCache('cache__teacher-main-office-'.$player->team->name, 'cache__player-main-office-'.$player->team->name);
-        if ($task->refPage->is("name~=memory-helmet|visualizer")) {
+        clearMarkupCache('cache__elements-'.$player->name);
+        if ($player->places->count == 4 || $player->people->count == 4) {
           clearSessionCache('headMenu');
         }
+      }
+      if ($task->is("name=buy|bought") && $task->refPage->category->name == 'group-items') {
+        clearSessionCache('headMenu');
       }
       // Save history
       $historyPage = saveHistory($player, $task, $newsBoard, $public);

@@ -2191,6 +2191,7 @@
               $p->save();
             }
           }
+          clearMarkupCache('cache__players-teacher-'.$team->name.'-*');
         }
         break;
       case 'select-element':
@@ -2208,6 +2209,7 @@
                 $new->save();
                 $element->owner->add($new);
               }
+              $cache->delete("cache__tasks-".$user->name);
               break;
             case 'period' : 
               $already = $element->periodOwner->get("singleTeacher=$user");
@@ -2238,6 +2240,7 @@
               } else {
                 $element->teacher->add($user);
               }
+              $cache->delete("cache__shop-".$user->name);
           }
           $element->of(false);
           $element->save();
@@ -2262,6 +2265,7 @@
           $team->forceHelmet = 1;
         }
         $team->save();
+        clearSessionCache("headMenu");
         break;
       case 'forceVisualizer':
         $team = $pages->get("$selectedTeam");
@@ -2273,6 +2277,7 @@
           $team->forceVisualizer = 1;
         }
         $team->save();
+        clearSessionCache("headMenu");
         break;
       case 'forceKnowledge':
         $team = $pages->get("$selectedTeam");
@@ -2284,6 +2289,7 @@
           $team->forceKnowledge = 1;
         }
         $team->save();
+        clearSessionCache("headMenu");
         break;
       case 'classActivity':
         $team = $pages->get("$selectedTeam");
@@ -2445,7 +2451,7 @@
           $out .= '<ul>';
             // Team Official Period
             if ($user->hasRole('teacher')) {
-              $allPeriods = $pages->find("template=period, periodOwner.singleTeacher=$user");
+              $allPeriods = $pages->find("template=period, periodOwner.singleTeacher=$user")->sort("title");
             } else {
               $allPeriods = $pages->find("template=period");
             }

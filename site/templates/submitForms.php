@@ -554,8 +554,6 @@
         echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
       }
     }
-    clearFileCache("newsboard", "main-office", "players");
-    clearMarkupCache("cache__teacher-main-office-".$player->team->name.'-*');
   }
 
 ?>

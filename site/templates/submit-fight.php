@@ -263,6 +263,5 @@
         }
       }
     }
-    /* clearFileCache("newsboard", "main-office", "players"); */
   }
 ?>

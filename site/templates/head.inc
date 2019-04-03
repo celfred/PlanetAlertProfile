@@ -14,9 +14,7 @@
     if ($user->isSuperuser()) { // Test team is included for debug
       $allTeams = $pages->find("template=team")->sort("title");
     } else {
-      $allTeams = $cache->get('cache__allTeams', 2678400, function($pages) {
-        return $pages->find("template=team, name!='test-team'")->sort("title");
-      });
+      $allTeams = $pages->find("template=team, name!='test-team'")->sort("title");
     }
     $allTeamsNames = $allTeams->implode(',', '{name}');
   ?>
@@ -92,16 +90,16 @@
         $out .= periodNotification($selectedTeam, $headTeacher);
       }
       
+      if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
+        $allTeams->filter("teacher=$user");
+        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
+      } else {
+        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
+      }
+
       if ($session->headMenu) { // Head menu already session cached
         $out .= $session->headMenu;
       } else { // Build head menu
-        if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
-          $allTeams->filter("teacher=$user");
-          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
-        } else {
-          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
-        }
-
         $headMenu = '<ul>';
           $headMenu .= '<div class="btn-group" role="group" aria-label="...">';
             $headMenu .= "<a class='btn' href='{$homepage->url}'>{$homepage->title}</a>";
