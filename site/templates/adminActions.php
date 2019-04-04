@@ -1247,7 +1247,8 @@
                 $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team, team.teacher=$user")->sort("title");
               }
             } else {
-              $allPlayers = $pages->find("parent.name=players, template=player")->sort("title");
+              $allPlayers = $pages->find("parent.name=players, template=player, sort=title, limit=50");
+              $pagination = $allPlayers->renderPager();
               $allTeachers = $pages->find("parent.name=teachers, template=teacherProfile")->sort("title");
             }
             $out .= '<section class="well">';
@@ -1280,6 +1281,7 @@
               $out .= '</table>';
               $out .= '<hr />';
             }
+            if (isset($pagination)) { $out .= $pagination;}
             $out .= '<p>';
             $out .= sprintf(__('There are currently %d players.'), $allPlayers->count());
             if ($user->name == 'flieutaud') {
