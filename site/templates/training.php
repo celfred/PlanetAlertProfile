@@ -187,7 +187,7 @@
               $out .= sprintf(__("Come back in %d days ;)"), $m->waitForTrain);
             }
           }
-          $formerRequest = $pages->get("has_parent=$player, template=event, task.name=fight-v|fight-vv, inClass=1, refPage=$m, date>$limitDate");
+          $formerRequest = $pages->get("has_parent=$player, template=event, task.name=fight-vv, inClass=1, refPage=$m, date>$limitDate");
           if ($formerRequest->id) {
             $out .= ' <span class="glyphicon glyphicon-ok" data-toggle="tooltip" title="'.__('You have already defeated this monster in the previous year.').'"></span>';
           } else {
