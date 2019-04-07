@@ -661,8 +661,8 @@ $(document).ready(function() {
   });
 
   $(document).on('click', '#switchGallery', function() {
-    $('#galleryPlacesList').toggle();
-    $('#detailedPlacesList').toggle();
+    $('#galleryList').toggle();
+    $('#detailedList').toggle();
   });
 
   $(document).on('click', 'button.popup', function(e) {
@@ -1427,6 +1427,10 @@ var initTables = function() {
   var shopAdminTable = $('#shopAdminTable').DataTable({
     paging: false,
     order: [[ 0, "asc"]]
+  });
+  $('#peopleTable').DataTable({
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, lang.all] ],
+    order: [[ 0, "asc" ]],
   });
   $('#fightersTable').DataTable({
     paging: false,

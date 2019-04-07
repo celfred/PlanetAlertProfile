@@ -47,7 +47,7 @@
         echo "<h2>".__('All places')." ({$totalCount})</h2>";
       }
 
-      $placesMenu = $cache->get("cache__placesMenu", 2678400, function($page, $pages) {
+      $placesMenu = $cache->get("cache__placesMenu-".$user->language->name, 2678400, function($page, $pages) {
         $cities = $pages->find("template=city, children.count>0, sort=title");
         $countries = $pages->find("template=country, children.count>0,sort=title");
         $out = '';
@@ -75,8 +75,10 @@
       echo $placesMenu;
 
     if ($type == 'all') { // Get all places from cache
-      $allPlacesGallery = $cache->get("cache__allPlacesGallery-page".$pageNum, 2678400, function() use($selectedPlaces, $pagination) {
-      $out = '<div id="galleryPlacesList" class="text-center">';
+      $cacheName = "cache__allPlacesGallery-".$user->language->name."-page".$pageNum;
+      $cacheUpdateTemplate = $templates->get("name=place");
+      $allPlacesGallery = $cache->get($cacheName, $cacheUpdateTemplate, function() use($selectedPlaces, $pagination) {
+      $out = '<div id="galleryList" class="text-center">';
         $out .= '<div class="text-center">'.$pagination.'</div>';
         $out .= '<ul class="list-inline placesList">';
           foreach($selectedPlaces as $place) {
@@ -88,7 +90,7 @@
         $out .= '</ul>';
         $out .= '<div class="text-center">'.$pagination.'</div>';
       $out .= '</div>';
-      $out .= '<div id="detailedPlacesList" style="display: none;" class="row">';
+      $out .= '<div id="detailedList" style="display: none;" class="row">';
         $out .= '<div class="text-center">'.$pagination.'</div>';
         $out .= '<table id="mapTable" class="table table-condensed table-hover">';
           $out .= '<thead>';
@@ -121,7 +123,7 @@
       });
       echo $allPlacesGallery;
     } else { // Load limited gallery
-      $out = '<div id="galleryPlacesList" class="text-center">';
+      $out = '<div id="galleryList" class="text-center">';
         $out .= '<div class="text-center">'.$pagination.'</div>';
         $out .= '<ul class="list-inline placesList">';
           foreach($selectedPlaces as $place) {
@@ -133,7 +135,7 @@
         $out .= '</ul>';
         $out .= '<div class="text-center">'.$pagination.'</div>';
       $out .= '</div>';
-      $out .= '<div id="detailedPlacesList" style="display: none;" class="row">';
+      $out .= '<div id="detailedList" style="display: none;" class="row">';
         $out .= '<div class="text-center">'.$pagination.'</div>';
         $out .= '<table id="mapTable" class="table table-condensed table-hover">';
           $out .= '<thead>';
