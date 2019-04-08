@@ -45,21 +45,21 @@
     $out .= '<div class="row">';
       $out .= '<div class="col-sm-4">';
         if ($item->image) {
-          $out .= '<img class="img-thumbnail" src="'.$item->image->getCrop("big")->url.'" alt="Image" />&nbsp;&nbsp;';
+          $out .= '<img class="img-thumbnail" src="'.$item->image->getCrop("big")->url.'" alt="'.$item->title.'." />&nbsp;&nbsp;';
         }
         $out .= '<h3>';
         $out .= '<span class="label label-primary"><span class="glyphicon glyphicon-signal"></span> '.$item->level.'</span>';
         $out .= '&nbsp;&nbsp;';
-        $out .= '<span class="label label-default"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$item->GC.__('GC').'</span>';
+        $out .= '<span class="label label-default"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="gold coins." /> '.$item->GC.__('GC').'</span>';
         $out .= '&nbsp;&nbsp;';
         if ($item->HP !== 0) {
           if ($item->HP > 0) { $sign = '+'; } else { $sign = ''; }
-          $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/heart.png" alt="HP" /> '.$sign.$item->HP.'HP</span>';
+          $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/heart.png" alt="heart." /> '.$sign.$item->HP.'HP</span>';
           $out .= '&nbsp;&nbsp;';
         }
         if ($item->XP !== 0) {
           if ($item->XP > 0) { $sign = '+'; } else { $sign = ''; }
-          $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/star.png" alt="XP" /> '.$sign.$item->XP.'XP</span>';
+          $out .= '<span class="label label-primary"><img src="'.$config->urls->templates.'img/star.png" alt="star." /> '.$sign.$item->XP.'XP</span>';
         }
         $out .= '</h3>';
       $out .= '</div>';

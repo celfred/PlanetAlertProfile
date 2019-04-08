@@ -238,15 +238,15 @@
         $headMenu .= '<div style=" color: #FFF;">';
         $headMenu .= '<span class="avatarContainer" data-loggedId="'.$player->id.'">';
           if ($player->avatar) {
-            $headMenu .= '<img class="avatar superpose" src="'.$player->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
+            $headMenu .= '<img class="avatar superpose" src="'.$player->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$player->title.'." />';
           } else {
             $headMenu .= '<Avatar>';
           }
           if ($bestWeapon && $bestWeapon->image) {
-            $headMenu .= '<img class="weapon mini superpose" src="'.$bestWeapon->image->getCrop("mini")->url.'" alt="'.$bestWeapon->title.'" />';
+            $headMenu .= '<img class="weapon mini superpose" src="'.$bestWeapon->image->getCrop("mini")->url.'" alt="'.$bestWeapon->title.'." />';
           }
           if ($bestProtection && $bestProtection->image) {
-            $headMenu .= '<img class="protection mini superpose" src="'.$bestProtection->image->getCrop("mini")->url.'" alt="'.$bestProtection->title.'" />';
+            $headMenu .= '<img class="protection mini superpose" src="'.$bestProtection->image->getCrop("mini")->url.'" alt="'.$bestProtection->title.'." />';
           }
         $headMenu .= '</span>';
         $headMenu .= '</div>';

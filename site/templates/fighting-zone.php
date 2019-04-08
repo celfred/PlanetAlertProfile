@@ -95,7 +95,7 @@
             $out .= '<ul class="list list-inline">';
             foreach($availableFights as $m) {
               if ($m->image) {
-                $mini = "<img class='' src='".$m->image->getCrop('small')->url."' alt='image' />";
+                $mini = "<img class='' src='".$m->image->getCrop('small')->url."' alt='".$m->title.".' />";
               } else {
                 $mini = '';
               }
@@ -112,7 +112,7 @@
             $out .= '<ul class="list">';
             foreach($waitingFights as $m) {
               if ($m->image) {
-                $mini = "<img class='' src='".$m->image->getCrop('mini')->url."' alt='image' />";
+                $mini = "<img class='' src='".$m->image->getCrop('mini')->url."' alt='".$m->title.".' />";
               } else {
                 $mini = '';
               }
@@ -162,7 +162,7 @@
         } else {
           $helpAlert = true;
           $helpTitle = __("Some monsters are absent !");
-          $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="image" /> ';
+          $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="Electronic visualizer." /> ';
           $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
         }
       } else {

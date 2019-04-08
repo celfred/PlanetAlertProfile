@@ -47,7 +47,7 @@
             $out .= '</div>';
             $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
             if ($monster->type->name == 'image-map') {
-              $out .= '<div class=""><img src="'.$monster->imageMap->first()->url.'" max-width="800" alt="Image" /></div>';
+              $out .= '<div class=""><img src="'.$monster->imageMap->first()->url.'" max-width="800" alt="Numbered vocabulary." /></div>';
             }
             $out .= '<div class="bubble-right">';
             if ($monster->type->name == 'jumble') {

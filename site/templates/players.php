@@ -77,19 +77,19 @@ echo '<div>';
       $out .= '<th data-toggle="tooltip" title="'.__("What happened on the last date?").'"><span class="glyphicon glyphicon-th-list"></span></th>';
     }
     $out .= '<th data-toggle="tooltip" title="'.__("Special skills").'">S.</th>';
-    $out .= '<th data-toggle="tooltip" title="'.__("Gold coins").'"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></th>';
+    $out .= '<th data-toggle="tooltip" title="'.__("Gold coins").'"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="gold coins." /></th>';
     $out .= '<th data-toggle="tooltip" title="'.__("Level").'"><span class="glyphicon glyphicon-signal"></span></th>';
     $out .= '<th data-toggle="tooltip" title="'.__("Reputation").'">R.</th>';
-    $out .= '<th data-toggle="tooltip" title="'.__("Health Points").'"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> ';
+    $out .= '<th data-toggle="tooltip" title="'.__("Health Points").'"><img src="'.$config->urls->templates.'img/heart.png" alt="heart." /> ';
     $out .= __("HP").'</th>';
-    $out .= '<th data-toggle="tooltip" title="'.__("Experience").'"><img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
+    $out .= '<th data-toggle="tooltip" title="'.__("Experience").'"><img src="'.$config->urls->templates.'img/star.png" alt="star." /> ';
     $out .= __("XP").'</th>';
-    $out .= '<th data-toggle="tooltip" title="'.__("Places").'"><img src="'.$config->urls->templates.'img/globe.png" alt="" /></th>';
+    $out .= '<th data-toggle="tooltip" title="'.__("Places").'"><img src="'.$config->urls->templates.'img/globe.png" alt="globe." /></th>';
     if ($selectedTeam->rank && $selectedTeam->rank->is("index>=8")) {
       $out .= '<th data-toggle="tooltip" title="'.__("People").'"><span class="glyphicon glyphicon-user"></span></th>';
     }
     $out .= '<th data-toggle="tooltip" title="'.__("Equipment").'"><span class="glyphicon glyphicon-wrench"></span></th>';
-    $out .= '<th data-toggle="tooltip" title="'.__("Donation").'"><img src="'.$config->urls->templates.'img/heart.png" alt="" /></th>';
+    $out .= '<th data-toggle="tooltip" title="'.__("Donation").'"><img src="'.$config->urls->templates.'img/heart.png" alt="heart." /></th>';
     $out .= '<th data-toggle="tooltip" title="'.__("Underground training").'">';
     $out .= __("UT").'</th>';
     $out .= '<th data-toggle="tooltip" title="'.__("Fighting Power").'">';
@@ -170,7 +170,7 @@ echo '<div>';
         $tooltipEquipment = '';
       }
       if ($player->avatar) {
-        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img class=\"tipList-light\" src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$player->avatar->getCrop('mini')->url."' alt='avatar' />";
+        $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img class=\"tipList-light\" src=\"".$player->avatar->getCrop('thumbnail')->url."\" alt=\"".$player->title.".\" />' src='".$player->avatar->getCrop('mini')->url."' alt='".$player->title.".' />";
       } else {
         $mini = '';
       }

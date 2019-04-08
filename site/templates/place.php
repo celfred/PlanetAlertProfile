@@ -72,7 +72,7 @@ include("./head.inc");
   <table class="table">
     <tr>
       <td rowspan="2" class="col-sm-3">
-        <img class="img-thumbnail" src="<?php echo $thumbImage; ?>" alt="Photo" />
+        <img class="img-thumbnail" src="<?php echo $thumbImage; ?>" alt="'.$p->title.'." />
       </td>
       <td class="col-sm-7">
         <h1><span class="label label-danger" data-toggle="tooltip" title="<?php echo __("Map index (Write it in your copybook)"); ?>"><?php echo $page->mapIndex; ?></span> <?php echo $page->title; ?></h1>
@@ -84,7 +84,7 @@ include("./head.inc");
           <h1 class="panel-title"><?php echo __('Level').' : '.$page->level; ?></h1>
         </div>
         <div class="panel-body text-center">
-          <h1><img style="float: left;" src="<?php  echo $config->urls->templates?>img/gold.png" alt="Value" width="50" height="50" /><span class="lead btn btn-default btn-lg"><?php echo $page->GC; ?></span></h1>
+          <h1><img style="float: left;" src="<?php  echo $config->urls->templates?>img/gold.png" alt="gold coins." width="50" height="50" /><span class="lead btn btn-default btn-lg"><?php echo $page->GC; ?></span></h1>
         </div>
         </div>
       </td>

@@ -952,7 +952,7 @@
                 $out .= '<a href="#" class="togglePublish" data-href="'.$page->url.'toggleMonster/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-danger" data-toggle="tooltip" title="'.__('Publish').'">✗</span></a> ';
               }
               if ($p->image) {
-                $out .= '<img src="'.$p->image->getCrop("mini")->url.'" alt="Image" /> ';
+                $out .= '<img src="'.$p->image->getCrop("mini")->url.'" alt="'.$p->name.'." /> ';
               } else {
                 $out .= '[-] ';
               }

@@ -38,35 +38,35 @@
     switch ($field) {
       case 'yearlyKarma' :
         $title = __('Most active');
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="star." />';
         break;
       case 'reputation' :
         $title = __('Most influential');
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="star." />';
         break;
       case 'places' :
         $title = __('Greatest # of places');
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="star." />';
         break;
       case 'people' :
         $title = __('Greatest # of people');
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="star." />';
         break;
       case 'fighting_power' :
         $title = __('Best warriors');
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="star." />';
         break;
       case 'donation' :
         $title = __('Best donators');
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="star." />';
         break;
       case 'underground_training' :
         $title = __('Most trained');
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="star." />';
         break;
       case 'group' :
         $title = __('Most active groups');
-        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="" />';
+        $img = '<img src="'.$config->urls->templates .'img/star.png" alt="star." />';
         $playerPos = false;
         break;
       default : 
@@ -151,7 +151,7 @@
     $out .= '  <div class="panel-heading">';
     $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field='.$field.'"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
     $out .= '  <h4 class="panel-title">';
-    $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
+    $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="star." /> ';
     $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.__("Your position in this scoreboard").'">'.$playerPos.'</span> '.$team.' '.$title.'</h4>';
     $out .= '  </div>';
     $out .= '  <div class="panel-body">';

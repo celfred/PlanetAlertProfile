@@ -147,7 +147,7 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
     $out .= '<div class="row well">';
     $out .= "<h2 class='text-center'>{$page->title} ({$player->title} [{$player->team->title}])</h2>";
     $out .= "<h3 class='text-center well'>";
-    $out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='' />&nbsp;<span id='remainingGC'>{$player->GC}</span> ".__("GC available.");
+    $out .= "<img src='{$config->urls->templates}img/gold_mini.png' alt='gold coins.' />&nbsp;<span id='remainingGC'>{$player->GC}</span> ".__("GC available.");
     $out .= " (<span id='nbChecked'>0</span> ".__("checked").") ";
     $out .= "<span class='badge badge-warning'>".__("3 items per day limit !")."</span>";
     $out .= "</h3>";
@@ -169,7 +169,7 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
         $out .= '<li>';
         $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
         if ($item->image) {
-          $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
+          $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="'.$item->title.'." /> ';
         }
         $out .= $item->title.' ['.$item->GC.__('GC').']';
         $out .= '</label>';
@@ -192,7 +192,7 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
           $out .= '<li>';
           $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
           if ($item->image) {
-            $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
+            $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="'.$item->title.'." /> ';
           }
           $out .= $item->title.' ['.$item->GC.__('GC').']';
           $out .= '</label>';
@@ -210,7 +210,7 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
           $out .= '<li>';
           $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> ';
           if ($item->image) {
-            $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="Image" /> ';
+            $out .= ' <img src="'.$item->image->getCrop('mini')->url.'" alt="'.$item->title.'." /> ';
           }
           $out .= $item->title.' ['.$item->GC.__('GC').']';
           $out .= '</label>';

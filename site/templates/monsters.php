@@ -40,7 +40,7 @@
     echo '<h4>';
     if ($helmet) {
       if ($helmet->image) {
-        echo '<img class="" src="'.$helmet->image->getCrop('small')->url.'" alt="Helmet" />';
+        echo '<img class="" src="'.$helmet->image->getCrop('small')->url.'" alt="Memory helmet." />';
       }
       echo ' <a href="'.$pages->get("name=underground-training")->url.'">'.__("Go to the Underground Training Zone").'</a>   ';
     } else {
@@ -50,7 +50,7 @@
     }
     if ($visualizer) {
       if ($visualizer->image) {
-        echo '<img class="" src="'.$visualizer->image->getCrop('small')->url.'" alt="Visualizer" />';
+        echo '<img class="" src="'.$visualizer->image->getCrop('small')->url.'" alt="Electronic visualizer." />';
       }
       echo ' <a href="'.$pages->get("name=Visualizer")->url.'">'.__("Use the Electronic Visualizer").'</a>   ';
     } else {
@@ -106,7 +106,7 @@
         $topics = $m->topic->implode(', ', '{title}');
         $out .= '<tr>';
         if ($m->image) {
-          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"image\" />' src='".$m->image->getCrop('mini')->url."' alt='image' />";
+          $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$m->image->getCrop('thumbnail')->url."\" alt=\"".$m->title.".\" />' src='".$m->image->getCrop('mini')->url."' alt='".$m->title.".' />";
         } else {
           $mini = '';
         }

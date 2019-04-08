@@ -58,10 +58,10 @@
               }
               if ($user->isSuperuser() || $lm->isTrainable != 0) {
                 $training = $pages->get("name=underground-training");
-                $out .= '<a class="btn btn-primary" href="'.$training->url.'?id='.$lm->id.'"><img src="'.$lm->image->getCrop('mini')->url.'" alt="image" /> '.$lm->title.'</a> ';
+                $out .= '<a class="btn btn-primary" href="'.$training->url.'?id='.$lm->id.'"><img src="'.$lm->image->getCrop('mini')->url.'" alt="'.$lm->title.'." /> '.$lm->title.'</a> ';
               }
             } else {
-              $out .= '<span class="label label-default"><img src="'.$lm->image->getCrop('mini')->url.'" alt="image" /> '.$lm->title.'</span> ';
+              $out .= '<span class="label label-default"><img src="'.$lm->image->getCrop('mini')->url.'" alt="'.$lm->title.'." /> '.$lm->title.'</span> ';
             }
           }
         $out .= '</p>';

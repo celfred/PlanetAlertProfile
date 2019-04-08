@@ -42,7 +42,7 @@
           }
           $team = $p->team;
           $donatorId = $p->id;
-          if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
+          if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="'.$p->title.'." />'; }
           $out .= '<div class="row">';
           $out .= '<div class="col-sm-6 text-center">';
           $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
@@ -54,18 +54,18 @@
             $out .= '<li><span class="label label-success">Reputation : '.$p->reputation.'</span></li>';
             $out .= '<li><span class="label label-default"><span class="glyphicon glyphicon-signal"></span> '.$p->level.'</span>';
             $threshold = getLevelThreshold($p->level);
-            $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$p->XP.'/'.$threshold.'</span></li>';
+            $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/star.png" alt="star." /> '.$p->XP.'/'.$threshold.'</span></li>';
             $nbFreeEl = $p->places->count();
             if ($p->team->rank && $p->team->rank->is("index>=8")) {
               $nbFreeEl += $p->people->count();
             }
-            $out .= '<li><span class="label label-default"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
+            $out .= '<li><span class="label label-default"><img src="'.$config->urls->templates.'img/globe.png" alt="globe." /> '.$nbFreeEl.'</span>';
             $out .= ' <span class="label label-default"><span class="glyphicon glyphicon-wrench"></span> '.$p->equipment->count().'</span></li>';
             $out .= '<li><span class="label label-default">'.$p->underground_training.' UT</span>';
             $out .= ' <span class="label label-default">'.$p->fighting_power.' FP</span>';
             $out .= '</li>';
-            $out .= '<li><span class="label label-default"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> '.$p->HP.'</span>';
-            $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$p->GC.'</span></li>';
+            $out .= '<li><span class="label label-default"><img src="'.$config->urls->templates.'img/heart.png" alt="heart." /> '.$p->HP.'</span>';
+            $out .= ' <span class="label label-default"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="gold coins." /> '.$p->GC.'</span></li>';
           } else {
             $out .= '<li class="label label-danger">Coma !</li>';
           }
@@ -88,7 +88,7 @@
               if ($gp->team->rank && $gp->team->rank->is("index>=8")) {
                 $nbFreeEl += $gp->people->count();
               }
-              if ($gp->avatar) { $mini = '<img src="'.$gp->avatar->getCrop('thumbnail')->url.'" alt="avatar" width="50" />'; }
+              if ($gp->avatar) { $mini = '<img src="'.$gp->avatar->getCrop('thumbnail')->url.'" alt="'.$gp->title.'." width="50" />'; }
             $out .= '<li>';
             $out .= $mini;
             $out .= '<span>';
@@ -96,9 +96,9 @@
             if ($gp->coma == 0) {
               $out .= ' <span class="badge">'.$gp->reputation.'K.</span>';
               $out .= ' <span class="badge"><span class="glyphicon glyphicon-wrench"></span>'.$gp->equipment->count().'</span>';
-              $out .= ' <span class="badge"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
-              $out .= ' <span class="badge">'.$gp->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="" /></span>';
-              $out .= ' <span class="badge">'.$gp->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /></span>';
+              $out .= ' <span class="badge"><img src="'.$config->urls->templates.'img/globe.png" alt="globe." /> '.$nbFreeEl.'</span>';
+              $out .= ' <span class="badge">'.$gp->HP.'<img src="'.$config->urls->templates.'img/heart.png" alt="heart." /></span>';
+              $out .= ' <span class="badge">'.$gp->GC.'<img src="'.$config->urls->templates.'img/gold_mini.png" alt="gold coins." /></span>';
             } else {
               $out .= '<span class="label label-danger">Coma !</span>';
             }
@@ -195,7 +195,7 @@
       case 'ambassador' :
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
-        if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="avatar" />'; }
+        if ($p->avatar) { $mini = '<img src="'.$p->avatar->getCrop('thumbnail')->url.'" alt="'.$p->title.'." />'; }
         $out .= '<h3 class="thumbnail">'.$mini.' <span class="caption">'.$p->title.'</span></h3>';
         break;
       case 'help' :
@@ -220,8 +220,8 @@
       case 'showInfo' :
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
-        if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('big')->url.'" alt="Photo" />'; }
-        if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="Photo" />'; }
+        if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('big')->url.'" alt="'.$p->title.'." />'; }
+        if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="'.$p->title.'." />'; }
         $out .= '<h3><span class="label label-primary">'.$p->title.'</span>';
         if ($p->is("template=place")) {
           $out .= ' (in '.$p->city->title.', '.$p->country->title.')</h3>';
@@ -273,8 +273,8 @@
       case 'buy' :
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");
-        if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('big')->url.'" alt="Photo" />'; }
-        if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="Photo" />'; }
+        if ($p->photo) { $mini = '<img src="'.$p->photo->eq(0)->getCrop('big')->url.'" alt="'.$p->title.'." />'; }
+        if ($p->image) { $mini = '<img src="'.$p->image->getCrop('thumbnail')->url.'" alt="'.$p->title.'." />'; }
         $out .= '<h3><span class="label label-primary">'.$p->title.'</span>';
         if ($p->is("template=place")) {
           $out .= ' ('.__("in").' '.$p->city->title.', '.$p->country->title.')</h3>';

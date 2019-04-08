@@ -98,7 +98,7 @@
           $left = $teamRate - $el->teamOwners->count();
           $title .= '<br /><h4><span class=\'label label-primary\'>'.$left.' '.__('more needed !').'</span></h4>';
         }
-        $out .= '<a href="'.$el->url.'" class=""><img class="'.$el->cssClass.'" src="'.$thumbImage.'" data-toggle="tooltip" data-html="true" title="'.$title.'" /></a>';
+        $out .= '<a href="'.$el->url.'" class=""><img class="'.$el->cssClass.'" src="'.$thumbImage.'" data-toggle="tooltip" data-html="true" title="'.$title.'" alt="'.$el->title.'."/></a>';
         $out .= "</div>";
       }
       $out .= '</section>';
@@ -124,7 +124,7 @@
           }
           $title .= '<h4>'.__("Freed by").' <span class=\'label label-success\'>'.$el->teamOwners->count().'</span> players '.$ownerList.'</h4>';
         }
-        $out .= '<a href="'.$el->url.'" class=""><img class="'.$el->cssClass.'" src="'.$thumbImage.'" data-toggle="tooltip" data-html="true" title="'.$title.'" /></a>';
+        $out .= '<a href="'.$el->url.'" class=""><img class="'.$el->cssClass.'" src="'.$thumbImage.'" data-toggle="tooltip" data-html="true" title="'.$title.'" alt="'.$el->title.'." /></a>';
         $out .= "</div>";
       }
       $out .= '</section>';

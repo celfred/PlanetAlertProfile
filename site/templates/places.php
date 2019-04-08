@@ -83,7 +83,7 @@
             $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
             $city = $place->parent->title;
             $country = $place->parent->parent->title;
-            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="" data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.','.$country.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
+            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="'.$place->title.'." data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.','.$country.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
           }
         $out .= '</ul>';
         $out .= '<div class="text-center">'.$pagination.'</div>';
@@ -105,7 +105,7 @@
               $out .= '<tr>';
               $out .= '<td>';
               $out .= $place->title;
-              $out .= '<img src="'.$place->photo->eq(0)->getCrop('mini')->url.'"  alt="" />';
+              $out .= '<img src="'.$place->photo->eq(0)->getCrop('mini')->url.'"  alt="'.$place->title.'." />';
               $out .= '</td>';
               $out .= '<td>'.$place->country->title.'</td>';
               $out .= '<td>'.$place->city->title.'</td>';
@@ -128,7 +128,7 @@
             $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
             $city = $place->parent->title;
             $country = $place->parent->parent->title;
-            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="" data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.','.$country.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
+            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="'.$place->title.'." data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.','.$country.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
           }
         $out .= '</ul>';
         $out .= '<div class="text-center">'.$pagination.'</div>';
@@ -150,7 +150,7 @@
               $out .= '<tr>';
               $out .= '<td>';
               $out .= $place->title;
-              $out .= '<img src="'.$place->photo->eq(0)->getCrop('mini')->url.'"  alt="" />';
+              $out .= '<img src="'.$place->photo->eq(0)->getCrop('mini')->url.'"  alt="'.$place->title.'." />';
               $out .= '</td>';
               $out .= '<td>'.$place->country->title.'</td>';
               $out .= '<td>'.$place->city->title.'</td>';

@@ -235,7 +235,7 @@
           $out .= '<div class="panel-heading">';
             $out .= '<h4 class="panel-title">';
               if ($player->avatar) {
-                $out .= '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />';
+                $out .= '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="'.$player->title.'." />';
               }
               $out .= __('Last 10 events in your personal history');
             $out .= '</h4>';
@@ -308,7 +308,7 @@
               $out .= '  <div class="panel-heading">';
               $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field='.$field.'"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
               $out .= '  <h4 class="panel-title">';
-              $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
+              $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="star." /> ';
               $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.__("Your position in this scoreboard").'">'.$playerPos.'</span> '.$team.' '.$title.'</h4>';
               $out .= '  </div>';
               $out .= '  <div class="panel-body">';
@@ -352,7 +352,7 @@
                         }
                         $out .= '<li>';
                         if ($p->avatar) {
-                          $out .= '<img class="" src="'.$p->avatar->getCrop("mini")->url.'" width="50" alt="Avatar" />';
+                          $out .= '<img class="" src="'.$p->avatar->getCrop("mini")->url.'" width="50" alt="'.$p->title.'." />';
                         } else {
                           $out .= '<Avatar>';
                         }
@@ -397,7 +397,7 @@
               $out .= '  <div class="panel-heading">';
               $out .= '  <a class="pull-right" href="'.$pages->get('name=scoreboard')->url.'?field='.$field.'"><span class="glyphicon glyphicon-list" data-toggle="tooltip" title="See the complete scoreboard"></span></a>';
               $out .= '  <h4 class="panel-title">';
-              $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="" /> ';
+              $out .= '<img src="'.$config->urls->templates.'img/star.png" alt="star." /> ';
               $out .= '<span class="label label-primary" data-toggle="tooltip" title="'.__("Your position in this scoreboard").'">'.$playerPos.'</span> '.$team.' '.$title.'</h4>';
               $out .= '  </div>';
               $out .= '  <div class="panel-body">';
@@ -485,7 +485,7 @@
           $out .= '<div id="" class="news panel panel-primary">';
             $out .= '<div class="panel-heading">';
             $out .= '<h4 class="panel-title">';
-              if ($player->avatar) { $out .= '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="avatar" />'; }
+              if ($player->avatar) { $out .= '<img src="'.$player->avatar->getCrop('mini')->url.'" alt="'.$player->title.'." />'; }
               $out .= __('Work statistics on current period').' ('.$currentPeriod->title.') <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Suivi du travail sur la période (pour SACoche). Si la période n\'est pas terminée, tu peux encore améliorer tes résultats !"></span>';
             $out .= '</h4>';
             $out .= '</div>';
@@ -526,7 +526,7 @@
           if ($currentPlayer->team->name == 'no-team') { $team = ''; } else { $team = '['.$currentPlayer->team->title.']'; }
           if ($currentPlayer->avatar) {
             $thumb = $currentPlayer->avatar->size(20,20);
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$thumb->url."' alt='avatar' />";
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$currentPlayer->avatar->getCrop('thumbnail')->url."\" alt=\"".$currentPlayer->title.".\" />' src='".$thumb->url."' alt='".$currentPlayer->title.".' />";
           } else {
             $mini = '';
           }

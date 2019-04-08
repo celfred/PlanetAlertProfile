@@ -50,10 +50,10 @@
       $out .= '<th>'.__("Item").'</th>';
       $out .= '<th></th>';
       $out .= '<th><span class="glyphicon glyphicon-signal"></span> '.__("Min level").'</th>';
-      $out .= '<th><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.__("Min # of Free Acts").'</th>';
-      $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="" /> '.__("HP").'</th>';
-      $out .= '<th><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.__("XP").'</th>';
-      $out .= '<th><img src="'.$config->urls->templates.'img/gold_mini.png" alt="" /> '.__("GC").'</th>';
+      $out .= '<th><img src="'.$config->urls->templates.'img/globe.png" alt="globe." /> '.__("Min # of Free Acts").'</th>';
+      $out .= '<th><img src="'.$config->urls->templates.'img/heart.png" alt="heart." /> '.__("HP").'</th>';
+      $out .= '<th><img src="'.$config->urls->templates.'img/star.png" alt="star." /> '.__("XP").'</th>';
+      $out .= '<th><img src="'.$config->urls->templates.'img/gold_mini.png" alt="gold coins." /> '.__("GC").'</th>';
       $out .= '<th>'.__("Category").'</th>';
       $out .= '</tr>';
       $out .= '</thead>';
@@ -61,7 +61,7 @@
       foreach ($allEquipments as $item) {
         $out .= '<tr>';
           if ($item->image) {
-            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$item->image->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$item->image->getCrop('mini')->url."' alt='avatar' />";
+            $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$item->image->getCrop('thumbnail')->url."\" alt=\"".$item->title.".\" />' src='".$item->image->getCrop('mini')->url."' alt='".$item->title.".' />";
           } else {
             $mini = '';
           }

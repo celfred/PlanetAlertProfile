@@ -83,14 +83,20 @@
     <div class="panel-body">
       <div class="row">
         <div class="text-center col-sm-6">
-          <img src="<?php if ($playerPage->avatar) echo $playerPage->avatar->url; ?>" alt="No avatar" height="200" />
+          <?php 
+            if ($playerPage->avatar) {
+              echo '<img src="'.$playerPage->avatar->url.'" alt="'.$playerPage->title.'." height="200" />';
+            } else {
+              echo 'No avatar';
+            }
+          ?>
         </div>
         <div class="col-sm-6">
           <ul class="player-details">
           <li><?php echo __("Karma"); ?> : <span class="label label-default"><?php echo $karma; ?></span> <?php if ($playerPage->team->name != 'no-team') {?><span data-toggle="tooltip" title="Team position">(<?php echo $playerPos; ?>/<?php echo $playersTotalNb; ?>)</span><?php } ?></li>
           <li><?php echo __("Reputation"); ?> : <span class="label label-default"><?php echo $playerPage->reputation; ?></span></li>
           <li><?php echo __("Level"); ?> : <?php echo $playerPage->level; ?></li>
-          <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="GC" /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="<?php echo __('Gold Coins'); ?>">
+          <li><img src="<?php  echo $config->urls->templates?>img/gold_mini.png" alt="gold coins." /> : <span class="label label-default" data-toggle="tooltip" data-html="true" title="<?php echo __('Gold Coins'); ?>">
             <?php echo $playerPage->GC.' '.__("GC"); ?>
           </span></li>
           <?php 
@@ -122,7 +128,7 @@
       <div class="row">
         <?php if ($playerPage->coma == 0) { ?>
           <div class="col-sm-2 text-right">
-            <span class="badge"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="HP" /> <?php echo $playerPage->HP; ?>/50</span>
+            <span class="badge"><img src="<?php  echo $config->urls->templates?>img/heart.png" alt="heart." /> <?php echo $playerPage->HP; ?>/50</span>
           </div>
           <div class="col-sm-10">
             <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="<?php echo __("Health points"); ?>">
@@ -139,7 +145,7 @@
             }
             $threshold = ($playerPage->level*10)+$delta;
             ?>
-            <span class="badge"><img src="<?php echo $config->urls->templates; ?>/img/star.png" alt="XP" /> <?php echo $playerPage->XP; ?>/<?php echo $threshold; ?></span>
+            <span class="badge"><img src="<?php echo $config->urls->templates; ?>/img/star.png" alt="star." /> <?php echo $playerPage->XP; ?>/<?php echo $threshold; ?></span>
           </div>
           <div class="col-sm-10">
             <div class="progress progress-striped progress-lg" data-toggle="tooltip" title="<?php echo sprintf(__("Experience (Level %d)"), $playerPage->level); ?>">
@@ -194,7 +200,7 @@
         if (count($playerPage->usabledItems)) {
           foreach($playerPage->usabledItems as $i) {
             if ($i->image) {
-              echo '<li data-toggle="tooltip" title="'.$i->title.'"><img src="'.$i->image->getCrop("small")->url.'" alt="'.$i->title.'" /></li>';
+              echo '<li data-toggle="tooltip" title="'.$i->title.'"><img src="'.$i->image->getCrop("small")->url.'" alt="'.$i->title.'." /></li>';
             } else {
               echo '<li>'.$i->title.'</li>';
             }
@@ -242,7 +248,7 @@
         $out .= '<ul class="playerPlaces list-inline">';
         foreach($playerPage->places as $place) {
           $thumbImage = $place->photo->eq(0)->getCrop('thumbnail')->url;
-          $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage.'" alt="" data-toggle="tooltip" data-html="true" title="'.$place->title.'<br />'.$place->summary.'<br />['.$place->parent->title.','.$place->parent->parent->title.']" /></a></li>';
+          $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage.'" alt="'.$place->title.'." data-toggle="tooltip" data-html="true" title="'.$place->title.'<br />'.$place->summary.'<br />['.$place->parent->title.','.$place->parent->parent->title.']" /></a></li>';
           }
         $out .= '</ul>';
         if ($playerPage->rank && $playerPage->rank->is("index>=8")) {
@@ -250,7 +256,7 @@
           $out .= '<ul class="playerPlaces list-inline">';
             foreach($playerPage->people as $p) {
               $thumbImage = $p->photo->eq(0)->getCrop('thumbnail')->url;
-              $out .= '<li><a href="'.$p->url.'"><img class="img-thumbnail" src="'.$thumbImage.'" alt="" data-toggle="tooltip" data-html="true" title="'.$p->title.'<br />'.$p->summary.'" /></a></li>';
+              $out .= '<li><a href="'.$p->url.'"><img class="img-thumbnail" src="'.$thumbImage.'" alt="'.$p->title.'." data-toggle="tooltip" data-html="true" title="'.$p->title.'<br />'.$p->summary.'" /></a></li>';
             }
           $out .= '</ul>';
         } else {

@@ -53,7 +53,7 @@
               $out .= '<li>';
               $out .= '<div class="thumbnail text-center">';
               if ($p->avatar) {
-                $out .= '<img class="" src="'.$p->avatar->getCrop("thumbnail")->url.'" width="50" alt="Avatar" />';
+                $out .= '<img class="" src="'.$p->avatar->getCrop("thumbnail")->url.'" width="50" alt="'.$p->title.'." />';
               } else {
                 $out .= '<Avatar>';
               }
@@ -103,7 +103,7 @@
             $out .= '<li>';
             $out .= '<div class="thumbnail text-center">';
             if ($p->avatar) {
-              $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
+              $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" alt="'.$p->title.'." />';
             } else {
               $out .= '<Avatar>';
             }
@@ -266,27 +266,27 @@
                   if ($n->task->is("name=fight-v")) { $out .= ' <span class="label label-success">V</span>'; }
                   if ($n->task->is("name=fight-r")) { $out .= ' <span class="label label-danger">R</span>'; }
                   if ($n->task->is("name=fight-rr")) { $out .= ' <span class="label label-danger">RR</span>'; }
-                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->refPage->title.'." />';
                   $out .= $out_02;
                   continue;
                 }
                 if ($n->task->is("name=best-time")) {
                   $out .= '<span class="label label-success"><i class="glyphicon glyphicon-time"></i> '.__('Best time on');
                   $out .= ' '.$n->refPage->title.'</span>';
-                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->refPage->title.'." />';
                   $out .= $out_02;
                   continue;
                 }
                 if ($n->task->is("name=free")) {
                   if ($n->refPage->photo) {
-                    $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                    $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->refPage->title.'." />';
                     $out .= $out_02;
                   }
                   continue;
                 }
                 if ($n->task->is("name=buy")) {
                   if ($n->refPage->image) {
-                    $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                    $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->refPage->title.'." />';
                     $out .= $out_02;
                   }
                   continue;
@@ -294,21 +294,21 @@
                 if ($n->task->is("name=best-time-lost")) {
                   $out .= '<span class="label label-danger"><i class="glyphicon glyphicon-time"></i> '.__('Best time lost on');
                   $out .= ' '.$n->refPage->title.'</span>';
-                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                  $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->image->getCrop("thumbnail")->url.'" alt="'.$n->refPage->title.'." />';
                   $out .= $out_02;
                   continue;
                 }
                 if ($n->refPage->parent->is("name=book-knowledge")) {
                   $out .= '<p><span class="label label-success">'.__('Copied lesson').'</span></p>';
                   $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
-                  $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                  $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="Open book." />';
                   $out .= $out_02;
                   continue;
                 }
                 if ($n->task->is("name=buy-pdf")) {
                   $out .= '<p><span class="label label-success">'.__('Buy PDF').'</span></p>';
                   $out .= '<p><span class="label label-primary">'.$n->refPage->title.'</span></p>';
-                  $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="'.$n->summary.'" />';
+                  $out .= '<img src="'.$pages->get("name=book-knowledge-item")->image->getCrop("thumbnail")->url.'" alt="Open book." />';
                   $out .= $out_02;
                   continue;
                 }
@@ -353,7 +353,7 @@
           $out .= '<li>';
           $out .= '<div class="thumbnail text-center">';
           if ($p->avatar) {
-            $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
+            $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$p->title.'." />';
           } else {
             $out .= '<Avatar>';
           }
@@ -390,7 +390,7 @@
           $out .= '<li>';
           $out .= '<div class="thumbnail text-center">';
           if ($p->avatar) {
-            $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />';
+            $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$p->title.'." />';
           } else {
             $out .= '<Avatar>';
           }
@@ -423,7 +423,7 @@
             $out .= '<li>';
             $out .= '<div class="thumbnail text-center">';
             if ($p->avatar) {
-              $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
+              $out .= '<img class="'.$pickFromList.'" data-list="'.$p->id.'" src="'.$p->avatar->getCrop("thumbnail")->url.'" alt="'.$p->title.'." />';
             } else {
               $out .= '<Avatar>';
             }
@@ -495,7 +495,7 @@
             $out .= '<li>';
             $out .= '<div class="fame thumbnail">'; // Best warrior
               $out .= '<span class="badge">'.__("Best warrior !").'</span>';
-              if ($fpPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$fpPlayer->id.'" src="'.$fpPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
+              if ($fpPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$fpPlayer->id.'" src="'.$fpPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$fpPlayer->title.'." />'; }
               $out .= '<div class="caption text-center">'.$fpPlayer->title.' <span class="badge">'.$fpPlayer->fighting_power.__("FP").'</span></div>';
             $out .= '</div>';
             $out .= '</li>';
@@ -504,7 +504,7 @@
             $out .= '<li>';
             $out .= '<div class="fame thumbnail">'; // Best donator
               $out .= '<span class="badge">'.__("Best donator !").'</span>';
-              if ($donPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$donPlayer->id.'" src="'.$donPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
+              if ($donPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$donPlayer->id.'" src="'.$donPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$donPlayer->title.'." />'; }
               $out .= '<div class="caption text-center">'.$donPlayer->title.' <span class="badge">'.$donPlayer->donation.'Don.</span></div>';
             $out .= '</div>';
             $out .= '</li>';
@@ -513,7 +513,7 @@
             $out .= '<li>';
             $out .= '<div class="fame thumbnail">'; // Most trained
               $out .= '<span class="badge">'.__("Most trained !").'</span>';
-              if ($utPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$utPlayer->id.'" src="'.$utPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
+              if ($utPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$utPlayer->id.'" src="'.$utPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$utPlayer->title.'." />'; }
               $out .= '<div class="caption text-center">'.$utPlayer->title.' <span class="badge">'.$utPlayer->underground_training.__("UT").'</span></div>';
             $out .= '</div>';
             $out .= '</li>';
@@ -522,7 +522,7 @@
             $out .= '<li>';
             $out .= '<div class="fame thumbnail">'; // Most equipped
               $out .= '<span class="badge">'.__("Most equipped !").'</span>';
-              if ($eqPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$eqPlayer->id.'" src="'.$eqPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
+              if ($eqPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$eqPlayer->id.'" src="'.$eqPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$eqPlayer->title.'." />'; }
               $out .= '<div class="caption text-center">'.$eqPlayer->title.' <span class="badge">'.$eqPlayer->equipment->count().'eq.</span></div>';
             $out .= '</div>';
             $out .= '</li>';
@@ -531,7 +531,7 @@
             $out .= '<li>';
             $out .= '<div class="fame thumbnail">'; // Greatest # of Places
               $out .= '<span class="badge">'.__("Greatest # of Places !").'</span>';
-              if ($plaPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$plaPlayer.'" src="'.$plaPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
+              if ($plaPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$plaPlayer.'" src="'.$plaPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$plaPlayer->title.'." />'; }
               $out .= '<div class="caption text-center">'.$plaPlayer->title.' <span class="badge">'.$plaPlayer->places->count().__("pla.").'</span></div>';
             $out .= '</div>';
             $out .= '</li>';
@@ -541,7 +541,7 @@
               $out .= '<li>';
               $out .= '<div class="fame thumbnail">'; // Greatest # of people
                 $out .= '<span class="badge">'.__("Greatest # of People !").'</span>';
-                if ($peoPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$peoPlayer->id.'" src="'.$peoPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="Avatar" />'; }
+                if ($peoPlayer->avatar) { $out .= '<img class="'.$pickFromList.'" data-list="'.$peoPlayer->id.'" src="'.$peoPlayer->avatar->getCrop("thumbnail")->url.'" width="80" alt="'.$peoPlayer->title.'." />'; }
                 $out .= '<div class="caption text-center">'.$peoPlayer->title.' <span class="badge">'.$peoPlayer->people->count().'peo.</span></div>';
               $out .= '</div>';
               $out .= '</li>';

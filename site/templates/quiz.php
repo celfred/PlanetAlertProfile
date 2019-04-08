@@ -135,8 +135,9 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
           $out .= '<section class="text-center">';
           $placeId = $quiz['id'];
           $options = array('upscaling'=>false);
-          $photo = $pages->get("$placeId")->photo->getRandom()->size(200,200, $options);
-            $out .= '<img src="'.$photo->url.'" alt="Photo" />';
+          $selectedElement = $pages->get("$placeId");
+          $photo = $selectedElement->photo->getRandom()->size(200,200, $options);
+            $out .= '<img src="'.$photo->url.'" alt="'.$selectedElement->title.'." />';
           $out .= '</section>';
         }
         $out .= '<a id="showAnswer" class="label label-info lead">['.__('Check answer').']</a>';
@@ -215,8 +216,9 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
         $out .= '<section class="text-center">';
         $placeId = $quiz['id'];
         $options = array('upscaling'=>false);
-        $photo = $pages->get("$placeId")->photo->getRandom()->size(300,300, $options);
-          $out .= '<img src="'.$photo->url.'" alt="Photo" />';
+        $selectedElement = $pages->get("$placeId");
+        $photo = $selectedElement->photo->getRandom()->size(300,300, $options);
+          $out .= '<img src="'.$photo->url.'" alt="'.$selectedElement->title.'." />';
         $out .= '</section>';
       }
       $out .= '<a id="showAnswer" class="label label-primary">'.__("[Check answer]").'</a>';

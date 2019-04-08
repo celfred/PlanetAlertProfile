@@ -40,7 +40,7 @@
       $helpAlert = true;
       $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
       $helpTitle = __("Some monsters are absent !");
-      $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="image" /> ';
+      $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="Electronic visualizer." /> ';
       $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
     }
     $out .= '<table id="fightersTable" class="table table-hover table-condensed">';

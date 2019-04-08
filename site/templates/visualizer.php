@@ -34,7 +34,7 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasR
 
     $out .= '<section class="well text-center">';
       $out .= '<h2>';
-        $out .= '<img class="" src="'.$visualizer->image->getCrop("small")->url.'" alt="image" /> ';
+        $out .= '<img class="" src="'.$visualizer->image->getCrop("small")->url.'" alt="Electronic visualizer." /> ';
         $out .= $visualizer->title;
         $out .= ' <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.__("All monsters are visible. The bigger the monster is, the closest to you it is. This means you should take action !").'"></i>';
       $out .= '</h2>';
@@ -88,7 +88,7 @@ if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasR
             $out .= '<span class="label label-primary">'.$m->title.'</span>';
           }
         }
-        $out .= '<img class="monsterInfo img-thumbnail" data-href="'.$m->url.'" data-toggle="tooltip" data-html="true" title="'.$m->title.'<br />Level '.$m->level.'<br />'.$m->summary.'" src="'.$m->image->url.'" alt="image" />';
+        $out .= '<img class="monsterInfo img-thumbnail" data-href="'.$m->url.'" data-toggle="tooltip" data-html="true" title="'.$m->title.'<br />Level '.$m->level.'<br />'.$m->summary.'" src="'.$m->image->url.'" alt="'.$m->title.'." />';
         $out .= '</div>';
       }
       $previousLevel = $m->level;

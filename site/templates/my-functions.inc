@@ -1791,7 +1791,7 @@ function displayCompleteScoreboard($allPlayers, $playerId, $field, $pageNum) {
   foreach ($allPlayers as $p) {
     $p->id == $playerId ? $focus = 'class="focus"' : $focus = '';
     if ($p->avatar) {
-      $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
+      $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"".$p->title.".\" />' src='".$p->avatar->getCrop('mini')->url."' alt='".$p->title.".' />";
     } else {
       $mini = '';
     }
@@ -1830,7 +1830,7 @@ function scoreboardLine($field, $player, $focus) {
   $out = '';
   $p = $player;
   if ($p->avatar) {
-    $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"avatar\" />' src='".$p->avatar->getCrop('mini')->url."' alt='avatar' />";
+    $mini = "<img data-toggle='tooltip' data-html='true' data-original-title='<img src=\"".$p->avatar->getCrop('thumbnail')->url."\" alt=\"".$p->title.".\" />' src='".$p->avatar->getCrop('mini')->url."' alt='".$p->title.".' />";
   } else {
     $mini = '';
   }
@@ -2814,20 +2814,20 @@ function miniProfile($player, $type = '') {
     $out .= '<li><span class="label label-success">'.__("Reputation").' : '.$player->reputation.'</span></li>';
     $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Level').'"><span class="glyphicon glyphicon-signal"></span> '.$player->level.'</span>';
     $threshold = getLevelThreshold($player->level);
-    $out .= ' <span class="label label-default" data-toggle="tooltip" title="XP"><img src="'.$config->urls->templates.'img/star.png" alt="" /> '.$player->XP.'/'.$threshold.'</span></li>';
+    $out .= ' <span class="label label-default" data-toggle="tooltip" title="XP"><img src="'.$config->urls->templates.'img/star.png" alt="star." /> '.$player->XP.'/'.$threshold.'</span></li>';
     if ($player->places) {
       $nbFreeEl = $player->places->count();
     }
     if ($player->team->rank && $player->team->rank->is('index>=8') && $player->people) {
       $nbFreeEl += $player->people->count();
     }
-    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Free Elements').'"><img src="'.$config->urls->templates.'img/globe.png" alt="" /> '.$nbFreeEl.'</span>';
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Free Elements').'"><img src="'.$config->urls->templates.'img/globe.png" alt="globe." /> '.$nbFreeEl.'</span>';
     $out .= ' <span class="label label-default" data-toggle="tooltip" title="'.__('Equipment').'"><span class="glyphicon glyphicon-wrench"></span> '.$player->equipment->count().'</span></li>';
     $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Underground Training').'">'.$player->underground_training.' '.__('UT').'</span>';
     $out .= ' <span class="label label-default" data-toggle="tooltip" title="'.__('Fighting Power').'">'.$player->fighting_power.' '.__('FP').'</span>';
     $out .= '</li>';
-    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Health Points').'"><img src="'.$config->urls->templates.'img/heart.png" alt="" /> '.$player->HP.'</span>';
-    $out .= ' <span id="playerGC" class="label label-default" data-toggle="tooltip" title="'.__('Gold Coins').'"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="GC" /> '.$player->GC.'</span></li>';
+    $out .= '<li><span class="label label-default" data-toggle="tooltip" title="'.__('Health Points').'"><img src="'.$config->urls->templates.'img/heart.png" alt="heart." /> '.$player->HP.'</span>';
+    $out .= ' <span id="playerGC" class="label label-default" data-toggle="tooltip" title="'.__('Gold Coins').'"><img src="'.$config->urls->templates.'img/gold_mini.png" alt="gold coins." /> '.$player->GC.'</span></li>';
 
     // Display according to $type
     switch ($type) {

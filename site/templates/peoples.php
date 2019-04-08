@@ -29,7 +29,7 @@
     foreach($allPeople as $p) {
       $photo = $p->photo->eq(0)->getCrop("thumbnail");
       $out .= '<tr>';
-      $out .= '<td><img src="'.$photo->url.'" alt="photo" /></td>';
+      $out .= '<td><img src="'.$photo->url.'" alt="'.$p->title.'." /></td>';
       $out .= '<td>'.$p->title;
       if ($user->hasRole('teacher') || $user->isSuperuser()) {
         $out .= '<a class="pdfLink btn btn-info" href="'. $p->url.'?pages2pdf=1&id='.$p->id.'">Get PDF</a>';

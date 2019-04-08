@@ -97,7 +97,7 @@
                   $out .= '<div class="well trainingBoard" ng-show="waitForStart">'.__("Please wait while loading data...").'</div>';
                   $out .= '<div class="well trainingBoard" ng-hide="waitForStart">';
                   if ($monster->type->name == 'image-map') {
-                    $out .= '<div><img src="'.$monster->imageMap->first()->url.'" max-width="800" alt="Image" /></div>';
+                    $out .= '<div><img src="'.$monster->imageMap->first()->url.'" max-width="800" alt="numbered vocabulary." /></div>';
                   }
                   if ($monster->instructions != '') {
                     $out .= '<span class="pull-right glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$monster->instructions.'"></span>';
@@ -144,10 +144,10 @@
                   $out .= '</div>';
                   $out .= '<span class="avatarContainer">';
                     if (isset($player) && $player->avatar) {
-                      $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="Avatar" />';
+                      $out .= '<img class="" src="'.$player->avatar->getCrop("thumbnail")->url.'" alt="'.$player->title.'." />';
                     }
                     if ($helmet->image) {
-                      $out .= '<img class="helmet superpose squeeze" src="'.$helmet->image->url.'" alt="image" />';
+                      $out .= '<img class="helmet superpose squeeze" src="'.$helmet->image->url.'" alt="memory helmet." />';
                     }
                   $out .= '</span>';
                   $out .= '<h4>';
@@ -214,7 +214,7 @@
     $out .= '<p>Level '.$page->level.'</p>';
     $out .= '<small>Type : '.$page->type->title.' <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" onmouseenter="$(this).tooltip(\'show\');" title="'.$page->type->summary.'"></span></small>';
       $out .= '<h3 class="thumbnail">';
-      if ($page->image) { $mini = '<img src="'.$page->image->getCrop('big')->url.'" alt="Photo" />'; }
+      if ($page->image) { $mini = '<img src="'.$page->image->getCrop('big')->url.'" alt="'.$page->title.'." />'; }
       $out .= $mini;
       $out .= '</h3>';
     $out .= '</div>';
@@ -242,7 +242,7 @@
         $out .= '<li><i class="glyphicon glyphicon-headphones"></i> <span class="label label-primary">'.$page->utGain.' UT</span>';
         if ($page->isTrainable == 1) {
           $helmet = $pages->get("name=memory-helmet");
-          $out .= '→ <a class="btn btn-primary" href="'.$page->url.'train"><img src="'.$helmet->image->getCrop("mini")->url.'" alt="Use the Memory Helmet" /> Use the Memory Helmet !</a>';
+          $out .= '→ <a class="btn btn-primary" href="'.$page->url.'train"><img src="'.$helmet->image->getCrop("mini")->url.'" alt="memory helmet." /> Use the Memory Helmet !</a>';
           if ($page->lastTrainingInterval != -1) {
             $out .= '<p>Last training session : '.$page->lastTrainingInterval.'</p>';
           } else {

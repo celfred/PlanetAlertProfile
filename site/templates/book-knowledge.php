@@ -9,7 +9,7 @@
 
   $book = $pages->get("template=item, name~=book-knowledge");
   $out .= '<div class="well">';
-  $out .= '<img class="pull-right" src="'.$book->image->getCrop("thumbnail")->url.'" alt="Image" /> ';
+  $out .= '<img class="pull-right" src="'.$book->image->getCrop("thumbnail")->url.'" alt="open book." /> ';
   $out .= '<h3 class="text-center">';
   $out .= $page->title;
   $out .= '</h3>';
@@ -43,7 +43,7 @@
       $out .= '<tr>';
       if ($l->level != '' && $l->summary !='' && $l->task) {
         $out .= '<td>'.$l->level.' </td>';
-          if (($user->hasRole('player') && ($player->equipment->has("name~=book-knowledge")) || $player->team->forceKnowledge == 1) || $user->hasRole('teacher') || $user->isSuperuser()) {
+          if (($user->hasRole('player') && ($player->equipment->has("name~=book-knowledge") || $player->team->forceKnowledge == 1)) || $user->hasRole('teacher') || $user->isSuperuser()) {
             $out .= '<td> <a href="'.$l->url.'">'.$l->title.' <span class="glyphicon glyphicon-eye-open"></span></a></td>';
           } else {
             $out .= '<td>'.$l->title.'</td>';

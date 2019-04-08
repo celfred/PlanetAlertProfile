@@ -43,14 +43,14 @@
         $out .= '<span class="pull-left glyphicon glyphicon-question-sign" data-toggle="tooltip" data-html="true" title="'.$page->summary.'"></span>';
         $out .= $page->title;
         if ($helmet->image) {
-          $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Helmet" />';
+          $out .= '<img class="pull-right" src="'.$helmet->image->url.'" alt="Memory helmet." />';
         }
       $out .= '</h2>';
       if (isset($hiddenMonstersNb)) { // Display helpAlert for Electronic visualizer
         $helpAlert = true;
         $link = '<a href="'.$pages->get("name=shop")->url.'/details/electronic-visualizer">Electronic Visualizer</a>';
         $helpTitle = __("Some monsters are absent !");
-        $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="image" /> ';
+        $helpMessage = '<img src="'.$pages->get("name~=visualizer")->image->getCrop("small")->url.'" alt="Electronic visualizer." /> ';
         $helpMessage .= '<h4>'.sprintf(__('%1$s monsters are absent because you don\'t have the %2$s.'), $hiddenMonstersNb, $link).'</h4>';
       }
       include("./helpAlert.inc.php"); 
