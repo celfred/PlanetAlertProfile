@@ -1,38 +1,41 @@
 <?php namespace ProcessWire; ?>
-      </div><!-- /#content -->
-    </div><!-- /.row -->
-  <div class="push"><!--//--!></div>
-  </div><!-- /.container -->
-</div><!--/wrap-->
-
-<?php if ($user->isSuperuser() || $user->hasRole('teacher') || $user->name == 'test') { ?>
-  <section class="navigate">
-    <a href="#" id="scrollUp"><span class="glyphicon glyphicon-triangle-top"></span></a>
-    <a href="#" id="scrollDown"><span class="glyphicon glyphicon-triangle-bottom"></span></a>
-  </section>
-<?php } ?>
-
-<footer class="text-center">
-  <p>Planet Alert v1.0.0
-    &nbsp;&copy; <?php echo date("Y"); ?> FL 
-    &nbsp;-&nbsp;
-    Powered by <a href="http://processwire.com">ProcessWire</a> CMS (v<?php echo $config->version; ?>)
-    &nbsp;
-    <?php $about = $pages->get("name=about"); ?>
-    <a href="<?php echo $about->url; ?>">[<?php echo $about->title; ?>]</a>
-    &nbsp;
-    <a href="https://framagit.org/celfred/planetAlert"><?php echo __('[Framagit repository]'); ?></a>
-   </p>
-</footer>
-
 <?php 
-  if ($user->isSuperuser()) {
-    echo '<span class="backendLink">';
-    echo '<a href="'.$config->urls->admin.'">[Backend]</a>';
-    echo '</span>';
-  } else if ($user->hasRole('teacher')) {
-    echo '<span class="backendLink">'.__("Teacher").'</span>';
+  if (!$config->ajax) {
+          echo '</div>'; // #content
+        echo '</div>'; // .row
+      echo '<div class="push"><!--//--!></div>';
+      echo '</div>'; // .container
+    echo '</div>'; // wrap
+
+    if ($user->isSuperuser() || $user->hasRole('teacher') || $user->name == 'test') {
+      echo '<section class="navigate">';
+        echo '<a href="#" id="scrollUp"><span class="glyphicon glyphicon-triangle-top"></span></a>';
+        echo '<a href="#" id="scrollDown"><span class="glyphicon glyphicon-triangle-bottom"></span></a>';
+      echo '</section>';
+    }
+
+    echo '<footer class="text-center">';
+      echo '<p>';
+      echo 'Planet Alert v1.0.0';
+      echo ' &copy; '.date("Y").' FL';
+      echo ' - ';
+      echo 'Powered by <a href="http://processwire.com">ProcessWire</a> CMS (v'.$config->version.')';
+      echo '&nbsp;';
+      $about = $pages->get("name=about");
+      echo '<a href="'.$about->url.'">['.$about->title.']</a>';
+      echo ' <a href="https://framagit.org/celfred/planetAlert">'.__("[Framagit repository]").'</a>';
+      echo '</p>';
+    echo '</footer>';
+
+    if ($user->isSuperuser()) {
+      echo '<span class="backendLink">';
+      echo '<a href="'.$config->urls->admin.'">[Backend]</a>';
+      echo '</span>';
+    } else if ($user->hasRole('teacher')) {
+      echo '<span class="backendLink">'.__("Teacher").'</span>';
+    }
   }
+
   $jsVersion = md5(filemtime($config->paths->templates.'foot.inc'));
 ?>
   <script src="<?php echo $config->urls->templates?>bower_components/jquery/dist/jquery.min.js"></script>
@@ -65,6 +68,9 @@
       echo '<script src="'.$config->urls->templates.'scripts/lang.en.js?v='.$jsVersion.'"></script>';
     }
     echo '<script src="'.$config->urls->templates.'scripts/main.js?v='.$jsVersion.'"></script>';
-  ?>
-</body>
-</html>
+
+  if (!$config->ajax) {
+    echo '</body>';
+    echo '</html>';
+  }
+?>

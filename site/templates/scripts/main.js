@@ -334,6 +334,24 @@ $(document).ready(function() {
 		});
 	});
 
+	$(document).on('click', '#programHelmet', function(e) {
+    e.preventDefault();
+		var $this = $(this);
+    var $form = $this.parent("form");
+    var $selectors = $form.serialize();
+    var $target = $('#trainingList');
+    var $href = $form.attr('action')+'?'+$selectors;
+    $.get($href, function(data) { 
+      if (data) {
+        $target.html(data);
+      } else {
+        $target.html('Error ?');
+      }
+    }); 
+    // TODO : Hide form (Show config cog ?)
+    return false;
+  });
+
 	$(document).on('click', '.simpleAjax', function(e) {
 		$this = $(this);
     $hide = $this.attr('data-hide-feedback');
