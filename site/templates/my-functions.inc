@@ -1344,7 +1344,11 @@ function setTeamRate($teamId) {
   $pages = wire('pages');
   $team = $pages->get($teamId);
   $nbPlayers = $pages->count("parent.name=players, team=$team");
-  $teamRate = round(($nbPlayers*20)/100);
+  if ($team->rank->index >= 8) { // Lower team rate for teams having a world composed of both places and people
+    $teamRate = round(($nbPlayers*15)/100);
+  } else {
+    $teamRate = round(($nbPlayers*20)/100);
+  }
   $teamRate == 0 ? $teamRate = 1 : '';
   return $teamRate;
 }
@@ -1458,7 +1462,7 @@ function updateTeamScores($team, $element = false) {
           $nbAllElements = $pages->find("template=place")->count();
         }
         $element = setElement($element, $team);
-        if ($element->completed) { $team->freeelements->add($element); }
+        if ($element->completed == 1) { $team->freeelements->add($element); }
         $percent = round((100*$team->freeelements->count())/$nbAllElements);
         $team->freeworld = $percent;
       }
@@ -1475,7 +1479,7 @@ function updateTeamScores($team, $element = false) {
     }
     $team->of(false);
     $team->save();
-    clearMarkupCache('cache__freeworld-'.$team->name , 'cache__scores-'.$team->teacher->eq(0));
+    clearMarkupCache('cache__freeworld-'.$team->name , 'cache__scores-'.$team->teacher->eq(0)->name);
   }
 }
 
