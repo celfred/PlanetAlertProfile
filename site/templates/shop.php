@@ -93,19 +93,27 @@
       $team = $allTeams->get("name=$input->urlSegment1");
       include("./tabList.inc"); 
       $out = '';
+      $playerId = $input->get("playerId");
       $allPlayers = $pages->findMany("parent.name=players, template=player, team=$team, sort=title");
       // Select form
       $out .= '<select class="" id="shopSelect" name="shopSelect">';
         $out .= '<option value="">'.__('Select a player').'</option>';
         foreach ($allPlayers as $player) {
           // Build selectEquipment
-          $out .= '<option value="'.$pages->get('/shop_generator')->url.$player->id.'">'.$player->title.' ['.$player->GC.__('GC').']</option>';
+          if ($player->id == $playerId) { $selected = 'selected="selected"'; bd($selected);} else { $selected = ''; }
+          $out .= '<option value="'.$pages->get('/shop_generator')->url.$player->id.'" '.$selected.'>'.$player->title.' ['.$player->GC.__('GC').']</option>';
         }
       $out .= '</select>';
 
       // Display possible equipment/places for selected player
-      $out .= '<section id="possibleItems">';
-      $out .= '</section>';
+      if (!$playerId) {
+        $out .= '<section id="possibleItems">';
+        $out .= '</section>';
+      } else {
+        $out .= '<section id="possibleItems" class="ajaxContent" data-href="'.$pages->get('/shop_generator')->url.$playerId.'">';
+        $out .= '<p class="text-center"><img src="'.$config->urls->templates.'img/hourglass.gif"></p>';
+        $out .= '</section>';
+      }
     } else {
       $session->redirect($shop->url);
     }
