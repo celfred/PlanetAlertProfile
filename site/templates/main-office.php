@@ -23,10 +23,10 @@
     $out .= getScoresSummaries($headTeacher);
 
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
-    $cacheName = 'cache__office-teacher-'.$input->urlSegment1.'-'.$user->language->name;
+    $cacheName = 'cache__'.$input->urlSegment1.'-office-teacher-'.$user->language->name;
   }
   if ($user->hasRole('player') || $user->isGuest()) {
-    $cacheName = 'cache__office-player-'.$input->urlSegment1.'-'.$headTeacher->language->name;
+    $cacheName = 'cache__'.$input->urlSegment1.'-office-player-'.$headTeacher->language->name;
   }
   $cachedOffice = $cache->get($cacheName, 86400, function($user, $pages) use($selectedTeam, $allPlayers, $pickFromList, $rank) {
     $out = '';

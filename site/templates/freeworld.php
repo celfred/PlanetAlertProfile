@@ -64,7 +64,7 @@
       $out .= ' <span data-toggle="tooltip" data-html="true" title="'.__("# of players required to complete a place and increase %.").'" class="glyphicon glyphicon-question-sign"></span></h4>';
     }
 
-    $freeworld = $cache->get("cache__freeworld-".$selectedTeam->name, 86400, function() use($allElements, $selectedTeam, $teamRate) {
+    $freeworld = $cache->get("cache__".$selectedTeam->name."-freeworld", 86400, function() use($allElements, $selectedTeam, $teamRate) {
       $out = '';
       $allCompleted = $allElements->find("completed=1");
       $notCompleted = $allElements->find("completed!=1");

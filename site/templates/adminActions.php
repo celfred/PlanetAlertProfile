@@ -1202,6 +1202,8 @@
             $out .= '<h3 class="text-center">';
             $out .=   'Set cache';
             $out .= '</h3>';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'cleanCache/all/1">Clean all markup Caches</button>';
+            $out .= '<hr />';
             $out .= '<div>';
             $out .= '<span>Select a team : </span>';
             $out .= '<select id="teamId">';
@@ -1539,7 +1541,7 @@
       $endDate = $endDate.' 23:59:59';
     }
 
-    $teamActions = ['toggle-lock', 'savePeriod', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp'];
+    $teamActions = ['toggle-lock', 'savePeriod', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp', 'clean-markupCache'];
     if (in_array($action, $teamActions)) {
       $type = 'team';
     }
@@ -1805,6 +1807,9 @@
           }
         }
         break;
+      case 'clean-markupCache' :
+        clearMarkupCache('cache__'.$selectedTeam->name.'-*');
+        break;
       case 'add-death' :
         if ($selectedPlayer) {
           $allPlayers = $pages->find("parent.name=players, template=player, team=$selectedPlayer->team");
@@ -1970,6 +1975,9 @@
         } else {
           $out .= '<p>Memory helmets seem to be clean.</p>';
         }
+        break;
+      case 'cleanCache' :
+        clearMarkupCache('cache__*');
         break;
       case 'clean-history' :
         if ($selectedPlayer) {
@@ -2547,6 +2555,10 @@
             // Recalculate tmp page
             $out .= '<li><label for="recalculateTmpPage"><input type="checkbox" id="recalculate-tmp"> '.__("Recalculate tmpPage").'</label> ';
             $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'recalculate-tmp/'.$selectedTeam.'/1">'.__("Save").'</button>';
+            $out .= '</li>';
+            // Clean MarkupCache
+            $out .= '<li><label for="clean-markupcache"><input type="checkbox" id="clean-markupcache"> '.__("Clean markupCache").'</label> ';
+            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'clean-markupCache/'.$selectedTeam.'/1">'.__("Save").'</button>';
             $out .= '</li>';
           $out .= '</ul>';
         } else {

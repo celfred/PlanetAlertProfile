@@ -59,10 +59,10 @@ echo '<div>';
 
   if (isset($pagination)) { $out .= $pagination;}
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
-    $cacheName = 'cache__players-teacher-'.$input->urlSegment1.'-'.$user->language->name;
+    $cacheName = 'cache__'.$input->urlSegment1.'-players-teacher-'.$user->language->name;
   }
   if ($user->hasRole('player') || $user->isGuest()) {
-    $cacheName = 'cache__players-player-'.$input->urlSegment1.'-'.$headTeacher->language->name;
+    $cacheName = 'cache__'.$input->urlSegment1.'-players-teacher-'.$headTeacher->language->name;
   }
   $cachedTable = $cache->get($cacheName, 86400, function($user, $pages, $config) use($selectedTeam, $allPlayers) {
     $out = '';
