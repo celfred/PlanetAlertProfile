@@ -170,10 +170,9 @@
         $out .= '<td class="text-left">';
         list($firstName, $lastName) = explode(' ', $name, 2); 
         if ($teamId != -1) {
-          $paPlayer = $pages->get("title~=$firstName, lastName~=$lastName, team.id=$teamId");
+          $paPlayer = $pages->get("parent.name=players, title~=$firstName, lastName~=$lastName, team.id=$teamId");
         } else {
-          bd('ok');
-          $paPlayer = $pages->get("title~=$firstName, lastName~=$lastName, team.name=$teamName");
+          $paPlayer = $pages->get("parent.name=players, title~=$firstName, lastName~=$lastName, team.name=$teamName");
         }
         if ($paPlayer->id) {
           $out .= ' <span class="label label-success">'.$paPlayer->title.' ['.$paPlayer->team->title.']</span>';
