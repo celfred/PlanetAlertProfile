@@ -1457,7 +1457,7 @@ var initTables = function() {
   if ($('#teamTable').length > 0 && $('.MarkupPagerNav').length > 0) { // No-team table is sorted on reputation column
     $('#teamTable').DataTable({
       paging: false,
-      searching: false,
+      info: false,
       columnDefs: [{ "orderable": false, "targets": 1 },
         { "orderable": false, "targets": 4}],
       order: [[ 7, "desc" ]],
@@ -1465,6 +1465,7 @@ var initTables = function() {
   } else {
     $('#teamTable').DataTable({
       paging: false,
+      info: false,
       searching: false,
       columnDefs: [{ "orderable": false, "targets": 1 },
         { "orderable": false, "targets": 4}],
