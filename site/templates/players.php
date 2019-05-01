@@ -52,6 +52,7 @@ echo '<div>';
     echo '</p>';
   } else {
     $pagination = $allPlayers->renderPager();
+    $pageNum = $input->pageNum;
   }
 
   // Players table
@@ -59,10 +60,18 @@ echo '<div>';
 
   if (isset($pagination)) { $out .= $pagination;}
   if ($user->hasRole('teacher') || $user->isSuperuser()) {
-    $cacheName = 'cache__players-teacher-'.$input->urlSegment1.'-'.$user->language->name;
+    if (isset($pagination)) {
+      $cacheName = 'cache__'.$input->urlSegment1.'-players-teacher-'.$user->language->name.'-page'.$pageNum;
+    } else {
+      $cacheName = 'cache__'.$input->urlSegment1.'-players-teacher-'.$user->language->name;
+    }
   }
   if ($user->hasRole('player') || $user->isGuest()) {
-    $cacheName = 'cache__players-player-'.$input->urlSegment1.'-'.$headTeacher->language->name;
+    if (isset($pagination)) {
+      $cacheName = 'cache__'.$input->urlSegment1.'-players-teacher-'.$headTeacher->language->name.'-page'.$pageNum;
+    } else {
+      $cacheName = 'cache__'.$input->urlSegment1.'-players-teacher-'.$headTeacher->language->name;
+    }
   }
   $cachedTable = $cache->get($cacheName, 86400, function($user, $pages, $config) use($selectedTeam, $allPlayers) {
     $out = '';
@@ -99,7 +108,6 @@ echo '<div>';
     $out .= '<tbody>';
     foreach($allPlayers as $player) {
       $historyPage = $player->get("name=history");
-      /* $player->login == $user->name ? $class = ' class="selected"' : $class = ''; */
       if ($user->isLoggedin()) { // Get last recorded events
         $lastEvent = $historyPage->child("sort=-date");
         $prevDate = date("m/d/Y", $lastEvent->date)." 0:0:0"; // Get all events on same day

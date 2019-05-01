@@ -361,6 +361,7 @@
     </div>
     <?php 
       if ($showDetails) {
+        $tmpCache = $playerPage->children()->get("name=tmp");
         if ($playerPage->equipment->has("name=memory-helmet")) {
     ?>
     <div class="panel-body ajaxContent" data-priority="1" data-href="<?php echo $pages->get('name=ajax-content')->url; ?>" data-id="utreport&playerId=<?php echo $playerPage->id; ?>">

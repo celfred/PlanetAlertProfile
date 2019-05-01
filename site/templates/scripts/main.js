@@ -334,6 +334,24 @@ $(document).ready(function() {
 		});
 	});
 
+	$(document).on('click', '#programHelmet', function(e) {
+    e.preventDefault();
+		var $this = $(this);
+    var $form = $this.parent("form");
+    var $selectors = $form.serialize();
+    var $target = $('#trainingList');
+    var $href = $form.attr('action')+'?'+$selectors;
+    $.get($href, function(data) { 
+      if (data) {
+        $target.html(data);
+      } else {
+        $target.html('Error ?');
+      }
+    }); 
+    // TODO : Hide form (Show config cog ?)
+    return false;
+  });
+
 	$(document).on('click', '.simpleAjax', function(e) {
 		$this = $(this);
     $hide = $this.attr('data-hide-feedback');
@@ -661,8 +679,8 @@ $(document).ready(function() {
   });
 
   $(document).on('click', '#switchGallery', function() {
-    $('#galleryPlacesList').toggle();
-    $('#detailedPlacesList').toggle();
+    $('#galleryList').toggle();
+    $('#detailedList').toggle();
   });
 
   $(document).on('click', 'button.popup', function(e) {
@@ -1428,6 +1446,10 @@ var initTables = function() {
     paging: false,
     order: [[ 0, "asc"]]
   });
+  $('#peopleTable').DataTable({
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, lang.all] ],
+    order: [[ 0, "asc" ]],
+  });
   $('#fightersTable').DataTable({
     paging: false,
     order: [[ 0, "asc" ]],
@@ -1435,7 +1457,7 @@ var initTables = function() {
   if ($('#teamTable').length > 0 && $('.MarkupPagerNav').length > 0) { // No-team table is sorted on reputation column
     $('#teamTable').DataTable({
       paging: false,
-      searching: false,
+      info: false,
       columnDefs: [{ "orderable": false, "targets": 1 },
         { "orderable": false, "targets": 4}],
       order: [[ 7, "desc" ]],
@@ -1443,6 +1465,7 @@ var initTables = function() {
   } else {
     $('#teamTable').DataTable({
       paging: false,
+      info: false,
       searching: false,
       columnDefs: [{ "orderable": false, "targets": 1 },
         { "orderable": false, "targets": 4}],

@@ -73,7 +73,7 @@ function getAllPlayers($user = false, $paginate = false) {
         $allPlayers = $pages->find("parent.name=players, template=player, team.name=$teamName, sort=group"); // Limit to team players
       } else { // Order no-team list by reputation (and paginate)
         if ($user->hasRole("teacher")) {
-          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user");
+          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=test-team, team.teacher=$user");
         } else {
           $allPlayers = $pages->find("parent.name=players, template=player, team.name=no-team, limit=35, sort=-reputation");
           $pagination = $allPlayers->renderPager();
@@ -270,8 +270,7 @@ function updateScore($player, $task, $real = true) {
     }
 
     if ($real == true) { // Save player's new scores if necessary
-      clearMarkupCache('cache__players-*-'.$player->team->name.'-*');
-      clearMarkupCache('cache__office-*-'.$player->team->name.'-*');
+      clearMarkupCache('cache__'.$player->team->name.'-*');
       clearFileCache("newsboard", "main-office", "players"); // For guests
       // Publish on Teacher's newsboard (requires teacher's work, in class)
       if ($task->is("name=inactivity|penalty|buy|free|fight-vv|bought|remove|buy-pdf")) {
