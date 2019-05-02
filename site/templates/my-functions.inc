@@ -2028,14 +2028,19 @@ function setMonster($player, $monster) {
     // Sets fighting possibilities
     $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
     if ($tmpCache->lastFightDate != '') {
-      $today = new \DateTime("today");
-      $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
-      $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
+      if ($monster->utGain >= 20) {
+        $today = new \DateTime("today");
+        $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
+        $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
+      } else { // Solve previous bugs when fights wrongly got available
+        $monster->waitForFight = 100;
+        $monster->lastFightInterval = -1;
+      }
     } else {
       if ($monster->utGain >= 20) {
-        $monster->waitForFight = -1; 
+        $monster->waitForFight = -1;
       } else {
-        $monster->waitForFight = 100; 
+        $monster->waitForFight = 100;
       }
       $monster->lastFightInterval = -1;
     }
