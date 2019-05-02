@@ -415,7 +415,7 @@ function taskExtraAction($player, $task, $real) {
   if ($task->is("name=battle-vv|fight-vv")) {
     $player->fighting_power = $player->fighting_power+2;
   }
-  if ($player->skills->has("!name=fighter") && $task->is("name~=fight")) {
+  if ($player->skills->get("name=fighter") == NULL && $task->is("name~=fight")) {
     if ($player->find("template=event, task.name~=fight")->count() > 9) {
       setFighter($player);
     }
