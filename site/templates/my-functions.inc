@@ -1332,9 +1332,15 @@ function nbFreedomActs($team, $startDate='', $endDate='') {
 }
 
 function progressBar($index, $total) {
-  $width = 150*$index/50;
+  if ($index >= $total) {
+    $width = 100;
+  } else if ($index == 0) {
+    $width = 0;
+  } else {
+    $width = (100*$index)/$total;
+  }
   $out = '<div class="progress progress-striped progress-mini">';
-  $out .= '<div class="progress-bar progress-bar-danger" role="progressbar" style="width: '.$width.'px;"></div>';
+  $out .= '<div class="progress-bar progress-bar-danger" role="progressbar" style="width: '.$width.'%;"></div>';
   $out .= '</div>';
   return $out;
 }
@@ -1373,13 +1379,13 @@ function setOwners($el, $player) {
 
 function setElement($el, $team) {
   $pages = wire('pages');
-  $allPlayers = $pages->find("template=player, team=$team");
+  $allPlayers = $pages->find("parent.name=players, template=player, team=$team");
   $teamRate = setTeamRate($team->id); // Set team stats
   if ($el->template == 'place') {
-    $teamOwners = $allPlayers->count("places=$el");
+    $teamOwners = $allPlayers->find("places=$el")->count();
   }
   if ($el->template == 'people') {
-    $teamOwners = $allPlayers->count("people=$el");
+    $teamOwners = $allPlayers->find("people=$el")->count();
   }
   $el->owners = $teamOwners;
   // Set element free rate
@@ -1455,15 +1461,17 @@ function updateTeamScores($team, $element = false) {
     if ($element != false) { // Test only new element
       $team->freeActs += 1;
       if (!$team->freeelements->has($element)) { // Element is not already freed
-        if ($team->rank->index >= 8) {
-          $nbAllElements = $pages->find("template=place|people")->count();
-        } else {
-          $nbAllElements = $pages->find("template=place")->count();
-        }
         $element = setElement($element, $team);
-        if ($element->completed == 1) { $team->freeelements->add($element); }
-        $percent = round((100*$team->freeelements->count())/$nbAllElements);
-        $team->freeworld = $percent;
+        if ($element->completed == 1) { 
+          if ($team->rank->index >= 8) {
+            $nbAllElements = $pages->count("template=place|people");
+          } else {
+            $nbAllElements = $pages->count("template=place");
+          }
+          $team->freeelements->add($element); 
+          $percent = round((100*$team->freeelements->count())/$nbAllElements);
+          $team->freeworld = $percent;
+        }
       }
     } else {
       $team->freeActs = nbFreedomActs($team);

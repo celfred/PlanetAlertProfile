@@ -293,7 +293,7 @@
                 $out .= '<div class="alert alert-info">';
                 $p = setOwners($p, $currentPlayer);
                 $out .= '<span class="">'.__("Free rate").' : ['.$p->owners->count().'/'.$p->teamRate.']</span> ';
-                $out .= progressbar($p->owners->count(), $p->teamRate);
+                $out .= progressBar($p->owners->count(), $p->teamRate);
                 if ($p->completed == 1) { $out .= '<span class="badge">'.__("Congratulations !").'</span>'; }
                 $out .= '</div>';
               }
