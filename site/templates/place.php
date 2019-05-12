@@ -32,13 +32,13 @@ include("./head.inc");
           break;
         case 'GC' : 
           $helpAlert = true;
-          $helpTitle = __("Not enoigh GC !");
+          $helpTitle = __("Not enough GC !");
           $helpMessage =  sprintf(__('This item requires %1$s GC ! You have only %2$sGC !'), $item->GC, $player->GC);
           break;
         case 'level' : 
           $helpAlert = true;
-          $helpTitle = __("Not enough GC !");
-          $helpMessage =  sprintf(__('This item requires a level %1$s ! You are only at level %2$sGC !'), $item->level, $player->level);
+          $helpTitle = __("Low Level !");
+          $helpMessage =  sprintf(__('This item requires a level %1$s ! You are only at level %2$s !'), $item->level, $player->level);
           break;
         default: 
           $helpAlert = true;
