@@ -384,8 +384,6 @@
               }
               echo '</span> : ';
               echo '<span data-toggle="tooltip" title="Quality : '.$m->monster->quality.'" onmouseenter="$(this).tooltip(\'show\');" data-html="true"> '.averageLabel($m->monster->quality).'</span>';
-              /* if ($m->monster->fightNb == 1) { $label = __('fight'); } else { $label = __('fights'); } */
-              /* echo ' → <span>'.$m->monster->fightNb.' '.$label; */
               echo ' → <span>'.sprintf(_n("%d fight", "%d fights", $m->monster->fightNb), $m->monster->fightNb);
               echo '  ['.__("Last fight").' : '.$m->monster->lastFightInterval.']</span>';
               echo '</li>';

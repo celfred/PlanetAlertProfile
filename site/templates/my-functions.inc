@@ -2034,15 +2034,14 @@ function setMonster($player, $monster) {
       $monster->waitForTrain = abs($monster->waitForTrain);
     }
     // Sets fighting possibilities
-    $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
     if ($tmpCache->lastFightDate != '') {
+      $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
       if ($monster->utGain >= 20) {
         $today = new \DateTime("today");
         $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
         $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
       } else { // Solve previous bugs when fights wrongly got available
-        $monster->waitForFight = 100;
-        $monster->lastFightInterval = -1;
+        $monster->waitForFight = 1000;
       }
     } else {
       if ($monster->utGain >= 20) {

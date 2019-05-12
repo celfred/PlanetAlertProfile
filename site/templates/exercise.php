@@ -237,52 +237,52 @@
           $page->waitForTrain = 0;
         }
         $out .= "<br /><br />";
-        $out .= '<p>Your activity :</p>';
+        $out .= '<p>'.__("Your activity").' :</p>';
         $out .= '<ul>';
         $out .= '<li><i class="glyphicon glyphicon-headphones"></i> <span class="label label-primary">'.$page->utGain.' UT</span>';
         if ($page->isTrainable == 1) {
           $helmet = $pages->get("name=memory-helmet");
-          $out .= '→ <a class="btn btn-primary" href="'.$page->url.'train"><img src="'.$helmet->image->getCrop("mini")->url.'" alt="memory helmet." /> Use the Memory Helmet !</a>';
+          $out .= '→ <a class="btn btn-primary" href="'.$page->url.'train"><img src="'.$helmet->image->getCrop("mini")->url.'" alt="memory helmet." /> '.__("Use the Memory Helmet !").'</a>';
           if ($page->lastTrainingInterval != -1) {
-            $out .= '<p>Last training session : '.$page->lastTrainingInterval.'</p>';
+            $out .= '<p>'.__("Last training session").' : '.$page->lastTrainingInterval.'</p>';
           } else {
-            $out .= '<p>You have never trained on this monster.</p>';
+            $out .= '<p>'.__("You have never trained on this monster.").'</p>';
           }
         } else {
           if ($page->lastTrainingInterval == 0) {
-            $out .= '<p>Last training session : Today !</p>';
+            $out .= '<p>'.__("Last training session : Today !").'</p>';
           } else {
-            $out .= '<p>Last training session : '.$page->lastTrainingInterval.'</p>';
+            $out .= '<p>'.__("Last training session").' : '.$page->lastTrainingInterval.'</p>';
           }
           if ($page->waitForTrain == 1) {
-            $out .= '<p>You have to wait for tomorrow before training again on this monster.</p>';
+            $out .= '<p>'.__("You have to wait for tomorrow before training again on this monster.").'</p>';
           } else {
-            $out .= '<p>You have to wait '.$page->waitForTrain.' days before training again on this monster.</p>';
+            $out .= '<p>'.sprintf(__('You have to wait %d days before training again on this monster.'), $page->waitForTrain).'</p>';
           }
         }
         $out .= '</li>';
-        $out .= '<li><i class="glyphicon glyphicon-flash"></i> <span class="label label-primary">'.$page->fightNb.' fight·s</span>';
+        $out .= '<li><i class="glyphicon glyphicon-flash"></i> <span class="label label-primary">'.$page->fightNb.' '.__("fight·s").'</span>';
         if ($page->isFightable == 1) {
-          $out .= '→ <a class="btn btn-primary" href="'.$page->url.'fight"><i class="glyphicon glyphicon-flash"></i> Fight  the monster !</a>';
+          $out .= '→ <a class="btn btn-primary" href="'.$page->url.'fight"><i class="glyphicon glyphicon-flash"></i> '.__("Fight  the monster !").'</a>';
           if ($page->lastFightInterval != -1) {
-            $out .= '<p>Last fight : '.$page->lastFightInterval.'</p>';
+            $out .= '<p>'.__("Last fight").' : '.$page->lastFightInterval.'</p>';
           } else {
-            $out .= '<p>You have never fought this monster.</p>';
+            $out .= '<p>'.__("You have never fought this monster.").'</p>';
           }
         } else {
-          if ($page->lastFightInterval == -1) {
-            $out .= '<p>You must have 20UT to fight this monster.</p>';
+          if ($page->utGain <= 20) {
+            $out .= '<p>'.__("You must have 20UT to fight this monster.").'</p>';
           } else {
             if ($page->lastTrainingInterval != 0) {
-              $out .= '<p>You have to wait '.$page->waitForFight.' days to fight this monster.</p>';
+              $out .= '<p>'.sprintf(__('You have to wait %d days to fight this monster.'), $page->waitForFight).'</p>';
             } else {
-              $out .= '<p>You can\'t fight this monster. You have used the Memory Helmet today so '.$page->title.' walked away.</p>';
+              $out .= '<p>'.sprintf(__('You can\'t fight this monster. You have used the Memory Helmet today so %s walked away.'), $page->title).'</p>';
             }
           }
         }
         // Show last result
         if (isset($page->quality) && $page->fightNb > 0) {
-          $out .= '<p>Average result : '.averageLabel($page->quality).'</p>';
+          $out .= '<p>'.__("Average result").' : '.averageLabel($page->quality).'</p>';
         }
         $out .= '</li>';
         // Is speedQuiz available ?

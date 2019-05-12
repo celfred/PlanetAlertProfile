@@ -66,8 +66,8 @@
             setMonster($player, $m);
           }
           $availableFights = $allMonsters->find("isFightable=1");
-          $waitingFights = $allMonsters->find("isFightable=0, lastFightInterval!=-1")->sort("waitForFight, allFightsNb");
-          $impossibleFights = $allMonsters->find("isFightable=0, lastFightInterval=-1")->sort("-utGain, title");
+          $waitingFights = $allMonsters->find("isFightable=0, utGain>=20")->sort("waitForFight, allFightsNb");
+          $impossibleFights = $allMonsters->find("isFightable=0, utGain<=20")->sort("-utGain, title");
         }
 
         $out .= '<div class="well">';
