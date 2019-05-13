@@ -47,7 +47,9 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
           $out .= '<ul class="list-unstyled list-inline">';
           foreach ($pPlaces as $item) {
             if ($item->photo) { $mini = $item->photo->eq(0)->getCrop("thumbnail"); }
-            $out .= '<li class="possibleItems" data-gc="'.$item->GC.'"><a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a></li>';
+            $out .= '<li class="possibleItems" data-gc="'.$item->GC.'">';
+            $out .= '<a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a>';
+            $out .= '</li>';
           }
           $out .= '</ul>';
         } else {
@@ -61,7 +63,9 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
             $out .= '<ul class="list-unstyled list-inline">';
             foreach ($pPeople as $item) {
               if ($item->photo) { $mini = $item->photo->eq(0)->getCrop("thumbnail"); }
-              $out .= '<li class="possibleItems" data-gc="'.$item->GC.'"><a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a></li>';
+              $out .= '<li class="possibleItems" data-gc="'.$item->GC.'">';
+              $out .= '<a href="#" class="showInfo buy" data-href="'.$pages->get("name=submitforms")->url.'" data-playerId="'.$player->id.'" data-id="'.$item->id.'"><img class="thumbnail" src="'.$mini->url.'" data-toggle="tooltip" data-html="true" title="'.$item->title.'" /></a>';
+              $out .= '</li>';
             }
             $out .= '</ul>';
           } else {
@@ -229,6 +233,8 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
         $out .= '<li>';
         $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->country->title.'] ['.$item->GC.__('GC').']</label>';
         $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="'.("Click for info").'" ></span></a>';
+        $item = setElement($item, $player->team);
+        $out .= ' <span class="'.$item->cssClass.'">['.$item->owners.'/'.$item->teamRate.']</span>';
         $out .= '</li>';
       }
       $out .= "</ul>";
@@ -245,6 +251,8 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) { // IE detected
           $out .= '<li>';
           $out .= '<label for="item['.$item->id.']"><input type="checkbox" id="item['.$item->id.']" name="item['.$item->id.']" ondblclick="return false;" onclick="shopCheck(this, $(\'#remainingGC\').text(),'.$item->GC.')" data-gc="'.$item->GC.'" /> '.$item->title.' ['.$item->GC.__('GC').']</label>';
           $out .= ' <a href="#" class="showInfo" data-href="" data-id="'.$item->id.'"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-html="true" title="'.__("Click for info").'" ></span></a>';
+          $item = setElement($item, $player->team);
+          $out .= ' <span class="'.$item->cssClass.'">['.$item->owners.'/'.$item->teamRate.']</span>';
           $out .= '</li>';
         }
         $out .= "</ul>";
