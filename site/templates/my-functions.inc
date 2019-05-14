@@ -2036,7 +2036,7 @@ function setMonster($player, $monster) {
     // Sets fighting possibilities
     if ($tmpCache->lastFightDate != '') {
       $monster->lastFightInterval = wire('datetime')->relativeTimeStr($tmpCache->lastFightDate);
-      if ($monster->utGain >= 20) {
+      if ($monster->utGain >= $minUt) {
         $today = new \DateTime("today");
         $availableFightDate = new \DateTime(date("Y-m-d", $tmpCache->lastFightDate));
         $monster->waitForFight = $spacedFights-$today->diff($availableFightDate)->format("%a");
@@ -2044,7 +2044,7 @@ function setMonster($player, $monster) {
         $monster->waitForFight = 1000;
       }
     } else {
-      if ($monster->utGain >= 20) {
+      if ($monster->utGain >= $minUt) {
         $monster->waitForFight = -1;
       } else {
         $monster->waitForFight = 100;

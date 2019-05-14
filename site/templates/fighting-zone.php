@@ -32,9 +32,9 @@
         if ($player->team->is("name=test-team")) {
           $allMonsters = $pages->find("parent.name=monsters, template=exercise")->sort("level, name");
         } else if ($player->equipment->has('name~=visualizer') || $player->team->forceVisualizer == 1) {
-          $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, summary!=''")->sort("level, name");
+          $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("level, name");
         } else { // Limit to visible monsters
-          $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0, summary!=''")->sort("level, name");
+          $allMonsters = $pages->find("template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0")->sort("level, name");
           $hiddenMonstersNb = $pages->count("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=1, summary!=''");
         }
       }
@@ -67,7 +67,7 @@
           }
           $availableFights = $allMonsters->find("isFightable=1");
           $waitingFights = $allMonsters->find("isFightable=0, utGain>=20")->sort("waitForFight, allFightsNb");
-          $impossibleFights = $allMonsters->find("isFightable=0, utGain<=20")->sort("-utGain, title");
+          $impossibleFights = $allMonsters->find("isFightable=0, utGain<20")->sort("-utGain, title");
         }
 
         $out .= '<div class="well">';
