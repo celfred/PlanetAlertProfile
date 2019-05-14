@@ -10,7 +10,7 @@
       $session->redirect('./');
     }
 
-    // All teams (and cache for faster access)
+    // All teams
     if ($user->isSuperuser()) { // Test team is included for debug
       $allTeams = $pages->find("template=team")->sort("title");
     } else {
@@ -90,11 +90,16 @@
         $out .= periodNotification($selectedTeam, $headTeacher);
       }
       
-      if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
-        $allTeams->filter("teacher=$user");
-        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
+      if ($session->allPlayers) {
+        $allPlayers = $pages->find("id=$session->allPlayers");
       } else {
-        $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
+        if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
+          $allTeams->filter("teacher=$user");
+          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team|test-team, team.teacher=$user")->sort("team->name, title"); // Required for quick access to player in menu
+        } else {
+          $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
+        }
+        $session->allPlayers = (string) $allPlayers;
       }
 
       if ($session->headMenu) { // Head menu already session cached

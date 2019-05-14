@@ -2,7 +2,12 @@
   include("./head.inc"); 
 
   if ($user->isLoggedin()) {
-    $allPlayers = getAllPlayers($user, false);
+    if ($session->allPlayers) {
+      $allPlayers = $pages->find("id=$session->allPlayers");
+    } else {
+      $allPlayers = getAllPlayers($user, false);
+      $session->allPlayers = (string) $allPlayers;
+    }
   }
 
   $out = '';
@@ -13,6 +18,8 @@
 
   $out .= '<div class="row">';
   if ($user->hasRole('teacher')) { // Teacher's Newsboard 
+    $ajaxContentUrl = $pages->get("name=ajax-content")->url;
+    $out .= '<div id="showInfo" data-href="'.$ajaxContentUrl.'"></div>';
     // Teacher's Admin board  (to prepare in-class papers to be given to players)
     $out .= '<div id="" class="news panel panel-primary">';
       $out .= '<div class="panel-heading">';
@@ -183,9 +190,10 @@
         }
         $out .= '<hr />';
         $out .= '<p class="label label-primary">'.__("Fight requests").'</p>';
+        $out .= ' <a href="#" class="ajaxBtn addRequest" data-type="addRequest">['.__("Add a request").']</a>';
         $fightRequests = $allPlayers->find("fight_request!=''");
         if (count($fightRequests) > 0) {
-          $out .= '<ul class="list-unstyled">';
+          $out .= '<ul id="fightRequests" class="list-unstyled">';
           foreach ($fightRequests as $p) {
             $out .= '<li>';
             $out .= '<a href="'.$p->url.'">'.$p->title.'</a> ['.$p->team->title.'] : <a href="'.$pages->get("name=monsters")->url.'?id='.$p->fight_request.'&pages2pdf=1">'.$pages->get($p->fight_request)->title.'</a>';
