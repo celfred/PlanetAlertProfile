@@ -1389,9 +1389,16 @@ function setElement($el, $team) {
   }
   $el->owners = $teamOwners;
   // Set element free rate
-  if ($teamOwners >= round($teamRate/2)) { $el->completed = 0.5; $el->cssClass = 'label label-info'; }
-  if ($teamOwners >= $teamRate) { $el->completed = 1; $el->cssClass = 'label label-success'; }
-  if ($teamOwners <= round($teamRate/2)) { $el->completed = 0; $el->cssClass = 'label label-danger'; }
+  if ($teamOwners >= $teamRate) { 
+    $el->completed = 1; 
+    $el->cssClass = 'label label-success';
+  } else if ($teamOwners >= round($teamRate/2)) { 
+    $el->completed = 0.5;
+    $el->cssClass = 'label label-primary';
+  } else {
+    $el->completed = 0;
+    $el->cssClass = 'label label-danger';
+  }
   $el->teamRate = $teamRate;
   return $el;
 }

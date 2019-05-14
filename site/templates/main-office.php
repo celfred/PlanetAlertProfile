@@ -280,6 +280,8 @@
                 if ($n->task->is("name=free")) {
                   if ($n->refPage->photo) {
                     $out .= '<img class="showInfo" data-id="'.$n->refPage->id.'" src="'.$n->refPage->photo->eq(0)->getCrop("thumbnail")->url.'" alt="'.$n->refPage->title.'." />';
+                    $n->refPage = setElement($n->refPage, $currentPlayer->team);
+                    $out .= ' <span class="'.$n->refPage->cssClass.'">['.$n->refPage->owners.'/'.$n->refPage->teamRate.']</span>';
                     $out .= $out_02;
                   }
                   continue;
