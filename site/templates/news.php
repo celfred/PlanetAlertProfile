@@ -338,7 +338,9 @@
                 // Help needed
                 $out .= '<div id="" class="board panel panel-danger">';
                   $out .= '<div class="panel-heading">';
-                    $dangerPlayers = $allPlayers->find('(coma=1), (HP<=15)')->sort("coma, HP");
+                    $dangerPlayers = $allPlayers->find("HP<=15")->sort("HP");
+                    $comaPlayers = $allPlayers->find("coma=1");
+                    $dangerPlayers->add($comaPlayers);
                     $out .= '<p class="panel-title">'.$team.' '.__("Help needed!").'</p>';
                   $out .= '</div>';
                   $out .= '<div class="panel-body">';
