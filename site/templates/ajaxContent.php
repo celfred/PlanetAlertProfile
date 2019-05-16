@@ -210,7 +210,10 @@
           $out .= '<ul class="col4 text-left list-unstyled">';
           foreach($allHelpers as $h) {
             $leftGC = $h->GC-$neededGC;
-            $out .= '<li><a href="'.$pages->get("name=main-office")->url.$player->team->name.'" data-href="'.$pages->get("name=submitforms")->url.'?form=quickDonation&receiver='.$player->id.'&donator='.$h->id.'&amount='.$neededGC.'" class="basicConfirm" data-reload="true" data-msg="['.$h->title.'→'.sprintf(__('%d GC left'), $leftGC).']">'.$h->title.' ('.$h->GC.__("GC").')</a></li>';
+            $out .= '<li>';
+            $out .= '<a href="'.$pages->get("name=main-office")->url.$player->team->name.'" data-href="'.$pages->get("name=submitforms")->url.'?form=quickDonation&receiver='.$player->id.'&donator='.$h->id.'&amount='.$neededGC.'" class="basicConfirm" data-reload="true" data-msg="['.$h->title.'→'.sprintf(__('%d GC left'), $leftGC).']">';
+            $out .= $h->title.' ('.$h->GC.__("GC").')</a>';
+            $out .= '</li>';
           }
           $out .= '</ul>';
         } else {
