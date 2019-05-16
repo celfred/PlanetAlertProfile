@@ -83,8 +83,13 @@
       $out .= '<option value="0">'.__('Select a player').'</option>';
       foreach ($globalPlayers as $plyr) {
         if ($plyr->id != $playerId) {
-          if ($plyr->team->name != 'no-team') { $teamTitle = ' ['.$plyr->team->title.']'; } else { $teamTitle = ''; }
-          $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' '.$plyr->lastName.$teamTitle.' ('.$plyr->GC.' GC)</option>';
+          if ($plyr->team->name != 'no-team') { 
+            $teamTitle = ' ['.$plyr->team->title.']';
+            $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' '.$teamTitle.' ('.$plyr->GC.' GC)</option>';
+          } else { 
+            $teamTitle = '';
+            $out .= '<option value="'.$plyr->id.'">'.$plyr->title.' '.substr($plyr->lastName, 0, 1).$teamTitle.' ('.$plyr->GC.' GC)</option>';
+          }
         }
       }
     $out .= '</select>';
