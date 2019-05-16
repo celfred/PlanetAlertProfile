@@ -200,7 +200,11 @@
         if (count($playerPage->usabledItems)) {
           foreach($playerPage->usabledItems as $i) {
             if ($i->image) {
-              echo '<li data-toggle="tooltip" title="'.$i->title.'"><img src="'.$i->image->getCrop("small")->url.'" alt="'.$i->title.'." /></li>';
+              if ($i->is("name~=transformation")) {
+                echo '<li data-toggle="tooltip" title="'.$i->title.' : '.__("Click to create a new avatar").'"><a target="_blank" href="http://www.icongenerators.net/chibit.html"><img src="'.$i->image->getCrop("small")->url.'" alt="'.$i->title.'." /></a></li>';
+              } else {
+                echo '<li data-toggle="tooltip" title="'.$i->title.'"><img src="'.$i->image->getCrop("small")->url.'" alt="'.$i->title.'." /></li>';
+              }
             } else {
               echo '<li>'.$i->title.'</li>';
             }
