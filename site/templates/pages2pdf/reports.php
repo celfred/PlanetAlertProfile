@@ -1,42 +1,43 @@
 <?php
-if (!$config->ajax) {
-  include("./head_report.inc"); 
-}
+include("./head_report.inc"); 
 
 $path = $config->paths->templates."reports/";
 if ($input->get['pages2pdf']) {
   include("../my-functions.inc");
 }
 
-if ($user->isSuperuser() || $user->hasRole('teacher')) {
-  $reportTitle = '';
-  // Populate variables
-  if (!$input->get['pages2pdf'] || !isset($input->post)) {
-    $reportCat = $input->post->reportCat;
-    if ($reportCat == NULL) { // Individual report
-      $reportCat = 'individual';
-    }
-    $reportSelected = $input->post->reportSelected;
-    $reportPeriod = $input->post->reportPeriod;
-    $startDate = $input->post->startDate;
-    $endDate = $input->post->endDate;
-    $reportSort = $input->post->reportSort;
-    $taskId = $input->post->taskId;
-    $monsterId = $input->post->monsterId;
-    $categoryId = $input->post->categoryId;
-  } else {
-    $reportCat = $input->urlSegment1;
-    $reportSelected = $input->urlSegment2;
-    $reportPeriod = $input->urlSegment3;
-    $startDate = $input->get->startDate;
-    $endDate = $input->get->endDate;
-    $reportSort = $input->get->reportSort;
-    $taskId = $input->get->taskId;
-    $monsterId = $input->get->monsterId;
-    $categoryId = $input->get->categoryId;
+$reportTitle = '';
+// Populate variables
+if (count($input->post) > 0) {
+  $reportCat = $input->post->reportCat;
+  if ($reportCat == NULL) { // Individual report
+    $reportCat = 'individual';
   }
-  // Set common options
-  $selected = $pages->get("id=$reportSelected");
+  $reportSelected = $input->post->reportSelected;
+  $reportPeriod = $input->post->reportPeriod;
+  $startDate = $input->post->startDate;
+  $endDate = $input->post->endDate;
+  $reportSort = $input->post->reportSort;
+  $taskId = $input->post->taskId;
+  $monsterId = $input->post->monsterId;
+  $categoryId = $input->post->categoryId;
+  $inClass = $input->post->inClass;
+} else {
+  $reportCat = $input->urlSegment1;
+  $reportSelected = $input->urlSegment2;
+  $reportPeriod = $input->urlSegment3;
+  $startDate = $input->get->startDate;
+  $endDate = $input->get->endDate;
+  $reportSort = $input->get->reportSort;
+  $taskId = $input->get->taskId;
+  $monsterId = $input->get->monsterId;
+  $categoryId = $input->get->categoryId;
+  $inClass = $input->get->inClass;
+}
+// Set common options
+$selected = $pages->get("id=$reportSelected");
+
+if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player') && $user->name == $selected->login)) { // Logged-in teacher can see his or her individual report
   switch($reportPeriod) {
     case 'customDates' :
       $period = new Page();
@@ -76,7 +77,11 @@ if ($user->isSuperuser() || $user->hasRole('teacher')) {
 
   // PDF Download link
   if (!$input->get['pages2pdf'] && ($user->isSuperuser() || $user->hasRole('teacher'))) {
-    echo '<a class="pdfLink btn btn-info" href="' . $page->url.$reportCat.'/'.$reportSelected.'/'.$reportPeriod. '?sort='.$reportSort.'&taskId='.$taskId.'&monsterId='.$monsterId.'&categoryId='.$categoryId.'&pages2pdf=1">Get PDF</a>';
+    if (isset($inClass)) {
+      echo '<a class="pdfLink btn btn-info" href="' . $page->url.$reportCat.'/'.$reportSelected.'/'.$reportPeriod. '?sort='.$reportSort.'&taskId='.$taskId.'&monsterId='.$monsterId.'&categoryId='.$categoryId.'&inClass='.$inClass.'&pages2pdf=1">Get PDF</a>';
+    } else {
+      echo '<a class="pdfLink btn btn-info" href="' . $page->url.$reportCat.'/'.$reportSelected.'/'.$reportPeriod. '?sort='.$reportSort.'&taskId='.$taskId.'&monsterId='.$monsterId.'&categoryId='.$categoryId.'&pages2pdf=1">Get PDF</a>';
+    }
     echo '<div class="row"></div>';
   }
 
@@ -91,13 +96,20 @@ if ($user->isSuperuser() || $user->hasRole('teacher')) {
     case 'ut':
       $reportTitle .= __("Underground Training report");
       break;
+    case 'battle':
+      $reportTitle .= __("Battle report");
+      break;
     case 'fight':
       if ($monsterId == '-1') {
         $subTitle = __('All monsters');
       } else {
         $subTitle = $monster->title;
       }
-      $reportTitle .= __("Fight report").' ['.$subTitle.']';
+      if (isset($inClass)) { 
+        $reportTitle .= __("Fight requests report").' ['.$subTitle.'] '.__("(in class)");
+      } else {
+        $reportTitle .= __("Fight report").' ['.$subTitle.']';
+      }
       break;
     case 'category':
       $reportTitle .= __("Category report").' ['.$category->title.']';
@@ -110,30 +122,27 @@ if ($user->isSuperuser() || $user->hasRole('teacher')) {
   $reportTitle .= 'Period : '.$period->title;
   $reportTitle .= ' ('.date("d/m/Y", $period->dateStart).' → '.date("d/m/Y", $period->dateEnd).')';
 
+  // Manage individual vs team report
   if ($selected->template == 'player') { // Player report
-    switch($reportCat) {
-      // Only complete report available for now
-      default: 
-        include($path.'singlePlayerReport_default.inc');
-    }
-  } else { // Team report
+    $allPlayers = new PageArray();
+    $allPlayers->add($selected);
+  } else {
     $allPlayers = $pages->find("parent.name=players, team=$selected, template=player")->sort("$reportSort");
-    switch($reportCat) {
-      case 'participation': include($path.'globalReport_participation.inc'); break;
-      case 'planetAlert': include($path.'globalReport_planetAlert.inc'); break;
-      case 'cm1': include($path.'globalReport_cm1.inc'); break;
-      case 'task': include($path.'report-task.inc'); break;
-      case 'ut': include($path.'report-ut.inc'); break;
-      case 'fight': include($path.'report-fight.inc'); break;
-      case 'category': include($path.'report-category.inc'); break;
-      default: include($path.'report-complete.inc');
-    }
+  }
+  switch($reportCat) {
+    case 'participation': include($path.'report-participation.inc'); break;
+    case 'planetAlert': include($path.'report-planetAlert.inc'); break;
+    case 'cm1': include($path.'report-cm1.inc'); break;
+    case 'task': include($path.'report-task.inc'); break;
+    case 'ut': include($path.'report-ut.inc'); break;
+    case 'fight': include($path.'report-fight.inc'); break;
+    case 'battle': include($path.'report-battle.inc'); break;
+    case 'category': include($path.'report-category.inc'); break;
+    default: include($path.'report-complete.inc');
   }
 } else {
   echo $noAuthMessage;
 }
 
-if (!$config->ajax) {
-  include("./foot.inc"); 
-}
+include("./foot.inc"); 
 ?>

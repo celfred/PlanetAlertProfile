@@ -1648,6 +1648,7 @@
                 $out .= '<option value="'.$p.'">'.$p->title.'</option>';
               }
               $out .= '</select>';
+              $out .= '<label for="inClass"><input type="checkbox" id="inClass" name="inClass" />'.__("In class only (fight requests ?)").'</label>';
             $out .= '</fieldset>';
             $out .= '<fieldset class="specificOption" id="categoryReport">';
               $out .= '<legend><span class="glyphicon glyphicon-cog"></span> '.__("Specific options").'</legend>';

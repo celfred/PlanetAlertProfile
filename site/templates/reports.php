@@ -21,6 +21,7 @@ if (count($input->post) > 0) {
   $taskId = $input->post->taskId;
   $monsterId = $input->post->monsterId;
   $categoryId = $input->post->categoryId;
+  $inClass = $input->post->inClass;
 } else {
   $reportCat = $input->urlSegment1;
   $reportSelected = $input->urlSegment2;
@@ -31,6 +32,7 @@ if (count($input->post) > 0) {
   $taskId = $input->get->taskId;
   $monsterId = $input->get->monsterId;
   $categoryId = $input->get->categoryId;
+  $inClass = $input->get->inClass;
 }
 // Set common options
 $selected = $pages->get("id=$reportSelected");
@@ -75,7 +77,11 @@ if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player
 
   // PDF Download link
   if (!$input->get['pages2pdf'] && ($user->isSuperuser() || $user->hasRole('teacher'))) {
-    echo '<a class="pdfLink btn btn-info" href="' . $page->url.$reportCat.'/'.$reportSelected.'/'.$reportPeriod. '?sort='.$reportSort.'&taskId='.$taskId.'&monsterId='.$monsterId.'&categoryId='.$categoryId.'&pages2pdf=1">Get PDF</a>';
+    if (isset($inClass)) {
+      echo '<a class="pdfLink btn btn-info" href="' . $page->url.$reportCat.'/'.$reportSelected.'/'.$reportPeriod. '?sort='.$reportSort.'&taskId='.$taskId.'&monsterId='.$monsterId.'&categoryId='.$categoryId.'&inClass='.$inClass.'&pages2pdf=1">Get PDF</a>';
+    } else {
+      echo '<a class="pdfLink btn btn-info" href="' . $page->url.$reportCat.'/'.$reportSelected.'/'.$reportPeriod. '?sort='.$reportSort.'&taskId='.$taskId.'&monsterId='.$monsterId.'&categoryId='.$categoryId.'&pages2pdf=1">Get PDF</a>';
+    }
     echo '<div class="row"></div>';
   }
 
@@ -90,7 +96,7 @@ if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player
     case 'ut':
       $reportTitle .= __("Underground Training report");
       break;
-    case 'fight':
+    case 'battle':
       $reportTitle .= __("Battle report");
       break;
     case 'fight':
@@ -99,7 +105,11 @@ if ($user->isSuperuser() || $user->hasRole('teacher') || ($user->hasRole('player
       } else {
         $subTitle = $monster->title;
       }
-      $reportTitle .= __("Fight report").' ['.$subTitle.']';
+      if (isset($inClass)) { 
+        $reportTitle .= __("Fight requests report").' ['.$subTitle.'] '.__("(in class)");
+      } else {
+        $reportTitle .= __("Fight report").' ['.$subTitle.']';
+      }
       break;
     case 'category':
       $reportTitle .= __("Category report").' ['.$category->title.']';
