@@ -1313,8 +1313,8 @@ function quizStat($el, $player, $startDate='', $endDate='') { // Get player's st
   if ($endDate == '') { $endDate = $schoolYear->dateEnd; }
   $invasions = $player->get("name=history")->find("template=event, task.name~=invasion, refPage=$el, date>=$startDate, date<=$endDate");
   if ($invasions->count() > 0) {
-    $right = $invasions->count("task.name=right-invasion");
-    $wrong = $invasions->count("task.name=wrong-invasion");
+    $right = $invasions->find("task.name=right-invasion")->count();
+    $wrong = $invasions->find("task.name=wrong-invasion")->count();
   }
   return array($right, $wrong);
 }
