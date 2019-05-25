@@ -486,6 +486,7 @@
                     $out .= '</h3>';
                     $out .= '<h4 class="text-center"><span class="label label-danger">New scores have been saved.';
                   }
+                  clearMarkupCache('cache__*');
                 } else {
                   if (isset($dirty)) {
                     $out .= '<h4><span class="label label-danger">Error detected! You should check history before saving anything !</span></h4>';
@@ -2446,6 +2447,7 @@
           $playerPage->save();
         }
         $pages->trash($event);
+        clearMarkupCache('cache__*');
         break;
       case 'removeUser' :
         $playerPage = $pages->get("id=$playerId");
