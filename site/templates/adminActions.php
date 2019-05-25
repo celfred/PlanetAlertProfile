@@ -1643,8 +1643,12 @@
               $out .= '<span>'.__("Select a monster").' → </span>';
               $out .= '<select id="monsterId" name="monsterId">';
               $out .= '<option value="-1">'.__("All monsters").'</option>';
-              // TODO : Limit to logged in teacher
-              $allPages = $pages->find("template=exercise, include=hidden, sort=title");
+              // Limit to logged in teacher
+              if (!$user->isSuperuser()) {
+                $allPages = $pages->find("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$user), (created_users_id=$user->id)")->sort("title");
+              } else {
+                $allPages = $pages->find("parent.name=monsters, template=exercise, include=hidden, sort=title");
+              }
               foreach($allPages as $p) {
                 $out .= '<option value="'.$p.'">'.$p->title.'</option>';
               }
