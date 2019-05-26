@@ -1025,6 +1025,8 @@
               // Possibility to test monster
               $out .= ' <a href="'.$p->url.'train" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
               $out .= ' <a href="'.$p->url.'/fight" data-toggle="tooltip" title="'.__("Test fight").'">[<i class="glyphicon glyphicon-flash"></i>]</a>'; // Fight link
+              // Possibility to copy monster
+              $out .= ' <a href="'.$page->url.'manage-monsters" class="basicConfirm copy" data-href="'.$page->url.'copyFromId/'.$user->id.'/'.$p->id.'?type=team" data-reload="true">'.__("[Copy]").'</a>';
             $out .= '</li>';
           }
           $out .= '</ul>';
@@ -2650,6 +2652,25 @@
           $out .= 'Password : '. $pass.'</p>';
           $out .= '<br />';
         }
+        break;
+      case 'copyFromId' :
+        $source = $pages->get($confirm); // urlSegment3 used for element's id
+        $new = $pages->clone($source, $source->parent, false);
+        $new->of(false);
+        $new->created_users_id = $user->id;
+        $new->title = $new->title.' (copy)';
+        $new->name = $sanitizer->pageName($new->name.'_'.uniqid());
+        $new->exerciseOwner->removeAll();
+        $mod = $new->exerciseOwner->getNew();
+        $mod->singleTeacher = $user;
+        $mod->publish = 0;
+        $new->mostTrained = '';
+        $new->best = '';
+        $new->bestTrainedPlayerId = '';
+        $new->bestTime = '';
+        $new->bestTimePlayer = '';
+        $new->bestTimePlayerId = '';
+        $new->save();
         break;
       case 'deleteFromId' :
         $id = $pages->get($confirm); // urlSegment3 used for element's id

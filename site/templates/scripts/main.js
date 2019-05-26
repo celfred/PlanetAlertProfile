@@ -38,15 +38,22 @@ $(document).ready(function() {
     $.get(href, function(data) { 
 			$("#ajaxViewport").html(''); 
       var $publish = $el.children('.togglePublish');
+      var $copy = $el.children('.copy');
 			if ($parentId == 'teacherElements') {
 				$('#notTeacherElements').append($el);
         if ($publish.length > 0) {
           $publish.addClass('hidden');
         }
+        if ($copy.length > 0) {
+          $copy.removeClass('hidden');
+        }
 			} else {
 				$('#teacherElements').append($el);
         if ($publish.length > 0) {
           $publish.removeClass('hidden');
+        }
+        if ($copy.length > 0) {
+          $copy.addClass('hidden');
         }
 			}
     }); 
@@ -319,7 +326,7 @@ $(document).ready(function() {
                 showConfirmButton: false,
                 timer: 500,
               }).then( result => {
-                if ($defaultHref) {
+                if ($defaultHref && $defaultHref != '#') {
                   window.location.href = $defaultHref;
                 } else {
                   window.location.href = $href;
