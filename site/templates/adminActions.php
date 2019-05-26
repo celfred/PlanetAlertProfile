@@ -962,6 +962,10 @@
               $out .= '<span class="toStrike '.$className.'">'.$p->title.'</span>';
               if ($p->summary != '') {
                 $out .= ' → <span>'.$p->summary.'</span> ';
+              } else {
+                if ($p->getLanguageValue($french, 'summary') != '') {
+                  $out .= ' → <span>'.$p->getLanguageValue($french, 'summary').'</span> ';
+                }
               }
               if ($p->type && $p->type->name && $p->exData != '') {
                 $allLines = preg_split('/$\r|\n/', $p->exData);
@@ -1004,9 +1008,14 @@
                 $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
               }
               $out .= '<a href="#" class="togglePublish hidden" data-href="'.$page->url.'toggleMonster/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
-              $out .= '<span>'.$p->title.'</span> → ';
-              $p->summary == '' ? $summary = '-' : $summary = $p->summary;
-              $out .= '<span>'.$summary.'</span> ';
+              $out .= '<span>'.$p->title.'</span>';
+              if ($p->summary != '') {
+                $out .= ' → <span>'.$p->summary.'</span> ';
+              } else {
+                if ($p->getLanguageValue($french, 'summary') != '') {
+                  $out .= ' → <span>'.$p->getLanguageValue($french, 'summary').'</span> ';
+                }
+              }
               if ($p->exData != '') {
                 $allLines = preg_split('/$\r|\n/', $p->exData);
                 $listWords = prepareListWords($allLines, $p->type->name);
