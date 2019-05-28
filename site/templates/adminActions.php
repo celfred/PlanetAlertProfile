@@ -962,6 +962,10 @@
               $out .= '<span class="toStrike '.$className.'">'.$p->title.'</span>';
               if ($p->summary != '') {
                 $out .= ' → <span>'.$p->summary.'</span> ';
+              } else {
+                if ($p->getLanguageValue($french, 'summary') != '') {
+                  $out .= ' → <span>'.$p->getLanguageValue($french, 'summary').'</span> ';
+                }
               }
               if ($p->type && $p->type->name && $p->exData != '') {
                 $allLines = preg_split('/$\r|\n/', $p->exData);
@@ -1004,9 +1008,14 @@
                 $out .= '<a href="'.$page->url.'select-element/'.$user->id.'/'.$p->id.'?type=team" class="selectElement btn btn-xs btn-primary"><i class="glyphicon glyphicon-sort"></i></a> ';
               }
               $out .= '<a href="#" class="togglePublish hidden" data-href="'.$page->url.'toggleMonster/'.$user->id.'/'.$p->id.'?type=team"><span class="label label-success" data-toggle="tooltip" title="'.__('Unpublish').'">✓</span></a> ';
-              $out .= '<span>'.$p->title.'</span> → ';
-              $p->summary == '' ? $summary = '-' : $summary = $p->summary;
-              $out .= '<span>'.$summary.'</span> ';
+              $out .= '<span>'.$p->title.'</span>';
+              if ($p->summary != '') {
+                $out .= ' → <span>'.$p->summary.'</span> ';
+              } else {
+                if ($p->getLanguageValue($french, 'summary') != '') {
+                  $out .= ' → <span>'.$p->getLanguageValue($french, 'summary').'</span> ';
+                }
+              }
               if ($p->exData != '') {
                 $allLines = preg_split('/$\r|\n/', $p->exData);
                 $listWords = prepareListWords($allLines, $p->type->name);
@@ -1025,6 +1034,8 @@
               // Possibility to test monster
               $out .= ' <a href="'.$p->url.'train" data-toggle="tooltip" title="'.__("Test training").'">[<i class="glyphicon glyphicon-headphones"></i>]</a>'; // Training link
               $out .= ' <a href="'.$p->url.'/fight" data-toggle="tooltip" title="'.__("Test fight").'">[<i class="glyphicon glyphicon-flash"></i>]</a>'; // Fight link
+              // Possibility to copy monster
+              $out .= ' <a href="'.$page->url.'manage-monsters" class="basicConfirm copy" data-href="'.$page->url.'copyFromId/'.$user->id.'/'.$p->id.'?type=team" data-reload="true">'.__("[Copy]").'</a>';
             $out .= '</li>';
           }
           $out .= '</ul>';
@@ -2650,6 +2661,25 @@
           $out .= 'Password : '. $pass.'</p>';
           $out .= '<br />';
         }
+        break;
+      case 'copyFromId' :
+        $source = $pages->get($confirm); // urlSegment3 used for element's id
+        $new = $pages->clone($source, $source->parent, false);
+        $new->of(false);
+        $new->created_users_id = $user->id;
+        $new->title = $new->title.' (copy)';
+        $new->name = $sanitizer->pageName($new->name.'_'.uniqid());
+        $new->exerciseOwner->removeAll();
+        $mod = $new->exerciseOwner->getNew();
+        $mod->singleTeacher = $user;
+        $mod->publish = 0;
+        $new->mostTrained = '';
+        $new->best = '';
+        $new->bestTrainedPlayerId = '';
+        $new->bestTime = '';
+        $new->bestTimePlayer = '';
+        $new->bestTimePlayerId = '';
+        $new->save();
         break;
       case 'deleteFromId' :
         $id = $pages->get($confirm); // urlSegment3 used for element's id
