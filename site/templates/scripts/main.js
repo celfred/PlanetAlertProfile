@@ -1086,6 +1086,47 @@ $(document).ready(function() {
 				}
 			});
 		}
+    if ($type == 'addRequest') {
+			var $this = $(this);
+			var $url = $('#showInfo').attr('data-href') + '?id=addRequest';
+			swal({
+				title: lang.loading,
+				onOpen: function() {
+					swal.showLoading()
+					$.get($url, function(data) { 
+						var $myContent = data;
+						swal({
+							title: '',
+							html: $myContent,
+              showConfirmButton: true,
+              confirmButtonText : lang.yes,
+							cancelButtonText : lang.no,
+							showCancelButton: true,
+							allowOutsideClick: true,
+							width: 800
+						}).then( result => {
+              if (result.value) {
+                var $url = $('#submitFormUrl').val();
+                var $playerId = $('#playerId').val();
+                var $monsterId = $('#monsterId').val();
+                $url = $url + '?form=fightRequest&playerId='+$playerId+'&monsterId='+$monsterId;
+                $.get($url, function(data) { 
+                  swal({
+                    title: lang.saved,
+                    text: lang.thanks,
+                    timer: 1000,
+                    showConfirmButton: false
+                  }).then( result => {
+                    $('#fightRequests').append(data); // Add to fight requests list
+                  }).catch(swal.noop);
+                });
+              } else {
+                return false;
+              }
+            });
+					});
+        }}).catch(swal.noop);
+    }
 		if ($type == 'initiative') {
 			swal({
 				title: lang.tell,

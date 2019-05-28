@@ -220,6 +220,30 @@
           $out .= '<p>'.__('No player has enough in the team. Team needs to get organized and collaborate to help the player !').'</p>';
         }
         break;
+      case 'addRequest' :
+        $allPlayers = $pages->find("id=$session->allPlayers, fight_request=''")->sort("title"); // Avoid pending fight requests
+        if ($user->hasRole('teacher')) {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1)")->sort("name");
+        } else if ($user->isSuperuser()) {
+          $allMonsters = $pages->find("parent.name=monsters, template=exercise, sort=name");
+        }
+        $out .= '<h1>'.__("Add a fight request ?").'</h1>';
+        $out .= '<p>'.__("Select a player").' : ';
+        $out .= '<select id="playerId">';
+        foreach ($allPlayers as $p) {
+          $out .= '<option value="'.$p->id.'">'.$p->title.' ['.$p->team->title.']';
+        }
+        $out .= '</select>';
+        $out .= '</p>';
+        $out .= '<p>'.__("Select a monster").' : ';
+        $out .= '<select id="monsterId">';
+        foreach ($allMonsters as $m) {
+          $out .= '<option value="'.$m->id.'">'.$m->title.'</option>';
+        }
+        $out .= '</select>';
+        $out .= '</p>';
+        $out .= '<input type="hidden" id="submitFormUrl" value="'.$pages->get('name=submitforms')->url.'" />';
+        break;
       case 'showInfo' :
         $pageId = $input->get('pageId');
         $p = $pages->get("id=$pageId");

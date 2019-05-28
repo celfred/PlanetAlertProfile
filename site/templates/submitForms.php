@@ -375,6 +375,26 @@
       $player->setAndSave('fight_request', '0');
     }
 
+    if (isset($input->get->form) && $input->get->form == 'fightRequest' && $input->get->playerId != '' && $input->get->monsterId != '') { // Teacher manually adds fight request
+      $player = $pages->get($input->get->playerId);
+      $monster = $pages->get($input->get->monsterId);
+      if ($monster->is("template=exercise")) {
+        // Only 1 pending lesson allowed for a player
+        if ($player->fight_request == 0) {
+          $player->setAndSave('fight_request', $monster->id);
+        }
+        $out = '<li>';
+        $out .= '<a href="'.$player->url.'">'.$player->title.'</a> ['.$player->team->title.'] : <a href="'.$pages->get("name=monsters")->url.'?id='.$player->fight_request.'&pages2pdf=1">'.$pages->get($player->fight_request)->title.'</a>';
+        $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="rr" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$player->id.'&result=RR&monsterId='.$player->fight_request.'">RR</button>';
+        $out .= ' <button class="ajaxBtn btn btn-xs btn-danger" data-type="fightRequest" data-result="r" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$player->id.'&result=R&monsterId='.$player->fight_request.'">R</button>';
+        $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="v" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$player->id.'&result=V&monsterId='.$player->fight_request.'">V</button>';
+        $out .= ' <button class="ajaxBtn btn btn-xs btn-success" data-type="fightRequest" data-result="vv" data-url="'.$pages->get('name=submit-fight')->url.'?form=fightRequest&playerId='.$player->id.'&result=VV&monsterId='.$player->fight_request.'">VV</button>';
+        $out .= ' <a href="'.$pages->get('name=submitforms')->url.'?form=deleteFightRequest&pageId='.$player->id.'" class="del">'.__('[Delete]').'</a>';
+        $out .= '</li>';
+        echo $out;
+      }
+    }
+
     if (isset($input->get->form) && $input->get->form == 'manualTask' && $input->get->playerId != '' && $input->get->taskId != '') { // Personal Initiative in Decisions, memory potion...
       $player = $pages->get($input->get->playerId);
       $task = $pages->get($input->get->taskId);
