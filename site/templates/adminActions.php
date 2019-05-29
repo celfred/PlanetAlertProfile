@@ -1430,7 +1430,7 @@
           if ($user->isSuperuser()) {
             $allAnnouncements = $pages->find("template=announcement")->sort("created_users_id, team.name, title");
           } else {
-            $allAnnouncements = $pages->find("template=announcement, created_users_id=$user->id|$adminId")->sort("created_users_id, team.name, title");
+            $allAnnouncements = $pages->find("template=announcement, parent=$allTeams, created_users_id=$user->id|$adminId")->sort("created_users_id, team.name, title");
           }
           $out .= '<table class="table">';
             $out .= '<tr>';

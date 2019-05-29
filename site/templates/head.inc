@@ -90,8 +90,9 @@
         $out .= periodNotification($selectedTeam, $headTeacher);
       }
       
-      if ($session->allPlayers) {
+      if ($session->allPlayers && $session->allTeams) {
         $allPlayers = $pages->find("id=$session->allPlayers");
+        $allTeams = $pages->find("id=$session->allTeams");
       } else {
         if (!$user->isSuperuser()) { // Limit to logged in Teacher's teams
           $allTeams->filter("teacher=$user");
@@ -100,6 +101,7 @@
           $allPlayers = $pages->find("parent.name=players, template=player, team.name!=no-team")->sort("team->name, title"); // Required for quick access to player in menu
         }
         $session->allPlayers = (string) $allPlayers;
+        $session->allTeams = (string) $allTeams;
       }
 
       if ($session->headMenu) { // Head menu already session cached
