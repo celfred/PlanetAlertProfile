@@ -610,7 +610,7 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
     }
     if ($wrongInvasions->count() >= 3) {
       $task = $pages->get("template=task, name=remove");
-      $task->comment = '3rd wrong invasions on '.$historyPage->refPage->title;
+      $task->comment = __('3rd wrong invasions on ').$historyPage->refPage->title;
       $task->refPage = $historyPage->refPage;
       $task->linkedId = $historyPage->id;
       updateScore($player, $task, $real);
