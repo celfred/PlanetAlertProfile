@@ -844,9 +844,6 @@
           $out .= '<h3 class="text-center">';
           $out .=   __('Manage lessons');
           $out .= '</h3>';
-          if (!$user->isSuperuser()) {
-            $out .= '<p class="text-center">'.__("Contact the administrator if you want to delete items in this list.").'</p>';
-          }
           $out .= $pages->get("name=book-knowledge")->feel(array(
             'mode' => 'page-add',
             'text' => __('[Add a new lesson]'),
@@ -886,6 +883,8 @@
                           "fields" => "title,topic,level,summary,body,images,task,linkedMonsters"
                         ));
               }
+              // Possibility to see lesson
+              $out .= ' <a href="'.$p->url.'" target="_blank" data-toggle="tooltip" title="'.__("See lesson").'">[<i class="glyphicon glyphicon-eye-open"></i>]</a>';
               $out .= '</li>';
             }
             $out .= '</ul>';
