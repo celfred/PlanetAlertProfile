@@ -41,6 +41,7 @@ if ($input->get['thumbnail']) {
   $allLines = preg_split('/$\r|\n/', $exData);
   shuffle($allLines);
   $listWords = [];
+  $instructionsOnNewPage = false;
   switch ($m->type->name) {
     case 'translate' :
       foreach($allLines as $l) {
@@ -117,8 +118,27 @@ if ($input->get['thumbnail']) {
           }
         }
       }
-      $clueWordsList = implode(', ', $clueWords);
-      $m->instructions = sprintf(__("Choose the correct word for each sentence among : %s."), $clueWordsList);
+      // Prepare for new page list with checkboxes if long clue words list
+      if (count($clueWords) > 10) {
+        $i = 0;
+        $clueWordsList .= '<table>';
+        foreach($clueWords as $w) {
+          if ($i%2 == 0) {
+            $clueWordsList .= '<tr>';
+          }
+          $w = trim($w);
+          $clueWordsList .= '<td style="border: 1px solid #000; text-align: center; font-size: 12pt; padding: 2px;">'.$w.'</td>';
+          if ($i%2 == 0) {
+            $clueWordsList .= '</tr>';
+          }
+          $i++;
+        }
+        $clueWordsList .= '</table>';
+        $instructionsOnNewPage = true;
+      } else {
+        $clueWordsList = implode(', ', $clueWords);
+      }
+      $m->instructions = sprintf(__("Choose the correct item among (some items may be used several times !): %s."), $clueWordsList);
       break;
     default :
       array_push($listWords, 'TODO');
@@ -130,8 +150,9 @@ if ($input->get['thumbnail']) {
   $out .= '<h2 style="text-align: center;">'.__("Monster Fight vs").' '.$m->title.'</h2>';
   $out .= '<h5 style="text-align: left;">'.__("Name (Class)").' : _______________________________________ &nbsp;&nbsp;&nbsp;';
   $out .= __('Date').' : ___________________________________</h5>';
-  $out .= '<p style="text-align: left;">'.$m->instructions.'</p>';
-
+  if (!$instructionsOnNewPage) {
+    $out .= '<p style="text-align: left;">'.$m->instructions.'</p>';
+  }
   if (count($allLines) > 24) {
     $nb = 24;
   } else {
@@ -174,7 +195,7 @@ if ($input->get['thumbnail']) {
         $out .= '<tr>';
         $j = $i+1;
         if ($m->type->name != "image-map") {
-          $out .= '<td class="text-center" style="font-size:14pt;">'.$j.'</td>';
+          $out .= '<td class="text-center" style="font-size:14pt; width:1cm;">'.$j.'</td>';
         }
         $out .= '<td style="'.$wrap.' padding: 4pt;">';
         $out .= '<p style="font-size: '.$fontSize.';">'.$listWords[$i].'</p>';
@@ -194,6 +215,11 @@ if ($input->get['thumbnail']) {
 
   if (count($allLines) < 11) {
     $out .= '<br />'.$out;
+  }
+
+  if ($instructionsOnNewPage == true) {
+    $out .= '<pagebreak />';
+    $out .= '<p style="text-align: left;">'.$m->instructions.'</p>';
   }
 }
 

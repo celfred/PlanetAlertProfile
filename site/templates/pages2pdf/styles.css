@@ -15,7 +15,7 @@ table th {
 }
 table tr {
 }
-table td {
+table td, table tr td {
   border: 1px solid #000;
   text-align: center;
   padding: 5px;
