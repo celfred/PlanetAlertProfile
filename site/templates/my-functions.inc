@@ -403,6 +403,10 @@ function taskExtraAction($player, $task, $real) {
       if ($player->HP<=0) { $player->HP = 1; }
     }
   }
+  if ($task->is("name=corrupted-identity")) {
+    // No death because of corrupted identity
+    if ($player->HP<=0) { $player->HP = 1; }
+  }
   if ($task->is("name=battle-r|fight-r|wrong-invasion")) {
     $player->fighting_power = $player->fighting_power-1;
     if ($task->is("name=battle-r")) { // No death because of battles
