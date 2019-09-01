@@ -787,8 +787,8 @@ function checkActivity(HookEvent $e) {
     } else {
       $lastActivityCount = -1;
     }
-    if ($lastActivityCount > 30 && $lastActivityCount <= 365) { // # of days of inactivity
-      if (!isset($lastEvent) || $lastEvent->name != 'inactivity') {
+    if ($lastActivityCount > 30) {
+      if ($lastEvent->name != 'inactivity') {
         $task = $refPage;
         $task->comment = sprintf(__('%d days of inactivity.'), $lastActivityCount);
         $task->refPage = false;
@@ -796,27 +796,33 @@ function checkActivity(HookEvent $e) {
         updateScore($player, $task, true);
         // No need to checkDeath, inactivity can't cause death
       }
-    } else if ($lastActivityCount > 365 ) { // 1 year of inactivity, delete player/user
-      if ($player->rank->index > 9) { // Don't delete middle-school players
-        deletePlayer($player);
+      if ($lastActivityCount > 365 ) { // 1 year of inactivity, delete player/user
+        if ($player->rank->index > 9) { // Delete only out-of-middle-school players
+          deletePlayer($player);
+        }
       }
     }
   }
 }
 
 function lastEvent($player) {
-  $historyPages = $player->children("name~=history")->sort('date');
+  $historyPages = $player->children("name~=history, sort=date");
   $historyPage = $historyPages->last();
   if ($historyPage) {
     $lastEvent = $historyPage->children()->last();
-    if ($lastEvent) {
-      return $lastEvent;
-    } else { // No events in historyPage, go back one history page
-      $lastEvent = $historyPage->prev()->children()->last();
-      return $lastEvent;
+    if (!$lastEvent) { // No events in historyPage, go back one history page
+      if ($historyPages->getPrev($historyPage)->hasChildren()) {
+        $lastEvent = $historyPages->getPrev($historyPage)->children()->last();
+      } else {
+        $lastEvent = false;
+      }
     }
   }
-  return false;
+  if ($lastEvent) {
+    return $lastEvent;
+  } else {
+    return false;
+  }
 }
 
 function daysFromToday($event) {
