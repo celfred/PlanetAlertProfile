@@ -31,13 +31,17 @@
   } else {
     $hkCount = '<span class="label label-danger">Private!</span>';
   }
-  // Get last activity # of days
-  $lastEvent = lastEvent($playerPage);
-  $lastActivityCount = daysFromToday($lastEvent);
-  if ($lastActivityCount > 20 && $lastActivityCount < 30) {
-    $helpAlert = true;
-    $helpTitle = __("Watch out for inactivity !");
-    $helpMessage = '<h4>'.__("You will lose all your GC if you don't do anything (UT, fight, donation, ...) before 30 days of inactivity !").'</h4>'; 
+  // Get last activity # of days (for no-team players)
+  if ($playerPage->team->name == 'no-team') {
+    $lastEvent = lastEvent($playerPage);
+    $lastActivityCount = daysFromToday($lastEvent);
+    if ($lastActivityCount > 20 && $lastActivityCount < 30) {
+      $helpAlert = true;
+      $helpTitle = __("Watch out for inactivity !");
+      $helpMessage = '<h4>'.__("You will lose all your GC if you don't do anything (UT, fight, donation, ...) before 30 days of inactivity !").'</h4>'; 
+    }
+  } else {
+    $lastActivityCount = 0 ;
   }
 
   // helpAlert

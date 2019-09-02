@@ -810,8 +810,12 @@ function checkActivity(HookEvent $e) {
 }
 
 function lastEvent($player) {
+  $historyPage = false;
+  $lastEvent = false;
   $historyPages = $player->children("name~=history, sort=date");
-  $historyPage = $historyPages->last();
+  if ($historyPages->count() == 1 && $historyPages->hasChildren()) {
+    $historyPage = $historyPages->last();
+  }
   if ($historyPage) {
     $lastEvent = $historyPage->children()->last();
     if (!$lastEvent) { // No events in historyPage, go back one history page
