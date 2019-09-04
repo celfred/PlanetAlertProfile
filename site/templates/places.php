@@ -13,14 +13,13 @@
   $formattedName = $pages->get("name=$name")->title;
   // Set parent accordingly
   if ($type && $name) {
-    $parent = $pages->get("template=$type, name=$name");
+      $selector = "template=place, $type=$name, sort=name, limit=30";
   } else {
     $type = 'all';
-    $parent = $pages->get("/places");
+    $selector = "template=place, sort=name, limit=30";
   }
 
   // Get selected places (or all places if $parent=/places)
-  $selector = "template=place, name!=places, has_parent=$parent, sort=name, limit=30";
   $selectedPlaces = $pages->find($selector);
   $pagination = $selectedPlaces->renderPager(array(
     'nextItemLabel' => ">",
@@ -48,8 +47,12 @@
       }
 
       $placesMenu = $cache->get("cache__placesMenu-".$user->language->name, 2678400, function($page, $pages) {
-        $cities = $pages->find("template=city, children.count>0, sort=title");
-        $countries = $pages->find("template=country, children.count>0,sort=title");
+        $allPlanetAlertPlaces = $pages->find("template=place");
+        $countries = new pageArray();
+        foreach ($allPlanetAlertPlaces as $p) {
+          $countries->add($p->country);
+        }
+        $countries->sort("title");
         $out = '';
         $out .= '<a class="btn btn-info" href="'.$page->url.'">'.__('See ALL places').'</a>';
         $out .= '<div class="dropdown btn-group">';
@@ -57,14 +60,6 @@
         $out .= '<ul class="dropdown-menu" role="menu">';
           foreach($countries as $country) {
            $out .= '<li><a href="'.$page->url.'country/'.$country->name.'">'.$country->title.'</a></li>';
-          }
-        $out .= '</ul>';
-        $out .= '</div>';
-        $out .= '<div class=" dropdown btn-group">';
-        $out .= '<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">'.__('Select a city').' <span class="caret"></span></button>';
-        $out .= '<ul class="dropdown-menu" role="menu">';
-          foreach($cities as $city) {
-            $out .= '<li><a href="'.$page->url.'city/'.$city->name.'">'.$city->title.'</a></li>';
           }
         $out .= '</ul>';
         $out .= '</div>';
@@ -83,9 +78,8 @@
         $out .= '<ul class="list-inline placesList">';
           foreach($selectedPlaces as $place) {
             $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
-            $city = $place->parent->title;
-            $country = $place->parent->parent->title;
-            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="'.$place->title.'." data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.','.$country.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
+            $place->city != '' ? $city = $place->city->title.', ' : $city = '';
+            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="'.$place->title.'." data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.$place->country->title.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
           }
         $out .= '</ul>';
         $out .= '<div class="text-center">'.$pagination.'</div>';
@@ -128,9 +122,8 @@
         $out .= '<ul class="list-inline placesList">';
           foreach($selectedPlaces as $place) {
             $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
-            $city = $place->parent->title;
-            $country = $place->parent->parent->title;
-            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="'.$place->title.'." data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.','.$country.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
+            $place->city != '' ? $city = $place->city->title.', ' : $city = '';
+            $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage->url.'" alt="'.$place->title.'." data-toggle="tooltip" data-html="true" title="<h4><span>'.$place->mapIndex.'</span> - '.$place->title.'</h4> <h5>'.$city.$place->country->title.'</h5> <strong>Level '.$place->level.', '.$place->GC.' GC</strong>" data-placement="bottom" /></a></li>';
           }
         $out .= '</ul>';
         $out .= '<div class="text-center">'.$pagination.'</div>';

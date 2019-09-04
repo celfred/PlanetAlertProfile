@@ -66,13 +66,17 @@ include("./head.inc");
   } else { // Portrait
     $thumbImage = $page->photo->eq(0)->size(200,0)->url;
   }
-  $city = $page->parent;
-  $country = $page->parent->parent;
+  $imageLink = $page->photo->eq(0)->description;
+  $city = $page->city;
+  $country = $page->country;
 ?>
   <table class="table">
     <tr>
       <td rowspan="2" class="col-sm-3">
         <img class="img-thumbnail" src="<?php echo $thumbImage; ?>" alt="'.$p->title.'." />
+        <?php if ($imageLink != '') { ?>
+          <small><a target="_blank" href="<?php echo $imageLink; ?>"><?php echo __("[Click here to see full-size and attributions.]") ?></a></small>
+          <?php } ?>
       </td>
       <td class="col-sm-7">
         <h1><span class="label label-danger" data-toggle="tooltip" title="<?php echo __("Map index (Write it in your copybook)"); ?>"><?php echo $page->mapIndex; ?></span> <?php echo $page->title; ?></h1>
@@ -111,7 +115,8 @@ include("./head.inc");
         <?php 
           $map = $modules->get('MarkupLeafletMap');
           echo $map->getLeafletMapHeaderLines();
-          $options = array('markerIcon' => 'flag', 'markerColour' => 'red');
+          $page->map->zoom = 3;
+          $options = array('markerIcon' => 'map-pin', 'markerColour' => 'red');
           echo $map->render($page, 'map', $options); 
         ?>
       </td>

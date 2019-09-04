@@ -1219,24 +1219,26 @@ function pick_question($player) {
       $randEl = $player->places->getRandom();
   }
   if ($randEl) {
-    $type = ['photo'];
     if ($randList == 'places') {
       switch ($rank) {
+        case '6':
+          $type = ['photo'];
+          break;
         case '7':
-          array_push($type, 'country', 'country', 'city', 'city');
+          $type = ['photo', 'map'];
           break;
         case '8':
           if ($randEl->quiz->count > 0) { // Add questions if they exists in backend
-            array_push($type, 'country', 'country', 'city', 'city', 'quiz', 'quiz');
+            $type = ['photo', 'map', 'quiz'];
           } else {
-            array_push($type, 'country', 'country', 'city', 'city');
+            $type = ['photo', 'map'];
           }
           break;
         case '9':
           if ($randEl->quiz->count > 0) { // Add questions if they exists in backend
-            array_push($type, 'country', 'city', 'quiz', 'quiz');
+            $type = ['photo', 'map', 'map', 'quiz', 'quiz'];
           } else {
-            array_push($type, 'country', 'country', 'city', 'city');
+            $type = ['photo', 'map', 'map'];
           }
           break;
         default:
@@ -1246,16 +1248,16 @@ function pick_question($player) {
       switch ($rank) {
         case '8':
           if ($randEl->quiz->count > 0) { // Add questions if they exists in backend
-            array_push($type, 'country', 'nationality', 'quiz');
+            $type = ['country', 'nationality', 'quiz'];
           } else {
-            array_push($type, 'country', 'nationality');
+            $type = ['country', 'nationality'];
           }
           break;
         case '9':
           if ($randEl->quiz->count > 0) { // Add questions if they exists in backend
-            array_push($type, 'country', 'nationality', 'quiz', 'quiz');
+            $type = ['country', 'nationality', 'quiz', 'quiz'];
           } else {
-            array_push($type, 'country', 'nationality');
+            $type = ['country', 'nationality'];
           }
           break;
         default:
@@ -1265,17 +1267,22 @@ function pick_question($player) {
     $quiz['type'] = $type[$rand];
     if ($randList == 'places') {
       switch($quiz['type']) {
-        case 'country' :
-          $quiz['question'] = $sanitizer->entitiesMarkdown(sprintf(__('In which **country** can you see **%s** ?'), $randEl->title));
-          $quiz['answer'] = sprintf(__('In %1$s (in the city of %2$s)'), $randEl->country->title, $randEl->city->title);
-          break;
-        case 'city' :
-          $quiz['question'] = $sanitizer->entitiesMarkdown(sprintf(__('In which **city** can you see **%s** ?'), $randEl->title));
-          $quiz['answer'] = sprintf(__('In %1$s (in %2$s)'), $randEl->city->title, $randEl->country->title);
-          break;
+        /* case 'country' : */
+        /*   $quiz['question'] = $sanitizer->entitiesMarkdown(sprintf(__('In which **country** can you see **%s** ?'), $randEl->title)); */
+        /*   $quiz['answer'] = sprintf(__('In %1$s (in the city of %2$s)'), $randEl->country->title, $randEl->city->title); */
+        /*   break; */
+        /* case 'city' : */
+        /*   $quiz['question'] = $sanitizer->entitiesMarkdown(sprintf(__('In which **city** can you see **%s** ?'), $randEl->title)); */
+        /*   $quiz['answer'] = sprintf(__('In %1$s (in %2$s)'), $randEl->city->title, $randEl->country->title); */
+        /*   break; */
         case 'photo' :
-          $quiz['question'] = $sanitizer->entitiesMarkdown(__('What **monument** is it ?'));
-          $quiz['answer'] = sprintf(__('%1$s (in %2$s, in %3$s)'), $randEl->title, $randEl->city->title, $randEl->country->title);
+          /* $quiz['question'] = $sanitizer->entitiesMarkdown(__('What **monument** is it ?')); */
+          $quiz['question'] = $sanitizer->entitiesMarkdown(__('What **monument** is it ? **Where** is it ?'));
+          if ($randEl->city->id) {
+            $quiz['answer'] = sprintf(__('%1$s (in %2$s, in %3$s)'), $randEl->title, $randEl->city->title, $randEl->country->title);
+          } else {
+            $quiz['answer'] = sprintf(__('%1$s (in %3$s)'), $randEl->title, $randEl->country->title);
+          }
           break;
         case 'quiz' :
           $randQuiz = $randEl->quiz->getRandom();
@@ -1284,6 +1291,13 @@ function pick_question($player) {
           if (strpos($quiz['question'], 'on the map') == true || strpos($quiz['question'], 'sur la carte') == true) {
             $quiz['type'] = 'map';
           }
+          break;
+        case 'map' :
+          $elTitle = $randEl->title;
+          $quiz['question'] = $sanitizer->entitiesMarkdown(__('What **monument** is it ?'));
+          $quiz['question'] .= ' ['.sprintf(__('Starts with %1$s, in %2$s word·s'), ucfirst(mb_substr($elTitle, 0, 1)), str_word_count($elTitle)).']'; // To make it unique
+          $quiz['question'] .= '<br />'.$sanitizer->entitiesMarkdown(__('**Where** is it ?'));
+          $quiz['answer'] = sprintf(__('%1$s (in %2$s, in %3$s)'), $randEl->title, $randEl->city->title, $randEl->country->title);
           break;
         default : $quiz['answer'] = __("Question type error !");
       }

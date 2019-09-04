@@ -127,7 +127,14 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
         // Display map if necessary
         if ( $quiz['type'] === 'map' ) {
           $out .= '<section class="">';
-          $out .= '<object id="worldMap" type="image/svg+xml" data="'.$config->urls->templates.'img/worldMap.svg" style="width: 100%; height: 400px; border:1px solid black; ">Your browser does not support SVG</object>';
+          /* $out .= '<object id="worldMap" type="image/svg+xml" data="'.$config->urls->templates.'img/worldMap.svg" style="width: 100%; height: 400px; border:1px solid black; ">Your browser does not support SVG</object>'; */
+            $placeId = $quiz['id'];
+            $selectedElement = $pages->get("$placeId");
+            $map = $modules->get('MarkupLeafletMap');
+            $out .= $map->getLeafletMapHeaderLines();
+            $selectedElement->map->zoom = 3;
+            $options = array('markerIcon' => 'flag', 'markerColour' => 'black');
+            $out .= $map->render($selectedElement, 'map', $options); 
           $out .= '</section>';
         }
         // Display photo if necessary
