@@ -154,7 +154,7 @@
                   $interval = $today->diff($date2);
                   $out .= '<li>';
                   $out .= ' <span class="badge">!</span> ';
-                  if ($p->team->name == 'no-team') { $lastname = ' '.$p->lastName; } else { $lastName = ''; }
+                  if ($p->team->name == 'no-team') { $lastName = ' '.$p->lastName; } else { $lastName = ''; }
                   $out .= '<span><a href="'.$p->url.'">'.$p->title.'</a>'.$lastName.' ['.$p->team->title.'] : '.$historyPage->refPage->title.' (bought '.$interval->days.' days ago)</span>';
                   $out .= ' <label for="unpublish_'.$historyPage->id.'" class="btn btn-danger btn-xs"><input type="checkbox" id="unpublish_'.$historyPage->id.'" class="ajaxUnpublish" value="'.$pages->get('name=submitforms')->url.'?form=unpublish&usedItemHistoryPageId='.$historyPage->id.'" /> '.__("remove").'</label>';
                   $out .= '</li>';
