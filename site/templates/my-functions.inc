@@ -1242,6 +1242,7 @@ function pick_question($player) {
           }
           break;
         default:
+          $type = ['photo'];
       }
     }
     if ($randList == 'people') {
@@ -1261,6 +1262,7 @@ function pick_question($player) {
           }
           break;
         default:
+          $type = ['country', 'nationality'];
       }
     }
     $rand = array_rand($type, 1);
@@ -1276,7 +1278,6 @@ function pick_question($player) {
         /*   $quiz['answer'] = sprintf(__('In %1$s (in %2$s)'), $randEl->city->title, $randEl->country->title); */
         /*   break; */
         case 'photo' :
-          /* $quiz['question'] = $sanitizer->entitiesMarkdown(__('What **monument** is it ?')); */
           $quiz['question'] = $sanitizer->entitiesMarkdown(__('What **monument** is it ? **Where** is it ?'));
           if ($randEl->city->id) {
             $quiz['answer'] = sprintf(__('%1$s (in %2$s, in %3$s)'), $randEl->title, $randEl->city->title, $randEl->country->title);
@@ -1295,7 +1296,8 @@ function pick_question($player) {
         case 'map' :
           $elTitle = $randEl->title;
           $quiz['question'] = $sanitizer->entitiesMarkdown(__('What **monument** is it ?'));
-          $quiz['question'] .= ' ['.sprintf(__('Starts with %1$s, in %2$s word·s'), ucfirst(mb_substr($elTitle, 0, 1)), str_word_count($elTitle)).']'; // To make it unique
+          /* $quiz['question'] .= ' ['.sprintf(__('Starts with %1$s, in %2$s word·s'), ucfirst(mb_substr($elTitle, 0, 1)), str_word_count($elTitle)).']'; // To make it unique */
+          $quiz['question'] .= ' [ '.preg_replace("/[^A-Z|\s]/", "-", $elTitle).' ]'; // To make it unique
           $quiz['question'] .= '<br />'.$sanitizer->entitiesMarkdown(__('**Where** is it ?'));
           $quiz['answer'] = sprintf(__('%1$s (in %2$s, in %3$s)'), $randEl->title, $randEl->city->title, $randEl->country->title);
           break;
