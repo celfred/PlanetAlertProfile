@@ -121,7 +121,11 @@
         if ($m->is(Page::statusUnpublished)) {
           $out .= '<span style="text-decoration: line-through">'.$m->title.'</span>';
         } else {
-          $out .= '<a href="'.$m->url.'train">'.$m->title.'</a>';
+          if ($helmet || $user->isSuperuser() || $user->hasRole('teacher')) {
+            $out .= '<a href="'.$m->url.'train">'.$m->title.'</a>';
+          } else {
+            $out .= $m->title;
+          }
         }
         $out .= '';
         $out .= '</td>';

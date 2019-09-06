@@ -88,7 +88,7 @@ function getAllPlayers($user = false, $paginate = false) {
 
 function initPlayer($player) {
   // Get previous score from last archived page
-  $prevScores = $player->get("template=archive, name!=history, sort=-date");
+  $prevScores = $player->children()->find("template=archive, name~=history, name!=history")->sort("-date")->first();
   if ($prevScores->id) {
     $player->reputation = $prevScores->reputation;
     $player->yearlyKarma = 0;
