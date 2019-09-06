@@ -2356,6 +2356,7 @@
         // 'Init' player
         $p->of(false);
         $p->HP = 50;
+        $p->yearlyKarma = 0;
         $p->coma = 0;
         $p->team = $noteam;
         $p->group = '';
@@ -2400,6 +2401,7 @@
           // 'Init' player
           $p->of(false);
           $p->HP = 50;
+          $p->yearlyKarma = 0;
           $p->coma = 0;
           $p->hkcount = 0;
           $p->team = $noteam;
