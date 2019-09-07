@@ -58,9 +58,9 @@
     // Check nb of pages according to nb of freed items
     echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index=-1&pages2pdf=1">'.__("Empty PDF").'</a>';
     echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index=0&pages2pdf=1">PDF 1</a>';
-    $nbPage = ceil($playerNbEl/10);
-    for ($i=0; $i<$nbPage; $i++) {
-      echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index='.($i+1).'&pages2pdf=1">PDF '.($i+2).'</a>';
+    $nbPages = ceil($playerNbEl/8);
+    for ($i=0; $i<$nbPages; $i++) {
+      echo '<a class="pdfLink btn btn-info" href="'.$playerPage->url.'?index='.($i+1).'&total='.$nbPages.'&pages2pdf=1">PDF '.($i+2).'</a>';
     }
     echo '</div>';
   }

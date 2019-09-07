@@ -213,7 +213,7 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
       $out .= '</h2>';
       // Display map if necessary
       if ( $quiz['type'] === 'map' ) {
-        $out .= '<section class="">';
+        $out .= '<section class="mapBox">';
           $placeId = $quiz['id'];
           $selectedElement = $pages->get("$placeId");
           $map = $modules->get('MarkupLeafletMap');

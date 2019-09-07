@@ -46,7 +46,7 @@ table.miniTable {
   /* float: right; */
   /* width: 350px; */
   /* font-size: 9px; */
-  margin: 5px;
+  margin: 1px 5px;
   border: 0px;
 }
 table.miniTable td {

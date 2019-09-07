@@ -198,7 +198,9 @@ footer p, footer a {
 footer a:hover {
   text-decoration: underline; 
 }
-
+.mapBox {
+  border: 2px solid #000;
+}
 .backendLink {
 	position: absolute;
 	top: 0;
