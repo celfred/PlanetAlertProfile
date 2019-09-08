@@ -45,7 +45,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
       $out .= '<td>'.$place->summary.'</td>';
       $out .= '<td>';
       $thumbImage = $place->photo->eq(0)->getCrop('thumbnail');
-      $out .= '<img style="border: 2px solid #000;" src="'.$thumbImage->url.'" />';
+      $out .= '<img style="border: 2px solid #000; max-width:2.5cm;" src="'.$thumbImage->url.'" />';
       $out .= '</td>';
     $out .= '</tr>';
   }
@@ -58,8 +58,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
   for ($i=0; $i<5; $i++) {
     $out .= '<table class="miniTable">';
     $out .= '<tr>';
-    $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">&nbsp;</td>';
-    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td colspan="3" rowspan="2" style="width: 0.8cm; border: 2px solid #000;">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
@@ -69,8 +68,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
 
     $out .= '<td class="empty" style="width:0.5cm">&nbsp;</td>';
 
-    $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">&nbsp;</td>';
-    $out .= '<td style="width:0.2cm">&nbsp;</td>';
+    $out .= '<td colspan="3" rowspan="2" style="width: 0.8cm; border: 2px solid #000;">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
     $out .= '<td style="width:0.2cm">&nbsp;</td>';
@@ -80,7 +78,6 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '</tr>';
 
     $out .= '<tr>';
-    $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
@@ -104,7 +101,6 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
     $out .= '<td>&nbsp;</td>';
-    $out .= '<td>&nbsp;</td>';
     if ($page->template == 'people') { $field = $page->nationality; }
     if ($page->template == 'place') {
       if ( $page->city->id ) {
@@ -119,9 +115,9 @@ if ($input->urlSegment1  == 'all') { // All places catalog
 
     $out .= '<tr>';
     if ($thumbImage->width < $thumbImage->height) {
-      $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="max-width:4cm; height:4cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
+      $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="max-width:2.8; height:3.3cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
     } else {
-      $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="width:4cm; max-height:4cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
+      $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="width:2.8cm; max-height:3.3cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
     }
     $textLength = strlen($page->summary);
     $fontSize = '10px;';
@@ -136,9 +132,9 @@ if ($input->urlSegment1  == 'all') { // All places catalog
     $out .= '<td class="empty" style="width:0.5cm;">&nbsp;</td>';
 
     if ($thumbImage->width < $thumbImage->height) {
-      $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="max-width:4cm; height:4cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
+      $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="max-width:2.8cm; height:3.3cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
     } else {
-      $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="width:4cm; max-height:4cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
+      $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="width:2.8cm; max-height:3.3cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
     }
     $textLength = strlen($page->summary);
     $fontSize = '10px;';
