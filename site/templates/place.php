@@ -80,16 +80,17 @@ include("./head.inc");
       </div>
       <div class="panel-body text-center">
         <?php
-          echo '<img class="img-thumbnail" src="'.$thumbImage.'" alt="'.$page->title.'" />';
           if ($imageLink != '') {
-             echo '<small><a target="_blank" href="'.$imageLink.'">'.__("[Click here to see full-size and attributions.]").'</a></small>';
+             echo '<a target="_blank" href="'.$imageLink.'"><img class="img-rounded" src="'.$thumbImage.'" alt="'.$page->title.' photo" data-toggle="tooltip" data-placement="right" title="'.__("Click to enlarge and see attributions").'" /></a></p>';
+          } else {
+            echo '<img class="img-thumbnail" src="'.$thumbImage.'" alt="'.$page->title.'" />';
           }
           if ($city) {
             echo '<h4 class="">'.__("City").' : '.$city->title.'</h4>';
           } 
           if ($country) {
             echo '<h4 class="">'.__("Country").' : ';
-            echo '<a href="'.$pages->get("name=places")->url.'country/'.$country->name.'" data-toggle="tooltip" title="'.__("See all places in ").$country->title.' data-placement="bottom">'.$country->title.' </a></h4>';
+            echo '<a href="'.$pages->get("name=places")->url.'country/'.$country->name.'" data-toggle="tooltip" data-placement="right" title="'.__("See all places in ").$country->title.' data-placement="bottom">'.$country->title.' </a></h4>';
           } 
         ?>
         <hr />
@@ -105,15 +106,14 @@ include("./head.inc");
       </div>
     </section>
     <section class="col-sm-9">
-      <p class="well lead text-justify">
-        <?php echo $page->summary; ?>
-        <span class="btn btn-info pull-right"><a href="<?php echo $page->link; ?>"><?php echo __("[Read more about this place]"); ?></a></span>
-      </p>
-      <?php 
+      <?php
+      echo '<p class="well lead text-justify">';
+        echo $page->summary;
+        echo '<span class="btn btn-info pull-right"><a href="'.$page->link.'">'.__("[Read more about this place]").'</a></span>';
         if ($user->language->name != 'french') {
           $page->of(false);
           if ($page->summary->getLanguageValue($french) != '') {
-            echo '<a class="btn btn-sm btn-primary" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
+            echo ' <a class="frenchVersion" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
             echo '<div class="collapse" id="collapseDiv">';
             echo '<div class="well">';
             echo $page->summary->getLanguageValue($french);
@@ -121,6 +121,7 @@ include("./head.inc");
             echo '</div>';
           }
         }
+        echo '</p>';
         $map = $modules->get('MarkupLeafletMap');
         echo $map->getLeafletMapHeaderLines();
         if ($page->map->zoom > 5) {
@@ -130,7 +131,7 @@ include("./head.inc");
         /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenTopoMap'); */
         /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenStreetMap.Mapnik'); */
         /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenStreetMap.HOT'); */
-        $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'Stamen.TonerLite');
+        $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'class' => 'mapBox', 'provider' => 'Stamen.TonerLite');
         echo $map->render($page, 'map', $options); 
       ?>
     </section>
