@@ -2,14 +2,12 @@
 
 $out = '';
 
-$id = $input->get->id;
-$people = $pages->get("template=people, id=$id");
+$people = $pages->get("template=people, name=$page->name");
 $thumbImage = $people->photo->eq(0)->getCrop('thumbnail');
 for ($i=0; $i<5; $i++) {
   $out .= '<table class="miniTable">';
   $out .= '<tr>';
-  $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">&nbsp;</td>';
-  $out .= '<td style="width:0.2cm">&nbsp;</td>';
+  $out .= '<td colspan="3" rowspan="2" style="width: 0.8cm; border: 2px solid #000;">&nbsp;</td>';
   $out .= '<td style="width:0.2cm">&nbsp;</td>';
   $out .= '<td style="width:0.2cm">&nbsp;</td>';
   $out .= '<td style="width:0.2cm">&nbsp;</td>';
@@ -19,8 +17,7 @@ for ($i=0; $i<5; $i++) {
 
   $out .= '<td class="empty" style="width:0.5cm">&nbsp;</td>';
 
-  $out .= '<td colspan="2" rowspan="2" style="width: 0.6cm; border: 2px solid #000;">&nbsp;</td>';
-  $out .= '<td style="width:0.2cm">&nbsp;</td>';
+  $out .= '<td colspan="3" rowspan="2" style="width: 0.8cm; border: 2px solid #000;">&nbsp;</td>';
   $out .= '<td style="width:0.2cm">&nbsp;</td>';
   $out .= '<td style="width:0.2cm">&nbsp;</td>';
   $out .= '<td style="width:0.2cm">&nbsp;</td>';
@@ -35,7 +32,6 @@ for ($i=0; $i<5; $i++) {
   $out .= '<td>&nbsp;</td>';
   $out .= '<td>&nbsp;</td>';
   $out .= '<td>&nbsp;</td>';
-  $out .= '<td>&nbsp;</td>';
   if ($page->template == 'people') { $field = $people->nationality; }
   $out .= '<th style="width: 2cm; height:0.7cm;">'.$field.'</th>';
   $out .= '<th style="width: 2cm;">'.$people->country->title.'</th>';
@@ -47,14 +43,13 @@ for ($i=0; $i<5; $i++) {
   $out .= '<td>&nbsp;</td>';
   $out .= '<td>&nbsp;</td>';
   $out .= '<td>&nbsp;</td>';
-  $out .= '<td>&nbsp;</td>';
   if ($page->template == 'people') { $field = $people->nationality; }
   $out .= '<th style="width: 2cm; height:0.7cm;">'.$field.'</th>';
   $out .= '<th style="width: 2cm;">'.$people->country->title.'</th>';
   $out .= '</tr>';
 
   $out .= '<tr>';
-  $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
+  $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="border: 2px solid #000; max-width:2.8cm;max-height:3.3cm;" src="'.$thumbImage->url.'" /></td>';
   $textLength = strlen($people->summary);
   $fontSize = '10px;';
   if ($textLength >= 600) { $fontSize = '8px'; }
@@ -67,7 +62,7 @@ for ($i=0; $i<5; $i++) {
 
   $out .= '<td class="empty" style="width:0.5cm;">&nbsp;</td>';
 
-  $out .= '<td colspan="8" style="width:2cm; height:3.5cm;"><img style="border: 2px solid #000;" src="'.$thumbImage->url.'" /></td>';
+  $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="border: 2px solid #000; max-width:2.8cm;max-height:3.3cm;" src="'.$thumbImage->url.'" /></td>';
   $textLength = strlen($people->summary);
   $fontSize = '10px;';
   if ($textLength >= 600) { $fontSize = '8px'; }

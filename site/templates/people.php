@@ -46,13 +46,7 @@
     include("./helpAlert.inc.php");
   }
 
-  if ($user->isSuperuser() || $user->hasRole('teacher')) {
-    echo '<a class="pdfLink btn btn-info" href="'. $page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
-  }
-  if ($user->isSuperuser()) {
-    echo '<p>'.$page->feel(array("fields" => "title,summary")).'</p>';
-  }
-
+  /* $thumbImage = $page->photo->eq(0)->getCrop('thumbnail')->url; */
   $imageHeight = $page->photo->eq(0)->height;
   $imageWidth = $page->photo->eq(0)->width;
   if ($imageWidth > $imageHeight) { // Landscape
@@ -60,57 +54,87 @@
   } else { // Portrait
     $thumbImage = $page->photo->eq(0)->size(200,0)->url;
   }
-  $city = $page->parent;
-  $country = $page->parent->parent;
+  $imageLink = $page->photo->eq(0)->description;
+  $nationality = $page->nationality;
+  $country = $page->country;
+
+  if ($user->isSuperuser() || $user->hasRole('teacher')) {
+    echo '<section class="row">';
+    echo '<a class="pdfLink btn btn-info" href="'.$page->url.'?pages2pdf=1">Get PDF ['.$page->title.']</a>';
+    echo '</section>';
+  }
 ?>
-  <table class="table">
-    <tr>
-      <td rowspan="2" class="col-sm-3">
-        <img class="img-thumbnail" src="<?php echo $thumbImage; ?>" alt="Photo" />
-      </td>
-      <td class="col-sm-7">
-        <h1><span class="label label-danger" data-toggle="tooltip" title="<?php echo __("Map index (Write it in your copybook)"); ?>"><?php echo $page->mapIndex; ?></span> <?php echo $page->title; ?></h1>
-        <?php echo "<h2><a href='places/?type=city&name={$city->name}' data-toggle='tooltip' title='See all places in {$city->title}' data-placement='bottom'>{$city->title}</a>, <a href='places/?type=country&name={$country->name}' data-toggle='tooltip' title='".__("See all places in ")."{$country->title}' data-placement='bottom'>{$country->title}</a></h2>"; ?>
-      </td>
-      <td class="col-sm-2">
-        <div class="panel panel-success">
-        <div class="panel-heading">
-          <h1 class="panel-title"><?php echo __('Level').' : '.$page->level; ?></h1>
-        </div>
-        <div class="panel-body text-center">
-          <h1><img style="float: left;" src="<?php  echo $config->urls->templates?>img/gold.png" alt="Value" width="50" height="50" /><span class="lead btn btn-default btn-lg"><?php echo $page->GC; ?></span></h1>
-        </div>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2" class="col-sm-10 text-justify">
-      <p class="lead"><?php echo $page->summary; ?> <span class="btn btn-info"><a href="<?php echo $page->link; ?>"><?php echo __("[Read more about this place]"); ?></a></span></p>
-      <?php 
-      if ($user->language->name != 'french') {
-        $page->of(false);
-        if ($page->summary->getLanguageValue($french) != '') {
-          echo '<a class="btn btn-sm btn-primary" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
-          echo '<div class="collapse" id="collapseDiv">';
-          echo '<div class="well">';
-          echo $page->summary->getLanguageValue($french);
-          echo '</div>';
-          echo '</div>';
-        }
-      }
-      ?>
-      </td>
-    <tr>
-      <td colspan="3" class="col-sm-12">
-        <?php 
-          $map = $modules->get('MarkupLeafletMap');
-          echo $map->getLeafletMapHeaderLines();
-          $options = array('markerIcon' => 'flag', 'markerColour' => 'red');
-          echo $map->render($page, 'map', $options); 
+  
+  <section class="row">
+    <section class="col-sm-3 text-center">
+      <div class="board panel panel-primary">
+      <div class="panel-heading">
+        <?php
+          if ($user->isSuperuser()) {
+            echo '<p class="pull-right btn btn-default">'.$page->feel(array("fields" => "title,summary,level,GC,photo,map")).'</p>';
+          }
         ?>
-      </td>
-    </tr>
-  </table>
+        <h1 class="panel-title"><span class="lead"><?php echo $page->title; ?></span></h1>
+      </div>
+      <div class="panel-body text-center">
+        <?php
+          if ($imageLink != '') {
+             echo '<a target="_blank" href="'.$imageLink.'"><img class="img-rounded" src="'.$thumbImage.'" alt="'.$page->title.' photo" data-toggle="tooltip" data-placement="right" title="'.__("Click to enlarge and see attributions").'" /></a></p>';
+          } else {
+            echo '<img class="img-thumbnail" src="'.$thumbImage.'" alt="'.$page->title.'" />';
+          }
+          if ($nationality) {
+            echo '<h4 class="">'.__("Nationality").' : '.$nationality.'</h4>';
+          } 
+          if ($country) {
+            echo '<h4 class="">'.__("Country").' : ';
+            echo '<a href="'.$pages->get("name=people")->url.$country->name.'" data-toggle="tooltip" data-placement="right" title="'.__("See all people from ").$country->title.' data-placement="bottom">'.$country->title.' </a></h4>';
+          } 
+        ?>
+        <hr />
+        <h4 class="">
+          <?php echo __('Level').' <span class="">'.$page->level; ?></span>
+          &nbsp;&nbsp;
+          <span class="badge"><?php echo $page->GC.__("GC"); ?></span>
+        </h4>
+      </div>
+      <div class="panel-footer text-center">
+        <a href="<?php echo $pages->get("name=people")->url; ?>"><?php echo __("See all people list"); ?></a>
+      </div>
+      </div>
+    </section>
+    <section class="col-sm-9">
+      <?php
+      echo '<p class="well lead text-justify">';
+        echo $page->summary;
+        echo '<span class="btn btn-info pull-right"><a href="'.$page->link.'">'.__("[Read more about this person]").'</a></span>';
+        if ($user->language->name != 'french') {
+          $page->of(false);
+          if ($page->summary->getLanguageValue($french) != '') {
+            echo ' <a class="frenchVersion" data-toggle="collapse" href="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">'.__("[French version]").'</a>';
+            echo '<div class="collapse" id="collapseDiv">';
+            echo '<div class="well">';
+            echo $page->summary->getLanguageValue($french);
+            echo '</div>';
+            echo '</div>';
+          }
+        }
+        echo '</p>';
+        $map = $modules->get('MarkupLeafletMap');
+        echo $map->getLeafletMapHeaderLines();
+        if ($page->map->zoom > 5) {
+          $page->map->zoom = 2;
+        }
+        /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'Stamen.Toner'); */
+        /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenTopoMap'); */
+        /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenStreetMap.Mapnik'); */
+        /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenStreetMap.HOT'); */
+        $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'class' => 'mapBox', 'provider' => 'Stamen.TonerLite');
+        echo $map->render($page, 'map', $options); 
+      ?>
+    </section>
+  </section>
+
 <?php
-  include("./foot.inc");
+  include("./foot.inc"); 
 ?>
