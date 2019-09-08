@@ -131,8 +131,12 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
             $selectedElement = $pages->get("$placeId");
             $map = $modules->get('MarkupLeafletMap');
             $out .= $map->getLeafletMapHeaderLines();
-            $selectedElement->map->zoom = 3;
-            $options = array('markerIcon' => 'flag', 'markerColour' => 'black');
+            $selectedElement->map->zoom = 2;
+            $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'Stamen.Toner');
+            /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenTopoMap'); */
+            /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenStreetMap.Mapnik'); */
+            /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenStreetMap.HOT'); */
+            /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'Stamen.TonerLite'); */
             $out .= $map->render($selectedElement, 'map', $options); 
           $out .= '</section>';
         }
@@ -218,8 +222,12 @@ if ($user->hasRole('teacher') || $user->isSuperuser()) {
           $selectedElement = $pages->get("$placeId");
           $map = $modules->get('MarkupLeafletMap');
           $out .= $map->getLeafletMapHeaderLines();
-          $selectedElement->map->zoom = 3;
-          $options = array('markerIcon' => 'flag', 'markerColour' => 'black');
+          $selectedElement->map->zoom = 2;
+          $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'Stamen.Toner');
+          /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenTopoMap'); */
+          /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenStreetMap.Mapnik'); */
+          /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'OpenStreetMap.HOT'); */
+          /* $options = array('markerIcon' => 'flag', 'markerColour' => 'green', 'provider' => 'Stamen.TonerLite'); */
           $out .= $map->render($selectedElement, 'map', $options); 
         $out .= '</section>';
       }
