@@ -25,7 +25,7 @@
 
   if (($user->isSuperuser() || $user->name == 'flieutaud') && $team->name != 'no-team') { // TODO Depends on teacher 
     if ($currentPeriod != false) {
-      $out .= '<li><a target="_blank" href="'.$pages->get("name=reports")->url.'participation/'.$team->id.'/'.$currentPeriod->id.'?sort=title">'.__("Current period participation").'</a></li>';
+      $out .= '<li><a target="_blank" href="'.$pages->get("name=reports")->url.'participation/'.$team->id.'/'.$currentPeriod->id.'?reportSort=title">'.__("Current period participation").'</a></li>';
     }
   }
   $out .= '</ul>';
