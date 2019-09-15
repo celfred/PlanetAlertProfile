@@ -115,7 +115,7 @@ if ($input->urlSegment1  == 'all') { // All places catalog
 
     $out .= '<tr>';
     if ($thumbImage->width < $thumbImage->height) {
-      $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="max-width:2.8; height:3.3cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
+      $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="max-width:2.8cm; height:3.3cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
     } else {
       $out .= '<td colspan="8" style="width:3cm; height:4cm;"><img style="width:2.8cm; max-height:3.3cm; border: 1px solid #000;" src="'.$thumbImage->url.'" /></td>';
     }
