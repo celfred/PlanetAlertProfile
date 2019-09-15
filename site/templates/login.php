@@ -19,7 +19,7 @@ if($input->post->username && $input->post->pass) {
       if($input->post->username) echo "<h3><span class='label label-danger'>Login failed... (check user name or password)</span></h3>"; ?>
       <form class="form-horizontal loginForm" action="<?php echo $page->url; ?>" method="post">
         <div class="form-group">
-          <label for="username" class="col-sm-4 control-label">User :</label>
+        <label for="username" class="col-sm-4 control-label"><?php echo __("Username"); ?> :</label>
           <div class="col-sm-6">
             <input class="form-control" type="text" name="username" id="username" placeholder="Username" />
           </div>
