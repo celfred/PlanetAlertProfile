@@ -74,7 +74,8 @@
                   $out .= '<div class="col-sm-12 text-center">';
                   $out .= '<h3>';
                   /* $out .= __("Memory helmet programmed").' : <span class="label label-danger">'.__("Training for").' '.$monster->title.' : </span>'; */
-                  $out .= __("Memory helmet programmed").' : '.__("Training for").' <span class="label label-danger">'.$monster->title.' : ';
+                  $out .= __("Memory helmet programmed").' : ';
+                  $out .= __("Training for").' <span class="label label-danger">'.$monster->title.' : ';
                   $out .= $monster->summary;
                   $out .= '</span>';
                   if ($user->language->name != 'french') {
