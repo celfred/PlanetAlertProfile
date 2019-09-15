@@ -50,7 +50,6 @@ function clearSessionCache(...$cacheNames) { // Session cache for logged in user
   }
 }
 
-
 function getAllPlayers($user = false, $paginate = false) {
   $page = wire('page');
   $pages = wire('pages');
@@ -270,7 +269,7 @@ function updateScore($player, $task, $real = true) {
     }
 
     if ($real == true) { // Save player's new scores if necessary
-      clearMarkupCache('cache__'.$player->team->name.'-*');
+      /* clearMarkupCache('cache__'.$player->team->name.'-*'); */
       clearFileCache("newsboard", "main-office", "players"); // For guests
       // Publish on Teacher's newsboard (requires teacher's work, in class)
       if ($task->is("name=inactivity|penalty|buy|free|fight-vv|bought|remove|buy-pdf")) {

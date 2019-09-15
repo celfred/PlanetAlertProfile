@@ -2235,7 +2235,13 @@
                 $new->save();
                 $element->owner->add($new);
               }
+              // Delete caches
               $cache->delete("cache__tasks-".$user->name);
+              $adminTablePage = $pages->get("name=adminTable");
+              $cacheFile = wire('modules')->PageRender->getCacheFile($adminTablePage);
+              if($cacheFile->exists()) {
+                $cacheFile->remove();
+              }
               break;
             case 'period' : 
               $already = $element->periodOwner->get("singleTeacher=$user");

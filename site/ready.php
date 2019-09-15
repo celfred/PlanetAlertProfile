@@ -19,6 +19,9 @@
       $cache->delete('cache__-placesMenu');
       $cache->delete('cache__-allPlacesGallery-page*');
     }
+    if ($page->is("template=player")) { // When a player is modified (score, avatar, name...)
+      $cache->delete('cache__'.$page->team->name.'-*');
+    }
   });
 
 ?>
