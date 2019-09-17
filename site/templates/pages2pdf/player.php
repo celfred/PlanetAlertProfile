@@ -40,7 +40,7 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</td>';
   $out .= '</tr>>';
   $out .= '<tr><td>';
-  $out .= __('Login').': '.$player->login.' / ';
+  $out .= __('Username').': '.$player->login.' / ';
   $out .= __("Password").' : _________________';
   $out .= '</td>';
   $out .= '<tr>';
@@ -215,7 +215,7 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</tr>';
   $out .= '<tr>';
   $out .= '<td colspan="3">';
-  $out .= '← '.__("Login").' ';
+  $out .= '← '.__("Username").' ';
   $out .= '&nbsp;|&nbsp;';
   $out .= __('Password').'  →';
   $out .= '</td>';
