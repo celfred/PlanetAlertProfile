@@ -12,6 +12,7 @@
           $out .= '<ul>';
           foreach($playersEvents as $e) {
             $out .= '<li>';
+            $out .= date('d/m', $e->date).' → ';
             if ($e->task->HP < 0) {
               $out .= '<span class="label label-danger">';
             } else {
