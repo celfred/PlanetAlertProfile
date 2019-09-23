@@ -104,7 +104,7 @@
             <?php echo $playerPage->GC.' '.__("GC"); ?>
           </span></li>
           <?php 
-            if ($playerPage->rank && $playerPage->rank->index >= 6 || $playerPage->team->rank->index >= 6) {
+            if ($playerPage->rank && $playerPage->rank->is("index>=6") || $playerPage->team->rank->is("index>=6")) {
               echo '<li><span class="glyphicon glyphicon-exclamation-sign"></span> '. __("Hk count") .' : '.$hkCount.'</li>';
             }
             if ($lastActivityCount >= 0 && $lastActivityCount < 30) { // Active players
@@ -259,7 +259,7 @@
           $out .= '<li><a href="'.$place->url.'"><img class="img-thumbnail" src="'.$thumbImage.'" alt="'.$place->title.'." data-toggle="tooltip" data-html="true" title="'.$place->title.'<br />'.$place->summary.'<br />['.$place->parent->title.','.$place->parent->parent->title.']" /></a></li>';
           }
         $out .= '</ul>';
-        if ($playerPage->rank && $playerPage->rank->is("index>=8")) {
+        if ($playerPage->rank && $playerPage->rank->is("index>=8") || $playerPage->team->rank->is("index>=8")) {
           $out .= '<h4 class="badge badge-info"><span class=""><span class="glyphicon glyphicon-thumbs-up"></span> '.__("Free people").'</span></h4>';
           $out .= '<ul class="playerPlaces list-inline">';
             foreach($playerPage->people as $p) {
