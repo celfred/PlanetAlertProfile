@@ -12,8 +12,13 @@ if (!$config->ajax) {
       $helmet = $pages->get("template=item, name=memory-helmet");
       $visualizer = $pages->get("template=item, name~=visualizer");
       if ($user->isSuperuser() || $user->hasRole('teacher')) {
-        $player = $pages->get("parent.name=players, name=test");
-        $request = false;
+        if ($input->get->playerId) {
+          $playerId = $input->get->playerId;
+          $player = $pages->get("id=$playerId");
+        } else {
+          $player = $pages->get("parent.name=players, name=test");
+        }
+        $headTeacher = getHeadTeacher($player);
       }
     } else {
       $helmet = $player->equipment->get("name=memory-helmet");
@@ -21,30 +26,22 @@ if (!$config->ajax) {
     if ($helmet) { // Display training catalogue
       $out = '<div>';
       // Set all available monsters
-      if ($user->hasRole('player')) {
-        // Check if player has the Visualizer (or forced by admin)
-        if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
-          $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
-          $allMonstersNb = $allMonsters->count();
-          $visualizer = $player->equipment->get("name~=visualizer");
-        } else {
-          $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0")->sort("name");
-          $hiddenMonstersNb = $pages->find("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), special=1")->count();
-        }
-        // Check if fightRequest
-        if ($player->fight_request == 0) { $request = false; } else { $request = $player->fight_request; }
-        // Load challenges
-        $allChallenges = $pages->get("template=teacherProfile, name=$headTeacher->name")->teamChallenges->get("team=$player->team")->linkedMonsters;
-        // Prepare all monsters
-        foreach($allMonsters as $m) {
-          setMonster($player, $m);
-        }
-      } else if ($user->hasRole('teacher')) {
-        $allMonsters = $pages->find("parent.name=monsters, template=exercise, (created_users_id=$user->id),(exerciseOwner.singleTeacher=$user,exerciseOwner.publish=1, summary!='')")->sort("name");
-        $allChallenges = false; // Depends on team
-      } else if ($user->isSuperuser()) {
-        $allMonsters = $pages->find("parent.name=monsters, template=exercise, sort=name, include=all");
-        $allChallenges = false; // Depends on team
+      // Check if player has the Visualizer (or forced by admin)
+      if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
+        $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
+        $allMonstersNb = $allMonsters->count();
+        $visualizer = $player->equipment->get("name~=visualizer");
+      } else {
+        $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0")->sort("name");
+        $hiddenMonstersNb = $pages->find("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), special=1")->count();
+      }
+      // Check if fightRequest
+      if ($player->fight_request == 0) { $request = false; } else { $request = $player->fight_request; }
+      // Load challenges
+      $allChallenges = $pages->get("template=teacherProfile, name=$headTeacher->name")->teamChallenges->get("team=$player->team")->linkedMonsters;
+      // Prepare all monsters
+      foreach($allMonsters as $m) {
+        setMonster($player, $m);
       }
       $availableNb = $allMonsters->find("isTrainable=1")->count();
       // Store allMonsters in session cache on 1st page load
@@ -68,6 +65,11 @@ if (!$config->ajax) {
           }
         $out .= '</span>';
       $out .= '</h2>';
+      if ($user->isSuperuser() || $user->hasRole('teacher')) {
+        $out .= '<h3 class="text-center"><span class="label label-danger">';
+        $out .= sprintf(__('Teacher\'s access for player %s'), $player->title);
+        $out .= '</span></h3>';
+      }
       $out .= '<p class="text-center">';
       $detector = $pages->get("name=electronic-Visualizer");
       $link = '<a href="'.$detector->url.'">'.$detector->title.'</a>';
@@ -91,7 +93,7 @@ if (!$config->ajax) {
           $out .= '<div class="frame">';
             $out .= __("Today's challenges !").' ';
             $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("Validate a solo-mission by doing the complete challenge !").'"></span>';
-            if ($user->hasRole("player") && $allChallenges->count() > 0) {
+            if ($allChallenges->count() > 0) {
               $out .= '<div class="row">';
                 $nbChallenge = 0;
                 foreach($allChallenges as $m) {
@@ -136,11 +138,7 @@ if (!$config->ajax) {
                 }
               $out .= '</div>';
             }  else {
-              if ($user->hasRole('teacher') || $user->isSuperuser()) {
-                $out .= ' → '.__("See Team options to set challenges.");
-              } else {
-                $out .= ' → '.__("No challenge for today.");
-              }
+              $out .= ' → '.__("No challenge for today.");
             }
           $out .= '</div>';
           $out .= '<div class="frame">';
