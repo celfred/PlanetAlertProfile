@@ -1454,6 +1454,11 @@ $(document).ready(function() {
 	}
 }); 
 
+	$(document).on('click', '.topic', function() {
+    $topic = $(this).attr("data-name");
+    $allMonsters = $(".topic[data-name="+$topic+"]").parents('li').toggleClass('focus');
+  });
+
 var FEEL = {
 	onBeforeReload: function (o) {
 			if($('#usersTable').length) {

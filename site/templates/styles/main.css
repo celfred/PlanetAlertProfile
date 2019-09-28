@@ -504,6 +504,9 @@ span.glyphicon {
 tr.selected {
   background-color: #FFF;
 }
+.topic {
+  cursor: pointer;
+}
 .focus, .focus a {
   background-color: #3175AF;
   color: #FFF;

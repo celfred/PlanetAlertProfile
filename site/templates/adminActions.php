@@ -973,7 +973,7 @@
                 $out .= '<span class="label label-success">'.$p->type->title.'</span> ';
               }
               if ($p->topic->count() > 0) {
-                $listTopics = $p->topic->implode(', ', '{title}');
+                $listTopics = $p->topic->implode(', ', '<span class="topic" data-name="{name}">{title}</span>');
                 $out .= '<span class="label label-danger">'.$listTopics.'</span>';
               }
               if ($userIsOwner) {
