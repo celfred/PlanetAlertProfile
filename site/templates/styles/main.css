@@ -264,6 +264,10 @@ table.report td h3 {
 .avatarContainer {
   position: relative;
 }
+.helmetAvatar {
+  position: relative;
+  top: -25px;
+}
 img.superpose {
   position: absolute;
 	z-index: 10;
@@ -279,13 +283,13 @@ img.superpose {
 	z-index: 11;
 }
 .weapon.superpose.mini {
-  top: 80px;
-  left: 2px;
+  top: 70px;
+  left: 12px;
 	z-index: 11;
 }
 .protection.superpose.mini {
-  top: 80px;
-  left: 63px;
+  top: 70px;
+  left: 53px;
 	z-index: 11;
 }
 .helmet.superpose {
@@ -324,6 +328,12 @@ img.superpose {
   bottom: 0px;
   border-radius: 30px 30px 0px 30px;
   margin-right: 100px;
+}
+.frame {
+  border: 1px solid #000;
+  border-radius: 10px;
+  padding: 5px;
+  margin: 5px 0px;
 }
 .zoom {
   animation-duration: 0.5s;
@@ -422,6 +432,14 @@ img.superpose {
   float:left;
   margin: 2px;
 }
+.row.display-flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+.row.display-flex > [class*='col-'] {
+  display: flex;
+  flex-direction: column;
+}
 .gc {
   position: relative;
   top: -15px;
@@ -517,6 +535,40 @@ tr.selected {
 .news {
   margin: 20px 0px;
   border-radius: 10px;
+}
+.monsterPanel {
+  padding: 2px;
+  margin: 2px 1px;
+  border: 1px solid #000;
+  border-radius: 10px;
+  background : #FFE;
+}
+.monsterPanelBody {
+  border-left : 1px dotted #000;
+  /* min-height: 250px; */
+}
+.monsterPanel .actionBar {
+  text-align: center;
+  padding: 3px;
+  padding-right: 10px;
+  border-bottom: 1px solid #000;
+}
+.monsterPanel .footerBar {
+  padding: 3px;
+  padding-top : 10px;
+  font-weight: bold;
+  /* min-height: 70px; */
+}
+.monsterSelection {
+  overflow: auto;
+  max-height: 200px;
+}
+.topics {
+  display: inline-block;
+  width: 100%;
+  padding : 3px;
+  font-size: 1.1em;
+  margin: 6px 0px;
 }
 .panel-heading {
   border-radius: 10px 10px 0px 0px;
@@ -1023,6 +1075,14 @@ ul.col3, ol.col3 {
 ul.col4, ol.col4 {
 	column-count: 4;
 }
+ul.col5, ol.col5 {
+	column-count: 5;
+}
+ul.col6, ol.col6 {
+	column-count: 6;
+}
+
+
 
 #discount { display: none; }
 
@@ -1063,6 +1123,29 @@ span.paTagItalicised {
 
 .actionBtn { margin: 5px; }
 
+.typewriter h1 {
+  overflow: hidden; /* Ensures the content is not revealed until the animation */
+  /* border-right: .15em solid orange; /1* The typwriter cursor *1/ */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: .15em; /* Adjust as needed */
+  animation: 
+    typing 2.5s steps(40, end),
+    blink-caret .75s step-end infinite;
+}
+
+/* The typing effect */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: orange; }
+}
+
 /* Large desktop */
 @media (min-width: 1200px) { 
 }
@@ -1087,6 +1170,17 @@ span.paTagItalicised {
   }
   #masthead a {
     padding: 48px 5px 15px 5px;
+  }
+  ul.utReport,
+  ul.col2, ol.col2,
+  ul.col3, ol.col3,
+  ul.col4, ol.col4,
+  ul.col5, ol.col5,
+  ul.col6, ol.col6 {
+    column-count: 1;
+  }
+  .avatarContainer {
+    display: none;
   }
 }
 

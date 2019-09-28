@@ -60,6 +60,14 @@
             $monster = $page;
             if (!$user->isSuperuser() && !$user->hasRole('teacher') || isset($player) && $player->team->is("name!=test-team")) {
               setMonster($player, $monster);
+              // Check if monster is in today's challenges
+              $teamChallenges = $pages->get("parent.name=teachers, template=teacherProfile, name=$headTeacher->name")->teamChallenges->get("team=$player->team");
+              if ($teamChallenges->linkedMonsters->has($monster)) {
+                list($utGain, $inClassUtGain) = utGain($monster, $player, date("Y-m-d 00:00:00"), date("Y-m-d 23:59:59"));
+                if ($utGain == 0) {
+                  $monster->isTrainable = 1;
+                }
+              }
             } else { // Never trained (for admin)
               $monster->isTrainable = 1;
               $monster->lastTrainingInterval = -1;
@@ -73,7 +81,6 @@
                 if ($monster->id) { // Training session starts
                   $out .= '<div class="col-sm-12 text-center">';
                   $out .= '<h3>';
-                  /* $out .= __("Memory helmet programmed").' : <span class="label label-danger">'.__("Training for").' '.$monster->title.' : </span>'; */
                   $out .= __("Memory helmet programmed").' : ';
                   $out .= __("Training for").' <span class="label label-danger">'.$monster->title.' : ';
                   $out .= $monster->summary;

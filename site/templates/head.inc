@@ -304,17 +304,6 @@
                   $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
                   $headMenu .= "<span class='strikeText'>".__("Go to the Fighters Playground")."</span></li>";
                 }
-                // Check if Visualizer is accessible in player's group
-                if ($player && ($player->team->forceVisualizer == 1 || $player->equipment->get("name=electronic-visualizer"))) {
-                  if ($player->team->forceVisualizer == 1) {
-                    $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a href='{$pages->get('name=visualizer')->url}'><span class='glyphicon glyphicon-th'></span> - ".__("Use the Electronic Visualizer")."</a></li>";
-                  } else {
-                    $headMenu .= "<li><a href='{$pages->get('name=visualizer')->url}'><span class='glyphicon glyphicon-th'></span> - ".__("Use the Electronic Visualizer")."</a></li>";
-                  }
-                } else {
-                  $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
-                  $headMenu .= "<span class='strikeText'>".__("Use the Electronic Visualizer")."</span></li>";
-                }
                 // Check if Book of Knowledge is accessible in player's group
                 if ($player && ($player->team->forceKnowledge == 1 || $player->equipment->get("name~=book-knowledge"))) {
                   if ($player->team->forceKnowledge == 1) {
