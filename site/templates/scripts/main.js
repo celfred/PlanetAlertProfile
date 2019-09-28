@@ -341,6 +341,28 @@ $(document).ready(function() {
 		});
 	});
 
+
+	$(document).on('click', '.pgHelmet', function(e) {
+    // $('#programHelmet').click();
+    e.preventDefault();
+		var $this = $(this);
+    var $target = $('#trainingList');
+    $target.html('<h3 class="text-center blink">'+lang.loading+'</h3>');
+    var $href = $this.attr('href');
+    $.get($href, function(data) { 
+      if (data) {
+        $target.html(data);
+      } else {
+        $target.html('Error ?');
+      }
+    }); 
+    $this.parent().parent(".monsterSelection").toggle();
+    $(".configHelmet").hide("blind");
+    return false;
+  });
+	$(document).on('click', '#configHelmetBtn', function(e) {
+    $(".configHelmet").toggle();
+  });
 	$(document).on('click', '#programHelmet', function(e) {
     e.preventDefault();
 		var $this = $(this);
@@ -452,7 +474,12 @@ $(document).ready(function() {
 				$('<span> '+lang.saving+'</span>').insertAfter($this);
 				$.get(href, function(data) { 
 					$this.next('span').html(' '+lang.saved);
-					setTimeout( function() { $this.next('span').remove(); }, 1000);
+          if ($this.attr('data-href').indexOf('saveChallenge') !== -1) {
+            $mTitle = $('#addChallenge option:selected').html();
+            $('#challenges').append('<li>'+$mTitle+'</li>');
+            $('.reloadRequired').removeClass('hidden');
+          }
+					setTimeout(function() { $this.next('span').remove(); }, 1000);
 				}); 
 			} else {
 				return false;
@@ -695,12 +722,18 @@ $(document).ready(function() {
 		$(this).closest('form').attr('target', '_blank').submit(); // Open form in new tab/window
 	});
 
-  $(document).on('focu', '#periodId', function() {
+  $(document).on('change', '#addChallenge', function() {
+		$confirmButton = $(this).next('button');
+		$href = $confirmButton.attr('data-original-href');
+		$confirmButton.attr('data-href', $href+$(this).val());
+		$confirmButton.prop('disabled', false);
+	});
+  $(document).on('focus', '#periodId', function() {
 		$('#selectedPeriod').click();
 	});
   $(document).on('change', '#periodId', function() {
 		$confirmButton = $(this).next('button');
-		$href = $(this).next('button').attr('data-href');
+		$href = $confirmButton.attr('data-href');
 		$confirmButton.attr('data-href', $href+'/'+$(this).val());
 		$confirmButton.prop('disabled', false);
 	});

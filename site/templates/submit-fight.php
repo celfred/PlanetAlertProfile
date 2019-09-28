@@ -59,9 +59,31 @@
 
         if ($monster->id && $player->id && $task->id) {
           setMonster($player, $monster);
-          $task->comment = $monster->title.' [+'.$result.'U.T.]';
+          $task->comment = $monster->title.' [+'.$result.__('UT').']';
           $task->refPage = $monster;
           $task->linkedId = false;
+          // Check if all challenges have been done today
+          $todayChallenge = false;
+          $teamChallenges = $pages->get("parent.name=teachers, template=teacherProfile, name=$headTeacher->name")->teamChallenges->get("team=$player->team");
+          $totalNbChallenges = $teamChallenges->linkedMonsters->count();
+          if ($teamChallenges->linkedMonsters->has($monster)) {
+            $nbChallenge = [];
+            array_push($nbChallenge, $result);
+            $monster->isTrainable = 1; // Overridde isTrainable state
+            $monster->spaced = 0; // in any case
+            if ($totalNbChallenges > 1) { // Check today's activity on other challenges
+              foreach($teamChallenges->linkedMonsters as $m) {
+                list($utGain, $inClassUtGain) = utGain($m, $player, date("Y-m-d 00:00:00"), date("Y-m-d 23:59:59"));
+                if ($utGain > 0) {
+                  array_push($nbChallenge, $utGain);
+                }
+              }
+            }
+            if (count($nbChallenge) == $totalNbChallenges) { // All challenges have been completed
+              sort($nbChallenge);
+              $todayChallenge = true;
+            }
+          }
           // test if training is possible
           if ($monster->isTrainable == 0 || $monster->spaced != 0) {
             // Record to log file
@@ -69,7 +91,7 @@
             $log->save('underground-training', $logText);
           } else {
             $best = __('No');
-            updateScore($player, $task, true);
+            $historyPageId = updateScore($player, $task, true);
             // No need to checkDeath, Underground Training can't cause death
             // Set group captains
             setGroupCaptain($player->id);
@@ -81,9 +103,33 @@
               $best = __('Yes');
               echo '1';
             }
+            // Validate solo-mission thanks to today's challenges
+            if ($todayChallenge) {
+              if ($nbChallenge[0] < 3) {
+                $task = $pages->get("template=task, name=micro-solo-v");
+              } else if ($nbChallenge[0] < 5) {
+                $task = $pages->get("template=task, name=solo-v");
+              } else {
+                $task = $pages->get("template=task, name=solo-vv");
+              }
+              if (!isset($task)) {
+                $error = __("No solo-mission set !");
+              } else {
+                $task->comment = __("All challenges completed !");
+                $challengesList = $teamChallenges->linkedMonsters->implode(', ', '{title}');
+                $task->comment .= ' ('.$challengesList.')'; 
+                $task->refPage = null;
+                $task->eDate = date('m/d/Y H:i:s', time()+1);
+                $task->linkedId = $historyPageId;
+                updateScore($player, $task, true);
+              }
+            }
             
             // Record to log file
             $logText = $player->id.' ('.$player->title.' ['.$player->team->title.']),'.$monster->id.' ('.$monster->title.'),'.$result;
+            if ($todayChallenge) {
+              $logText .= ', Validated challenge ('.$challengesList.')';
+            }
             $log->save('underground-training', $logText);
 
             // Notify teacher (or admin)
@@ -97,7 +143,18 @@
             $msg .= __("Total training on this monster")." : ". $utGain."\r\n";
             $bestTrained = $pages->get($monster->bestTrainedPlayerId);
             $msg .= __("New best player")." :  ". $best." (".$bestTrained->title." [".$bestTrained->team->title."] : ".$monster->best.")\r\n";
-            $msg .= __("Global UT of player")." : ". $player->underground_training;
+            $msg .= __("Global UT of player")." : ". $player->underground_training."\r\n";
+            if ($teamChallenges->linkedMonsters->has($monster)) {
+              $msg .= __("Belongs to today's challenges !")."\r\n";
+            }
+            if ($todayChallenge) {
+              $msg .= __("All challenges are completed !").' ('.$challengesList.')\r\n';
+              if (!isset($error)) {
+                $msg .= sprintf(__('A %s has been validated.'), $task->title);
+              } else {
+                $msg .= __('No solo-mission are set in your actions !');
+              }
+            }
 
             if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
               $message = $mail->new();

@@ -224,7 +224,7 @@ function updateScore($player, $task, $real = true) {
 
     // Calculate UT
     if ($task->is("name=ut-action-v|ut-action-vv")) {
-      preg_match("/\[\+([\d]+)U\.T\.\]/", $task->comment, $matches);
+      preg_match("/\[\+([\d]+)U\.?T\.?\]/", $task->comment, $matches);
       if ($matches[0]) {
         $player->underground_training = (int) $player->underground_training + $matches[1];
       } else {
@@ -2389,7 +2389,7 @@ function updateCache($player, $historyPage) {
       $tmpCache = $tmpPage->tmpMonstersActivity->get("monster=$monster");
     }
     if ($historyPage->task->is("name~=ut-action")) { // Update tmpCache
-      preg_match("/\[\+([\d]+)U\.T\.\]/", $historyPage->summary, $matches);
+      preg_match("/\[\+([\d]+)U\.?T\.?\]/", $historyPage->summary, $matches);
       if ($matches[0]) {
         $delta = $matches[1];
       } else {

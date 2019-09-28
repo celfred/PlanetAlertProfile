@@ -581,7 +581,7 @@
           $out .=   __('Team options');
           $out .= '</h3>';
           $out .= '<div>';
-          if ($user->isSuperuser()) { // Old version, ALL teams
+          if ($user->isSuperuser()) { // ALL teams
             $out .= '<span>'.__("Select a team").' : </span>';
             $out .= '<select id="teamId">';
             $out .= '<option value="-1">'.__("Select a team").'</option>';
@@ -931,7 +931,7 @@
             $notTeacherEl = $pages->find("parent.name=monsters, template=exercise, include=all")->sort("title");
           }
           if (!$user->isSuperuser()) {
-            $out .= '<h4><span>'.__("Your monsters").'</span></h4>';
+            $out .= '<h4><span>'.__("Your monsters").' ('.$teacherEl->count().')</span></h4>';
             $out .= '<ul id="teacherElements">';
             foreach($teacherEl as $p) {
               if ($p->created_users_id == $user->id) { $userIsOwner = true; } else { $userIsOwner = false; }
@@ -1552,7 +1552,7 @@
       $endDate = $endDate.' 23:59:59';
     }
 
-    $teamActions = ['toggle-lock', 'savePeriod', 'archive', 'forceHelmet', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp', 'clean-markupCache'];
+    $teamActions = ['toggle-lock', 'saveperiod', 'archive', 'forcehelmet', 'saveChallenge',  'removeChallenge', 'forcevisualizer', 'forceknowledge', 'classactivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp', 'clean-markupCache'];
     if (in_array($action, $teamActions)) {
       $type = 'team';
     }
@@ -2120,9 +2120,7 @@
           $out .= '</section>';
           $out .= '<section>';
           $out .= '<ul><span class="label label-danger">New scores</span>';
-          t();
           $free = nbFreedomActs($selectedTeam);
-          bd(t());
           $allElements = teamFreeworld($selectedTeam);
           $completed = $allElements->find("completed=1");
           $percent = round((100*$completed->count())/$allElements->count());
@@ -2218,6 +2216,48 @@
             }
           }
           clearMarkupCache('cache__players-teacher-'.$team->name.'-*');
+        }
+        break;
+      case 'saveChallenge':
+        $team = $pages->get("$selectedTeam");
+        if (!$user->isSuperuser()) {
+          $teacherPage = $pages->get("parent.name=teachers, template=teacherProfile, name=$user->name");
+        } else {
+          $teacherPage = $pages->get("parent.name=teachers, template=teacherProfile, name=flieutaud");
+        }
+        if ($confirm != -1) {
+          $monster = $pages->get($confirm); // urlSegment3 used for id
+        } else {
+          $monster = false;
+        }
+        $teacherPage->of(false);
+        if ($teacherPage && $monster && $monster->is("template=exercise")) {
+          $teamPage = $teacherPage->teamChallenges->get("team=$team");
+          $teamPage->of(false);
+          $teamPage->linkedMonsters->add($monster);
+          $teamPage->save();
+          $teacherPage->save();
+        }
+        break;
+      case 'removeChallenge' :
+        $team = $pages->get($playerId);
+        if (!$user->isSuperuser()) {
+          $teacherPage = $pages->get("parent.name=teachers, template=teacherProfile, name=$user->name");
+        } else {
+          $teacherPage = $pages->get("parent.name=teachers, template=teacherProfile, name=flieutaud");
+        }
+        if ($confirm != -1) {
+          $monster = $pages->get($confirm); // urlSegment3 used for id
+        } else {
+          $monster = false;
+        }
+        $teacherPage->of(false);
+        if ($teacherPage && $monster && $monster->is("template=exercise")) {
+          $teamPage = $teacherPage->teamChallenges->get("team=$team");
+          $teamPage->of(false);
+          $teamPage->linkedMonsters->remove($monster);
+          $teamPage->save();
+          $teacherPage->save();
         }
         break;
       case 'select-element':
@@ -2547,6 +2587,66 @@
             $out .= '<li><label for="forceKnowledge"><input type="checkbox" id="forceKnowledge" '.$status.'> '.__("Force the Book of Knowledge").'</label> ';
             $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceKnowledge/'.$selectedTeam.'/1">'.__("Save").'</button>';
             $out .= '</li>';
+            // Today's challenge
+            if ($selectedTeam->name != 'no-team') {
+              if ($user->hasRole('teacher')) {
+                $teacherPage = $pages->get("parent.name=teachers, template=teacherProfile, name=$user->name");
+              } else { // Superuser
+                $teacherPage = $pages->get("parent.name=teachers, template=teacherProfile, name=flieutaud");
+              }
+              $teamPage = $teacherPage->teamChallenges->get("team=$selectedTeam");
+              $teacherPage->of(false);
+              if (!$teamPage) { // Team page isn't ready let's create it
+                $teamPage = new Page();
+                $teamPage->of(false);
+                $teamPage = $teacherPage->teamChallenges->getNew();
+                $teamPage->team = $selectedTeam;
+                $teamPage->save();
+                $teacherPage->teamChallenges->add($teamPage);
+                $teacherPage->save();
+              }
+              // Build monsters' list
+              if ($user->isSuperuser()) {
+                $allMonsters = $pages->get("name=monsters")->children()->sort("name");
+              } 
+              if ($user->hasRole('teacher')) {
+                $allMonsters = $pages->get("name=monsters")->children("(created_users_id=$user->id), (exerciseOwner.singleTeacher=$user, exerciseOwner.publish=1)")->sort("level, name");
+              }
+              $out .= '<li>';
+                $out .= __("Today's challenges").' : ';
+                $out .= '<ul id="challenges">';
+                  if ($teamPage->linkedMonsters->count() > 0) {
+                    foreach($teamPage->linkedMonsters as $m) {
+                      $out .= '<li class="challenge">';
+                      $out .= '<span class="label label-danger">';
+                      $out .= $m->title;
+                      $out .= '</span>';
+                      $out .= '<button class="basicConfirm btn btn-xs btn-danger" data-href="'.$page->url.'removeChallenge/'.$selectedTeam->id.'/'.$m->id.'" data-toDelete="li.challenge">'.__("Remove").'</button>';
+                      $out .= '</li>';
+                    }
+                  } else {
+                    $out .= '<li><span class="label label-danger">'.__("No challenges are set.").'</span></li>';
+                  }
+                $out .= '</ul>';
+                $out .= '<ul class="list list-unstyled">';
+                  $out .= '<li>';
+                    $out .=   '<label for="addChallenge">'.__("Add a challenge").' :&nbsp;</label>';
+                    $out .=   '<select id="addChallenge">';
+                    $out .=     '<option value="-1">'.__("No selection").'</option>';
+                    foreach($allMonsters as $m) {
+                      if (!$teamPage->linkedMonsters->has($m)) {
+                        $out .= '<option value="'.$m->id.'">'.$m->title.'</option>';
+                      }
+                    }
+                    $out .= '</select>';
+                    $out .= '<button class="confirm btn btn-primary" data-original-href="'.$page->url.'saveChallenge/'.$selectedTeam.'/" data-href="" disabled="disabled">'.__("Save").'</button>';
+                    $out .= ' <span class="reloadRequired label label-danger blink hidden"><span class="glyphicon glyphicon-warning"></span> '.__("Reload required").'</span>';
+                  $out .= '</li>';
+                $out .= '</ul>';
+              $out .= '</li>';
+            } else {
+              $out .= '<li>'.__("No challenges for no team players.").'</li>';
+            }
             // Lock Fights (Training but no 'tests')
             $lock = $pages->get("$selectedTeam")->lockFights;
             if ($lock == 1) {

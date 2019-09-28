@@ -36,38 +36,17 @@
       $helmet = $player->equipment->get('memory-helmet');
       $visualizer = $player->equipment->get('name~=visualizer');
     }
-    echo '<div class="text-center">';
-    echo '<h4>';
-    if ($helmet) {
-      if ($helmet->image) {
-        echo '<img class="" src="'.$helmet->image->getCrop('small')->url.'" alt="Memory helmet." />';
+    echo '<h4 class="text-center">';
+      if ($user->hasRole('teacher') || $user->isSuperuser()) {
+        echo '<span class="glyphicon glyphicon-headphones"></span> ';
+        echo ' <a href="'.$pages->get("name=underground-training")->url.'">'.__("Go to the Training zone").'</a>   ';
+        echo '<span class="glyphicon glyphicon-flash"></span> ';
+        echo ' <a href="'.$pages->get("name=fighting-zone")->url.'">'.__("Go to the Fighting zone").'</a>   ';
       }
-      echo ' <a href="'.$pages->get("name=underground-training")->url.'">'.__("Go to the Underground Training Zone").'</a>   ';
-    } else {
-      echo '<div class="well text-center">';
-      echo __("You must buy the Memory Helmet if you want to do Underground Training.");
-      echo '</div>';
-    }
-    if ($visualizer) {
-      if ($visualizer->image) {
-        echo '<img class="" src="'.$visualizer->image->getCrop('small')->url.'" alt="Electronic visualizer." />';
-      }
-      echo ' <a href="'.$pages->get("name=Visualizer")->url.'">'.__("Use the Electronic Visualizer").'</a>   ';
-    } else {
-      echo '<div class="well text-center">';
-      echo __("You must buy the Electronic Visualizer to detect ALL monsters.");
-      echo '</div>';
-    }
-    if ($user->hasRole('teacher') || $user->isSuperuser()) {
-      echo '<span class="glyphicon glyphicon-flash"></span> ';
-      echo ' <a href="'.$pages->get("name=fighting-zone")->url.'">'.__("Go to the Fighting zone").'</a>   ';
-    }
     echo '</h4>';
-    echo '</div>';
   } else {
     echo '<h2 class="text-center">'.__("Planet Alert Monsters/Exercises").'</h2>';
   }
-
 
   if ($user->isSuperuser() || $user->hasRole('teacher')) {
     $colIndex = 1;
@@ -79,7 +58,7 @@
 <div id="Filters" data-fcolindex="<?php echo $colIndex; ?>" class="text-center">
   <ul class="list-inline well">
     <?php foreach ($allCategories as $category) { ?>
-    <li><label for="<?php echo $category->name; ?>" class="btn btn-primary btn-xs"><?php echo $category->title; ?> <input type="checkbox" value="<?php echo $category->title; ?>" class="categoryFilter" name="categoryFilter" id="<?php echo $category->name; ?>"></label></li>
+      <li><label for="<?php echo $category->name; ?>" class="btn btn-primary btn-xs"><?php echo $category->title; ?> <input type="checkbox" value="<?php echo $category->title; ?>" class="categoryFilter" name="categoryFilter" id="<?php echo $category->name; ?>"></label></li>
     <?php } ?> 
   </ul>
 </div>
@@ -121,6 +100,11 @@
         if ($m->is(Page::statusUnpublished)) {
           $out .= '<span style="text-decoration: line-through">'.$m->title.'</span>';
         } else {
+          if ($m->special == 1) {
+            $out .= '<span class="label label-danger" data-toggle="tooltip" title="'.__("The Electronic visualizer is required to detect all monsters.").'">';
+            $out .= __("Hidden");
+            $out .= '</span> ';
+          }
           if ($helmet || $user->isSuperuser() || $user->hasRole('teacher')) {
             $out .= '<a href="'.$m->url.'train">'.$m->title.'</a>';
           } else {
