@@ -811,25 +811,17 @@ function checkActivity(HookEvent $e) {
 function lastEvent($player) {
   $historyPage = false;
   $lastEvent = false;
-  $historyPages = $player->children("name~=history, sort=date");
-  if ($historyPages->count() == 1 && $historyPages->hasChildren()) {
+  $historyPages = $player->children("name~=history, children.count>0, sort=date");
+  if ($historyPages->count() > 1) {
     $historyPage = $historyPages->last();
-  }
-  if ($historyPage) {
-    $lastEvent = $historyPage->children()->last();
-    if (!$lastEvent) { // No events in historyPage, go back one history page
-      if ($historyPages->getPrev($historyPage)->hasChildren()) {
-        $lastEvent = $historyPages->getPrev($historyPage)->children()->last();
-      } else {
-        $lastEvent = false;
+    if ($historyPage) {
+      $lastEvent = $historyPage->children()->last();
+      if ($lastEvent) {
+        return $lastEvent;
       }
     }
   }
-  if ($lastEvent) {
-    return $lastEvent;
-  } else {
-    return false;
-  }
+  return false;
 }
 
 function daysFromToday($event) {
