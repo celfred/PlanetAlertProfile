@@ -316,16 +316,29 @@
                             $boughtNb = 0;
                             foreach ($members as $p) {
                               $bought = $p->get("name=history")->get("task.name=bought, refPage=$newItem, summary*=[unlocked]");
-                              if ($bought->id) {
-                                $boughtNb++;
-                                $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
-                              } else {
-                                $out .= '<li><span class="label label-danger">'.$p->title.' : [buy]</span></li>';
+                              if ($p->id != $selectedPlayer->id) {
+                                if ($bought->id) {
+                                  $boughtNb++;
+                                  $out .= '<li><span class="label label-success">'.$p->title.' : [unlocked]</span></li>';
+                                } else {
+                                  if (!$p->equipment->has($newItem)) {
+                                    $out .= '<li><span class="label label-danger">'.$p->title.' : No item !</span></li>';
+                                  } else {
+                                    $buy = $p->get("name=history")->get("task.name=buy, refPage=$newItem");
+                                    if ($buy) {
+                                      $boughtNb++;
+                                      $out .= '<li><span class="label label-success">'.$p->title.' : Buy</span></li>';
+                                    } else {
+                                      $out .= '<li><span class="label label-danger">'.$p->title.' : No bought ?</span></li>';
+                                    }
+                                  }
+                                }
                               }
                             }
                             if ($boughtNb != $members->count-1) {
                               $dirty = true;
                               $out .= '<li><span class="label label-danger"> ⇒ Error : Check [unlocked] status in the group</span></li>';
+                              $out .= '<button class="confirm btn btn-danger" data-href="'.$page->url.'addGroupItem/'.$playerId.'/'.$newItem->id.'/'.$e->id.'">'.__("Add item to group members ?").'</button>';
                             }
                             // [unlocked] or [bought] ?
                             // task page should be set accordingly but prevention here for backward compatibility
@@ -340,7 +353,7 @@
                             }
                           } else { // No groups, item shoudn't be there
                               $dirty = true;
-                              $out .= ' <span class="label label-danger">Error : No groups set. Item shouldn\'t be there.</span>';
+                              $out .= ' <span class="label label-danger">Error : No groups set. Item shouldn\'t be there ?</span>';
                           }
                           $out .= '</ul>';
                         }
@@ -1892,6 +1905,25 @@
           }
         }
         break;
+      case 'addGroupItem' :
+        if ($selectedPlayer) {
+          $allPlayers = $pages->find("parent.name=players, template=player, team=$selectedPlayer->team, group=$selectedPlayer->group");
+          $itemId = $confirm; // urlSegment3 used for eventId
+          $item = $pages->get("id=$itemId");
+          $eventId = $input->urlSegment4;
+          $event = $pages->get("id=$eventId");
+          $task = $pages->get("name=bought");
+          $task->comment = sprintf(__('%1$s [unlocked] - thanks to %2$s'), $item->title, $selectedPlayer->title);
+          $task->linkedId = $eventId;
+          $task->refPage = $item;
+          $task->eDate = date($event->date+1);
+          foreach ($allPlayers as $p) { // Add item and bought event for each member
+            $p->of(false);
+            $p->equipment->add($item);
+            saveHistory($p, $task, 1, 0);
+          }
+        }
+        break;
       case 'helmet' :
         $helmet = $pages->get("name=memory-helmet");
         $out .= 'Total # of players : '.$allPlayers->count();
@@ -2839,7 +2871,6 @@
     $out .= '<script>';
     $out .= '$(".delete").click( function() { var eventId=$(this).attr("data-eventId"); var action=$(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ eventId; var that=$(this).parents("tr"); if (confirm("Delete event?")) {$.get(href, function(data) { that.hide(); $("button[data-action=recalculate]").click(); }) };});';
     $out .= '$(".remove").click( function() { var itemId=$(this).attr("data-itemId"); var action = $(this).attr("data-action"); var playerId=$(this).attr("data-playerId"); var href=$(this).attr("data-href") + action +"/"+ playerId +"/"+ itemId; var that=$(this).parents("li"); if (confirm("Remove item?")) {$.get(href, function(data) { that.hide(); }) };});';
-    /* $out .= '$(".confirm").click( function() { var href=$(this).attr("data-href"); var that=$(this); var $urlSeg3 = $("#periodId").val(); if ($urlSeg3) { href = href+"/"+$urlSeg3; }; if (confirm("Proceed?" + href)) {$.get(href, function(data) { that.attr("disabled", true); that.html("Saved!"); $("button[data-action=recalculate]").click(); }) };});'; */
     $out .= '$(".death").click( function() { var href=$(this).attr("data-href"); var that=$(this); if (confirm("Proceed?")) {$.get(href, function(data) { that.attr("disabled", true); that.html("Please reload!"); $("button[data-action=recalculate]").click();}) };});';
     $out .= '</script>';
 
