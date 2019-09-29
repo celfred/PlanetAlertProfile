@@ -909,6 +909,7 @@ exerciseApp.controller('TrainingCtrl', function ($scope, $http, $timeout, $inter
         });
       }
     }
+    return false;
   }
 
   $scope.saveData = function (redirect) { // Save result
