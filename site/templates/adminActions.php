@@ -1552,7 +1552,7 @@
       $endDate = $endDate.' 23:59:59';
     }
 
-    $teamActions = ['toggle-lock', 'saveperiod', 'archive', 'forcehelmet', 'saveChallenge',  'removeChallenge', 'forcevisualizer', 'forceknowledge', 'classactivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp', 'clean-markupCache'];
+    $teamActions = ['toggle-lock', 'savePeriod', 'archive', 'forceHelmet', 'saveChallenge',  'removeChallenge', 'forceVisualizer', 'forceKnowledge', 'classActivity', 'reset-streaks', 'ut-stats', 'recalculate-tmp', 'clean-markupCache'];
     if (in_array($action, $teamActions)) {
       $type = 'team';
     }
@@ -2328,7 +2328,7 @@
         }
         break;
       case 'forceHelmet':
-        $team = $pages->get("$selectedTeam");
+        $team = $pages->get("id=$selectedTeam");
         $team->of(false);
         if ($team->forceHelmet == 1) {
           // Remove lock
@@ -2340,7 +2340,7 @@
         clearSessionCache("headMenu");
         break;
       case 'forceVisualizer':
-        $team = $pages->get("$selectedTeam");
+        $team = $pages->get("id=$selectedTeam");
         $team->of(false);
         if ($team->forceVisualizer == 1) {
           // Remove lock
@@ -2352,7 +2352,7 @@
         clearSessionCache("headMenu");
         break;
       case 'forceKnowledge':
-        $team = $pages->get("$selectedTeam");
+        $team = $pages->get("id=$selectedTeam");
         $team->of(false);
         if ($team->forceKnowledge == 1) {
           // Remove lock
@@ -2364,7 +2364,7 @@
         clearSessionCache("headMenu");
         break;
       case 'classActivity':
-        $team = $pages->get("$selectedTeam");
+        $team = $pages->get("id=$selectedTeam");
         $team->of(false);
         if ($team->classActivity == 1) {
           // Remove lock

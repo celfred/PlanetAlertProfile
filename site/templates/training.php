@@ -11,7 +11,7 @@ if (!$config->ajax) {
     if ($user->isSuperuser() || $user->hasRole('teacher') || $player->team->forceHelmet == 1) {
       $helmet = $pages->get("template=item, name=memory-helmet");
       $visualizer = $pages->get("template=item, name~=visualizer");
-      if ($user->isSuperuser() || $user->hasRole('teacher')) {
+      if ($user->isSuperuser() || $user->hasRole('teacher')) { // Set player
         if ($input->get->playerId) {
           $playerId = $input->get->playerId;
           $player = $pages->get("id=$playerId");
@@ -71,8 +71,7 @@ if (!$config->ajax) {
         $out .= '</span></h3>';
       }
       $out .= '<p class="text-center">';
-      $detector = $pages->get("name=electronic-Visualizer");
-      $link = '<a href="'.$detector->url.'">'.$detector->title.'</a>';
+      $link = '<a href="'.$visualizer->url.'">'.$visualizer->title.'</a>';
       if (!isset($hiddenMonstersNb)) {
         $out .= sprintf(__('There are %1$s detected monsters thanks to your %2$s.'), $allMonstersNb, $link);
       } else {
@@ -92,8 +91,8 @@ if (!$config->ajax) {
       if ($input->urlSegment1 == '') { // No selection
           $out .= '<div class="frame">';
             $out .= __("Today's challenges !").' ';
-            $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("Validate a solo-mission by doing the complete challenge !").'"></span>';
-            if ($allChallenges->count() > 0) {
+            $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("Recommended training ! Validate a solo-mission by doing the complete challenges !").'"></span>';
+            if ($allChallenges->count() > 0&& $player->team->classActivity == 0) {
               $out .= '<div class="row">';
                 $nbChallenge = 0;
                 foreach($allChallenges as $m) {
@@ -138,7 +137,11 @@ if (!$config->ajax) {
                 }
               $out .= '</div>';
             }  else {
-              $out .= ' → '.__("No challenge for today.");
+              if ($player->team->classActivity == 1) {
+                $out .= ' → '.__("No challenge in class.");
+              } else {
+                $out .= ' → '.__("No challenge for today.");
+              }
             }
           $out .= '</div>';
           $out .= '<div class="frame">';
