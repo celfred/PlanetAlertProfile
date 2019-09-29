@@ -88,7 +88,7 @@ function getAllPlayers($user = false, $paginate = false) {
 function initPlayer($player) {
   // Get previous score from last archived page
   $prevScores = $player->children()->find("template=archive, name~=history, name!=history")->sort("-date")->first();
-  if ($prevScores->id) {
+  if ($prevScores) {
     $player->reputation = $prevScores->reputation;
     $player->yearlyKarma = 0;
     $player->HP = 50;
@@ -811,25 +811,17 @@ function checkActivity(HookEvent $e) {
 function lastEvent($player) {
   $historyPage = false;
   $lastEvent = false;
-  $historyPages = $player->children("name~=history, sort=date");
-  if ($historyPages->count() == 1 && $historyPages->hasChildren()) {
+  $historyPages = $player->children("name~=history, children.count>0, sort=date");
+  if ($historyPages->count() > 1) {
     $historyPage = $historyPages->last();
-  }
-  if ($historyPage) {
-    $lastEvent = $historyPage->children()->last();
-    if (!$lastEvent) { // No events in historyPage, go back one history page
-      if ($historyPages->getPrev($historyPage)->hasChildren()) {
-        $lastEvent = $historyPages->getPrev($historyPage)->children()->last();
-      } else {
-        $lastEvent = false;
+    if ($historyPage) {
+      $lastEvent = $historyPage->children()->last();
+      if ($lastEvent) {
+        return $lastEvent;
       }
     }
   }
-  if ($lastEvent) {
-    return $lastEvent;
-  } else {
-    return false;
-  }
+  return false;
 }
 
 function daysFromToday($event) {
