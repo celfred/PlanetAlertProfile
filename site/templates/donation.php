@@ -37,23 +37,13 @@
     $out .= '<h3 class="well text-center">'.__("Make a donation").'</h3>';
     $out .= "<section id='donationDiv' class='well text-center'>";
     $out .= '<form id="donateForm" name="donateForm" action="'.$pages->get("name=submitforms")->url.'" method="post" class="form-horizontal" role="form">';
-    $out .= '<div class="form-group has-warning has-feedback">';
-    if ($user->isSuperuser() || $user->hasRole('teacher')) {
-      $out .= '<label for="amount" class="col-sm-5 control-label">'.__("Amount").' (<span class="glyphicon glyphicon-warning-sign"></span>&nbsp;<span id="maxAmount">'.$maxAmount.'</span>GC max.) : </label>';
-    } else {
-      $out .= '<label for="amount" class="col-sm-5 control-label">'.__('Amount').' (<span id="maxAmount">'.$maxAmount.'</span>GC max.) : </label>';
-    }
-    $out .= '<div class="col-sm-5">';
-    $out .= '<input id="amount" name="amount" type="text" data-max="'.$maxAmount.'" size="5" placeholder="0" class="form-control" />';
-    $out .= '<span class="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>';
-    $out .= '</div>';
-    $out .= '</div>';
     if ($user->isSuperuser() || $user->hasRole('teacher')) { // Donator selection
       $out .= '<div class="form-group has-warning has-feedback">';
       $out .= '<label for="donator" class="col-sm-5 control-label">'.__("Donation from").' : </label>';
       $out .= '<div class="col-sm-5">';
       $out .= '<select class="form-control" id="donator" name="donator">';
         $out .= '<option value="0" data-gc="0">'.__("Select a player").'</option>';
+        $out .= '<option value="'.$user->id.'" data-gc="100">'.__("Teacher").'</option>';
         foreach ($globalPlayers as $plyr) {
           if ($plyr->GC > 0) {
             if ($plyr->id == $playerId) {
@@ -94,6 +84,23 @@
       }
     $out .= '</select>';
     $out .= '<span class="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>';
+    $out .= '</div>';
+    $out .= '</div>';
+    $out .= '<div class="form-group has-warning has-feedback">';
+    if ($user->isSuperuser() || $user->hasRole('teacher')) {
+      $out .= '<label for="amount" class="col-sm-5 control-label">'.__("Amount").' (<span class="glyphicon glyphicon-warning-sign"></span>&nbsp;<span id="maxAmount">'.$maxAmount.'</span>GC max.) : </label>';
+    } else {
+      $out .= '<label for="amount" class="col-sm-5 control-label">'.__('Amount').' (<span id="maxAmount">'.$maxAmount.'</span>GC max.) : </label>';
+    }
+    $out .= '<div class="col-sm-5">';
+    $out .= '<input id="amount" name="amount" type="text" data-max="'.$maxAmount.'" size="5" placeholder="0" class="form-control" />';
+    $out .= '<span class="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>';
+    $out .= '</div>';
+    $out .= '</div>';
+    $out .= '<div class="form-group has-warning has-feedback hidden">';
+      $out .= '<label for="extraComment" class="col-sm-5 control-label">'.__("Extra comment").' : </label>';
+    $out .= '<div class="col-sm-5">';
+    $out .= '<input id="extraComment" name="extraComment" type="text" size="5" placeholder="'.__('Comment').'" class="form-control" />';
     $out .= '</div>';
     $out .= '</div>';
     $out .= ' <input id="donateFormSubmit" name="donateFormSubmit" type="submit" class="form-control btn btn-primary btn-sm" value="'.__('Donate !').'" disabled="true" />';

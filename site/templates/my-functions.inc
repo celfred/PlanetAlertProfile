@@ -447,9 +447,10 @@ function taskExtraAction($player, $task, $real) {
     $player->donation = (int) $player->donation + $matches[0];
     return;
   }
-  if ($task->is("name=donated")) {
+  if ($task->is("name=donated|extra-donation")) {
     preg_match("/\d+/", $task->comment, $matches);
     $player->GC = (int) $player->GC + $matches[0];
+    bd($player->GC.'-'.$matches[0]);
     return;
   }
   if ($task->is("name=fake-donator")) { // Reset donation indicator
@@ -578,7 +579,7 @@ function addGroupItem($player, $historyPage, $real) {
   $members = $pages->find("team=$player->team, group=$player->group, id!=$player->id");
   foreach ($members as $m) {
     $task = $pages->get("name=bought");
-    $task->comment = $historyPage->refPage->title." [unlocked]";
+    $task->comment = sprintf(__('%s [unlocked]'), $historyPage->refPage->title);
     $task->refPage = $historyPage->refPage;
     $task->linkedId = $historyPage->id;
     updateScore($m, $task, $real);
@@ -589,7 +590,7 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
   $pages = wire('pages');
   if ($player->hkcount >= 3 && $historyPage->task->is("name=no-homework|homework-half-done|signature|material")) {  // Record a Hk penalty
     $task = $pages->get("template=task, name=penalty"); 
-    $task->comment = 'Automatic homework penalty';
+    $task->comment = __('Automatic homework penalty');
     $task->refPage = false;
     $task->linkedId = $historyPage->id;
     updateScore($player, $task, $real);
@@ -598,7 +599,7 @@ function extraActionAfterSave($player, $historyPage, $real) { // Watch out : rec
     $task = $pages->get("name=donated");
     preg_match("/\d+/", $historyPage->summary, $matches);
     $amount = $matches[0];
-    $task->comment = $amount. ' GC received from '.$player->title.' ['.$player->team->title.']';
+    $task->comment = sprintf(__('%1$sGC received from %2$s [%3$s]'), $amount, $player->title, $player->team->title);
     $task->refPage = $player;
     $receiverPlayer = $historyPage->refPage;
     $task->linkedId = $historyPage->id;
@@ -699,7 +700,7 @@ function getLevelThreshold($level) {
 
 function setStreak($player, $task) {
   $pages = wire('pages');
-  if ($task->is("name!=donation|donated|absent")) {
+  if ($task->is("name!=donation|donated|absent|extraDonation")) {
     if ($task->HP>=0 && $task->is("name!=inactivity")) {
       $player->streak++;
     } else {
@@ -857,9 +858,9 @@ function displayTrendScores($player, $old) {
   $trendLevel = $player->level-$old->level;
   if ($trendLevel > 0) { $out .= '<li>+'.$trendLevel.'lvl→'.$player->level.'</li>'; }
   if ($trendLevel < 0) { $out .= '<li>'.$trendLevel.'lvl→'.$player->level.'</li>'; }
-  $trendKarma = $player->reputation-$old->karma;
-  if ($trendKarma > 0) { $out .= '<li>+'.$trendKarma.'R.→'.$player->reputation.'</li>'; }
-  if ($trendKarma < 0) { $out .= '<li>'.$trendKarma.'R.→'.$player->reputation.'</li>'; }
+  $trendReputation = $player->reputation-$old->reputation;
+  if ($trendReputation > 0) { $out .= '<li>+'.$trendReputation.'R.→'.$player->reputation.'</li>'; }
+  if ($trendReputation < 0) { $out .= '<li>'.$trendReputation.'R.→'.$player->reputation.'</li>'; }
   $trendHP = $player->HP-$old->HP;
   if ($trendHP > 0) { $out .= '<li>+'.$trendHP.'HP→'.$player->HP.'</li>'; }
   if ($trendHP < 0) { $out .= '<li>'.$trendHP.'HP→'.$player->HP.'</li>'; }

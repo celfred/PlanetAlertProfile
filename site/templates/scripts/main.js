@@ -861,6 +861,7 @@ $(document).ready(function() {
   });
 	$(document).on('change', '#donator', function() {
     $('#amount').val('');
+    $('#extraComment').parents('.form-group').addClass('hidden');
     $maxAmount = $(this).find("option:selected").attr('data-GC');
     $('#maxAmount').text($maxAmount);
     $('#amount').attr('data-max', $maxAmount);
@@ -869,6 +870,10 @@ $(document).ready(function() {
 			if (checkAmount($('#amount').val())) {
 				$('#donateFormSubmit').prop('disabled', false);
 			}
+      $donatorText = $(this).find("option:selected").text();
+      if ($donatorText == 'Teacher' || $donatorText == 'Prof') {
+        $('#extraComment').parents(".form-group").removeClass('hidden');
+      }
 		} else {
 			$(this).next('.form-control-feedback').show();
 			$('#donateFormSubmit').prop('disabled', true);

@@ -547,31 +547,40 @@
         $playerId = $input->get->donator;
         $amount = (integer) $input->get->amount;
         $receiverId = $input->get->receiver;
+        $extraComment = $input->get->extraComment;
       } else {
         $playerId = $input->post->donator;
         $amount = (integer) $input->post->amount;
         $receiverId = $input->post->receiver;
+        $extraComment = $input->post->extraComment;
       }
-      $player = $pages->get($playerId);
-      $player->of(false);
+      $donator = $pages->get($playerId);
+      $donator->of(false);
       $receiver = $pages->get($receiverId);
       $receiver->of(false);
       
       // Save donation
-      // If valid amount
-      if ($player && $receiverId && $amount != 0 && $amount <= $player->GC) {
-        // Modify player's page
-        $task = $pages->get("template='task', name='donation'");
-        $task->comment = $amount. ' GC donated to '.$receiver->title.' ['.$receiver->team->title.']';
-        $task->refPage = $receiver;
+      if ($donator->hasRole('teacher') || $donator->isSuperuser()) {
+        $task = $pages->get("template=task, name=extra-donation");
+        $task->comment = sprintf(__('%1$sGC received from teacher [%2$s]'), $amount, $extraComment);
+        $task->refPage = $donator;
         $task->linkedId = false;
-        updateScore($player, $task, true);
-        // No need to checkDeath, Donation can't cause death
-        setGroupCaptain($player->id);
-        // Redirection to Team page (in main.js, because doesn't work due to Ajax ?)
-        /* $session->redirect($pages->get("name=players")->url.$player->team->name); */
-        $url = $pages->get('/players')->url.$player->team->name;
-        echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
+        updateScore($receiver, $task, true);
+      } else {
+        if ($donator && $receiverId && $amount != 0 && $amount <= $donator->GC) { // If valid amount, modify donator's page
+          $task = $pages->get("template=task, name=donation");
+          $task->comment = $amount. 'GC donated to '.$receiver->title.' ['.$receiver->team->title.']';
+          $task->comment = sprintf(__('%1$sGC donated to %2$s [%3$s]'), $amount, $receiver->title, $receiver->team->title);
+          $task->refPage = $receiver;
+          $task->linkedId = false;
+          updateScore($donator, $task, true);
+          // No need to checkDeath, Donation can't cause death
+          setGroupCaptain($donator->id);
+          // Redirection to Team page (in main.js, because doesn't work due to Ajax ?)
+          /* $session->redirect($pages->get("name=players")->url.$player->team->name); */
+          $url = $pages->get('/players')->url.$donator->team->name;
+          echo json_encode(array("sender"=>"marketPlace", "url"=>$url));
+        }
       }
     }
   }
