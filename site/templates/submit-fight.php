@@ -51,7 +51,7 @@
       $user->language = $headTeacher->language;
 
       if ($training == true) { // Training session
-        if ($result>=1 && $result <=3) { // Excellent training session if 3UT or more
+        if ($result>=1 && $result <=3) { // Excellent training session if 4UT or more
           $task = $pages->get("name=ut-action-v"); 
         } else if ($result > 3) {
           $task = $pages->get("name=ut-action-vv");
@@ -119,7 +119,7 @@
                 $challengesList = $teamChallenges->linkedMonsters->implode(', ', '{title}');
                 $task->comment .= ' ('.$challengesList.')'; 
                 $task->refPage = null;
-                $task->eDate = date('m/d/Y H:i:s', time()+1);
+                $task->eDate = date('m/d/Y H:i:s', time()+10);
                 $task->linkedId = $historyPageId;
                 updateScore($player, $task, true);
               }
@@ -137,18 +137,15 @@
             $subject .= $player->title. ' ['.$player->team->title.']';
             $subject .= ' - +'.$result.__("UT");
             $subject .= ' ['.$monster->title.']';
-            $msg = __("Player")." : ".$player->title." [".$player->team->title."]\r\n";
-            $msg .= __("Monster")." : ".$monster->title."\r\n";
-            $msg .= __("Result")." : +".$result.__("UT")."\r\n";
-            $msg .= __("Total training on this monster")." : ". $utGain."\r\n";
+            $msg = __("Total training on this monster")." : ". $utGain."\r\n";
             $bestTrained = $pages->get($monster->bestTrainedPlayerId);
             $msg .= __("New best player")." :  ". $best." (".$bestTrained->title." [".$bestTrained->team->title."] : ".$monster->best.")\r\n";
             $msg .= __("Global UT of player")." : ". $player->underground_training."\r\n";
             if ($teamChallenges->linkedMonsters->has($monster)) {
-              $msg .= __("Belongs to today's challenges !")."\r\n";
+              $msg .= __("Belongs to challenges !")."\r\n";
             }
             if ($todayChallenge) {
-              $msg .= __("All challenges are completed !").' ('.$challengesList.')\r\n';
+              $msg .= __("All challenges are completed !")." (".$challengesList.")\r\n";
               if (!isset($error)) {
                 $msg .= sprintf(__('A %s has been validated.'), $task->title);
               } else {
