@@ -178,9 +178,11 @@
                 $thumb = $equipment->image->getCrop('small')->url;
                 echo "<li data-toggle='tooltip' data-html='true' title='{$equipment->title}<br />{$equipment->summary}'>";
                 if ($equipment->name == "memory-helmet") { // Direct link to training zone
-                  echo '<a href="'.$trainingZone->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
-                } else if ($equipment->name == "electronic-visualizer") { // Direct link to Visualizer page
-                  echo '<a href="'.$pages->get("name=visualizer")->url.'" title="Use the '.$equipment->title.'"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                  if ($user->isSuperuser() || $user->hasRole('teacher')) {
+                    echo '<a href="'.$trainingZone->url.'?playerId='.$playerPage->id.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                  } else {
+                    echo '<a href="'.$trainingZone->url.'" title="Go to the Training Zone"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
+                  }
                 } else if ($equipment->name == "book-knowledge-item") { // Direct link to Visualizer page
                   echo '<a href="'.$pages->get("name=book-knowledge")->url.'" title="Use the '.$equipment->title.'"><img class="img-thumbnail" src="'.$thumb.'" /></a>';
                 } else {
@@ -392,16 +394,16 @@
       <?php
         if ($playerPage->equipment->get("name=memory-helmet")) {
           if ($user->isSuperuser() || $user->hasRole('teacher')) {
-            echo '→ <span class="glyphicon glyphicon-headphones"></span> <a href="'.$pages->get('name=underground-training')->url.'?playerId='.$playerPage->id.'">'.__("Use the Memory Helmet (Training Zone)").'</a>&nbsp;&nbsp;&nbsp;';
-            echo '→ <span class="glyphicon glyphicon-flash"></span> <a href="'.$pages->get('name=fighting-zone')->url.$playerPage->id.'?playerId='.$playerPage->id.'">'.__("Go to the Fighting Zone").'</a>&nbsp;&nbsp;&nbsp;';
+            echo '→ <span class="glyphicon glyphicon-headphones"></span> <a href="'.$trainingZone->url.'?playerId='.$playerPage->id.'">'.__("Use the Memory Helmet (Training Zone)").'</a>&nbsp;&nbsp;&nbsp;';
+            echo '→ <span class="glyphicon glyphicon-flash"></span> <a href="'.$fightingZone->url.$playerPage->id.'?playerId='.$playerPage->id.'">'.__("Go to the Fighting Zone").'</a>&nbsp;&nbsp;&nbsp;';
             if ($playerPage->skills->has("name=fighter")) {
-              echo '→ <span class="glyphicon glyphicon-time"></span> <a href="'.$pages->get("name=fighters-playground")->url.$playerPage->name.'?playerId='.$playerPage->id.'">'.__("Go to the Fighters playground").'</a>';
+              echo '→ <span class="glyphicon glyphicon-time"></span> <a href="'.$playground->url.$playerPage->name.'?playerId='.$playerPage->id.'">'.__("Go to the Fighters playground").'</a>';
             }
           } else {
-            echo '→ <span class="glyphicon glyphicon-headphones"></span> <a href="'.$pages->get('name=underground-training')->url.'">'.__("Use the Memory Helmet (Training Zone)").'</a>&nbsp;&nbsp;&nbsp;';
-            echo '→ <span class="glyphicon glyphicon-flash"></span> <a href="'.$pages->get('name=fighting-zone')->url.$playerPage->id.'">'.__("Go to the Fighting Zone").'</a>&nbsp;&nbsp;&nbsp;';
+            echo '→ <span class="glyphicon glyphicon-headphones"></span> <a href="'.$trainingZone->url.'">'.__("Use the Memory Helmet (Training Zone)").'</a>&nbsp;&nbsp;&nbsp;';
+            echo '→ <span class="glyphicon glyphicon-flash"></span> <a href="'.$fightingZone->url.$playerPage->id.'">'.__("Go to the Fighting Zone").'</a>&nbsp;&nbsp;&nbsp;';
             if (($user->hasRole('player') && $player->skills->has("name=fighter"))) {
-              echo '→ <span class="glyphicon glyphicon-time"></span> <a href="'.$pages->get("name=fighters-playground")->url.$playerPage->name.'">'.__("Go to the Fighters playground").'</a>';
+              echo '→ <span class="glyphicon glyphicon-time"></span> <a href="'.$playground->url.$playerPage->name.'">'.__("Go to the Fighters playground").'</a>';
             }
           }
         } else {

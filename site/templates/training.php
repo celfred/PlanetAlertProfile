@@ -9,16 +9,21 @@ if (!$config->ajax) {
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $user->hasRole('teacher') || $player->team->forceHelmet == 1) {
-      $helmet = $pages->get("template=item, name=memory-helmet");
-      $visualizer = $pages->get("template=item, name~=visualizer");
       if ($user->isSuperuser() || $user->hasRole('teacher')) { // Set player
         if ($input->get->playerId) {
           $playerId = $input->get->playerId;
           $player = $pages->get("id=$playerId");
+          $getPlayerId = '?playerId='.$playerId;
         } else {
+          $getPlayerId = '';
           $player = $pages->get("parent.name=players, name=test");
         }
         $headTeacher = getHeadTeacher($player);
+        $helmet = $player->equipment->get("name=memory-helmet");
+        $visualizer = $player->equipment->get("name~=visualizer");
+      } else {
+        $helmet = $pages->get("template=item, name=memory-helmet");
+        $visualizer = $pages->get("template=item, name~=visualizer");
       }
     } else {
       $helmet = $player->equipment->get("name=memory-helmet");
@@ -38,14 +43,18 @@ if (!$config->ajax) {
       // Check if fightRequest
       if ($player->fight_request == 0) { $request = false; } else { $request = $player->fight_request; }
       // Load challenges
-      $allChallenges = $pages->get("template=teacherProfile, name=$headTeacher->name")->teamChallenges->get("team=$player->team")->linkedMonsters;
+      if ($player->team->is("name!=no-team")) {
+        $allChallenges = $pages->get("template=teacherProfile, name=$headTeacher->name")->teamChallenges->get("team=$player->team")->linkedMonsters;
+      } else {
+        $allChallenges = false;
+      }
       // Prepare all monsters
       foreach($allMonsters as $m) {
         setMonster($player, $m);
       }
       $availableNb = $allMonsters->find("isTrainable=1")->count();
       // Store allMonsters in session cache on 1st page load
-      $cache->save("monstersList_".$user->name, $allMonsters);
+      $cache->save("monstersList_".$player->name, $allMonsters);
       $allMonstersNb = $allMonsters->count();
       $out .= '<div class="well">';
       $out .= '<h2 class="text-center">';
@@ -92,7 +101,7 @@ if (!$config->ajax) {
           $out .= '<div class="frame">';
             $out .= __("Today's challenges !").' ';
             $out .= '<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="'.__("Recommended training ! Validate a solo-mission by doing the complete challenges !").'"></span>';
-            if ($allChallenges->count() > 0&& $player->team->classActivity == 0) {
+            if ($player->team->name != 'no-team' && $allChallenges->count() > 0 && $player->team->classActivity == 0) {
               $out .= '<div class="row">';
                 $nbChallenge = 0;
                 foreach($allChallenges as $m) {
@@ -150,17 +159,17 @@ if (!$config->ajax) {
               $out .= '<div class="btn-group btn-group-lg" role="group">';
                 /* $out .= '<a href="'.$page->url.'random" class="btn btn-primary pgHelmet">'.__("Personal recommandation").'</a>&nbsp;'; // TODO */
                 if ($availableNb > 0) {
-                  $out .= '<a href="'.$page->url.'random" class="btn btn-primary pgHelmet">'.__("Random selection").'</a>&nbsp;';
+                  $out .= '<a href="'.$page->url.'random/'.$getPlayerId.'" class="btn btn-primary pgHelmet">'.__("Random selection").'</a>&nbsp;';
                 }
               $out .= '</div>';
               $out .= '<div class="btn-group btn-group-lg" role="group">';
-                $out .= '<a href="'.$page->url.'never" class="btn btn-primary pgHelmet">'.__("Never trained").'</a>';
-                $out .= '<a href="'.$page->url.'available" class="btn btn-primary pgHelmet">'.__("Available today").'</a>';
+                $out .= '<a href="'.$page->url.'never'.$getPlayerId.'" class="btn btn-primary pgHelmet">'.__("Never trained").'</a>';
+                $out .= '<a href="'.$page->url.'available'.$getPlayerId.'" class="btn btn-primary pgHelmet">'.__("Available today").'</a>';
               $out .= '</div>';
               $out .= '<div class="btn-group btn-group-lg" role="group">';
-                $out .= '<a href="'.$page->url.'level/1" class="btn btn-primary pgHelmet">Level 1</a>';
-                $out .= '<a href="'.$page->url.'level/2" class="btn btn-primary pgHelmet">Level 2</a>';
-                $out .= '<a href="'.$page->url.'level/3" class="btn btn-primary pgHelmet">Level 3</a>';
+                $out .= '<a href="'.$page->url.'level/1'.$getPlayerId.'" class="btn btn-primary pgHelmet">Level 1</a>';
+                $out .= '<a href="'.$page->url.'level/2'.$getPlayerId.'" class="btn btn-primary pgHelmet">Level 2</a>';
+                $out .= '<a href="'.$page->url.'level/3'.$getPlayerId.'" class="btn btn-primary pgHelmet">Level 3</a>';
               $out .= '</div>';
               $out .= '<div class="btn-group btn-group-lg" role="group">';
                 $out .= '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
@@ -169,7 +178,7 @@ if (!$config->ajax) {
                 $out .= '<ul class="dropdown-menu monsterSelection">';
                   $allCat = [];
                   foreach($allMonsters as $m) {
-                    $out .= '<li><a class="pgHelmet" href="'.$page->url.'monster/'.$m->id.'">'.$m->title.'</a></li>';
+                    $out .= '<li><a class="pgHelmet" href="'.$page->url.'monster/'.$m->id.'/'.$getPlayerId.'">'.$m->title.'</a></li>';
                     foreach($m->topic as $c){
                       if (!in_array($c->title, $allCat)) {
                         array_push($allCat, $c->title);
@@ -180,7 +189,7 @@ if (!$config->ajax) {
                 $out .= '</ul>';
               $out .= '</div>';
               $out .= '<div class="btn-group btn-group-lg" role="group">';
-                $out .= '<a href="'.$page->url.'notAvailable" class="btn btn-primary pgHelmet">'.__("Not available today").'</a>';
+                $out .= '<a href="'.$page->url.'notAvailable'.$getPlayerId.'" class="btn btn-primary pgHelmet">'.__("Not available today").'</a>';
               $out .= '</div>';
             $out .= '</div>';
           $out .= '</div>';
@@ -188,7 +197,7 @@ if (!$config->ajax) {
             $out .= __("Topic selection ?");
             $out .= '<ul class="list list-unstyled col6">';
               foreach($allCat as $c) {
-                $out .= '<li class="text-left"><a href="'.$page->url.$sanitizer->pageName($c).'" class="label label-danger pgHelmet topics">'.$c.'</a></li>';
+                $out .= '<li class="text-left"><a href="'.$page->url.$sanitizer->pageName($c).$getPlayerId.'" class="label label-danger pgHelmet topics">'.$c.'</a></li>';
               }
             $out .= '</ul>';
           $out .= '</div>';
@@ -209,21 +218,30 @@ if (!$config->ajax) {
   include("./foot.inc"); 
 } else { // Load selected training possibilities
   if (!$user->isSuperuser()) {
-    $headTeacher = getHeadTeacher($user);
-    $user->language = $headTeacher->language;
     if ($user->hasRole('player')) { // Get logged in player
+      $headTeacher = getHeadTeacher($user);
+      $user->language = $headTeacher->language;
       $player = $pages->get("template=player, login=$user->name");
+      $allCachedMonsters = $cache->get("monstersList_".$user->name); // Read from cache after 1st page load
     } else {
-      $player = $pages->get("template=player, name=test");
+      if ($input->get->playerId) {
+        $playerId = $input->get->playerId;
+        $player = $pages->get("id=$playerId");
+        $allCachedMonsters = $cache->get("monstersList_".$player->name); // Read from cache after 1st page load
+      } else {
+        $player = $pages->get("template=player, name=test");
+        $allCachedMonsters = $cache->get("monstersList_".$player->name); // Read from cache after 1st page load
+      }
+      $headTeacher = getHeadTeacher($player);
     }
   } else {
     $player = $pages->get("template=player, name=test");
   }
-  $allCachedMonsters = $cache->get("monstersList_".$user->name); // Read from cache after 1st page load
   foreach($allCachedMonsters as $m) {
     setMonster($player, $m);
   }
   $availableNb = $allCachedMonsters->find("isTrainable=1")->count();
+  bd($allCachedMonsters);
   switch($input->urlSegment1) {
     case 'random' :
       if ($availableNb > 3) { $nbSelected = 3; } else { $nbSelected = $availableNb; }
