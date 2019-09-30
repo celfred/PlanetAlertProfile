@@ -78,8 +78,8 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</div>';
   $out .= '</div>';
 
-  $out .= '<div style="margin: 5px; text-align: center;">';
-  $out .= '<img src="'.$worldMap.'" height="300" />';
+  $out .= '<div style="margin: 5px 0px; text-align: center;">';
+  $out .= '<img src="'.$worldMap.'" height="500" />';
   $out .= '</div>';
   
   $out .= $footer;
@@ -97,7 +97,7 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '<h3 style="margin: 0px;">'.__("My Acts of Freedom").' - '.$player->title.' ['.$player->team->title.']</h3>';
   // 5 lines to fill the page
   $out .= '<table>';
-  for ($line=0; $line<4; $line++) {
+  for ($line=0; $line<3; $line++) {
     $out .= '<tr><td style="border:0px;height:5.6cm;">';
     $elIndex = $startIndex+($line*2);
     $nextElIndex = $startIndex+($line*2)+1;
@@ -195,8 +195,8 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '</div>';
   $out .= '</div>';
 
-  $out .= '<div style="margin: 5px; text-align: center;">';
-  $out .= '<img src="'.$worldMap.'" height="220" />';
+  $out .= '<div style="margin: 5px 0px; text-align: center;">';
+  $out .= '<img src="'.$worldMap.'" height="500" />';
   $out .= '</div>';
 
   $out .= $footer;
@@ -230,15 +230,15 @@ if ($pageNumber == 0) { // Player's equipment
   for ($line=0; $line<3; $line++) {
     $eqMax = $line+7;
     $out .= '<tr>';
-    $out .= '<td style="height:4cm; width:1px; background-color: #FFF; border:0px;"></td>';
+    $out .= '<td style="height:3.5cm; width:1px; background-color: #FFF; border:0px;"></td>';
     $out .= '</tr>';
   }
   $out .= '</table>';
   $out .= '</div>';
   $out .= '</div>';
 
-  $out .= '<div style="margin: 5px; text-align: center;">';
-  $out .= '<img src="'.$worldMap.'" height="300" />';
+  $out .= '<div style="margin: 5px 0px; text-align: center;">';
+  $out .= '<img src="'.$worldMap.'" height="500" />';
   $out .= '</div>';
   
   $out .= $footer;
@@ -247,19 +247,19 @@ if ($pageNumber == 0) { // Player's equipment
   $out .= '<pagebreak>';
   $out .= '<div style="margin-top: 10px; text-align: center; background-color: #C366FF; padding: 5px;">';
   $out .= '<div style="padding: 0px; background-color: #FFF; border-radius: 20px 20px 0px 0px;">';
-  $out .= '<h3 style="margin: 0px;">'.__("My Acts of Freedom").'</h3>';
   // 5 lines to fill the page
+  $out .= '<h3 style="margin: 0px;">'.__("My Acts of Freedom").'</h3>';
   $out .= '<table style="border:0px;">';
-  for ($line=0; $line<4; $line++) {
-    $out .= '<tr><td style="border:0px;height:4.5cm;">';
+  for ($line=0; $line<3; $line++) {
+    $out .= '<tr><td style="border:0px;height:5cm;">';
     $out .= '</td>';
     $out .= '</tr>';
   }
   $out .= '</table>';
   $out .= '</div>';
   $out .= '</div>';
-  $out .= '<div style="margin: 5px;text-align: center;">';
-  $out .= '<img src="'.$worldMap.'" height="300" />';
+  $out .= '<div style="margin: 5px 0px; text-align: center;">';
+  $out .= '<img src="'.$worldMap.'" height="500" />';
   $out .= '</div>';
   
   $out .= $footer;
