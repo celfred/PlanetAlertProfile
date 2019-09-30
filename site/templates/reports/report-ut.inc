@@ -21,7 +21,7 @@
         $out .= sprintf(_n("%d session", "%d sessions", $playersTrainings->count()), $playersTrainings->count());
         // Find total UT gained over the period
         foreach($playersTrainings as $t) {
-          preg_match("/\[\+([\d]+)U\.T\.\]/", $t->summary, $matches);
+          preg_match("/\[\+([\d]+)U\.?T\.?\]/", $t->summary, $matches);
           if (!$matches) {
             if ($t->inClass == 0) {
               $totalOutUt++;
@@ -49,7 +49,7 @@
         if ($mTrainings->count() > 0) {
           $out .= '<ul>';
           foreach($mTrainings as $mT) {
-            preg_match("/\[\+([\d]+)U\.T\.\]/", $mT->summary, $matches);
+            preg_match("/\[\+([\d]+)U\.?T\.?\]/", $mT->summary, $matches);
             if (!$matches) {
               if ($mT->inClass == 0) {
                 $outUt++;

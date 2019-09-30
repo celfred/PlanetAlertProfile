@@ -2299,10 +2299,10 @@ function calculatedUt($monster, $player, $startDate='', $endDate='') {
   $inClassUtGain = 0;
   if ($startDate == '') { $startDate = date('2000-01-01 00:00:00'); }
   if ($endDate == '') { $endDate = date('Y-m-d 23:59:59'); }
-  $prevUt = $player->find("template=event,refPage=$monster, task.name~=ut-action, date>$startDate, date<$endDate, sort=-date");
+  $prevUt = $player->find("template=event, refPage=$monster, task.name~=ut-action, date>$startDate, date<$endDate, sort=-date");
   if ($prevUt->count() > 0) {
     foreach($prevUt as $p) {
-      preg_match("/\[\+([\d]+)U\.T\.\]/", $p->summary, $matches);
+      preg_match("/\[\+([\d]+)U\.?T\.?\]/", $p->summary, $matches);
       if (!$matches) {
         if ($p->inClass == 0) {
           $utGain++;
@@ -2436,7 +2436,7 @@ function initTmpMonstersActivity($player) {
       $tmpCache = $tmpPage->tmpMonstersActivity->getNew();
       $tmpCache->monster = $m;
       foreach($allTrainings as $e) {
-        preg_match("/\[\+([\d]+)U\.T\.\]/", $e->summary, $matches);
+        preg_match("/\[\+([\d]+)U\.?T\.?\]/", $e->summary, $matches);
         if (isset($matches[0])) {
           $delta = $matches[1];
         } else {
