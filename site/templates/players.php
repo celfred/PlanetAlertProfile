@@ -73,7 +73,7 @@ echo '<div>';
       $cacheName = 'cache__'.$input->urlSegment1.'-players-teacher-'.$headTeacher->language->name;
     }
   }
-  $cachedTable = $cache->get($cacheName, 86400, function($user, $pages, $config) use($selectedTeam, $allPlayers) {
+  $cachedTable = $cache->get($cacheName, 50400, function($user, $pages, $config) use($selectedTeam, $allPlayers) {
     $out = '';
     $out .= '<table id="teamTable" class="table table-hover table-condensed teamView" data-highlight="{$loggedId}">';
     $out .= '<thead>';
