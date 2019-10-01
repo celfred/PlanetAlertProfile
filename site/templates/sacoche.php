@@ -170,13 +170,19 @@
         $out .= '<td class="text-left">';
         list($firstName, $lastName) = explode(' ', $name, 2); 
         if ($teamId != -1) {
+          $warning = false;
           $paPlayer = $pages->get("parent.name=players, title~=$firstName, lastName~=$lastName, team.id=$teamId");
+          if ($paPlayer->id == '') { // Not found, guess by last name only ?
+            $paPlayer = $pages->get("parent.name=players, lastName~=$lastName, team.id=$teamId");
+            $warning = true;
+          }
         } else {
           $paPlayer = $pages->get("parent.name=players, title~=$firstName, lastName~=$lastName, team.name=$teamName");
         }
         if ($paPlayer->id) {
           $out .= ' <span class="label label-success">'.$paPlayer->title.' ['.$paPlayer->team->title.']</span>';
           $out .= '<input type="checkbox" checked="checked" class="toggleCheckboxes pull-right" name="box-'.$index.'" id="box-'.$index.'" data-row="'.$index.'" />';
+          if ($warning) { $out .= '<span class="glyphicon glyphicon-warning-sign"></span>'; }
         } else {
           $out .= ' <span class="label label-danger">'.__("Not found !").'</span>';
         }
