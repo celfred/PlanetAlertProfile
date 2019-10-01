@@ -435,7 +435,7 @@
           }
         }
         if (count($attacks) > 0) {
-          echo '<p class="label label-primary">'.sprintf(_n('You have faced %d monster attack.', 'You have faced %d monster attacks.', count($attacks)), count($attacks)).'</p>';
+          echo '<p class="label label-primary">'.sprintf(_n('You have faced %d monster attack during the current school year.', 'You have faced %d monster attacks during the current school year.', count($attacks)), count($attacks)).'</p>';
           echo '<ul class="utReport list-group list-unstyled">';
           foreach($attacks as $key => $gr){
             $count = count($gr);
@@ -476,7 +476,7 @@
           }
           echo '</ul>';
         } else {
-          echo "<p>".__("You haven't faced any monster attacks yet.")."</p>";
+          echo "<p>".__("You haven't faced any monster attacks during the current school year.")."</p>";
         }
         break;
       case 'history' :

@@ -2279,7 +2279,7 @@ function prepareListWords($allLines, $type) {
 
 function battleReport($player, $monster = false) {
   if (!$monster) { // All monsters
-    $allBattles = $player->find("template=event, task~=battle")->sort("-date");
+    $allBattles = $player->get("name=history")->find("template=event, task~=battle")->sort("-date");
     if ($allBattles->count() > 0) {
       foreach($allBattles as $f) { // Create monsters list
         // Set monster result
