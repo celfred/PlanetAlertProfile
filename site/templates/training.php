@@ -35,7 +35,7 @@ if (!$config->ajax) {
       if ($player->equipment->has("name~=visualizer") || $player->team->forceVisualizer == 1) {
         $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1")->sort("name");
         $allMonstersNb = $allMonsters->count();
-        $visualizer = $player->equipment->get("name~=visualizer");
+        $visualizer = $pages->get("template=item, name~=visualizer");
       } else {
         $allMonsters = $pages->find("parent.name=monsters, template=exercise, exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1, special=0")->sort("name");
         $hiddenMonstersNb = $pages->find("parent.name=monsters, template=exercise, (exerciseOwner.singleTeacher=$headTeacher, exerciseOwner.publish=1), special=1")->count();

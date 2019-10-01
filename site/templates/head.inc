@@ -286,7 +286,12 @@
                 if ($player && ($player->team->forceHelmet == 1 || $player->equipment->get("name=memory-helmet"))) {
                   if ($player->team->forceHelmet == 1) {
                     $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a href='{$pages->get('name=underground-training')->url}'><span class='glyphicon glyphicon-headphones'></span> - ".__("Use the Memory helmet")."</a></li>";
-                    $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - ".__("Fight a monster")."</a></li>";
+                    if ($player->team->lockFights == 0) {
+                      $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>Special</span> <a href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - ".__("Fight a monster")."</a></li>";
+                    } else {
+                      $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> ";
+                      $headMenu .= "<span class='strikeText'>".__("Fight a monster")."</span></li>";
+                    }
                   } else {
                     $headMenu .= "<li><a href='{$pages->get('name=underground-training')->url}'><span class='glyphicon glyphicon-headphones'></span> - ".__("Use the Memory helmet")."</a></li>";
                     $headMenu .= "<li><a href='{$pages->get('name=fighting-zone')->url}'><span class='glyphicon glyphicon-flash'></span> - ".__("Fight a monster")."</a></li>";
