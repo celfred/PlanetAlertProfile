@@ -271,6 +271,9 @@
         $out .= '<div class="col-sm-8 text-justify">';
           $out .= '<br/>';
           $out .= '<p class="lead">'.$p->summary.'</p>';
+          if ($p->is("template=place")) {
+            $out .= '<p><a href="'.$p->url.'" target="_blank">'.__("[See details and map]").'</a></p>';
+          }
           if ($p->is("template=exercise")) {
             $out .= '<p>';
             $out .= __('Most trained player').' → ';
