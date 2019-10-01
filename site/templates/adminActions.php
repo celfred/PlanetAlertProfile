@@ -1394,7 +1394,11 @@
                 } else {
                   $lastActivityCount = -1;
                 }
-                $out .= '<td>'.$lastActivityCount.'</td>';
+                if ($lastActivityCount == -1) {
+                  $out .= '<td>'.__('Active ?').'</td>';
+                } else {
+                  $out .= '<td>'.sprintf(_n('%d day', '%d days', $lastActivityCount), $lastActivityCount).'</td>';
+                }
               }
               /* $out .= '<td><a class="btn btn-xs btn-success" href="'.$config->urls->admin.'page/edit/?id='.$p->id.'">Edit page in backend</a></td>'; */
               $out .= '<td><a class="btn btn-xs btn-danger" href="'.$adminActions->url.'recalculate/'.$p->id.'">Check history</a></td>';

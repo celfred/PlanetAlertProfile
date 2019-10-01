@@ -813,13 +813,10 @@ function lastEvent($player) {
   $historyPage = false;
   $lastEvent = false;
   $historyPages = $player->children("name~=history, children.count>0, sort=date");
-  if ($historyPages->count() > 1) {
-    $historyPage = $historyPages->last();
-    if ($historyPage) {
-      $lastEvent = $historyPage->children()->last();
-      if ($lastEvent) {
-        return $lastEvent;
-      }
+  if ($historyPages->count() > 0) {
+    $lastEvent = $historyPages->last()->children()->sort("date")->last();
+    if ($lastEvent) {
+      return $lastEvent;
     }
   }
   return false;
@@ -829,7 +826,7 @@ function daysFromToday($event) {
   if ($event) {
     // Find # of days compared to today
     $date1 = new \DateTime("today");
-    $date2 = new \DateTime(date("Y-m-d", $event->created));
+    $date2 = new \DateTime(date("Y-m-d", $event->date));
     $interval = $date1->diff($date2);
     return $interval->days;
   } else {
