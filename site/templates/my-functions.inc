@@ -176,9 +176,11 @@ function resetPlayer($player, $previousLevel) {
 
 function deletePlayer($player) {
   $u = wire('users')->get("name=$player->login");
-  wire('pages')->trash($player);
-  if ($u && $u->hasRole('player')) {
-    wire('users')->delete($u);
+  if (!$player->skills->has('name=master|top-trained')) {
+    wire('pages')->trash($player);
+    if ($u && $u->hasRole('player')) {
+      wire('users')->delete($u);
+    }
   }
 }
 
@@ -928,12 +930,13 @@ function setGroupCaptain($playerId, $real = true) {
     }
   }
 }
-function setTeamCaptains($team, $real = true) {
-  if ($team->is("name!=no-team")) { // Skip no-team players
+
+function setTeamSkill($team, $skillName = false, $real = true) {
+  if ($skillName) { // Skip no-team players
     $pages = wire('pages');
     $players = $pages->find("template=player, team=$team");
-    // Remove old captains
-    $role = $pages->get("parent.name=skills, name=captain");
+    // Remove former players' skills
+    $role = $pages->get("parent.name=skills, name=$skillName");
     $groups = new PageArray();
     foreach($players as $p) {
       $p->of(false);
@@ -943,17 +946,73 @@ function setTeamCaptains($team, $real = true) {
         $p->save();
       }
     }
-    foreach($groups as $group) {
-      // Find group captain
-      $captain = $players->sort("-yearlyKarma")->findOne("group=$group");
-      if (isset($captain->id)) {
-        $captain->skills->add($role);
-        if ($real == true) {
-          $captain->save();
+    switch ($skillName) {
+      case 'ambassador' :
+        foreach($players as $p) {
+          $streak = checkStreak($p);
+          $p->streak = $streak;
+          if ($streak >= 10) {
+            $p->skills->add($role);
+          } else {
+            $p->skills->remove($role);
+          }
+          if ($real == true) {
+            $p->save();
+          }
         }
-      }
+        break;
+      case 'fighter' :
+        foreach($players as $p) {
+          $nbFights = $p->find("template=event, task.name~=fight")->count();
+          if ($nbFights >= 10) {
+            $p->skills->add($role);
+          }
+          if ($real == true) {
+            $p->save();
+          }
+        }
+        break;
+      case 'captain' :
+        if ($team->is("name!=no-team")) {
+          foreach($groups as $group) {
+            // Find group captain
+            $captain = $players->sort("-yearlyKarma")->findOne("group=$group");
+            if (isset($captain->id)) {
+              $captain->skills->add($role);
+              if ($real == true) {
+                $captain->save();
+              }
+            }
+          }
+        }
+        break;
+      case 'top-trained' :
+        foreach($players as $p) {
+          $best = $pages->get("template=exercise, bestTrainedPlayerId=$p->id");
+          if ($best->id) {
+            $p->skills->add($role);
+          }
+          if ($real == true) {
+            $p->save();
+          }
+        }
+        break;
+      case 'master' :
+        foreach($players as $p) {
+          $best = $pages->get("template=exercise, bestTimePlayerId=$p->id");
+          if ($best->id) {
+            $p->skills->add($role);
+          }
+          if ($real == true) {
+            $p->save();
+          }
+        }
+        break;
+      default :
+        return;
     }
   }
+  return false;
 }
 
 function checkMaster($player) {
@@ -975,22 +1034,6 @@ function setMaster($player) {
   $player->save();
 }
 
-function setFighters($team, $real = true) {
-  $pages = wire('pages');
-  $players = $pages->find("template=player, team=$team");
-  $role = $pages->get("parent.name=skills, name=fighter");
-  foreach($players as $p) {
-    $p->of(false);
-    $p->skills->remove($role);
-    $nbFights = $p->find("template=event, task.name~=fight")->count();
-    if ($nbFights >= 10) {
-      $p->skills->add($role);
-    }
-    if ($real == true) {
-      $p->save();
-    }
-  }
-}
 function setFighter($player) {
   $pages = wire('pages');
   $role = $pages->get("parent.name=skills, name=fighter");
@@ -2468,6 +2511,15 @@ function initTmpMonstersActivity($player) {
   $tmpPage->save();
 }
 
+function checkAnyBest($playerId) {
+  $isBest = $pages->get("template=exercise, bestTrainedPlayerId=$playerId");
+  if ($isBest->id) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function setBestPlayer($monster, $player, $utGain) {
   $pages = wire('pages');
   $monster = $pages->get($monster->id);
@@ -2475,6 +2527,9 @@ function setBestPlayer($monster, $player, $utGain) {
   $monster->bestTrainedPlayerId = $player->id;
   $monster->best = $utGain;
   $monster->save();
+  $role = $pages->get("parent.name=skills, name=top-trained");
+  $player->skills->add($role);
+  $player->save();
 }
 
 /* function pma($player) { */

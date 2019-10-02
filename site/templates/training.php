@@ -6,6 +6,7 @@ if (!$config->ajax) {
   $limitDate = strtotime($limitDate->format('Y-m-d'));
 
   if (isset($player) && $user->isLoggedin() || $user->isSuperuser() || $user->hasRole('teacher')) {
+    $getPlayerId = '';
     // Test if player has unlocked Memory helmet (only training equipment for the moment)
     // or if admin has forced it in Team options
     if ($user->isSuperuser() || $user->hasRole('teacher') || $player->team->forceHelmet == 1) {
@@ -15,7 +16,6 @@ if (!$config->ajax) {
           $player = $pages->get("id=$playerId");
           $getPlayerId = '?playerId='.$playerId;
         } else {
-          $getPlayerId = '';
           $player = $pages->get("parent.name=players, name=test");
         }
         $headTeacher = getHeadTeacher($player);
@@ -27,6 +27,7 @@ if (!$config->ajax) {
       }
     } else {
       $helmet = $player->equipment->get("name=memory-helmet");
+      $visualizer = $pages->get("template=item, name~=visualizer");
     }
     if ($helmet) { // Display training catalogue
       $out = '<div>';

@@ -46,6 +46,7 @@
     echo '</h4>';
   } else {
     echo '<h2 class="text-center">'.__("Planet Alert Monsters/Exercises").'</h2>';
+    $helmet = false;
   }
 
   if ($user->isSuperuser() || $user->hasRole('teacher')) {

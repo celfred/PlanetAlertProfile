@@ -102,6 +102,13 @@
               setBestPlayer($monster, $player, $newUtGain);
               $best = __('Yes');
               echo '1';
+              $bestTrained = $player;
+            } else {
+              if ($monster->bestTrainedPlayerId != '') {
+                $bestTrained = $pages->get($monster->bestTrainedPlayerId);
+              } else {
+                $bestTrained = false;
+              }
             }
             // Validate solo-mission thanks to today's challenges
             if ($todayChallenge) {
@@ -138,8 +145,9 @@
             $subject .= ' - +'.$result.__("UT");
             $subject .= ' ['.$monster->title.']';
             $msg = __("Total training on this monster")." : ". $utGain."\r\n";
-            $bestTrained = $pages->get($monster->bestTrainedPlayerId);
-            $msg .= __("New best player")." :  ". $best." (".$bestTrained->title." [".$bestTrained->team->title."] : ".$monster->best.")\r\n";
+            if ($bestTrained) {
+              $msg .= __("New best player")." :  ". $best." (".$bestTrained->title." [".$bestTrained->team->title."] : ".$monster->best.")\r\n";
+            }
             $msg .= __("Global UT of player")." : ". $player->underground_training."\r\n";
             if ($teamChallenges->linkedMonsters->has($monster)) {
               $msg .= __("Belongs to challenges !")."\r\n";

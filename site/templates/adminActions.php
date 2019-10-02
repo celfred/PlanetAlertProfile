@@ -613,8 +613,154 @@
             $out .= '</ul>';
           }
           $out .= '</div>';
+          if ($input->get->direct && $input->get->type == 'team') {
+            $selectedTeam = $pages->get("$input->urlSegment2");
+          }
           if ($allTeams->count() > 0) {
-            $out .= '<section id="ajaxViewport" class="well">'.__("Select a team.").'</section>';
+            $out .= '<section id="ajaxViewport" class="well">';
+            // TODO Include from external file to avoid double code (Ajax or direct access)
+            if ($selectedTeam && $selectedTeam != '-1') {
+              $submitform = $pages->get("name=submitforms");
+              $out .= '<h4 class="text-center">';
+              $out .= sprintf(__('Team options for %1$s'), $selectedTeam->title);
+              $out .= '</h4>';
+              $out .= '<ul>';
+                // Team Official Period
+                if ($user->hasRole('teacher')) {
+                  $allPeriods = $pages->find("template=period, periodOwner.singleTeacher=$user")->sort("title");
+                } else {
+                  $allPeriods = $pages->find("template=period");
+                }
+                if ($selectedTeam->periods != false) {
+                  $officialPeriod = $selectedTeam->periods;
+                } else {
+                  $officialPeriod = false;
+                }
+                $out .= '<li>';
+                  $out .=   '<label for="periodId">'.__("Official period").' :&nbsp;</label>';
+                  $out .=   '<select id="periodId">';
+                  $out .=     '<option value="-1">'.__("No official period (holidays ?)").'</option>';
+                  foreach($allPeriods as $p) {
+                    if ($officialPeriod != false) {
+                      if ($p->id == $officialPeriod->id) {
+                        $status = 'selected="selected"';
+                      } else {
+                        $status = '';
+                      }
+                    } else {
+                      $status = '';
+                    }
+                    $dateStart = date("d/m/Y", $p->dateStart);
+                    $dateEnd = date("d/m/Y", $p->dateEnd);
+                    $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.' ('.$dateStart.' → '.$dateEnd.')</option>';
+                  }
+                  $out .= ' </select>';
+                  $out .= '&nbsp;';
+                  $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'savePeriod/'.$selectedTeam.'" disabled="disabled">'.__("Save").'</button>';
+                $out .= '</li>';
+                // Today's challenge
+                if ($selectedTeam->name != 'no-team') {
+                  if ($user->hasRole('teacher')) {
+                    $teacherPage = $pages->get("parent.name=teachers, template=teacherProfile, name=$user->name");
+                  } else { // Superuser
+                    $teacherPage = $pages->get("parent.name=teachers, template=teacherProfile, name=flieutaud");
+                  }
+                  $teamPage = $teacherPage->teamChallenges->get("team=$selectedTeam");
+                  $teacherPage->of(false);
+                  if (!$teamPage) { // Team page isn't ready let's create it
+                    $teamPage = new Page();
+                    $teamPage->of(false);
+                    $teamPage = $teacherPage->teamChallenges->getNew();
+                    $teamPage->team = $selectedTeam;
+                    $teamPage->save();
+                    $teacherPage->teamChallenges->add($teamPage);
+                    $teacherPage->save();
+                  }
+                  // Build monsters' list
+                  if ($user->isSuperuser()) {
+                    $allMonsters = $pages->get("name=monsters")->children()->sort("name");
+                  } 
+                  if ($user->hasRole('teacher')) {
+                    $allMonsters = $pages->get("name=monsters")->children("(created_users_id=$user->id), (exerciseOwner.singleTeacher=$user, exerciseOwner.publish=1)")->sort("level, name");
+                  }
+                  $out .= '<li>';
+                    $out .= __("Today's challenges").' : ';
+                    $out .= '<ul id="challenges">';
+                      if ($teamPage->linkedMonsters->count() > 0) {
+                        foreach($teamPage->linkedMonsters as $m) {
+                          $out .= '<li class="challenge">';
+                          $out .= '<span class="label label-danger">';
+                          $out .= $m->title;
+                          $out .= '</span>';
+                          $out .= '<button class="basicConfirm btn btn-xs btn-danger" data-href="'.$page->url.'removeChallenge/'.$selectedTeam->id.'/'.$m->id.'" data-toDelete="li.challenge">'.__("Remove").'</button>';
+                          $out .= '</li>';
+                        }
+                      } else {
+                        $out .= '<li><span class="label label-danger">'.__("No challenges are set.").'</span></li>';
+                      }
+                    $out .= '</ul>';
+                    $out .= '<ul class="list list-unstyled">';
+                      $out .= '<li>';
+                        $out .=   '<label for="addChallenge">'.__("Add a challenge").' :&nbsp;</label>';
+                        $out .=   '<select id="addChallenge">';
+                        $out .=     '<option value="-1">'.__("No selection").'</option>';
+                        foreach($allMonsters as $m) {
+                          if (!$teamPage->linkedMonsters->has($m)) {
+                            $out .= '<option value="'.$m->id.'">'.$m->title.'</option>';
+                          }
+                        }
+                        $out .= '</select>';
+                        $out .= '<button class="confirm btn btn-primary" data-original-href="'.$page->url.'saveChallenge/'.$selectedTeam.'/" data-href="" disabled="disabled">'.__("Save").'</button>';
+                        $out .= ' <span class="reloadRequired label label-danger blink hidden"><span class="glyphicon glyphicon-warning"></span> '.__("Reload required").'</span>';
+                      $out .= '</li>';
+                    $out .= '</ul>';
+                  $out .= '</li>';
+                } else {
+                  $out .= '<li>'.__("No challenges for no team players.").'</li>';
+                }
+                // Force Memory Helmet
+                $lock = $pages->get("$selectedTeam")->forceHelmet;
+                $lock == 1 ? $status = 'checked="checked"' : $status = '';
+                $out .= '<li><label for="forceHelmet"><input type="checkbox" id="forceHelmet" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=forceHelmet" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Force Memory Helmet").'</label></li>';
+                // Force Visualizer
+                $lock = $pages->get("$selectedTeam")->forceVisualizer;
+                $lock == 1 ? $status = 'checked="checked"' : $status = '';
+                $out .= '<li><label for="forceVisualizer"><input type="checkbox" id="forceVisualizer" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=forceVisualizer" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Force Visualizer").'</label></li>';
+                // Force Book of Knowledge
+                $lock = $pages->get("$selectedTeam")->forceKnowledge;
+                $lock == 1 ? $status = 'checked="checked"' : $status = '';
+                $out .= '<li><label for="forceKnowledge"><input type="checkbox" id="forceKnowledge" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=forceKnowledge" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Force the Book of Knowledge").'</label></li>';
+                // Lock Fights (Training but no 'tests')
+                $lock = $pages->get("$selectedTeam")->lockFights;
+                $lock == 1 ? $status = 'checked="checked"' : $status = '';
+                $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=lockFights" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Lock fights").'</label></li>';
+                // 'Class activity' tag (ignored for 'motivation' statistic)
+                $lock = $pages->get("$selectedTeam")->classActivity;
+                $lock == 1 ? $status = 'checked="checked"' : $status = '';
+                $out .= '<li><label for="classActivity"><input type="checkbox" id="classActivity" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=classActivity" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Class activity tag").'</label></li>';
+                // Reset streak
+                $out .= '<li><label for="resetStreaks"><input type="checkbox" id="reset-streaks"> '.__("Reset streaks").'</label> ';
+                $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'reset-streaks/'.$selectedTeam.'/1">'.__("Save").'</button>';
+                $out .= '</li>';
+                // Recalculate tmp page
+                $out .= '<li><label for="recalculateTmpPage"><input type="checkbox" id="recalculate-tmp"> '.__("Recalculate tmpPage").'</label> ';
+                $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'recalculate-tmp/'.$selectedTeam.'/1">'.__("Save").'</button>';
+                $out .= '</li>';
+                // Clean MarkupCache
+                $out .= '<li><label for="clean-markupcache"><input type="checkbox" id="clean-markupcache"> '.__("Clean markupCache").'</label> ';
+                $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'clean-markupCache/'.$selectedTeam.'/1">'.__("Save").'</button>';
+                $out .= '</li>';
+                if ($user->isSuperuser()) {
+                  // Archive team
+                  $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> '.__("Archive").'</label> ';
+                  $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">'.__("Save").'</button>';
+                  $out .= '</li>';
+                };
+              $out .= '</ul>';
+            } else {
+              $out .= __("Select a team.");
+            }
+            $out .= '</section>';
           } else {
             $out .= '<p>'.__("You have no teams.").'</p>';
           }
@@ -1136,23 +1282,36 @@
           $out .= '</div>';
           $out .= '</section>';
           break;
-        case 'setFighters' :
-          if ($user->isSuperuser()) {
+        case 'checkSkills' :
+          if ($user->isSuperuser() || $user->hasRole('teacher')) {
             $out .= '<section class="well">';
-            $out .= '<h3 class="text-center">';
-            $out .=   'Set Fighters';
-            $out .= '</h3>';
-            $out .= '<div>';
-            $out .= '<span>Select a team : </span>';
-            $out .= '<select id="teamId">';
-            $out .= '<option value="-1">Select a team</option>';
-            foreach($allTeams as $p) {
-              $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
-            }
-            $out .= '</select>';
-            $out .= '</div>';
-            $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="setFighters">Generate</button>';
-            $out .= '<section id="ajaxViewport" class="well"></section>';
+              $out .= '<h3 class="text-center">';
+              $out .=   __('Check Skills for your teams');
+              $out .= '</h3>';
+              if ($user->isSuperuser()) { // ALL teams in a select
+                $out .= '<span>'.__("Select a team").' : </span>';
+                $out .= '<select id="teamId">';
+                $out .= '<option value="-1">Select a team</option>';
+                foreach($allTeams as $p) {
+                  $out .= '<option value="'.$p->id.'">'.$p->title.'</option>';
+                }
+                $out .= '</select>';
+                $out .= '<button class="adminAction btn btn-primary btn-block" data-href="'.$page->url.'" data-action="checkSkills">'.__('Generate').'</button>';
+              } else { // Quick buttons for teacher's teams
+                $out .= '<ul class="list list-inline">';
+                foreach($allTeams as $p) {
+                  $out .= '<li>';
+                  $out .= '<a href="'.$page->url.'checkSkills/'.$p->id.'?type=team" class="teamOption btn btn-success">'.$p->title.'</a>';
+                  $out .= '</li>';
+                }
+                $out .= '</ul>';
+              }
+              if ($allTeams->count() > 0) {
+                $out .= '<section id="ajaxViewport" class="well">'.__("Select a team.").'</section>';
+              } else {
+                $out .= '<p>'.__("You have no teams.").'</p>';
+              }
+            $out .= '</section>';
           } else {
             $out .= $noAuthMessage;
           }
@@ -2075,36 +2234,32 @@
         $player->equipment->remove($item);
         $player->save();
         break;
-      case 'setFighters':
+      case 'checkSkills':
         if ($selectedTeam && $selectedTeam != '-1') {
-          $old = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=fighter")->implode(', ', '{title}');
-          $out .= '</div>';
+          $allSkills = $pages->find("parent.name=skills");
           $out .= '<h4 class="text-center">';
-          $out .=   'Set Fighters for '.$selectedTeam->title;
+          $out .= sprintf(__('Skills for %s'),$selectedTeam->title);
           $out .= '</h4>';
-          $out .= '<section>';
-          $out .= '<p> Old fighters : '.$old.'</p>';
-          setFighters($selectedTeam, false);
-          $new = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=fighter")->implode(', ', '{title}');
-          $out .= '<p> New fighters : '.$new.'</p>';
-          $out .= '</section>';
-          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveFighters/'.$selectedTeam->id.'/1">Save new fighters</button>';
-        }
-        break;
-      case 'setCaptains':
-        if ($selectedTeam && $selectedTeam != '-1') {
-          $oldCaptains = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=captain")->implode(', ', '{title}');
-          $out .= '</div>';
-          $out .= '<h4 class="text-center">';
-          $out .=   'Set Captains for '.$selectedTeam->title;
-          $out .= '</h4>';
-          $out .= '<section>';
-          $out .= '<p> Old captains : '.$oldCaptains.'</p>';
-          setTeamCaptains($selectedTeam, false);
-          $newCaptains = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=captain")->implode(', ', '{title}');
-          $out .= '<p> New captains : '.$newCaptains.'</p>';
-          $out .= '</section>';
-          $out .= '<button class="confirm btn btn-block btn-primary" data-href="'.$page->url.'saveCaptains/'.$selectedTeam->id.'/1">Save new captains</button>';
+          foreach($allSkills as $s) {
+            $out .= '<section class="frame">';
+            $formerPlayers = $allPlayers->find("team=$selectedTeam, skills.count>0, skills=$s")->implode(', ', '{title}');
+            $out .= '<p>'.sprintf(__('Former %s list'), $s->title).' : '.$formerPlayers.'</p>';
+            setTeamSkill($selectedTeam, $s->name, false);
+            $newPlayers = $allPlayers->find("team=$selectedTeam, skills.count>0, skills.name=$s->name")->implode(', ', '{title}');
+            $out .= '<p>';
+            if ($formerPlayers != $newPlayers) {
+              $out .= '<span class="label label-danger"><span class="glyphicon glyphicon-warning-sign"></span></span> ';
+            } else {
+              $out .= '<span class="label label-success">OK</span> ';
+            }
+            $out .= sprintf('Recalculated %s list', $s->title).' : '.$newPlayers;
+            $out .= '</p>';
+            if ($formerPlayers != $newPlayers) {
+              $out .= '<button class="confirm btn btn-xs btn-danger" data-href="'.$page->url.'saveSkills/'.$selectedTeam->id.'/1/'.$s->name.'">'.__('Save new players').'</button>';
+              $out .= ' <span class="reloadRequired label label-danger blink hidden"><span class="glyphicon glyphicon-warning"></span> '.__("Reload required").'</span>';
+            }
+            $out .= '</section>';
+          }
         }
         break;
       case 'setReputation':
@@ -2167,15 +2322,11 @@
           $out .= '</section>';
         }
         break;
-      case 'saveFighters':
+      case 'saveSkills':
         $selectedTeam = $pages->get("$input->urlSegment2");
         $allPlayers = $allPlayers->find("team=$selectedTeam");
-        setFighters($selectedTeam, true);
-        break;
-      case 'saveCaptains':
-        $selectedTeam = $pages->get("$input->urlSegment2");
-        $allPlayers = $allPlayers->find("team=$selectedTeam");
-        setTeamCaptains($selectedTeam, true);
+        $skillName = $input->urlSegment4;
+        setTeamSkill($selectedTeam, $skillName, true);
         break;
       case 'saveReputation':
         $selectedTeam = $pages->get("$input->urlSegment2");
@@ -2555,7 +2706,7 @@
         break;
       case 'team-options' :
         if ($selectedTeam && $selectedTeam != '-1') {
-          $out .= '</div>';
+          $submitform = $pages->get("name=submitforms");
           $out .= '<h4 class="text-center">';
           $out .= sprintf(__('Team options for %1$s'), $selectedTeam->title);
           $out .= '</h4>';
@@ -2572,56 +2723,26 @@
               $officialPeriod = false;
             }
             $out .= '<li>';
-            $out .=   '<label for="periodId">'.__("Official period").' :&nbsp;</label>';
-            $out .=   '<select id="periodId">';
-            $out .=     '<option value="-1">'.__("No official period (holidays ?)").'</option>';
-            foreach($allPeriods as $p) {
-              if ($officialPeriod != false) {
-                if ($p->id == $officialPeriod->id) {
-                  $status = 'selected="selected"';
+              $out .=   '<label for="periodId">'.__("Official period").' :&nbsp;</label>';
+              $out .=   '<select id="periodId">';
+              $out .=     '<option value="-1">'.__("No official period (holidays ?)").'</option>';
+              foreach($allPeriods as $p) {
+                if ($officialPeriod != false) {
+                  if ($p->id == $officialPeriod->id) {
+                    $status = 'selected="selected"';
+                  } else {
+                    $status = '';
+                  }
                 } else {
                   $status = '';
                 }
-              } else {
-                $status = '';
+                $dateStart = date("d/m/Y", $p->dateStart);
+                $dateEnd = date("d/m/Y", $p->dateEnd);
+                $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.' ('.$dateStart.' → '.$dateEnd.')</option>';
               }
-              $dateStart = date("d/m/Y", $p->dateStart);
-              $dateEnd = date("d/m/Y", $p->dateEnd);
-              $out .=   '<option value="'.$p->id.'" '.$status.'>'.$p->title.' ('.$dateStart.' → '.$dateEnd.')</option>';
-            }
-            $out .= ' </select>';
-            $out .= '&nbsp;';
-            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'savePeriod/'.$selectedTeam.'" disabled="disabled">'.__("Save").'</button>';
-            $out .= '</li>';
-            // Force Memory Helmet
-            $lock = $pages->get("$selectedTeam")->forceHelmet;
-            if ($lock == 1) {
-              $status = 'checked="checked"';
-            } else {
-              $status = '';
-            }
-            $out .= '<li><label for="forceHelmet"><input type="checkbox" id="forceHelmet" '.$status.'> '.__("Force Memory Helmet").'</label> ';
-            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceHelmet/'.$selectedTeam.'/1">'.__("Save").'</button>';
-            $out .= '</li>';
-            // Force Visualizer
-            $lock = $pages->get("$selectedTeam")->forceVisualizer;
-            if ($lock == 1) {
-              $status = 'checked="checked"';
-            } else {
-              $status = '';
-            }
-            $out .= '<li><label for="forceVisualizer"><input type="checkbox" id="forceVisualizer" '.$status.'> '.__("Force Visualizer").'</label> ';
-            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceVisualizer/'.$selectedTeam.'/1">'.__("Save").'</button>';
-            $out .= '</li>';
-            // Force Book of Knowledge
-            $lock = $pages->get("$selectedTeam")->forceKnowledge;
-            if ($lock == 1) {
-              $status = 'checked="checked"';
-            } else {
-              $status = '';
-            }
-            $out .= '<li><label for="forceKnowledge"><input type="checkbox" id="forceKnowledge" '.$status.'> '.__("Force the Book of Knowledge").'</label> ';
-            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'forceKnowledge/'.$selectedTeam.'/1">'.__("Save").'</button>';
+              $out .= ' </select>';
+              $out .= '&nbsp;';
+              $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'savePeriod/'.$selectedTeam.'" disabled="disabled">'.__("Save").'</button>';
             $out .= '</li>';
             // Today's challenge
             if ($selectedTeam->name != 'no-team') {
@@ -2683,32 +2804,26 @@
             } else {
               $out .= '<li>'.__("No challenges for no team players.").'</li>';
             }
+            // Force Memory Helmet
+            $lock = $pages->get("$selectedTeam")->forceHelmet;
+            $lock == 1 ? $status = 'checked="checked"' : $status = '';
+            $out .= '<li><label for="forceHelmet"><input type="checkbox" id="forceHelmet" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=forceHelmet" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Force Memory Helmet").'</label></li>';
+            // Force Visualizer
+            $lock = $pages->get("$selectedTeam")->forceVisualizer;
+            $lock == 1 ? $status = 'checked="checked"' : $status = '';
+            $out .= '<li><label for="forceVisualizer"><input type="checkbox" id="forceVisualizer" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=forceVisualizer" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Force Visualizer").'</label></li>';
+            // Force Book of Knowledge
+            $lock = $pages->get("$selectedTeam")->forceKnowledge;
+            $lock == 1 ? $status = 'checked="checked"' : $status = '';
+            $out .= '<li><label for="forceKnowledge"><input type="checkbox" id="forceKnowledge" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=forceKnowledge" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Force the Book of Knowledge").'</label></li>';
             // Lock Fights (Training but no 'tests')
             $lock = $pages->get("$selectedTeam")->lockFights;
-            if ($lock == 1) {
-              $status = 'checked="checked"';
-            } else {
-              $status = '';
-            }
-            $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" '.$status.'> '.__("Lock fights").'</label> ';
-            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'toggle-lock/'.$selectedTeam.'/1">'.__("Save").'</button>';
-            $out .= '</li>';
+            $lock == 1 ? $status = 'checked="checked"' : $status = '';
+            $out .= '<li><label for="lockFights"><input type="checkbox" id="lockFights" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=lockFights" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Lock fights").'</label></li>';
             // 'Class activity' tag (ignored for 'motivation' statistic)
             $lock = $pages->get("$selectedTeam")->classActivity;
-            if ($lock == 1) {
-              $status = 'checked="checked"';
-            } else {
-              $status = '';
-            }
-            $out .= '<li><label for="classActivity"><input type="checkbox" id="classActivity" '.$status.'> '.__("Class activity tag").'</label> ';
-            $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'classActivity/'.$selectedTeam.'/1">'.__("Save").'</button>';
-            $out .= '</li>';
-            if ($user->isSuperuser()) {
-              // Archive team
-              $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> '.__("Archive").'</label> ';
-              $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">'.__("Save").'</button>';
-              $out .= '</li>';
-            };
+            $lock == 1 ? $status = 'checked="checked"' : $status = '';
+            $out .= '<li><label for="classActivity"><input type="checkbox" id="classActivity" data-href="'.$submitform->url.'?form=forceOption&teamId='.$selectedTeam.'&optionName=classActivity" class="simpleAjax" data-hide-feedback="true" '.$status.'> '.__("Class activity tag").'</label></li>';
             // Reset streak
             $out .= '<li><label for="resetStreaks"><input type="checkbox" id="reset-streaks"> '.__("Reset streaks").'</label> ';
             $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'reset-streaks/'.$selectedTeam.'/1">'.__("Save").'</button>';
@@ -2721,6 +2836,12 @@
             $out .= '<li><label for="clean-markupcache"><input type="checkbox" id="clean-markupcache"> '.__("Clean markupCache").'</label> ';
             $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'clean-markupCache/'.$selectedTeam.'/1">'.__("Save").'</button>';
             $out .= '</li>';
+            if ($user->isSuperuser()) {
+              // Archive team
+              $out .= '<li><label for="archiveTeam"><input type="checkbox" id="archiveTeam"> '.__("Archive").'</label> ';
+              $out .= '<button class="confirm btn btn-primary" data-href="'.$page->url.'archive/'.$selectedTeam.'/1">'.__("Save").'</button>';
+              $out .= '</li>';
+            };
           $out .= '</ul>';
         } else {
           $out .= '<p>'.__("You need to select a team for more options.").'</p>';

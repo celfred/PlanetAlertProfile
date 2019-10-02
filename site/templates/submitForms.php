@@ -294,6 +294,16 @@
         $n->setAndSave('publish', 0);
       }
     }
+    // Toggle team option
+    if (isset($input->get->form) && $input->get->form == 'forceOption' && $input->get->teamId != '' && $input->get->optionName != '') {
+      $team = $pages->get($input->get->teamId);
+      $optionName = $input->get->optionName;
+      if ($team->$optionName == 0) { // Untick
+        $team->setAndSave($optionName, 1);
+      } else { // Tick
+        $team->setAndSave($optionName, 0);
+      }
+    }
     // Toggle inClass indicator
     if (isset($input->get->form) && $input->get->form == 'inClass' && $input->get->eventId != '') {
       $e = $pages->get($input->get->eventId);
@@ -495,7 +505,7 @@
       foreach($allNegPlayers as $p) {
         checkDeath($p, true);
       }
-      setTeamCaptains($player->team);
+      setTeamSkill($selectedTeam, 'captain', true);
 
       if ($clearAdminTableCache) {
         clearFileCache("adminTable");

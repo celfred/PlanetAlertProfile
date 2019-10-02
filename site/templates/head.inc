@@ -11,10 +11,10 @@
     }
 
     // All teams
-    if ($user->isSuperuser()) { // Test team is included for debug
+    if ($user->isSuperuser() || $user->name == 'flieutaud') { // Test team is included for debug
       $allTeams = $pages->find("template=team")->sort("title");
     } else {
-      $allTeams = $pages->find("template=team, name!='test-team'")->sort("title");
+      $allTeams = $pages->find("template=team, name!=test-team")->sort("title");
     }
     $allTeamsNames = $allTeams->implode(',', '{name}');
   ?>
@@ -124,7 +124,9 @@
                     $headMenu .= "<a href='{$office->url}{$team->name}'>{$team->title} [-]</a>";
                   }
                 } else {
-                  $headMenu .= "<a href='{$office->url}{$team->name}'>{$team->title}</a>";
+                  if ($team->name != 'test-team') {
+                    $headMenu .= "<a href='{$office->url}{$team->name}'>{$team->title}</a>";
+                  }
                 }
                   $headMenu .= "<ul class='dropdown-menu'>";
                 $headMenu .=  "<li><a href='{$office->url}{$team->name}'>{$team->title} {$office->title}</a>";
@@ -182,43 +184,52 @@
                 $headMenu .= '<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("Teacher Zone").'<span class="caret"> </span></button>';
               }
               $headMenu .= '<ul class="dropdown-menu">';
-                $headMenu .= "<li><a href='{$adminActions->url}/team-options/'><span class='glyphicon glyphicon-cog'></span> - ".__('Team options')."</a></li>";
+                $headMenu .= '<li class="dropdown-submenu">';
+                  $headMenu .= "<a href='{$adminActions->url}team-options/'><span class='glyphicon glyphicon-cog'></span> - ".__('Team options')."</a>";
+                  $headMenu .= '<ul class="dropdown-menu">';
+                    foreach($allTeams as $team) {
+                      $headMenu .= "<li>";
+                      $headMenu .= "<a href='{$adminActions->url}team-options/{$team->id}?direct=true&type=team'>{$team->title}</a>";
+                      $headMenu .= "</li>";
+                    }
+                  $headMenu .= '</ul>';
+                $headMenu .= '</li>';
                 $headMenu .= "<li><a href='{$adminActions->url}announcements/'><span class='glyphicon glyphicon-comment'></span> - ".__('Announcements')."</a></li>";
                 $headMenu .= '<li class="dropdown-submenu">';
                   $headMenu .= '<a href=""><span class="glyphicon glyphicon-cog"></span> - '.__("Planet Alert Settings").'</a>';
                   $headMenu .= '<ul class="dropdown-menu">';
-                  $headMenu .= "<li><a href='{$adminActions->url}/manage-periods/'><span class='glyphicon glyphicon-calendar'></span> - ".__('Manage periods')."</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/manage-groups/'><span class='glyphicon glyphicon-user'></span> - ".__('Manage group names')."</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/manage-actions/'><span class='glyphicon glyphicon-flash'></span> - ".__('Manage actions')."</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/manage-categories/'><span class='glyphicon glyphicon-tag'></span> - ".__('Manage categories and topics')."</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/manage-lessons/'><span class='glyphicon glyphicon-file'></span> - ".__('Manage lessons')."</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/manage-monsters/'><span class='glyphicon glyphicon-headphones'></span> - ".__('Manage monsters')."</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/manage-shop/'><span class='glyphicon glyphicon-shopping-cart'></span> - ".__('Manage marketplace')."</a></li>";
-                  // Check if teacher has selected the Memory potion
-                  $memoryPotion = $pages->get("name=memory-potion");
-                  if ($user->isSuperuser() || $memoryPotion->teacher->has($user)) {
-                    $headMenu .= "<li><a href='{$pages->get("name=shop")->url}details/memory-potion'><span class='glyphicon glyphicon-duplicate'></span> - ".__('Manage Memory potion')."</a></li>";
-                  } else {
-                    $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> <span class='strikeText'>".__('Manage Memory potion')."</span></li>";
-                  }
+                    $headMenu .= "<li><a href='{$adminActions->url}manage-periods/'><span class='glyphicon glyphicon-calendar'></span> - ".__('Manage periods')."</a></li>";
+                    $headMenu .= "<li><a href='{$adminActions->url}manage-groups/'><span class='glyphicon glyphicon-user'></span> - ".__('Manage group names')."</a></li>";
+                    $headMenu .= "<li><a href='{$adminActions->url}manage-actions/'><span class='glyphicon glyphicon-flash'></span> - ".__('Manage actions')."</a></li>";
+                    $headMenu .= "<li><a href='{$adminActions->url}manage-categories/'><span class='glyphicon glyphicon-tag'></span> - ".__('Manage categories and topics')."</a></li>";
+                    $headMenu .= "<li><a href='{$adminActions->url}manage-lessons/'><span class='glyphicon glyphicon-file'></span> - ".__('Manage lessons')."</a></li>";
+                    $headMenu .= "<li><a href='{$adminActions->url}manage-monsters/'><span class='glyphicon glyphicon-headphones'></span> - ".__('Manage monsters')."</a></li>";
+                    $headMenu .= "<li><a href='{$adminActions->url}manage-shop/'><span class='glyphicon glyphicon-shopping-cart'></span> - ".__('Manage marketplace')."</a></li>";
+                    // Check if teacher has selected the Memory potion
+                    $memoryPotion = $pages->get("name=memory-potion");
+                    if ($user->isSuperuser() || $memoryPotion->teacher->has($user)) {
+                      $headMenu .= "<li><a href='{$pages->get("name=shop")->url}details/memory-potion'><span class='glyphicon glyphicon-duplicate'></span> - ".__('Manage Memory potion')."</a></li>";
+                    } else {
+                      $headMenu .= "<li>&nbsp; <span class='badge badge-danger'>".__("Locked")."</span> <span class='strikeText'>".__('Manage Memory potion')."</span></li>";
+                    }
                   $headMenu .= '</ul>';
                 $headMenu .= '</li>';
                 $headMenu .= "<li><a href='{$adminActions->url}reports/' target='_blank'><span class='glyphicon glyphicon-file'></span> - ".__('Reports')."</a></li>";
                 $headMenu .= "<li><a href='{$adminActions->url}users'><span class='glyphicon glyphicon-user'></span> - ".__('Users / History')."</a></li>";
                 $headMenu .= "<li><a href='{$pages->get("name=statistics")->url}' target='_blank'><span class='glyphicon glyphicon-stats'></span> - ".__('Statistics')."</a></li>";
                 $headMenu .= "<li><a href='{$pages->get("name=sacoche")->url}' target='_blank'><span class='glyphicon glyphicon-flash'></span> - ".__('Import SACoche')."</a></li>";
+                $headMenu .= "<li><a href='{$adminActions->url}checkSkills'><span class='glyphicon glyphicon-check'></span> - ".__('Check Skills')."</a></li>";
                 
                 // Add Admin Zone
                 if ($user->isSuperuser()) {
                   $headMenu .= "<li role='separator' class='divider'></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/ut/'>UT Hall of fame</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/setScores/'>Set scores</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/setReputation/'>Set reputation</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/setYearlyKarma/'>Set yearly karmas</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/setCaptains/'>Set captains</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/setFighters/'>Set fighters</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}ut/'>UT Hall of fame</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}setScores/'>Set scores</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}setReputation/'>Set reputation</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}setYearlyKarma/'>Set yearly karmas</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}checkSkills/'>Check skills</a></li>";
                   $headMenu .= "<li><a href='{$adminActions->url}setCache/'>Set cache</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}/script/'>Script</a></li>";
+                  $headMenu .= "<li><a href='{$adminActions->url}script/'>Script</a></li>";
                 }
               $headMenu .= '</ul>';
               $headMenu .= '</div>';

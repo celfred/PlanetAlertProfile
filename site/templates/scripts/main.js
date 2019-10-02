@@ -392,7 +392,7 @@ $(document).ready(function() {
     if ($this.next().hasClass("ajaxFeedback")) {
       $this.next().remove();
     }
-    $that = $('<span class="ajaxFeedback"> '+lang.loading+'</span>').insertAfter($this);
+    $that = $('<span class="ajaxFeedback label label-danger pull-right"> '+lang.loading+'</span>').insertAfter($this);
     $.get(href, function(data) { 
       if (data) {
         if ($targetId) {
@@ -461,6 +461,7 @@ $(document).ready(function() {
 
 	$(document).on('click', '.confirm', function() {
 		$this = $(this);
+    $reload = $(this).attr("data-reload");
 		swal({
 			title: lang.sure,
 			type: "warning",
@@ -479,7 +480,12 @@ $(document).ready(function() {
             $('#challenges').append('<li>'+$mTitle+'</li>');
             $('.reloadRequired').removeClass('hidden');
           }
-					setTimeout(function() { $this.next('span').remove(); }, 1000);
+          setTimeout(function() { 
+            $this.next('span').remove(); 
+            if ($this.siblings('.reloadRequired').length > 0) {
+              $this.siblings('.reloadRequired').removeClass('hidden');
+            }
+          }, 1000);
 				}); 
 			} else {
 				return false;
