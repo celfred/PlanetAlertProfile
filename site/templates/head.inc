@@ -227,7 +227,6 @@
                   $headMenu .= "<li><a href='{$adminActions->url}setScores/'>Set scores</a></li>";
                   $headMenu .= "<li><a href='{$adminActions->url}setReputation/'>Set reputation</a></li>";
                   $headMenu .= "<li><a href='{$adminActions->url}setYearlyKarma/'>Set yearly karmas</a></li>";
-                  $headMenu .= "<li><a href='{$adminActions->url}checkSkills/'>Check skills</a></li>";
                   $headMenu .= "<li><a href='{$adminActions->url}setCache/'>Set cache</a></li>";
                   $headMenu .= "<li><a href='{$adminActions->url}script/'>Script</a></li>";
                 }
