@@ -722,7 +722,7 @@ function setStreak($player, $task) {
 
 function checkStreak($player) {
   $streak = 0;
-  $lastEvents = $player->get("name=history")->find("template=event, sort=-date, limit=10, task.name!=donated|donation|absent");
+  $lastEvents = $player->get("name=history")->find("template=event, sort=-date, limit=10, task.name!=donated|donation|absent|bought|extraDonation");
   foreach ($lastEvents as $e) {
     if ($e->task->HP >= 0 && $e->task->is("name!=inactivity")) {
       $streak++;
