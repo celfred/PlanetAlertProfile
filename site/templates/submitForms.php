@@ -505,7 +505,7 @@
       foreach($allNegPlayers as $p) {
         checkDeath($p, true);
       }
-      setTeamSkill($selectedTeam, 'captain', true);
+      setTeamSkill($player->team, 'captain', true);
 
       if ($clearAdminTableCache) {
         clearFileCache("adminTable");
@@ -570,7 +570,7 @@
       $receiver->of(false);
       
       // Save donation
-      if ($donator->hasRole('teacher') || $donator->isSuperuser()) {
+      if ($users->get("$donator->id")->is("role=teacher|superuser") && ($user->hasRole('teacher') || $user->isSuperuser())) {
         $task = $pages->get("template=task, name=extra-donation");
         $task->comment = sprintf(__('%1$sGC received from teacher [%2$s]'), $amount, $extraComment);
         $task->refPage = $donator;
