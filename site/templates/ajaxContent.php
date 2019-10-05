@@ -354,7 +354,7 @@
         $tmpPage = $playerPage->child("name=tmp");
         if ($tmpPage->id && $tmpPage->tmpMonstersActivity) {
           $allConcernedMonsters = $tmpPage->tmpMonstersActivity->find("trainNb>0");
-          $allConcernedMonsters->sort("date('Ymd', lastTrainDate), date");
+          $allConcernedMonsters->sort("lastTrainDate, date");
           if ($allConcernedMonsters->count() > 0) {
             echo '<p class="label label-success"> '.sprintf(__("You have trained on %d different monsters"), $allConcernedMonsters->count()).'</p>';
             echo '<ul class="utReport list-group list-unstyled">';
