@@ -179,7 +179,7 @@
               }
               if ($todayChallenge) {
                 $msg .= __("All challenges are completed !")." (".$challengesList.")\r\n";
-                if (!isset($error)) {
+                if (!$error) {
                   $msg .= sprintf(__('A %s has been validated.'), $task->title);
                 } else {
                   $msg .= __('No solo-mission are set in your actions !');
