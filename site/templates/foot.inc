@@ -16,7 +16,7 @@
 
     echo '<footer class="text-center">';
       echo '<p>';
-      echo 'Planet Alert v1.0.0';
+      echo 'Planet Alert v1.1.0';
       echo ' &copy; '.date("Y").' FL';
       echo ' - ';
       echo 'Powered by <a href="http://processwire.com">ProcessWire</a> CMS (v'.$config->version.')';

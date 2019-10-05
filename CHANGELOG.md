@@ -26,6 +26,112 @@ For easier maintaining of this file, here are the Guiding Principles to keep a g
 	- 'Backend' for changes in backend fields/templates
 
 
+## [v1.1.0] - [05/10/2019]
+Quite a while since the last update... So many things to add at once. Sorry... 
+
+[Added]
+Add Top trained skill for most trained players
+Add direct access to team options for teachers
+Add link to details and map in showInfo() for Places
+Add teacher's donations possibility
+Add teacher's access to a particular player's training zone
+Add focus when teacher clicks on a topic while managing monsters
+Add date on Category reports
+Add link to enlarge photo and see attributions on Places details
+Add world map on player's PDF pages
+Add new page if long list of categories in monster fights
+Add edit lesson access for teachers
+Add teacher's possibility to copy an exercise when managing monsters
+Add in-class restriction in Fight reports
+Add link to external avatar's website when transformation potion has been bought
+Add teacher's possibility to manually add a fight request from Newsboard
+Add free rate info in Main Office
+Add free rate info when teacher accesses a player's marketplace
+Add cache for People pages
+Add Challenges functionality for Memory helmet
+Add CSS rules for phone display
+Add fight lock in menu when locked by teacher
+Add admin option to clear all markup cache at once
+Add possibility to quickly add group item to all group members
+
+[Fixed]
+Fix training sessions sorting
+Fix boolean test when submitting a training session
+Fix duplicate recordings of UT sessions in some cases
+Fix PHP warning when checking deletion of old players
+Fix donation submit form (bug introduced with teachers' donations)
+Fix setTeamSkill() call when saving adminTable
+Fix inactive top-trained or master player's deletion : Kepp old players having records.
+Fix double menu entry
+Fix checkStreak()
+Fix inactivity checking and cleaning of out-of-middle school inactive players
+Fix battle report (limited to current school year)
+Fix name detection when importing from SACoche : if a player is not found, look for last name only.
+Fix visualizer detection when forced
+Fix teacher's access to a player's Training Zone
+Fix Memory helmet direct link from player's equipment list
+Fix parameters in UT queries
+Fix group item status when checking player's history
+Fix lastEvent()
+Fix mail notification display
+Fix sorting on current period participation page
+Fix yearlyKarma initialization
+Fix recalculating bug which was based on the wrong history page (when several)
+Fix monster's access
+Fix empty history bug
+Fix checkInactivity()
+Fix admin announcements' visibility for teachers
+Fix cache cleaning after manually editing history
+Fix previous invasions indicators while quizzing
+Fix player's last name was displayed in donation
+Fix list of players needing help on logged in player's Newsboard
+Fix fighting zone possibilities
+Fix last fight date indication in player's profile after a Fight Request
+Fix free progressbar status
+Fix available fights in fighting zone
+Fix setting fighter role after 10 fights
+Fix SACoche import
+Fix Reputation recalculation
+Fix quick access to player's marketplace from decision menu
+Fix caching issues
+Fix scores update
+Fix PHP warnings
+Fix typos
+
+[Changed]
+Change Memory helmet catalogue display for a better user experience
+Change Monster Invasions : more map quiz, more complete answers Remove city menu in 'All places' list
+Change Place/People page appearance
+Adapt Place/People PDF (larger mapIndex box)
+Change map provider for higher contrast when quizzing in class
+Change team cache expiring date
+Override player's rank if team's rank exists
+Change all 'Login' to 'Username' references
+Limit all monsters list to logged in teacher in reports
+Show french summary if english summary is empty when managing monsters
+Rename markup cache files for easier cleaning
+Allow another fight request if not perfect (VV) on a preceding fight request
+Paginate users list for admin to avoid memory limit
+Change Ajax saving for some team options
+Change group team options for checking skills : hence the new setTeamSkill() function.
+Update alt attributes for better accessibility
+Update README
+Update CHANGELOG
+
+[Remove]
+Remove player's last name indication in potion planner (except for no-team players)
+Remove Electronic visualizer from menu (simple detector functionality for Memory helmet)
+Remove Electronic visualizer link from player's equipment list
+Remove Training Zone access from Info monsters page
+Remove inactivity checking for players having a team
+Remove mapIndex indication
+
+[Backend]
+Backend modifications for places management (no more country/city subtree)
+Add corrupted identity action
+Add top-trained skill for most trained players
+
+
 ## [v1.0.0] - [04/03/2019]
 Make Planet Alert site profile available for ProcessWire users. They should be able to easily start a Planet Alert website from a blank ProcessWire installation. The other important change with this version is to try and use a lot more of PW cache's options in order to improve wite performances. There are also some minor bug fixes.
 
@@ -579,3 +685,4 @@ Initial official release.
 [v0.6.0]: https://framagit.org/celfred/planetAlert/tags/v0.6.0
 [v0.7.0]: https://framagit.org/celfred/planetAlert/tags/v0.7.0
 [v1.0.0]: https://framagit.org/celfred/planetAlert/tags/v1.0.0
+[v1.1.0]: https://framagit.org/celfred/planetAlert/tags/v1.1.0
