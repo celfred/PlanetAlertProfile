@@ -6,6 +6,7 @@
 !LICENSE
 !.gitignore
 /site/assets/*/*
+/site/templates/bower_components
 /site/templates/bower_components/*
 /site/templates/Session.vim
 /site/templates/*.swp
