@@ -1,4 +1,21 @@
 {
+  "name": "planetalert",
+  "version": "1.1.1",
+  "description": "Planet Alert dependencies",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://framagit.org/celfred/planetAlert.git"
+  },
+  "keywords": [
+    "education"
+  ],
+  "author": "Fred Lieutaud",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@bower_components/angular": "angular/bower-angular#1.7.5",
     "@bower_components/angular-animate": "angular/bower-angular-animate#1.7.5",
